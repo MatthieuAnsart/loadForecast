@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Root relaxation and parallel MIP processing" />
+<meta name="abstract" content="Describes special considerations about the root relaxation in parallel MIP optimization." />
+<meta name="Description" content="Describes special considerations about the root relaxation in parallel MIP optimization." />
+<meta name="DC.subject" content="parallel processing, root relaxation, concurrent optimizer, root relaxation and, parallel processing and, selected starting algorithm, starting algorithm, RootAlg parameter, parallel processing and barrier, CPX_PARAM_STARTALG" />
+<meta name="keywords" content="parallel processing, root relaxation, concurrent optimizer, root relaxation and, parallel processing and, selected starting algorithm, starting algorithm, RootAlg parameter, parallel processing and barrier, CPX_PARAM_STARTALG" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/13_parallel_MIP_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_parallel.1028896" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/13_parallel_MIP_title_synopsis.html" />
+<title>Root relaxation and parallel MIP processing</title>
+</head>
+<body role="main" id="User_manual.uss_parallel.1028896">
+<h1 class="title topictitle1">Root relaxation and parallel MIP processing</h1>
+<div class="body"><p class="shortdesc">Describes special considerations about the root
+relaxation in parallel MIP optimization.</p>
+<p class="p">In some models, the continuous root relaxation takes significant
+solution time before parallel branching begins. These models have
+potential for additional speed increases by running the root relaxation
+step in parallel. If the root problem is an LP or QP, CPLEX invokes
+the concurrent optimizer by default. This practice provides a form
+of parallelism that assigns the available threads to multiple optimizers.
+If the root problem is a QCP, the barrier optimizer alone is used.</p>
+<p class="p">You can try a different form of parallelism at the root
+by selecting the barrier optimizer specifically with the 
+<a class="xref" href="../../../../Parameters/topics/STARTALG.html" title="Sets which continuous optimizer will be used to solve the initial relaxation of a MIP.">algorithm for initial MIP relaxation</a> parameter:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">RootAlg</samp> in Concert
+Technology;</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_STARTALG</samp> in
+the Callable Library; </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">set mip strategy startalgorithm</samp> 
+in the Interactive Optimizer. </p>
+</li>
+</ul>
+<p class="p">In such a case, the parallel threads will all be applied
+to the barrier algorithm.</p>
+<p class="p">To help you evaluate how much time is spent at the root
+node before parallel processing begins, the log of parallel MIP processing
+distinguishes time spent processing the root node before parallel
+branch and cut begins, like this typical log:</p>
+<pre class="pre codeblock"><code>Root node processing (before b&amp;c):    
+   Real time             =    4.67 sec. (991.49 ticks)    
+Parallel b&amp;c, 2 threads:       
+   Real time             =    17.68 sec. (5417.26 ticks)   
+   Sync time (average)   =    0.01    
+   Wait time (average)   =    0.00    
+                            -------   
+Total (root+branch&amp;cut) =   22.35 sec. (6408.75 ticks)</code></pre>
+<p class="p">The log of sequential MIP optimization also distinguishes time
+spent processing the root node before sequential branch and cut begins.
+If you contrast the following sample log file of sequential MIP optimization
+with the previous sample log file of parallel MIP optimization, you
+get an idea of the time spent in synchronization and waiting. This
+contrast in your own model may help you estimate how much speed up
+in performance to anticipate from parallel optimization.</p>
+<pre class="pre codeblock"><code>Root node processing (before b&amp;c):  
+    Real time             =    4.25 sec. (971.17 ticks)
+Sequential b&amp;c:                     
+    Real time             =    19.12 sec. (6441.66 ticks)
+                            ------- 
+    Total (root+branch&amp;cut) =  23.37 sec. (7412.83 ticks)</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/13_parallel_MIP_title_synopsis.html" title="Describes the parallel MIP optimizer.">Parallel MIP optimizer</a></div>
+</div>
+</div></body>
+</html>

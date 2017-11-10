@@ -1,0 +1,87 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">// Problem 4 from Model Building in Mathematical Programming, 3rd ed.</font></b>
+13: <b><font color="#007D00">//   by HP Williams</font></b>
+14: <b><font color="#007D00">// Factory Planning 2 </font></b>
+15: <b><font color="#007D00">// This model is described in the documentation. </font></b>
+16: <b><font color="#007D00">// See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+17: 
+18: {<b><font color="#0000FF">string</font></b>} Prod = ...;
+19: {<b><font color="#0000FF">string</font></b>} Process = ...;
+20: 
+21: <b><font color="#0000FF">int</font></b> NbMonths = ...;
+22: <b><font color="#0000FF">range</font></b> Months = 1..NbMonths;
+23: 
+24: <b><font color="#0000FF">float</font></b> ProfitProd[Prod] = ...;
+25: <b><font color="#0000FF">float</font></b> ProcessProd[Process][Prod] = ...;
+26: <b><font color="#0000FF">float</font></b> MarketProd[Months][Prod] = ...;
+27: <b><font color="#0000FF">float</font></b> HoursMonth = ...;
+28: <b><font color="#0000FF">int</font></b>   NumProcess[Process] = ...;
+29: <b><font color="#0000FF">int</font></b>   NumDown[Process] = ...;
+30: 
+31: <b><font color="#0000FF">float</font></b> CostHold = ...;
+32: <b><font color="#0000FF">float</font></b> StartHold = ...;
+33: <b><font color="#0000FF">float</font></b> EndHold = ...;
+34: <b><font color="#0000FF">float</font></b> MaxHold = ...;
+35: 
+36: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Make[Prod][Months];
+37: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Hold[Prod][0..NbMonths] <b><font color="#0000FF">in</font></b> 0..MaxHold;
+38: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Sell[j <b><font color="#0000FF">in</font></b> Prod][m <b><font color="#0000FF">in</font></b> Months] <b><font color="#0000FF">in</font></b> 0..MarketProd[m][j];
+39: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+   Down[i <b><font color="#0000FF">in</font></b> Process][m <b><font color="#0000FF">in</font></b> Months] <b><font color="#0000FF">in</font></b> 0..NumProcess[i];
+40: 
+41: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> Profit = 
+42:   <b><font color="#7D007D">sum </font></b>(j <b><font color="#0000FF">in</font></b> Prod, m <b><font color="#0000FF">in</font></b> Months) ProfitProd[j] * Sell[j][m];
+43: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> Cost = 
+44:   <b><font color="#7D007D">sum </font></b>(j <b><font color="#0000FF">in</font></b> Prod, m <b><font color="#0000FF">in</font></b> Months) CostHold * Hold[j][m];
+45:   
+46: <b><font color="#0000FF">maximize</font></b> Profit - Cost;
+47:     
+48: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+49:   <b><font color="#007D00">// Limits on process capacity</font></b>
+50:   <b><font color="#7D007D">forall</font></b>(m <b><font color="#0000FF">in</font></b> Months, i <b><font color="#0000FF">in</font></b> Process)
+51:     ctCapacity: <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Prod) ProcessProd[i][j] * Make[j][m]
+52:            + HoursMonth * Down[i][m]
+53:            &lt;= NumProcess[i] * HoursMonth;
+54: 
+55:   <b><font color="#007D00">// Inventory balance</font></b>
+56:   <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> Prod, m <b><font color="#0000FF">in</font></b> Months)
+57:     ctInvBal: Hold[j][m-1] + Make[j][m] == Sell[j][m] + Hold[j][m];
+58: 
+59:   <b><font color="#007D00">// Starting and ending inventories are fixed</font></b>
+60:   <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> Prod) {
+61:     ctStartInv: Hold[j][0] == StartHold;    
+62:     ctEndInv: Hold[j][NbMonths] == EndHold;
+63:   }
+64:    
+65:   <b><font color="#007D00">// Maintenance requirement</font></b>
+66:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Process)
+67:     mnt: <b><font color="#7D007D">sum</font></b>(m <b><font color="#0000FF">in</font></b> Months) Down[i][m] &gt;= NumDown[i];
+68: }
+69: 
+70: <b><font color="#0000FF">execute</font></b> DISPLAY {
+71:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> m <b><font color="EA7D00">in</font></b> Months) 
+72:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> Process)
+73:          <b><font color="EA7D00">if</font></b>(Down[i][m] &gt;= 1) 
+74:             writeln(<b><font color="#8A2BE2">"down["</font></b>,i,<b><font color="#8A2BE2">"]["</font></b>,m,<b><font color="#8A2BE2">"] = "</font></b>,Down[i][m]);
+75:             
+76:    writeln();
+77: 
+78:    <b><font color="#007D00">//plan[m][j] describes how much to make, sell, and hold of each product j in each month m</font></b>
+79:    <b><font color="EA7D00">for</font></b>(m <b><font color="EA7D00">in</font></b> Months)
+80:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> Prod)
+81:          writeln(<b><font color="#8A2BE2">"plan["</font></b>,m,<b><font color="#8A2BE2">"]["</font></b>,j,<b><font color="#8A2BE2">"] = &lt;Make:"</font></b>,Make[j][m],<b><font color="#8A2BE2">", Sell:"</font></b>,Sell[j][m],<b><font color="#8A2BE2">", Hold:"</font></b>,Hold[j][m],<b><font color="#8A2BE2">"&gt;"</font></b>);
+82: }
+</tt></pre>

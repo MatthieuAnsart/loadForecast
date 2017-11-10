@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="What are callbacks?" />
+<meta name="abstract" content="Defines callbacks." />
+<meta name="Description" content="Defines callbacks." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callbacks.1046303" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<title>What are callbacks?</title>
+</head>
+<body role="main" id="User_manual.uss_callbacks.1046303">
+<h1 class="title topictitle1">What are callbacks?</h1>
+<div class="body"><p class="shortdesc">Defines callbacks.</p>
+<p class="p">Callbacks allow you to monitor closely and to guide the
+behavior of CPLEX  
+optimizers. In particular, callbacks allow user code to be executed
+regularly during an optimization or during a tuning session. To use
+callbacks (either optimization or tuning callbacks) with CPLEX, you
+must first write the callback function, and then pass it to CPLEX.
+The topic <a class="xref" href="../../progr_consid/tuning/15_tuning_cb.html" title="Describes callbacks available to the tuning tool.">Callbacks for tuning</a> offers
+information about callbacks specific to a tuning session. This part
+of the manual concentrates on optimization callbacks, and the topic <a class="xref" href="../callbacks_adv/01_adv_callbacks_title_synopsis.html" title="Documents the advanced MIP control interface.">Advanced MIP control interface</a> offers further information beyond this introduction
+to optimization callbacks. There are three types of optimization callbacks:
+informational callbacks, query callbacks, and control callbacks. </p>
+<div class="section" id="User_manual.uss_callbacks.1046303__section1304337441108"><h2 class="title sectiontitle">Callbacks in the class hierarchy of the APIs</h2><p class="p">Each of the application programming interfaces (APIs)
+of CPLEX supports callbacks. That is, you can write callbacks to use
+with CPLEX in your preferred programming language, whether it is C,
+C++, Java, C#.NET, or Python.</p>
+<p class="p">The callback class hierarchy for <strong class="ph b">Java</strong> and
+.NET is exactly the same as the hierarchy for C++, but the class names
+differ, in that there is no <samp class="ph codeph">I</samp> at the end.
+For example, the Java implementation class corresponding to the C++
+class <samp class="ph codeph">IloCplex::OptimizationCallbackI</samp> is <samp class="ph codeph">IloCplex.OptimizationCallback</samp>.
+ </p>
+<p class="p">The names of callback classes in <strong class="ph b">.NET</strong> correspond
+very closely to those in the C++ and Java APIs. However, the name
+of a .NET class does not begin with <samp class="ph codeph">Ilo</samp>.
+Furthermore, the names of .NET methods are capitalized (that is, they
+begin with an uppercase character) according to .NET conventions.
+For example, the corresponding callback class in .NET is <samp class="ph codeph">Cplex.OptimizationCallback</samp>. </p>
+<p class="p">Similarly, callbacks in Python follow the usual Python
+naming conventions for classes, modules, and packages. Thus, the <strong class="ph b">Python</strong> name
+of the callback class corresponding to the C++ class <samp class="ph codeph">IloCplex::MIPInfoCallback</samp> is <samp class="ph codeph">callbacks.MIPInfoCallback</samp>.</p>
+</div>
+<div class="section" id="User_manual.uss_callbacks.1046303__section1304337449530"><h2 class="title sectiontitle">Callbacks and the CPLEX environment</h2><p class="p">Depending on the programming language you choose, you
+may need to pay more or less attention to the CPLEX environment when
+you write and use callbacks in your application.</p>
+<p class="p">In <strong class="ph b">Java</strong>, <strong class="ph b">.NET</strong>,
+and <strong class="ph b">Python</strong> applications, the CPLEX
+environment is not exposed to your application, so you need not worry
+about using the correct environment. Thus your only concern with respect
+to the CPLEX environment is that your callback must not modify the
+model currently being optimized.</p>
+<p class="p">In contrast, in a <strong class="ph b">C++</strong> application,
+the environment to use depends on your purpose.</p>
+<ul class="ul"><li class="li"><p class="p">In most cases, use the environment returned
+by the member function <samp class="ph codeph">getEnv</samp> of the callback
+class. The environment returned by <samp class="ph codeph">getEnv</samp> of
+the callback class in some cases may be the same environment used
+in the current optimization. In such cases, it is valid to use that
+environment in these particular places. </p>
+</li>
+<li class="li"><p class="p">If you create a new problem in a callback,
+and you want that object to endure after the optimization, then you
+should use a new environment that is not currently used by the optimization.</p>
+</li>
+</ul>
+<p class="p">In an application of the Callable Library (<strong class="ph b">C
+API</strong>), one of the arguments passed to your callback
+specifies an environment. Problem objects you create in an environment
+will be destroyed as soon as that environment is destroyed. According
+to what you want CPLEX to do after optimization, this environment
+may or may not be the environment you should use in your callback. </p>
+<ul class="ul"><li class="li"><p class="p">In most cases, if at all possible, use
+the same environment passed to the callback and no other environment.</p>
+</li>
+<li class="li"><p class="p">If you create a problem object in your
+callback, and you want that problem object to endure after the optimization
+routine (such as <samp class="ph codeph">CPXlpopt</samp>, <samp class="ph codeph">CPXmipopt</samp>, <samp class="ph codeph">CPXbaropt</samp>,
+or another) terminates, then do <strong class="ph b">not</strong> use
+the environment passed to the callback function. Instead, create a
+new environment that is not used in an optimization function, and
+use this new environment to create the enduring problem object of
+your callback.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" title="Introduces optimization callbacks.">Using optimization callbacks</a></div>
+</div>
+</div></body>
+</html>

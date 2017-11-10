@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Subclassing IloCustomOplDataSource" />
+<meta name="abstract" content="Indicates what provided code sample to start from to subclass this class." />
+<meta name="Description" content="Indicates what provided code sample to start from to subclass this class." />
+<meta name="DC.subject" content="classes, IloCustomOplDataSource, subclassing, IloCustomOplDataSource class, subclassing" />
+<meta name="keywords" content="classes, IloCustomOplDataSource, subclassing, IloCustomOplDataSource class, subclassing" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_data.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_externalfunctions.1025050" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_data.html" />
+<title>Subclassing IloCustomOplDataSource</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_externalfunctions.1025050">
+<h1 class="title topictitle1">Subclassing IloCustomOplDataSource</h1>
+<div class="body"><p class="shortdesc">Indicates what provided code sample to start from to
+subclass this class.</p>
+<p class="p">The associated code sample is the <samp class="ph codeph">externaldataread</samp> example. </p>
+<p class="p">The Java subclass of <span class="keyword apiname">IloCustomOplDataSource</span> is implemented at the following location:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl_interfaces\java\externaldataread\src\externaldataread\ExternalDataRead.java</span> </p>
+<p class="p">This code sample contains standard Java OPL code, like
+the <span class="ph filepath">Warehouse.java</span> example documented
+in <a class="xref" href="../../usroplinterfaces/topics/opl_interfaces_work.html" title="Explains in more general terms how to work with the OPL C++, Java and .NET Interfaces. This section is also illustrated by code samples for each language.">Working with OPL interfaces</a> of the <em class="ph i">Interfaces
+User’s Manual</em>. The difference in this example
+is that you will use the custom data source directly from the OPL
+model by attaching it from the script statement to an instance of <span class="keyword apiname">IloOplModel</span>. To do so, you will reuse the two functions
+described in <a class="xref" href="opl_languser_extfunc_knapusejava.html#usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020525">Calling Java</a> to
+call Java functions, as shown in the following code extract:</p>
+<pre class="pre codeblock"><code>   IloOplImportJava("./classes");
+  
+   // Create a new model using this model definition and cplex.
+   var opl = new IloOplModel(thisOplModel.modelDefinition,cplex);
+   opl.addDataSource(new IloOplDataSource("externaldataread.dat"));
+  
+   // Create the custom data source.
+   var customDataSource = IloOplCallJava("externaldataread.ExternalDataRead",
+      "&lt;init&gt;", "(Lilog.opl.IloOplModel;)V", opl);
+        
+   // Pass it to the model (notice that you can do this from a script because the custom data source
+   // was converted to a script data source upon return of the Java call).
+   opl.addDataSource(customDataSource);</code></pre>
+<p class="p">Now the custom data source is attached to the OPL model.
+When the model is generated, using the <span class="keyword apiname">generate</span> method, the data will be filled from that custom data source. In
+this example, you can see this effect in the way element <samp class="ph codeph">a</samp> is given a value. This element is defined as:</p>
+<pre class="pre codeblock"><code>int a = ...;</code></pre>
+<p class="p">and filled from the custom data source by means of the <span class="keyword apiname">customRead</span> method:</p>
+<pre class="pre codeblock"><code>        public void customRead()
+        {
+                IloOplDataHandler handler = getDataHandler();
+                handler.startElement("a");
+                handler.addIntItem(1);
+                handler.endElement();
+        }</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_data.html" title="Shows how to use calls to external functions to define two customer-specific ways of feeding data to an OPL model: by using a subclass of IloCustomOplDataSource and by using a script function from a .dat file.">Using data from other sources</a></div>
+</div>
+</div></body>
+</html>

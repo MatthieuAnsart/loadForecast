@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Changes in callbacks" />
+<meta name="abstract" content="Describes major changes in callbacks." />
+<meta name="Description" content="Describes major changes in callbacks." />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Release_notes.uss_relnotescplex.1031924" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" />
+<title>Changes in callbacks</title>
+</head>
+<body role="main" id="Release_notes.uss_relnotescplex.1031924">
+<h1 class="title topictitle1">Changes in callbacks</h1>
+<div class="body"><p class="shortdesc">Describes major changes in callbacks.</p>
+<p class="p">CPLEX V12.3 offers improved callbacks. These improvements
+include new features, described in these release notes in the topic <a class="xref" href="releasenotescplex123_17.html" title="New symbols in all APIs provide access to more information; new routines and methods offer greater control from callbacks.">New features in callbacks</a>. These improvements also
+entail modifications that may impact your applications that use callbacks,
+as described in the following topics.</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1301234309679">Incumbent callbacks distinguish node solutions from heuristic solutions in MIPs</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300645543945">User cut callbacks distinguished from lazy constraint callbacks</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300952675947">Presolve parameters and lazy constraints</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1301324184801">C API: changes in user cut callbacks and in lazy constraint callbacks</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300050687048">C++ API: changes in user cut callbacks and in lazy constraint callbacks</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300050332887">Java API: changes in user cut callbacks and in lazy constraint callbacks</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300050629722">.NET API: changes in user cut callbacks and lazy constraint callbacks</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300050635097">Python API: changes in user cut callbacks and lazy constraint callbacks</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300641055940">C API: change in delete node callback</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1302618265953">C++ API: changes in queries in NodeCallbackI</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1302619108156">Java API: changes in queries in NodeCallback</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1299841483202">Java API: changes in solve callbacks</a></p>
+</li>
+</ul>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1301234309679"><h2 class="title sectiontitle">Incumbent callbacks distinguish node solutions from heuristic
+solutions in MIPs</h2><p class="p">Changes in <strong class="ph b">incumbent callbacks</strong> in
+CPLEX V12.3 make it possible now for a user’s application to
+discern whether a MIP solution resulted from optimization of a relaxed
+LP at a node, came from a heuristic, or was supplied by the user. </p>
+<p class="p"> The symbol <samp class="ph codeph">CPX_CALLBACK_MIP_INCUMBENT</samp> has
+been <strong class="ph b">replaced</strong> by three new, more
+precise symbols specifying where the solution came from.</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">CPX_CALLBACK_MIP_INCUMBENT_NODESOLN</samp></p>
+
+<p class="p">The callback is called for an integral solution that
+was found as a solution to the LP relaxation of a node in the search
+tree.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_CALLBACK_MIP_INCUMBENT_HEURSOLN</samp></p>
+
+<p class="p">The callback is called for an integral solution that
+was found by a CPLEX heuristic.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_CALLBACK_MIP_INCUMBENT_USERSOLN</samp></p>
+
+<p class="p">The callback is called for an integral solution that
+was found in the user's heuristic callback.</p>
+</li>
+</ul>
+<p class="p">Routines and methods are available in CPLEX V12.3 to
+identify the source of a solution.</p>
+<ul class="ul"><li class="li"><p class="p">For the <strong class="ph b">Callable Library
+(C API)</strong>,  the source of the solution can be identified
+by the <samp class="ph codeph">wherefrom</samp> argument that is passed
+to the incumbent callback. See routines that specify a <samp class="ph codeph">wherefrom</samp> argument,
+such as <samp class="ph codeph">CPXgetcallbackincumbent</samp>, <samp class="ph codeph">CPXgetcallbacknodeinfo</samp>, <samp class="ph codeph">CPXgetcallbacknodex</samp>, <samp class="ph codeph">CPXgetcallbacknodeobjval</samp>, <samp class="ph codeph">CPXgetcallbacktype</samp>, <samp class="ph codeph">CPXgetcallbacknodelp</samp>,
+and others.</p>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">C++ API</strong>,
+a new enumeration, <samp class="ph codeph">IloCplex::IncumbentCallbackI::SolutionSource</samp> specifies
+possible values <samp class="ph codeph">SolutionSource::NodeSolution</samp>, <samp class="ph codeph">SolutionSource::HeuristicSolution</samp>,
+or <samp class="ph codeph">SolutionSource::UserSolution</samp>. The new
+method <samp class="ph codeph">IloCplex::IncumbentCallbackI::getSolutionSource</samp> returns
+one of those values, specifying the source of the incumbent.</p>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">Java API</strong>,
+see the new method <samp class="ph codeph">IloCplex.IncumbentCallback.getSolutionSource</samp>,
+which accesses the new symbols specifying where a solution came from.</p>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">.NET API</strong>,
+see the new property <samp class="ph codeph">Cplex.IncumbentCallback.Source</samp>,
+which specifies where a solution came from.</p>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">Python API</strong>,
+see the members of the class <samp class="ph codeph">IncumbentCallback.solution_source</samp> for
+the possible values and the method <samp class="ph codeph">IncumbentCallback.get_solution_source</samp>.
+ </p>
+</li>
+</ul>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1300645543945"><h2 class="title sectiontitle">User cut callbacks distinguished from lazy constraint callbacks</h2><p class="p">The cut callback interface has been improved in all APIs
+of CPLEX V12.3 in order to distinguish user cut callbacks from lazy
+constraint callbacks. This change means that a user can now define
+two such callbacks, a lazy constraint callback and a user cut callback,
+in the same application. Routines in the Callable Library (C API)
+and methods in the object-oriented APIs (C++, Java, .NET, Python)
+have been added to make it easier for the user to access information
+about user cuts, lazy constraints, and progress of search.</p>
+<p class="p">If you want to <strong class="ph b">reproduce the previous
+behavior</strong> of an existing user cut callback or lazy
+constraint callback by means of the new interface, you can do so by
+registering your cut callback function as both a lazy constraint callback
+function and a user cut callback function. To register your existing
+cut callback function in both ways, choose one of the following alternative
+approaches.</p>
+<ul class="ul"><li class="li"><p class="p">In the Callable Library, invoke <strong class="ph b">both</strong> of
+the new routines, <span class="keyword apiname">CPXsetlazyconstraintcallbackfunc</span> and <span class="keyword apiname">CPXsetusercutcallbackfunc</span> in order to register your
+callback function with respect to both user cut callbacks and lazy
+constraint callbacks.</p>
+</li>
+<li class="li"><p class="p">In Concert Technology, you need to create
+two callbacks: a user cut callback function and a lazy constraint
+callback function. In other words, derive a cut generator from <strong class="ph b">each</strong> class, <samp class="ph codeph">UserCutCallbackI</samp> and <samp class="ph codeph">LazyConstraintCallbackI</samp>.
+(Do not use multiple inheritance; instead, create two functions.)
+The two cut generators should perform the same computation. Then use
+the method <samp class="ph codeph">use</samp> of <strong class="ph b">both</strong> new
+classes to register your callback function as both a lazy constraint
+callback function and a user cut callback function. </p>
+
+<p class="p">If you use the macros <samp class="ph codeph">ILOUSERCUTCALLBACK</samp> and <samp class="ph codeph">ILOLAZYCONSTRAINTCALLBACK</samp> to
+create the derived classes, then embed the source code for the cut
+generator in both macros.</p>
+</li>
+</ul>
+<p class="p">To take advantage of this improved interface for user
+cut callbacks and lazy constraint callbacks, CPLEX V12.3 offers new
+routines in the Callable Library (C API) and new classes and methods
+in the object-oriented APIs. Additionally, the topic <a class="xref" href="releasenotescplex123_17.html#descriptiveTopic1301324953161__section1300644779455">More wherefrom values in MIP callbacks</a> in these release notes enumerates
+the new symbols that specify more precisely where a callback was called
+from.</p>
+<ul class="ul"><li class="li"><p class="p">For the <strong class="ph b">Callable Library
+(C API)</strong>, use these new routines to replace the deprecated
+routines  <samp class="ph codeph">CPXgetcutcallback</samp> and <samp class="ph codeph">CPXsetcutcallback</samp>.
+In these release notes, see also the topic <a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1301324184801">C API: changes in user cut callbacks and in lazy constraint callbacks</a>.</p>
+
+<ul class="ul"><li class="li"><p class="p"><span class="keyword apiname">CPXgetlazyconstraintcallbackfunc</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXgetusercutcallbackfunc</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXsetlazyconstraintcallbackfunc</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXsetusercutcallbackfunc</span></p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">C++ API</strong>,
+see methods of the classes <samp class="ph codeph">IloCplex::LazyConstraintCallbackI</samp> and <samp class="ph codeph">IloCplex::UserCutCallbackI</samp>.
+For example, the new method <samp class="ph codeph">IloCplex::UserCutCallbackI::abortCutLoop</samp> instructs
+CPLEX to leave the loop where cuts are added and to move instead to
+branching. In these release notes, see also the topic <a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300050687048">C++ API: changes in user cut callbacks and in lazy constraint callbacks</a>.</p>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">Java API</strong>,
+see methods of the classes <samp class="ph codeph">IloCplex.LazyConstraintCallback</samp> and <samp class="ph codeph">IloCplex.UserCutCallback</samp>.
+In these release notes, see also the topic <a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300050332887">Java API: changes in user cut callbacks and in lazy constraint callbacks</a>.</p>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">.NET API</strong>,
+see methods of the classes <samp class="ph codeph">Cplex.LazyConstraintCallback</samp> and <samp class="ph codeph">Cplex.UserCutCallback</samp>.</p>
+</li>
+<li class="li"><p class="p">For the <strong class="ph b">Python API</strong>,
+see methods and members of the classes <samp class="ph codeph">cplex.callbacks.LazyConstraintCallback</samp> and <samp class="ph codeph">cplex.callbacks.UserCutCallback</samp>.
+In these release notes, see also the topic <a class="xref" href="releasenotescplex123_6.html#Release_notes.uss_relnotescplex.1031924__section1300050635097">Python API: changes in user cut callbacks and lazy constraint callbacks</a>.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1300952675947"><h2 class="title sectiontitle">Presolve parameters and lazy constraints</h2><p class="p">In previous versions of CPLEX, the user was obliged to
+manage presolve or preprocessing parameters, explicitly turning them
+on or off according to the needs of the user’s application.
+This explicit management of these parameters is no longer necessary
+in CPLEX V12.3 with respect to user cuts and lazy constraints.</p>
+<p class="p">Because CPLEX V12.3 distinguishes user cut callbacks
+from lazy constraint callbacks, parameters controlling <strong class="ph b">presolve</strong> (that
+is, preprocessing) behave differently from previous versions. In the
+presence of lazy constraints, such as lazy constraints that you have
+explicitly added to the model, or lazy constraints added from a callback
+by a method or routine, such as <span class="keyword apiname">CPXsetlazyconstraintcallbackfunc</span>, CPLEX V12.3 automatically <strong class="ph b">turns
+off dual presolve reductions and nonlinear presolve reductions</strong> in
+order to preserve those lazy constraints in the presolved, preprocessed
+model.</p>
+<p class="p">For more information about dual presolve reductions,
+see the documentation of the <a class="xref" href="../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a> (<samp class="ph codeph">CPX_PARAM_REDUCE</samp>, <samp class="ph codeph">Reduce</samp>)
+in the <em class="ph i">CPLEX Parameters Reference
+Manual</em>.</p>
+<p class="p">For more information about nonlinear presolve reductions,
+see the documentation of <a class="xref" href="../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a> (<samp class="ph codeph">CPX_PARAM_PRELINEAR</samp>, <samp class="ph codeph">PreLinear</samp>)
+in the <em class="ph i">CPLEX Parameters Reference
+Manual</em>.</p>
+<p class="p">To take advantage of changed behavior, no modification
+of your application is necessary; CPLEX automatically turns off these
+reductions in the presence of lazy constraints. Moreover, you can
+simplify your application by removing the manual setting of the parameters <a class="xref" href="../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a> (<samp class="ph codeph">CPX_PARAM_REDUCE</samp>, <samp class="ph codeph">Reduce</samp>)
+and  <a class="xref" href="../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a> (<samp class="ph codeph">CPX_PARAM_PRELINEAR</samp>, <samp class="ph codeph">PreLinear</samp>)
+from your application, if they were necessary in previous versions.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1305032002260"><h2 class="title sectiontitle">Purging lazy constraints</h2><p class="p">With the new framework distinguishing lazy constraint
+callbacks from user cut callbacks, you can instruct CPLEX V12.3 when
+you add a lazy constraint that you want CPLEX to purge the lazy constraint
+under certain conditions (that is, to eliminate the lazy constraint,
+just as CPLEX would purge a user cut under similar conditions). However,
+if you designate a lazy constraint as purgeable when you add it, you
+must bear in mind that, as a consequence, CPLEX may later eliminate
+that purgeable lazy constraint (for example, if it becomes slack).
+Consequently, that purged constraint will no longer be present in
+a subsequent relaxation. That is, the lazy constraint, having been
+eliminated through purging, may be violated by the solution of a subsequent
+relaxation. </p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1301324184801"><h2 class="title sectiontitle">C API: changes in user cut callbacks and in lazy constraint
+callbacks</h2><p class="p">Routines have been added to the Callable Library (C API)
+to support greater access to information in user cut callbacks and
+in lazy constraint callbacks. Furthermore, a user’s C application
+can now use both a lazy constraint callback and a user cut callback
+at the same time. See the documentation of these new routines in the
+reference manual of the Callable Library for more detail about their
+arguments and improved behavior.</p>
+<ul class="ul"><li class="li"><p class="p"><span class="keyword apiname">CPXgetlazyconstraintcallbackfunc</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXgetusercutcallbackfunc</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXsetlazyconstraintcallbackfunc</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXsetusercutcallbackfunc</span></p>
+</li>
+</ul>
+<p class="p">These routines <strong class="ph b">replace</strong> the <strong class="ph b">deprecated</strong> routines <samp class="ph codeph">CPXgetcutcallbackfunc</samp> and <samp class="ph codeph">CPXsetcutcallbackfunc</samp>.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">To take advantage of the improved interface for user
+cut callbacks and lazy constraint callbacks, you must replace the
+deprecated routines by one of the new cut callback routines. Your
+application must <strong class="ph b">not</strong> mix deprecated
+and new routines.</p>
+</div>
+<p class="p">More information is available from both user cut callbacks
+and lazy constraint callbacks now. Also further actions, such as telling
+CPLEX to stop generating cuts and to go on instead to branching, can
+be initiated by a user from these callbacks now. For a list of further
+information and actions, see the topics <a class="xref" href="releasenotescplex123_17.html#descriptiveTopic1301324953161__section1300640842771">More information from callbacks</a> and <a class="xref" href="releasenotescplex123_17.html#descriptiveTopic1301324953161__section1300644779455">More wherefrom values in MIP callbacks</a> in these release notes.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1300050687048"><h2 class="title sectiontitle">C++ API: changes in user cut callbacks and in lazy constraint
+callbacks</h2><p class="p">In CPLEX V12.3, the inheritance of the classes <samp class="ph codeph">LazyConstraintCallbackI</samp> and <samp class="ph codeph">UserCutCallbackI</samp> has
+been refined so that a user’s application can now include both
+a lazy constraint callback and a user cut callback. The class <samp class="ph codeph">CutCallbackI</samp> has
+been removed. The class <samp class="ph codeph">LazyConstraintCallbackI</samp> now
+inherits directly from the class <samp class="ph codeph">ControlCallbackI</samp>.
+Likewise, the class  <samp class="ph codeph">UserCutCallbackI</samp> now
+inherits directly from the class  <samp class="ph codeph">ControlCallbackI</samp>. </p>
+<p class="p">The macros <samp class="ph codeph">ILOCUTCALLBACKn</samp> have
+also been removed. CPLEX V12.3 offers new macros, distinguishing user
+cut callbacks from lazy constraint callbacks: <samp class="ph codeph">ILOUSERCUTCALLBACKn</samp> and <samp class="ph codeph">ILOLAZYCONSTRAINTCALLBACKn</samp>.
+Both suites of macros are documented in the reference manual of the
+C++ API.</p>
+<p class="p">These new methods in the C++ API of CPLEX V12.3 provide
+a way for the user’s application to learn from which part of
+the search a callback is called:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">LazyConstrantCallbackI::isUnboundedNode</samp></p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">UserCutCallbackI::isAfterCutLoop</samp></p>
+</li>
+</ul>
+<p class="p">The new method <samp class="ph codeph">UserCutCallbackI::abortCutLoop</samp> allows
+your application to tell CPLEX to break out of the cut loop and to
+move on to branching after the user cut callback.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1300050332887"><h2 class="title sectiontitle">Java API: changes in user cut callbacks and in lazy constraint
+callbacks</h2><p class="p">In CPLEX V12.3, the inheritance of the classes  <samp class="ph codeph">IloCplex.LazyConstraintCallback</samp> and <samp class="ph codeph">IloCplex.UserCutCallback</samp> has
+been refined so that a user’s application can now include both
+a lazy constraint callback and a user cut callback. The class <samp class="ph codeph">IloCplex.CutCallback</samp> has
+been <strong class="ph b">deprecated</strong> in favor of these
+new classes. The class <samp class="ph codeph">LazyConstraintCallback</samp> now
+inherits directly from the class <samp class="ph codeph">ControlCallback</samp>.
+Likewise, the class  <samp class="ph codeph">UserCutCallback</samp> now
+inherits directly from the class  <samp class="ph codeph">ControlCallback</samp>. </p>
+<p class="p">New methods have also been added. For example, the method <samp class="ph codeph">IloCplex.UserCutCallback.abortCutLoop</samp> allows
+your application to tell CPLEX to break out of the cut loop and move
+on to branching after the user cut callback.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1300050629722"><h2 class="title sectiontitle">.NET API: changes in user cut callbacks and lazy constraint
+callbacks</h2><p class="p">CPLEX V12.3 offers users of the .NET API to invoke both
+a lazy constraint callback and a user cut callback in the user’s
+application. New callback classes support access to more information
+and greater control in user-written callback functions for user cut
+and lazy constraint callbacks. See the methods available in the documentation
+of the classes <samp class="ph codeph">Cplex.UserCutCallback</samp> and <samp class="ph codeph">Cplex.LazyConstraintCallback</samp>.</p>
+<p class="p">New methods have also been added. For example, the method <samp class="ph codeph">Cplex.UserCutCallback.AbortCutLoop</samp> allows
+your application to tell CPLEX to break out of the cut loop and move
+on to branching after the user cut callback.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1300050635097"><h2 class="title sectiontitle">Python API: changes in user cut callbacks and lazy constraint
+callbacks</h2><p class="p">CPLEX V12.3 allows users of the Python API to invoke
+both a lazy constraint callback and a user cut callback in the application.
+The following changes in the Python API to provide more information
+and better access by users in cut callback functions:</p>
+<ul class="ul"><li class="li"><p class="p">A new class <samp class="ph codeph">UserCutCallback</samp> derives
+from the existing class <samp class="ph codeph">CutCallback</samp>.</p>
+</li>
+<li class="li"><p class="p">A new method, <samp class="ph codeph">abort_cut_loop</samp>,
+in the class <samp class="ph codeph">UserCutCallback</samp>, allows your
+application to tell CPLEX to break out of the cut loop and move on
+to branching after the user cut callback.</p>
+</li>
+<li class="li"><p class="p">A new class <samp class="ph codeph">LazyConstraintCallback</samp> derives
+from the existing class <samp class="ph codeph">CutCallback</samp>.</p>
+</li>
+<li class="li"><p class="p">A new method, <samp class="ph codeph">get_ray</samp>,
+in the class <samp class="ph codeph">LazyConstraintCallback</samp>, returns
+a list of floating point values that define the direction of unboundedness
+of the current node LP when CPLEX determines that he current LP relaxation
+is unbounded.</p>
+</li>
+</ul>
+<p class="p">If a user defines a subclass of the class <samp class="ph codeph">CutCallback</samp>,
+CPLEX raises an exception when the callback is registered. To avoid
+such a situation, derive instead from the new classes <samp class="ph codeph">UserCutCallback</samp> or <samp class="ph codeph">LazyConstraintCallback</samp>.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1300641055940"><h2 class="title sectiontitle">C API: change in delete node callback</h2><p class="p">In CPLEX V12.3, the behavior of the Callable Library
+(C API) routine <span class="keyword apiname">CPXsetdeletenodecallbackfunc</span> is different from previous versions. This routine
+sets a user-written callback function that CPLEX calls whenever a
+node is deleted from the search tree. If the delete node callback
+function changes (for example, your application changes the callback
+function associated with the deletion of nodes by means of the routine <span class="keyword apiname">CPXsetdeletenodecallbackfunc</span>), then CPLEX removes all MIP solutions from all
+problems registered in that environment (that is, problems created
+with the same argument <samp class="ph codeph">env</samp>). CPLEX takes
+this action so that existing nodes in the tree do not become incompatible
+with the changed callback function; that is, incompatible with the
+new delete node callback function. </p>
+<p class="p">Because deletion of solutions implies deletion of unprocessed
+nodes contained   in this solution, CPLEX V12.3 can invoke the delete
+node callback outside a call of <samp class="ph codeph">CPXmipopt</samp>.
+When the user calls <samp class="ph codeph">CPXsetdeletenodecallbackfunc</samp>,
+CPLEX invokes the old delete node callback for every node that is
+deleted.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1302618265953"><h2 class="title sectiontitle">C++ API: changes in queries in NodeCallbackI</h2><p class="p">In CPLEX V12.3, the signatures of queries in the class <samp class="ph codeph">IloCplex::NodeCallbackI</samp> have
+changed to support very large numbers as the index of a node, as the
+number of nodes, as the depth of a node, as the number of infeasibilities,
+and so forth. In other words, for certain methods, the type of the
+return value or the type of an argument has changed from <samp class="ph codeph">int</samp> to <samp class="ph codeph">IloInt64</samp>.
+For more detail about these changed methods, see their documentation
+in the reference manual of the C++ API.</p>
+<pre class="pre codeblock"><code>IloCplex {
+      NodeCallbackI {
+         NodeId getNodeId64(IloInt64 node) const;
+         IloNum getObjValue64(IloInt64 node) const;
+         IloNum getEstimatedObjValue64(IloInt64 node) const;
+         IloInt getDepth64(IloInt64 node) const;
+         IloNum getInfeasibilitySum64(IloInt64 node) const;
+         IloInt getNinfeasibilities64(IloInt64 node) const;
+         NodeData  *getNodeData64(IloInt64 node) const;
+         void selectNode64(IloInt64 node);
+         IloNumVar getBranchVar64(IloInt64 node) const;
+         IloInt64 getNodeNumber64(NodeId nodeid) const;
+      }}</code></pre>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1302619108156"><h2 class="title sectiontitle">Java API: changes in queries in NodeCallback</h2><p class="p">In CPLEX V12.3, the signatures of queries in the class <samp class="ph codeph">IloCplex.NodeCallback</samp> have
+changed to support very large numbers as the index of a node, as the
+number of nodes, as the depth of a node, as the number of infeasibilities,
+and so forth. In other words, for certain methods, the type of the
+return value or the type of an argument has changed from <samp class="ph codeph">int</samp> to <samp class="ph codeph">long</samp>.
+For more detail about these changed methods, see their documentation
+in the reference manual of the Java API.</p>
+<pre class="pre codeblock"><code>   NodeCallback {
+          NodeId getNodeId(long node);
+          double getObjValue(long node);
+          double getEstimatedObjValue(long node);
+          int getDepth(long node);
+          double getInfeasibilitySum(long node);
+          int getNinfeasibilities(long node);
+          void selectNode(long node);
+          IloNumVar getBranchVar(long node);
+          Object getNodeData(long node);
+       }
+    }</code></pre>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031924__section1299841483202"><h2 class="title sectiontitle">Java API: changes in solve callbacks</h2><p class="p">As a result of a change in the inheritance hierarchy
+of the callback classes in the Java API, more information is available
+to your solve callbacks in CPLEX V12.3. The Java class <span class="keyword apiname">IloCplex.SolveCallback</span> no
+longer derives from <span class="keyword apiname">IloCplex.MIPCallback</span>.
+Instead, it now derives from <span class="keyword apiname">IloCplex.ControlCallback</span>,
+which in turn  derives from <span class="keyword apiname">IloCplex.MIPCallback</span>.
+In other words, the hierarchy changed <strong class="ph b">from</strong></p>
+<pre class="pre codeblock"><code>SolveCallback -&gt; MIPCallback</code></pre>
+<p class="p"><strong class="ph b"> to</strong> </p>
+<pre class="pre codeblock"><code>SolveCallback -&gt; ControlCallback -&gt; MIPCallback</code></pre>
+<p class="p">This change in the class hierarchy is unlikely to break
+existing code, but it makes more information available to solve callbacks.
+For example, you can now query the user-object stored at a branch-and-bound
+node from a solve callback.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" title="Users of prior versions must first apply the conversion notes accompanying previous versions of this product before upgrading to this new version.">Conversion notes for all users</a></div>
+</div>
+</div></body>
+</html>

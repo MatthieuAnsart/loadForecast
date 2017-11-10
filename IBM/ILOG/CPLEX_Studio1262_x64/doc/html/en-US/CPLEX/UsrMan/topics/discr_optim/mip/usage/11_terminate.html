@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Terminating MIP optimization" />
+<meta name="abstract" content="Describes termination conditions of the MIP optimizer." />
+<meta name="Description" content="Describes termination conditions of the MIP optimizer." />
+<meta name="DC.subject" content="MIP, terminating optimization, terminating, MIP optimization, optimization, stopping, stopping criterion, optimization (MIP), tolerance, termination and, MIP gap tolerance, MIP gap tolerance, relative, absolute" />
+<meta name="keywords" content="MIP, terminating optimization, terminating, MIP optimization, optimization, stopping, stopping criterion, optimization (MIP), tolerance, termination and, MIP gap tolerance, MIP gap tolerance, relative, absolute" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/usage/08_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.685048" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/usage/08_title_synopsis.html" />
+<title>Terminating MIP optimization</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.685048">
+<h1 class="title topictitle1">Terminating MIP optimization</h1>
+<div class="body"><p class="shortdesc">Describes termination conditions of the MIP optimizer.</p>
+<p class="p">CPLEX terminates MIP optimization under a variety of circumstances.
+First, CPLEX declares integer optimality and terminates when it finds
+an integer solution and all parts of the search space have been processed.
+Optimality in this case is relative to whatever tolerances and optimality
+criteria you have set. For example, CPLEX considers any user-supplied
+cutoff value (such as <samp class="ph codeph">CutLo</samp> or <samp class="ph codeph">CutUp</samp>) as well as the objective difference parameter
+(<samp class="ph codeph">ObjDif</samp>) when it treats nodes during branch &amp; cut.
+Thus these settings indirectly affect termination.</p>
+<p class="p">An important termination criterion that the user can set
+explicitly is the MIP gap tolerance. In fact, there are two such tolerances:
+a relative MIP gap tolerance that is commonly used, and an absolute
+MIP gap tolerance that is appropriate in cases where the expected
+optimal objective function is quite small in magnitude. The default
+value of the relative MIP gap tolerance is 1e-4; the default value
+of the absolute MIP gap tolerance is 1e-6. These default values indicate
+to CPLEX to stop when an integer feasible solution has been proved
+to be within 0.01% of optimality. On a difficult model with input
+data obtained with only approximate accuracy, where a proved optimum
+is thought to be unlikely within a reasonable amount of computation
+time, a user might choose a larger relative MIP gap to allow early
+termination; for example, a relative MIP gap of 0.05 (corresponding
+to 5%). Conversely, in a model where the objective function amounts
+to billions of dollars and the data are accurate to a degree that
+further processing is worthwhile, a tighter relative MIP Gap (even
+0.0) may be advantageous to avoid any chance of missing the best possible
+solution.</p>
+<p class="p">CPLEX also terminates optimization when it reaches any limit
+that you have set. You can set limits on time, number of nodes, size
+of tree memory, and number of integer solutions. <a class="xref" href="11_terminate.html#User_manual.uss_solveMIP.685048__User_manual.uss_solveMIP.685073" title="A five-column table showing a task, a link to the documentation of the parameter for that task, its name in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), and its name in the Interactive Optimizer.">Table 1</a> summarizes those parameters and their purpose. </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A five-column table showing a task, a link to the documentation of the parameter for that task, its name in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), and its name in the Interactive Optimizer." id="User_manual.uss_solveMIP.685048__User_manual.uss_solveMIP.685073" class="table ShadedHead" width="100%" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Parameters to limit MIP optimization</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" width="18.181818181818183%" id="d425501e75">To set a limit on</th>
+<th class="entry" align="left" valign="top" width="18.181818181818183%" id="d425501e77">Use this parameter</th>
+<th class="entry" align="left" valign="top" width="18.181818181818183%" id="d425501e79"> Concert Technology </th>
+<th class="entry" align="left" valign="top" width="27.27272727272727%" id="d425501e81"> Callable Library </th>
+<th class="entry" align="left" valign="top" width="18.181818181818183%" id="d425501e83"> Interactive Optimizer </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" valign="top" width="18.181818181818183%" headers="d425501e75 ">elapsed time </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e77 "><a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a></td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e79 "><samp class="ph codeph">TiLim</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d425501e81 "><samp class="ph codeph">CPX_PARAM_TILIM</samp> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e83 "> <samp class="ph codeph">timelimit</samp> </td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="18.181818181818183%" headers="d425501e75 ">elapsed deterministic time </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e77 "><a class="xref" href="../../../../../Parameters/topics/DetTiLim.html" title="Deterministic time limit">deterministic time limit</a></td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e79 "><samp class="ph codeph">DetTiLim</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d425501e81 "><samp class="ph codeph">CPX_PARAM_DETTILIM</samp> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e83 "> <samp class="ph codeph">dettimelimit</samp> </td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="18.181818181818183%" headers="d425501e75 ">number of nodes</td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e77 "><a class="xref" href="../../../../../Parameters/topics/NodeLim.html" title="Sets the maximum number of nodes solved before the algorithm terminates without reaching optimality.">MIP node limit</a></td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e79 "><samp class="ph codeph">NodeLim</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d425501e81 "><samp class="ph codeph">CPX_PARAM_NODELIM</samp> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e83 "> <samp class="ph codeph">mip limits nodes</samp> </td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="18.181818181818183%" headers="d425501e75 ">size of tree</td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e77 "><a class="xref" href="../../../../../Parameters/topics/TreLim.html" title="Sets an absolute upper limit on the size (in megabytes, uncompressed) of the branch-and-cut tree.">tree memory limit</a></td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e79 "><samp class="ph codeph">TreLim</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d425501e81 "><samp class="ph codeph">CPX_PARAM_TRELIM</samp> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e83 "> <samp class="ph codeph">mip limits treememory</samp> </td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="18.181818181818183%" headers="d425501e75 ">number of integer solutions</td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e77 "><a class="xref" href="../../../../../Parameters/topics/IntSolFilePrefix.html" title="MIP integer solution file switch and filename prefix.">MIP integer solution-file switch and prefix</a></td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e79 "><samp class="ph codeph">IntSolLim</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d425501e81 "><samp class="ph codeph">CPX_PARAM_INTSOLLIM</samp> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e83 "> <samp class="ph codeph">mip limits solutions</samp> </td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="18.181818181818183%" headers="d425501e75 ">relative MIP gap tolerance </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e77 "><a class="xref" href="../../../../../Parameters/topics/EpGap.html" title="Sets a relative tolerance on the gap between the best integer objective and the objective of the best node remaining.">relative MIP gap tolerance</a></td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e79 "><samp class="ph codeph">EpGap</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d425501e81 "><samp class="ph codeph">CPX_PARAM_EPGAP</samp> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e83 "> <samp class="ph codeph">mip tolerances mipgap</samp> </td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="18.181818181818183%" headers="d425501e75 ">absolute MIP gap tolerance </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e77 "><a class="xref" href="../../../../../Parameters/topics/EpAGap.html" title="Sets an absolute tolerance on the gap between the best integer objective and the objective of the best node remaining.">absolute MIP gap tolerance</a></td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e79 "><samp class="ph codeph">EpAGap</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d425501e81 "><samp class="ph codeph">CPX_PARAM_EPAGAP</samp> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d425501e83 "> <samp class="ph codeph">mip tolerances absmipgap</samp> </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">CPLEX also terminates when an error occurs, such as when
+CPLEX runs out of memory or when a subproblem cannot be solved. If
+an error is due to failure to solve a subproblem, an additional line
+appears in the node log file to indicate the reason for that failure.
+For suggestions about overcoming such errors, see <a class="xref" href="../troubleshoot/53_trouble_title_synopsis.html" title="Describes symptoms of performance problems in MIP optimization and recommends remedies.">Troubleshooting MIP performance problems</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/usage/08_title_synopsis.html" title="Describes features of the MIP optimizer.">Using the mixed integer optimizer</a></div>
+</div>
+</div></body>
+</html>

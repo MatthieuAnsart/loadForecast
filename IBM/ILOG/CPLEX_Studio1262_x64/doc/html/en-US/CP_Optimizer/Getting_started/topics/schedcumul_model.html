@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the house building with budget and resource pools problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the house building with budget and resource pools problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/schedcumul.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerschedcumul.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/schedcumul.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerschedcumul.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the house building with budget and resource pools
+problem has been described using natural language, you then use Concert
+Technology classes to model the constraint programming problem.</p>
+<p class="p">After you have written a description of your problem, you can use IBM® ILOG® Concert
+Technology classes to model it. </p>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.158085"><h2 class="title sectiontitle">Step
+2: Open the example file</h2><p class="p">Open
+the example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/sched_cumul_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You will enter the missing code in each step
+in this lesson. At the end, you will have completed the program code,
+and you can compile and run the program.</p>
+<p class="p">In this lesson, you
+include the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>. To catch
+exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code for creating the environment and model and for printing out
+the solution found by the CP Optimizer engine is provided.</p>
+<p class="p">In
+addition, the data related to the tasks, such as the tasks (<samp class="ph codeph">Tasks</samp>),
+the number of tasks (<samp class="ph codeph">NbTasks</samp>), the names of the tasks
+(<samp class="ph codeph">TaskNames</samp>) and sizes of the tasks (<samp class="ph codeph">TaskDurations</samp>),
+are provided. The number of workers (<samp class="ph codeph">NbWorkers</samp>) is
+also provided.</p>
+<p class="p">After you create an environment and a model,
+you need to define the decision variables and add the constraints
+and objective to the model. Since the requirements for each of the
+five houses are similar, you use a function, <samp class="ph codeph">MakeHouse</samp>,
+to create the decision variables, constraints and costs associated
+with each house. Information about individual houses that must be
+shared with the main function includes the expressions needed to create
+the objective function and information about worker usage and the
+cash balance. In order to display the results of the optimization,
+it is also useful to maintain an array of all the interval variables. </p>
+<p class="p">To
+access this information, you create objects to be updated in the <samp class="ph codeph">MakeHouse</samp> function.
+An array of task interval variables, <samp class="ph codeph">allTasks</samp>, stores
+all the interval variables that are created.   The cost expression
+involves the date at which moving is completed for each house, and
+the integer expression array <samp class="ph codeph">ends</samp> is used to store
+this information. In addition, the expressions used to represent worker
+usage and the cash balance are included in the global information
+that is updated in each call to the <samp class="ph codeph">MakeHouse</samp> function.</p>
+<p class="p">Since
+the workers are equivalent in this problem, it is better to represent
+them as one pool of workers instead of as individual workers with
+no overlap constraints as was done in the earlier examples. This representation
+removes symmetry. The expression representing usage of the pool of
+workers can be modified by the interval variables that require a worker. </p>
+<p class="p">To
+model both the limited number of workers and the limited budget, you
+need to represent the sum of individual contributions of interval
+variables. In the case of the cash budget, some tasks consume some
+of the budget at the start. In the case of the workers, a task requires
+a worker only for the duration of the task. Concert Technology provides
+the class <samp class="ph codeph">IloCumulFunctionExpr</samp> to represent the sum
+of individual contributions of interval variables.      </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Cumulative
+function expression</strong> </p>
+ <p class="p">A cumulative function, represented
+in IBM ILOG Concert Technology by <samp class="ph codeph">IloCumulFunctionExpr</samp>,
+can be used to model a resource usage function over time. This function
+can be computed as a sum of interval variable demands on a resource
+over time. </p>
+ <p class="p">An interval usually increases the cumulated resource
+usage function at its start time and decreases it when it releases
+the resource at its end time (pulse function).</p>
+ <p class="p">For resources
+that can be produced and consumed by activities (for instance the
+contents of an inventory or a tank), the resource level can also be
+described as a function of time. A production activity will increase
+the resource level at the start or end time of the activity whereas
+a consuming activity will decrease it. The cumulated contribution
+of activities on the resource can be represented by a function of
+time, and constraints can be posted on this function (for instance,
+a maximal or a safety level). </p>
+ <p class="p">A cumulative function expression
+can be computed as a sum of the following types of elementary demands: </p>
+ <ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">IloStep</samp>, which increases or decreases the
+level of the function by a given amount at a given time;</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">IloPulse</samp>, which increases or decreases the
+level of the function by a given amount for the length of a given
+interval variable or fixed interval;</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloStepAtStart</samp>, which increases or decreases
+the level of the function by a given amount at the start of a given
+interval variable;</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloStepAtEnd</samp>, which increases or decreases
+the level of the function by a given amount at the end of a given
+interval variable.</p>
+ </li>
+</ul>
+ <p class="p">A cumulative function expression can be constrained to model
+limited resource capacity by constraining that the function be <samp class="ph codeph">&lt;=</samp> the
+capacity. </p>
+ </div>
+<p class="p">To illustrate, consider a cumulative resource
+usage function that measures how much of a resource is being used.
+There are two intervals, A and B, bound in time, and each interval
+increases the cumulative function expression by one unit over its
+duration. For each interval, this modification to the cumulative resource
+usage function can be made by incrementing the cumulative function
+with the elementary function <samp class="ph codeph">IloPulse</samp>, created with
+the interval and the given amount. Given this, the function would
+take the profile as in the figure “Pulse on Cumulative Function Expression.”</p>
+<div class="fig fignone"><span class="figcap">Figure 1. Pulse on Cumulative Function Expression</span><div class="image"><img class="image" src="../images/pulse_cdr.png" alt="Graph of a pulse function" /></div></div>
+<p class="p">As another example, consider a function measuring a consumable
+resource, similar to the budget resource. Consider that the level
+of the resource is zero, until time 2 when the value is increased
+to 4; modeled by modifying the cumulative function with the elementary
+cumul function <samp class="ph codeph">IloStep</samp> at time 2. There are two intervals,
+A and B, fixed in time. Interval A decreases the level of the resource
+by 3 at the start of the interval, modeled by applying <samp class="ph codeph">IloStepAtStart</samp>,
+created with Interval A and the value (3), to the cumulative function.
+Interval B increases the level of the resource by 2 at the end of
+the interval, modeled by applying <samp class="ph codeph">IloStepAtEnd</samp>, created
+with Interval B and the value (2), to the cumulative function for
+the interval. Given this, the function would take the profile as in
+the figure “Step on Cumulative Function Expression.”</p>
+<div class="fig fignone"><span class="figcap">Figure 2. Step
+on Cumulative Function Expression</span><div class="image"><img class="image" src="../images/step_cdr.png" alt="Graph of a consumable resource over time" /></div></div>
+<p class="p">For the house building problem, you create two cumulative
+function expression objects, one to represent the usage of the workers
+and the other to represent the cash balance. The constructor of the
+class <samp class="ph codeph">IloCumulFunctionExpr</samp> takes one argument, the
+environment.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.158074"><h2 class="title sectiontitle">Step
+3: Declare the objects needed for MakeHouse</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Declare the objects needed for MakeHouse</samp>  </p>
+<pre class="pre codeblock"><code>    IloCumulFunctionExpr workersUsage(env);
+    IloCumulFunctionExpr cash(env);
+    IloIntExprArray ends(env);
+    IloIntervalVarArray allTasks(env);
+</code></pre>
+<p class="p">To set the increases to the cash balance, you use the
+function <samp class="ph codeph">IloStep</samp>, which can be used to increment
+or decrement the cumulative function expression by a fixed amount
+on a given date. The first argument passed to this function is the
+environment. The second argument is the date at which the function
+should be modified. The third argument is the amount by which the
+function should be changed; this must be a non-negative value.    </p>
+<pre class="pre codeblock"><code>  IloCumulFunctionExpr IloStep(const IloEnv env, IloInt t, IloInt v);
+</code></pre>
+<p class="p">For setting the increases to the cash balance, the
+cumulative function expression for the cash balance should be incremented
+by the appropriate amount, 30,000 dollars, every 60 days, starting
+at day 0. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.158061"><h2 class="title sectiontitle">Step
+4: Add the cash payment expression</h2><p class="p">Add the following code
+after the comment <samp class="ph codeph">//Add the cash payment expression</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt p=0; p&lt;5; ++p)
+      cash += IloStep(env, 60*p, 30000);  
+</code></pre>
+<p class="p">You need to pass the model, the house identifier, the
+earliest start date of the house, the cumulative function expressions
+for the worker usage and cash balance, the array of expressions representing
+the completion dates of the houses and the array of all the tasks
+as arguments to the <samp class="ph codeph">MakeHouse</samp> function. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.158045"><h2 class="title sectiontitle">Step
+5: Create the MakeHouse function</h2><p class="p">Add the following code
+after the comment <samp class="ph codeph">//Create the MakeHouse function</samp> </p>
+<pre class="pre codeblock"><code>void MakeHouse(IloModel model,
+                IloInt id,
+                IloInt rd,
+                IloCumulFunctionExpr&amp; workersUsage,
+                IloCumulFunctionExpr&amp; cash,
+                IloIntExprArray ends,
+                IloIntervalVarArray allTasks) {
+</code></pre>
+<p class="p">Each house has a list of <samp class="ph codeph">NbTasks</samp> that
+must be scheduled. Task <samp class="ph codeph">i</samp>, where <samp class="ph codeph">i</samp> is
+in <samp class="ph codeph">0..NbTasks-1</samp>, has a size of <samp class="ph codeph">TaskDurations[i]</samp> and
+the name <samp class="ph codeph">TaskNames[i]</samp>.   Using these, you build an
+array <samp class="ph codeph">tasks</samp> of interval variables. As you create
+each interval variable, you also add it to the array <samp class="ph codeph">allTasks</samp> that
+will be used to display the solution once the schedule has been computed. </p>
+<p class="p">Each
+task also requires one worker from the start to the end of the task
+interval. To represent the fact that a worker is required for the
+task, you modify the cumulative function expression, <samp class="ph codeph">workerUsage</samp>.
+Since it is not known when a task will begin or end, you use the function <samp class="ph codeph">IloPulse</samp>.
+The first argument passed to this function is the interval during
+which the function should be modified. The second argument is the
+amount by which the function should be changed; this must be a non-negative
+value.       </p>
+<pre class="pre codeblock"><code>  IloCumulFunctionExpr IloPulse(const IloIntervalVar a, IloInt v);
+</code></pre>
+<p class="p">Moreover, each task requires a payment equal to 200
+dollars a day for the length of the task, payable at the start of
+the task. For each task, you use the function <samp class="ph codeph">IloStepAtStart</samp> to
+adjust the cash balance cumulative function expression.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.158018"><h2 class="title sectiontitle">Step
+6: Create the interval variables</h2><p class="p">Add the following code
+after the comment <samp class="ph codeph">//Create the interval variables</samp> </p>
+<pre class="pre codeblock"><code>  char name[128];
+  IloIntervalVarArray tasks(env, NbTasks);
+  for (IloInt i=0; i&lt;NbTasks; ++i) {
+    sprintf(name, "H%ld-%s", id, TaskNames[i]);
+    IloIntervalVar task(env, TaskDurations[i], name);
+    tasks[i] = task;
+    allTasks.add(task);
+    workersUsage += IloPulse(task, 1);
+    cash -= IloStepAtStart(task, 200 * TaskDurations[i]);
+  }
+</code></pre>
+<p class="p">The tasks have precedence constraints that are added
+to the model. Moreover, each house has an earliest starting date. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.158007"><h2 class="title sectiontitle">Step
+7: Add the temporal constraints</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Add the temporal constraints</samp> </p>
+<pre class="pre codeblock"><code>  tasks[masonry].setStartMin(rd);
+  model.add(IloEndBeforeStart(env, tasks[masonry], tasks[carpentry]));
+  model.add(IloEndBeforeStart(env, tasks[masonry], tasks[plumbing]));
+  model.add(IloEndBeforeStart(env, tasks[masonry], tasks[ceiling]));
+  model.add(IloEndBeforeStart(env, tasks[carpentry], tasks[roofing]));
+  model.add(IloEndBeforeStart(env, tasks[ceiling], tasks[painting]));
+  model.add(IloEndBeforeStart(env, tasks[roofing], tasks[windows]));
+  model.add(IloEndBeforeStart(env, tasks[roofing], tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing], tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[roofing], tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing], tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[windows], tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[facade], tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[garden], tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[painting], tasks[moving]));
+</code></pre>
+<p class="p">To model the cost of building the houses, you will
+need to determine the maximum completion date among the individual
+house projects. To determine the expression representing the completion
+date of the house currently in consideration, you use the function <samp class="ph codeph">IloEndOf</samp> on
+the last task in building a house (here, it is the moving task) and
+store this expression in the array <samp class="ph codeph">ends</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.157996"><h2 class="title sectiontitle">Step
+8: Add the objective expression</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Add the objective expression</samp> </p>
+<pre class="pre codeblock"><code>  ends.add(IloEndOf(tasks[moving]));
+</code></pre>
+<p class="p">This completes the <samp class="ph codeph">MakeHouse</samp> function.
+In the main function, you now call the <samp class="ph codeph">MakeHouse</samp> function,
+once for each house. At each call, additional elements are appended
+to the arrays <samp class="ph codeph">ends</samp> and <samp class="ph codeph">allTasks</samp>,
+and the expressions for worker usage and the cash balance are modified.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.157983"><h2 class="title sectiontitle">Step
+9: Create the houses</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Create the houses</samp> </p>
+<pre class="pre codeblock"><code>    MakeHouse(model, 0,  31, workersUsage, cash, ends, allTasks);
+    MakeHouse(model, 1,   0, workersUsage, cash, ends, allTasks);
+    MakeHouse(model, 2,  90, workersUsage, cash, ends, allTasks);
+    MakeHouse(model, 3, 120, workersUsage, cash, ends, allTasks);
+    MakeHouse(model, 4,  90, workersUsage, cash, ends, allTasks);
+</code></pre>
+<p class="p">To add the constraint that the cash balance must remain
+positive, you constrain the cumulative function expression representing
+the cash to be non-negative. (Note that by default the function is
+constrained to be non-negative, but the cumulative expression function
+must be added to the model in order for the optimizer to take it into
+account during the search.) </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.157972"><h2 class="title sectiontitle">Step
+10: Add the cash balance constraint</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Add the cash balance constraint</samp> </p>
+<pre class="pre codeblock"><code>    model.add(0 &lt;= cash);
+</code></pre>
+<p class="p">To add the constraint that there can be only three
+workers working at a given time, you constrain the cumulative function
+expression representing worker usage to be no greater than the value <samp class="ph codeph">NbWorkers</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.157964"><h2 class="title sectiontitle">Step
+11: Add the worker usage constraint</h2><p class="p">Add the following code
+after the comment <samp class="ph codeph">//Add the worker usage constraint</samp> </p>
+<pre class="pre codeblock"><code>    model.add(workersUsage &lt;= NbWorkers);
+</code></pre>
+<p class="p">The objective of this problem is to minimize the overall
+completion date (the completion date of the house that is completed
+last). To do this, you minimize the maximal expression in the array <samp class="ph codeph">ends</samp>.
+  </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcumul.114936__migration.uss_gscpoptimizerschedcumul.157931"><h2 class="title sectiontitle">Step
+12: Add the objective</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the objective</samp> </p>
+<pre class="pre codeblock"><code>    model.add(IloMinimize(env, IloMax(ends)));
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/schedcumul.html" title="In this lesson, you will learn how to find a solution to a house building with budget and resource pools problem using CP Optimizer and the three-stage method.">Using cumulative functions: house building with budget and resource pools</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Introducing the barrier optimizer" />
+<meta name="abstract" content="Describes the type of problem the barrier optimizer solves and characterizes its approach." />
+<meta name="Description" content="Describes the type of problem the barrier optimizer solves and characterizes its approach." />
+<meta name="DC.subject" content="barrier optimizer, algorithm, LP, problem formulation, primal, barrier, slack, in primal formulation (barrier), dual, primal feasibility, feasibility, dual feasibility, duality gap, solution, complementary, complementarity, barrier optimizer and, tolerance, complementary solution and, Cholesky factor, barrier iteration, uses, performance, characteristics" />
+<meta name="keywords" content="barrier optimizer, algorithm, LP, problem formulation, primal, barrier, slack, in primal formulation (barrier), dual, primal feasibility, feasibility, dual feasibility, duality gap, solution, complementary, complementarity, barrier optimizer and, tolerance, complementary solution and, Cholesky factor, barrier iteration, uses, performance, characteristics" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/01_barrier_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveBarrier.673166" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/01_barrier_title_synopsis.html" />
+<title>Introducing the barrier optimizer</title>
+</head>
+<body role="main" id="User_manual.uss_solveBarrier.673166">
+<h1 class="title topictitle1">Introducing the barrier optimizer</h1>
+<div class="body"><p class="shortdesc">Describes the type of problem the barrier optimizer solves
+and characterizes its approach.</p>
+<p class="p">The IBM ILOG
+CPLEX barrier optimizer is well suited to large, sparse problems.
+An alternative to the simplex optimizers, which are also suitable
+to problems in which the matrix representation is dense, the barrier
+optimizer exploits a primal-dual logarithmic barrier algorithm to
+generate a sequence of strictly positive primal and dual solutions
+to a problem. As with the simplex optimizers, it is not really necessary
+to understand the internal workings of barrier in order to obtain
+its performance benefits. However, for the interested reader, here
+is an outline of how it works.</p>
+<p class="p">CPLEX finds the primal solutions, conventionally denoted
+(x, s), from the primal formulation:</p>
+<p class="p">Minimize c<sup class="ph sup">T</sup>x</p>
+<p class="p">subject to Ax = b </p>
+<p class="p">with these bounds x + s = u and x <samp class="ph codeph">≥</samp> l </p>
+<p class="p">where A is the constraint matrix, including slack and
+surplus variables; u is the upper and l the lower bounds on the variables. </p>
+<p class="p">Simultaneously, CPLEX automatically finds the dual solutions,
+conventionally denoted (y, z, w) from the corresponding
+dual formulation:</p>
+<p class="p">Maximize b<sup class="ph sup">T</sup>y - u<sup class="ph sup">T</sup>w + l<sup class="ph sup">T</sup>z</p>
+<p class="p">subject to A<sup class="ph sup">T</sup>y - w + z = c</p>
+<p class="p">with these bounds w <samp class="ph codeph">≥</samp> 0
+and z <samp class="ph codeph">≥</samp> 0</p>
+<p class="p">All possible solutions maintain strictly positive primal
+solutions (x - l, s) and strictly positive reduced
+costs (z, w) so that the value 0 (zero) forms a barrier for primal
+and dual variables within the algorithm.</p>
+<p class="p">CPLEX measures progress by considering the primal feasibility,
+dual feasibility, and duality gap at each iteration. To measure feasibility,
+CPLEX considers the accuracy with which the primal constraints (Ax = b, x + s = u)
+and dual constraints (A<sup class="ph sup">T</sup>y + z - w = c)
+are satisfied. The optimizer stops when it finds feasible primal and
+dual solutions that are complementary. A complementary solution is
+one where the sums of the products (x<sub class="ph sub">j</sub>  -l<sub class="ph sub">j</sub>)z<sub class="ph sub">j</sub> and
+(u<sub class="ph sub">j</sub>  - x<sub class="ph sub">j</sub>)z<sub class="ph sub">j</sub> are
+within some tolerance of 0 (zero). Since each (x<sub class="ph sub">j</sub>  -l<sub class="ph sub">j</sub>),
+(u<sub class="ph sub">j</sub>  - x<sub class="ph sub">j</sub>),
+and z<sub class="ph sub">j</sub> is strictly positive,
+the sum can be near zero only if each of the individual products is
+near zero. The sum of these products is known as the <em class="ph i">complementarity</em> of the problem.</p>
+<p class="p">On each iteration of the barrier optimizer, CPLEX computes
+a matrix based on AA<sup class="ph sup">T</sup> and
+then computes a Cholesky factor of it. This factored matrix has the
+same number of nonzeros on each iteration. The number of nonzeros
+in this matrix is influenced by the barrier ordering parameter.</p>
+<p class="p">The CPLEX barrier optimizer is appropriate and often
+advantageous for large problems, for example, those with more than
+100 000 rows or columns. It is not <em class="ph i">always</em> the
+best choice, though, for sparse models with more than 100 000
+rows. It is effective on problems with staircase structures or banded
+structures in the constraint matrix. It is also effective on problems
+with a small number of nonzeros per column (perhaps no more than a
+dozen nonzero values per column).</p>
+<p class="p">In short, denseness or sparsity are not the deciding
+issues when you are deciding whether to use the barrier optimizer.
+In fact, its performance is most dependent on these characteristics:</p>
+<ul class="ul"><li class="li"><p class="p">the number of floating-point operations
+required to compute the Cholesky factor;</p>
+</li>
+<li class="li"><p class="p">the presence of dense columns, that
+is, columns with a relatively high number of nonzero entries.</p>
+</li>
+</ul>
+<p class="p">To decide whether to use the barrier optimizer on a given
+problem, you should look at both these characteristics, not simply
+at denseness, sparseness, or problem size. (How to check those characteristics
+is explained later in this chapter in <a class="xref" href="15_log_file_Cholesky.html" title="Identifies the report of the Cholesky factor in the log file of the barrier optimizer.">Cholesky factor in the log file</a>,
+and <a class="xref" href="13_log_file_nonzeros.html" title="Explains report of nonzeros in the log file of the barrier optimizer.">Nonzeros in lower triangle of A*A' in the log file</a>).</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/01_barrier_title_synopsis.html" title="Documents solving linear programming problems by means of the CPLEX barrier optimizer.">Solving LPs: barrier optimizer</a></div>
+</div>
+</div></body>
+</html>

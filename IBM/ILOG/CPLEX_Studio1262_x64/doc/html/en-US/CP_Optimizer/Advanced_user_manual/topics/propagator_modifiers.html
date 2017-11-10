@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Elementary modifiers for variables" />
+<meta name="abstract" content="Elementary modifiers for decision variables are used to remove inconsistent values from domains." />
+<meta name="Description" content="Elementary modifiers for decision variables are used to remove inconsistent values from domains." />
+<meta name="DC.subject" content="IloCustomConstraint class, IloPropagatorI class, modifier, elementary" />
+<meta name="keywords" content="IloCustomConstraint class, IloPropagatorI class, modifier, elementary" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerprop.1021867" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<title>Elementary modifiers for variables</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerprop.1021867">
+<h1 class="title topictitle1">Elementary modifiers for variables</h1>
+<div class="body"><p class="shortdesc">Elementary modifiers for decision variables are used to
+remove inconsistent values from domains.</p>
+<p class="p">A propagator reduces the domains of the variables involved in the
+constraint propagator. In the C++ API, the modifiers for the domains
+of decision variables are available as member functions of <samp class="ph codeph">IloPropagatorI</samp>.
+In the Java™ API, the modifiers
+for the domains of integer variables are available as member functions
+of <samp class="ph codeph">IloCustomConstraint</samp>. In both APIs, these functions
+are <samp class="ph codeph">removeValue</samp>, <samp class="ph codeph">setMax</samp>, <samp class="ph codeph">setMin</samp>, <samp class="ph codeph">setRange</samp> and <samp class="ph codeph">setValue</samp>.
+You can use these elementary modifiers to implement the inference
+algorithm for your constraint propagator.</p>
+<p class="p">For example, consider how <samp class="ph codeph">setValue</samp>, one of these
+predefined modifiers, behaves when called on a decision variable <em class="ph i">x</em> with
+current domain [0..1]. In the C++ API, the code fragment:  </p>
+<pre class="pre codeblock"><code> setValue(x,1);</code></pre>
+<p class="p">reduces the domain of <em class="ph i">x</em> to a singleton (a single element)
+with the value 1. This behavior literally involves a domain reduction,
+and this behavior is consistent throughout CP Optimizer.</p>
+<p class="p">For example, consider the following constraint propagator written
+using the C++ API:  </p>
+<pre class="pre codeblock"><code>void ModConstraintI::execute () {
+  setValue(_x,1);
+}
+</code></pre>
+<p class="p">Adding this constraint propagator to the model and propagating:
+ </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 1, 3, "x");
+    model.add(ModConstraint(x));
+    IloCP cp(model);
+    if (cp.propagate())
+        cp.out() &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+    else
+        cp.out() &lt;&lt; "No solution." &lt;&lt; std::endl;
+    cp.end();    cp.end();
+</code></pre>
+<p class="p">produces output that contains: </p>
+<pre class="pre codeblock"><code> x[1]</code></pre>
+<p class="p">If you attempt to set the value of a constrained variable to a
+value that is not in the current domain, this action leads to a failure
+in the search. Assume that the decision variable <em class="ph i">x</em> has the
+domain of [2..3] and you set the value to 1. This leads to a failure,
+and the optimizer will no longer investigate the subtree of the current
+node. The output produced contains  </p>
+<pre class="pre codeblock"><code> No solution.
+</code></pre>
+<p class="p">In the C++ API, the elementary modifiers used in a propagator are
+member functions of the class <samp class="ph codeph">IloPropagatorI</samp>. In
+the Java API, the elementary
+modifiers are member functions of the class <samp class="ph codeph">IloCustomConstraint</samp> which
+implements the interface <samp class="ph codeph">IloPropagator</samp>.  </p>
+<p class="p"> In both APIs, the modifiers are:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">setValue(IloIntVar x, IloInt value)</samp> tries
+to make <samp class="ph codeph">x</samp> equal to <samp class="ph codeph">value</samp>; </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">setMin(IloIntVar x, IloInt min)</samp> tries to make <samp class="ph codeph">x</samp> greater
+than or equal to <samp class="ph codeph">min</samp>;</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">setMax(IloIntVar x, IloInt max)</samp> tries to make <samp class="ph codeph">x</samp> less
+than or equal to <samp class="ph codeph">max</samp>; </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">setRange(IloIntVar x, IloInt min, IloInt max)</samp> tries
+to make <samp class="ph codeph">x</samp> stay between <samp class="ph codeph">min</samp> and <samp class="ph codeph">max</samp>,
+inclusive;</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">removeValue(IloIntVar x, IlcInt value)</samp> tries
+to make the current domain of <samp class="ph codeph">x</samp> not contain <samp class="ph codeph">value</samp>. </p>
+ </li>
+</ul>
+<p class="p">Elementary modifiers only reduce domains: they do not enlarge domains.
+For that reason, the following code does not modify the domain [0..1]
+of the decision variable and, in particular, it does not make the
+variable’s upper bound equal to 2: </p>
+<pre class="pre codeblock"><code>  setMax(x,2);</code></pre>
+<p class="p">The next section shows how to take an implementation of an invariant
+and write a constraint propagator. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" title="A constraint propagator is a simple way to define a custom constraint, that is, one where you define the domain reduction rules.">Using constraint propagators</a></div>
+</div>
+</div></body>
+</html>

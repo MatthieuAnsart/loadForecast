@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Interpreting output from FeasOpt" />
+<meta name="abstract" content="Documents typical output from FeasOpt." />
+<meta name="Description" content="Documents typical output from FeasOpt." />
+<meta name="DC.subject" content="FeasOpt, output" />
+<meta name="keywords" content="FeasOpt, output" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/feasopt/01_feasopt_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="feasoptInterpretOutput" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/feasopt/01_feasopt_title_synopsis.html" />
+<title>Interpreting output from FeasOpt</title>
+</head>
+<body role="main" id="feasoptInterpretOutput">
+<h1 class="title topictitle1">Interpreting output from FeasOpt</h1>
+<div class="body"><p class="shortdesc">Documents typical output from FeasOpt.</p>
+<p class="p">The output from FeasOpt consists of two vectors: 
+a conventional solution vector and 
+another vector of values for infeasible constraints and variables.</p>
+<div class="section"><h2 class="title sectiontitle">Solution vector from FeasOpt</h2>
+<div class="p"> 
+FeasOpt produces a vector of solution values, like the solution vector produced by 
+the Callable Library routine <span class="keyword apiname">CPXlpopt</span> or the Concert Technology method <span class="keyword apiname">solve</span>. 
+Your application accesses this vector by means of the usual queries to access a solution vector.
+<ul class="ul"><li class="li">In Concert Technology, use one of these methods to access the solution vector produced by FeasOpt:
+    <ul class="ul"><li class="li">In the C++ API, use the method <span class="keyword apiname">IloCplex::getValues</span>.</li>
+<li class="li">In the Java API, use the method <span class="keyword apiname">IloCplex.getValues</span>.</li>
+<li class="li">In the .NET API, use the method <span class="keyword apiname">Cplex.GetValues</span>.</li>
+</ul>
+
+    </li>
+<li class="li">In the Callable Library (C API), use the routine <span class="keyword apiname">CPXsolution</span>.</li>
+<li class="li">In the Python API, use the method <span class="keyword apiname">get_values</span> from the class <span class="keyword apiname">SolutionInterface</span>.</li>
+<li class="li">In the Interactive Optimizer, use the command <samp class="ph codeph">display solution</samp>.</li>
+</ul>
+</div>
+
+<p class="p">If the model that your application passed to FeasOpt is infeasible, 
+these solution values violate at least one constraint or variable bound. </p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Infeasibility vector from FeasOpt</h2>
+<p class="p">In addition to that conventional solution vector, FeasOpt also produces 
+a vector of values that provide useful information about infeasible constraints and variables. These infeasibility values 
+are 0 (zero) if the constraint or the variable bounds are satisfied by the relaxed solution.  
+Otherwise, the infeasibility value produced by FeasOpt
+is the amount that makes the queried solution valid when that amount is added to 
+the infeasible constraint or variable bound. 
+For example, for a less-than-or-equal-to constraint 
+or variable upper bound,
+that amount is positive. 
+Likewise, for a greater-than-or-equal-to constraint 
+or variable lower bound, 
+that amount is negative . 
+For an equality constraint, that amount is also positive 
+when the row activity exceeds the right hand side (RHS), 
+and negative when the row activity is less than the right hand side (RHS). </p>
+
+<p class="p">Similarly, these amounts in the infeasibility vector are significant 
+for ranges, such as ranged rows in the Callable Library (C API) or for 
+instances of the class <span class="keyword apiname">IloRange</span> in the C++ API and Java API, 
+or <span class="keyword apiname">Range</span> in the .NET API. Specifically, 
+a negative infeasibility value specifies the amount by which the lower bound 
+of the range must be changed; a positive value specifies the amount by which 
+the upper bound of the range must be changed.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/feasopt/01_feasopt_title_synopsis.html" title="Documents FeasOpt, a feature for repairing infeasibility in a model.">Repairing infeasibilities with FeasOpt</a></div>
+</div>
+</div></body>
+</html>

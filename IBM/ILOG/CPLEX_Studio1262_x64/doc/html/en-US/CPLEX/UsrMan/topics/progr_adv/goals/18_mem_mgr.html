@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Memory management and goals" />
+<meta name="abstract" content="Describes goals in the context of memory management." />
+<meta name="Description" content="Describes goals in the context of memory management." />
+<meta name="DC.subject" content="deleting nodes, delete goal stacks, reference counting" />
+<meta name="keywords" content="deleting nodes, delete goal stacks, reference counting" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_goals.1018478" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<title>Memory management and goals</title>
+</head>
+<body role="main" id="User_manual.uss_goals.1018478">
+<h1 class="title topictitle1">Memory management and goals</h1>
+<div class="body"><p class="shortdesc">Describes goals in the context of memory management.</p>
+<p class="p">Java and .NET use garbage collection to handle all memory
+management issues. Thus the following applies only to the C++ library.
+Java or .NET users may safely skip ahead to <a class="xref" href="19_cuts.html" title="Distinguishes local cuts from global cuts and illustrates cuts added by a goal">Cuts and goals</a>.</p>
+<p class="p">To conserve memory, in the C++ API, CPLEX only stores
+active nodes of the tree and deletes nodes as soon as they become
+inactive. When deleting nodes, CPLEX also deletes the goal stacks
+associated with them, including all goals they may still contain.
+In other words, CPLEX takes over memory management for goals.</p>
+<p class="p">It does so by keeping track of how many references to
+every goal are in use. As soon as this number drops to zero (0), the
+goal is automatically deleted. This technique is known as reference
+counting.</p>
+<p class="p">CPLEX implements reference counting in the handle class <samp class="ph codeph">IloCplex::Goal</samp>.
+Every <samp class="ph codeph">IloCplex::GoalI</samp> object maintains
+a count of how many <samp class="ph codeph">IloCplex::Goal</samp> handle
+objects refer to it. The assignment operator, the constructors, and
+the destructor of class <samp class="ph codeph">IloCplex::Goal</samp> are
+implemented in such a way as to keep the reference count up-to-date.
+This convention means that users should always access goals through
+handle objects, rather than keeping their own pointers to implementation
+objects.</p>
+<p class="p">Other than that, nothing special needs to be observed
+when dealing with goals. In particular, goals don't have <samp class="ph codeph">end</samp> methods
+like other handle classes in the C++ API of Concert Technology. Instead,
+CPLEX goal objects are automatically deleted when no more references
+to them exist.</p>
+<p class="p">Local cut goals contain <samp class="ph codeph">IloRange</samp> objects.
+Since the <samp class="ph codeph">IloRange</samp> object is only applied
+when the goal is executed, the method <samp class="ph codeph">end</samp> must
+not be called for a range constraint from which a local cut goal is
+built. The goal will take over memory management for the constraints
+and call the method <samp class="ph codeph">end</samp> when the goal itself
+is destroyed. Also, an <samp class="ph codeph">IloRange</samp> object
+can only be used in exactly one local cut goal. Similarly, method <samp class="ph codeph">end</samp> must
+not be called for <samp class="ph codeph">IloRangeArray</samp> objects
+that are passed to local cut goals. Also such arrays must not contain
+duplicate elements.</p>
+<p class="p">Going back to the example <samp class="ph codeph">ilogoalex1.cpp</samp>,
+you see that the method <samp class="ph codeph">end</samp> is called for
+the temporary arrays <samp class="ph codeph">x</samp>, <samp class="ph codeph">obj</samp>,
+and <samp class="ph codeph">feas</samp> at the end of the <samp class="ph codeph">execute</samp> method.
+Though a bit hidden, two <samp class="ph codeph">IloRange</samp> constraints
+are constructed for the goal, corresponding to the arguments of the <samp class="ph codeph">Or</samp> goal.
+CPLEX takes over memory management for these two constraints as soon
+as they are enclosed in a goal. This takeover happens via the implicit
+constructor <samp class="ph codeph">IloCplex::Goal::Goal(IloRange rng)</samp> that
+is called when the range constraints are passed as arguments to the <samp class="ph codeph">Or</samp> 
+goal.</p>
+<p class="p">In summary, the user is responsible for calling <samp class="ph codeph">end</samp> 
+on all Concert Technology objects created in a goal, except when they
+have been passed as arguments to a new goal.</p>
+<p class="p">Also, user code in the <samp class="ph codeph">execute</samp> method
+is <strong class="ph b">not</strong> allowed to modify existing
+Concert Technology objects in any way. CPLEX uses an optimized memory
+management system within goals for dealing with temporary objects.
+However, this memory management system cannot be mixed with the default
+memory management system used by Concert Technology. Thus, for example,
+it is illegal to add an element to array <samp class="ph codeph">vars</samp> in
+the example, since this array has been created outside of the goal.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" title="Documents goals and their role in a branch &amp; cut search.">Using goals</a></div>
+</div>
+</div></body>
+</html>

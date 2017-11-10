@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using the Interactive Optimizer for debugging" />
+<meta name="abstract" content="Describes Interactive Optimizer more fully as debugger." />
+<meta name="Description" content="Describes Interactive Optimizer more fully as debugger." />
+<meta name="DC.subject" content="Interactive Optimizer, debugging and, debugging, Interactive Optimizer and, Callable Library and, Callable Library, CPXwriteprob, CPXcopyctype routine, checking types of variables" />
+<meta name="keywords" content="Interactive Optimizer, debugging and, debugging, Interactive Optimizer and, Callable Library and, Callable Library, CPXwriteprob, CPXcopyctype routine, checking types of variables" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/dev_hints/01_dev_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_developAppli.636168" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/dev_hints/01_dev_title_synopsis.html" />
+<title>Using the Interactive Optimizer for debugging</title>
+</head>
+<body role="main" id="User_manual.uss_developAppli.636168">
+<h1 class="title topictitle1">Using the Interactive Optimizer for debugging</h1>
+<div class="body"><p class="shortdesc">Describes Interactive Optimizer more fully as debugger.</p>
+<p class="p">The CPLEX Interactive Optimizer distributed with the Component
+Libraries offers a way to see what is going on within the CPLEX part
+of your application when you observe peculiar behavior in your optimization
+application. The commands of the Interactive Optimizer correspond
+exactly to routines of the Component Libraries, so anomalies due to
+the CPLEX-part of your application will manifest themselves in the
+Interactive Optimizer as well, and contrariwise, if the Interactive
+Optimizer behaves appropriately on your problem, you can be reasonably
+sure that routines you call in your application from the Component
+Libraries work in the same appropriate way.</p>
+<p class="p">With respect to parameter settings, you can write a parameter file
+with the file extension .<samp class="ph codeph">prm</samp> from your application
+by means of one of these methods:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">IloCplex::writeParam</samp> in the C++ API</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloCplex.writeParam</samp> in the Java API</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">Cplex.WriteParam</samp> in the .NET API</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">CPXwriteparam</samp> in the Callable Library</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">write</samp> <em class="ph i">file</em> <samp class="ph codeph">.prm</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">The Interactive Optimizer can read a .<samp class="ph codeph">prm</samp> file
+and then set parameters exactly as they are in your application. </p>
+<p class="p">In the other direction, you can use the <samp class="ph codeph">display</samp> command
+in the Interactive Optimizer to show the nondefault parameter settings;
+you can then save those settings in a <samp class="ph codeph">.prm</samp> file for
+re-use later. See the topic <a class="xref" href="../../../../InteractiveOptimizer/topics/saveParamSpecs.html" title="A parameter specification file records your customized parameter settings..">Saving a parameter specification file</a> in
+the reference manual of the Interactive Optimizer for more detail
+about using a parameter file in this way.</p>
+<p class="p">To use the Interactive Optimizer for debugging, you first need
+to write a version of the problem from the application into a formatted
+file that can then be loaded into the Interactive Optimizer. To do
+so, insert a call to the method <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#exportModel" title="(Opens in a new tab or window)">exportModel</a> or to the
+routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/writeprob.html" title="The routine CPXXwriteprob/CPXwriteprob writes a CPLEX problem object to a file in one of the formats in the table.">CPXwriteprob</a></samp> into
+your application. Use that call to create a file, whether an LP, SAV,
+or MPS formatted problem file. (<a class="xref" href="../input_output/manageIO_file_formats_synopsis.html" title="Explains programming considerations about widely used file formats.">Understanding file formats</a> briefly
+describes these file formats.) Then read that file into the Interactive
+Optimizer and optimize the problem there.</p>
+<p class="p">Note that MPS, LP and SAV files have differences that influence
+how to interpret the results of the Interactive Optimizer for debugging.
+SAV files contain the exact binary representation of the problem as
+it appears in your program, while MPS and LP files are text files
+containing possibly less precision for numeric data. And, unless every
+variable appears on the objective function, CPLEX will probably order
+the variables differently when it reads the problem from an LP file
+than from an MPS or SAV file. With this in mind, SAV files are the
+most useful for debugging using the Interactive Optimizer, followed
+by MPS files, then finally LP files, in terms of the change in behavior
+you might see by use of explicit files. On the other hand, LP files
+are often quite helpful when you want to examine the problem, more
+so than as input for the Interactive Optimizer. Furthermore, try solving
+both the SAV and MPS files of the same problem using the Interactive
+Optimizer. Different results may provide additional insight into the
+source of the difficulty. In particular, use the following guidelines
+with respect to reproducing your program’s behavior in the Interactive
+Optimizer.</p>
+<ol class="ol"><li class="li"><p class="p">If you can reproduce the behavior with a SAV file, but not
+with an MPS file, this suggests corruption or errors in the problem
+data arrays. Use the <samp class="ph codeph">DataCheck</samp> parameter or diagnostic
+routines in the source file <samp class="ph codeph">check.c</samp> to track down
+the problem.</p>
+</li>
+<li class="li"><p class="p">If you can reproduce the behavior in neither the SAV file nor
+the MPS file, the most likely cause of the problem is that your program
+has some sort of memory error. Memory debugging tools such as Purify
+will usually find such problems quickly.</p>
+ </li>
+<li class="li"><p class="p">When solving a problem in MPS or LP format, if the Interactive
+Optimizer issues a message about a segmentation fault or similar ungraceful
+interruption and exits, contact CPLEX customer support to arrange
+for transferring the problem file. The Interactive Optimizer should
+never exit with a system interrupt when solving a problem from a text
+file, even if the program that created the file has errors. Such cases
+are extremely rare.</p>
+ </li>
+</ol>
+<p class="p">If the peculiar behavior that you observed in your application
+persists in the Interactive Optimizer, then you must examine the LP
+or MPS or SAV problem file to discover whether the problem file actually
+defines the problem you intended. If it does not define the problem
+you intended to optimize, then the problem is being passed incorrectly
+from your application to CPLEX, so you need to look at that part of
+your application.</p>
+<p class="p">Make sure the problem statistics and matrix coefficients indicated
+by the Interactive Optimizer match the ones for the intended model
+in your application. Use the Interactive Optimizer command <samp class="ph codeph">display problem stats</samp> to
+verify that the size of the problem, the sense of the constraints,
+and the types of variables match your expectations. For example, if
+your model is supposed to contain only general integer variables,
+but the Interactive Optimizer indicates the presence of binary variables,
+check the type variable passed to the constructor of the variable
+(Concert Technology) or check the specification of the <samp class="ph codeph">ctype</samp> array
+and the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/copyctype.html" title="The routine CPXXcopyctype/CPXcopyctype can be used to copy variable type information into a given problem.">CPXcopyctype</a></samp> (Callable
+Library). You can also examine the matrix, objective, and righthand
+side coefficients in an LP or MPS file to see if they are consistent
+with the values you expect in the model.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/dev_hints/01_dev_title_synopsis.html" title="Offers suggestions for improving application development and debugging completed applications.">Developing CPLEX applications</a></div>
+</div>
+</div></body>
+</html>

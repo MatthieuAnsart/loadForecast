@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>ILOCPLEXGOAL0</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cplex.cpp/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../macros/ILOCPLEXGOAL0.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Macro ILOCPLEXGOAL0</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcplex/ilogoals.h</span></div><div
+            class="prototype">ILOCPLEXGOAL0(name)</div><div
+            class="prototype">ILOCPLEXGOAL1(name, type0, var0)</div><div
+            class="prototype">ILOCPLEXGOAL2(name, type0, var0, type1, var1)</div><div
+            class="prototype">ILOCPLEXGOAL3(name, type0, var0, type1, var1, type2, var2)</div><div
+            class="prototype">ILOCPLEXGOAL4(name, t0, v0, t1, v1, t2, v2, t3, v3)</div><div
+            class="prototype">ILOCPLEXGOAL5(name, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4)</div><div
+            class="prototype">ILOCPLEXGOAL6(name, t0, v0, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5)</div><div
+                        class="description"><p>This macro defines a user goal class named <code>nameI</code> and a
+ constructor named <code>name</code> with <em>n</em> data members,
+ where <em>n</em> is the number following <code>ILOCPLEXGOAL</code>. The
+ first parameter of this macro is always the name of the constructor 
+ to be created. What follows are <em>n</em> pairs of parameters, each
+ parameter specifying a data member of the goal. The first parameter of such
+ a pair specifies the type of the data member and is denoted as
+ <code>Ti</code> in the macro definition above. The second parameter of such
+ a pair, denoted by <code>datai</code>, specifies the data member's name.</p><p>The constructor <code>name</code> created by this function
+ will have <code>IloEnv</code><code>env</code> as its first argument,
+ followed by <em>n</em> additional arguments. The constructor 
+ creates a new instance of the user-written goal class <code>nameI</code> and
+ populates its data members with the arguments following <code>IloEnv</code><code>env</code> in the function argument list. The constructor 
+ <code>name</code> is what you should use to create new goal objects.</p><p>The call to the macro must be followed immediately by the
+ <code>execute</code> method of the goal class. This method must
+ be enclosed in curly brackets, as shown in the examples that follow. The
+ macro will also generate an implementation of the method 
+ <code>duplicateGoal</code> that simply calls the default constructor
+ for the new class <code>nameI</code>.</p><p>You are not obliged to use this macro to define goals. In particular, if
+ your data members do not permit the use of the default constructor as an
+ implementation of the method <code>duplicateGoal</code> or
+ the default destructor, you must subclass <code><a
+                href="../classes/IloCplex_GoalI.html">IloCplex::GoalI</a></code> directly and implement those methods
+ appropriately.</p><p>Since the argument <code>name</code> is used to construct the name of the
+ goal's implementation class, it is not possible to use the same name for
+ several goal definitions.</p><p><strong>Example</strong></p><p>Here's how to define a goal with one data member:</p><pre
+                class="sample">
+     ILOCPLEXGOAL1(PrintX, IloInt, x) {	  
+       IloEnv env = getEnv();	
+       env.out() &lt;&lt; &quot;PrintX: a goal with one data member&quot; &lt;&lt;
+ endl;
+       env.out() &lt;&lt; x &lt;&lt; endl;    
+       return 0;  
+     }
+ </pre><p>This macro generates code similar to the following lines: </p><pre class="sample">
+     class PrintXI : public IloCplex::GoalI {	
+     public:	 
+       IloInt x;       
+       PrintXI(IloEnv env, IloInt arg1)
+       IloCplex::Goal execute();  
+       IloCplex::Goal duplicateGoal();  
+     };	
+
+     PrintXI::PrintXI(IloEnv env, IloInt arg1) :
+ 				    IloCplex::GoalI(env), 
+ 				    x(arg1) {
+     }
+
+     IloCplex::Goal PrintX(IloEnv env, IloInt x) {    
+       return new PrintXI(env, x); 
+     }  
+
+     IloCplex::Goal PrintXI::execute() {    
+       IloEnv env = getEnv();	
+       env.out() &lt;&lt; &quot;PrintX: a goal with one data member&quot; &lt;&lt;
+ endl;
+       env.out() &lt;&lt; x &lt;&lt; endl;    
+       return 0;  
+     }
+
+     IloCplex::Goal PrintXI::duplicateGoal() {
+       return new PrintXI(getEnv(), x);
+     }
+ </pre></div></body>
+</html>

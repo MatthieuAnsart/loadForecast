@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: calling populate" />
+<meta name="abstract" content="Shows an example of the populate procedure in the Interactive Optimizer." />
+<meta name="Description" content="Shows an example of the populate procedure in the Interactive Optimizer." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/06_populate_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solnpool.1050200" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/06_populate_title_synopsis.html" />
+<title>Example: calling populate</title>
+</head>
+<body role="main" id="User_manual.uss_solnpool.1050200">
+<h1 class="title topictitle1">Example: calling populate</h1>
+<div class="body"><p class="shortdesc">Shows an example of the populate procedure in the Interactive
+Optimizer.</p>
+<p class="p">You can generate multiple solutions with populate. To
+see this effect in the <strong class="ph b">Interactive Optimizer</strong>,
+first read the example cited in <a class="xref" href="03_eg_facility_location.html" title="Describes a model used in documentation of the solution pool.">Example: simple facility location problem</a>,
+like this:  </p>
+<pre class="pre codeblock"><code>read location.lp
+populate</code></pre>
+<p class="p">At default settings in the Interactive Optimizer, you
+will see results such as these:  </p>
+<pre class="pre codeblock"><code>Populate: phase I
+Tried aggregator 1 time.
+MIP Presolve eliminated 3 rows and 3 columns.
+MIP Presolve modified 47 coefficients.
+Reduced MIP has 49 rows, 40 columns, and 148 nonzeros.
+Presolve time =    0.01 sec.
+Clique table members: 45.
+MIP emphasis: balance optimality and feasibility.
+Root relaxation solution time =    0.04 sec.</code></pre>
+<pre class="pre codeblock"><code>        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer     Best Node    ItCnt     Gap
+
+      0     0      452.1107    27                    452.1107       51
+*     0+    0                          549.0000      452.1107       51   17.65%
+      0     0      468.2224    23      549.0000      Cuts: 17       64   14.71%
+*     0+    0                          512.0000      468.2224       64    8.55%
+      0     0      470.5942    23      512.0000       Cuts: 2       68    8.09%
+      0     0      470.6800    20      512.0000       Cuts: 3       70    8.07%
+      0     2      470.6800    20      512.0000      470.6800       70    8.07%
+*    10     6      integral     0      499.0000      479.9271      129    3.82%</code></pre>
+<pre class="pre codeblock"><code>Cover cuts applied:  2
+Zero-half cuts applied:  2
+Gomory fractional cuts applied:  1</code></pre>
+<pre class="pre codeblock"><code>Populate: phase II
+MIP emphasis: balance optimality and feasibility.
+    100    26    infeasible            499.0000      500.0000      234   -0.20%
+
+Cover cuts applied:  2
+Zero-half cuts applied:  2
+Gomory fractional cuts applied:  1</code></pre>
+<pre class="pre codeblock"><code>Solution pool: 20 solutions saved.
+
+Populate - Populate solution limit exceeded, integer optimal:  Objective =  4.9900000000e+02
+Solution time =    0.54 sec.  Iterations = 261  Nodes = 193 (34)
+</code></pre>
+<p class="p">In that log, you see that the procedure executed its
+first and second phases. It reports parameter settings, such as MIP
+emphasis, like other optimization logs. It also reports how many solutions
+it found. It stops when it reaches the populate limit. (In this example,
+the populate limit rests at its default, 20 solutions.)</p>
+<p class="p">Interestingly, the gap printed in that log becomes negative
+in the second phase of populate. At the end of the first phase of
+populate, the model was solved to optimality; the best node value
+and the best integer value coincided and were equal to the optimal
+objective value; the gap was zero. Early in the second phase, the
+best integer value remained equal to the optimal objective value,
+but as populate progressed, nodes were explored and fathomed. At some
+point, all nodes with a relaxation value equal to the optimal objective
+value were fathomed. This fathoming explains why the best node value
+increased above the optimal objective value (for a minimization problem,
+such as this example) as the search space was explored in the second
+phase. Recall that the gap value is computed as:</p>
+<p class="p"><samp class="ph codeph">(bestInteger-bestBound)*objSense/(abs(bestInteger)+1e-10)</samp></p>
+<p class="p">Consequently, the gap can become negative. A negative
+gap value ( <samp class="ph codeph">-g%</samp> ) indicates that the search
+space explored by populate does not contain any more solutions that
+are less than <samp class="ph codeph">g%</samp>  worse than the optimal
+objective value.</p>
+<p class="p">You can invoke the populate procedure multiple times.
+In successive invocations, it will re-use information it has accumulated
+in previous invocations. For example, if you then immediately invoke
+populate a second time on this model, it re-uses the information it
+gathered in the previous invocation to resume its second phase, like
+this:  </p>
+<pre class="pre codeblock"><code>CPLEX&gt; populate
+
+Populate: phase II
+MIP emphasis: balance optimality and feasibility.
+    200    32    infeasible            499.0000      512.0000      268   -2.61%
+    300    38    infeasible            499.0000      514.0000      282   -3.01%
+    400    44      516.0000     1      499.0000      516.0000      295   -3.41%
+    500    48      518.0000     1      499.0000      518.0000      312   -3.81%
+
+Cover cuts applied:  2
+Zero-half cuts applied:  2
+Gomory fractional cuts applied:  1
+
+Solution pool: 40 solutions saved.
+
+Populate - Populate solution limit exceeded, integer optimal:  Objective =  4.9900000000e+02
+Solution time =    0.23 sec.  Iterations = 320  Nodes = 532 (53)</code></pre>
+<p class="p">In this second invocation, <samp class="ph codeph">populate</samp> 
+does not disturb the twenty solutions already accumulated in the solution
+pool, and it continues to search for another twenty solutions before
+stopping at its default limit again. </p>
+<p class="p">The status line of both invocations of populate indicates
+that the optimal solution of the model has been found. Nevertheless,
+populate continues to produce solutions: optimality is not the stopping
+criterion for populating the solution pool. For more detail about
+stopping criteria, see <a class="xref" href="11_populate_stop.html" title="Defines stopping criteria of the populate procedure.">Stopping criteria for the populate procedure</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/06_populate_title_synopsis.html" title="Explains populate, the fundamental procedure of the solution pool.">Populating the solution pool</a></div>
+</div>
+</div></body>
+</html>

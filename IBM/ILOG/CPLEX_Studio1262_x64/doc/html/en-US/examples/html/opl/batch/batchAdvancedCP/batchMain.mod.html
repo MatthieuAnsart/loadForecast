@@ -1,0 +1,135 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011:  
+012: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+013:  
+014: <b><font color="#0000FF">string</font></b> dataPath = ...;
+015: <b><font color="#0000FF">int</font></b> timeLimit = ...;
+016: <b><font color="#0000FF">int</font></b> seed = ...;
+017: 
+018: <b><font color="#007D00">/** </font></b>
+019: <b><font color="#007D00"> * Solves a given OPL project with engine parameters changed by code.</font></b>
+020: <b><font color="#007D00"> * In this example, are compared the KPIs of a model solved </font></b>
+021: <b><font color="#007D00"> * with a different engine.param.randomSeed value.</font></b>
+022: <b><font color="#007D00"> */</font></b> 
+023: <b><font color="#0000FF">main</font></b> {
+024:   writeln(<b><font color="#8A2BE2">"* This OPL model is not compliant with cloud execution"</font></b>);
+025:         
+026:         includeScript(<b><font color="#8A2BE2">"../kpiFile.js"</font></b>);
+027:         includeScript(<b><font color="#8A2BE2">"../htmlReport.js"</font></b>);
+028:         
+029:         <b><font color="#007D00">/**</font></b>
+030: <b><font color="#007D00">         * Redefine this method to save the KPIs for a given modelName, optional </font></b>
+031: <b><font color="#007D00">         * modelParam  and dataSet </font></b>
+032: <b><font color="#007D00">         * using the solution from the engine.</font></b>
+033: <b><font color="#007D00">         * You can write your own method to define your custom KPIs.</font></b>
+034: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> modelName Name of the model with the full path of the file</font></b>
+035: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> modelParam Optional parameter changed by code on the model</font></b>
+036: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> dataSetName Name of the data set with the full path</font></b>
+037: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> engine Optimization engine</font></b>
+038: <b><font color="#007D00">         */</font></b>
+039:         <b><font color="EA7D00">function</font></b> overload_output_saveAllKpi(modelName, modelParam, dataSetName, engine) {                                                  
+040:                 <b><font color="EA7D00">if</font></b> (<b><font color="EA7D00">typeof</font></b>(engine)==<b><font color="#8A2BE2">"IloOplMain.IloCplex"</font></b>) {
+041:                     <b><font color="#007D00">// CPLEX</font></b>
+042:                 
+043:                 } <b><font color="EA7D00">else</font></b> {
+044:                         <b><font color="#007D00">// CP</font></b>
+045:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"obj"</font></b>, engine.getObjValue(), MAX);
+046:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"seed"</font></b>, engine.param.randomSeed, MAX);
+047:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"total time"</font></b>, engine.info.TotalTime, MIN);
+048:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"solve time"</font></b>, engine.info.SolveTime, MIN);
+049:                 <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"nb fails"</font></b>, engine.info.NumberOfFails, MIN);
+050:                 <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"nb cons aggre"</font></b>, engine.info.NumberOfConstraintsAggregated, MIN);
+051:                 <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"nb branches"</font></b>, engine.info.NumberOfBranches, MIN);
+052:                 <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"nb choices"</font></b>, engine.info.NumberOfChoicePoints, MIN);
+053:                 }       
+054:         } 
+055:         
+056:         <b><font color="#007D00">/**</font></b>
+057: <b><font color="#007D00">         * Solves the oplProject for a given random seed and </font></b>
+058: <b><font color="#007D00">         * timeLimit, and then save the resulting KPIs the file kpiFile.</font></b>
+059: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> oplProject The OPL project</font></b>
+060: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> seed The random seed</font></b>
+061: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> timeLimit The time limit</font></b>
+062: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> kpiFile The KPI file</font></b>
+063: <b><font color="#007D00">         */</font></b>
+064:         <b><font color="EA7D00">function</font></b> solveModel( oplProject, seed, timeLimit, kpiFile ) {
+065:                 writeln(<b><font color="#8A2BE2">"solving "</font></b>, oplProject, <b><font color="#8A2BE2">" with seed="</font></b>, seed);
+066:                 <b><font color="EA7D00">var</font></b> prj = <b><font color="EA7D00">new</font></b> IloOplProject(oplProject);
+067:                 <b><font color="EA7D00">var</font></b> rc = prj.makeRunConfiguration();
+068:                 rc.oplModel.generate();
+069:                 <b><font color="EA7D00">var</font></b> engine = rc.cp;
+070:                 <b><font color="#007D00">// Change by code the random seed and the time limit</font></b>
+071:                 engine.param.randomSeed = seed;
+072:                 engine.param.timeLimit = timeLimit;
+073:                 <b><font color="EA7D00">if</font></b> (engine.solve()){
+074:                     <b><font color="#007D00">// Save the KPI after the solve</font></b>
+075:                         kpiFile.saveAllKpi(oplProject, <b><font color="#8A2BE2">"Seed="</font></b> + seed, oplProject, engine);
+076:                 }
+077:                 rc.end();
+078:                 prj.end();
+079:         }         
+080:         <b><font color="#007D00">/**</font></b>
+081: <b><font color="#007D00">         * Solves the oplProject for a given random seed and </font></b>
+082: <b><font color="#007D00">         * timeLimit, and then save the resulting KPIs the file kpiFile.</font></b>
+083: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> oplProject The OPL project</font></b>
+084: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> seed The random seed</font></b>
+085: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> timeLimit The time limit</font></b>
+086: <b><font color="#007D00">         */</font></b>
+087:         <b><font color="EA7D00">function</font></b> solveModels(oplProject, seed, timeLimit) {             
+088:                 <b><font color="EA7D00">var</font></b> kpiFileName = getKpiFileName(oplProject);
+089:                 <b><font color="EA7D00">var</font></b> kpiFile = <b><font color="EA7D00">new</font></b> KpiOutputFile(kpiFileName);
+090:                 <b><font color="#007D00">// Redefine the save kpi method</font></b>
+091:                 kpiFile.saveAllKpi = overload_output_saveAllKpi;
+092:                 <b><font color="#007D00">// For seed ranging from zero to the value specified in the path.dat </font></b>
+093:                 <b><font color="#007D00">// solve the CP model and save the resulting KPI</font></b>
+094:                 <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i = 0; i&lt;= seed; i++){ 
+095:                         solveModel(oplProject, i, timeLimit, kpiFile);
+096:         }
+097:                 <b><font color="#007D00">// Close the kpi file</font></b>
+098:                 kpiFile.close();
+099:                 <b><font color="EA7D00">return</font></b> <b><font color="EA7D00">true</font></b>;
+100:         }
+101:         
+102:         <b><font color="#007D00">/**</font></b>
+103: <b><font color="#007D00">         * Returns the name of the KPI file.</font></b>
+104: <b><font color="#007D00">         */</font></b>
+105:     <b><font color="EA7D00">function</font></b> getKpiFileName(modelFile) {
+106:                 <b><font color="EA7D00">return</font></b> <b><font color="#8A2BE2">"cpoKPIs.kpi"</font></b>;
+107:         }
+108:         <b><font color="#007D00">//**********************************************************/</font></b>
+109:         <b><font color="EA7D00">var</font></b> status = <b><font color="EA7D00">true</font></b>;
+110:         <b><font color="#0000FF">thisOplModel</font></b>.generate();
+111:         
+112:         <b><font color="EA7D00">var</font></b> oplDataPath = <b><font color="#0000FF">thisOplModel</font></b>.dataElements.dataPath;
+113:         <b><font color="EA7D00">var</font></b> timeLimit = <b><font color="#0000FF">thisOplModel</font></b>.timeLimit;
+114:         <b><font color="EA7D00">var</font></b> seed = <b><font color="#0000FF">thisOplModel</font></b>.seed;           
+115:                 
+116:         <b><font color="#007D00">// Solve the opl models if needed and generate the related kpi files</font></b>
+117:         <b><font color="EA7D00">if</font></b> (status) { 
+118:                 status = solveModels(oplDataPath, seed, timeLimit);
+119:         }
+120:         <b><font color="#007D00">// Generate the html kpi comparator</font></b>
+121:         <b><font color="EA7D00">if</font></b> (status) {
+122:                 <b><font color="EA7D00">var</font></b> htmlFileName = <b><font color="#8A2BE2">"report.html"</font></b>;
+123:                 <b><font color="EA7D00">var</font></b> html = <b><font color="EA7D00">new</font></b> HtmlReportFile(htmlFileName);
+124:                 <b><font color="#007D00">// Array of models</font></b>
+125:                 <b><font color="EA7D00">var</font></b> modelNames = <b><font color="EA7D00">new</font></b> Array();
+126:                 modelNames[modelNames.length] = oplDataPath
+127:                 status = html.generateReport(modelNames, modelNames);
+128:         }
+129:         status;
+130: }
+</tt></pre>

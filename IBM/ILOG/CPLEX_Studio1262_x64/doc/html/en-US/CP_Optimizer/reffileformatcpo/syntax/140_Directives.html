@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Directives" />
+<meta name="abstract" content="The CPO file format supports two types of directive: #include (to include a file) and #line (to set an additional line number for error reporting)." />
+<meta name="Description" content="The CPO file format supports two types of directive: #include (to include a file) and #line (to set an additional line number for error reporting)." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/syntax.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Directives" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/syntax.html" />
+<title>Directives</title>
+</head>
+<body role="main" id="Directives">
+<h1 class="title topictitle1">Directives</h1>
+<div class="body conbody"><p class="shortdesc">The CPO file format supports two types of directive: #include (to
+include a file) and #line (to set an additional line number for
+error reporting).</p>
+<div class="section">
+<p class="p">Directives start by the character <samp class="ph codeph">#</samp> at the beginning of the line. No whitespace
+before or after <samp class="ph codeph">#</samp> is allowed.</p>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/syntax.html" title="This section describes the elements of the CPO file format such as statements, expressions, types, variables, constants or directives, and how to use them.">CP Optimizer file format syntax</a></div>
+</div>
+</div><div class="topic concept nested1" id="Directive_include"><h2 class="title topictitle2">Directive #include</h2>
+<div class="body conbody"><p class="p">The CPO file format supports a C-style #include directive to include one
+file from another. The path to the file can be absolute or relative to
+the current file or current working directory and must be enclosed in quotes. The included file must have a .cpo extension.</p>
+<div class="imageleft"><img class="image syntaxdiagram" src="../diagrams/diagram10.png" /></div><div class="section" id="Directive_include__Example"><h3 class="title sectiontitle">Example</h3>
+<pre class="pre codeblock"><code>#include <span class="ph stringemph">"var_declaration.cpo"</span>
+<a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a>([a, b, c, d]);
+#include <span class="ph stringemph">"params/myparams.cpo"</span></code></pre>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" id="Directive_line"><h2 class="title topictitle2">Directive #line</h2>
+<div class="body conbody"><p class="p">This directive tells the parser that subsequent lines of the CPO file were
+automatically generated from/by another file and indicates the source line in
+that file. This information is used by error reporting: if an error is found
+then the location of the error in both files is displayed.  This is especially
+useful for debugging the generation of a CPO file from a program.</p>
+<p class="p">The syntax follows C standard: <samp class="ph codeph">#line</samp> followed by line number and optionally
+by the file name in quotes. Additionally it is possible to indicate that the
+previous <samp class="ph codeph">#line</samp> directive is no longer valid using <samp class="ph codeph">#line off</samp> syntax:</p>
+<div class="imageleft"><img class="image syntaxdiagram" src="../diagrams/diagram11.png" /></div><p class="p">If no file name is specified then the file name from the previous
+<samp class="ph codeph">#line</samp> directive is used. The first <samp class="ph codeph">#line</samp> directive must provide a file name.</p>
+<p class="p">Unlike in C, the specified line number is not incremented automatically,
+the same line number is used until the next <samp class="ph codeph">#line</samp> directive.</p>
+<div class="section" id="Directive_line__Example2"><h3 class="title sectiontitle">Example</h3>
+<pre class="pre codeblock"><code>#line 112 <span class="ph stringemph">"myprog.py"</span>
+<span class="ph stringemph">"x[1]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..10);
+<span class="ph stringemph">"x[2]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..10);
+<span class="ph stringemph">"x[3]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..10);
+x = intVarArray[<span class="ph stringemph">"x[1]"</span>, <span class="ph stringemph">"x[2]"</span>, <span class="ph stringemph">"x[3]"</span>];
+#line 113
+<a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a>(x);
+#line off
+x + y + z == 13</code></pre>
+
+<p class="p">The first four lines are generated by line 112 in <samp class="ph codeph">myprog.py</samp>, the line with
+<samp class="ph codeph"><a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a></samp> is generated by line 113 also in <samp class="ph codeph">myprog.py</samp>, finally the last line
+is not generated or its source location is unknown.</p>
+
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Writing callback classes by hand" />
+<meta name="abstract" content="Describes user’s implementation of a callback class." />
+<meta name="Description" content="Describes user’s implementation of a callback class." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/18_Concert_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callbacks.1009178" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/18_Concert_title_synopsis.html" />
+<title>Writing callback classes by hand</title>
+</head>
+<body role="main" id="User_manual.uss_callbacks.1009178">
+<h1 class="title topictitle1">Writing callback classes by hand</h1>
+<div class="body"><p class="shortdesc">Describes user’s implementation of a callback
+class.</p>
+<p class="p">To implement your own callback for <samp class="ph codeph">IloCplex</samp>,
+first select the callback class corresponding to the callback you
+want implemented. From it, derive your own implementation class, and
+overwrite the virtual method <samp class="ph codeph">main</samp> . This
+is where you implement the callback actions, using the protected methods
+of the callback class from which you derived your callback or one
+of its base classes.</p>
+<p class="p">Next write a function that creates a new object of your
+implementation class using the environment operator <samp class="ph codeph">new</samp> and
+returning it as an <samp class="ph codeph">IloCplex::Callback</samp> handle
+object. Here is an example implementation of such a function: </p>
+<pre class="pre codeblock"><code>IloCplex::Callback MyCallback(IloEnv env, IloInt num) {
+    return (new (env) MyCallbackI(num));
+}</code></pre>
+<p class="p">It is not customary to write such a function for <strong class="ph b">Java</strong> nor
+for <strong class="ph b">.NET</strong> applications; instead, <samp class="ph codeph">new</samp> 
+is called explicitly for creating a callback object when needed. </p>
+<p class="p">After an implementation object of your callback is created
+(either with the constructor function in C++ or by directly calling
+the <samp class="ph codeph">new</samp>  operator for Java or .NET), use
+it with <samp class="ph codeph">IloCplex</samp> by calling <samp class="ph codeph">cplex.use</samp> with
+the callback object as an argument. In C++, to remove a callback that
+is being used by a <samp class="ph codeph">cplex</samp> object, call <samp class="ph codeph">callback.end</samp> 
+on the <samp class="ph codeph">IloCplex::Callback</samp>  handle callback.
+In <strong class="ph b">Java</strong> or <strong class="ph b">.NET</strong>,
+there is no way of removing individual callbacks from your <samp class="ph codeph">IloCplex</samp> or <samp class="ph codeph">Cplex</samp> object.
+Instead, you remove all callbacks by calling the method <samp class="ph codeph">IloCplex.clearCallbacks</samp> or <samp class="ph codeph">CplexClearCallbacks</samp>.
+Since <strong class="ph b">Java</strong> and <strong class="ph b">.NET</strong> use
+garbage collection for memory management, there is nothing equivalent
+to the <samp class="ph codeph">end</samp>  method for callbacks in the
+Java or .NET API.</p>
+<p class="p">One object of a callback implementation class can be
+used with only one <samp class="ph codeph">IloCplex</samp> object at a
+time. Thus, when you use a callback with more than one <samp class="ph codeph">cplex</samp> 
+object, a copy of the implementation object is created every time <samp class="ph codeph">cplex.use</samp> 
+is called except for the first time. In C++, the method <samp class="ph codeph">IloCplex::use</samp> returns
+a handle to the callback object that has actually been installed to
+enable calling <samp class="ph codeph">end</samp> on it.</p>
+<p class="p">To construct the copies of the callback objects in C++,
+class <samp class="ph codeph">IloCplex::CallbackI</samp>  defines another
+pure virtual method:</p>
+<p class="p"><samp class="ph codeph">virtual IloCplex::CallbackI* IloCplex::CallbackI::duplicateCallback()
+const = 0;</samp> </p>
+<p class="p">which must be implemented for your callback class. This
+method will be called to create the copies needed for using a callback
+on different <samp class="ph codeph">cplex</samp>  objects or on one <samp class="ph codeph">cplex</samp> object
+with a parallel optimizer.</p>
+<p class="p">In most cases you can avoid writing callback classes
+by hand, using supplied macros that make the process as easy as implementing
+a function. You must implement a callback by hand only if the callback
+manages internal data not passed as arguments, or if the callback
+requires eight or more arguments.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/18_Concert_title_synopsis.html" title="Documents callbacks in Concert Technology.">Implementing callbacks with Concert Technology</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="isomorphism" />
+<meta name="abstract" content="OPL (scheduling) constraint used to model a one-to-one correspondence between the intervals present in two arrays." />
+<meta name="Description" content="OPL (scheduling) constraint used to model a one-to-one correspondence between the intervals present in two arrays." />
+<meta name="DC.subject" content="isomorphism, OPL scheduling function" />
+<meta name="keywords" content="isomorphism, OPL scheduling function" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_interval.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="E6PrMWre" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<title>isomorphism</title>
+</head>
+<body role="main" id="E6PrMWre">
+<h1 class="title topictitle1">isomorphism</h1>
+<div class="body refbody"><p class="shortdesc">OPL (scheduling) constraint used to model a one-to-one
+correspondence between the intervals present in two arrays.</p>
+<div class="section"><h2 class="title sectiontitle">Purpose</h2><p class="p">OPL constraint (scheduling) used
+to model a one-to-one correspondence between the intervals present
+in two arrays.</p>
+</div>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+<tr class="strow"><td valign="top" class="stentry">type</td>
+<td valign="top" class="stentry"><pre class="pre">boolean (1 if the constraint is true, 0 otherwise)</pre>
+</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>isomorphism(A, B);
+isomorphism(A, B, M, v);
+
+where
+
+dvar interval A[];
+dvar interval B[];
+dvar int M[];
+dexpr int v;</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">The constraint <em class="ph i">isomorphism({a1,
+.., an}, {b1, .., bp})</em> states that in a solution there is a one-to-one
+correspondence between the present intervals in array <em class="ph i">{b1, ..,
+bp}</em> and the present intervals in array <em class="ph i">{a1, .., an} </em>.</p>
+<p class="p">The
+constraint <em class="ph i">isomorphism({a1, .., an}, {b1, .., bp}, {m1, .., mp},
+v)</em> states that in a solution there is a one-to-one correspondence
+between the present intervals in array <em class="ph i">{b1, .., bp}</em> and the
+present intervals in array <em class="ph i">{a1, .., an} </em> <strong class="ph b">and</strong> that if
+the interval at the ith position in array <em class="ph i">B</em> is in correspondence
+with the interval in jth position in array <em class="ph i">A</em> then the ith variable
+of the array <em class="ph i">M</em> takes the value <em class="ph i">j</em>. The ith integer variable
+of the array <em class="ph i">M</em> takes the value <em class="ph i">v</em> if the ith interval
+of array <em class="ph i">B</em> is absent.</p>
+<p class="p">A rephrasing of the previous formulation
+is: Each of the interval variables of <em class="ph i">A</em> is an alternative on <em class="ph i">B</em> and
+each of the interval variables of <em class="ph i">B</em> is an alternative on <em class="ph i">A</em> whose
+selected integer variable position is <em class="ph i">M</em>.</p>
+<p class="p">The arrays <em class="ph i">B</em> and <em class="ph i">M</em> must
+be of the same size and the possible domain of <em class="ph i">{m1, .., mp}</em> variables
+must be included in {the values of the array <em class="ph i">A</em>’s indexer} Union
+{<em class="ph i">v</em> }.</p>
+<p class="p">The arrays <em class="ph i">A</em>, <em class="ph i">B</em>, <em class="ph i">M</em> must be
+one-dimensional arrays; for greater complexity, use the keyword <a class="xref" href="tlr_opl_all.html" title="OPL keyword that allows you to use only part of an array with functions that take array parameters.">all</a>.</p>
+<div class="note note"><span class="notetitle">Note:</span> This constraint
+cannot be used in a meta-constraint.</div>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">The code below defines two arrays
+of optional interval variables and a one-to-one correspondence between
+them where <samp class="ph codeph">spans[indices[i]]</samp> is in correspondence
+with <samp class="ph codeph">intervals[i] and indices[i]=0 when intervals[i]</samp> is
+absent.</p>
+<pre class="pre codeblock"><code>dvar interval spans[m in 1..12] optional in sminM[m]..emaxM[m] size 0..lenM[m];
+dvar interval intervals[s in 1..15] optional in sminS[s]..emaxS[s] size lenS[s]..maxinterval;
+dvar int indices[1..15] in -3..13;
+subject to {
+  forall (m in 2..3)
+    presenceOf(spans[m]) == true;
+  forall (s in 3..4)
+    presenceOf(intervals[s]) == true;
+  isomorphism(all[1..12](i in 1..12) spans[i],
+              all(i in 1..15) intervals[i],
+              all(i in 1..15) indices[i],
+              0);
+};</code></pre>
+<p class="p">The complete example can be found in your installation
+directory:</p>
+<p class="p"><samp class="ph codeph">&lt;Install_dir&gt;\opl\examples\opl\sched_learning_effect\sched_learning_effect.mod</samp></p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" title="Description, syntax, and example for each individual OPL function.">OPL functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_oplsch_interval.html" title="OPL keyword (CP, scheduling) for interval variables.">interval</a></div>
+</div>
+</div></body>
+</html>

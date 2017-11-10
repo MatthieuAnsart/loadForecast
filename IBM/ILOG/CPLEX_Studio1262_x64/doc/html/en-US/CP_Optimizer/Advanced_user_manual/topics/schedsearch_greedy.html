@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Writing a greedy search" />
+<meta name="abstract" content="A simple example is used to illustrate custom search for scheduling." />
+<meta name="Description" content="A simple example is used to illustrate custom search for scheduling." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1271769110944" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<title>Writing a greedy search</title>
+</head>
+<body role="main" id="descriptiveTopic1271769110944">
+<h1 class="title topictitle1">Writing a greedy search</h1>
+<div class="body"><p class="shortdesc">A simple example is used to illustrate custom search
+for scheduling.</p>
+<p class="p">The example <samp class="ph codeph">schedsearch_greedandrelax.cpp</samp> illustrates
+the design aspects of writing your own search by showing you how to:</p>
+<ul class="ul"><li class="li"><p class="p">write a search that builds a chronological
+schedule with a very simple search that does not have a branch and
+bound tree traversal;</p>
+</li>
+<li class="li"><p class="p">write a dynamic selector for chronological
+list scheduling of the interval variables which only considers variables
+that are the actual decision variables;</p>
+</li>
+<li class="li"><p class="p">use the internal solve method of the
+instance of <samp class="ph codeph">IloCP</samp> to iterate on schedule
+building procedures. This is a key point as writing an iterative improvement
+ method follows the same principle.</p>
+</li>
+</ul>
+<p class="p">To define a new  search, you will have to create at least
+two separate sets of data. The first set of data, the model context,
+collects the information you need from the model, such as the instances
+of <samp class="ph codeph">IloIntervalVar</samp> that need to be fixed,
+as well as all the structural and invariant information that may be
+needed to build the search. This set of data should be allocated on
+the <samp class="ph codeph">IloEnv</samp> instance or by your own allocator.
+The second set of data, the engine context, contains all of the information
+that is used by the search algorithm to define the tree traversal
+and, eventually, the constraints that you may add to the solving engine.
+The engine context contains the counterparts of the model variables
+that are needed during the search (for example instances of <samp class="ph codeph">IlcIntervalVar</samp>),
+a local copy of all structural and invariant information you may need
+to build the search and that may change during the search as well
+as reversible data (instances of <samp class="ph codeph">IlcRevInt</samp> and <samp class="ph codeph">IlcRevAny</samp>).
+This data set is allocated on the heap of the optimizer, the <samp class="ph codeph">IloCP</samp> instance.
+The model context should never be used in the search, since the model
+environment data is not under the control of the solving engine. Conversely,
+the engine context must never point to data allocated outside of heap
+of the instance of <samp class="ph codeph">IloCP</samp>. An instance of <samp class="ph codeph">IloGoal</samp> in
+the model context should be wrapped in a goal wrapper that returns
+an instance of <samp class="ph codeph">IlcGoa</samp>l. The instance of
+the <samp class="ph codeph">IlcGoal</samp> is created in the engine context
+and can be used to launch the search tree traversal.  This design
+is strongly recommended as it clearly separates the data from the
+model declaration and the data structure of the solving procedure.
+ </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" title="Custom constraints and goals for scheduling can be written using engine extensions.">Writing custom scheduling constraints and goals</a></div>
+</div>
+</div></body>
+</html>

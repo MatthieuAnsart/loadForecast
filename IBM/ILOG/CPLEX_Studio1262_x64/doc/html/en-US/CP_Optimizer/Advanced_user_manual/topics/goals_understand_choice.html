@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Choice points" />
+<meta name="abstract" content="A choice point is a choice between two subgoals of a goal." />
+<meta name="Description" content="A choice point is a choice between two subgoals of a goal." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/goals_understand.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizergoals.1015307" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_understand.html" />
+<title>Choice points</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizergoals.1015307">
+<h1 class="title topictitle1">Choice points</h1>
+<div class="body"><p class="shortdesc">A choice point is a choice between two subgoals of a
+goal.</p>
+<p class="p">A goal can be defined as a choice between subgoals; this
+choice of subgoals is referred to as a choice point and is the mechanism
+with which CP Optimizer can try alternatives in the search. In order
+for the goal to succeed, only one of the subgoals of the choice point
+must succeed. At the Concert Technology level, a choice point can
+be created using the <samp class="ph codeph">operator||</samp> function.
+For example, a choice point between the custom goals “Hello
+World” and “Greetings”: </p>
+<pre class="pre codeblock"><code>    IloModel model(env);
+    IloCP cp(model);
+    cp.setParameter(IloCP::LogVerbosity,IloCP::Quiet);
+    if (cp.solve(HelloWorldConcert(env) || GreetingsConcert(env)))
+      cp.out() &lt;&lt; "Success" &lt;&lt; std::endl;
+    else 
+      cp.out() &lt;&lt; "Fail" &lt;&lt; std::endl;
+    cp.end();
+</code></pre>
+<p class="p">produces the following results: </p>
+<pre class="pre codeblock"><code>Hello World
+Success
+</code></pre>
+<p class="p">Because the “Hello World” subgoal is executed
+first and succeeds, the “Greetings” subgoal is not pushed
+onto the goal stack and is not executed. </p>
+<p class="p">At the search level, choice points are implemented by
+the function <samp class="ph codeph">IlcOr</samp>. </p>
+<p class="p">The member function <samp class="ph codeph">IloCP::next</samp> produces,
+if possible, one successful execution of a given goal and stops. To
+continue to try the other choices, you should place <samp class="ph codeph">IloCP::next</samp> within
+a loop.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_understand.html" title="Customizable search goals enable you to write your own search strategy.">Understanding goals</a></div>
+</div>
+</div></body>
+</html>

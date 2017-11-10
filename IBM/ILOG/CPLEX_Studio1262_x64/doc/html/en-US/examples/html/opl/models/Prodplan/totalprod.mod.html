@@ -1,0 +1,216 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/*  ----------------------------------------------------</font></b>
+013: <b><font color="#007D00"> *   OPL Model for Production planning Example</font></b>
+014: <b><font color="#007D00"> *</font></b>
+015: <b><font color="#007D00"> * This model is described in the documentation. </font></b>
+016: <b><font color="#007D00"> * See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+017: <b><font color="#007D00"> *   --------------------------------------------------- */</font></b>
+018:  
+019: <b><font color="#007D00">// The data</font></b>
+020: {<b><font color="#0000FF">string</font></b>} ComputerTypes = ...;
+021: {<b><font color="#0000FF">string</font></b>} ComponentTypes = ...;
+022: 
+023: <b><font color="#0000FF">int</font></b> NumComputerTypes = <b><font color="#7D007D">card</font></b>(ComputerTypes);
+024: 
+025: <b><font color="#007D00">// Number of Periods to use for this problem</font></b>
+026: <b><font color="#0000FF">int</font></b> NbPeriods = ...;
+027: <b><font color="#0000FF">range</font></b> Periods = 1..NbPeriods;
+028: 
+029: <b><font color="#007D00">/*   ---------------------------------------------------</font></b>
+030: <b><font color="#007D00"> *   Each computer type has a list of components, a </font></b>
+031: <b><font color="#007D00"> *   selling price and a maximum on the number allowed </font></b>
+032: <b><font color="#007D00"> *   to be held over in inventory to the next period.</font></b>
+033: <b><font color="#007D00"> *   --------------------------------------------------- */</font></b>
+034: <b><font color="#0000FF">tuple</font></b> computersToBuild
+035: {
+036:   {<b><font color="#0000FF">string</font></b>} components;
+037:   <b><font color="#0000FF">int</font></b>      price;
+038:   <b><font color="#0000FF">int</font></b>      maxInventory;
+039: }
+040: 
+041: computersToBuild Computers[ComputerTypes] = ...;
+042: 
+043: <b><font color="#007D00">/*   ---------------------------------------------------</font></b>
+044: <b><font color="#007D00"> *   Each computer type has a maximum and minimum amount</font></b>
+045: <b><font color="#007D00"> *   that can be sold in each period.  These values are</font></b>
+046: <b><font color="#007D00"> *   used to calculate a range on the total to build of</font></b>
+047: <b><font color="#007D00"> *   each computer type.  There is also a plant capacity</font></b>
+048: <b><font color="#007D00"> *   for each period.</font></b>
+049: <b><font color="#007D00"> *   --------------------------------------------------- */</font></b>
+050: 
+051: <b><font color="#0000FF">int</font></b> MinDemand[ComputerTypes][1..NbPeriods] = ...;
+052: <b><font color="#0000FF">int</font></b> MaxDemand[ComputerTypes][1..NbPeriods] = ...;
+053: <b><font color="#0000FF">int</font></b> MaxBuildPerPeriod[1..NbPeriods] = ...;
+054: <b><font color="#0000FF">int</font></b> MaxBuild = 0;
+055: <b><font color="#0000FF">int</font></b> TotalMaxDemand[ComputerTypes];
+056: <b><font color="#0000FF">int</font></b> TotalMinDemand[ComputerTypes];
+057: <b><font color="#0000FF">float</font></b> TotalBuild[ComputerTypes];
+058: <b><font color="#0000FF">execute</font></b> INITIALIZE {
+059:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> p <b><font color="EA7D00">in</font></b> Periods) {
+060:     MaxBuild = MaxBuild + MaxBuildPerPeriod[p];
+061:     <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> c <b><font color="EA7D00">in</font></b> ComputerTypes) {
+062:       TotalMaxDemand[c] = MaxDemand[c][p] + TotalMaxDemand[c];
+063:       TotalMinDemand[c] = MinDemand[c][p] + TotalMinDemand[c];
+064:     }
+065:   }
+066: }
+067: 
+068: {string} Suppliers = ...;
+069: int NbIncrements = ...;         // Number of "breaks" in PLF
+070: int SupplyCostIncrements[1..NbIncrements] = ...;
+071: range Incrementspp = 1..NbIncrements+1;
+072: 
+073: tuple componentInfo
+074: {
+075:   string supplier;
+076:   <b><font color="#0000FF">int</font></b>    costSlope[1..3];   <b><font color="#007D00">//should be Incrementspp</font></b>
+077: }
+078: {componentInfo} Components[ComponentTypes] = ...;
+079: tuple supplierMatch {
+080:   string         component;
+081:   componentInfo  componentInformation;
+082: }
+083: {supplierMatch} ComponentSupplierMatches = { &lt;i,j&gt; | i <b><font color="EA7D00">in</font></b> ComponentTypes, j <b><font color="EA7D00">in</font></b> Components[i] };
+084: 
+085: /*  ----------------------------------------------------
+086:  *   Variables:
+087:  *   build --   How many of each computer type to build.
+088:  *   necessaryComponents -- Based on build
+089:  *   suppliedCompmponents -- How many of each component
+090:  *         type are supplied by which supplier
+091:  *   inHouse -- How many of each component type are
+092:  *         manufactured in House.
+093:  *   grossProfit -- linear funciton of build
+094:  *   cost -- funcion of suppliedComponents and inHouse
+095:  *   --------------------------------------------------- */
+096: dvar float+ Build[ComputerTypes];
+097: dvar float+ NecessaryComponents[ComponentTypes];
+098: dvar float+ InHouse[ComponentTypes];
+099: dvar float+ SuppliedComponents[ComponentSupplierMatches];
+100: 
+101: /*  ----------------------------------------------------
+102:  *   constraints
+103:  *   --------------------------------------------------- */
+104: 
+105: dexpr float Cost =       
+106:   sum(m in ComponentSupplierMatches)
+107:     piecewise(i in 1..NbIncrements) {
+108:       m.componentInformation.costSlope[i] -&gt; SupplyCostIncrements[i];   
+109:       m.componentInformation.costSlope[NbIncrements+1]
+110:     } SuppliedComponents[m];
+111:     
+112: dexpr float GrossProfit=
+113:   sum(p in ComputerTypes) Computers[p].price * Build[p];
+114: 
+115: minimize Cost-GrossProfit;
+116: 
+117: subject to
+118: {
+119:   ctPlantCapacity:
+120:     sum(p <b><font color="EA7D00">in</font></b> ComputerTypes) Build[p] &lt;= MaxBuild;
+121:       
+122:   forall(p <b><font color="EA7D00">in</font></b> ComputerTypes)
+123:     ctComputerTypeMaxDemand: Build[p] &lt;= TotalMaxDemand[p];
+124:       
+125:   forall(p <b><font color="EA7D00">in</font></b> ComputerTypes)
+126:     ctComputerTypeMinDemand: Build[p] &gt;= TotalMinDemand[p];
+127: 
+128:   <b><font color="#007D00">// Get the necessary components</font></b>
+129:   forall(c <b><font color="EA7D00">in</font></b> ComponentTypes)
+130:     ctDetermineAmtNecessary:      
+131:       sum(p <b><font color="EA7D00">in</font></b> ComputerTypes: c <b><font color="EA7D00">in</font></b> Computers[p].components) 
+132:         Build[p] == NecessaryComponents[c];
+133:          
+134:   forall(c <b><font color="EA7D00">in</font></b> ComponentTypes)
+135:     ctDetermineAmtSupplied:      
+136:       sum(m <b><font color="EA7D00">in</font></b> ComponentSupplierMatches: c == m.component) 
+137:          SuppliedComponents[m] == NecessaryComponents[c];
+138: 
+139:   forall(m <b><font color="EA7D00">in</font></b> ComponentSupplierMatches: m.componentInformation.supplier == <b><font color="#8A2BE2">"InHouse"</font></b>)
+140:     ctMadeInHouse:      
+141:       InHouse[m.component] == SuppliedComponents[m];
+142:          
+143: }
+144: 
+145: main {
+146: 
+147: <b><font color="#007D00">/*   ---------------------------------------------------</font></b>
+148: <b><font color="#007D00"> *   Solve the first model.  This piecewise-linear </font></b>
+149: <b><font color="#007D00"> *   program determines the total number of each computer </font></b>
+150: <b><font color="#007D00"> *   type to build, as well as from where to acquire the </font></b>
+151: <b><font color="#007D00"> *   necessary components.  The objectivie is to </font></b>
+152: <b><font color="#007D00"> *   maximize profit (really, minimize -profit).</font></b>
+153: <b><font color="#007D00"> *   The quantity.build var values are stored to use in</font></b>
+154: <b><font color="#007D00"> *   the second step.</font></b>
+155: <b><font color="#007D00"> *   --------------------------------------------------- */</font></b>
+156: 
+157:    <b><font color="EA7D00">var</font></b> quantity = <b><font color="#0000FF">thisOplModel</font></b>;
+158:    quantity.generate();
+159:    <b><font color="EA7D00">if</font></b> (<b><font color="#0000FF">cplex</font></b>.solve()) {
+160: 
+161:      <b><font color="EA7D00">var</font></b> c;   
+162:      <b><font color="EA7D00">var</font></b> totalbuild = <b><font color="EA7D00">new</font></b> Array();
+163: 
+164:      <b><font color="#007D00">// Output &amp; get total to build of each type</font></b>
+165:      writeln(<b><font color="#8A2BE2">"Net profit: "</font></b>, -<b><font color="#0000FF">cplex</font></b>.getObjValue());
+166:      <b><font color="EA7D00">for</font></b>(c <b><font color="EA7D00">in</font></b> quantity.ComputerTypes) {
+167:        writeln(<b><font color="#8A2BE2">"   "</font></b>, c, <b><font color="#8A2BE2">":  "</font></b>, quantity.Build[c].solutionValue);
+168:        totalbuild[c] = quantity.Build[c].solutionValue;
+169:      }
+170: 
+171:      writeln(<b><font color="#8A2BE2">"Components to build in-house:"</font></b>);
+172:      <b><font color="EA7D00">for</font></b>(c <b><font color="EA7D00">in</font></b> quantity.ComponentTypes)
+173:        <b><font color="EA7D00">if</font></b>(quantity.InHouse[c] &gt; 0) {
+174:          writeln(<b><font color="#8A2BE2">"  "</font></b>, c, <b><font color="#8A2BE2">": "</font></b>, quantity.InHouse[c].solutionValue);
+175:        }
+176: 
+177:      <b><font color="#007D00">/*   ---------------------------------------------------</font></b>
+178: <b><font color="#007D00">      *   Solve the second model.  This linear program</font></b>
+179: <b><font color="#007D00">      *   determines the number of each computer type to</font></b>
+180: <b><font color="#007D00">      *   build, sell and hold in each period.  The </font></b>
+181: <b><font color="#007D00">      *   objective is to find a feasible solution.</font></b>
+182: <b><font color="#007D00">      *   --------------------------------------------------- */</font></b>
+183: 
+184:      <b><font color="EA7D00">var</font></b> source = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"period.mod"</font></b>);
+185:      <b><font color="EA7D00">var</font></b> def = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(source);
+186:      <b><font color="EA7D00">var</font></b> newCplex = <b><font color="EA7D00">new</font></b> IloCplex();
+187:      <b><font color="EA7D00">var</font></b> dates = <b><font color="EA7D00">new</font></b> IloOplModel(def, newCplex);
+188:      <b><font color="EA7D00">var</font></b> data = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"period.dat"</font></b>);
+189:      dates.addDataSource(data);
+190:      dates.generate();
+191:      data = dates.dataElements;
+192:      <b><font color="EA7D00">for</font></b>(c <b><font color="EA7D00">in</font></b> dates.ComputerTypes) {
+193:        data.TotalBuild[c] = totalbuild[c];
+194:      }
+195:      <b><font color="EA7D00">if</font></b> (newCplex.solve()) {
+196:        <b><font color="#007D00">// Output</font></b>
+197:        <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> p <b><font color="EA7D00">in</font></b> dates.Periods) {
+198:          writeln(<b><font color="#8A2BE2">"Period: "</font></b>, p)
+199:          <b><font color="EA7D00">for</font></b>(c <b><font color="EA7D00">in</font></b> dates.ComputerTypes) {
+200:            writeln(<b><font color="#8A2BE2">"  "</font></b>, c, <b><font color="#8A2BE2">":  "</font></b>)
+201:            writeln(<b><font color="#8A2BE2">"      Build: "</font></b>, dates.Build[c][p].solutionValue)
+202:            writeln(<b><font color="#8A2BE2">"      Sell:  "</font></b>, dates.Sell[c][p].solutionValue)
+203:            writeln(<b><font color="#8A2BE2">"      Hold:  "</font></b>, dates.InStockAtEndOfPeriod[c][p].solutionValue)
+204:          }
+205:        }
+206:      }
+207:      dates.end();
+208:    } <b><font color="EA7D00">else</font></b> {
+209:      writeln(<b><font color="#8A2BE2">"Could not determine the total number of each computer type to build"</font></b>);
+210:    }
+211: }
+</tt></pre>

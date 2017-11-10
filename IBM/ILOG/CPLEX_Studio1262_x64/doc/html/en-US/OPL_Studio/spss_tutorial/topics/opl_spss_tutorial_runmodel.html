@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Running an optimization model in the IDE and reading data from SPSS Modeler" />
+<meta name="abstract" content="Activate the SPSS Connector to run an optimization model in the IDE and read data from an SPSS stream." />
+<meta name="Description" content="Activate the SPSS Connector to run an optimization model in the IDE and read data from an SPSS stream." />
+<meta name="DC.subject" content="SPSS data in an optimization model, SPSS data displayed in the IDE, SPSSConnection, OPL keyword, SPSSRead, OPL keyword" />
+<meta name="keywords" content="SPSS data in an optimization model, SPSS data displayed in the IDE, SPSSConnection, OPL keyword, SPSSRead, OPL keyword" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/spss_tutorial/topics/opl_spss_tutorial_intro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1309352604156" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/spss_tutorial/topics/opl_spss_tutorial_intro.html" />
+<title>Running an optimization model in the IDE and reading data from SPSS Modeler</title>
+</head>
+<body role="main" id="descriptiveTopic1309352604156">
+<h1 class="title topictitle1">Running an optimization model in the IDE and reading data
+from SPSS Modeler</h1>
+<div class="body"><p class="shortdesc">Activate the SPSS Connector to run an optimization model
+in the IDE and read data from an SPSS stream.</p>
+<ol class="ol"><li class="li"><p class="p">Create a new run configuration in the IDE, with the skeleton model
+<samp class="ph codeph">pm_selflearn.str.mod</samp> and an empty <samp class="ph codeph">.dat</samp> file. For this example, use
+the default run configuration <samp class="ph codeph">Configuration1</samp> created earlier.</p>
+<p class="p">Rename the configuration <samp class="ph codeph">test_selflearn</samp> for clarity.</p>
+</li>
+<li class="li"><p class="p">Create a new data file, <samp class="ph codeph">test_selflearn.dat</samp> and add it to the run configuration
+<samp class="ph codeph">test_selflearn</samp>. In this data file, enter OPL code to declare that you want to:</p>
+
+<ul class="ul"><li class="li">work with SPSS Modeler</li>
+<li class="li">create a connection between OPL and an SPSS stream</li>
+<li class="li">read data from the stream into an OPL tuple set</li>
+</ul>
+</li>
+<li class="li"><p class="p">To activate the connection with SPSS
+Modeler, enter the following OPL code at the beginning of the <samp class="ph codeph">.dat</samp> file:</p>
+
+<pre class="pre codeblock"><code>prepare {includeScript("oplspss.js");}</code></pre>
+</li>
+<li class="li"><p class="p">Then add the <a class="xref" href="../../opllang_quickref/topics/tlr_opl_SPSSConnection.html" title="This OPL keyword invokes the SPSS Connector, which connects CPLEX Studio to a data stream in SPSS Modeler. The SPSS Connector is available on Windows 32-bit and 64-bit platforms.">SPSSConnection</a> keyword in the <samp class="ph codeph">.dat</samp> file
+to connect to the stream <samp class="ph codeph">pm_selflearn.str</samp> in
+SPSS Modeler.</p>
+
+<pre class="pre codeblock"><code>SPSSConnection spss("pm_selflearn.str","");</code></pre>
+
+<p class="p">The second argument to <samp class="ph codeph">SPSSConnection</samp>,
+the empty string <samp class="ph codeph">""</samp>, is for future extensions
+of the SPSS connector.</p>
+</li>
+<li class="li"><p class="p">Add the <a class="xref" href="../../opllang_quickref/topics/tlr_opl_SPSSRead.html" title="Reads data from an SPSS stream into an OPL tuple set, via SPSS Modeler.">SPSSRead</a> keyword in the <samp class="ph codeph">.dat</samp> file
+to read the tuple set <samp class="ph codeph">Table</samp> in the stream,
+from the <samp class="ph codeph">Filter</samp> node.</p>
+
+<pre class="pre codeblock"><code>Table from SPSSRead(spss,"Filter");</code></pre>
+</li>
+<li class="li"><p class="p">The OPL data file, <samp class="ph codeph">test_selflearn.dat</samp>,
+now looks like this:</p>
+
+<div class="image"><img class="image" src="../images/spss_declarations_in_dat_file.jpg" alt="SPSS connector code: SPSSConnection, SPSSRead" /></div>
+<p class="p">Save the file <samp class="ph codeph">test_selflearn.dat</samp>.</p>
+</li>
+<li class="li"><p class="p">Add the model <samp class="ph codeph">pm_selflearn.str.mod</samp> and the new data file
+<samp class="ph codeph">test_selflearn.dat</samp> to the renamed configuration. Run the configuration
+<samp class="ph codeph">test_selflearn</samp>.</p>
+</li>
+<li class="li"><p class="p">The Problems tab displays warnings about the renamed characters, if you haven't already renamed
+them. (You can rename characters that are not supported by OPL, directly in SPSS Modeler, before
+running the OPL model in the IDE. See <a class="xref" href="opl_spss_tutorial_prepa.html#descriptiveTopic1309276846081__section1321883956058">Adapting the SPSS stream for CPLEX Studio</a>.)</p>
+
+<div class="image"><img class="image" src="../images/SPSSRead_warning.jpg" alt="Warnings about renamed characters in the Problems tab" /></div></li>
+<li class="li"><p class="p">The results table is displayed in the
+Scripting log.</p>
+
+<div class="image"><img class="image" src="../images/spss_table_in_scripting_log.jpg" alt="Snapshot of the results table is displayed in the Scripting log." /></div></li>
+<li class="li"><p class="p">In the Problem browser, the results
+set can be displayed if you hover the mouse over the value cell of
+the <samp class="ph codeph">Table</samp> data item.</p>
+
+<div class="image"><img class="image" src="../images/spss_table_in problem_browser.jpg" alt="Results table as hover help" /></div></li>
+<li class="li"><p class="p">Finally, you can display the results
+table in the IDE editor by clicking the <strong class="ph b">Show data
+view</strong> button.</p>
+
+<div class="image"><img class="image" src="../images/spss_table_in_ide_editor.jpg" alt="Results table displayed in the IDE editor" /></div></li>
+</ol>
+<p class="p">From this point you can continue working with your optimization
+model.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/spss_tutorial/topics/opl_spss_tutorial_intro.html" title="The SPSS Connector connects IBM SPSS Modeler to IBM ILOG CPLEX Studio and enables you to read data from an SPSS stream into an OPL tuple set. The SPSS Connector is available on Windows 32-bit and 64-bit platforms.">SPSS Connector in CPLEX Studio</a></div>
+</div>
+</div></body>
+</html>

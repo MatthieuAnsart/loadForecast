@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Programming paradigm in C for the CPLEX remote object" />
+<meta name="abstract" content="Describes a programming paradigm in C for the remote object in CPLEX." />
+<meta name="Description" content="Describes a programming paradigm in C for the remote object in CPLEX." />
+<meta name="DC.subject" content="distributed optimization, programming paradigm, remote object, remote object and" />
+<meta name="keywords" content="distributed optimization, programming paradigm, remote object, remote object and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="remoteObjectProgrParadigm" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<title>Programming paradigm in C for the CPLEX remote object</title>
+</head>
+<body role="main" id="remoteObjectProgrParadigm">
+<h1 class="title topictitle1">Programming paradigm in C for the CPLEX remote object</h1>
+<div class="body"><p class="shortdesc">Describes a programming paradigm in C for the remote object in CPLEX.</p>
+<p class="p">Consider the outline of a simple application that uses the CPLEX Callable Library 
+(C API). 
+(For the sake of brevity, this outline omits status checking.)</p>
+<img class="image" src="../../../images/progParadigm_local.jpg" /><p class="p">That skeleton code solves the model declared in the file <samp class="ph codeph">filename</samp> 
+on the local machine. What if you want to run the code on the local machine but
+perform the actual solve on a different (remote) machine? In that situation,
+you can use the CPLEX remote object. To solve the problem on a
+remote machine change this line:</p>
+<pre class="pre codeblock"><code>  env = CPXXopenCPLEX(&amp;status);</code></pre>
+<p class="p">to the following line:</p>
+<pre class="pre codeblock"><code>  env = CPXXopenCPLEXremote(transport, argc, argv, &amp;status);</code></pre>
+<p class="p">After that change (explained more fully later), your program looks like this:</p>
+<img class="image" src="../../../images/progParadigm_remote.jpg" /><p class="p">In that code, the arguments <samp class="ph codeph">transport, argc, argv</samp> 
+define the machine on which the remote solve takes place. 
+In contrast to the original routine <span class="keyword apiname">CPXXopenCPLEX</span>, 
+the remote function <span class="keyword apiname">CPXXopenCPLEXremote</span> does not 
+open the Callable Library on the local machine, but rather on the remote machine 
+specified by the arguments. Like <span class="keyword apiname">CPXXopenCPLEX</span>, 
+<span class="keyword apiname">CPXXopenCPLEXremote</span> returns a pointer to the CPLEX
+environment, <span class="keyword apiname">CPXENVptr</span> that acts as a handle to 
+the CPLEX Callable Library; however, this time, it acts as the handle 
+to a library instantiated on a remote machine.</p>
+<p class="p">As you can see in the modified code snippet, the rest of the code does not
+need to know nor care whether the <span class="keyword apiname">CPXENVptr</span> 
+passed to it references a local or
+a remote instance of the library. The implementation of the functions simply 
+takes care to do the right thing: if the <span class="keyword apiname">CPXENVptr</span> 
+references a remote library,
+then the function call is forwarded to this remote library instance; if
+the <span class="keyword apiname">CPXENVptr</span> argument references a local library, 
+then the call is executed locally.</p>
+<p class="p"><strong class="ph b">The arguments transport, argc, argv</strong></p>
+<p class="p">The simplest setting of the arguments to 
+<span class="keyword apiname">CPXXopenCPLEXremote</span> instructs CPLEX to create 
+a new worker with the process transport on the local machine. It looks like this:</p>
+<pre class="pre codeblock"><code>  char const *transport = "processtransport";
+  char const *argv[] = { "cplex", "-worker=process" };
+  int const argc = sizeof (argv) / sizeof (*argv);</code></pre>
+<p class="p">This simple declaration assumes that the <samp class="ph codeph">cplex</samp> binary file  
+is available to your application, for example, in your <samp class="ph codeph">$PATH</samp> 
+environment variable. This simple declaration also assumes that it must 
+start the remote environment in a different process on the <strong class="ph b">same</strong> machine.</p>
+<p class="p">A more ambitious declaration (to start the remote environment in a different process 
+on a different machine) invokes a secure shell, such as <samp class="ph codeph">ssh</samp>, 
+to reach a remote machine (such as, for example, <samp class="ph codeph">remote.com</samp>), like this:</p>
+<pre class="pre codeblock"><code>  char const *transport = "processtransport";
+  char const *argv[] = { "ssh", "remote.com", "cplex", "-worker=process" };
+  int const argc = sizeof (argv) / sizeof (*argv);</code></pre>
+<p class="p">For that more ambitious declaration to work successfully (invoking a secure shell 
+in a different process on a remote machine), you need to satisfy these <strong class="ph b">prerequisites</strong>:</p>
+<ul class="ul"><li class="li">The <samp class="ph codeph">cplex</samp> <strong class="ph b">binary file must be installed on the remote machine</strong>, as cited 
+in the declaration; in this example, the remote machine is cited as <samp class="ph codeph"><em class="ph i">remote.com</em></samp>, 
+but clearly your application must supply a valid name of a remote machine, where a user 
+account to which your application has login-access has already been set up for remote access 
+(such as automatic login, secure shell, or other facilities appropriate to your environment).</li>
+<li class="li">The location of the <samp class="ph codeph">cplex</samp> binary file must be available in the 
+<strong class="ph b">remote environment</strong>;
+for example, through the <samp class="ph codeph">$PATH</samp> environment variable on <samp class="ph codeph"><em class="ph i">remote.com</em></samp>. </li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" title="Introduces the remote object available in CPLEX for distributed parallel optimization.">Remote object for distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

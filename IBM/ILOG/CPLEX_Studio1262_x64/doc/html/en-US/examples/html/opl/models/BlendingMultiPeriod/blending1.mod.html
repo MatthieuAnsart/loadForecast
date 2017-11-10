@@ -1,0 +1,116 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// Problem 1 from Model Building in Mathematical Programming, 3rd ed.</font></b>
+013: <b><font color="#007D00">//   by HP Williams</font></b>
+014: <b><font color="#007D00">// Food Manufacture</font></b>
+015: <b><font color="#007D00">// Multi-period blending problem</font></b>
+016: <b><font color="#007D00">//This model is described in the documentation. </font></b>
+017: <b><font color="#007D00">//See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+018: 
+019: {<b><font color="#0000FF">string</font></b>} Raw = ...;
+020: 
+021: <b><font color="#0000FF">int</font></b> NbMonths = ...;
+022: <b><font color="#0000FF">range</font></b> Months = 1..NbMonths;
+023: 
+024: <b><font color="#0000FF">float</font></b> CostRaw[Months][Raw] = ...;
+025: <b><font color="#0000FF">float</font></b> HardRaw[Raw] = ...;
+026: <b><font color="#0000FF">float</font></b> ProfitProd = ...;
+027: <b><font color="#0000FF">float</font></b> IsVeg[Raw] = ...;
+028: <b><font color="#0000FF">float</font></b> IsOil[Raw] = ...;
+029: <b><font color="#0000FF">float</font></b> MaxVeg = ...;
+030: <b><font color="#0000FF">float</font></b> MaxOil = ...;
+031: <b><font color="#0000FF">float</font></b> CostStore = ...;
+032: <b><font color="#0000FF">float</font></b> StartEndStore = ...;
+033: <b><font color="#0000FF">float</font></b> MaxStore = ...;
+034: 
+035: <b><font color="#0000FF">range</font></b> R = 0..NbMonths;
+036: 
+037: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Buy[Raw][Months];
+038: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Store[Raw][R] <b><font color="#0000FF">in</font></b> 0..MaxStore;
+039: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Use[Raw][Months];
+040: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ p[Months];
+041: 
+042: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> Profit = 
+043:   <b><font color="#7D007D">sum </font></b>(m <b><font color="#0000FF">in</font></b> Months) ProfitProd * p[m];
+044: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> Cost =
+045:   <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Raw, m <b><font color="#0000FF">in</font></b> Months)
+046:          (CostRaw[m][j] * Buy[j][m] + CostStore * Store[j][m]);
+047:          
+048: <b><font color="#0000FF">maximize</font></b> Profit - Cost;
+049: 
+050: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+051: 
+052:   <b><font color="#7D007D">forall</font></b>(m <b><font color="#0000FF">in</font></b> Months) {
+053:       
+054:     <b><font color="#007D00">// Maximum usage per month   </font></b>
+055:     ctMaxUseVeg: <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Raw) IsVeg[j] * Use[j][m] &lt;= MaxVeg;
+056:     ctMaxUseOil: <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Raw) IsOil[j] * Use[j][m] &lt;= MaxOil;
+057:      
+058:     <b><font color="#007D00">// Hardness constraints</font></b>
+059:     ctHard1: <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Raw) HardRaw[j] * Use[j][m] - 6 * p[m] &lt;= 0;
+060:     ctHard2: <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Raw) HardRaw[j] * Use[j][m] - 3 * p[m] &gt;= 0;
+061: 
+062:     <b><font color="#007D00">// Material balance constraints</font></b>
+063:     ctMatBal: <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Raw) Use[j][m] - p[m] == 0;
+064:         
+065:   }
+066: 
+067:   <b><font color="#007D00">// Inventory balance</font></b>
+068:   <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> Raw, m <b><font color="#0000FF">in</font></b> Months)
+069:     ctInvVal: Store[j][m-1] + Buy[j][m] == Use[j][m] + Store[j][m];
+070: 
+071:   <b><font color="#007D00">// Starting and ending inventories are fixed</font></b>
+072:   <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> Raw) {
+073:     ctStartInv: Store[j][0] == StartEndStore;
+074:     ctEndInv: Store[j][NbMonths] == StartEndStore;
+075:   }
+076: }
+077: 
+078: 
+079: <b><font color="#0000FF">tuple</font></b> pSolutionT{ 
+080:         <b><font color="#0000FF">int</font></b> Months; 
+081:         <b><font color="#0000FF">float</font></b> value; 
+082: };
+083: {pSolutionT} pSolution = {&lt;i0,p[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Months};
+084: <b><font color="#0000FF">tuple</font></b> BuySolutionT{ 
+085:         <b><font color="#0000FF">string</font></b> Raw; 
+086:         <b><font color="#0000FF">int</font></b> Months; 
+087:         <b><font color="#0000FF">float</font></b> value; 
+088: };
+089: {BuySolutionT} BuySolution = {&lt;i0,i1,Buy[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Raw,i1 <b><font color="#0000FF">in</font></b> Months};
+090: <b><font color="#0000FF">tuple</font></b> StoreSolutionT{ 
+091:         <b><font color="#0000FF">string</font></b> Raw; 
+092:         <b><font color="#0000FF">int</font></b> R; 
+093:         <b><font color="#0000FF">float</font></b> value; 
+094: };
+095: {StoreSolutionT} StoreSolution = {&lt;i0,i1,Store[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Raw,i1 <b><font color="#0000FF">in</font></b> R};
+096: <b><font color="#0000FF">tuple</font></b> UseSolutionT{ 
+097:         <b><font color="#0000FF">string</font></b> Raw; 
+098:         <b><font color="#0000FF">int</font></b> Months; 
+099:         <b><font color="#0000FF">float</font></b> value; 
+100: };
+101: {UseSolutionT} UseSolution = {&lt;i0,i1,Use[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Raw,i1 <b><font color="#0000FF">in</font></b> Months};
+102: 
+103: 
+104: 
+105: <b><font color="#007D00">//Display the plan for each month and each raw material</font></b>
+106: <b><font color="#007D00">//plan[m][j] = &lt;Buy[j][m], Use[j][m], Store[j][m]&gt;</font></b>
+107: <b><font color="#0000FF">execute</font></b> DISPLAY {
+108:    <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> m <b><font color="EA7D00">in</font></b> Months)
+109:       <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> Raw)
+110:          writeln(<b><font color="#8A2BE2">"plan["</font></b>,m,<b><font color="#8A2BE2">"]["</font></b>,j,<b><font color="#8A2BE2">"] = &lt;buy:"</font></b>,Buy[j][m],<b><font color="#8A2BE2">",use:"</font></b>,Use[j][m],<b><font color="#8A2BE2">",store:"</font></b>,Store[j][m],<b><font color="#8A2BE2">"&gt;"</font></b>);
+111: }
+</tt></pre>

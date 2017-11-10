@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="noOverlap" />
+<meta name="abstract" content="OPL constraint (scheduling) used to prevent intervals in a sequence from overlapping and (optionally) to enforce a minimal distance between consecutive intervals." />
+<meta name="Description" content="OPL constraint (scheduling) used to prevent intervals in a sequence from overlapping and (optionally) to enforce a minimal distance between consecutive intervals." />
+<meta name="DC.subject" content="noOverlap, interval sequence variable constraint, interval sequence, noOverlap constraint, scheduling, noOverlap OPL function, transition based scheduling, noOverlap" />
+<meta name="keywords" content="noOverlap, interval sequence variable constraint, interval sequence, noOverlap constraint, scheduling, noOverlap OPL function, transition based scheduling, noOverlap" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_interval.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_sequence.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="zIwbiU55" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<title>noOverlap</title>
+</head>
+<body role="main" id="zIwbiU55">
+<h1 class="title topictitle1">noOverlap</h1>
+<div class="body refbody"><p class="shortdesc">OPL constraint (scheduling) used to prevent intervals in
+a sequence from overlapping and (optionally) to enforce a minimal
+distance between consecutive intervals.</p>
+<div class="section"><div class="note note"><span class="notetitle">Note:</span> This constraint cannot be used in a meta-constraint.</div>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+<tr class="strow"><td valign="top" class="stentry">type</td>
+<td valign="top" class="stentry"><pre class="pre msgblock"><code>boolean (1 if the constraint is true, 0 otherwise)</code></pre>
+</td>
+</tr>
+</table>
+</div>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>noOverlap(p, M [,next]); //With a transition distance, matrix M
+                         //between immediate successors (if next=true), or
+                         //between all successors (if next=false)
+
+Where:
+
+p is a sequence variable
+M is a distance matrix
+next is a boolean
+
+For example:
+
+dvar sequence p in A [types T];
+dvar interval A[];
+int T[];
+tuple triplet {int id1; int id2; int value;};
+{triplet} M = ...;</code></pre>
+<pre class="pre msgblock"><code>A construction of noOverlap that shortcuts the creation of the interval sequence variable for simple cases where the sequence is not useful:
+noOverlap(A); //Same as: dvar sequence p in A;
+              //noOverlap(p);</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">The <em class="ph i">noOverlap</em> constraint
+on an interval sequence variable <em class="ph i">p</em> states that the sequence
+defines a chain of non-overlapping intervals, where any interval in
+the chain is constrained to end before the start of the next interval
+in the chain. This constraint is typically useful for modelling disjunctive
+resources.</p>
+<p class="p">An optional transition matrix <em class="ph i">M</em> (in the form
+of a non-negative integer tuple set) can be passed to the <em class="ph i">noOverlap</em> constraint
+meaning that if <em class="ph i">ai</em> appears before <em class="ph i">aj</em> in the sequence,
+then a minimal distance <em class="ph i">M[typei,typej]</em> must be respected between
+the end of <em class="ph i">ai</em> and the start of <em class="ph i">aj</em> (<em class="ph i">typei</em> and <em class="ph i">typej</em> denote
+the types of <em class="ph i">ai</em> and <em class="ph i">aj</em> in the sequence).</p>
+<p class="p">If a
+transition distance matrix M is specified, it defines the minimal
+non-negative distance that must separate consecutive intervals in
+the sequence. Two versions of the constraint are available: one that
+enforces the transition distance between each interval and its next
+interval in the sequence <em class="ph i">(Next)</em> and the other that enforces
+the transition distance between each interval and all its successors
+in the sequence <em class="ph i">(After)</em>.</p>
+<p class="p">More formally, if <samp class="ph codeph">T(p,a)</samp> denotes
+the non-negative integer type of interval <samp class="ph codeph">a</samp> in the
+sequence variable <samp class="ph codeph">p</samp>:</p>
+<div class="fig fignone"><div class="image"><img class="image" src="../images/noOverlapEquation.jpg" alt="Equations for noOverlap scheduling function." /></div></div>
+<p class="p">Note that if the transition matrix M satisfies the triangular
+inequality, the semantics of each of the two versions of the constraint <em class="ph i">noOverlap(π,
+M, Next)</em> and <em class="ph i">noOverlap(π, M, After)</em> is the same. If M does
+not satisfy the triangular inequality, constraint <em class="ph i">noOverlap(π,
+M, After)</em> is stronger than <em class="ph i">noOverlap(π, M, Next)</em>.</p>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">A set of <em class="ph i">n</em> activities <em class="ph i">A[i]</em> of
+integer type <em class="ph i">T[i]</em> to be sequenced on a machine with a sequence
+dependent setup time <em class="ph i">abs(ti-tj)</em> to switch from activity type <em class="ph i">ti</em> to
+activity type<em class="ph i"> tj</em> with no activity overlap.</p>
+<pre class="pre msgblock"><code>{int} Types = {T[i] | i in 1..n};
+tuple triplet {int id1; int id2; int value;};
+{triplet} M = {&lt;i,j,ftoi(abs(i-j))&gt; | i in Types, j in Types};
+
+dvar interval A[i in 1..n] size d[i];
+dvar sequence p in A types T; 
+
+subject to {
+  noOverlap(p, M);
+};</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" title="Description, syntax, and example for each individual OPL function.">OPL functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_oplsch_interval.html" title="OPL keyword (CP, scheduling) for interval variables.">interval</a></div>
+<div><a class="link" href="tlr_oplsch_sequence.html" title="OPL keyword (CP, scheduling) to define a sequence of interval variables.">sequence</a></div>
+</div>
+</div></body>
+</html>

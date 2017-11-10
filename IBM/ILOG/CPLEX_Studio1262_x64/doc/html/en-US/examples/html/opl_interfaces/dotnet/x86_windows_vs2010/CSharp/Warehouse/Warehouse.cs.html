@@ -1,0 +1,227 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+002: <b><font color="#007D00">// File: Warehouse.cs</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">//-------------------------------------------------------------- -*- C# -*-</font></b>
+015: <b><font color="#007D00">// C# version of warehouse.cpp of OPL distrib</font></b>
+016: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+017: using System;
+018: using ILOG.Concert;
+019: using ILOG.CPLEX;
+020: using ILOG.OPL;
+021: 
+022: namespace Warehouse
+023: {
+024:     <b><font color="EA7D00">class</font></b> Warehouse
+025:     {
+026:         <b><font color="#007D00">/// &lt;summary&gt;</font></b>
+027:         <b><font color="#007D00">/// The main entry point for the application.</font></b>
+028:         <b><font color="#007D00">/// &lt;/summary&gt;</font></b>
+029:         [STAThread]
+030:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">void</font></b> Main(string[] args)
+031:         {
+032:             <b><font color="#0000FF">int</font></b> nbWarehouses = -1;
+033:             <b><font color="#0000FF">int</font></b> nbStores = -1;
+034:             <b><font color="#0000FF">int</font></b> fixedP = -1;
+035:             <b><font color="#0000FF">int</font></b> disaggregate = -1;
+036:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0; i &lt; args.Length; i++)
+037:             {
+038:                 <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-h"</font></b>.Equals(args[i]))
+039:                 {
+040:                     usage();
+041:                 }
+042:                 <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"fixed"</font></b>.Equals(args[i]))
+043:                 {
+044:                     <b><font color="EA7D00">if</font></b> (i == args.Length)
+045:                     {
+046:                         usage();
+047:                     }
+048:                     fixedP = System.Int32.Parse(args[++i]);
+049:                 }
+050:                 <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"nbWarehouses"</font></b>.Equals(args[i]))
+051:                 {
+052:                     <b><font color="EA7D00">if</font></b> (i == args.Length)
+053:                     {
+054:                         usage();
+055:                     }
+056:                     nbWarehouses = System.Int32.Parse(args[++i]);
+057:                 }
+058:                 <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"nbStores"</font></b>.Equals(args[i]))
+059:                 {
+060:                     <b><font color="EA7D00">if</font></b> (i == args.Length)
+061:                     {
+062:                         usage();
+063:                     }
+064:                     nbStores = System.Int32.Parse(args[++i]);
+065:                 }
+066:                 <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"disaggregate"</font></b>.Equals(args[i]))
+067:                 {
+068:                     <b><font color="EA7D00">if</font></b> (i == args.Length)
+069:                     {
+070:                         usage();
+071:                     }
+072:                     disaggregate = System.Int32.Parse(args[++i]);
+073:                 }
+074:                 <b><font color="EA7D00">else</font></b>
+075:                 {
+076:                     <b><font color="EA7D00">break</font></b>;
+077:                 }
+078:             }
+079: 
+080:             <b><font color="EA7D00">if</font></b> (fixedP == -1 || nbWarehouses == -1 || nbStores == -1 || disaggregate == -1)
+081:             {
+082:                 usage();
+083:             }
+084: 
+085:             <b><font color="#0000FF">int</font></b> status = 127;
+086:             <b><font color="EA7D00">try</font></b>
+087:             {
+088:                 OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+089:                 OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+090:                 OplErrorHandler errHandler = oplF.CreateOplErrorHandler(Console.Out);
+091:                 OplModelSource modelSource = oplF.CreateOplModelSourceFromString(GetModelText(), <b><font color="#8A2BE2">"warehouse"</font></b>);
+092:                 OplSettings settings = oplF.CreateOplSettings(errHandler);
+093:                 OplModelDefinition def = oplF.CreateOplModelDefinition(modelSource, settings);
+094:                 Cplex cplex = oplF.CreateCplex();
+095:                 OplModel opl = oplF.CreateOplModel(def, cplex);
+096:                 OplDataSource dataSource = <b><font color="EA7D00">new</font></b> MyParams(oplF, nbWarehouses, nbStores, fixedP, disaggregate);
+097:                 opl.AddDataSource(dataSource);
+098:                 opl.Generate();
+099:                 <b><font color="EA7D00">if</font></b> (cplex.Solve())
+100:                 {
+101:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.Cplex.ObjValue);
+102:                     opl.PostProcess();
+103:                     opl.PrintSolution(Console.Out);
+104:                     status = 0;
+105:                 }
+106:                 <b><font color="EA7D00">else</font></b>
+107:                 {
+108:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>);
+109:                     status = 1;
+110:                 }
+111: 
+112:                 oplF.End();
+113:             }
+114:             <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+115:             {
+116:                 Console.WriteLine(ex.Message);
+117:                 status = 2;
+118:             }
+119:             <b><font color="EA7D00">catch</font></b> (ILOG.Concert.Exception ex)
+120:             {
+121:                 Console.WriteLine(ex.Message);
+122:                 status = 3;
+123:             }
+124:             <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+125:             {
+126:                 Console.WriteLine(ex.Message);
+127:                 status = 4;
+128:             }
+129: 
+130:             Environment.ExitCode = status;
+131: 
+132:             Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>);
+133:             Console.ReadLine();
+134:         }
+135: 
+136:         <b><font color="EA7D00">static</font></b> String GetModelText()
+137:         {
+138:             String model = <b><font color="#8A2BE2">""</font></b>;
+139:             model += <b><font color="#8A2BE2">"int   fixed        = ...;"</font></b>;
+140:             model += <b><font color="#8A2BE2">"int   nbWarehouses = ...;"</font></b>;
+141:             model += <b><font color="#8A2BE2">"int   nbStores     = ...;"</font></b>;
+142:             model += <b><font color="#8A2BE2">"int   disaggregate = ...;"</font></b>;
+143:             model += <b><font color="#8A2BE2">"assert nbStores &gt; nbWarehouses;"</font></b>;
+144: 
+145:             model += <b><font color="#8A2BE2">"range Warehouses = 1..nbWarehouses;"</font></b>;
+146:             model += <b><font color="#8A2BE2">"range Stores     = 1..nbStores;"</font></b>;
+147: 
+148:             model += <b><font color="#8A2BE2">"int capacity[w in Warehouses] = nbStores div nbWarehouses + w mod (nbStores div nbWarehouses);"</font></b>;
+149:             model += <b><font color="#8A2BE2">"int supplyCost[s in Stores][w in Warehouses] = 1+((s+10*w) mod 100);"</font></b>;
+150: 
+151:             model += <b><font color="#8A2BE2">"dvar boolean open[Warehouses];"</font></b>;
+152:             model += <b><font color="#8A2BE2">"dvar boolean supply[Stores][Warehouses];"</font></b>;
+153: 
+154:             model += <b><font color="#8A2BE2">"minimize "</font></b>;
+155:             model += <b><font color="#8A2BE2">"sum(w in Warehouses) fixed * open[w] +"</font></b>;
+156:             model += <b><font color="#8A2BE2">"sum(w in Warehouses, s in Stores) supplyCost[s][w] * supply[s][w];"</font></b>;
+157: 
+158:             model += <b><font color="#8A2BE2">"constraints {"</font></b>;
+159:             model += <b><font color="#8A2BE2">"  forall(s in Stores)"</font></b>;
+160:             model += <b><font color="#8A2BE2">"    sum(w in Warehouses) supply[s][w] == 1;"</font></b>;
+161:             model += <b><font color="#8A2BE2">"  forall(w in Warehouses)"</font></b>;
+162:             model += <b><font color="#8A2BE2">"    sum(s in Stores) supply[s][w] &lt;= open[w]*capacity[w];"</font></b>;
+163:             model += <b><font color="#8A2BE2">"  if (disaggregate == 1) {"</font></b>;
+164:             model += <b><font color="#8A2BE2">"   forall(w in Warehouses, s in Stores)"</font></b>;
+165:             model += <b><font color="#8A2BE2">"      supply[s][w] &lt;= open[w];"</font></b>;
+166:             model += <b><font color="#8A2BE2">"  }"</font></b>;
+167:             model += <b><font color="#8A2BE2">"}"</font></b>;
+168:             <b><font color="EA7D00">return</font></b> model;
+169:         }
+170: 
+171:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">void</font></b> usage()
+172:         {
+173:             Console.Error.WriteLine();
+174:             Console.Error.WriteLine(<b><font color="#8A2BE2">"Usage: warehouse [-h] parameters"</font></b>);
+175:             Console.Error.WriteLine(<b><font color="#8A2BE2">"  -h  this help message"</font></b>);
+176:             Console.Error.WriteLine(<b><font color="#8A2BE2">"  parameters "</font></b>);
+177:             Console.Error.WriteLine(<b><font color="#8A2BE2">"    nbWarehouses &lt;value&gt; "</font></b>);
+178:             Console.Error.WriteLine(<b><font color="#8A2BE2">"    nbStores &lt;value&gt; "</font></b>);
+179:             Console.Error.WriteLine(<b><font color="#8A2BE2">"    fixed &lt;value&gt; "</font></b>);
+180:             Console.Error.WriteLine(<b><font color="#8A2BE2">"    disaggregate &lt;value&gt; "</font></b>);
+181:             Console.Error.WriteLine();
+182:             Environment.Exit(0);
+183:         }
+184:     }
+185: 
+186:     internal <b><font color="EA7D00">class</font></b> MyParams : CustomOplDataSource
+187:     {
+188:         <b><font color="#0000FF">int</font></b> _nbWarehouses;
+189:         <b><font color="#0000FF">int</font></b> _nbStores;
+190:         <b><font color="#0000FF">int</font></b> _fixed;
+191:         <b><font color="#0000FF">int</font></b> _disaggregate;
+192: 
+193:         internal MyParams(OplFactory oplF, <b><font color="#0000FF">int</font></b> nbWarehouses, <b><font color="#0000FF">int</font></b> nbStores, <b><font color="#0000FF">int</font></b> fixedP, <b><font color="#0000FF">int</font></b> disaggregate)
+194:             : base(oplF)
+195:         {
+196:             _nbWarehouses = nbWarehouses;
+197:             _nbStores = nbStores;
+198:             _fixed = fixedP;
+199:             _disaggregate = disaggregate;
+200:         }
+201:         <b><font color="EA7D00">public</font></b> override <b><font color="#0000FF">void</font></b> CustomRead()
+202:         {
+203:             OplDataHandler handler = DataHandler;
+204: 
+205:             handler.StartElement(<b><font color="#8A2BE2">"nbWarehouses"</font></b>);
+206:             handler.AddIntItem(_nbWarehouses);
+207:             handler.EndElement();
+208: 
+209:             handler.StartElement(<b><font color="#8A2BE2">"nbStores"</font></b>);
+210:             handler.AddIntItem(_nbStores);
+211:             handler.EndElement();
+212: 
+213:             handler.StartElement(<b><font color="#8A2BE2">"fixed"</font></b>);
+214:             handler.AddIntItem(_fixed);
+215:             handler.EndElement();
+216: 
+217:             handler.StartElement(<b><font color="#8A2BE2">"disaggregate"</font></b>);
+218:             handler.AddIntItem(_disaggregate);
+219:             handler.EndElement();
+220:         }
+221:     }
+222: }
+</tt></pre>

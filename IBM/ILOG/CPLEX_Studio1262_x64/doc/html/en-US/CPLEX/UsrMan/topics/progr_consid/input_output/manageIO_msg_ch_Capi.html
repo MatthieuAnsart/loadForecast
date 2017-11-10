@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Callable Library routines for message channels" />
+<meta name="abstract" content="Describes routines to control message channels in the C API." />
+<meta name="Description" content="Describes routines to control message channels in the C API." />
+<meta name="DC.subject" content="cpxresults message channel, cpxerror message channel, cpxwarning message channel, cpxlog message channel, message channel, cpxresults, cpxerror, cpxwarning, cpxlog, CPXopenCPLEX routine, managing input and output, CPXgetchannels routine, CPXsetlogfile routine, channels and, CPX_PARAM_SCRIND, CPXmsg routine, CPXflushchannel routine, CPXdisconnectchannel routine, CPXaddfpdest routine, message channels and, CPXdelfpdest routine, CPXaddfuncdest routine, CPXdelfuncdest routine" />
+<meta name="keywords" content="cpxresults message channel, cpxerror message channel, cpxwarning message channel, cpxlog message channel, message channel, cpxresults, cpxerror, cpxwarning, cpxlog, CPXopenCPLEX routine, managing input and output, CPXgetchannels routine, CPXsetlogfile routine, channels and, CPX_PARAM_SCRIND, CPXmsg routine, CPXflushchannel routine, CPXdisconnectchannel routine, CPXaddfpdest routine, message channels and, CPXdelfpdest routine, CPXaddfuncdest routine, CPXdelfuncdest routine" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_msg_ch_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_manageIO.1002721" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_msg_ch_synopsis.html" />
+<title>Callable Library routines for message channels</title>
+</head>
+<body role="main" id="User_manual.uss_manageIO.1002721">
+<h1 class="title topictitle1">Callable Library routines for message channels</h1>
+<div class="body"><p class="shortdesc">Describes routines to control message channels in the C API.</p>
+<p class="p">The <strong class="ph b">Callable Library (C API)</strong> defines several message channels
+for flexible control over message output:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">cpxresults</samp>  for messages containing status
+and progress information;</p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph">cpxerror</samp>  for messages issued when a task
+cannot be completed;</p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph">cpxwarning</samp>  for messages issued when a nonfatal
+difficulty is encountered; or when an action taken may have side-effects;
+or when an assumption made may have side-effects;</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">cpxlog</samp>  for messages containing information
+that would not conventionally be displayed on screen but could be
+useful in a log file. In other words, this message channel displays 
+information that is not displayed elsewhere, such information as 
+branching information in the MIP log or
+basis-change information in the Simplex log.  
+Because this information complements the information printed through the channel declared by 
+<samp class="ph codeph">cpxresults</samp>, 
+this channel is most useful when the output destinations for the 
+<samp class="ph codeph">cpxlog</samp> channel are also connected to the channel declared by 
+<samp class="ph codeph">cpxresults</samp>.</p>
+ </li>
+</ul>
+<p class="p">Output messages flow through message channels to destinations.
+Message channels are associated with destinations through their destination
+list. Messages from routines of the CPLEX Callable Library are assigned
+internally to one of those predefined channels. Those default channels
+are C pointers to CPLEX objects; they are initialized by <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/openCPLEX.html" title="The routine CPXXopenCPLEX/CPXopenCPLEX initializes a CPLEX environment.">CPXopenCPLEX</a></samp>;
+they are not global variables. Your application accesses these objects
+by calling the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getchannels.html" title="The routine CPXXgetchannels/CPXgetchannels obtains pointers to the four default channels created when you call the routine CPXXopenCPLEX/CPXopenCPLEX.">CPXgetchannels</a></samp>.
+You can use these predefined message channels for your own application
+messages. You can also define new channels.</p>
+<p class="p">An application using routines from the CPLEX Callable Library produces
+no output messages unless the application specifies message handling
+instructions through one or more calls to the message handling routines
+of the Callable Library. In other words, the destination list of each
+channel is initially empty.</p>
+<p class="p">Messages from multiple channels may be sent to one destination.
+All predefined CPLEX channels can be directed to a single file by
+a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setlogfile.html" title="The routine CPXXsetlogfile/CPXsetlogfile modifies the log file to which messages from all four CPLEX-defined channels are written.">CPXsetlogfile</a></samp>.
+Similarly, all predefined CPLEX channels except <samp class="ph codeph">cpxlog</samp> can
+be directed to the screen by the <a class="xref" href="../../../../Parameters/topics/SCRIND.html" title="Decides whether or not results are displayed on screen in an application of the C API.">messages to screen switch</a> <samp class="ph codeph">CPX_PARAM_SCRIND</samp>.
+For a finer level of control, or to define destinations for application-specific
+messages, use the following message handling routines, all documented
+in the <em class="ph i">Callable Library Reference Manual</em>:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/msg.html" title="The routine CPXXmsg/CPXmsg writes a message to a specified channel.">CPXmsg</a></samp> writes
+a message to a predefined channel;</p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/flushchannel.html" title="The routine CPXXflushchannel/CPXflushchannel flushes (outputs and clears the buffers of) all message destinations for a channel.">CPXflushchannel</a></samp> flushes
+a channel to its associated destination;</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/disconnectchannel.html" title="The routine CPXXdisconnectchannel/CPXdisconnectchannel flushes all message destinations associated with a channel and clears the corresponding message destination list.">CPXdisconnectchannel</a></samp> flushes
+a channel and clears its destination list;</p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addfpdest.html" title="The routine CPXXaddfpdest/CPXaddfpdest adds a file to the list of message destinations for a channel.">CPXaddfpdest</a></samp> adds
+a destination file to the list of destinations associated with a channel;</p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/delfpdest.html" title="The routine CPXXdelfpdest/CPXdelfpdest removes a file from the list of message destinations for a channel.">CPXdelfpdest</a></samp> deletes
+a destination from the destination list of a channel;</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addfuncdest.html" title="The routine CPXXaddfuncdest/CPXaddfuncdest adds a function msgfunction to the message destination list for a channel.">CPXaddfuncdest</a></samp> adds
+a destination function to a channel;</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/delfuncdest.html" title="The routine CPXXdelfuncdest/CPXdelfuncdest removes the function msgfunction from the list of message destinations associated with a channel.">CPXdelfuncdest</a></samp> deletes
+a destination function to a channel;</p>
+</li>
+</ul>
+<p class="p">After channel destinations are established, messages can be sent
+to multiple destinations by a single call to a message-handling routine.</p>
+<div class="fig fignone" id="User_manual.uss_manageIO.1002721__User_manual.uss_manageIO.1007807"><span class="figcap">Figure 1. CPLEX message handling
+routines</span><div class="image"><img class="image" src="../../../images/manageIOi.gif" alt="Shows the passage of a message through channels to destination file or function." /></div></div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_msg_ch_synopsis.html" title="Describes message channels.">Controlling message channels</a></div>
+</div>
+</div></body>
+</html>

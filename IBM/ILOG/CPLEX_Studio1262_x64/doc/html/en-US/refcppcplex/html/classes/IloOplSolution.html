@@ -1,0 +1,900 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloOplSolution</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloOplSolution.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloOplSolution</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilopl/ilosolution.h</span></div><div><img
+                src="IloOplSolution.png" border="0"
+                usemap="#svg_map_IloOplSolution"
+                    alt="Map of IloOplSolution"><map
+                        name="svg_map_IloOplSolution"><area
+                        href="../classes/IloOplSolution.html"
+                        shape="rect" alt="IloOplSolution"
+                        coords="10.0,37.6357421875,84.0,55.271484375" /><area
+                        href="../classes/IloOplSolution.html"
+                        shape="rect" alt="IloOplSolution"
+                        coords="10.0,37.6357421875,84.0,55.271484375" /><area
+                        href="../classes/IloSolution.html" shape="rect"
+                        alt="IloSolution"
+            coords="57.0,10.0,131.0,27.6357421875" /></map></img></div>
+Instances of this class store solutions to problems.
+    <div
+                        class="description"><p>Instances of this class store solutions to problems. The fundamental property of
+ <code>IloSolution</code> is its ability to transfer stored values from or to the
+ active objects associated with it. In particular, the member function
+ <code><a
+                        href="../classes/IloSolution.html#method_store">IloSolution::store</a></code> stores the values from algorithm variables while
+ the member function <code><a
+                    href="../classes/IloSolution.html#method_restore">IloSolution::restore</a></code> instantiates the actual
+ variables with stored values. Variables in the solution may be selectively restored.
+ This class also offers member functions to copy and to compare solutions.</p><p>Information about these classes of variables can be stored in an instance of
+ <code>IloSolution</code>:</p><ul>
+<li><code>IloAnySet:</code> the required and possible sets are stored; when the
+ variable is bound, the required and possible sets are equivalent.</li><li><code>IloAnyVar</code>: the value of the variable is stored.</li><li><code>IloBoolVar</code>: the value (true or false) of the variable is stored. Some
+ of the member functions for <code>IloBoolVar</code> are covered by the member function
+ for <code>IloNumVar</code>, as <code>IloBoolVar</code> is a subclass of
+ <code>IloNumVar</code>. For example, there is no explicit member function to add
+ objects of type <code>IloBoolVar</code>.</li><li><code>IloIntSetVar</code>: the required and possible sets are stored; when the
+ variable is bound, the required and possible sets are equivalent.</li><li><code>IloNumVar</code>: the lower and upper bounds are stored; when the variable
+ is bound, the current lower and upper bound are equivalent.</li><li><code>IloIntVar</code>: the lower and upper bounds are stored; when the variable
+ is bound, the current lower and upper bound are equivalent.</li><li><code>IloIntervalVar</code>: the lower and upper bounds of the start, end, length and
+ size are stored as well as the presence status.</li><li><code>IloObjective</code>: the value of the objective is stored. Objectives are
+ never restored; operations such as <code>setRestorable</code> cannot change this. More
+ than one instance of <code>IloObjective</code> can be added to a solution,. In such
+ cases, there is the idea of an active objective, which is returned by
+ <code>IloSolution::getObjective</code>. The active objective typically specifies the
+ optimization criterion for the problem to which the solution object is a solution. For
+ example, the IBM ILOG Solver class <code>IloImprove</code> uses the idea of an active
+ objective.</li>
+</ul><p>Most member functions in this class contain <code>assert</code> statements. For an
+ explanation of the macro <code>NDEBUG</code> (a way to turn on or turn off these
+ <code>assert</code> statements), see the concept
+ <a
+                href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p><p>Objects of type <code>IloSolution</code> have a scope, comprising the set of
+ variables that have their values stored in the solution. The scope is given
+ <em>before</em> the basic operations of storing and restoring are performed, via
+ <code>add</code> and <code>remove</code> methods. For example,</p><pre
+                class="sample">
+ IloNumVar var(env);
+ IloSolution soln(env);
+ solution.add(var);
+ </pre><p>creates a numeric variable and a solution
+ and adds the variable to the solution.
+ Arrays of variables can also be added to the solution. For example,</p><pre
+                class="sample">
+ IloNumVarArray arr(env, 10, 0, 1);
+ soln.add(arr);
+ </pre><p>adds 10 variables with range [0...1].
+ When an array of variables is added to the
+ solution, the array object itself is not present in the scope of the solution; only
+ the elements are present. If the solution is then stored by means of
+ <code>soln.store(algorithm)</code>, the values of variable <code>var</code> and
+ <code>arr[0]</code> to <code>arr[9]</code> are saved. Any attempt to add a variable
+ that is already present in a solution throws an exception, an instance of
+ <code>IloException</code>.</p><p>Accessors allow access to the stored values of the variables, regardless of the
+ state (or existence) of the algorithm they were stored from. For example,</p><pre
+                class="sample">
+ cout &lt;&lt; &quot;arr[3] = &quot; &lt;&lt; soln.getValue(arr[3]) &lt;&lt; endl;
+ </pre><p>Any attempt to access a variable that is not present in the solution throws an
+ instance of <code>IloException</code>.</p><p>A variable or an array of variables can be removed from a solution. For example,</p><pre
+                class="sample">
+ soln.remove(var);
+ </pre><p>removes <code>var</code> from the scope of the solution; and</p><pre
+            class="sample">
+ soln.remove(arr);
+ </pre><p>removes <code>arr[0]</code> to <code>arr[9]</code> from the solution.</p><p>Any attempt to remove a variable that is not present in the solution throws an
+ instance of <code>IloException</code>.</p><p><strong>See Also</strong> these classes in the <em>IBM ILOG Solver Reference
+ Manual</em>:
+ <code>IloAnySetVar</code>,
+ <code>IloAnyVar</code>,
+ <code>IloIntSetVar</code>,
+ <code>IloStoreSolution</code>,
+ <code>IloFRestoreSolution</code>. </p><p><strong>See Also</strong> this class in the <em>IBM ILOG CP Optimizer Reference
+ Manual</em>:
+ <code>IloIntervalVar</code>. </p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloNumVar.html">IloNumVar</a>, <a
+                href="../classes/IloIntVar.html">IloIntVar</a>, <a
+            href="../classes/IloObjective.html">IloObjective</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_add">add</a>(const <a
+                    href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> map) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_add">add</a>(const <a
+                    href="../classes/IloIntVarMap.html">IloIntVarMap</a> map) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloOplSolution.html#method_IloOplSolution">IloOplSolution</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloOplSolution.html#method_IloOplSolution">IloOplSolution</a>(IloSolutionI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloOplSolution.html#method_IloOplSolution">IloOplSolution</a>(const IloOplSolution &amp; solution)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_IloOplSolution">IloOplSolution</a>(<a
+                    href="../classes/IloEnv.html">IloEnv</a> mem, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEnd">setEnd</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEnd">setEnd</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEnd">setEnd</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEndMax">setEndMax</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEndMax">setEndMax</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEndMax">setEndMax</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEndMin">setEndMin</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEndMin">setEndMin</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setEndMin">setEndMin</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setMax">setMax</a>(const <a
+                            href="../classes/IloIntVarMap.html">IloIntVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setMin">setMin</a>(const <a
+                            href="../classes/IloIntVarMap.html">IloIntVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setOptionality">setOptionality</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setPresence">setPresence</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setPresence">setPresence</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStart">setStart</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStart">setStart</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStart">setStart</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStartMax">setStartMax</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStartMax">setStartMax</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStartMax">setStartMax</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStartMin">setStartMin</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStartMin">setStartMin</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setStartMin">setStartMin</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloIntMap.html">IloIntMap</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setValue">setValue</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> var, const <a
+                    href="../classes/IloTuple.html">IloTuple</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setValue">setValue</a>(const <a
+                            href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> var, const <a
+                    href="../classes/IloTupleMap.html">IloTupleMap</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloOplSolution.html#method_setValue">setValue</a>(const <a
+                            href="../classes/IloIntVarMap.html">IloIntVarMap</a> var, const <a
+            href="../classes/IloIntMap.html">IloIntMap</a> value) const</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloSolution.html">IloSolution</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_add"></a><a
+                            href="../classes/IloSolution.html#method_add">add</a>, <a
+                            href="../classes/IloSolution.html#method_contains"></a><a
+                            href="../classes/IloSolution.html#method_contains">contains</a>, <a
+                            href="../classes/IloSolution.html#method_copy"></a><a
+                            href="../classes/IloSolution.html#method_copy">copy</a>, <a
+                            href="../classes/IloSolution.html#method_copy"></a><a
+                            href="../classes/IloSolution.html#method_copy">copy</a>, <a
+                            href="../classes/IloSolution.html#method_end"></a><a
+                            href="../classes/IloSolution.html#method_end">end</a>, <a
+                            href="../classes/IloSolution.html#method_getEnd"></a><a
+                            href="../classes/IloSolution.html#method_getEnd">getEnd</a>, <a
+                            href="../classes/IloSolution.html#method_getEndMax"></a><a
+                            href="../classes/IloSolution.html#method_getEndMax">getEndMax</a>, <a
+                            href="../classes/IloSolution.html#method_getEndMin"></a><a
+                            href="../classes/IloSolution.html#method_getEndMin">getEndMin</a>, <a
+                            href="../classes/IloSolution.html#method_getEnv"></a><a
+                            href="../classes/IloSolution.html#method_getEnv">getEnv</a>, <a
+                            href="../classes/IloSolution.html#method_getImpl"></a><a
+                            href="../classes/IloSolution.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloSolution.html#method_getLength"></a><a
+                            href="../classes/IloSolution.html#method_getLength">getLength</a>, <a
+                            href="../classes/IloSolution.html#method_getLengthMax"></a><a
+                            href="../classes/IloSolution.html#method_getLengthMax">getLengthMax</a>, <a
+                            href="../classes/IloSolution.html#method_getLengthMin"></a><a
+                            href="../classes/IloSolution.html#method_getLengthMin">getLengthMin</a>, <a
+                            href="../classes/IloSolution.html#method_getMax"></a><a
+                            href="../classes/IloSolution.html#method_getMax">getMax</a>, <a
+                            href="../classes/IloSolution.html#method_getMax"></a><a
+                            href="../classes/IloSolution.html#method_getMax">getMax</a>, <a
+                            href="../classes/IloSolution.html#method_getMin"></a><a
+                            href="../classes/IloSolution.html#method_getMin">getMin</a>, <a
+                            href="../classes/IloSolution.html#method_getMin"></a><a
+                            href="../classes/IloSolution.html#method_getMin">getMin</a>, <a
+                            href="../classes/IloSolution.html#method_getName"></a><a
+                            href="../classes/IloSolution.html#method_getName">getName</a>, <a
+                            href="../classes/IloSolution.html#method_getObject"></a><a
+                            href="../classes/IloSolution.html#method_getObject">getObject</a>, <a
+                            href="../classes/IloSolution.html#method_getObjective"></a><a
+                            href="../classes/IloSolution.html#method_getObjective">getObjective</a>, <a
+                            href="../classes/IloSolution.html#method_getObjectiveValue"></a><a
+                            href="../classes/IloSolution.html#method_getObjectiveValue">getObjectiveValue</a>, <a
+                            href="../classes/IloSolution.html#method_getObjectiveVar"></a><a
+                            href="../classes/IloSolution.html#method_getObjectiveVar">getObjectiveVar</a>, <a
+                            href="../classes/IloSolution.html#method_getPossibleSet"></a><a
+                            href="../classes/IloSolution.html#method_getPossibleSet">getPossibleSet</a>, <a
+                            href="../classes/IloSolution.html#method_getRequiredSet"></a><a
+                            href="../classes/IloSolution.html#method_getRequiredSet">getRequiredSet</a>, <a
+                            href="../classes/IloSolution.html#method_getSize"></a><a
+                            href="../classes/IloSolution.html#method_getSize">getSize</a>, <a
+                            href="../classes/IloSolution.html#method_getSizeMax"></a><a
+                            href="../classes/IloSolution.html#method_getSizeMax">getSizeMax</a>, <a
+                            href="../classes/IloSolution.html#method_getSizeMin"></a><a
+                            href="../classes/IloSolution.html#method_getSizeMin">getSizeMin</a>, <a
+                            href="../classes/IloSolution.html#method_getStart"></a><a
+                            href="../classes/IloSolution.html#method_getStart">getStart</a>, <a
+                            href="../classes/IloSolution.html#method_getStartMax"></a><a
+                            href="../classes/IloSolution.html#method_getStartMax">getStartMax</a>, <a
+                            href="../classes/IloSolution.html#method_getStartMin"></a><a
+                            href="../classes/IloSolution.html#method_getStartMin">getStartMin</a>, <a
+                            href="../classes/IloSolution.html#method_getValue"></a><a
+                            href="../classes/IloSolution.html#method_getValue">getValue</a>, <a
+                            href="../classes/IloSolution.html#method_getValue"></a><a
+                            href="../classes/IloSolution.html#method_getValue">getValue</a>, <a
+                            href="../classes/IloSolution.html#method_getValue"></a><a
+                            href="../classes/IloSolution.html#method_getValue">getValue</a>, <a
+                            href="../classes/IloSolution.html#method_getValue"></a><a
+                            href="../classes/IloSolution.html#method_getValue">getValue</a>, <a
+                            href="../classes/IloSolution.html#method_IloSolution"></a><a
+                            href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>, <a
+                            href="../classes/IloSolution.html#method_IloSolution"></a><a
+                            href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>, <a
+                            href="../classes/IloSolution.html#method_IloSolution"></a><a
+                            href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>, <a
+                            href="../classes/IloSolution.html#method_IloSolution"></a><a
+                            href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>, <a
+                            href="../classes/IloSolution.html#method_isAbsent"></a><a
+                            href="../classes/IloSolution.html#method_isAbsent">isAbsent</a>, <a
+                            href="../classes/IloSolution.html#method_isBetterThan"></a><a
+                            href="../classes/IloSolution.html#method_isBetterThan">isBetterThan</a>, <a
+                            href="../classes/IloSolution.html#method_isBound"></a><a
+                            href="../classes/IloSolution.html#method_isBound">isBound</a>, <a
+                            href="../classes/IloSolution.html#method_isBound"></a><a
+                            href="../classes/IloSolution.html#method_isBound">isBound</a>, <a
+                            href="../classes/IloSolution.html#method_isEquivalent"></a><a
+                            href="../classes/IloSolution.html#method_isEquivalent">isEquivalent</a>, <a
+                            href="../classes/IloSolution.html#method_isEquivalent"></a><a
+                            href="../classes/IloSolution.html#method_isEquivalent">isEquivalent</a>, <a
+                            href="../classes/IloSolution.html#method_isFixed"></a><a
+                            href="../classes/IloSolution.html#method_isFixed">isFixed</a>, <a
+                            href="../classes/IloSolution.html#method_isInDomain"></a><a
+                            href="../classes/IloSolution.html#method_isInDomain">isInDomain</a>, <a
+                            href="../classes/IloSolution.html#method_isObjectiveSet"></a><a
+                            href="../classes/IloSolution.html#method_isObjectiveSet">isObjectiveSet</a>, <a
+                            href="../classes/IloSolution.html#method_isPresent"></a><a
+                            href="../classes/IloSolution.html#method_isPresent">isPresent</a>, <a
+                            href="../classes/IloSolution.html#method_isRestorable"></a><a
+                            href="../classes/IloSolution.html#method_isRestorable">isRestorable</a>, <a
+                            href="../classes/IloSolution.html#method_isWorseThan"></a><a
+                            href="../classes/IloSolution.html#method_isWorseThan">isWorseThan</a>, <a
+                            href="../classes/IloSolution.html#method_makeClone"></a><a
+                            href="../classes/IloSolution.html#method_makeClone">makeClone</a>, <a
+                            href="../classes/IloSolution.html#method_operator="></a><a
+                            href="../classes/IloSolution.html#method_operator=">operator=</a>, <a
+                            href="../classes/IloSolution.html#method_remove"></a><a
+                            href="../classes/IloSolution.html#method_remove">remove</a>, <a
+                            href="../classes/IloSolution.html#method_remove"></a><a
+                            href="../classes/IloSolution.html#method_remove">remove</a>, <a
+                            href="../classes/IloSolution.html#method_restore"></a><a
+                            href="../classes/IloSolution.html#method_restore">restore</a>, <a
+                            href="../classes/IloSolution.html#method_restore"></a><a
+                            href="../classes/IloSolution.html#method_restore">restore</a>, <a
+                            href="../classes/IloSolution.html#method_setAbsent"></a><a
+                            href="../classes/IloSolution.html#method_setAbsent">setAbsent</a>, <a
+                            href="../classes/IloSolution.html#method_setDomain"></a><a
+                            href="../classes/IloSolution.html#method_setDomain">setDomain</a>, <a
+                            href="../classes/IloSolution.html#method_setEnd"></a><a
+                            href="../classes/IloSolution.html#method_setEnd">setEnd</a>, <a
+                            href="../classes/IloSolution.html#method_setEndMax"></a><a
+                            href="../classes/IloSolution.html#method_setEndMax">setEndMax</a>, <a
+                            href="../classes/IloSolution.html#method_setEndMin"></a><a
+                            href="../classes/IloSolution.html#method_setEndMin">setEndMin</a>, <a
+                            href="../classes/IloSolution.html#method_setFalse"></a><a
+                            href="../classes/IloSolution.html#method_setFalse">setFalse</a>, <a
+                            href="../classes/IloSolution.html#method_setLength"></a><a
+                            href="../classes/IloSolution.html#method_setLength">setLength</a>, <a
+                            href="../classes/IloSolution.html#method_setLengthMax"></a><a
+                            href="../classes/IloSolution.html#method_setLengthMax">setLengthMax</a>, <a
+                            href="../classes/IloSolution.html#method_setLengthMin"></a><a
+                            href="../classes/IloSolution.html#method_setLengthMin">setLengthMin</a>, <a
+                            href="../classes/IloSolution.html#method_setLocation"></a><a
+                            href="../classes/IloSolution.html#method_setLocation">setLocation</a>, <a
+                            href="../classes/IloSolution.html#method_setMax"></a><a
+                            href="../classes/IloSolution.html#method_setMax">setMax</a>, <a
+                            href="../classes/IloSolution.html#method_setMin"></a><a
+                            href="../classes/IloSolution.html#method_setMin">setMin</a>, <a
+                            href="../classes/IloSolution.html#method_setName"></a><a
+                            href="../classes/IloSolution.html#method_setName">setName</a>, <a
+                            href="../classes/IloSolution.html#method_setNonRestorable"></a><a
+                            href="../classes/IloSolution.html#method_setNonRestorable">setNonRestorable</a>, <a
+                            href="../classes/IloSolution.html#method_setNonRestorable"></a><a
+                            href="../classes/IloSolution.html#method_setNonRestorable">setNonRestorable</a>, <a
+                            href="../classes/IloSolution.html#method_setObject"></a><a
+                            href="../classes/IloSolution.html#method_setObject">setObject</a>, <a
+                            href="../classes/IloSolution.html#method_setObjective"></a><a
+                            href="../classes/IloSolution.html#method_setObjective">setObjective</a>, <a
+                            href="../classes/IloSolution.html#method_setOptional"></a><a
+                            href="../classes/IloSolution.html#method_setOptional">setOptional</a>, <a
+                            href="../classes/IloSolution.html#method_setPossibleSet"></a><a
+                            href="../classes/IloSolution.html#method_setPossibleSet">setPossibleSet</a>, <a
+                            href="../classes/IloSolution.html#method_setPresent"></a><a
+                            href="../classes/IloSolution.html#method_setPresent">setPresent</a>, <a
+                            href="../classes/IloSolution.html#method_setRequiredSet"></a><a
+                            href="../classes/IloSolution.html#method_setRequiredSet">setRequiredSet</a>, <a
+                            href="../classes/IloSolution.html#method_setRestorable"></a><a
+                            href="../classes/IloSolution.html#method_setRestorable">setRestorable</a>, <a
+                            href="../classes/IloSolution.html#method_setRestorable"></a><a
+                            href="../classes/IloSolution.html#method_setRestorable">setRestorable</a>, <a
+                            href="../classes/IloSolution.html#method_setSize"></a><a
+                            href="../classes/IloSolution.html#method_setSize">setSize</a>, <a
+                            href="../classes/IloSolution.html#method_setSizeMax"></a><a
+                            href="../classes/IloSolution.html#method_setSizeMax">setSizeMax</a>, <a
+                            href="../classes/IloSolution.html#method_setSizeMin"></a><a
+                            href="../classes/IloSolution.html#method_setSizeMin">setSizeMin</a>, <a
+                            href="../classes/IloSolution.html#method_setStart"></a><a
+                            href="../classes/IloSolution.html#method_setStart">setStart</a>, <a
+                            href="../classes/IloSolution.html#method_setStartMax"></a><a
+                            href="../classes/IloSolution.html#method_setStartMax">setStartMax</a>, <a
+                            href="../classes/IloSolution.html#method_setStartMin"></a><a
+                            href="../classes/IloSolution.html#method_setStartMin">setStartMin</a>, <a
+                            href="../classes/IloSolution.html#method_setTrue"></a><a
+                            href="../classes/IloSolution.html#method_setTrue">setTrue</a>, <a
+                            href="../classes/IloSolution.html#method_setValue"></a><a
+                            href="../classes/IloSolution.html#method_setValue">setValue</a>, <a
+                            href="../classes/IloSolution.html#method_setValue"></a><a
+                            href="../classes/IloSolution.html#method_setValue">setValue</a>, <a
+                            href="../classes/IloSolution.html#method_setValue"></a><a
+                            href="../classes/IloSolution.html#method_setValue">setValue</a>, <a
+                            href="../classes/IloSolution.html#method_store"></a><a
+                            href="../classes/IloSolution.html#method_store">store</a>, <a
+                            href="../classes/IloSolution.html#method_store"></a><a
+                            href="../classes/IloSolution.html#method_store">store</a>, <a
+                            href="../classes/IloSolution.html#method_unsetObjective"></a><a
+            href="../classes/IloSolution.html#method_unsetObjective">unsetObjective</a></code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloOplSolution">IloOplSolution</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloOplSolution</span>()</div><div
+                class="description"><p>This constructor creates a solution whose implementation pointer is 0 (zero). The
+ handle must be assigned before its methods can be used.</p></div><hr /><h3><a
+            name="method_IloOplSolution">IloOplSolution</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloOplSolution</span>(IloSolutionI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description"><p>This constructor creates a handle object (an instance of the class
+ <code>IloSolution</code>) from a pointer to an implementation object (an instance of
+ the class <code>IloSolutionI</code>).</p></div><hr /><h3><a
+            name="method_IloOplSolution">IloOplSolution</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloOplSolution</span>(const IloOplSolution &amp; <span
+            class="parameter-name">solution</span>)</div><div
+                class="description"><p>This constructor creates a handle object from a reference to a solution. After
+ execution, both the newly constructed handle and <code>solution</code> point to the
+ same implementation object.</p></div><hr /><h3><a
+            name="method_IloOplSolution">IloOplSolution</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloOplSolution</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">mem</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an instance of the <code>IloSolution</code> class. The
+ optional argument <code>name</code>, if supplied, becomes the name of the created
+ object.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+            class="parameter-name">map</span>) const</div><div
+                class="description"><p>This member function adds each element of <code>map</code> to
+ the invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(const <a
+                href="../classes/IloIntVarMap.html">IloIntVarMap</a> <span
+            class="parameter-name">map</span>) const</div><div
+                class="description"><p>This member function adds each element of <code>map</code> to
+ the invoking solution.</p></div><hr /><h3><a
+            name="method_setEnd">setEnd</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEnd</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the end value of interval variable
+ <code>var</code> in the invoking solution to the corresponding end
+ value specified in tuple <code>value</code>. Tuple
+ <code>value</code> should be of the form <code>tuple T { int
+ present; int start; int end; int size; }</code>.</p></div><hr /><h3><a
+            name="method_setEnd">setEnd</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEnd</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the end value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding end value specified in tuple map
+ <code>value</code>. Tuples in tuple set <code>value</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>value</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setEnd">setEnd</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEnd</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the end value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding value specified in map <code>value</code>. The two
+ maps <code>var</code> and <code>value</code> must be indexed in the
+ same way.</p></div><hr /><h3><a
+            name="method_setEndMax">setEndMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal end value of interval
+ variable <code>var</code> in the invoking solution to the
+ corresponding end value specified in tuple <code>max</code>. Tuple
+ <code>max</code> should be of the form <code>tuple T { int present;
+ int start; int end; int size; }</code>.</p></div><hr /><h3><a
+            name="method_setEndMax">setEndMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMax</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal end value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding end value specified in tuple map
+ <code>max</code>. Tuples in tuple set <code>max</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>max</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setEndMax">setEndMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMax</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal end value of each
+ interval variable of map <code>var</code> in the invoking solution
+ to the corresponding maximal value specified in map
+ <code>max</code>. The two maps <code>var</code> and
+ <code>max</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setEndMin">setEndMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal end value of interval
+ variable <code>var</code> in the invoking solution to the
+ corresponding end value specified in tuple <code>min</code>. Tuple
+ <code>min</code> should be of the form <code>tuple T { int present;
+ int start; int end; int size; }</code>.</p></div><hr /><h3><a
+            name="method_setEndMin">setEndMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMin</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal end value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding end value specified in tuple map
+ <code>min</code>. Tuples in tuple set <code>min</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>min</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setEndMin">setEndMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMin</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal end value of each
+ interval variable of map <code>var</code> in the invoking solution
+ to the corresponding minimal value specified in map
+ <code>min</code>. The two maps <code>var</code> and
+ <code>min</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setMax">setMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMax</span>(const <a
+                href="../classes/IloIntVarMap.html">IloIntVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal value of each variable of map
+ <code>var</code> in the invoking solution to the corresponding
+ maximal value specified in map <code>max</code>. The two maps
+ <code>var</code> and <code>max</code> must be indexed in the same
+ way.</p></div><hr /><h3><a
+            name="method_setMin">setMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMin</span>(const <a
+                href="../classes/IloIntVarMap.html">IloIntVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal value of each variable of map
+ <code>var</code> in the invoking solution to the corresponding
+ minimal value specified in map <code>min</code>. The two maps
+ <code>var</code> and <code>min</code> must be indexed in the same
+ way.</p></div><hr /><h3><a
+            name="method_setOptionality">setOptionality</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setOptionality</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the presence status of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ value specified in map <code>value</code>. If the value is -1, the
+ presence status of the interval variable is set to false. If the
+ value is +1, the presence status of the interval variable is set to
+ true. If the value is 0, the presence/absence status of the
+ interval variable is unbound. The two maps <code>var</code> and
+ <code>value</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setPresence">setPresence</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setPresence</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the presence status of interval
+ variable <code>var</code> in the invoking solution to the
+ corresponding value specified in tuple <code>value</code>. Tuple
+ <code>value</code> should be of the form <code>tuple T { int
+ present; int start; int end; int size; }</code>.</p></div><hr /><h3><a
+            name="method_setPresence">setPresence</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setPresence</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the presence status of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding value specified in tuple map
+ <code>value</code>. Tuples in tuple set <code>value</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>value</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setStart">setStart</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStart</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the start value of interval variable
+ <code>var</code> in the invoking solution to the corresponding
+ start value specified in tuple <code>value</code>. Tuple
+ <code>value</code> should be of the form <code>tuple T { int
+ present; int start; int end; int size; }</code>.</p></div><hr /><h3><a
+            name="method_setStart">setStart</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStart</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the start value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding start value specified in tuple map
+ <code>value</code>. Tuples in tuple set <code>value</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>value</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setStart">setStart</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStart</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the start value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding value specified in map <code>value</code>. The two
+ maps <code>var</code> and <code>value</code> must be indexed in the
+ same way.</p></div><hr /><h3><a
+            name="method_setStartMax">setStartMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal start value of interval
+ variable <code>var</code> in the invoking solution to the
+ corresponding start value specified in tuple
+ <code>max</code>. Tuple <code>max</code> should be of the form
+ <code>tuple T { int present; int start; int end; int size;
+ }</code>.</p></div><hr /><h3><a
+            name="method_setStartMax">setStartMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMax</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal start value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding start value specified in tuple map
+ <code>max</code>. Tuples in tuple set <code>max</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>max</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setStartMax">setStartMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMax</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal start value of each
+ interval variable of map <code>var</code> in the invoking solution
+ to the corresponding maximal value specified in map
+ <code>max</code>. The two maps <code>var</code> and
+ <code>max</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setStartMin">setStartMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal start value of interval
+ variable <code>var</code> in the invoking solution to the
+ corresponding start value specified in tuple
+ <code>min</code>. Tuple <code>min</code> should be of the form
+ <code>tuple T { int present; int start; int end; int size;
+ }</code>.</p></div><hr /><h3><a
+            name="method_setStartMin">setStartMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMin</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal start value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding start value specified in tuple map
+ <code>min</code>. Tuples in tuple set <code>min</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>min</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setStartMin">setStartMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMin</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal start value of each
+ interval variable of map <code>var</code> in the invoking solution
+ to the corresponding minimal value specified in map
+ <code>min</code>. The two maps <code>var</code> and
+ <code>min</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTuple.html">IloTuple</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function fixes the value of interval variable
+ <code>var</code> in the invoking solution to the corresponding
+ value specified in tuple <code>value</code>. Tuple
+ <code>value</code> should be of the form <code>tuple T { int
+ present; int start; int end; int size; }</code>.</p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(const <a
+                href="../classes/IloIntervalVarMap.html">IloIntervalVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloTupleMap.html">IloTupleMap</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function fixes the value of each interval
+ variable of map <code>var</code> in the invoking solution to the
+ corresponding value specified in tuple map
+ <code>value</code>. Tuples in tuple set <code>value</code> should
+ be of the form <code>tuple T { int present; int start; int end; int
+ size; }</code>. The two maps <code>var</code> and
+ <code>value</code> must be indexed in the same way.</p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(const <a
+                href="../classes/IloIntVarMap.html">IloIntVarMap</a> <span
+                class="parameter-name">var</span>, const <a
+                href="../classes/IloIntMap.html">IloIntMap</a> <span
+            class="parameter-name">value</span>) const</div><div class="description"><p>This member function sets the value of each variable of map
+ <code>var</code> in the invoking solution to the corresponding
+ value specified in map <code>value</code>. The two maps
+ <code>var</code> and <code>value</code> must be indexed in the same
+ way.</p></div><hr /></body>
+</html>

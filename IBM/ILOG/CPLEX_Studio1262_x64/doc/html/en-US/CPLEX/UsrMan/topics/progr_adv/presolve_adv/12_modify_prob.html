@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modifying a problem" />
+<meta name="abstract" content="Describes conditions in which to modify a model after presolve." />
+<meta name="Description" content="Describes conditions in which to modify a model after presolve." />
+<meta name="DC.subject" content="CPX_PARAM_REDUCE, presolve and problem modifications, CPXaddcols routine, modifying problems, CPXchgrhs, CPXchgbds, CPXpreaddrows" />
+<meta name="keywords" content="CPX_PARAM_REDUCE, presolve and problem modifications, CPXaddcols routine, modifying problems, CPXchgrhs, CPXchgbds, CPXpreaddrows" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advancedPresolve.999913" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<title>Modifying a problem</title>
+</head>
+<body role="main" id="User_manual.uss_advancedPresolve.999913">
+<h1 class="title topictitle1">Modifying a problem</h1>
+<div class="body"><p class="shortdesc">Describes conditions in which to modify a model after presolve.</p>
+<p class="p">This section briefly discusses the mechanics of modifying a model
+after presolve has been performed. This discussion applies only to
+linear programs; it does <strong class="ph b">not</strong> apply to quadratic programs, quadratically
+constrained programs, nor mixed integer programs.</p>
+<p class="p">As noted earlier, the user must specify through the parameter <samp class="ph codeph">CPX_PARAM_REDUCE</samp>,
+documented in <a class="xref" href="../../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a>, the types
+of modifications that are going to be performed on the model. Recall
+that if primal reductions are turned off, the user can add variables,
+change the righthand-side vector, or loosen variable bounds without
+losing the presolved model. These changes are made through the standard
+problem modification interface (<samp class="ph codeph">CPXaddcols</samp>, <samp class="ph codeph">CPXchgrhs</samp>,
+and <samp class="ph codeph">CPXchgbds</samp>). </p>
+<p class="p">If dual reductions are turned off, the user can add constraints
+to the problem, change the objective function, or tighten variable
+bounds. Variable bounds are tightened through the standard interface
+(<samp class="ph codeph">CPXchgbds</samp>). The addition of constraints or changes
+to the objective value must be done through the two routines <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/preaddrows.html" title="The routine CPXXpreaddrows/CPXpreaddrows adds rows to an LP problem object and its associated presolved LP problem object.">CPXpreaddrows</a></samp> and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/prechgobj.html" title="The routine CPXXprechgobj/CPXprechgobj changes the objective function coefficients of an LP problem object and its associated presolved LP problem object.">CPXprechgobj</a></samp>.
+The constraints added by <samp class="ph codeph">CPXpreaddrows</samp> are equivalent
+to but sometimes different from those input by the user. The dual
+variables associated with the added rows may take different values
+than those the user might expect.</p>
+<p class="p">If a user makes a problem modification that is not consistent with
+the setting of <samp class="ph codeph">CPX_PARAM_REDUCE</samp>, CPLEX discards the
+presolved model, and presolve is re-invoked at the next optimization
+call. Similarly, CPLEX discards the presolved model if the user modifies
+a variable or constraint that presolve had previously removed from
+the problem. You can use <samp class="ph codeph">CPXpreaddrows</samp> or <samp class="ph codeph">CPXprechgobj</samp> to
+make sure that this will not happen. Note that <samp class="ph codeph">CPXpreaddrows</samp> also
+permits changes to the bounds of the presolved model. If the nature
+of the procedure dictates a real need to modify the variables that
+presolve removed, you can use the <samp class="ph codeph">CPXcopyprotected</samp> routine
+to instruct CPLEX not to remove those variables from the problem.</p>
+<p class="p">Instead of changing the bounds on the presolved model, consider
+changing the bounds on the original model. CPLEX will discard the
+presolved model, but calling <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/presolve.html" title="The routine CPXXpresolve/CPXpresolve performs LP or MIP presolve depending whether a problem object is an LP or a MIP.">CPXpresolve</a></samp> will
+cause CPLEX to apply presolve to the modified model, with the added
+benefit of reductions based on the latest modifications. Then use <samp class="ph codeph">CPXcrushx</samp>, <samp class="ph codeph">CPXcrushpi</samp>,
+and <samp class="ph codeph">CPXcopystart</samp> to provide an advanced start for
+the problem after presolve has been applied on the modified problem.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" title="Documents the advanced presolve routines, available only in the Callable Library (C API).">Advanced presolve routines</a></div>
+</div>
+</div></body>
+</html>

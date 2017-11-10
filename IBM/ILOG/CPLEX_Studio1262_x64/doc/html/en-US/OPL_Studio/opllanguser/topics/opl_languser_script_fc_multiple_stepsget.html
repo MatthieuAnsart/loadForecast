@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Getting the data elements from an IloOplModel instance" />
+<meta name="abstract" content="Defines data elements and explains how to access them." />
+<meta name="Description" content="Defines data elements and explains how to access them." />
+<meta name="DC.subject" content="data sources, publishers, publishers of data sources, data elements, definition and use, IloOplModel class, getting data elements from an instance, dataElements method, IloOplModel class, dataElements method" />
+<meta name="keywords" content="data sources, publishers, publishers of data sources, data elements, definition and use, IloOplModel class, getting data elements from an instance, dataElements method, IloOplModel class, dataElements method" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_mulmod.1012840" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" />
+<title>Getting the data elements from an IloOplModel instance</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_mulmod.1012840">
+<h1 class="title topictitle1">Getting the data elements from an IloOplModel instance</h1>
+<div class="body"><p class="shortdesc">Defines data elements and explains how to access them.</p>
+<div class="section" id="usropllangtut.uss_langtut_mulmod.1012840__usropllangtut.uss_langtut_mulmod.1012843"><h2 class="title sectiontitle">What
+are data elements?</h2><p class="p">You cannot directly change the data in
+a <span class="q">"data source"</span>. A data source represents what is in a <span class="ph filepath">.dat</span> file
+and the only way to change it would be to modify the <span class="ph filepath">.dat</span> file.
+However, you can ask for another editable view of the data. This other
+view is referred to as the <span class="q">"data elements"</span> of the OPL model.
+These data elements can be modified and then used as a data source
+for another model.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_mulmod.1012840__usropllangtut.uss_langtut_mulmod.1016077"><h2 class="title sectiontitle">Using
+data elements</h2><p class="p">In the <samp class="ph codeph">mulprod_main</samp> example,
+you want to get the data from the current model at each successful
+iteration, modify it, and use it to solve another optimization model. </p>
+<ol class="ol"><li class="li"><p class="p">To get the elements of the <span class="keyword apiname">IloOplModel</span> instance,
+write:</p>
+ <pre class="pre codeblock"><code>var data = produce.dataElements;</code></pre>
+ </li>
+<li class="li"><p class="p">To reuse the same model definition, write:</p>
+ <pre class="pre codeblock"><code>var def = produce.modelDefinition;</code></pre>
+ </li>
+</ol>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">All the scalar elements that are in the <span class="ph filepath">.dat</span> file
+(<samp class="ph codeph">string</samp>, <samp class="ph codeph">int</samp>, <samp class="ph codeph">float</samp>)
+are copied whereas complex data such as arrays, sets, and tuples are
+shared. In other words, scalar data elements are passed by value while
+nonscalar data is passed by reference. </p>
+ </div>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_mulmod.1012840__usropllangtut.uss_langtut_mulmod.1015304"><h2 class="title sectiontitle">Data
+elements and data publishers</h2><p class="p">When calling the
+method <span class="keyword apiname">dataElements</span> on an <span class="keyword apiname">IloOplModel</span> instance,
+you obtain a container of all the data elements of this model. This
+container does <strong class="ph b">not</strong> include the data source publishers: if the <span class="keyword apiname">IloOplModel</span> instance
+has been created by means of a data source that contained publishers,
+these publishers will not be included in the data elements structure.
+For example, if you have created an <span class="keyword apiname">IloOplModel</span> instance
+with a <span class="ph filepath">.dat</span> file containing a publisher such
+as:</p>
+<pre class="pre codeblock"><code>result to DBUpdate (db,"INSERT INTO writeOPL(id) VALUES (?)");</code></pre>
+<p class="p">and you want to use the same publisher on another <span class="keyword apiname">IloOplModel</span> instance,
+you must use a specific <span class="ph filepath">.dat</span> file containing
+only the publishers and add it to the new <span class="keyword apiname">IloOplModel</span>,
+as shown in the following code extract.</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_mulmod.1012840__usropllangtut.uss_langtut_mulmod.1015382">Reusing
+data source publishers</p>
+<pre class="pre codeblock"><code>main {
+   var Source = new IloOplModelSource("writeDB.mod");
+   var Def = new IloOplModelDefinition(Source);
+   var Cplex = new IloCplex();
+   var Data = new IloOplDataSource("writeDBfromScript.dat");
+  
+   var model = new IloOplModel(Def,Cplex);
+   model.addDataSource(Data);
+   model.generate();
+   Cplex.solve();
+   var DataElts = model.dataElements;
+  
+   var model2 = new IloOplModel(Def,Cplex);
+   model2.addDataSource(DataElts);
+   var Data2 = new IloOplDataSource("publisherData.dat");
+   model2.addDataSource(Data2);
+   DataElts.lb = 5;
+   model2.generate();
+   if (Cplex.solve()) {
+      model2.postProcess();
+   }
+   else
+     writeln("no solution");
+}</code></pre>
+<p class="p">The data file <samp class="ph codeph">writeDBfromScript.dat</samp> contains:</p>
+<pre class="pre codeblock"><code>lb=2;
+DBConnection db("access","testDB.mdb");
+result to DBUpdate (db,"INSERT INTO writeOPL(id) VALUES (?)");</code></pre>
+<p class="p">The
+data file <samp class="ph codeph">publisherData.dat</samp> contains:</p>
+<pre class="pre codeblock"><code>DBConnection db("access","testDB.mdb");
+result to DBUpdate (db,"INSERT INTO writeOPL(id) VALUES (?)");</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" title="Provides more detail on each step of the procedure summary.">Detailed steps</a></div>
+</div>
+</div></body>
+</html>

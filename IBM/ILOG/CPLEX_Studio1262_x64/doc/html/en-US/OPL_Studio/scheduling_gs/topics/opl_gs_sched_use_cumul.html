@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using cumulative functions in the house building problem" />
+<meta name="abstract" content="Introduces cumulative functions to the house building problem." />
+<meta name="Description" content="Introduces cumulative functions to the house building problem." />
+<meta name="DC.subject" content="cumulative functions, limit, fail, fail limit, cumulative functions, viewing in the IDE" />
+<meta name="keywords" content="cumulative functions, limit, fail, fail limit, cumulative functions, viewing in the IDE" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="KNmwW9tN" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Using cumulative functions in the house building problem</title>
+</head>
+<body role="main" id="KNmwW9tN">
+<h1 class="title topictitle1">Using cumulative functions in the house building problem</h1>
+<div class="body"><p class="shortdesc">Introduces cumulative functions to the house building problem.</p>
+<p class="p">In this section, you will learn how to:</p>
+<ul class="ul"><li class="li"><p class="p">use the keyword <span class="keyword apiname">cumulFunction</span>;</p>
+</li>
+<li class="li"><p class="p">use the keywords <span class="keyword apiname">pulse</span>, <span class="keyword apiname">step</span>, <span class="keyword apiname">stepAtStart</span> and <span class="keyword apiname">stepAtEnd</span>;</p>
+ </li>
+</ul>
+<p class="p">You will learn how to model and solve a house building problem, a problem of scheduling the tasks involved in building multiple houses in such a manner that minimizes the overall completion date of the houses. Some tasks must necessarily take place before other tasks, and each task has a predefined duration. Moreover, there are three workers, and each task requires any one of the three workers. A worker can be assigned to at most one task at a time. In addition, there is a cash budget with a starting balance. Each task consumes a certain amount of the budget at the start of the task, and the cash balance is increased every 60 days. To find a solution to this problem using IBM ILOG OPL, you will use the three-stage method: describe, model, and solve.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="gx3E1KCJ"><h2 class="title topictitle2">Describe</h2>
+<div class="body"><p class="p">The problem consists of assigning start dates to a set of tasks in such a way that the schedule satisfies temporal constraints and minimizes a criterion. The criterion for this problem is to minimize the overall completion date. Each task requires 200 dollars per day of the task, payable at the start of the task. Every 60 days, starting at day 0, the amount of 30,000 dollars is added to the cash balance.</p>
+<p class="p">For each task type in the house building project, the following table shows the duration of the task in days along with the tasks that must be finished before the task can start. Each task requires any one of the three workers. A worker can only work on one task at a time; each task, once started, may not be interrupted.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three column table that lists the ten tasks in the house building problem, the duration of each task, in days, and the tasks that must precede." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. House construction tasks</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d872112e59">Task</th>
+<th class="entry" align="left" valign="top" id="d872112e61">Duration</th>
+<th class="entry" align="left" valign="top" id="d872112e63">Preceding tasks</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">35</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 "> </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">15</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">plumbing</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">40</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">15</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">roofing</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">5</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">carpentry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">painting</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">10</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">ceiling</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">windows</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">5</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">roofing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">facade</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">10</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">garden</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">5</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e59 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d872112e61 ">5</td>
+<td class="entry" align="left" valign="top" headers="d872112e63 ">windows, facade, garden, painting </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">There is an earliest starting date for each of the five houses that must be built.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two column table that lists the five houses to be built, from 0 to 4, and the earliest starting date for each house." class="table ShadedHead" rules="all" frame="border" border="1"><span class="desc tabledesc"></span><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d872112e147">House</th>
+<th class="entry" align="left" valign="top" id="d872112e149">Earliest starting date</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d872112e147 ">0</td>
+<td class="entry" align="left" valign="top" headers="d872112e149 ">31</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e147 ">1</td>
+<td class="entry" align="left" valign="top" headers="d872112e149 ">0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e147 ">2</td>
+<td class="entry" align="left" valign="top" headers="d872112e149 ">90</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e147 ">3</td>
+<td class="entry" align="left" valign="top" headers="d872112e149 ">120</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d872112e147 ">4</td>
+<td class="entry" align="left" valign="top" headers="d872112e149 ">90</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Solving the problem consists of determining starting dates for the tasks such that the overall completion date is minimized.</p>
+<div class="section" id="gx3E1KCJ__cTkbM4TI"><h3 class="title sectiontitle">Step 1: Describe the problem</h3><p class="p">The first step in modeling and solving the problem is to write a natural language description of the problem, identifying the decision variables and the constraints on these variables.</p>
+<p class="p">Write a natural language description of this problem. Answer these questions:</p>
+<ul class="ul"><li class="li"><p class="p">What is the known information in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the decision variables or unknowns in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the constraints on these variables?</p>
+ </li>
+<li class="li"><p class="p">What is the objective?</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="gx3E1KCJ__wSrWjoQe"><h3 class="title sectiontitle">Discussion</h3><p class="p">What is the known information in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">There are five houses to be built by three workers. For each house, there are ten house building tasks, each with a given size and cost. For each task, there is a list of tasks that must be completed before the task can start. There is a starting cash balance of a given amount, and, each sixty days, the cash balance is increased by a given amount.</p>
+ </li>
+</ul>
+<p class="p">What are the decision variables or unknowns in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">The unknown is the point in time that each task will start. Once starting dates have been fixed, the overall completion date will also be fixed.</p>
+</li>
+</ul>
+<p class="p">What are the constraints on these variables?</p>
+<ul class="ul"><li class="li"><p class="p">There are constraints that specify that a particular task may not begin until one or more given tasks have been completed. Each task requires any one of the three workers. In addition, there are constraints that specify that a worker can be assigned to only one task at a time. Before a task can start, the cash balance must be large enough to pay the cost of the task.</p>
+ </li>
+</ul>
+<p class="p">What is the objective?</p>
+<ul class="ul"><li class="li"><p class="p">The objective is to minimize the overall completion date.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="hWRxtfn9"><h2 class="title topictitle2">Model</h2>
+<div class="body"><p class="p">After you have written a description of your problem, you can use the OPL language to model and solve it.</p>
+<div class="section" id="hWRxtfn9__pAzoQPzl"><h3 class="title sectiontitle">Step 2: Open the example file</h3><ul class="ul"><li class="li"><p class="p">Still working with the <span class="ph uicontrol">scheduling_tutorial</span> project, open the <span class="ph uicontrol">sched_cumul.mod</span> file in the CPLEX Studio IDE.</p>
+ </li>
+</ul>
+<p class="p">This file is an OPL model that is only partially completed. You will add the missing code in each step of this lesson. At the end, you will have completed the OPL model.</p>
+<p class="p">The code for reading the data into the data structures from the data file is provided.</p>
+<p class="p">In the related data file, the data provided includes the number of houses (<samp class="ph codeph">NbHouses</samp>), the number of workers (<samp class="ph codeph">NbWorkers</samp>), the names of the tasks (<samp class="ph codeph">TaskNames</samp>), the sizes of the tasks (<samp class="ph codeph">Duration</samp>), the precedence relations (<samp class="ph codeph">Precedences</samp>), and the earliest start dates of the houses (<samp class="ph codeph">ReleaseDate</samp>).</p>
+<p class="p">As each house has an earliest starting date, you declare the task interval variables to have a start date no earlier than that release date of the associated house. The ending dates of the tasks are not constrained, so the upper value of the range for the variables is <span class="keyword apiname">maxint</span>.</p>
+</div>
+<div class="section" id="hWRxtfn9__vIvSY4iZ"><h3 class="title sectiontitle">Step 3: Create the interval variables</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the interval variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar interval itvs[h in Houses][t in TaskNames] in ReleaseDate[h]..(maxint div 2)-1 size Duration[t];</code></pre>
+<p class="p">As the workers are equivalent in this problem, it is better to represent them as one pool of workers instead of as individual workers with no overlap constraints as was done in the earlier examples. The expression representing usage of this pool of workers can be modified by the interval variables that require a worker.</p>
+<p class="p">To model both the limited number of workers and the limited budget, you need to represent the sum of the individual contributions associated with the interval variables. In the case of the cash budget, some tasks consume some of the budget at the start. In the case of the workers, a task requires the worker only for the duration of the task. IBM ILOG OPL provides the keyword <span class="keyword apiname">cumulFunction</span> to represent the sum of individual contributions of interval variables.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Cumulative function expression</strong></p>
+ <p class="p">A cumulative function expression, represented in IBM ILOG OPL by <span class="keyword apiname">cumulFunction</span>, can be used to model a resource usage function over time. This function can be computed as a sum of interval variable demands on a resource over time.</p>
+ <p class="p">An interval usually increases the cumulated resource usage function at its start time and decreases it when it releases the resource at its end time (pulse function).</p>
+ <p class="p">For resources that can be produced and consumed by activities (for instance the contents of an inventory or a tank), the resource level can also be described as a function of time. A production activity will increase the resource level at the start or end time of the activity whereas a consuming activity will decrease it. The cumulated contribution of activities on the resource can be represented by a function of time, and constraints can be modeled on this function (for instance, a maximal or a safety level).</p>
+ <p class="p">The value of the expression at any given moment in time is constrained to be nonnegative. A cumulative function expression can be modified with the atomic demand keywords:</p>
+<ul class="ul"><li class="li"><p class="p"><span class="keyword apiname">step</span>, which increases or decreases the level of the function by a given amount at a given time; </p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">pulse</span>, which increases or decreases the level of the function by a given amount for the length of a given interval variable or fixed interval;</p>
+ </li>
+<li class="li"><p class="p"><span class="keyword apiname">stepAtStart</span>, which increases or decreases the level of the function by a given amount at the start of a given interval variable;</p>
+ </li>
+<li class="li"><p class="p"><span class="keyword apiname">stepAtEnd</span>, which increases or decreases the level of the function by a given amount at the end of a given interval variable.</p>
+ </li>
+</ul>
+ <p class="p">A cumulative function expression can be constrained to model limited resource capacity by constraining that the function be ≤ the capacity.</p>
+ </div>
+<p class="p">You create two cumulative functions, one to represent the usage of the workers and the other to represent the cash balance.</p>
+<p class="p">Each task requires one worker from the start to the end of the task interval. To represent the fact that a worker is required for the task, you create a cumulative function expression, <samp class="ph codeph">workerUsage</samp>. This function will be constrained to not exceed the number of workers at any point in time. The keyword <span class="keyword apiname">pulse</span> adjusts the expression by a given amount on the interval. Summing these pulse atoms over all the interval variables results in an expression that represents worker usage over the entire time frame for building the houses.</p>
+</div>
+<div class="section" id="hWRxtfn9__KM8VXXNE"><h3 class="title sectiontitle">Step 4: Declare the worker usage function</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare the worker usage function</samp>:</p>
+<pre class="pre codeblock"><code>cumulFunction workersUsage = 
+   sum(h in Houses, t in TaskNames) pulse(itvs[h][t],1);
+</code></pre>
+<p class="p">To model the cash budget, you create a cumulative function expression, <samp class="ph codeph">cash</samp>. To set the initial cash balance of 30,000 dollars and increase the balance by 30,000 every sixty days, you use the keyword <span class="keyword apiname">step</span>, which can be used to increment or decrement the cumulative function expression by a fixed amount on a given date.</p>
+<p class="p">Each task requires a cash payment equal to 200 dollars a day for the length of the task, payable at the start of the task. The keyword <span class="keyword apiname">stepAtStart</span> is used to adjust the cash balance cumulative function expression the appropriate amount for every task. </p>
+</div>
+<div class="section" id="hWRxtfn9__DN6ZuMEl"><h3 class="title sectiontitle">Step 5: Declare the cash budget function</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare the cash budget function</samp>:</p>
+<pre class="pre codeblock"><code>cumulFunction cash = 
+  sum (p in 0..5) step(60*p, 30000)
+  - sum(h in Houses, t in TaskNames) stepAtStart(itvs[h][t], 200*Duration[t]);
+</code></pre>
+<p class="p">The tasks have precedence constraints that are added to the model.</p>
+</div>
+<div class="section" id="hWRxtfn9__HJ35DGUf"><h3 class="title sectiontitle">Step 6: Add the temporal constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the temporal constraints</samp>:</p>
+<pre class="pre codeblock"><code>  forall(h in Houses)
+    forall(p in Precedences)
+      endBeforeStart(itvs[h][p.pre], itvs[h][p.post]);
+</code></pre>
+<p class="p">To add the constraint that there is a limited number of workers, you constrain the cumulative function expression representing worker usage to be no greater than the value <samp class="ph codeph">NbWorkers</samp>.</p>
+</div>
+<div class="section" id="hWRxtfn9__KtJ3fJax"><h3 class="title sectiontitle">Step 7: Add the worker usage constraint</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the worker usage constraint</samp>:</p>
+<pre class="pre codeblock"><code>  workersUsage &lt;= NbWorkers;
+</code></pre>
+<p class="p">To add the constraints that the budget must always be nonnegative, you constrain the cumulative function expression representing the cash budget to be greater than 0.</p>
+</div>
+<div class="section" id="hWRxtfn9__qB6mgkQm"><h3 class="title sectiontitle">Step 8: Add the cash budget constraint</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the cash budget constraint</samp>:</p>
+<pre class="pre codeblock"><code>  cash &gt;= 0;</code></pre>
+<p class="p">The objective of this problem is to minimize the overall completion date (the completion date of the house that is completed last). You determine the maximum completion date among the individual house projects using the expression <span class="keyword apiname">endOf</span> on the last task in building each house (here, it is the moving task) and minimize the maximum of these expressions.</p>
+</div>
+<div class="section" id="hWRxtfn9__k9aYNDec"><h3 class="title sectiontitle">Step 9: Add the objective</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the objective</samp>:</p>
+<pre class="pre codeblock"><code>minimize max(h in Houses) endOf(itvs[h]["moving"]);</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="vXFdOqs1"><h2 class="title topictitle2">Solve</h2>
+<div class="body"><p class="p">The search for an optimal solution in this problem could potentiality take a long time, so a fail limit has been placed on the solve process. The search will stop when the fail limit is reached, even if optimality of the current best solution is not guaranteed. The code for limiting the solve process has been provided for you:</p>
+<pre class="pre codeblock"><code>execute {
+  cp.param.FailLimit = 10000;
+}</code></pre>
+<div class="section" id="vXFdOqs1__eqPx6r97"><h3 class="title sectiontitle">Step 9: Execute the model</h3><p class="p">There are two ways of solving the model:</p>
+<ul class="ul"><li class="li"><p class="p">Execute the model in the CPLEX Studio IDE. You can view the results in tabular and chart form; see below <em class="ph i">Viewing the results of cumulative functions in the IDE</em>. </p>
+</li>
+<li class="li"><p class="p">Execute the model using <samp class="ph codeph">oplrun</samp>. You will need to pass as arguments not only the model file but also the data file, <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/tutorial/sched_cumul.dat</span></p>
+</li>
+</ul>
+<p class="p">You can view the complete model online in the file <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_cumul/sched_cumul.mod</span>. </p>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="section1268042880632"><h2 class="title topictitle2">Viewing the results of cumulative functions in the IDE</h2>
+<div class="body"><p class="p">After a problem is solved in the CPLEX Studio IDE, the Problem browser shows both data and decision variable values. If a scheduling model includes the <samp class="ph codeph">cumulFunction</samp> keyword or a <samp class="ph codeph">cumulFunction</samp> array, their values can be displayed in a dedicated view.</p>
+<p class="p">The sample model:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/models/sched_atfm/sched_atfm.mod</span></p>
+<p class="p">includes a <samp class="ph codeph">cumulFunction</samp> array and, after the model is solved, the values of the cumulative functions are displayed in the Problem browser.</p>
+<p class="p">Detailed information can be viewed by clicking the button <img class="image" src="../../gsoplide/images/dataview_button.jpg" alt="Show data view button" /><span class="ph uicontrol">Show data view</span>, which appears when the mouse hovers over a variable name in the Problem browser. In the screen capture below, the button is next to the variable name <samp class="ph codeph">r</samp>. The array is displayed in a tabular view in the central window. Each line of the table is a string representation (that can be copied and pasted) of the value of the cumulative function, as a stepwise function.</p>
+<div class="image"><img class="image" src="../images/cumul_function.jpg" alt="Screen capture showing result of cumul function" /></div><p class="p">When lines are selected, a "staircase chart" below the tabular view shows the selected functions. Two types of chart mode are available: <span class="ph uicontrol">Summed</span> or <span class="ph uicontrol">Superimposed</span>.</p>
+<p class="p">To zoom into the chart, use Ctrl + left click + mouse move. To zoom out, use Shift + left click + mouse move.</p>
+</div>
+</div>
+</body>
+</html>

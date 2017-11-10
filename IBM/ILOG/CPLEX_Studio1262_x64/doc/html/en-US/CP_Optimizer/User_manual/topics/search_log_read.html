@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Reading a search log" />
+<meta name="abstract" content="The search log provides detailed information of the model and the search." />
+<meta name="Description" content="The search log provides detailed information of the model and the search." />
+<meta name="DC.subject" content="branch, branch decision, choice point, extraction, memory usage, log, search log, solution status, time, elapsed" />
+<meta name="keywords" content="branch, branch decision, choice point, extraction, memory usage, log, search log, solution status, time, elapsed" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/search_log.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizersearch.1027817" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/search_log.html" />
+<title>Reading a search log</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizersearch.1027817">
+<h1 class="title topictitle1">Reading a search log</h1>
+<div class="body"><p class="shortdesc">The search log provides detailed information of the model
+and the search.</p>
+<p class="p">A sample of the search log looks like: </p>
+<pre class="pre codeblock"><code> ! ----------------------------------------------------------------------------
+ ! Minimization problem - 1408 variables, 15805 constraints, 1 phase
+ ! Presolve : 42 extractables eliminated, 42 constraints generated
+ ! Workers              = 2
+ ! TimeLimit            = 500
+ ! Initial process time : 0.25s (0.00s extraction + 0.25s propagation)
+ !  . Log search space  : 4408.7 (before), 4235.2 (after)
+ !  . Memory usage      : 5.7 MB (before), 8.3 MB (after)
+ !  . Variables fixed   : 42
+ ! Using parallel search with 2 workers.
+ ! ----------------------------------------------------------------------------
+ !          Best Branches  Non-fixed    W       Branch decision
+                     1000        664    1         9  = _int280
+                     1000        773    2         5 != _int291
+                     2000        664    1         2 != _int250
+                     2000        523    2         3  = _int942
+                     3000        577    1         8  = _int146
+ *            24     2523 2.81s         2            -
+              24     4000        577    1        10  = _int290
+              24     3000        274    2         0  = _int1169
+ *            14     3274 5.60s         2            -
+              14     5002        573    1         1 != _int164
+              14     6000        573    1        10  = _int164
+              14     4001        737    2         6 != _int211
+              14     7001        573    1        10  = _int152
+              14     5000        347    2         0  = _int971
+              14     8002        573    1         1 != _int164
+              14     9000        573    1        19  = _int164
+              14     6000          1    2         1  = _int217
+              14    10000        573    1         4 != _int266
+              14    11000        573    1         1  = _int218
+              14     7000          1    2         2  = _int209
+ ! Time = 21.76s, Explored branches = 18536, Memory usage = 9.0 MB
+ !          Best Branches  Non-fixed    W       Branch decision
+              14     8000          1    2         1  = _int985
+              14    12000        573    1        16  = _int218
+ *            13     8531 12.57s        2            -
+ ! ----------------------------------------------------------------------------
+ ! Search terminated normally, 3 solutions found.
+ ! Best objective         : 13 (optimal - effective tol. is 0)
+ ! Number of branches     : 20722
+ ! Number of fails        : 8155
+ ! Total memory usage     : 10.4 MB (9.0 MB CP Optimizer + 1.4 MB Concert)
+ ! Time spent in solve    : 24.79s (24.79s engine + 0.00s extraction)
+ ! Search speed (br. / s) : 1735.7
+ ! ----------------------------------------------------------------------------
+</code></pre>
+<p class="p">The first line of the log indicates the type of problem, along
+with the number of decision variables and constraints in the model.
+In this case, there is an objective included in the model, so the
+problem is reported to be a “Minimization problem”. When the model
+does not include an objective, the problem type is reported as a “Satisfiability
+problem”. The number of search phases, if any, is also displayed in
+the first line. </p>
+<p class="p">The second line of the log shows the result of presolve. The number
+of model objects (extractables) eliminated is displayed along with
+the number of constraints generated to improve the formulation of
+the eliminated extractables. </p>
+<p class="p">Any parameter change from its default is displayed after the preprocessing
+information.</p>
+<p class="p">The next three lines of the log provide information regarding the
+initial constraint propagation. The “Initial process time” is the
+time in seconds spent at the root node of the search tree where the
+initial propagation occurs. This time encompasses the time used by
+the optimizer to load the model, called extraction, and the time spent
+in initial propagation. The value for “Log search space” provides
+an estimate on the size of the depth-first search tree; this value
+is the log (base 2) of the products of the domains sizes of all the
+decision variables of the problem. Typically, the estimate of the
+size of the search tree should be smaller after the initial propagation,
+as choices will have been eliminated. However, this value is always
+an overestimate of the log of the number of remaining leaf nodes of
+the tree because it does not take into account the action of propagation
+of constraints at each node. The memory used by the optimizer during
+the initial propagation is reported. </p>
+<p class="p">The log then display the type of search used, sequential or parallel;
+in the latter case, the number of workers used is also displayed. </p>
+<p class="p">In order to interpret the remainder of the log file, you may want
+to think about the search as a binary tree. The root of the tree is
+the starting point in the search for a solution; each branch descending
+from the root represents an alternative choice or decision in the
+search. Each of these branches leads to a node where constraint propagation
+during search will occur. If the branch does not lead to a failure
+and a solution is not found at a node, the node is called a choice
+point. The optimizer can make an additional decision and create two
+new alternative branches from the current node, or it can jump in
+the tree and search from another node.</p>
+<p class="p">The lines in the next section of the progress log are displayed
+periodically during the search and describe the state of the search.
+The display frequency of the progress log can be controlled with parameters
+of the optimizer.</p>
+<p class="p">The progress information given in a progress log update includes:</p>
+<ul class="ul"><li class="li"><p class="p">Best: the value of the best solution found so far, in the case
+of an optimization problem;</p>
+ </li>
+<li class="li"><p class="p">Branches: the number of branches explored in the binary search
+tree;</p>
+</li>
+<li class="li"><p class="p">Non-fixed: the number of uninstantiated (not fixed) model variables,
+or the elapsed time;</p>
+ </li>
+<li class="li"><p class="p">W: the id of the worker at the branch currently under consideration
+by the optimizer;</p>
+ </li>
+<li class="li"><p class="p">Branch decision: the decision made at the branch currently
+under consideration by the optimizer.</p>
+ </li>
+</ul>
+<p class="p">The final lines of the log provide information about the entire
+search, after the search has terminated. </p>
+<p class="p">Whenever a solution is found, the time is displayed in place of
+the non-fixed value, which is always zero in this case.</p>
+<p class="p">This information about the search includes:</p>
+<ul class="ul"><li class="li"><p class="p"> Termination status line: the conditions under which the search
+terminated and the number of solutions found during search;</p>
+</li>
+<li class="li"><p class="p">Best objective: the value of the best solution found during
+search along with the effective optimality tolerance;</p>
+ </li>
+<li class="li"><p class="p">Number of branches: the number of branches explored in the
+binary search tree;</p>
+</li>
+<li class="li"><p class="p">Number of fails: the number of branches that did not lead to
+a solution;</p>
+</li>
+<li class="li"><p class="p">Total memory usage: the memory used by IBM® ILOG® Concert
+Technology and the CP Optimizer engine;</p>
+ </li>
+<li class="li"><p class="p">Time spent in solve: the elapsed time from start to the end
+of the search displayed in hh:mm:ss.ff format;</p>
+ </li>
+<li class="li"><p class="p">Search speed: average time spent per branch.</p>
+</li>
+</ul>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">   The CP Optimizer search log is meant for visual inspection
+only, not for mechanized parsing. In particular, the log may change
+from version to version of CP Optimizer in order to improve the quality
+of information displayed in the log. Any code based on the log output
+may have to be updated when a new version of CP Optimizer is released.
+ </p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/search_log.html" title="During search, information regarding the progress of the optimizer is displayed to the output channel of the optimizer; this information is called the search log or simply the log.">The search log</a></div>
+</div>
+</div></body>
+</html>

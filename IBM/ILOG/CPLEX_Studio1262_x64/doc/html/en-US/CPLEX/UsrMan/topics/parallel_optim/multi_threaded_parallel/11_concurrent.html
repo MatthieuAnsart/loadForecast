@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Concurrent optimizer in parallel" />
+<meta name="abstract" content="Describes the concurrent optimizer." />
+<meta name="Description" content="Describes the concurrent optimizer." />
+<meta name="DC.subject" content="concurrent optimizer, parallelism and, optimizer, concurrent, callbacks and, callback, concurrent optimizer and, interpreting log of, basis solution and, performance considerations, aspect ratio, sifting, linear programming (LP), concurrent optimization and" />
+<meta name="keywords" content="concurrent optimizer, parallelism and, optimizer, concurrent, callbacks and, callback, concurrent optimizer and, interpreting log of, basis solution and, performance considerations, aspect ratio, sifting, linear programming (LP), concurrent optimization and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_parallel.1042173" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" />
+<title>Concurrent optimizer in parallel</title>
+</head>
+<body role="main" id="User_manual.uss_parallel.1042173">
+<h1 class="title topictitle1">Concurrent optimizer in parallel</h1>
+<div class="body"><p class="shortdesc">Describes the concurrent optimizer.</p>
+<p class="p">On a multiprocessor computer, the concurrent optimizer
+launches distinct LP and QP optimizers on multiple threads, terminating
+as soon as the first optimizer finishes. The first thread uses the
+same strategy as the single-processor automatic setting (0 zero) of
+the <a class="xref" href="../../../../Parameters/topics/LPMETHOD.html" title="Controls which algorithm is used to solve continuous models or to solve the root relaxation of a MIP.">algorithm for continuous problems</a> (<samp class="ph codeph">CPX_PARAM_LPMETHOD</samp>, <samp class="ph codeph">RootAlg</samp>)
+or <a class="xref" href="../../../../Parameters/topics/QPMETHOD.html" title="Sets which algorithm to use when the C routine CPXqpopt (or the command optimize in the Interactive Optimizer) is invoked.">algorithm for continuous quadratic optimization</a> 
+(<samp class="ph codeph">CPX_PARAM_QPMETHOD</samp>, <samp class="ph codeph">RootAlg</samp>)
+depending on the problem type. If a second thread is available, the
+concurrent optimizer runs the barrier optimizer on it. </p>
+<p class="p">In the presence of more than three threads (for example, on hardware with four or more processors),
+the behavior of the concurrent optimizer depends on whether the parallel mode is <strong class="ph b">opportunistic</strong> or <strong class="ph b">deterministic</strong>.  
+If the parallel mode is <strong class="ph b">opportunistic</strong> and a third
+processor is available, the concurrent optimizer runs all three optimizers
+simultaneously: dual simplex, primal simplex, and barrier. All further
+available threads are devoted to making the barrier optimization parallel. In contrast,
+if the parallel mode is <strong class="ph b">deterministic</strong> (the default mode) and more than two threads are available, 
+then the concurrent optimizer runs the dual simplex and barrier optimizers simultaneously 
+and applies all additional threads to making the barrier optimizer parallel.</p>
+<div class="section"><h2 class="title sectiontitle">LP with large aspect ratio</h2>
+<p class="p">When the concurrent optimizer is invoked on a linear program (LP), 
+it checks the aspect ratio of the model. If the aspect ratio is large, 
+and if more than 10 (ten) threads are available to CPLEX, then 
+concurrent optimization also invokes sifting on the LP. For more 
+information about sifting, see the topic 
+<a class="xref" href="../../cont_optim/simplex/10_sifting.html" title="Describes conditions favoring the sifting optimizer.">Sifting optimizer</a>.</p>
+</div>
+<div class="section" id="User_manual.uss_parallel.1042173__waydejAR"><h2 class="title sectiontitle">Finishing first: basis solution in concurrent optimization</h2><p class="p">Barrier optimization is not considered complete until
+the crossover step has been performed and simplex re-optimization
+has converged; in other words, regardless of which optimizer turns
+out to be the fastest, the concurrent optimizer always returns a basis
+solution at optimality.</p>
+</div>
+<div class="section" id="User_manual.uss_parallel.1042173__zlXYKkl5"><h2 class="title sectiontitle">Performance trade-offs in concurrent optimization</h2><p class="p">The concurrent optimizer requires more memory than any
+individual optimizer, and of course it adds system load by consuming
+more aggregate CPU time than the fastest individual optimizer would
+alone. However, the advantages offered in terms of robust solution
+of models, and assurance in most cases of the minimum solution time,
+will make it attractive in many situations.</p>
+</div>
+<div class="section" id="User_manual.uss_parallel.1042173__Kq14cJbr"><h2 class="title sectiontitle">Interpreting the log in concurrent optimization</h2><p class="p">When you invoke concurrent optimization in your application,
+you may observe a point in the log when CPLEX® reports a solution
+of the model by an optimizer, but no other report of activity appears
+in the log for a considerable time afterward. During this apparently
+inactive period, concurrent optimization deterministically manages
+potential race conditions among competing optimizers. Among other
+decisions during this period, the concurrent optimizer decides deterministically
+from which of those competing optimizers to accept the final solution.</p>
+<p class="p">If this apparent wait during the race between concurrent
+optimizers poses a problem for your application, there are two alternative
+remedies available to you:</p>
+<ul class="ul"><li class="li"><p class="p">Use opportunistic mode, rather than
+the default deterministic mode. To do so, change the setting of the <a class="xref" href="../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> (<samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>, <samp class="ph codeph">ParallelMode</samp>)
+documented in the <em class="ph i">CPLEX Parameters
+Reference Manual.</em></p>
+</li>
+<li class="li"><p class="p">Set the optimizer that consistently
+solves your model first as the starting algorithm in your application.</p>
+
+<p class="p">To do so, set the parameter appropriate for your type
+of model:</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="../../../../Parameters/topics/LPMETHOD.html" title="Controls which algorithm is used to solve continuous models or to solve the root relaxation of a MIP.">algorithm for continuous problems</a> (<samp class="ph codeph">CPX_PARAM_LPMETHOD</samp>, <samp class="ph codeph">RootAlg</samp>)
+documented in the  <em class="ph i">CPLEX Parameters
+Reference Manual.</em></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../../Parameters/topics/QPMETHOD.html" title="Sets which algorithm to use when the C routine CPXqpopt (or the command optimize in the Interactive Optimizer) is invoked.">algorithm for continuous quadratic optimization</a> (<samp class="ph codeph">CPX_PARAM_QPMETHOD</samp>, <samp class="ph codeph">RootAlg</samp>)
+documented in the <em class="ph i">CPLEX Parameters
+Reference Manual.</em></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../../Parameters/topics/STARTALG.html" title="Sets which continuous optimizer will be used to solve the initial relaxation of a MIP.">algorithm for initial MIP relaxation</a> (<samp class="ph codeph">CPX_PARAM_STARTALG</samp>, <samp class="ph codeph">RootAlg</samp>)
+documented in the <em class="ph i">CPLEX Parameters
+Reference Manual.</em></p>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="User_manual.uss_parallel.1042173__FTgNbov7"><h2 class="title sectiontitle">Callbacks and concurrent optimization</h2><p class="p">Because of considerations about thread safety and predictable
+behavior, concurrent optimization should <strong class="ph b">not</strong> invoke
+any callbacks except in the first, main thread.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" title="Documents the CPLEX multithreaded parallel optimizers.">Multithreaded parallel optimizers</a></div>
+</div>
+</div></body>
+</html>

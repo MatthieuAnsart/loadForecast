@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Aggregating goals" />
+<meta name="abstract" content="Describes aggregate goals (And, Or)." />
+<meta name="Description" content="Describes aggregate goals (And, Or)." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_goals.1029501" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<title>Aggregating goals</title>
+</head>
+<body role="main" id="User_manual.uss_goals.1029501">
+<h1 class="title topictitle1">Aggregating goals</h1>
+<div class="body"><p class="shortdesc">Describes aggregate goals (And, Or).</p>
+<p class="p">Since And goals and Or goals take other goals as arguments,
+goals can be combined into aggregate goals. In fact, this is how goals
+are typically used for specifying a branching strategy. A typical
+return goal of a user-written <samp class="ph codeph">execute</samp> method
+for <strong class="ph b">C++</strong> looks like this: </p>
+<pre class="pre codeblock"><code>return AndGoal(OrGoal(var &lt;= IloFloor(val), var &gt;= IloFloor(val)+1), this);</code></pre>
+<p class="p">and for <strong class="ph b">Java</strong>, it looks
+like this: </p>
+<pre class="pre codeblock"><code>return cplex.and(cplex.or(cplex.leGoal(var, Math.floor(val)),
+                          cplex.geGoal(var, Math.floor(val)+1)), this);</code></pre>
+<p class="p">and for <strong class="ph b">C#.NET</strong>, it
+looks like this:  </p>
+<pre class="pre codeblock"><code>return cplex.And(
+            cplex.Or(cplex.GeGoal(_vars[bestj], System.Math.Floor(x[bestj])+1),
+                     cplex.LeGoal(_vars[bestj], System.Math.Floor(x[bestj]))), 
+            this);</code></pre>
+<p class="p">For the C++ case, note that since this statement would
+be called from the <samp class="ph codeph">execute</samp> method of a
+subclass of <samp class="ph codeph">IloCplex::GoalI</samp>, the full name <samp class="ph codeph">IloCplex::GoalI::OrGoal</samp> 
+can be abbreviated to <samp class="ph codeph">OrGoal. </samp> Likewise,
+the full name  <samp class="ph codeph">IloCplex::GoalI::AndGoal</samp> can
+be abbreviated to <samp class="ph codeph">AndGoal</samp>.</p>
+<p class="p">This return statement returns an <samp class="ph codeph">And</samp> goal
+that first executes the <samp class="ph codeph">Or</samp>  goal and then
+the current goal itself specified by the <samp class="ph codeph">this</samp> argument.
+When the <samp class="ph codeph">Or</samp> goal is executed next, it will
+create two subnodes. In the first subnode, the first local cut goal
+representing </p>
+<p class="p"><img class="image" src="../../../images/goalsz.gif" alt="goalsz.gif" /> </p>
+<p class="p">(where </p>
+<p class="p"><img class="image" src="../../../images/goals2.gif" alt="goals2.gif" /> </p>
+<p class="p">denotes the floor of <samp class="ph codeph">val</samp>)
+will be executed, thus adding the constraint </p>
+<p class="p"><img class="image" src="../../../images/goals3.gif" alt="goals3.gif" /> </p>
+<p class="p">for the subtree of this node. Similarly, the second subnode
+will be created, and when executing its constraint goal the constraint </p>
+<p class="p"><samp class="ph codeph">var</samp>  ≥<img class="image" src="../../../images/goals4.gif" alt="goals4.gif" /> </p>
+<p class="p">will be added for the subtree. <samp class="ph codeph">this</samp> 
+is then executed on each of the nodes that have just been created;
+the same goal is used for both subtrees. Further details about how
+goals are processed are available in <a class="xref" href="17_stack.html" title="Describes the goal stack.">The goal stack</a>, <a class="xref" href="21_control_srch.html" title="Describes node selection strategy with goals.">Controlling goal-defined search</a>,
+and <a class="xref" href="23_srch_limits.html" title="Describes search limits induced by a goal.">Search limits</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" title="Documents goals and their role in a branch &amp; cut search.">Using goals</a></div>
+</div>
+</div></body>
+</html>

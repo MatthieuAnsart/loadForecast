@@ -1,0 +1,116 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: {<b><font color="#0000FF">string</font></b>} Cities = ...;
+013: {<b><font color="#0000FF">string</font></b>} Products = ...;
+014: <b><font color="#0000FF">float</font></b> Capacity = ...;
+015: 
+016: <b><font color="#0000FF">tuple</font></b> tableRoutesType { 
+017:   <b><font color="#0000FF">string</font></b> p; 
+018:   <b><font color="#0000FF">string</font></b> o; 
+019:   <b><font color="#0000FF">string</font></b> d; 
+020:   <b><font color="#0000FF">float</font></b> cost; 
+021: }
+022: {tableRoutesType} TableRoutes = ...;
+023: 
+024: <b><font color="#0000FF">tuple</font></b> connection { 
+025:   <b><font color="#0000FF">string</font></b> o; 
+026:   <b><font color="#0000FF">string</font></b> d; 
+027: }
+028: <b><font color="#0000FF">tuple</font></b> route { 
+029:   <b><font color="#0000FF">string</font></b> p; 
+030:   connection e; 
+031: }
+032: {route} Routes = { &lt; p,&lt;o,d&gt; &gt; | &lt;p,o,d,c&gt; <b><font color="#0000FF">in</font></b> TableRoutes };
+033: {connection} Connections = { c | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+034: <b><font color="#0000FF">tuple</font></b> supply{ 
+035:   <b><font color="#0000FF">string</font></b> p; 
+036:   <b><font color="#0000FF">string</font></b> o; 
+037: }
+038: {supply} Supplies = { &lt;p,c.o&gt; | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+039: <b><font color="#0000FF">float</font></b> Supply[Supplies] = ...;
+040: <b><font color="#0000FF">tuple</font></b> customer { 
+041:   <b><font color="#0000FF">string</font></b> p; 
+042:   <b><font color="#0000FF">string</font></b> d; 
+043: }
+044: {customer} Customers = { &lt;p,c.d&gt; | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+045: <b><font color="#0000FF">float</font></b> Demand[Customers] = ...;
+046: 
+047: <b><font color="#0000FF">float</font></b> Cost[Routes] = [ &lt;t.p,&lt;t.o,t.d&gt;&gt;:t.cost | t <b><font color="#0000FF">in</font></b> TableRoutes ];
+048: <b><font color="#007D00">/*</font></b>
+049: <b><font color="#007D00">// Alternate way to initialize the indexing array 'Cost'</font></b>
+050: <b><font color="#007D00">float Cost[Routes];</font></b>
+051: <b><font color="#007D00">execute INITIALIZE {</font></b>
+052: <b><font color="#007D00">  for( var t in TableRoutes ) {</font></b>
+053: <b><font color="#007D00">      Cost[Routes.get(t.p,Connections.get(t.o,t.d))] = t.cost;</font></b>
+054: <b><font color="#007D00">   }</font></b>
+055: <b><font color="#007D00">}</font></b>
+056: <b><font color="#007D00">*/</font></b>
+057: 
+058: <b><font color="#0000FF">execute</font></b> PARAMS {
+059:   <b><font color="#0000FF">cplex</font></b>.tilim = 100;
+060: }
+061: 
+062: execute SETTINGS {
+063:   settings.displayComponentName = <b><font color="EA7D00">true</font></b>;
+064:   settings.displayWidth = 40;
+065:   writeln(<b><font color="#8A2BE2">"Routes: "</font></b>,Routes);
+066: }
+067: 
+068: execute DISPLAY {
+069:   <b><font color="EA7D00">function</font></b> printRoute(r) {
+070:     write(<b><font color="#8A2BE2">"  "</font></b>,r.p,<b><font color="#8A2BE2">":"</font></b>);
+071:     writeln(r.e.o,<b><font color="#8A2BE2">"-&gt;"</font></b>,r.e.d);
+072:   }
+073: 
+074:   writeln(<b><font color="#8A2BE2">"Routes:"</font></b>);
+075:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> r <b><font color="EA7D00">in</font></b> Routes) {
+076:     printRoute(r);
+077:   }
+078: }
+079: {string} Orig[p in Products] = { c.o | &lt;p,c&gt; <b><font color="EA7D00">in</font></b> Routes };
+080: {string} Dest[p in Products] = { c.d | &lt;p,c&gt; <b><font color="EA7D00">in</font></b> Routes };
+081: 
+082: {connection} CPs[p in Products] = { c | &lt;p,c&gt; <b><font color="EA7D00">in</font></b> Routes };
+083: 
+084: assert forall( p in Products ) 
+085:   sum( o in Orig[p] ) 
+086:     Supply[&lt;p,o&gt;] == sum( d in Dest[p] ) Demand[&lt;p,d&gt;];
+087: 
+088: dvar float+ Trans[Routes];   
+089: 
+090: constraint ctSupply[Products][Cities];
+091: constraint ctDemand[Products][Cities];
+092: 
+093: minimize
+094:   sum( l in Routes ) Cost[l] * Trans[l];
+095:    
+096: subject to {
+097:   forall( p <b><font color="EA7D00">in</font></b> Products , o <b><font color="EA7D00">in</font></b> Orig[p] ) 
+098:       ctSupply[p][o]: 
+099:         sum( &lt;o,d&gt; <b><font color="EA7D00">in</font></b> CPs[p] ) 
+100:           Trans[&lt; p,&lt;o,d&gt; &gt;] == Supply[&lt;p,o&gt;];
+101:     forall( p <b><font color="EA7D00">in</font></b> Products , d <b><font color="EA7D00">in</font></b> Dest[p] ) 
+102:       ctDemand[p][d]:  
+103:         sum( &lt;o,d&gt; <b><font color="EA7D00">in</font></b> CPs[p] ) 
+104:           Trans[&lt; p,&lt;o,d&gt; &gt;] == Demand[&lt;p,d&gt;];
+105:     forall( c <b><font color="EA7D00">in</font></b> Connections )
+106:       ctCapacity:
+107:         sum( &lt;p,c&gt; <b><font color="EA7D00">in</font></b> Routes ) 
+108:           Trans[&lt;p,c&gt;] &lt;= Capacity;
+109: }
+110: 
+111: 
+</tt></pre>

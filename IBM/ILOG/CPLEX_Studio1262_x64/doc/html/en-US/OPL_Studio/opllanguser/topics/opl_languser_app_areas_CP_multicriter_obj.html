@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving models with a multi-criteria objective" />
+<meta name="abstract" content="CP Optimizer can solve models with a multi-criteria objective." />
+<meta name="Description" content="CP Optimizer can solve models with a multi-criteria objective." />
+<meta name="DC.subject" content="multi-criteria objective, objective, multi-criteria, constraint programming, multi-criteria objective, truckfleet example" />
+<meta name="keywords" content="multi-criteria objective, objective, multi-criteria, constraint programming, multi-criteria objective, truckfleet example" />
+<meta name="DC.Relation" scheme="URI" content="../../opllang_quickref/topics/tlr_oplf_staticLex.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Release_notes/topics/relnotes_V123_changes_multi.html#descriptiveTopic1299537365760" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="multi-criteriaobjective" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP.html" />
+<title>Solving models with a multi-criteria objective</title>
+</head>
+<body role="main" id="multi-criteriaobjective">
+<h1 class="title topictitle1">Solving models with a multi-criteria objective</h1>
+<div class="body"><p class="shortdesc">CP Optimizer can solve models with a multi-criteria objective.</p>
+<p class="p">The truckfleet example illustrates this feature. The model and
+data files can be found in:</p>
+<p class="p"><samp class="ph codeph">Install_dir\opl\examples\opl\truckfleet</samp></p>
+<p class="p">where <samp class="ph codeph">Install_dir</samp> is your installation directory.</p>
+<p class="p">In the model <samp class="ph codeph">truckfleet.mod</samp>, there are two criteria
+for the minimize objective, <samp class="ph codeph">e1</samp> and <samp class="ph codeph">e2</samp>,
+as shown in the code extract.</p>
+<pre class="pre codeblock"><code>// Objective: first criterion for minimizing the cost for configuring and loading trucks 
+//            second criterion for minimizing the number of trucks
+dexpr int e1 = sum(t in Trucks) (truckCost[truckConfigs[t]]*(load[t]!=0))
+  + sum(t in Trucks) transitionCost[t];
+dexpr int e2 = numUsed;
+
+minimize staticLex(e1, e2);  // trying to minimize cost first</code></pre>
+<p class="p">If you declare a multi-criteria objective in a model, the important
+keyword to use is <a class="xref" href="../../opllang_quickref/topics/tlr_oplf_staticLex.html" title="OPL function used by CP Optimizer in models with a multi-criteria objective.">staticLex</a>.</p>
+<div class="note note"><span class="notetitle">Note:</span> When you use <samp class="ph codeph">staticLex</samp> with a multi-criteria
+objective, the objective function cannot contain arithmetic operations.
+For example, <samp class="ph codeph">minimize staticLex(e1,e2) + x1</samp> will
+not be accepted.</div>
+<div class="section"><h2 class="title sectiontitle">Solving in the IDE</h2><p class="p">When you solve the model
+in the IDE, you see the result for each criterion in the Problem Browser
+and the Solutions tab.</p>
+<p class="p"><img class="image" src="../images/multicriteria_solution.jpg" alt="Result for each criterion in the Problem Browser and the Solutions tab." /></p>
+<div class="note note"><span class="notetitle">Note:</span> In
+the Statistics tab, only the value for the first criterion is displayed.</div>
+</div>
+<div class="section"><h2 class="title sectiontitle">Solving with oplrun</h2><p class="p">When you solve a model
+that contains a multi-criteria objective with <samp class="ph codeph">oplrun</samp>,
+you see the results for the criteria in the command prompt. For the
+truckfleet example,  you see <samp class="ph codeph">OBJECTIVE: 26; 13</samp></p>
+<p class="p"><img class="image" src="../images/multicriteria_oplrun.jpg" alt="Result for each criterion in the command prompt." /></p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Modifying the example</h2><p class="p">The truckfleet model
+contains an alternative objective, with the criteria in a different
+order, and giving different results.</p>
+<p class="p"><samp class="ph codeph">//minimize staticLex(e2,
+e1);  // trying to minimize numUsed first</samp></p>
+<p class="p">You can move
+the comment symbol to the other <samp class="ph codeph">minimize</samp> statement
+and run the model again. This time you will see: </p>
+<p class="p"><samp class="ph codeph">Solution
+with objective 9; 36</samp></p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP.html" title="Defines constraint programming and describes a column generation problem (vellino example), a production problem (car sequencing example), a time tabling problem (time tabling example), and an introductory scheduling problem.">Applications of constraint programming</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="../../opllang_quickref/topics/tlr_oplf_staticLex.html" title="OPL function used by CP Optimizer in models with a multi-criteria objective.">staticLex</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../../../CP_Optimizer/Release_notes/topics/relnotes_V123_changes_multi.html#descriptiveTopic1299537365760" title="Announces the introduction of multi-criteria objectives.">New feature: Multi-criteria objectives</a></div>
+</div>
+</div></body>
+</html>

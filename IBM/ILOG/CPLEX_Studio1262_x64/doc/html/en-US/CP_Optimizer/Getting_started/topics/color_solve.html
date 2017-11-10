@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solve" />
+<meta name="abstract" content="Once the map coloring problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="Description" content="Once the map coloring problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="DC.subject" content="IloCP class, solve" />
+<meta name="keywords" content="IloCP class, solve" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/color.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizercolor.128202" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/color.html" />
+<title>Solve</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizercolor.128202">
+<h1 class="title topictitle1">Solve</h1>
+<div class="body"><p class="shortdesc">Once the map coloring problem has been described
+and modeled, you use CP Optimizer classes and functions to solve the
+constraint programming problem.</p>
+<p class="p">Solving a problem consists of finding a value for each
+decision variable so that all constraints are satisfied. You may not
+always know beforehand whether there is a solution that satisfies
+all the constraints of the problem. In some cases, there may be no
+solution. In other cases, there may be many solutions to a problem.</p>
+<p class="p">You use an instance of the class <samp class="ph codeph">IloCP</samp> to
+solve a problem expressed in a model.    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Optimizer </strong> </p>
+ <p class="p">The
+class <samp class="ph codeph">IloCP</samp> in the C++ API and the Java™ API and the class <samp class="ph codeph">CP</samp> in the C# API can be used to employ different
+algorithms for solving problems modeled with Concert Technology modeling
+classes. </p>
+ <p class="p">An object of this class is sometimes referred
+to as the optimizer. </p>
+ </div>
+<p class="p"> The constructor for <samp class="ph codeph">IloCP</samp> takes
+an <samp class="ph codeph">IloModel</samp> as its argument. </p>
+<div class="section" id="migration.uss_gscpoptimizercolor.128202__migration.uss_gscpoptimizercolor.129934"><h2 class="title sectiontitle">Step 7: Create an instance of IloCP</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create an
+instance of IloCP</samp> </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+</code></pre>
+<p class="p">You now use the member function <samp class="ph codeph">IloCP::solve</samp>,
+which solves the problem contained in the model by using constructive
+search and constraint propagation. It is possible to modify the search
+using <em class="ph i">tuning objects</em> and <em class="ph i">search parameters</em> (more
+on this in <a class="xref" href="dinner.html" title="In this lesson, you will learn how to find a solution to a team building problem using CP Optimizer and the three-stage method.">Using search parameters: team building</a>).</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.128202__migration.uss_gscpoptimizercolor.130708"><h2 class="title sectiontitle">Step 8: Search for a solution</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Search
+for a solution</samp>  </p>
+<pre class="pre codeblock"><code>    if (cp.solve())
+</code></pre>
+<p class="p">The member function <samp class="ph codeph">IloCP::solve</samp> returns
+a Boolean value of type <samp class="ph codeph">IloBool</samp>. If a solution
+is found, a value of <samp class="ph codeph">IloTrue</samp> is returned.</p>
+<p class="p">After a solution has been found, you can use member functions
+of <samp class="ph codeph">IloAlgorithm</samp>, the base class for algorithms
+in IBM® ILOG® Concert Technology, to examine that solution.
+The member function <samp class="ph codeph">IloAlgorithm::getValue</samp> takes
+a decision variable as an argument and returns the value the CP Optimizer
+engine has assigned to that variable. When you print the solution,
+you associate each value with the name of a color using the array <samp class="ph codeph">Names[]</samp>. The value <samp class="ph codeph">0</samp> is
+associated with <samp class="ph codeph">Names[0]</samp>, which is the first
+array element “blue”; the value <samp class="ph codeph">1</samp> is associated
+with <samp class="ph codeph">Names[1]</samp>, which is the second array
+element “white”; and so on. The array <samp class="ph codeph">Names[]</samp> is
+already created for you in the lesson code. </p>
+<p class="p">The member
+function <samp class="ph codeph">IloAlgorithm::getStatus</samp> returns
+a status code which provides information about the solution that the
+optimizer has found. The stream <samp class="ph codeph">IloAlgorithm::out</samp> is
+the communication stream for general output.</p>
+<p class="p">The code
+for displaying the solution has been provided for you:</p>
+<pre class="pre codeblock"><code>      cp.out() &lt;&lt; std::endl &lt;&lt; cp.getStatus() &lt;&lt; " Solution" &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Belgium:     " &lt;&lt; Names[cp.getValue(Belgium)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Denmark:     " &lt;&lt; Names[cp.getValue(Denmark)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "France:      " &lt;&lt; Names[cp.getValue(France)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Germany:     " &lt;&lt; Names[cp.getValue(Germany)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Luxembourg:  " &lt;&lt; Names[cp.getValue(Luxembourg)]  &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Netherlands: " &lt;&lt; Names[cp.getValue(Netherlands)] &lt;&lt; std::endl;
+</code></pre>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">If there is more than one
+set of values for the variables that satisfy the constraints of the
+problem, there is more than one solution. Within your problem, there
+may be certain criteria that make one such set of values more appropriate
+than another as a solution. This appropriateness is usually measured
+in terms of a cost function that can be optimized. You can read more
+on cost functions, also called objectives, in <a class="xref" href="facility.html" title="In this lesson, you will learn how to use CP Optimizer and a three-stage method to find a solution to a warehouse location problem.">Using arrays and objectives: warehouse location</a> </p>
+ </div>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.128202__migration.uss_gscpoptimizercolor.129969"><h2 class="title sectiontitle">Step 9: Compile and run the program</h2><p class="p">Compile
+and run the program. You should get the following results: </p>
+<pre class="pre codeblock"><code>Feasible Solution
+Belgium:     yellow
+Denmark:     blue
+France:      blue
+Germany:     white
+Luxembourg:  green
+Netherlands: blue
+</code></pre>
+<p class="p">As you can see, all four colors are used.</p>
+<p class="p">The complete program can be viewed online in the <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/color.cpp</samp> file. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/color.html" title="In this lesson, you will learn how to use CP Optimizer and a three-stage method to find a solution to a map coloring problem.">Modeling and solving a simple problem with integer variables: map coloring</a></div>
+</div>
+</div></body>
+</html>

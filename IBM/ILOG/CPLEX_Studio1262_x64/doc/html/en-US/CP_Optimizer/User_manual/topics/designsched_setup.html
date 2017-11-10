@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling sequence-dependent setup times" />
+<meta name="abstract" content="Setup times on disjunctive resources can be modeled by a no-overlap constraint with a transition distance." />
+<meta name="Description" content="Setup times on disjunctive resources can be modeled by a no-overlap constraint with a transition distance." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="IPsOOFEf" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Modeling sequence-dependent setup times</title>
+</head>
+<body role="main" id="IPsOOFEf">
+<h1 class="title topictitle1">Modeling sequence-dependent setup times</h1>
+<div class="body"><p class="shortdesc">Setup times on disjunctive resources can be modeled by
+a no-overlap constraint with a transition distance.</p>
+<p class="p">It is quite common that a certain minimal amount of time
+must elapse between the execution of two successive operations on
+a resource (e.g. a machine), and, often, this amount of time depends
+on the types of the two successive operations. This is the notion
+of sequence-dependent setup time and can be captured in CP Optimizer
+by a <em class="ph i">no-overlap</em> constraint
+with <em class="ph i">transition distance</em>. </p>
+<p class="p">Operations on the machine are represented by interval
+variables a[i] and a sequence variable seq is created on these interval
+variables to model the sequence of operations on the machine. The <em class="ph i">type</em> of the different operations
+(used to compute the setup time) are specified when building the sequence
+variable. </p>
+<p class="p">A transition distance is represented by a transition
+distance class and stored as a matrix of setup times. A no-overlap
+constraint must be posted with the sequence variable and the transition
+distance to state that interval variables of the sequence do not overlap
+and that the sequence-dependent setup time of the transition distance
+applies to the intervals of the sequence. </p>
+<p class="p">CP Optimizer distinguishes two kinds of behavior of the
+no-overlap constraint with respect to transition distances: (1) transition
+distance between immediate successors and (2) transition distances
+between all successors. </p>
+<p class="p">A transition distance between immediate successors is
+generally useful for modeling the duration of a setup activity to
+switch the state of the resource from one interval to the next interval
+in the sequence. Here, the state of the resource is represented by
+the type of the interval in the sequence. This is illustrated in Sample
+1; the Boolean flag passed at the construction of the no-overlap constraint
+specifies if the transition distance must only be applied between <strong class="ph b">immediate</strong> successors on the sequence
+variable. A complete example of transition distance between immediate
+successors is available in the delivered example <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/sched_setup.cpp</samp>.
+In some more complex cases, the setup activity will have to be explicitly
+modeled as an interval variable because, for instance, it requires
+some additional resource. In this case, you can use the expressions <em class="ph i">typeOfNext</em> and <em class="ph i">typeOfPrev</em> on the sequence variable
+to constrain the length of the setup activity as illustrated in Sample
+2. See <a class="xref" href="designsched_costs.html" title="Classical scheduling costs such as makespan, earliness/tardiness, resource allocation costs and activity execution costs can be modeled efficiently in CP Optimizer.">Modeling classical scheduling costs</a> for modeling sequence-dependent setup costs. </p>
+<p class="p">In some specific cases, the transition distance must
+be applied between <strong class="ph b">all</strong> pairs
+of intervals succeeding each other on the sequence, no matter if there
+are other intervals in between. For example, consider a set of movies
+to be scheduled on a TV channel. If a movie of type <em class="ph i">ti</em> is scheduled after a movie of
+type <em class="ph i">tj</em> (no matter
+which other movies are shown in between), depending on the types <em class="ph i">ti,tj</em>, one would like a minimal amount
+of time to elapse between the two occurrences to avoid showing movies
+of similar types too close to each other. Sample 3 illustrates such
+a use-case using a minimal delay <samp class="ph codeph">separationTime[ti]</samp> between
+movies of type <samp class="ph codeph">ti</samp>; the Boolean flag passed
+at the construction of the no-overlap constraint specifies that the
+transition distance must be applied between <strong class="ph b">all</strong> successors
+on the sequence variable. </p>
+<p class="p"><strong class="ph b">SAMPLE 1:</strong> Sequence-dependent
+setup time on immediate successors</p>
+<pre class="pre codeblock"><code>  IloEnv env;
+  IloModel model(env);
+  IloInt m = ...; // Number of types { 0, 1, ..., m-1 }
+
+  IloTransitionDistance setupTimes(env, m);
+  for (IloInt ti=0; ti&lt;m; ++ti)
+    for (IloInt tj=0; tj&lt;m; ++tj)
+      setupTimes.setValue(ti,tj, ...); // Setup time between types ti and tj
+
+  IloInt n = ...;    // Number of activities on the machine
+  IloIntervalVarArray act(env, n); // Activities on the machine
+  IloIntArray        type(env, n); // Activity types
+  // ...
+
+  IloIntervalSequenceVar machine(env, act, type);
+  // Transition distance applies between immediate successors
+  model.add(IloNoOverlap(env, machine, setupTimes, IloTrue));
+</code></pre>
+<p class="p"><strong class="ph b">SAMPLE 2:</strong> Sequence-dependent
+setup activities</p>
+<pre class="pre codeblock"><code>  IloEnv env;
+  IloModel model(env);
+  IloInt m = ...; // Number of types { 0, 1, ..., m-1 }
+
+  IloInt n = ...;    // Number of activities on the machine
+  IloIntervalVarArray act  (env, n); // Activities on the machine
+  IloIntervalVarArray setup(env, n); // Setup activities on the machine
+  IloIntervalVarArray cover(env, n); // Covering activities on the machine
+  IloIntArray         type (env, n); // Activity types
+
+  // ...
+  for (IloInt i=0; i&lt;n; ++i) {
+    act  [i] = ...;
+    type [i] = ...;
+    cover[i] = IloIntervalVar(env);
+    setup[i] = IloIntervalVar(env);
+    IloIntervalVarArray dec(env); dec.add(act[i]); dec.add(setup[i]);
+    model.add(IloSpan(env, cover[i], dec));
+    model.add(IloEndBeforeStart(env, act[i], setup[i]));
+  }
+
+  IloIntervalSequenceVar machine(env, cover, type);
+  model.add(IloNoOverlap(env, machine));  // Setup activities
+
+  IloIntArray2 setupDuration(env, m);
+  IloInt last = m;  // Type of next for the last activity on the machine
+  for (IloInt ti=0; ti&lt;m; ++ti) {
+    setupDuration[ti]= IloIntArray(env, m+1);
+    for (IloInt tj=0; tj&lt;m; ++tj)
+      setupDuration[ti][tj] = ...; // Length of setup activity between types ti and tj
+    setupDuration[ti][last] = 0;   // Length of last setup activity
+   }
+  for (IloInt i=0; i&lt;n; ++i)
+   model.add(IloLengthOf(setup[i])==setupDuration[type[i]][IloTypeOfNext(machine,cover[i],last)]);
+</code></pre>
+<p class="p"><strong class="ph b">SAMPLE 3:</strong> Sequence-dependent
+setup time on all successors</p>
+<pre class="pre codeblock"><code>  IloEnv env;
+  IloModel model(env);
+  IloInt m = ...; // Number of types { 0, 1, ..., m-1 }
+
+  IloTransitionDistance separationTimes(env, m);
+  for (IloInt ti=0; ti&lt;m; ++ti)
+    separationTimes.setValue(ti,ti, ...); // Separation time between two movies of type ti
+
+  IloInt n = ...;    // Number of movies
+  IloIntervalVarArray movie(env, n); // Movies
+  IloIntArray          type(env, n); // Types
+  // ...
+
+  IloIntervalSequenceVar movieSequence(env, movie, type);  // Transition distance applies between all successors
+  model.add(IloNoOverlap(env, movieSequence, separationTimes, IloFalse));</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

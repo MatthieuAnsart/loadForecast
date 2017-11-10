@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Fixed charge in a production planning problem" />
+<meta name="abstract" content="Presents the model and data files, and a solution to the problem." />
+<meta name="Description" content="Presents the model and data files, and a solution to the problem." />
+<meta name="DC.subject" content="code samples, prodmilp.dat, code samples, prodmilp.mod" />
+<meta name="keywords" content="code samples, prodmilp.dat, code samples, prodmilp.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_MILP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1068963" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_MILP.html" />
+<title>Fixed charge in a production planning problem</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1068963">
+<h1 class="title topictitle1">Fixed charge in a production planning problem</h1>
+<div class="body"><p class="shortdesc">Presents the model and data files, and a solution
+to the problem.</p>
+<p class="p">Consider how to upgrade the production-planning problem
+presented in <a class="xref" href="opl_languser_shortTour_LP_elements.html#usropllangtut.uss_langtut_shortTour.1005660">Tuples</a> to
+include a fixed charge for the products. The example below <samp class="ph codeph">prodmilp.mod</samp> describes
+the new model and <samp class="ph codeph">prodmilp.dat</samp> describes
+the instance data.</p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1068963__usropllangtut.uss_langtut_linearInteger.1022739"><h2 class="title sectiontitle">A fixed-charge production model (<samp class="ph codeph">prodmilp.mod</samp>) </h2><pre class="pre codeblock"><code>{string} Products = ...;
+{string} Resources = ...;
+{string} Machines = ...;
+float MaxProduction = ...;
+
+tuple typeProductData {
+  float demand;
+  float incost;
+  float outcost;
+  float use[Resources];
+  string machine;
+}
+
+typeProductData Product[Products] = ...;
+float Capacity[Resources] = ...;
+float RentCost[Machines] = ...;
+
+dvar boolean Rent[Machines];
+dvar float+ Inside[Products];
+dvar float+ Outside[Products];
+
+
+minimize
+  sum( p in Products ) 
+    ( Product[p].incost * Inside[p] + 
+      Product[p].outcost * Outside[p] ) +
+  sum( m in Machines ) 
+    RentCost[m] * Rent[m];
+   
+subject to {
+  forall( r in Resources )
+    ctCapacity:
+      sum( p in Products ) 
+        Product[p].use[r] * Inside[p] &lt;= Capacity[r];
+
+  forall( p in Products )
+    ctDemand: 
+      Inside[p] + Outside[p] &gt;= Product[p].demand;
+
+  forall( p in Products )
+    ctMaxProd:
+      Inside[p] &lt;= MaxProduction * Rent[Product[p].machine];
+}</code></pre>
+</div>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1068963__usropllangtut.uss_langtut_linearInteger.1022753"><h2 class="title sectiontitle">Data for the fixed-charge production model (<samp class="ph codeph">prodmilp.dat</samp>) </h2><pre class="pre codeblock"><code>Products =  { "kluski" "capellini" "fettucine" };
+Resources = { "flour" "eggs" };
+Machines = { m1 m2  m3 };
+RentCost = [ 20 10 5 ];
+MaxProduction = 100000;
+Product = #[
+      kluski : &lt; 100, 0.6, 0.8, [ 0.5, 0.2 ] m1 &gt;
+      capellini : &lt; 200, 0.8, 0.9, [ 0.4, 0.4 ] m2 &gt;
+      fettucine : &lt; 300, 0.3, 0.4, [ 0.3, 0.6 ] m3&gt;
+          ]#;
+Capacity = [ 20, 40 ];</code></pre>
+</div>
+<p class="p">Note that the model now contains two types of variables:
+0-1 variables that represent whether to rent a machine and production
+variables of type <samp class="ph codeph">float</samp>. The product data
+is enhanced with a field describing the required machine, while the
+new constraints are modeled as in the fixed-charge problem in <a class="xref" href="opl_languser_app_areas_IP_fixed.html#usropllangtut.uss_langtut_linearInteger.1063111__usropllangtut.uss_langtut_linearInteger.1022668">A fixed-charge model (fixed.mod)</a>. </p>
+<div class="section" id="usropllangtut.uss_langtut_linearInteger.1068963__usropllangtut.uss_langtut_linearInteger.1049455"><h2 class="title sectiontitle">A solution to prodmilp.mod</h2><p class="p">For the instance
+data in <samp class="ph codeph">prodmilp.dat</samp>,
+OPL returns the optimal solution </p>
+<pre class="pre codeblock"><code>Final Solution with objective 378.3333:
+  inside = [0.0000 0.0000 66.6667];
+  outside = [100.0000 200.0000 233.3333];
+  rent = [0 0 1];</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_MILP.html" title="Defines mixed integer-linear programming and describes an upgrade to the production-planning problem to include a fixed charge for the products.">Mixed integer-linear programming</a></div>
+</div>
+</div></body>
+</html>

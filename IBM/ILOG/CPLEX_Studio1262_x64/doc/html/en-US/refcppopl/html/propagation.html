@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Propagation in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="propagation.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="42"><div
+                class="section-title1">Propagation in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                    href="propagationevents.html">PREVIOUS</a> <a
+                href="reversibility.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%" /><div
+                        class="section-body"><p>When you post a constraint, the constraint is used immediately to reduce the domains of the constrained 
+  variables that it involves. CP Optimizer reduces a domain by removing those values that cannot satisfy the constraint 
+  and thus cannot participate in a solution.</p><p>Posting a constraint is reversible: the constraint is removed when CP Optimizer backtracks to choice points set before 
+  that constraint was posted.</p><p>If constraint propagation causes a domain to be reduced to a single value, then the constrained variable will be 
+  bound to that remaining value.</p><p>In addition, when you post a constraint, the constraint is saved so that whenever any of the variables to which it 
+  applies is modified, the constraint will be activated, and the modification will be transmitted to the other variables 
+  that the constraint involves. This activity is called constraint propagation.</p><p>The algorithm used for constraint propagation in CP Optimizer is straightforward in principle. CP Optimizer maintains a queue of 
+  variables, called the constraint propagation queue. When a constrained variable is modified, that variable is put at the 
+  end of that queue if it is not already in the queue. As long as there are variables in that queue, the algorithm takes 
+  the first variable from the queue. We then say this particular variable is in process.</p><p>When a variable is processed, it is first removed from the propagation queue. Then each constraint posted on that 
+  variable is examined. For one such constraint, all the variables on which it is posted are in turn examined: their 
+  domains are reduced by removing those values that are inconsistent with it. If a variable is already in process, then 
+  this domain reduction will be deferred until it is no longer in process. If some of these variables are modified during 
+  this activity, they, too, are put into the queue if they are not yet in the queue. The algorithm continues as long as 
+  there is a variable in the queue to process. The algorithm automatically reduces domains as necessary and halts in 
+  either of two situations: when all domains contain only values consistent with the constraints, or when a domain becomes 
+  empty. For performance considerations, it does not carry out all the reductions theoretically possible.</p><p>This algorithm has several important properties: </p><ul>
+<li> This algorithm always halts. </li><li> It lets you use constraints (such as arithmetic constraints, for example) on more than two variables at a time. </li><li> It lets you handle problems dynamically; that is, you can solve problems where new constraints can be added during 
+ the search for a solution. </li><li> Regardless of the order in which the constraints are considered, the domains will always be the same at the end of 
+ the execution of the propagation. </li>
+</ul><p>See the concepts <a
+                        href="choice.html">Choice point in CP Optimizer</a>, 
+<a
+                        href="domain.html">Domain-delta in CP Optimizer</a>, 
+<a
+                        href="propagationevents.html">Propagation events in CP Optimizer</a>, 
+<a
+                        href="reversibility.html">Reversibility in CP Optimizer</a>, and 
+<a
+                        href="state.html">State in CP Optimizer</a> for more information.</p><p><strong>See also</strong></p><p><a
+                href="classes/IlcConstraint.html">IlcConstraint</a></p></div><div
+                    align="right"><a
+                    href="propagationevents.html">PREVIOUS</a> <a href="reversibility.html">NEXT</a></div></div></body>
+</html>

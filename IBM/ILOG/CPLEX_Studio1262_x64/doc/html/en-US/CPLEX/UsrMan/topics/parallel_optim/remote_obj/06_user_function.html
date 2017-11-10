@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="User functions to run user-defined code on the remote machine" />
+<meta name="abstract" content="Documents user functions for the remote object." />
+<meta name="Description" content="Documents user functions for the remote object." />
+<meta name="DC.subject" content="user function, definition, remote object, user functions (C API), remote object and (C API), user functions (C++ API), remote object and (C++ API), user functions (Java API), remote object and (Java API)" />
+<meta name="keywords" content="user function, definition, remote object, user functions (C API), remote object and (C API), user functions (C++ API), remote object and (C++ API), user functions (Java API), remote object and (Java API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="remoteOjbUsrFcn" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<title>User functions to run user-defined code on the remote machine</title>
+</head>
+<body role="main" id="remoteOjbUsrFcn">
+<h1 class="title topictitle1">User functions to run user-defined code on the remote machine</h1>
+<div class="body"><p class="shortdesc">Documents user functions for the remote object.</p>
+<p class="p">In the framework of the CPLEX remote object, the worker that runs on the 
+remote machine is always a predefined binary file  (that is, the <samp class="ph codeph">cplex</samp> 
+binary file) started by the special argument <samp class="ph codeph">-worker= . . . </samp> on the command line. </p>
+<p class="p">You can <strong class="ph b">dynamically</strong> extend this binary file by means of a
+<strong class="ph b">user functions</strong>. A user function is a piece of executable code that is
+compiled into a dynamically loadable object (that is, a shared library or DLL) and
+loaded by the worker binary file at runtime.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> User functions to extend the worker binary file are available from 
+the Callable Library (C API), 
+the Concert C++ API, and 
+the Concert Java API.
+However, to implement a user function on the 
+CPLEX remote object worker, you must use the Callable Library (C API).
+In fact, the user function cannot
+"see" any of the Concert C++ classes nor any of the Concert Java classes 
+that are used on the master side of the CPLEX remote object.
+For examples of how to implement a user function for the the CPLEX remote object, 
+see the sample <span class="ph filepath">iloparmipopt.cpp</span>.</div>
+<p class="p">In order to load such an object, use the following command line argument:</p>
+<p class="p"><samp class="ph codeph"> -userfunction=<em class="ph i">object</em>=<em class="ph i">function</em></samp></p>
+<p class="p">where <em class="ph i">object</em> is the name of the object file 
+that contains the code to be loaded, and 
+<em class="ph i">function</em> is the name of a function called by the worker binary file as
+soon as <em class="ph i">object</em> is loaded. The signature of this function must conform to this pattern:</p>
+<pre class="pre codeblock"><code>CPXEXPORT void CPXPUBLIC function (CPXMESSAGEHANDLERptr handler)</code></pre>
+<p class="p">Furthermore, the function must be visible to the worker binary file; that is, the 
+function can <strong class="ph b">not</strong> be a static function.</p>
+<p class="p">The purpose of <em class="ph i">function</em> is to register a handler function for user messages
+with the message handler that is passed in to <em class="ph i">function</em>. This user message
+handler has the following signature:</p>
+<pre class="pre codeblock"><code>   int userfunction (CPXENVptr env, int id, CPXLONG inlen,
+                     void const *indata, CPXLONG maxout,
+                     CPXLONG *outlen_p, void *outdata, void *handle)</code></pre>
+<p class="p">To register the handler function, use the following routine in the 
+Callable Library (C API):</p>
+<pre class="pre codeblock"><code>   int CPXXsetuserfunction (CPXMESSAGEHANDLERptr handler,
+                            CPXUSERFUNCTION *function, void *handle)</code></pre>
+<p class="p">In other words, a typical implementation looks like this:</p>
+<pre class="pre codeblock"><code>   typedef struct { ... } USERHANDLE;
+   static int CPXPUBLIC userfunction (CPXENVptr env, int id, CPXLONG inlen,
+                            void const *indata, CPXLONG maxout,
+                            CPXLONG *outlen_p, void *outdata, void *handle)
+   {
+      USERHANDLE *h = handle;
+      ...
+   }
+   CPXEXPORT void CPXPUBLIC REGISTER_USERFUNCTION (CPXMESSAGEHANDLERptr handler) {
+      static USERHANDLE handle;
+      ...
+      CPXXsetuserfunction (handler, userfunction, &amp;handle);
+   }</code></pre>
+<p class="p">When such an implementation is compiled into <samp class="ph codeph">libuser.so</samp> (or, 
+equivalently, <samp class="ph codeph">user.dll</samp>), the compiled implementation can be loaded 
+by means of the following command-line argument:</p>
+<pre class="pre codeblock"><code>-userfunction=user=REGISTER_USERFUNCTION</code></pre>
+<p class="p">In order to invoke a user-defined function on the remote worker, the master
+invokes a function with the following signature in the Callable Library (C API):</p>
+<pre class="pre codeblock"><code>   int CPXXuserfunction (CPXENVptr env, int id, CPXLONG insize,
+                         void const *indata, CPXLONG outspace,
+                         CPXLONG *outsize_p, void *outdata)</code></pre>
+<p class="p">In the Concert C++ API, use the method <span class="keyword apiname">IloCplex::userfunction</span>.</p>
+<p class="p">In the Concert Java API, use the method <span class="keyword apiname">IloCplex.userfunction</span>.</p>
+<p class="p">That invocation triggers the following actions:</p>
+<ol class="ol"><li class="li">The items specified by the arguments 
+    <samp class="ph codeph">id</samp>, 
+    <samp class="ph codeph">inlen</samp>, 
+    <samp class="ph codeph">indata</samp>, and 
+    <samp class="ph codeph">outspace</samp> 
+    are passed or copied to the remote worker identified by the argument <samp class="ph codeph">env</samp>.</li>
+<li class="li">The remote worker tests whether a user message handler has been installed.
+   If no such handler has been installed, then the remote worker produces an error.
+   If a user message handler has been installed, then this handler is invoked with 
+   these arguments:
+   <ul class="ul"><li class="li"><samp class="ph codeph">env, id, insize, outspace</samp></li>
+<li class="li">valid <samp class="ph codeph">outlen_p</samp> and <samp class="ph codeph">outdata</samp>
+   (That is, the outdata buffer passed to the handler is at least <samp class="ph codeph">outspace</samp> bytes long.)
+   </li>
+<li class="li">the handle argument that was specified when the handler was registered</li>
+</ul>
+</li>
+<li class="li">If the user message handler returns successfully, then <samp class="ph codeph">outlen_p</samp> bytes 
+   are copied from <samp class="ph codeph">outdata</samp> to the master into the <samp class="ph codeph">outsize_p</samp> and 
+   <samp class="ph codeph">outdata</samp> output arguments of <span class="keyword apiname">CPXXuserfunction</span>.</li>
+<li class="li"><span class="keyword apiname">CPXXuserfunction</span> returns the value that was returned by the user 
+   message handler on the remote worker.</li>
+</ol>
+<p class="p">By means of these conventions, it is possible to extend the worker binary file  
+by almost any kind of function. For example, consider these possibilities:</p>
+<ul class="ul"><li class="li"><samp class="ph codeph">id</samp> can be used when you implement more than one user-defined function. The 
+    identifier then specifies what exactly to execute.</li>
+<li class="li"><samp class="ph codeph">insize</samp> and <samp class="ph codeph">indata</samp> 
+    are the serialized input arguments for the function specified by 
+    <samp class="ph codeph">id</samp>.</li>
+<li class="li"><samp class="ph codeph">outspace</samp> specifies the maximum size of the output arguments.</li>
+<li class="li"><samp class="ph codeph">outsize_p</samp> and <samp class="ph codeph">outdata</samp> are the 
+    serialized output arguments of the function specified by <samp class="ph codeph">id</samp>.</li>
+</ul>
+<p class="p">When you serialize input and output data in an application of the Callable Library (C API), 
+the structures  
+<samp class="ph codeph">CPXSERIALIZERptr</samp>  and 
+<samp class="ph codeph">CPXDESERIALIZERptr</samp> may be helpful. You can create those structures by means of 
+the routines <span class="keyword apiname">CPXXserializercreate</span> and <span class="keyword apiname">CPXXdeserializercreate</span>
+to serialize data independantly of machine specifics, such as byte order. See 
+the reference manual of the CPLEX Callable Library (C API) for documentation of these structures and routines for 
+more detail, and see also the topic 
+<a class="xref" href="07_serializer.html" title="Documents serialization to support the remote object.">Serializing for the remote object</a> in this manual.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" title="Introduces the remote object available in CPLEX for distributed parallel optimization.">Remote object for distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

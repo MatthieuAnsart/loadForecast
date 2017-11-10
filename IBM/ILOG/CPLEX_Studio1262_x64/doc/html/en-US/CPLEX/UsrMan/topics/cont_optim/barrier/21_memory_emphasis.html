@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Memory emphasis: letting the optimizer use disk for storage" />
+<meta name="abstract" content="Describes effect of the memory emphasis parameter on the performance of the barrier optimizer." />
+<meta name="Description" content="Describes effect of the memory emphasis parameter on the performance of the barrier optimizer." />
+<meta name="DC.subject" content="performance, barrier, memory management and, memory emphasis, emphasis, memory (barrier), MemoryEmphasis parameter, CPX_PARAM_MEMORYEMPHASIS, working memory, WorkMem parameter, CPX_PARAM_WORKMEM, working directory, WorkDir parameter, CPX_PARAM_WORKDIR" />
+<meta name="keywords" content="performance, barrier, memory management and, memory emphasis, emphasis, memory (barrier), MemoryEmphasis parameter, CPX_PARAM_MEMORYEMPHASIS, working memory, WorkMem parameter, CPX_PARAM_WORKMEM, working directory, WorkDir parameter, CPX_PARAM_WORKDIR" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/19_tuning_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveBarrier.672330" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/19_tuning_title_synopsis.html" />
+<title>Memory emphasis: letting the optimizer use disk for storage</title>
+</head>
+<body role="main" id="User_manual.uss_solveBarrier.672330">
+<h1 class="title topictitle1">Memory emphasis: letting the optimizer use disk for storage</h1>
+<div class="body"><p class="shortdesc">Describes effect of the memory emphasis parameter on
+the performance of the barrier optimizer.</p>
+<p class="p">At default settings, the CPLEX barrier optimizer will
+do all of its work in central memory (also variously referred to as
+RAM, core, or physical memory). For models too large to solve in the
+central memory on your computer, or in cases where you simply do not
+want to use this much memory, it is possible to instruct the barrier
+optimizer to use disk for part of the working storage it needs, specifically
+the Cholesky factorization. Since access to disk is slower than access
+to central memory, there may be some lost performance by this choice
+on models that could be solved entirely in central memory, but the
+out-of-core feature in the barrier optimizer is designed to make this
+trade-off as efficient as possible. It generally will be far more
+effective than relying on the virtual memory (that is, the swap space)
+of your operating system. </p>
+<p class="p">To activate the out-of-core feature, set the memory emphasis
+parameter (<a class="xref" href="../../../../Parameters/topics/MemoryEmphasis.html" title="Directs CPLEX that it should conserve memory where possible.">memory reduction switch</a>)
+to 1 (one) instead of its default value of 0 (zero). </p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">MemoryEmphasis</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">CPX_PARAM_MEMORYEMPHASIS</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">emphasis memory</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">This memory emphasis feature will also invoke other memory
+conservation tactics, such as compression of the data within presolve.</p>
+<p class="p">Memory emphasis uses some working memory in RAM to store
+the portion of the factor on which it is currently performing computation.
+You can improve performance by allocating more working memory by means
+of the working memory parameter (<a class="xref" href="../../../../Parameters/topics/WorkMem.html" title="Specifies an upper limit on the amount of central memory, in megabytes, that CPLEX is permitted to use for working memory.">memory available for working storage</a>). </p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">WorkMem</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">CPX_PARAM_WORKMEM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">workmem</samp> 
+in the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">More working memory allows the optimizer to transfer
+less data to and from disk. In fact, the Cholesky factor matrix will
+not be written to disk at all if its size does not exceed the value
+of the working memory parameter. The default for this parameter is
+128 megabytes. </p>
+<p class="p">When the barrier optimizer operates with memory emphasis,
+the location of disk storage is controlled by the working directory
+parameter (<a class="xref" href="../../../../Parameters/topics/WorkDir.html" title="Specifies the name of an existing directory into which CPLEX may store temporary working files.">directory for working files</a>).</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">WorkDir</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_WORKDIR</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">workdir</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">For example, to use the directory <samp class="ph codeph">/tmp/mywork</samp>,
+set the working directory parameter to the string<samp class="ph codeph"> /tmp/mywork</samp>.
+The value of the working directory parameter should be specified as
+the name of a directory that already exists, and CPLEX will create
+its working directory as a subdirectory there. At the end of barrier
+optimization, CPLEX will automatically delete any working directories
+it created, leaving the directory specified by the working directory
+parameter intact.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/19_tuning_title_synopsis.html" title="Describes facilities for tuning performance of the barrier optimizer.">Tuning barrier optimizer performance</a></div>
+</div>
+</div></body>
+</html>

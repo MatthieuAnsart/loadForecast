@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="State functions" />
+<meta name="abstract" content="Describes the state function." />
+<meta name="Description" content="Describes the state function." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_scheduling.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="CBkphI69" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_scheduling.html" />
+<title>State functions</title>
+</head>
+<body role="main" id="CBkphI69">
+<h1 class="title topictitle1">State functions</h1>
+<div class="body"><p class="shortdesc">Describes the state function.</p>
+<p class="p">Some scheduling problems involve reasoning with resources
+whose state may change over time. The state of the resource can change
+because of the scheduled activities or because of exogenous events;
+yet some activities in the schedule may need a particular condition
+on the resource state to be true in order to execute. For instance,
+the temperature of an oven may change due to an activity that sets
+the oven temperature to a value<em class="ph i"> v</em>, and a cooking activity may follow that requires the oven temperature
+to start at and maintain a temperature level <em class="ph i">v'</em> throughout its execution. Furthermore,
+the transition between two states is not always instantaneous and
+a transition time may be needed for the resource to switch from a
+state <em class="ph i">v</em> to a state <em class="ph i">v'</em>.</p>
+<p class="p">CP Optimizer introduces the notion of <em class="ph i">state</em> <em class="ph i">function</em> which is used to describe the evolution
+of a given feature of the environment. The possible evolution of this
+feature is constrained by interval variables of the problem. The main
+difference between state functions and cumulative functions is that
+interval variables have an incremental effect on cumul functions (increasing
+or decreasing the function value) whereas they have an absolute effect
+on state functions (requiring the function value to be equal to a
+particular state or in a set of possible states).</p>
+<p class="p">Informally speaking, a state function is a set of non-overlapping
+intervals over which the function maintains a particular non-negative
+integer state. In between those intervals, the state of the function
+is not defined, typically because of an ongoing transition between
+two states. For instance for an oven with three possible temperature
+levels identified by indexes 0, 1 and 2 we could have:</p>
+<ul class="ul"><li class="li"><p class="p"> [start=0, end=100): state=0,</p>
+</li>
+<li class="li"><p class="p"> [start=150, end=250): state=1,</p>
+</li>
+<li class="li"><p class="p"> [start=250, end=300): state=1,</p>
+</li>
+<li class="li"><p class="p"> [start=320, end=420): state=2,</p>
+</li>
+<li class="li"><p class="p"> [start=460, end=560): state=0, ...</p>
+</li>
+</ul>
+<p class="p">Constraints are available to restrict the evolution of
+a state function. These constraints allow you to specify:</p>
+<ul class="ul"><li class="li"><p class="p">That the state of the function must
+be defined and should remain equal to a given non-negative state everywhere
+over a given fixed or variable interval (<em class="ph i">alwaysEqual</em>).</p>
+</li>
+<li class="li"><p class="p"> That the state of the function must
+be defined and should remain constant (no matter its value) everywhere
+over a given fixed or variable interval (<em class="ph i">alwaysConstant</em>).</p>
+</li>
+<li class="li"><p class="p">That intervals requiring the state of
+the function to be defined cannot overlap a given fixed or variable
+interval (<em class="ph i">alwaysNoState</em>).</p>
+</li>
+<li class="li"><p class="p">That everywhere over a given fixed or
+variable interval, the state of the function, if defined, must remain
+within a given range of non-negative states [<em class="ph i">v</em><sub class="ph sub">min</sub>, <em class="ph i">v</em><sub class="ph sub">max</sub>] (<em class="ph i">alwaysIn</em>).</p>
+</li>
+</ul>
+<p class="p">Additionally, the two first constraints can be complemented
+to specify that the given fixed or variable interval should have its
+start and/or end point synchronized with the start and/or end point
+of the interval of the state function that maintains the required
+state. This is the notion of <em class="ph i">start</em> and <em class="ph i">end</em> <em class="ph i">alignment</em> which is particularly useful
+for modelling parallel batches. For instance in the oven example above,
+all interval variables that would require an oven temperature of level
+1 and specify a start and end alignment, if executed over the interval
+[150, 250) would have to start exactly at 150 and end at 250. This
+is depicted in the following figure where <em class="ph i">a</em><sub class="ph sub">1</sub> and <em class="ph i">a</em><sub class="ph sub">2</sub> are two start and end aligned interval variables, <em class="ph i">a</em><sub class="ph sub">3</sub> is start aligned only and <em class="ph i">a</em><sub class="ph sub">4</sub> is not aligned at all.</p>
+<div class="image"><img class="image" src="../images/state.jpg" alt="state" /></div><div class="section" id="CBkphI69__dhvwRy2N"><h2 class="title sectiontitle">State functions and transition distance</h2><p class="p">A state function <em class="ph i">f</em> is a decision variable whose value is a set of non-overlapping intervals,
+each interval [<em class="ph i">s</em><sub class="ph sub">i</sub>, <em class="ph i">e</em><sub class="ph sub">i</sub>) being
+associated a non-negative integer value <em class="ph i">v</em><sub class="ph sub">i</sub> that represents
+the state of the function over the interval.</p>
+<div class="image"><img class="image" src="../images/state_func1.jpg" alt="state_func1" /></div><p class="p">For instance, in the example of the oven introduced previously,
+we would have <img class="image" src="../images/f_underscore.jpg" alt="f_underscore" />(200) = 1, <em class="ph i">s</em>(<img class="image" src="../images/f_underscore.jpg" alt="f_underscore" />, 200) = 150 and <em class="ph i">e</em>(<em class="ph i">f</em>, 200) = 250.</p>
+<p class="p">A state function can be associated with a <em class="ph i">transition</em> <em class="ph i">distance</em>. The transition distance
+defines the minimal distance that must separate two consecutive states
+in the state function. More formally, if <em class="ph i">M</em>[<em class="ph i">v</em>, <em class="ph i">v'</em>] represents
+a transition distance matrix between state <em class="ph i">v</em> and state <em class="ph i">v'</em>, the transition distance means
+that:</p>
+<div class="image"><img class="image" src="../images/state_func2.jpg" alt="state_func2" /></div><p class="p">The transition distance matrix <em class="ph i">M</em> must satisfy the triangular inequality.
+For instance, in the example of the oven, the state function depicted
+in the previous figure is consistent with the following transition
+distance:</p>
+<div class="image"><img class="image" src="../images/state_func3.jpg" alt="state_func3" /></div></div>
+<div class="section" id="CBkphI69__iRyUqe8o"><h2 class="title sectiontitle">Constraints on state functions</h2><p class="p">If <em class="ph i">f</em> is a state function, <em class="ph i">a</em> an interval variable, <em class="ph i">v</em>, <em class="ph i">v</em><sub class="ph sub">min</sub>, <em class="ph i">v</em><sub class="ph sub">max</sub> non-negative integers and <em class="ph i">algn</em><sub class="ph sub">s</sub>, <em class="ph i">algn</em><sub class="ph sub">e</sub> two boolean values:</p>
+<ul class="ul"><li class="li"><p class="p"> The constraint <em class="ph i">alwaysEqual</em>(<em class="ph i">f</em>, <em class="ph i">a</em>, <em class="ph i">v</em>, <em class="ph i">algn</em><sub class="ph sub">s</sub>, <em class="ph i">algn</em><sub class="ph sub">e</sub>) specifies that whenever <em class="ph i">a</em> is present, state function<em class="ph i"> f </em>must be defined everywhere between
+the start and the end of interval <em class="ph i">a</em> and be constant and equal to non-negative value <em class="ph i">v</em> over this interval. If <em class="ph i">algn</em><sub class="ph sub">s</sub> is true, it means that interval a is start-aligned with <em class="ph i">f</em>: Interval <em class="ph i">a</em> must start at the beginning of
+the interval where <em class="ph i">f</em> is maintained in state <em class="ph i">s</em>. If <em class="ph i">algn</em><sub class="ph sub">e</sub> is true, it means that interval <em class="ph i">a</em> is end-aligned with <em class="ph i">f</em>: Interval <em class="ph i">a</em> must end at the end of the interval
+where <em class="ph i">f</em> is maintained
+in state <em class="ph i">s</em>. More
+formally:</p>
+
+<div class="image"><img class="image" src="../images/state_func4.jpg" alt="state_func4" /></div></li>
+<li class="li"><p class="p"> The constraint <em class="ph i">alwaysConstant</em>(<em class="ph i">f,</em> <em class="ph i">a</em>, <em class="ph i">algn</em><sub class="ph sub">s</sub>, <em class="ph i">algn</em><sub class="ph sub">e</sub>) specifies
+that whenever <em class="ph i">a</em> is
+present, state function <em class="ph i">f</em> must be defined everywhere between the start and the end of interval <em class="ph i">a</em> and be constant over this interval.
+More formally: <img class="image" src="../images/state_func6.jpg" alt="state_func6" /></p>
+</li>
+<li class="li"><p class="p"> The constraint <em class="ph i">alwaysNoState</em>(<em class="ph i">f</em>, <em class="ph i">a</em>) specifies that whenever <em class="ph i">a</em> is present, state function <em class="ph i">f</em> cannot provide any valid state
+between the start and the end of interval <em class="ph i">a</em>. As a consequence, any interval constrained with <em class="ph i">alwaysEqual</em> or <em class="ph i">alwaysConstant</em> on this function and
+thus requiring the function to be defined cannot overlap interval <em class="ph i">a</em>. Formally: <img class="image" src="../images/state_func7.jpg" alt="state_func7" /></p>
+</li>
+<li class="li"><p class="p"> The constraint <em class="ph i">alwaysIn</em>(<em class="ph i">f</em>, <em class="ph i">a</em>, <em class="ph i">v</em><sub class="ph sub">min</sub>, <em class="ph i">v</em><sub class="ph sub">max</sub>) specifies that whenever <em class="ph i">a</em> is present, everywhere between
+the start and the end of interval <em class="ph i">a</em> the state of function <em class="ph i">f</em>, if defined, must belong to the
+range [<em class="ph i">v</em><sub class="ph sub">min</sub>, <em class="ph i">v</em><sub class="ph sub">max</sub>] where 0 ≤ V<sub class="ph sub">min</sub> ≤ V<sub class="ph sub">max</sub>. Formally:<img class="image" src="../images/state_func5.jpg" alt="state_func5" /></p>
+</li>
+</ul>
+</div>
+<div class="section" id="CBkphI69__SEP8BeEZ"><h2 class="title sectiontitle">Syntax and examples</h2><p class="p">For the syntax and examples of use of a state function
+see <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_stateFunc.html" title="OPL keyword (CP, scheduling) to create a state function.">stateFunction</a>. </p>
+<p class="p">The results of a solved scheduling model can be viewed
+in the CPLEX Studio IDE. An example of results containing a state
+function is provided in <a class="xref" href="../../scheduling_gs/topics/opl_gs_sched_state_incompatibilities.html#section1268063248943">Viewing the results of state functions in a Gantt chart</a>.</p>
+<p class="p">Another example featuring a transition and the <em class="ph i">alwaysEqual</em> constraint is shown below.</p>
+<p class="p">The following list includes the constraints available
+on a state function. A full description and example for each syntax
+is available in the <em class="ph i">OPL Language Quick
+Reference</em>.</p>
+<ul class="ul"><li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysEqual.html" title="OPL constraint (scheduling) used on a state function">alwaysEqual</a><samp class="ph codeph">(f,s,e,v[,aligns,aligne]);</samp></p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysEqual.html" title="OPL constraint (scheduling) used on a state function">alwaysEqual</a><samp class="ph codeph">(f,a,v[,aligns,aligne])</samp>;</p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysConstant.html" title="OPL constraint (scheduling) used on a state function">alwaysConstant</a><samp class="ph codeph">(f,s,e,[,aligns,aligne]);</samp></p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysConstant.html" title="OPL constraint (scheduling) used on a state function">alwaysConstant</a><samp class="ph codeph">(f,a,[,aligns,aligne])</samp>;</p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysNoState.html" title="OPL constraint (scheduling) used on a state function">alwaysNoState</a><samp class="ph codeph">(f,s,e);</samp></p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysNoState.html" title="OPL constraint (scheduling) used on a state function">alwaysNoState</a><samp class="ph codeph">(f,a);</samp></p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysIn.html" title="OPL constraint (scheduling) used on a cumulative function or a state function">alwaysIn</a><samp class="ph codeph">(f,u,v,hmin,hmax);</samp></p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysIn.html" title="OPL constraint (scheduling) used on a cumulative function or a state function">alwaysIn</a><samp class="ph codeph">(f,a,hmin,hmax);</samp></p>
+</li>
+</ul>
+<p class="p">Note that these constraints cannot be used in meta-constraints.</p>
+<p class="p"><strong class="ph b">Example with</strong> <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_stateFunc.html" title="OPL keyword (CP, scheduling) to create a state function.">stateFunction</a><strong class="ph b">, transition,
+and </strong><a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_alwaysEqual.html" title="OPL constraint (scheduling) used on a state function">alwaysEqual</a><strong class="ph b">.</strong></p>
+<p class="p">A machine can be equipped with a tool among a set of <em class="ph i">n</em> possible tools. Each operation <em class="ph i">o</em> executed on the machine needs a
+specific tool <em class="ph i">RequiredTool</em>[<em class="ph i">o</em>]. The machine
+can process several operation simultaneously provided these operations
+are compatible with the tool currently installed on the machine. Changing
+the tool installed on the machine needs some constant set-up time
+which is supposed to be independent from the tools.</p>
+<pre class="pre codeblock"><code>int nbTools = ...;
+int nbOps = ...;
+int setupTime = ...;
+range Tools = 1..nbTools;
+range Operations = 1..nbOps;
+int Duration [Operations] = ...;
+int RequiredTool [Operations] = ...;
+
+dvar interval op[o in Operations] size Duration[o];
+
+tuple triplet { int tl1; int tl2; int value; };
+{ triplet } Transition = { &lt;tl1,tl2,setupTIme&gt; } tl1, tl2 in Tools };
+stateFunction machineTool with Transition;
+
+constraints {
+  forall(o in Operations) {
+     alwaysEqual(machineTool, op[o], RequiredTool[o]);
+  }
+}
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_scheduling.html" title="Describes how to model scheduling problems in OPL.">Scheduling</a></div>
+</div>
+</div></body>
+</html>

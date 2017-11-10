@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Linear programming: a product mix problem" />
+<meta name="abstract" content="Describes the problem and presents the model and data files." />
+<meta name="Description" content="Describes the problem and presents the model and data files." />
+<meta name="DC.subject" content="linear programming, product mix problem, product mix problem, models, product mix, code samples, product.dat, code samples, product.mod" />
+<meta name="keywords" content="linear programming, product mix problem, product mix problem, models, product mix, code samples, product.dat, code samples, product.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_exs.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_examples.1040875" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_exs.html" />
+<title>Linear programming: a product mix problem</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_examples.1040875">
+<h1 class="title topictitle1">Linear programming: a product mix problem</h1>
+<div class="body"><p class="shortdesc">Describes the problem and presents the model and
+data files.</p>
+<p class="p">As a first example, let’s consider a simple mathematical
+programming (MP) problem to determine an optimal production mix. </p>
+<p class="p">To meet the demands of its customers, a company manufactures
+its products in its own factories (<em class="ph i">inside</em> production)
+or buys them from other companies (<em class="ph i">outside</em> production).
+Inside production is subject to some resource constraints: each product
+consumes a certain amount of each resource. In contrast, outside production
+is theoretically unlimited. The problem is to determine how much of
+each product should be produced inside the company and how much outside,
+while minimizing the overall production cost, meeting the demand,
+and not exceeding the resource constraints.</p>
+<p class="p">The statement of the problem must specify the set of products
+and the set of resources. For each product, we need to know the inside
+and outside production costs, and for each resource we need to know
+the available capacity of that resource. Finally, we need to know
+the consumption of resources by the different products.</p>
+<p class="p">This is a general outline of an optimization problem.
+The <span class="ph filepath">production</span> example illustrates a
+specific pasta manufacturing problem. The project contains a model, <span class="ph filepath">product.mod</span>, shown in the example below,
+which states the problem to be solved. The data to be used by the
+model is also shown below, in the file<span class="ph filepath">product.dat</span>.</p>
+<div class="example" id="usropllangtut.uss_langtut_examples.1040875__usropllangtut.uss_langtut_examples.1040912"><h2 class="title sectiontitle">A pasta manufacturing problem (<samp class="ph codeph">product.mod</samp>) </h2><pre class="pre codeblock"><code>{string} Products = ...;
+{string} Resources = ...;
+tuple productData {
+   float demand;
+   float insideCost;
+   float outsideCost;
+   float consumption[Resources];
+}
+productData Product[Products] = ...;
+float Capacity[Resources] = ...;
+
+dvar float+ Inside[Products];
+dvar float+ Outside[Products];
+
+execute CPX_PARAM {
+  cplex.preind = 0;   
+  cplex.simdisplay = 2;   
+}
+
+
+minimize
+  sum( p in Products ) 
+    (Product[p].insideCost * Inside[p] + 
+    Product[p].outsideCost * Outside[p] );
+subject to {
+  forall( r in Resources )
+    ctInside: 
+      sum( p in Products ) 
+        Product[p].consumption[r] * Inside[p] &lt;= Capacity[r];
+  forall( p in Products )
+    ctDemand: 
+      Inside[p] + Outside[p] &gt;= Product[p].demand;
+}</code></pre>
+</div>
+<div class="example" id="usropllangtut.uss_langtut_examples.1040875__usropllangtut.uss_langtut_examples.1041637"><h2 class="title sectiontitle">Data for the pasta manufacturing problem (<samp class="ph codeph">product.dat</samp>) </h2><pre class="pre codeblock"><code>Products =  { "kluski", "capellini", "fettucine" };
+Resources = { "flour", "eggs" };
+Product = #[
+      kluski : &lt; 100, 0.6, 0.8, [ 0.5, 0.2 ] &gt;,
+      capellini : &lt; 200, 0.8, 0.9, [ 0.4, 0.4 ] &gt;,
+      fettucine : &lt; 300, 0.3, 0.4, [ 0.3, 0.6 ] &gt;
+          ]#;
+Capacity = [ 20, 40 ];</code></pre>
+</div>
+<p class="p">In the model, the instruction </p>
+<pre class="pre codeblock"><code>tuple productData {
+   float demand;
+   float insideCost;
+   float outsideCost;
+   float consumption[Resources];
+}</code></pre>
+<p class="p">declares a tuple type with four fields. The first three
+fields, of type <samp class="ph codeph">float</samp>, are used to represent
+the demand and costs of a product; the last field is an array representing
+the resource consumptions of the product. These fields are intended
+to hold all the data related to a given product. </p>
+<p class="p">The instruction </p>
+<pre class="pre codeblock"><code>ProductData product[Products] = ...; </code></pre>
+<p class="p">declares an array of these tuples, one for each product. </p>
+<p class="p">The model also contains two arrays of decision variables
+to represent the inside and outside production, respectively. There
+is an objective function to minimize the total production cost, and
+there are two types of constraints: a set of constraints to avoid
+exceeding the capacity limitation, and another set of constraints
+to satisfy the demand requirements. </p>
+<p class="p">Initialization of the data given in <samp class="ph codeph">product.dat</samp> for
+one instance of this problem specifies these various data items: to
+initialize the tuples, values are given for each of their fields.</p>
+<pre class="pre codeblock"><code>Product = #[
+      kluski : &lt; 100, 0.6, 0.8, [ 0.5, 0.2 ] &gt;,
+      capellini : &lt; 200, 0.8, 0.9, [ 0.4, 0.4 ] &gt;,
+      fettucine : &lt; 300, 0.3, 0.4, [ 0.3, 0.6 ] &gt;
+           ]#;</code></pre>
+<p class="p">In the data file we use a set of strings called <samp class="ph codeph">Products</samp> to represent the varieties of pasta and
+another set of strings called <samp class="ph codeph">Resources</samp> to
+represent the raw ingredients of flour and eggs.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_exs.html" title="Demonstrates how OPL is used in linear programming (product mix problem) and integer programming (warehouse location problem).">Some examples</a></div>
+</div>
+</div></body>
+</html>

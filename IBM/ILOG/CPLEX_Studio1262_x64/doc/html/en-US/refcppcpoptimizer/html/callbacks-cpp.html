@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Callbacks in Concert Technology</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="callbacks-cpp.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="13"><div
+                class="section-title1">Callbacks in Concert Technology</div>
+</a><div
+                    align="right"><a href="branch.html">PREVIOUS</a> <a
+                href="choice.html">NEXT</a></div><table class="summary"
+                border="1" cellpadding="3" cellspacing="0"
+                width="100%" /><div
+                    class="section-body"><p>
+A callback is an object 
+with a <code>main</code> method implemented by a user.
+This user-written <code>main</code> method is called by the
+<code>IloCplex</code> algorithm at specific points during 
+optimization. 
+</p><p>
+Callbacks may be called repeatedly at various points during optimization; 
+for each place a callback is called, CPLEX provides a separate callback 
+class (derived from the class <code>IloCplex::CallbackI</code>). 
+Such a callback class provides the specific API as a protected method 
+to use for the particular implementation.
+</p><p>
+There are two varieties of callbacks:
+</p><ul>
+<li>
+Query callbacks enable your application to retrieve information 
+about the current solution in an instance of <code>IloCplex</code>. 
+The information available depends on the algorithm 
+(primal simplex, dual simplex, barrier, mixed integer, or network) 
+that you are using. For example, a query callback can return the 
+current objective value, the number of simplex iterations that have 
+been completed, and other details. Query callbacks can also be called 
+from presolve, probing, fractional cuts, and disjunctive cuts.
+</li><li>
+Control callbacks enable you to direct the search when you are 
+solving a MIP in an instance of <code>IloCplex</code>. For example, 
+control callbacks enable you to select the next node to process 
+or to control the creation of subnodes (among other possibilities).
+Control callbacks are an advanced feature of CPLEX, and as such,
+they require a greater degree of familiarity with CPLEX algorithms.
+</li>
+</ul><p>
+You do not create instances of the class <code>IloCplex::CallbackI</code>; 
+rather, you use one of its child classes to implement your own callback. 
+In order to implement your user-written callbacks with an instance of 
+<code>IloCplex</code>, you should follow these steps:
+</p><ol>
+<li>
+Determine which kind of callback you want to write, 
+and choose the appropriate class for it. The class hierarchy 
+in Tree may give you some ideas here.
+</li><li>
+Derive your own subclass, <code>MyCallbackI</code>, say, 
+from the appropriate predefined callback class.
+</li><li>
+In your subclass of the callback class, use the protected API 
+defined in the base class to implement the <code>main</code> 
+routine of your user-written callback. (All constructors of 
+predefined callback classes are protected; they can be called 
+only from user-written derived subclasses.)
+</li><li>
+In your subclass, implement the method <code>duplicateCallback</code>.
+</li><li>
+Write a function <code>myCallback</code>, say, 
+that creates an instance of your implementation class in the 
+Concert Technology environment and returns it as an 
+<code>IloCplex::Callback</code> handle.
+</li><li>
+Create an instance of your callback class and pass it to 
+the member function <code>IloCplex::use</code>.
+</li>
+</ol><p>
+There are macros of the form <code>ILOXXXCALLBACKn</code> (for n from 0 to 7)
+available to facilitate steps 2 through 5, where <code>XXX</code>
+stands for the particular callback under construction and n stands for 
+the number of arguments that the function written in step 5 is to receive
+in addition to the environment argument.
+</p><p>
+You can use one instance of a callback with only one instance of 
+<code>IloCplex</code>. When you use a callback with a second 
+instance of <code>IloCplex</code>, a copy will be automatically 
+created using the method <code>duplicateCallback</code>, 
+and that copy will be used instead.
+</p><p>
+Also, an instance of <code>IloCplex</code> takes account of 
+only one instance of a particular callback at any given time. 
+That is, if you call <code>IloCplex::use</code> more than once 
+with the same class of callback, the last call overrides any previous one. 
+For example, you can use only one primal simplex callback at a
+time, or you can use only one network callback at a time; and so forth.
+</p><p>
+Existing extractables should never be modified within a callback. 
+Temporary extractables, such as arrays, expressions, and range constraints, 
+can be created and modified. Temporary extractables are often useful, 
+for example, for computing cuts.
+</p><p><strong>
+Compound Termination Criteria in Callbacks
+</strong></p><p>
+Here is an example showing you how to terminate optimization
+after a given period of time if the solution is good enough.
+It uses one of the predefined macros to facilitate writing
+a control callback with a timer, a time limit, and a way
+to recognize a good enough solution.
+</p><pre
+                class="sample">
+ILOMIPCALLBACK3(MyCallback, IloTimer, myTimer,
+                            IloNum, timeLimit,
+                            IloNum, acceptableGap) {
+  if ( hasIncumbent()  ) {
+     IloNum objval = getIncumbentObjValue();
+     IloNum bound  = getBestObjValue();
+     IloNum gap = fabs(objval - bound) / (1.0 + fabs(bound));
+     if ( myTimer.getTime() &gt; timeLimit    &amp;&amp;
+                        gap &lt; acceptableGap  ) {
+        cout &lt;&lt; &quot;Good enough solution at = &quot;
+             &lt;&lt; myTimer.getTime() &lt;&lt; &quot; sec., gap = &quot;
+             &lt;&lt; gap * 100.00 &lt;&lt; &quot;, quitting&quot; &lt;&lt; endl;
+        abort();
+     }
+  }
+</pre></div><div
+                    align="right"><a href="branch.html">PREVIOUS</a> <a href="choice.html">NEXT</a></div></div></body>
+</html>

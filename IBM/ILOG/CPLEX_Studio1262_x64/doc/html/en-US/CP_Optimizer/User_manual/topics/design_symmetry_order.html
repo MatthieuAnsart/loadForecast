@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Introduce order among variables" />
+<meta name="abstract" content="One method for removing symmetries is to introduce order among variables." />
+<meta name="Description" content="One method for removing symmetries is to introduce order among variables." />
+<meta name="DC.subject" content="decision variable, introducing order" />
+<meta name="keywords" content="decision variable, introducing order" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/design_symmetry.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerdesign.1010897" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/design_symmetry.html" />
+<title>Introduce order among variables</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerdesign.1010897">
+<h1 class="title topictitle1">Introduce order among variables</h1>
+<div class="body"><p class="shortdesc">One method for removing symmetries is to introduce order
+among variables.</p>
+<p class="p">In some cases, there is really no point in examining
+all the possible solutions for variables and their values.</p>
+<p class="p"> This is the case when two or more constrained variables
+satisfy the following conditions: </p>
+<ul class="ul"><li class="li"><p class="p">the initial domains of these constrained
+variables are identical; </p>
+</li>
+<li class="li"><p class="p">these variables are subject to the same
+constraints; </p>
+</li>
+<li class="li"><p class="p">the variables can be permuted without
+changing the statement of the problem. </p>
+</li>
+</ul>
+<p class="p">In fact, the permutations give rise to sets of solutions
+that are identical as far as the physical reality of the problem is
+concerned. This idea can be exploited to minimize the size of the
+search space.</p>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1010897__migration.uss_usrcpoptimizerdesign.1010030"><h2 class="title sectiontitle">Principle</h2><p class="p">If these domains are reduced by introducing a supplementary
+constraint, such as order, or by imposing a special feature on each
+of these variables, the size of the search space can be markedly reduced. </p>
+</div>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1010897__migration.uss_usrcpoptimizerdesign.1010033"><h2 class="title sectiontitle">Example</h2><p class="p">Assume, for example, that there is the following system
+of equations:</p>
+<p class="p"><em class="ph i">x</em><sub class="ph sub">1</sub><em class="ph i"> + x</em><sub class="ph sub">2</sub><em class="ph i"> + x</em><sub class="ph sub">3</sub><em class="ph i"> = 9</em></p>
+<p class="p"><em class="ph i">x</em><sub class="ph sub">1</sub><em class="ph i"> × x</em><sub class="ph sub">2</sub><em class="ph i"> × x</em><sub class="ph sub">3</sub><em class="ph i"> = 12</em></p>
+<p class="p">For the ordered triple (<em class="ph i">x</em><sub class="ph sub">1</sub>,<em class="ph i"> x</em><sub class="ph sub">2</sub>,<em class="ph i"> x</em><sub class="ph sub">3</sub>),
+there are six solutions: </p>
+<p class="p"><em class="ph i">(1, 2, 6) (1, 6, 2) (2,
+1, 6) (2, 6, 1) (6, 1, 2) (6, 2, 1)</em> </p>
+<p class="p">If the variables are permuted, the problem is not changed.
+For instance, if <em class="ph i">x</em><sub class="ph sub">1</sub><em class="ph i"> </em>and <em class="ph i">x</em><sub class="ph sub">2</sub>are
+swapped, the problem becomes:</p>
+<p class="p"><em class="ph i">x</em><sub class="ph sub">2</sub><em class="ph i"> + x</em><sub class="ph sub">1</sub><em class="ph i"> + x</em><sub class="ph sub">3</sub><em class="ph i"> = 9</em></p>
+<p class="p"><em class="ph i">x</em><sub class="ph sub">2</sub><em class="ph i"> × x</em><sub class="ph sub">1</sub><em class="ph i"> × x</em><sub class="ph sub">3</sub><em class="ph i"> = 12</em></p>
+<p class="p">That problem is obviously the same as the first one.
+In this case, it is a good idea to introduce a supplementary constraint
+to enforce order among the variables. This order can be introduced
+in this manner: </p>
+<p class="p"><em class="ph i">x1  &lt;= x2 &lt;= x3</em></p>
+<p class="p">The additional constraint on the order among the variables
+greatly reduces the combinatorial possibilities <em class="ph i">without removing any real solutions</em>. </p>
+<p class="p">In fact, only one solution can be returned under these
+conditions:</p>
+<p class="p">(<em class="ph i">x</em><sub class="ph sub">1</sub><em class="ph i">, x</em><sub class="ph sub">2</sub><em class="ph i">, x</em><sub class="ph sub">3</sub><em class="ph i"> </em>) = (1, 2, 6)</p>
+<p class="p">While removing possibilities wherever possible is a good
+idea, you should guard against adding a supplementary constraint that
+inadvertently suppresses solutions that you would like to see. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/design_symmetry.html" title="Removing symmetries is one model design principle to consider. There are multiple ways in which to remove symmetries.">Remove symmetries</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><title>operator new</title>
+<link
+            type="text/css" rel="stylesheet"
+            href="../cppdoc.css" />
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../functions/operatornew.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+                name="ibm-content"></a><h3><a
+            name="method_operator_new">operator new</a></h3><div
+                class="prototype">public void * <span
+                class="function-name">operator new</span>(size_t <span
+                class="parameter-name">s</span>, IlcAllocationStack * <span
+            class="parameter-name">heap</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+            class="include-file">&lt;ilcp/cpext.h&gt;</span></div>
+Overloaded C++ operator.
+      <div
+                        class="description"><p>CP Optimizer provides an overloaded <code>new</code> operator. This
+ operator is overloaded to allocate data on the heap associated with the invoking
+ optimizer (an instance of <code><a
+                            href="../classes/IloCP.html">IloCP</a></code>). The memory
+ used by objects allocated with this operator is automatically reclaimed in
+ these situations: </p><ul>
+<li>whenever CP Optimizer backtracks to a choice point set previously; </li><li>when a model (an instance of <code>
+ IloModel</code>) or other extractable objects (instances of <code>
+ IloExtractable</code> or its subclasses) is re-extracted for an optimizer (an instance of <code><a
+                href="../classes/IloCP.html">IloCP</a></code>);</li><li>when the member function <code>
+ end</code> is called for the invoking optimizer.</li>
+</ul><p>As a developer, you must <em>not</em> delete objects allocated with this
+ operator because of this automatic freeing of memory. </p><p>In other words, the <code>delete</code> operator must <em>not</em> be used for
+ objects allocated on the heap associated with a optimizer.</p><p>The use of this overloaded <code>new</code> operator is <em>not</em> obligatory.
+ In fact, the use of the CP Optimizer heap is not mandatory. You determine whether CP Optimizer
+ uses the overloaded <code>new</code> operator or the conventional C++ <code>new</code>
+ operator when you define the ILC_NO_MEMORY_MANAGER environment variable. In particular, you can
+ allocate instances of CP Optimizer classes using the standard <code>new</code> operator or even
+ a special purpose allocator. However, some CP Optimizer objects contain other objects. For example,
+ CP Optimizer variables contain other objects (finite sets) that represent their domains. These
+ subobjects are allocated onto the optimizer allocation heap. Likewise, constraints are allocated
+ onto the optimizer allocation heap. Thus, they must not be deleted. CP Optimizer manages the corresponding
+ memory transparently.</p><p>To allocate an array of <code>size</code> objects of type <code>T</code> on the optimizer
+ allocation heap, you simply write this:</p><pre
+                class="sample">
+ T* array = new (s.getHeap()) T [size];</pre><p>When you do not want to use the optimizer allocation heap, you write this:</p><pre
+                class="sample">
+ T* array = new T [size];</pre><p>When you allocate an array in the way we recommend, it will automatically be de-allocated
+ in either of two situations: if backtracking occurs to a choice point set before this allocation;
+ if the member function <code>end</code> is called for the invoking optimizer.</p></div><hr /><h3><a
+            name="method_operator_new">operator new</a></h3><div
+                class="prototype">public void * <span
+                class="function-name">operator new</span>(size_t <span
+                class="parameter-name">sz</span>, const <a
+                href="../classes/IloEnv.html">IloEnv</a> &amp; <span
+            class="parameter-name">env</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilconcert/iloenv.h</span></div>
+Overloaded C++ <code>new</code> operator.
+      <div
+                        class="description"><p>IBM ILOG Concert Technology offers this overloaded C++ <code>new</code>
+ operator.  This operator is overloaded to allocate data on internal data
+ structures associated with an invoking environment (an instance of <code><a
+                        href="../classes/IloEnv.html">IloEnv</a></code>). The memory used by objects allocated with
+ this overloaded operator is automatically reclaimed when you call the member
+ function <code><a href="../classes/IloEnv.html#method_end">IloEnv::end</a></code>. As a developer, you
+ must <em>not</em> delete objects allocated with this operator because of
+ this automatic freeing of memory.</p><p>In other words, you must <em>not</em> use the <code>delete</code>
+ operator for objects allocated with this overloaded <code>new</code>
+ operator.</p><p>The use of this overloaded <code>new</code> operator is not obligatory in
+ Concert Technology applications. You will see examples of its use in the
+ user's manuals that accompany the IBM ILOG optimization products. </p></div><hr /></body>
+</html>

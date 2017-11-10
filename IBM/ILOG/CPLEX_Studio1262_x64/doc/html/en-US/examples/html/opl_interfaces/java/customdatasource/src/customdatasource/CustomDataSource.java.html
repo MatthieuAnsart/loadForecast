@@ -1,0 +1,196 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*/</font></b>
+010: 
+011: <b><font color="#007D00">//-------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">//Java version of customdatasource.cpp of OPL distrib</font></b>
+013: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+014: package customdatasource;
+015: 
+016: import ilog.concert.*;
+017: import ilog.cplex.*;
+018: import ilog.opl.*;
+019: 
+020: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> CustomDataSource
+021: {
+022:   <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> String DATADIR = <b><font color="#8A2BE2">"."</font></b>;
+023: 
+024:   <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">class</font></b> MyCustomDataSource <b><font color="EA7D00">extends</font></b> IloCustomOplDataSource
+025:   {
+026:     MyCustomDataSource(IloOplFactory oplF)
+027:     {
+028:       <b><font color="EA7D00">super</font></b>(oplF);
+029:     }
+030: 
+031:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> customRead()
+032:     {
+033:       IloOplDataHandler handler = getDataHandler();
+034:       <b><font color="#007D00">// initialize the int 'simpleInt'</font></b>
+035:       handler.startElement(<b><font color="#8A2BE2">"anInt"</font></b>);
+036:       handler.addIntItem(3);
+037:       handler.endElement();
+038: 
+039:       <b><font color="#007D00">// initialize the int array 'simpleIntArray'</font></b>
+040:       handler.startElement(<b><font color="#8A2BE2">"anIntArray"</font></b>);
+041:       handler.startArray();
+042:       handler.addIntItem(1);
+043:       handler.addIntItem(2);
+044:       handler.addIntItem(3);
+045:       handler.endArray();
+046:       handler.endElement();
+047: 
+048:       <b><font color="#007D00">// initialize int array indexed by float 'anArrayIndexedByFloat'</font></b>
+049:       handler.startElement(<b><font color="#8A2BE2">"anArrayIndexedByFloat"</font></b>);
+050:       handler.startIndexedArray();
+051:       handler.setItemNumIndex(2.0);
+052:       handler.addIntItem(1);
+053:       handler.setItemNumIndex(2.5);
+054:       handler.addIntItem(2);
+055:       handler.setItemNumIndex(1.0);
+056:       handler.addIntItem(3);
+057:       handler.setItemNumIndex(1.5);
+058:       handler.addIntItem(4);
+059:       handler.endIndexedArray();
+060:       handler.endElement();
+061: 
+062:       <b><font color="#007D00">// initialize int array indexed by string 'anArrayIndexedByString'</font></b>
+063:       handler.startElement(<b><font color="#8A2BE2">"anArrayIndexedByString"</font></b>);
+064:       handler.startIndexedArray();
+065:       handler.setItemStringIndex(<b><font color="#8A2BE2">"idx1"</font></b>);
+066:       handler.addIntItem(1);
+067:       handler.setItemStringIndex(<b><font color="#8A2BE2">"idx2"</font></b>);
+068:       handler.addIntItem(2);
+069:       handler.endIndexedArray();
+070:       handler.endElement();
+071: 
+072:       <b><font color="#007D00">// initialize a tuple in the order the components are declared</font></b>
+073:       handler.startElement(<b><font color="#8A2BE2">"aTuple"</font></b>);
+074:       handler.startTuple();
+075:       handler.addIntItem(1);
+076:       handler.addNumItem(2.3);
+077:       handler.addStringItem(<b><font color="#8A2BE2">"not named tuple"</font></b>);
+078:       handler.endTuple();
+079:       handler.endElement();
+080: 
+081:       <b><font color="#007D00">// initialize a tuple using tuple component names.</font></b>
+082:       handler.startElement(<b><font color="#8A2BE2">"aNamedTuple"</font></b>);
+083:       handler.startNamedTuple();
+084:       handler.setItemName(<b><font color="#8A2BE2">"f"</font></b>);
+085:       handler.addNumItem(3.45);
+086:       handler.setItemName(<b><font color="#8A2BE2">"s"</font></b>);
+087:       handler.addStringItem(<b><font color="#8A2BE2">"named tuple"</font></b>);
+088:       handler.setItemName(<b><font color="#8A2BE2">"i"</font></b>);
+089:       handler.addIntItem(99);
+090:       handler.endNamedTuple();
+091:       handler.endElement();
+092: 
+093:       <b><font color="#007D00">// initialize the tuple set 'simpleTupleSet'</font></b>
+094:       handler.startElement(<b><font color="#8A2BE2">"aTupleSet"</font></b>);
+095:       handler.startSet();
+096:       <b><font color="#007D00">// first tuple</font></b>
+097:       handler.startTuple();
+098:       handler.addIntItem(1);
+099:       handler.addNumItem(2.5);
+100:       handler.addStringItem(<b><font color="#8A2BE2">"a"</font></b>);
+101:       handler.endTuple();
+102:       <b><font color="#007D00">// second element</font></b>
+103:       handler.startTuple();
+104:       handler.addIntItem(3);
+105:       handler.addNumItem(4.1);
+106:       handler.addStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+107:       handler.endTuple();
+108:       handler.endSet();
+109:       handler.endElement();
+110: 
+111:       <b><font color="#007D00">// initialize element 3 and 2 of the tuple array 'simpleTupleArray' in that particular order</font></b>
+112:       handler.startElement(<b><font color="#8A2BE2">"aTupleArray"</font></b>);
+113:       handler.startIndexedArray();
+114:       <b><font color="#007D00">// initialize 3rd cell</font></b>
+115:       handler.setItemIntIndex(3);
+116:       handler.startTuple();
+117:       handler.addIntItem(1);
+118:       handler.addNumItem(2.5);
+119:       handler.addStringItem(<b><font color="#8A2BE2">"a"</font></b>);
+120:       handler.endTuple();
+121:       <b><font color="#007D00">// initialize second cell</font></b>
+122:       handler.setItemIntIndex(2);
+123:       handler.startTuple();
+124:       handler.addIntItem(3);
+125:       handler.addNumItem(4.1);
+126:       handler.addStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+127:       handler.endTuple();
+128:       handler.endIndexedArray();
+129:       handler.endElement();
+130: 
+131:       <b><font color="#007D00">// initialize int array indexed by tuple set 'anArrayIndexedByTuple'</font></b>
+132:       handler.startElement(<b><font color="#8A2BE2">"anArrayIndexedByTuple"</font></b>);
+133:       handler.startIndexedArray();
+134:       handler.startItemTupleIndex();
+135:       handler.addIntItem(3);
+136:       handler.addNumItem(4.1);
+137:       handler.addStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+138:       handler.endItemTupleIndex();
+139:       handler.addIntItem(1);
+140:       handler.endIndexedArray();
+141:       handler.endElement();
+142: 
+143:       <b><font color="#007D00">// initialize a 2-dimension int array 'a2DIntArray'</font></b>
+144:       handler.startElement(<b><font color="#8A2BE2">"a2DIntArray"</font></b>);
+145:       handler.startArray();
+146:       <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=1;i&lt;=2;i++) {
+147:     handler.startArray();
+148:     <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j=1;j&lt;=3;j++)
+149:       handler.addIntItem(i * 10 + j);
+150:     handler.endArray();
+151:       }
+152:       handler.endArray();
+153:       handler.endElement();
+154:     }
+155:   };
+156: 
+157:   <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception
+158:   {
+159:     <b><font color="#0000FF">int</font></b> status = 127;
+160:     <b><font color="EA7D00">try</font></b> {
+161:         IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+162:         IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+163:         IloOplErrorHandler errHandler = oplF.createOplErrorHandler(System.out);
+164:         IloOplModelSource modelSource = oplF.createOplModelSource(DATADIR + <b><font color="#8A2BE2">"/customDataSource.mod"</font></b>);
+165:         IloOplSettings settings = oplF.createOplSettings(errHandler);
+166:         IloOplModelDefinition def=oplF.createOplModelDefinition(modelSource,settings);
+167:         IloCplex cplex = oplF.createCplex();
+168:         IloOplModel opl=oplF.createOplModel(def,cplex);
+169: 
+170:         IloOplDataSource dataSource=<b><font color="EA7D00">new</font></b> MyCustomDataSource(oplF);
+171:         opl.addDataSource(dataSource);
+172:         opl.generate();
+173:         oplF.end();
+174:         status = 0;
+175:     } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+176:         System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+177:         ex.printStackTrace();
+178:         status = 2;
+179:     } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+180:         System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+181:         ex.printStackTrace();
+182:         status = 3;
+183:     } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+184:         System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+185:         ex.printStackTrace();
+186:         status = 4;
+187:     }
+188:     System.exit(status);
+189: 
+190:   }
+191: }
+</tt></pre>

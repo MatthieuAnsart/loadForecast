@@ -1,0 +1,204 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: <b><font color="#007D00">/******************************************************************************</font></b>
+012: <b><font color="#007D00"> * </font></b>
+013: <b><font color="#007D00"> * OPL Script for Investment Portfolio Problem</font></b>
+014: <b><font color="#007D00"> *</font></b>
+015: <b><font color="#007D00">******************************************************************************/</font></b>
+016: 
+017: <b><font color="#007D00">/*************************MODEL SUMMARY*****************************</font></b>
+018: 
+019: <b><font color="#007D00">  This OPL model is a tool for investment portfolio optimization. </font></b>
+020: <b><font color="#007D00">  The model is formulated as a Quadratic Programming (QP) problem.  </font></b>
+021: <b><font color="#007D00">  A complete description of the theory of portfolio investment that </font></b>
+022: <b><font color="#007D00">  underlies this formulation can be found in the book:</font></b>
+023: <b><font color="#007D00">  </font></b>
+024: <b><font color="#007D00">  "Portfolio Selection:  Efficient Diversification of Investments", </font></b>
+025: <b><font color="#007D00">  Harry M. Markowitz, 2nd Ed, April 1991, Blackwell Pub</font></b>
+026: <b><font color="#007D00">  </font></b>
+027: <b><font color="#007D00">  and many of the articles in this text's bibliography.</font></b>
+028: <b><font color="#007D00">   </font></b>
+029: <b><font color="#007D00">  The model requires a set of investment options, their expected returns,</font></b>
+030: <b><font color="#007D00">  a covariance matrix (must be positive semi-definite) summarizing the </font></b>
+031: <b><font color="#007D00">  dependencies between all investment options, a user defined parameter </font></b>
+032: <b><font color="#007D00">  indicating the preferred trade-off between risk and reward, and</font></b>
+033: <b><font color="#007D00">  a user defined stopping criteria for the Benders iteration</font></b>
+034: <b><font color="#007D00">  used to solve the QP.</font></b>
+035: 
+036: <b><font color="#007D00">*******************************************************************/</font></b>
+037: {<b><font color="#0000FF">string</font></b>} Investments = ...;
+038: <b><font color="#0000FF">float</font></b> InvestReturn[Investments] = ...;
+039: <b><font color="#0000FF">float</font></b>  Covariance[Investments][Investments] = ...;
+040: <b><font color="#0000FF">float</font></b> Wealth = ...;
+041: <b><font color="#0000FF">float</font></b> EpsilonTolerance = ...;
+042: <b><font color="#0000FF">float</font></b> rho = ...;
+043: <b><font color="#0000FF">float</font></b> BigNumber = ...;
+044: 
+045: <b><font color="#0000FF">tuple</font></b> t_BenderReturn {
+046:   <b><font color="#0000FF">string</font></b> invstmt;
+047:   <b><font color="#0000FF">int</font></b> i;
+048:   <b><font color="#0000FF">float</font></b> br;
+049: }
+050: {t_BenderReturn} BendersReturns = {};
+051: <b><font color="#0000FF">tuple</font></b> t_RHS {
+052:   <b><font color="#0000FF">int</font></b> id;
+053:   <b><font color="#0000FF">float</font></b> rhs;
+054: }
+055: {t_RHS} RHSset = {};
+056: 
+057: <b><font color="#0000FF">main</font></b> {
+058:     <b><font color="#0000FF">thisOplModel</font></b>.settings.mainEndEnabled = <b><font color="EA7D00">true</font></b>;
+059:     <b><font color="#0000FF">thisOplModel</font></b>.generate();
+060: 
+061:         <b><font color="#007D00">// Investment data </font></b>
+062:         <b><font color="EA7D00">var</font></b> Investments = <b><font color="#0000FF">thisOplModel</font></b>.Investments;
+063:         <b><font color="EA7D00">var</font></b> InvestReturn = <b><font color="#0000FF">thisOplModel</font></b>.InvestReturn; <b><font color="#007D00">// Expected return on investment</font></b>
+064:         <b><font color="EA7D00">var</font></b> Covariance = <b><font color="#0000FF">thisOplModel</font></b>.Covariance;  <b><font color="#007D00">// Covariance matrix</font></b>
+065:         
+066:         <b><font color="EA7D00">var</font></b> Wealth = <b><font color="#0000FF">thisOplModel</font></b>.Wealth; <b><font color="#007D00">// Initial wealth</font></b>
+067:         <b><font color="EA7D00">var</font></b> EpsilonTolerance = <b><font color="#0000FF">thisOplModel</font></b>.EpsilonTolerance; <b><font color="#007D00">// Stopping Criteria for the Benders iteration</font></b>
+068:         <b><font color="EA7D00">var</font></b> rho = <b><font color="#0000FF">thisOplModel</font></b>.rho; <b><font color="#007D00">// Variance Penalty (increasing rho from 0.001 to 1.0 </font></b>
+069:                                 <b><font color="#007D00">//                   produces a distribution of funds </font></b>
+070:                                 <b><font color="#007D00">//                   with smaller and smaller variability).</font></b>
+071:         <b><font color="EA7D00">var</font></b> BigNumber = <b><font color="#0000FF">thisOplModel</font></b>.BigNumber;
+072:         
+073:         writeln(<b><font color="#8A2BE2">"Solve the portfolio problem using Benders decomposition"</font></b>);
+074:         
+075:         
+076:         <b><font color="#007D00">// Put in dummy Benders cut to get things started</font></b>
+077:         <b><font color="EA7D00">var</font></b> NumberOfCuts = 1; <b><font color="#007D00">// Number of Benders Cuts </font></b>
+078:         <b><font color="EA7D00">var</font></b> BendersReturns = <b><font color="#0000FF">thisOplModel</font></b>.BendersReturns;
+079:         <b><font color="EA7D00">var</font></b> up = <b><font color="EA7D00">new</font></b> Array();
+080:         <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> Investments) 
+081:         {
+082:            up[i] = 1;
+083:            BendersReturns.add(i,up[i],0);
+084:         }
+085:         <b><font color="EA7D00">var</font></b> RHSup = 1;
+086:         <b><font color="EA7D00">var</font></b> RHSset = <b><font color="#0000FF">thisOplModel</font></b>.RHSset;
+087:         RHSset.add(RHSup,BigNumber);
+088:         
+089:         <b><font color="EA7D00">var</font></b> Stop = 0; <b><font color="#007D00">// Indicator Variable (Stop = 1 =&gt; Stop Iterating</font></b>
+090:                       <b><font color="#007D00">//                     Stop = 0 =&gt; Continue Iterating</font></b>
+091:         
+092:         <b><font color="EA7D00">var</font></b> pbasis = <b><font color="EA7D00">new</font></b> IloOplCplexBasis();
+093:         
+094:         <b><font color="EA7D00">while</font></b> (Stop == 0) 
+095:         {
+096:                 <b><font color="#007D00">// Load portfolio model</font></b>
+097:                 <b><font color="EA7D00">var</font></b> portfolioSrc = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"portfolioModel.mod"</font></b>);
+098:                 <b><font color="EA7D00">var</font></b> portfolioDef = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(portfolioSrc);
+099:                 <b><font color="EA7D00">var</font></b> portfolio = <b><font color="EA7D00">new</font></b> IloOplModel(portfolioDef,<b><font color="#0000FF">cplex</font></b>);
+100:                 <b><font color="EA7D00">var</font></b> portfolioData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+101:             portfolioData.Investments = Investments;
+102:             portfolioData.InvestReturn = InvestReturn; 
+103:             portfolioData.Covariance = Covariance;  
+104:             portfolioData.Wealth = Wealth; 
+105:             portfolioData.EpsilonTolerance = EpsilonTolerance;
+106:             portfolioData.rho = rho;
+107:             portfolioData.BigNumber = BigNumber;
+108:             portfolioData.BendersReturns = BendersReturns;
+109:             portfolioData.RHSset = RHSset;
+110:                 portfolio.addDataSource(portfolioData);
+111: 
+112:                 portfolio.generate();
+113:                 <b><font color="#0000FF">cplex</font></b>.LPmethod = 2; <b><font color="#007D00">// "dual"</font></b>
+114:         
+115:                 <b><font color="EA7D00">if</font></b> (NumberOfCuts &gt; 1)  
+116:                 pbasis.setBasis(<b><font color="#0000FF">cplex</font></b>);
+117:                 <b><font color="EA7D00">if</font></b> (<b><font color="#0000FF">cplex</font></b>.solve()) 
+118:                 {
+119:                      portfolio.postProcess();
+120:                  pbasis.getBasis(<b><font color="#0000FF">cplex</font></b>);
+121:                  <b><font color="EA7D00">var</font></b> currentAllocation = <b><font color="EA7D00">new</font></b> Array();
+122:                      <b><font color="EA7D00">var</font></b> currentAlpha;
+123:                      <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> Investments) 
+124:                      {
+125:                        currentAllocation[i] = portfolio.allocation[i];
+126:                      }
+127:                      currentAlpha = portfolio.alpha;
+128:                      <b><font color="EA7D00">var</font></b> Objective = portfolio.Objective;
+129:                  writeln(<b><font color="#8A2BE2">"Objective Function Value = "</font></b>, Objective);  
+130:                      writeln(<b><font color="#8A2BE2">"alpha                    = "</font></b>, currentAlpha);
+131:                      
+132:                      <b><font color="EA7D00">if</font></b> (Objective &gt; currentAlpha) 
+133:                      {
+134:                         Stop = 1;
+135:                         writeln(<b><font color="#8A2BE2">"Error:  Outer Linearization in not an upper bound"</font></b>);
+136:                         <b><font color="EA7D00">break</font></b>;               
+137:                      } 
+138:                      <b><font color="EA7D00">else</font></b> 
+139:                      {
+140:                        <b><font color="EA7D00">if</font></b>(((currentAlpha - Objective)/Opl.abs(currentAlpha)) &lt; EpsilonTolerance) 
+141:                        {
+142:                      Stop = 1;
+143:                          writeln(<b><font color="#8A2BE2">"</font></b>\n\n<b><font color="#8A2BE2">The Outer Linearization is tight enough.  Time to Stop Iterating.</font></b>\n<b><font color="#8A2BE2">"</font></b>);
+144:                          <b><font color="EA7D00">break</font></b>;   
+145:                        } 
+146:                        <b><font color="EA7D00">else</font></b> 
+147:                        {
+148:                          <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> Investments) 
+149:                          {
+150:                            up[i] = up[i]+ 1;
+151:                            <b><font color="EA7D00">var</font></b> br = InvestReturn[i];
+152:                            <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> Investments) 
+153:                              br = br - rho*Covariance[i][j]*currentAllocation[j];
+154:                            BendersReturns.add(i,up[i],br);  
+155:                          }
+156:                          RHSup = RHSup+1
+157:                          <b><font color="EA7D00">var</font></b> rhs = Objective;
+158:                          <b><font color="EA7D00">for</font></b> (j <b><font color="EA7D00">in</font></b> Investments) {
+159:                            <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> k <b><font color="EA7D00">in</font></b> BendersReturns) {
+160:                              <b><font color="EA7D00">if</font></b> (k.invstmt==j &amp;&amp; k.i== up[j])
+161:                               rhs = rhs - k.br*currentAllocation[j];
+162:                             }  
+163:                          }  
+164:                          RHSset.add(RHSup,rhs);
+165:                          NumberOfCuts = NumberOfCuts + 1;
+166:                          writeln(<b><font color="#8A2BE2">"NumberOfCuts= "</font></b>, NumberOfCuts);
+167:                          writeln(<b><font color="#8A2BE2">"Current relative gap = "</font></b>,((currentAlpha - Objective)/Opl.abs(currentAlpha)));
+168:                    }
+169:                  }
+170:                 }
+171:                 <b><font color="EA7D00">else</font></b>
+172:                 {
+173:                         writlen(<b><font color="#8A2BE2">"Error:  LP did not return a solution"</font></b>);
+174:                     Stop = 1;
+175:                     <b><font color="EA7D00">break</font></b>;   
+176:                 }
+177:                 portfolio.end();
+178:         }
+179:         writeln(<b><font color="#8A2BE2">"Optimal Distribution of Funds:"</font></b>); 
+180:         <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> Investments) 
+181:            writeln(<b><font color="#8A2BE2">"allocation["</font></b>,i, <b><font color="#8A2BE2">"]= "</font></b>, currentAllocation[i]);  
+182:         
+183:         write(<b><font color="#8A2BE2">"Expected Return on Investment: "</font></b>);
+184:         <b><font color="EA7D00">var</font></b> expInvRet = 0;
+185:         <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> Investments)
+186:           expInvRet = expInvRet + InvestReturn[i]*currentAllocation[i];
+187:         writeln(expInvRet);  
+188:         
+189:         write(<b><font color="#8A2BE2">"Expected Variance of Investment: "</font></b>);
+190:         <b><font color="EA7D00">var</font></b> expInvVar = 0; 
+191:         <b><font color="EA7D00">for</font></b>(i <b><font color="EA7D00">in</font></b> Investments) 
+192:         {
+193:           <b><font color="EA7D00">var</font></b> tmp = 0 ; 
+194:           <b><font color="EA7D00">for</font></b> (j <b><font color="EA7D00">in</font></b> Investments)
+195:             tmp = tmp+Covariance[i][j]*currentAllocation[j];
+196:           expInvVar = expInvVar + currentAllocation[i]*tmp;
+197:         }
+198:         writeln(expInvVar);
+199: }
+</tt></pre>

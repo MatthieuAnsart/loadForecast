@@ -1,0 +1,157 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+002: <b><font color="#007D00">// File: Cutstock.cs</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">//-------------------------------------------------------------- -*- C# -*-</font></b>
+015: <b><font color="#007D00">// C# version of cutstock.cpp of OPL distrib</font></b>
+016: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+017: 
+018: using System;
+019: using ILOG.Concert;
+020: using ILOG.OPL;
+021: using ILOG.CPLEX;
+022: 
+023: namespace Cutstock
+024: {
+025:     <b><font color="EA7D00">class</font></b> Cutstock
+026:     {
+027:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> Main(string[] args)
+028:         {
+029:             <b><font color="#0000FF">int</font></b> status = 127;
+030:             <b><font color="EA7D00">const</font></b> string DATADIR = <b><font color="#8A2BE2">"../.."</font></b>;
+031:             <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">double</font></b> RC_EPS = 0.000001;
+032:             <b><font color="EA7D00">try</font></b>
+033:             {
+034:                 OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+035:                 OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+036:                 OplErrorHandler errHandler = oplF.CreateOplErrorHandler();
+037:                 OplSettings settings = oplF.CreateOplSettings(errHandler);
+038:                 <b><font color="#007D00">// Make master model </font></b>
+039:                 Cplex masterCplex = oplF.CreateCplex();
+040:                 masterCplex.SetOut(<b><font color="EA7D00">null</font></b>);
+041: 
+042:                 OplRunConfiguration masterRC0 = oplF.CreateOplRunConfiguration(DATADIR + <b><font color="#8A2BE2">"/cutstock.mod"</font></b>, DATADIR + <b><font color="#8A2BE2">"/cutstock.dat"</font></b>);
+043:                 masterRC0.Cplex = masterCplex;
+044:                 OplDataElements masterDataElements = masterRC0.OplModel.MakeDataElements();
+045: 
+046:                 <b><font color="#007D00">// prepare sub model source, definition and engine</font></b>
+047:                 OplModelSource subSource = oplF.CreateOplModelSource(DATADIR + <b><font color="#8A2BE2">"/cutstock-sub.mod"</font></b>);
+048:                 OplModelDefinition subDef = oplF.CreateOplModelDefinition(subSource, settings);
+049:                 Cplex subCplex = oplF.CreateCplex();
+050:                 subCplex.SetOut(<b><font color="EA7D00">null</font></b>);
+051: 
+052:                 <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">int</font></b> nbItems = 5;
+053:                 IIntRange items = masterCplex.IntRange(1, 5);
+054:                 <b><font color="#0000FF">double</font></b> best;
+055:                 <b><font color="#0000FF">double</font></b> curr = <b><font color="#0000FF">double</font></b>.MaxValue;
+056:                 <b><font color="EA7D00">do</font></b>
+057:                 {
+058:                     best = curr;
+059: 
+060:                     masterCplex.ClearModel();
+061: 
+062:                     OplRunConfiguration masterRC = oplF.CreateOplRunConfiguration(masterRC0.OplModel.ModelDefinition, masterDataElements);
+063:                     masterRC.Cplex = masterCplex;
+064:                     masterRC.OplModel.Generate();
+065: 
+066:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"Solve master."</font></b>);
+067:                     <b><font color="EA7D00">if</font></b> (masterCplex.Solve())
+068:                     {
+069:                         curr = masterCplex.ObjValue;
+070:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + curr);
+071:                         status = 0;
+072:                     }
+073:                     <b><font color="EA7D00">else</font></b>
+074:                     {
+075:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>);
+076:                         status = 1;
+077:                     }
+078: 
+079:                     <b><font color="#007D00">// prepare sub model data</font></b>
+080:                     OplDataElements subDataElements = oplF.CreateOplDataElements();
+081:                     subDataElements.AddElement(masterDataElements.GetElement(<b><font color="#8A2BE2">"RollWidth"</font></b>));
+082:                     subDataElements.AddElement(masterDataElements.GetElement(<b><font color="#8A2BE2">"Size"</font></b>));
+083:                     subDataElements.AddElement(masterDataElements.GetElement(<b><font color="#8A2BE2">"Duals"</font></b>));
+084:                     <b><font color="#007D00">// get reduced costs and set them in sub problem</font></b>
+085:                     INumMap duals = subDataElements.GetElement(<b><font color="#8A2BE2">"Duals"</font></b>).AsNumMap();
+086:                     <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 1; i &lt;= nbItems; i++)
+087:                     {
+088:                         IForAllRange forAll = (IForAllRange)masterRC.OplModel.GetElement(<b><font color="#8A2BE2">"ctFill"</font></b>).AsConstraintMap().Get(i);
+089:                         duals.Set(i, masterCplex.GetDual(forAll));
+090:                     }
+091:                     <b><font color="#007D00">//make sub model</font></b>
+092:                     OplModel subOpl = oplF.CreateOplModel(subDef, subCplex);
+093:                     subOpl.AddDataSource(subDataElements);
+094:                     subOpl.Generate();
+095: 
+096:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"Solve sub."</font></b>);
+097:                     <b><font color="EA7D00">if</font></b> (subCplex.Solve())
+098:                     {
+099:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + subCplex.ObjValue);
+100:                         status = 0;
+101:                     }
+102:                     <b><font color="EA7D00">else</font></b>
+103:                     {
+104:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>);
+105:                         status = 1;
+106:                     }
+107: 
+108:                     <b><font color="EA7D00">if</font></b> (subCplex.ObjValue &gt; -RC_EPS)
+109:                     {
+110:                         <b><font color="EA7D00">break</font></b>;
+111:                     }
+112: 
+113:                     <b><font color="#007D00">// Add variable in master model</font></b>
+114:                     IIntMap newFill = masterCplex.IntMap(items);
+115:                     <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 1; i &lt;= nbItems; i++)
+116:                     {
+117:                         <b><font color="#0000FF">int</font></b> coef = (<b><font color="#0000FF">int</font></b>)subCplex.GetValue(subOpl.GetElement(<b><font color="#8A2BE2">"Use"</font></b>).AsIntVarMap().Get(i));
+118:                         newFill.Set(i, coef);
+119:                     }
+120:                     ITupleBuffer buf = masterDataElements.GetElement(<b><font color="#8A2BE2">"Patterns"</font></b>).AsTupleSet().MakeTupleBuffer(-1);
+121:                     buf.SetIntValue(<b><font color="#8A2BE2">"id"</font></b>, masterDataElements.GetElement(<b><font color="#8A2BE2">"Patterns"</font></b>).AsTupleSet().Size);
+122:                     buf.SetIntValue(<b><font color="#8A2BE2">"cost"</font></b>, 1);
+123:                     buf.SetIntMapValue(<b><font color="#8A2BE2">"fill"</font></b>, newFill);
+124:                     buf.Commit();
+125: 
+126:                     subOpl.End();
+127:                     masterRC.End();
+128:                 } <b><font color="EA7D00">while</font></b> (best != curr &amp;&amp; status == 0);
+129:                 oplF.End();
+130:             }
+131:             <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+132:             {
+133:                 Console.WriteLine(ex.Message);
+134:                 status = 2;
+135:             }
+136:             <b><font color="EA7D00">catch</font></b> (ILOG.Concert.Exception ex)
+137:             {
+138:                 Console.WriteLine(ex.Message);
+139:                 status = 3;
+140:             }
+141:             <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+142:             {
+143:                 Console.WriteLine(ex.Message);
+144:                 status = 4;
+145:             }
+146: 
+147:             Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>);
+148:             Console.ReadLine();
+149:             <b><font color="EA7D00">return</font></b> status;
+150:         }
+151:     }
+152: }
+</tt></pre>

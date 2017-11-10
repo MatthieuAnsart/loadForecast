@@ -1,0 +1,80 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: REM ------------------------------------------------ -*- Visual Basic .Net -*-
+02: REM File: Mulprod.vb
+03: REM --------------------------------------------------------------------------
+04: REM Licensed Materials - Property of IBM
+05: REM 
+06: REM 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55
+07: REM Copyright IBM Corporation 1998, 2013. All Rights Reserved.
+08: REM
+09: REM Note to U.S. Government Users Restricted Rights:
+10: REM Use, duplication or disclosure restricted by GSA ADP Schedule
+11: REM Contract with IBM Corp.
+12: REM --------------------------------------------------------------------------
+13: 
+14: 
+15: REM --------------------------------------------------------------------------
+16: REM Visual Basic version of mulprod.cpp of OPL distrib
+17: REM --------------------------------------------------------------------------
+18: 
+19: Imports ILOG.OPL
+20: Imports ILOG.Concert
+21: Imports ILOG.CPLEX
+22: 
+23: Module Mulprod
+24:   Const DATADIR As String = <b><font color="#8A2BE2">"../.."</font></b>
+25: 
+26:   Sub Main()
+27:     Dim status As Integer = 127
+28:     Try
+29:       OplFactory.DebugMode = True
+30: 
+31:       Dim oplF As OplFactory = New OplFactory
+32:  
+33:       Dim errorHandler As OplErrorHandler = oplF.CreateOplErrorHandler()
+34:     
+35:       Dim modelSource As OplModelSource = oplF.CreateOplModelSource(DATADIR + <b><font color="#8A2BE2">"/mulprod.mod"</font></b>)
+36:       Dim settings As OplSettings = oplF.CreateOplSettings(errorHandler)
+37:      
+38:       Dim def As OplModelDefinition = oplF.CreateOplModelDefinition(modelSource, settings)
+39:    
+40:       Dim cplex As Cplex = oplF.CreateCplex()
+41:       cplex.SetOut(Nothing)
+42:       Dim opl As OplModel = oplF.CreateOplModel(def, cplex)
+43:       Dim dataSource As OplDataSource = oplF.CreateOplDataSource(DATADIR + <b><font color="#8A2BE2">"/mulprod.dat"</font></b>)
+44:       opl.AddDataSource(dataSource)
+45:     
+46:       opl.Generate()
+47:   
+48:       If (cplex.Solve()) Then
+49:         
+50:       
+51:         Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + Str(opl.Cplex.ObjValue))
+52:         opl.PostProcess()
+53:         opl.PrintSolution(Console.Out)
+54:         status = 0
+55:       Else
+56:         Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>)
+57:         status = 1
+58:       End If
+59:       oplF.End()
+60:     Catch ex As ILOG.OPL.OplException
+61:         Console.Out.WriteLine(ex.Message)
+62:         Status = 2
+63:     Catch ex As ILOG.Concert.Exception
+64:         Console.Out.WriteLine(ex.Message)
+65:         Status = 3
+66:     Catch ex As System.Exception
+67:         Console.Out.WriteLine(ex.Message)
+68:         Status = 4
+69:     End Try
+70:     Environment.ExitCode = status
+71:     Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>)
+72:     Console.ReadLine()
+73:   End Sub
+74: 
+75: End Module
+</tt></pre>

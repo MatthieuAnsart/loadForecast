@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Tuning models in the Callable Library (C API)" />
+<meta name="abstract" content="Describes the tuning tool in the C API." />
+<meta name="Description" content="Describes the tuning tool in the C API." />
+<meta name="DC.subject" content="advanced basis, ignored by tuning tool" />
+<meta name="keywords" content="advanced basis, ignored by tuning tool" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/01_tune_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_tuningTool.1020432" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/01_tune_title_synopsis.html" />
+<title>Tuning models in the Callable Library (C API)</title>
+</head>
+<body role="main" id="User_manual.uss_tuningTool.1020432">
+<h1 class="title topictitle1">Tuning models in the Callable Library (C API)</h1>
+<div class="body"><p class="shortdesc">Describes the tuning tool in the C API.</p>
+<p class="p">The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/tuneparam.html" title="The routine CPXXtuneparam/CPXtuneparam tunes the parameters of the environment for improved optimizer performance on the specified problem object.">CPXtuneparam</a></samp> tunes
+one existing model, and the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/tuneparamprobset.html" title="The routine CPXXtuneparamprobset/CPXtuneparamprobset tunes the parameters of the CPLEX environment for improved optimizer performance for a set of problems.">CPXtuneparamprobset</a></samp> tunes
+a group of models, specified by an array of file names. </p>
+<p class="p">Both these routines are applicable to models of one of these types:
+LP, QP, and MIP. (Neither applies to networks. Neither applies to
+quadratically constrained programs (QCP).) Advanced bases in .<samp class="ph codeph">sav</samp> 
+files are ignored by these routines. Acceptable file formats for these
+routines are:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">.mps</samp> </p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph">.lp</samp> </p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph">.sav</samp> </p>
+ </li>
+</ul>
+<p class="p">Parameter settings in the environment control the resources for
+the tuning tool; the parameter settings passed in the arguments of
+these routines are used by CPLEX as a starting point for tuning. You
+can specify parameters and corresponding values for CPLEX to use as
+a starting point. Bear in mind that the parameters you specify at
+nondefault settings will be fixed during the tuning. That is, the
+tuning tool will not attempt to modify them. In other words, when
+you set a parameter as a starting point, you eliminate it from consideration
+by the tuning tool.</p>
+<p class="p">Callbacks (except the tuning callback) are ignored by these tuning
+routines in the Callable Library (C API).</p>
+<p class="p">The tuning tool checks the termination signal (that is, the variable
+set by the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setterminate.html" title="This routine enables applications to terminate CPLEX gracefully.">CPXsetterminate</a></samp>)
+and terminates the tuning process in compliance with that termination
+signal. Tuning also respects time limits set in the environment.</p>
+<p class="p">The result of either tuning routine is an environment containing
+the parameter settings recommended by tuning. You can query these
+values or write them to a formatted PRM file with the usual routines.</p>
+<p class="p">After tuning, the return value of either routine specifies 0 (zero)
+when tuning completed successfully and nonzero when it has not done
+so. A tuning status is also returned as an argument to these routines.
+The possible nonzero values of the tuning status argument are these:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">CPX_TUNE_ABORT</samp>  specifies that abort occurred
+through <samp class="ph codeph">CPXsetterminate</samp>. </p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph">CPX_TUNE_TILIM</samp>  specifies that tuning reached
+the time limit specified in the environment by the  overall optimizer
+time limit parameter <samp class="ph codeph">CPX_PARAM_TILIM</samp> . </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">CPX_TUNE_DETTILIM</samp>  specifies that tuning
+reached the deterministic time limit specified by the deterministic
+time limit parameter <samp class="ph codeph">CPX_PARAM_DETTILIM</samp>. </p>
+</li>
+</ul>
+<p class="p">Tuning will set any parameters which have been chosen even if there
+is an early termination.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/01_tune_title_synopsis.html" title="The tuning tool, a utility to aid you in improving the performance of your optimization applications, analyzes a model or a group of models and suggests a suite of parameter settings for you to use that provide better performance than the default parameter settings for your model or group of models. This topic documents the tuning tool of IBM ILOG CPLEX.">Tuning tool</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Stating resource constraints" />
+<meta name="abstract" content="Shows syntax of resource constraints for this model." />
+<meta name="Description" content="Shows syntax of resource constraints for this model." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_et_sched/01_early_tardy_sched_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingEarlyTardySched.1009097" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_et_sched/01_early_tardy_sched_title_synopsis.html" />
+<title>Stating resource constraints</title>
+</head>
+<body role="main" id="User_manual.uss_usingEarlyTardySched.1009097">
+<h1 class="title topictitle1">Stating resource constraints</h1>
+<div class="body"><p class="shortdesc">Shows syntax of resource constraints for this model.</p>
+<p class="p">Each resource can process one activity at a time. To
+avoid having two (or more) activities that share the same resource
+overlap with each other, disjunctive constraints are added to the
+model. Disjunctive constraints look like this:  </p>
+<pre class="pre codeblock"><code>s1 &gt;= s2 + d2 or s2 &gt;= s1 + d1</code></pre>
+<p class="p">where <samp class="ph codeph">s</samp>  is the starting date
+of an activity and <samp class="ph codeph">d</samp>  is its duration.</p>
+<p class="p">If <samp class="ph codeph">n</samp>  activities need to be
+processed on the same resource then about <samp class="ph codeph">(n*n)/2</samp>  disjunctions need to be stated and added to the model, like this:
+ </p>
+<pre class="pre codeblock"><code> for(i = 0; i &lt; nbResource; i++) {
+      IloInt end = nbJob - 1;
+      for(j = 0; j &lt; end; j++){
+        IloInt a = activityOnAResource[i][j];
+        for(IloInt k = j + 1; k &lt; nbJob; k++){
+          IloInt b = activityOnAResource[i][k];
+          model.add(s[j][a] &gt;= s[k][b] + duration[k][b] 
+                    || 
+                    s[k][b] &gt;= s[j][a] + duration[j][a]);
+        }
+      }
+    }</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_et_sched/01_early_tardy_sched_title_synopsis.html" title="Solves a scheduling problem by applying logical constraints, piecewise linear functions, and aggressive MIP emphasis.">Early tardy scheduling</a></div>
+</div>
+</div></body>
+</html>

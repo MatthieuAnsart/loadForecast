@@ -1,0 +1,387 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*</font></b>
+010: <b><font color="#007D00">*/</font></b>
+011: <b><font color="#007D00">// -------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">// Java version of OplRunSample.cpp of OPL distrib</font></b>
+013: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+014: package oplrunsample;
+015: 
+016: import java.util.*;
+017: import java.io.*;
+018: import ilog.concert.*;
+019: import ilog.opl.*;
+020: 
+021: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> OplRunSample {
+022:     CommandLine _cl;
+023: 
+024:     Timer _timer = <b><font color="EA7D00">new</font></b> Timer();
+025: 
+026:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) {
+027:         <b><font color="#0000FF">int</font></b> status = 127;
+028:         <b><font color="EA7D00">try</font></b> {
+029:             CommandLine cl = <b><font color="EA7D00">new</font></b> CommandLine(args);
+030:             OplRunSample oplRun = <b><font color="EA7D00">new</font></b> OplRunSample(cl);
+031:             oplRun.run();
+032:             status = 0;
+033:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+034:             System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+035:             ex.printStackTrace();
+036:             status = 2;
+037:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+038:             System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+039:             ex.printStackTrace();
+040:             status = 3;
+041:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+042:             System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+043:             ex.printStackTrace();
+044:             status = 4;
+045:         }
+046:         System.exit(status);
+047:       }
+048: 
+049:     OplRunSample(CommandLine cl) <b><font color="EA7D00">throws</font></b> IloException {
+050:         _cl = cl;
+051:     }
+052: 
+053:     <b><font color="#0000FF">int</font></b> run() <b><font color="EA7D00">throws</font></b> Exception {
+054:         IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+055:         IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+056: 
+057:         <b><font color="EA7D00">if</font></b> (_cl.getCompileName() != <b><font color="EA7D00">null</font></b>) {
+058:             IloOplCompiler compiler = oplF.createOplCompiler();
+059:             FileOutputStream ofs = <b><font color="EA7D00">new</font></b> FileOutputStream(_cl.getCompileName());
+060:             IloOplModelSource modelSource = oplF.createOplModelSource(_cl.getModelFileName());
+061:             compiler.compile(modelSource, ofs);
+062:             ofs.close();
+063:             trace(<b><font color="#8A2BE2">"compile"</font></b>);
+064:             <b><font color="EA7D00">return</font></b> 0;
+065:         }
+066: 
+067:         IloOplErrorHandler errHandler = oplF.createOplErrorHandler();
+068:         IloOplRunConfiguration rc = <b><font color="EA7D00">null</font></b>;
+069:         <b><font color="EA7D00">if</font></b> (_cl.isProject()) {
+070:             IloOplProject prj = oplF.createOplProject(_cl.getProjectPath());
+071:             rc = prj.makeRunConfiguration(_cl.getRunConfigurationName());
+072:         } <b><font color="EA7D00">else</font></b> {
+073:             <b><font color="EA7D00">if</font></b> (_cl.getDataFileNames().size() == 0) {
+074:                 rc = oplF.createOplRunConfiguration(_cl.getModelFileName());
+075:             } <b><font color="EA7D00">else</font></b> {
+076:                 String[] dataFiles = _cl.getDataFileNames().toArray(
+077:                         <b><font color="EA7D00">new</font></b> String[_cl.getDataFileNames().size()]);
+078:                 rc = oplF.createOplRunConfiguration(_cl.getModelFileName(),
+079:                         dataFiles);
+080:             }
+081:         }
+082:         rc.setErrorHandler(errHandler);
+083: 
+084:         trace(<b><font color="#8A2BE2">"initial"</font></b>);
+085: 
+086:         IloOplModel opl = rc.getOplModel();
+087: 
+088:         IloOplSettings settings = opl.getSettings();
+089:         settings.setWithLocations(<b><font color="EA7D00">true</font></b>);
+090:         settings.setWithNames(<b><font color="EA7D00">true</font></b>);
+091:         settings.setForceElementUsage(_cl.isForceElementUsage());
+092: 
+093:         <b><font color="EA7D00">if</font></b> (opl.getModelDefinition().hasMain()) {
+094:             opl.main();
+095:             trace(<b><font color="#8A2BE2">"main"</font></b>);
+096:         } <b><font color="EA7D00">else</font></b> {
+097:             opl.generate();
+098:             trace(<b><font color="#8A2BE2">"generate model"</font></b>);
+099:             <b><font color="EA7D00">if</font></b> (opl.hasCplex()) {
+100:                 <b><font color="EA7D00">if</font></b> (_cl.getExportName() != <b><font color="EA7D00">null</font></b>) {
+101:                     opl.getCplex().exportModel(_cl.getExportName());
+102:                     trace(<b><font color="#8A2BE2">"export model"</font></b>, _cl.getExportName());
+103:                 }
+104:                 <b><font color="EA7D00">if</font></b> (_cl.isRelaxation()) {
+105:                     System.out
+106:                             .println(<b><font color="#8A2BE2">"RELAXATIONS to obtain a feasable problem: "</font></b>);
+107:                     <b><font color="#0000FF">int</font></b> count = opl.printRelaxation(System.out);
+108:                     System.out.println(<b><font color="#8A2BE2">"RELAXATIONS done."</font></b>);
+109:                     <b><font color="EA7D00">if</font></b> (count &gt; 0) {
+110:                         opl.postProcess();
+111:                         trace(<b><font color="#8A2BE2">"post process"</font></b>);
+112:                         <b><font color="EA7D00">if</font></b> (_cl.isVerbose()) {
+113:                             opl.printSolution(System.out);
+114:                         }
+115:                     }
+116:                 } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (_cl.isConflict()) {
+117:                     System.out.println(<b><font color="#8A2BE2">"CONFLICTS to obtain a feasable problem: "</font></b>);
+118:                     opl.printConflict(System.out);
+119:                     System.out.println(<b><font color="#8A2BE2">"CONFLICTS done."</font></b>);
+120:                 } <b><font color="EA7D00">else</font></b> {
+121:                     <b><font color="#0000FF">boolean</font></b> result = opl.getCplex().solve();
+122:                     <b><font color="EA7D00">if</font></b> (result) {
+123:                         trace(<b><font color="#8A2BE2">"solve"</font></b>);
+124:                         System.out.println();
+125:                         System.out.println();
+126:                         System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b>
+127:                                     + opl.getCplex().getObjValue());
+128:                         opl.postProcess();
+129:                         trace(<b><font color="#8A2BE2">"post process"</font></b>);
+130:                         <b><font color="EA7D00">if</font></b> (_cl.isVerbose()) {
+131:                             opl.printSolution(System.out);
+132:                         }
+133:                     } <b><font color="EA7D00">else</font></b> {
+134:                         trace(<b><font color="#8A2BE2">"no solution"</font></b>);
+135:                     }
+136:                 }
+137:             }<b><font color="EA7D00">else</font></b> { <b><font color="#007D00">//opl.hasCP()</font></b>
+138:                 <b><font color="#0000FF">boolean</font></b> result = opl.getCP().solve();
+139:                 <b><font color="EA7D00">if</font></b> (result) {
+140:                     trace(<b><font color="#8A2BE2">"solve"</font></b>);
+141:                     System.out.println();
+142:                     System.out.println();
+143:                     <b><font color="EA7D00">if</font></b> (opl.getCP().hasObjective()) {
+144:                         System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.getCP().getObjValue());
+145:                     } <b><font color="EA7D00">else</font></b> {
+146:                         System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: no objective"</font></b>);
+147:                     }
+148:                     opl.postProcess();
+149:                     trace(<b><font color="#8A2BE2">"post process"</font></b>);
+150:                     <b><font color="EA7D00">if</font></b> (_cl.isVerbose()) {
+151:                         opl.printSolution(System.out);
+152:                     }
+153:                 } <b><font color="EA7D00">else</font></b> {
+154:                     trace(<b><font color="#8A2BE2">"no solution"</font></b>);
+155:                 }
+156:             }
+157:             trace(<b><font color="#8A2BE2">"done"</font></b>);
+158:         }
+159:         <b><font color="EA7D00">if</font></b> (_cl.getExternalDataName() != <b><font color="EA7D00">null</font></b>) {
+160:             FileOutputStream ofs = <b><font color="EA7D00">new</font></b> FileOutputStream(_cl.getExternalDataName());
+161:             opl.printExternalData(ofs);
+162:             ofs.close();
+163:             trace(<b><font color="#8A2BE2">"write external data"</font></b>, _cl.getExternalDataName());
+164:         }
+165:         <b><font color="EA7D00">if</font></b> (_cl.getInternalDataName() != <b><font color="EA7D00">null</font></b>) {
+166:             FileOutputStream ofs = <b><font color="EA7D00">new</font></b> FileOutputStream(_cl
+167:                     .getInternalDataName());
+168:             opl.printInternalData(ofs);
+169:             ofs.close();
+170:             trace(<b><font color="#8A2BE2">"write internal data"</font></b>, _cl.getInternalDataName());
+171:         }
+172:         <b><font color="EA7D00">if</font></b> (opl.hasCplex())
+173:             opl.getCplex().end();
+174:         <b><font color="EA7D00">else</font></b>
+175:             opl.getCP().end();
+176:         oplF.end();
+177:         <b><font color="EA7D00">return</font></b> 0;
+178:     }
+179: 
+180:     <b><font color="#0000FF">void</font></b> trace(String title, String info) {
+181:         System.out.println();
+182:         System.out.print(<b><font color="#8A2BE2">"&lt;&lt;&lt; "</font></b> + title);
+183:         <b><font color="EA7D00">if</font></b> (info != <b><font color="EA7D00">null</font></b>) {
+184:             System.out.print(<b><font color="#8A2BE2">": "</font></b> + info);
+185:         }
+186:         <b><font color="EA7D00">if</font></b> (_cl.isVerbose()) {
+187:             System.out.print(<b><font color="#8A2BE2">", at "</font></b> + _timer.getAbsoluteTime() + <b><font color="#8A2BE2">"s"</font></b>
+188:                     + <b><font color="#8A2BE2">", took "</font></b> + _timer.getTime() + <b><font color="#8A2BE2">"s"</font></b>);
+189:             _timer.restart();
+190:         }
+191:         System.out.println();
+192:         System.out.println();
+193:     }
+194: 
+195:     <b><font color="#0000FF">void</font></b> trace(String title) {
+196:         trace(title, <b><font color="EA7D00">null</font></b>);
+197:     }
+198: }
+199: 
+200: <b><font color="EA7D00">class</font></b> CommandLine {
+201:     <b><font color="#0000FF">boolean</font></b> _verbose;
+202:     <b><font color="#0000FF">boolean</font></b> _forceUsage;
+203:     <b><font color="#0000FF">boolean</font></b> _isRelaxation;
+204:     <b><font color="#0000FF">boolean</font></b> _isConflict;
+205: 
+206:     String _modelFileName;
+207:     ArrayList&lt;String&gt; _dataFileNames = <b><font color="EA7D00">new</font></b> ArrayList&lt;String&gt;();
+208:     <b><font color="#0000FF">boolean</font></b> _project;
+209: 
+210:     String _exportName;
+211:     String _compileName;
+212:     String _externalDataName;
+213:     String _internalDataName;
+214: 
+215:     CommandLine(String[] args) {
+216:         _verbose = <b><font color="EA7D00">false</font></b>;
+217:         <b><font color="EA7D00">if</font></b> (args.length &lt; 1) {
+218:         _modelFileName = <b><font color="#8A2BE2">".</font></b>\\<b><font color="#8A2BE2">mulprod.mod"</font></b>;
+219:             _dataFileNames.add(<b><font color="#8A2BE2">".</font></b>\\<b><font color="#8A2BE2">mulprod.dat"</font></b>);
+220:         }
+221:         <b><font color="#0000FF">int</font></b> i = 0;
+222:         <b><font color="EA7D00">for</font></b> (i = 0; i &lt; args.length; i++) {
+223:             <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-h"</font></b>.equals(args[i])) {
+224:                 usage();
+225:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-p"</font></b>.equals(args[i])) {
+226:                 _project = <b><font color="EA7D00">true</font></b>;
+227:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-v"</font></b>.equals(args[i])) {
+228:                 _verbose = <b><font color="EA7D00">true</font></b>;
+229:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-e"</font></b>.equals(args[i])) {
+230:                 i++;
+231:                 <b><font color="EA7D00">if</font></b> (i &lt; args.length &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'-'</font></b>
+232:                         &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b>) {
+233:                     _exportName = args[i];
+234:                 } <b><font color="EA7D00">else</font></b> {
+235:                     _exportName = <b><font color="#8A2BE2">"oplRunSample.lp"</font></b>;
+236:                     i--;
+237:                 }
+238:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-o"</font></b>.equals(args[i])) {
+239:                 i++;
+240:                 <b><font color="EA7D00">if</font></b> (i &lt; args.length &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'-'</font></b>
+241:                         &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b>) {
+242:                     _compileName = args[i];
+243:                 } <b><font color="EA7D00">else</font></b> {
+244:                     usage();
+245:                 }
+246:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-de"</font></b>.equals(args[i])) {
+247:                 i++;
+248:                 <b><font color="EA7D00">if</font></b> (i &lt; args.length &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'-'</font></b>
+249:                         &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b>) {
+250:                     _externalDataName = args[i];
+251:                 } <b><font color="EA7D00">else</font></b> {
+252:                     usage();
+253:                 }
+254:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-di"</font></b>.equals(args[i])) {
+255:                 i++;
+256:                 <b><font color="EA7D00">if</font></b> (i &lt; args.length &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'-'</font></b>
+257:                         &amp;&amp; args[i].charAt(0) != <b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b>) {
+258:                     _internalDataName = args[i];
+259:                 } <b><font color="EA7D00">else</font></b> {
+260:                     usage();
+261:                 }
+262:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-f"</font></b>.equals(args[i])) {
+263:                 _forceUsage = <b><font color="EA7D00">true</font></b>;
+264:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-relax"</font></b>.equals(args[i])) {
+265:                 _isRelaxation = <b><font color="EA7D00">true</font></b>;
+266:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"-conflict"</font></b>.equals(args[i])) {
+267:                 _isConflict = <b><font color="EA7D00">true</font></b>;
+268:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (args[i].charAt(0) == <b><font color="#8A2BE2">'-'</font></b>) {
+269:                 System.err.println(<b><font color="#8A2BE2">"Unknown option: "</font></b> + args[i]);
+270:                 usage();
+271:             } <b><font color="EA7D00">else</font></b> {
+272:                 <b><font color="EA7D00">break</font></b>;
+273:             }
+274:         }
+275:         <b><font color="EA7D00">if</font></b> (i &gt;= args.length &amp; i &gt; 1) {
+276:             usage();
+277:         }
+278:         <b><font color="EA7D00">if</font></b> ((isProject() &amp; _dataFileNames.size() &gt;= 1) || (isProject() &amp; args.length &lt; 2)) {
+279:             usage();
+280:         }
+281:         <b><font color="EA7D00">if</font></b> (i &lt; args.length) {
+282:             _modelFileName = args[i];
+283:             <b><font color="EA7D00">for</font></b> (i++; i &lt; args.length; i++) {
+284:                 _dataFileNames.add(args[i]);
+285:             }
+286:         }
+287:     }
+288: 
+289:     <b><font color="#0000FF">void</font></b> usage() {
+290:         System.err.println();
+291:         System.err.println(<b><font color="#8A2BE2">"Usage:"</font></b>);
+292:         System.err.println(<b><font color="#8A2BE2">"OplRunSample [options] model-file [data-file ...]"</font></b>);
+293:         System.err
+294:                 .println(<b><font color="#8A2BE2">"OplRunSample [options] -p project-path [run-configuration]"</font></b>);
+295:         System.err.println(<b><font color="#8A2BE2">"  options "</font></b>);
+296:         System.err.println(<b><font color="#8A2BE2">"    -h               this help message"</font></b>);
+297:         System.err.println(<b><font color="#8A2BE2">"    -v               verbose"</font></b>);
+298:         System.err.println(<b><font color="#8A2BE2">"    -e [export-file] export model"</font></b>);
+299:         System.err.println(<b><font color="#8A2BE2">"    -de [dat-file]   write external data"</font></b>);
+300:         System.err.println(<b><font color="#8A2BE2">"    -di [dat-file]   write internal data"</font></b>);
+301:         System.err.println(<b><font color="#8A2BE2">"    -o output-file   compile model"</font></b>);
+302:         System.err.println(<b><font color="#8A2BE2">"    -f               force element usage"</font></b>);
+303:         System.err
+304:                 .println(<b><font color="#8A2BE2">"    -relax           calculate relaxations needed for feasable model"</font></b>);
+305:         System.err
+306:                 .println(<b><font color="#8A2BE2">"    -conflict        calculate a conflict for an infeasable model"</font></b>);
+307:         System.err.println();
+308:         System.exit(0);
+309:     }
+310: 
+311:     String getModelFileName() {
+312:         <b><font color="EA7D00">return</font></b> _modelFileName;
+313:     }
+314: 
+315:     List&lt;String&gt; getDataFileNames() {
+316:         <b><font color="EA7D00">return</font></b> _dataFileNames;
+317:     }
+318: 
+319:     <b><font color="#0000FF">boolean</font></b> isProject() {
+320:         <b><font color="EA7D00">return</font></b> _project;
+321:     }
+322: 
+323:     String getProjectPath() {
+324:         <b><font color="EA7D00">return</font></b> _project ? _modelFileName : <b><font color="EA7D00">null</font></b>;
+325:     }
+326: 
+327:     String getRunConfigurationName() {
+328:         <b><font color="EA7D00">return</font></b> (_project &amp;&amp; _dataFileNames.size() == 1) ? (String) _dataFileNames
+329:                 .get(0)
+330:                 : <b><font color="EA7D00">null</font></b>;
+331:     }
+332: 
+333:     <b><font color="#0000FF">boolean</font></b> isVerbose() {
+334:         <b><font color="EA7D00">return</font></b> _verbose;
+335:     }
+336: 
+337:     <b><font color="#0000FF">boolean</font></b> isForceElementUsage() {
+338:         <b><font color="EA7D00">return</font></b> _forceUsage;
+339:     }
+340: 
+341:     <b><font color="#0000FF">boolean</font></b> isRelaxation() {
+342:         <b><font color="EA7D00">return</font></b> _isRelaxation;
+343:     }
+344: 
+345:     <b><font color="#0000FF">boolean</font></b> isConflict() {
+346:         <b><font color="EA7D00">return</font></b> _isConflict;
+347:     }
+348: 
+349:     String getExportName() {
+350:         <b><font color="EA7D00">return</font></b> _exportName;
+351:     }
+352: 
+353:     String getCompileName() {
+354:         <b><font color="EA7D00">return</font></b> _compileName;
+355:     }
+356: 
+357:     String getExternalDataName() {
+358:         <b><font color="EA7D00">return</font></b> _externalDataName;
+359:     }
+360: 
+361:     String getInternalDataName() {
+362:         <b><font color="EA7D00">return</font></b> _internalDataName;
+363:     }
+364: }
+365: 
+366: <b><font color="EA7D00">class</font></b> Timer {
+367:     <b><font color="#0000FF">long</font></b> _time = System.currentTimeMillis();
+368: 
+369:     <b><font color="#0000FF">long</font></b> _startTime = System.currentTimeMillis();
+370: 
+371:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> restart() {
+372:         _time = System.currentTimeMillis();
+373:     }
+374: 
+375:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">float</font></b> getTime() {
+376:         <b><font color="EA7D00">return</font></b> (System.currentTimeMillis() - _time) / 1000;
+377:     }
+378: 
+379:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">float</font></b> getAbsoluteTime() {
+380:         <b><font color="EA7D00">return</font></b> (System.currentTimeMillis() - _startTime) / 1000;
+381:     }
+382: }
+</tt></pre>

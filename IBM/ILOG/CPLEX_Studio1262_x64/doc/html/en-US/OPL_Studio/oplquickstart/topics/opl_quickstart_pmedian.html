@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling the P-Median problem with OPL" />
+<meta name="abstract" content="The P-Median problem is a well known warehouse allocation problem in Operations Research." />
+<meta name="Description" content="The P-Median problem is a well known warehouse allocation problem in Operations Research." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplquickstart/topics/opl_quickstart.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplquickstart.uss_fromortoopl.1032102" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplquickstart/topics/opl_quickstart.html" />
+<title>Modeling the P-Median problem with OPL</title>
+</head>
+<body role="main" id="oplquickstart.uss_fromortoopl.1032102">
+<h1 class="title topictitle1">Modeling the P-Median problem with OPL</h1>
+<div class="body"><p class="shortdesc">The P-Median problem is a well known warehouse allocation
+problem in Operations Research.</p>
+<p class="p">The <em class="ph i">P-Median</em> problem is a well known warehouse allocation
+problem in Operations Research. The problem can be stated very simply,
+like this: given a set of customers with known amounts of demand,
+a set of candidate locations for warehouses, and the distance between
+each pair of customer-warehouse, choose <samp class="ph codeph">P</samp> warehouses
+to open that minimize the demand-weighted distance of serving all
+customers from those <samp class="ph codeph">P</samp> warehouses.</p>
+<p class="p">A standard textbook would probably write out the P-Median problem
+like this:</p>
+<div class="section" id="oplquickstart.uss_fromortoopl.1032102__oplquickstart.uss_fromortoopl.1031313"><h2 class="title sectiontitle">Data</h2><div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="Data for the P-Median problem, presented in a borderless table to facilitate alignment of text." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="8.16326530612245%">P</td>
+<td class="entry" valign="top" width="7.142857142857142%">=</td>
+<td class="entry" valign="top" width="84.6938775510204%">number of facilities to locate</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="8.16326530612245%">I</td>
+<td class="entry" valign="top" width="7.142857142857142%">=</td>
+<td class="entry" valign="top" width="84.6938775510204%">set of customers</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="8.16326530612245%">J</td>
+<td class="entry" valign="top" width="7.142857142857142%">=</td>
+<td class="entry" valign="top" width="84.6938775510204%">set of candidate locations for warehouses</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="8.16326530612245%">h<sub class="ph sub">i</sub></td>
+<td class="entry" valign="top" width="7.142857142857142%">=</td>
+<td class="entry" valign="top" width="84.6938775510204%">demand for customer i</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="8.16326530612245%">d<sub class="ph sub">ij</sub></td>
+<td class="entry" valign="top" width="7.142857142857142%">=</td>
+<td class="entry" valign="top" width="84.6938775510204%">distance between customer i and candidate warehouse j</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="oplquickstart.uss_fromortoopl.1032102__oplquickstart.uss_fromortoopl.1031314"><h2 class="title sectiontitle">Decision
+variables</h2><div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="Decision variables for the P-Median problem, presented in a borderless table to facilitate alignment of text." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="18.10781476121563%">x<sub class="ph sub">j</sub></td>
+<td class="entry" valign="top" width="5.5535455861070915%">=</td>
+<td class="entry" valign="top" width="76.33863965267727%">1 if candidate warehouse j is used; 0 otherwise</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.10781476121563%">y<sub class="ph sub">ij</sub></td>
+<td class="entry" valign="top" width="5.5535455861070915%">=</td>
+<td class="entry" valign="top" width="76.33863965267727%">1 if demand for customer i is satisfied by warehouse j; 0 otherwise</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="oplquickstart.uss_fromortoopl.1032102__oplquickstart.uss_fromortoopl.1031266"><h2 class="title sectiontitle">Objective</h2><p class="p">Minimize
+the demand-weighted distance of delivering to customers.</p>
+<p class="p">Or,
+expressed as an equation:</p>
+<p class="p"><img class="image" src="../images/fromortoopl10.jpg" alt="Equation minizing the demand-weighted distance of delivering to customers" /></p>
+</div>
+<div class="section" id="oplquickstart.uss_fromortoopl.1032102__oplquickstart.uss_fromortoopl.1031440"><h2 class="title sectiontitle">Constraints</h2><div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="Constraints for the P-Median problem, presented in a borderless table to facilitate alignment of text." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="19.402985074626866%">1<sup class="ph sup">st</sup></td>
+<td class="entry" colspan="2" valign="top">constraint makes sure that each
+customer is served by exactly one warehouse.</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="19.402985074626866%">2<sup class="ph sup">nd</sup></td>
+<td class="entry" colspan="2" valign="top">constraint makes sure that P warehouses
+are built.</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="19.402985074626866%">3<sup class="ph sup">rd</sup></td>
+<td class="entry" colspan="2" valign="top">constraint makes sure that a customer
+is not served by an unopened warehouse.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Or, expressed as equations:</p>
+<p class="p"><img class="image" src="../images/fromortoopl11.jpg" alt="Equation expressing a constraint" /></p>
+<p class="p"><img class="image" src="../images/fromortoopl12.jpg" alt="Equation expressing another constraint" /></p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="Constraints, expressed as equations, for the P-Median problem, presented in a borderless table to facilitate alignment of text." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopla.jpg" alt="Inequality" /></td>
+<td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopl2.jpg" alt="i is part of I" /></td>
+<td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopl3.jpg" alt="j is part of J" /></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopl4.jpg" alt="Equation" /></td>
+<td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopl5.jpg" alt="j is part of J" /></td>
+<td class="entry" valign="top" width="33.33333333333333%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopl6.jpg" alt="Equation" /></td>
+<td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopl7.jpg" alt="i is part of I" /></td>
+<td class="entry" valign="top" width="33.33333333333333%"><img class="image" src="../images/fromortoopl8.jpg" alt="j is part of J" /></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">The construction of an OPL model file (<span class="ph filepath">.mod</span>)
+follows the same format exactly. The P-Median problem can be formulated
+in OPL like this:</p>
+<pre class="pre codeblock"><code>//Data
+int P = ...;
+{string} Customers = ...;
+{string} Warehouses = ...;
+int Demand[Customers] = ...;
+float Distance[Customers][Warehouses] = ...;
+
+//Variables
+dvar boolean OpenWarehouse[Warehouses];
+dvar boolean ShipToCustomer[Customers][Warehouses];
+
+//Objective
+minimize 
+  sum( c in Customers , w in Warehouses ) 
+    Demand[c]*Distance[c][w]*ShipToCustomer[c][w];
+
+//Constraints
+subject to {
+  forall( c in Customers )
+    ctShip:
+      sum( w in Warehouses ) 
+        ShipToCustomer[c][w] == 1;
+
+  ctOpen:
+    sum( w in Warehouses ) 
+      OpenWarehouse[w] == P;
+
+  forall( c in Customers , w in Warehouses )
+    ctShipOpen:
+      ShipToCustomer[c][w] &lt;= OpenWarehouse[w];
+}</code></pre>
+<p class="p">Notice
+that:</p>
+<ul class="ul"><li class="li"><p class="p">the names of the customers and warehouses are specified as
+sets of strings in the data file. (That is what the notation <samp class="ph codeph">{string}</samp> means.) </p>
+ </li>
+<li class="li"><p class="p">it is also possible to use sets of integers as the labels for
+the customers and warehouses. You can also use ranges instead of sets.
+The demand and distance data remain the same, regardless of the format
+of the labels for customers and warehouses. </p>
+ </li>
+<li class="li"><p class="p">the <samp class="ph codeph">...</samp> (ellipsis) syntax means that the data
+is initialized externally, that is, from a data file (<span class="ph filepath">pmedian.dat</span>).</p>
+  <pre class="pre codeblock"><code>P=2;
+Customers={"Albert","Bob","Chris","Daniel"};
+Warehouses={"Santa Clara","San Jose","Berkeley"};
+Demand=[100,80,80,70];
+Distance=
+[[ 2 , 10 , 50 ],
+ [ 2, 10, 52 ],
+ [ 50, 60 , 3],
+ [ 40 , 60 , 1]];</code></pre>
+</li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplquickstart/topics/opl_quickstart.html" title="This Quick Start is for OR experts who are not familiar with the CPLEX Studio approach to the development and deployment of optimization models. It starts from a well known, hands-on example based on the P-Median warehouse allocation problem. More detailed information on the concepts, terms, and procedures presented in this section is provided throughout the CPLEX Studio documentation set, in particular in the Glossary and in Getting Started with the IDE.">A quick start to CPLEX Studio</a></div>
+</div>
+</div></body>
+</html>

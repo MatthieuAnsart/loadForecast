@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Postprocessing the solution" />
+<meta name="abstract" content="Using postprocessing statements and scripting capabilities." />
+<meta name="Description" content="Using postprocessing statements and scripting capabilities." />
+<meta name="DC.subject" content="solutions, postprocessing in time tabling example, postprocessing, solutions of time tabling project" />
+<meta name="keywords" content="solutions, postprocessing in time tabling example, postprocessing, solutions of time tabling project" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_cp.1069771" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<title>Postprocessing the solution</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_cp.1069771">
+<h1 class="title topictitle1">Postprocessing the solution</h1>
+<div class="body taskbody"><p class="shortdesc">Using postprocessing statements and scripting capabilities.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div><p class="p">To present the solution, the model uses OPL postprocessing
+statements and scripting capabilities. </p>
+</div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To specify postprocessing:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Define the <samp class="ph codeph">Course</samp> tuple which
+is used to aggregate information from the <samp class="ph codeph">room</samp>, <samp class="ph codeph">teacher</samp> and <samp class="ph codeph">start</samp> decision
+variable arrays.</span> <pre class="pre codeblock"><code>{Course} timetable[t in Time][c in Class] = {
+  &lt;p,d,r,i,n&gt; 
+  | d in Discipline
+  , r in Room
+  , x in InstanceSet
+  , n in x.repetition..x.repetition
+  , p in Teacher 
+  , i in x.id..x.id
+  : (t &gt;= startOf(courses[x]))
+  &amp;&amp; (t &lt; endOf(courses[x]))
+  &amp;&amp; (x.Class == c)
+  &amp;&amp; (roomRes[x] == ord(Room,r))
+  &amp;&amp; (ord(Teacher,p) == teacherRes[x])
+  &amp;&amp; (d == x.discipline) 
+};</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Write the postprocessing script which iterates over the
+solution-derived course set to pretty-print, for each class, what
+will be the courses, the dedicated teacher, and the assigned room.</span> <pre class="pre codeblock"><code>execute POST_PROCESS {
+  timetable;
+  for(var c in Class) {
+    writeln("Class ", c);
+    var day = 0;
+    for(var t = 0; t &lt; makespan; t++) {
+      if(t % DayDuration == 0) {
+        day++;
+        writeln("Day ", day);
+      }
+      if(t % DayDuration == HalfDayDuration) 
+        writeln("Lunch break");
+      var activity = 0;
+      for(var x in timetable[t][c]) {
+        activity++;
+        writeln((t % DayDuration)+1, "\t",
+                x.room, "\t", 
+                x.discipline, "\t", 
+                x.id, "/", 
+                x.repetition, "\t", 
+                x.teacher);
+      }
+      if(activity == 0)
+        writeln((t % DayDuration)+1, "\tFree time");
+    }
+  }
+}</code></pre>
+</li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" title="Shows how to build a school timetable, given a set of room specifications, teacher skills, and educational requirements.">The time tabling example</a></div>
+</div>
+</div></body>
+</html>

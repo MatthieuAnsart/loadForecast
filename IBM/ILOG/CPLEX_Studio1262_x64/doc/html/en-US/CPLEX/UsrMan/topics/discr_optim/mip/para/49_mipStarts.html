@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Starting from a solution: MIP starts" />
+<meta name="abstract" content="Documents advanced starts; also known as warm starts or MIP starts." />
+<meta name="Description" content="Documents advanced starts; also known as warm starts or MIP starts." />
+<meta name="DC.subject" content="solution, supplying first integer in MIPs, MIP, supplying first integer solution, RepairTries parameter, MIP starts and, CPX_PARAM_REPAIRTRIES, AdvInd parameter, MIP start, CPX_PARAM_ADVIND, reading, start values from MST file, feasible in MIPs, MIP start, supplying first integer solution, interaction with incumbent, interaction with solution pool, multiple" />
+<meta name="keywords" content="solution, supplying first integer in MIPs, MIP, supplying first integer solution, RepairTries parameter, MIP starts and, CPX_PARAM_REPAIRTRIES, AdvInd parameter, MIP start, CPX_PARAM_ADVIND, reading, start values from MST file, feasible in MIPs, MIP start, supplying first integer solution, interaction with incumbent, interaction with solution pool, multiple" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.638620" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" />
+<title>Starting from a solution: MIP starts</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.638620">
+<h1 class="title topictitle1">Starting from a solution: MIP starts</h1>
+<div class="body"><p class="shortdesc">Documents advanced starts; also known as warm
+starts or MIP starts.</p>
+<p class="p">When you are solving a mixed integer programming problem
+(MIP), you can supply hints to help CPLEX find an initial solution.
+These hints consist of pairs of variables and values, known as a <strong class="ph b">MIP start</strong>, an <strong class="ph b">advanced start</strong>, or a <strong class="ph b">warm start</strong>. A MIP start might come from a different problem
+you have previously solved or from your knowledge of the problem,
+for example. You can also provide CPLEX with one or more MIP starts,
+that is, multiple MIP starts.</p>
+<p class="p">A MIP start may be a feasible solution of the model, but
+it need not be; it may even be infeasible or incomplete. If you are
+interested in debugging an infeasible MIP start, that is, if you want
+to discover why CPLEX regards the model inferred from the pairs of
+variables and values in a MIP start as infeasible, consider using
+the conflict refiner on that model inferred from that MIP start, as
+explained in <a class="xref" href="../../../infeas_unbd/conflict_refiner/22_MIPstart.html" title="Describes how a MIP start may be used with the conflict refiner.">Refining a conflict in a MIP start</a>.</p>
+<div class="section" id="User_manual.uss_solveMIP.638620__B6g2YxGP"><h2 class="title sectiontitle">What are the characteristics
+of a MIP start?</h2><p class="p">A MIP start may include continuous variables and discrete
+variables of various types, such as integer variables, binary variables,
+semi-continuous variables, semi-integer variables, or variables appearing
+in special ordered sets. For more information about each of those
+types, see these topics in this manual:</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="../../semi_cont_var/01_SemiCont_title_synopsis.html" title="Demonstrates semi-continuous variables in Concert Technology in an example of managing production in a power plant.">Using semi-continuous variables: a rates example</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" title="Documents pools of user-defined cuts and lazy constraints.">User-cut and lazy-constraint pools</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../indicator_constr/01_indicators_title_synopsis.html" title="Introduces indicator constraints and emphasizes their advantages over Big M formulations.">Indicator constraints in optimization</a> or <a class="xref" href="../../logical_constr/01_logical_constr_title_synopsis.html" title="Describes logical constraints in CPLEX with Concert Technology.">Logical constraints in optimization</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../sos/01_SOS_title_synopsis.html" title="Describes special ordered sets (SOSs) in a model as a way to specify integrality conditions.">Using special ordered sets (SOS)</a></p>
+</li>
+</ul>
+<p class="p">You may specify values for any combination of discrete
+and continuous variables. CPLEX decides how to construct a starting
+point from these variable-value pairs depending on the specified values
+and on the specified effort level. For more detail about effort level,
+see <a class="xref" href="49_mipStarts.html#User_manual.uss_solveMIP.638620__section1218612714531">MIP starts and effort level</a>.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__section1219740389375"><h2 class="title sectiontitle">Managing
+a MIP start with the advanced start switch</h2><p class="p">After
+a MIP start has been established for your model, you control its use
+by the <a class="xref" href="../../../../../Parameters/topics/AdvInd.html" title="If set to 1 or 2, this parameter specifies that CPLEX should use advanced starting information when it initiates optimization.">advanced start switch</a> (<samp class="ph codeph">AdvInd</samp> in
+Concert Technology; <samp class="ph codeph">CPX_PARAM_ADVIND</samp> in
+the Callable Library). At the default setting of 1 (one) , the MIP
+start values that you specify are used. If you set <samp class="ph codeph">AdvInd</samp> to
+the value 0 (zero), then the MIP start will not be used. If you set
+this parameter to 2, CPLEX retains the current incumbent (if there
+is one), re-applies presolve, and starts a new search from a new root.
+Setting 2 can be particularly useful for solving fixed MIP models,
+where a start vector but no corresponding basis is available. For
+more about a fixed MIP, see <a class="xref" href="51_soln.html#User_manual.uss_solveMIP.683642__paragroup1219739495795">Working with the fixed MIP problem</a>.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__CFsLmpbc"><h2 class="title sectiontitle">Using a MIP start</h2><p class="p">When you provide a MIP start as data, CPLEX processes it
+before starting branch and cut during an optimization. If one or more
+of the MIP starts define a solution, CPLEX installs the best of these
+solutions as the <strong class="ph b">incumbent</strong> solution. Having an incumbent
+from the very beginning of branch and cut allows CPLEX to eliminate
+portions of the search space and thus may result in smaller branch-and-cut
+trees. Having an incumbent also allows CPLEX to use heuristics which
+require an incumbent, such as relaxation induced neighborhood search
+(RINS heuristic) or solution polishing.</p>
+<p class="p">You
+may invoke relaxation induced neighborhood search on a starting solution.
+See <a class="xref" href="../heuristics/45_rins.html" title="Describes RINS as a heuristic of the MIP optimizer.">Relaxation induced neighborhood search (RINS) heuristic</a> in this manual for more about that
+topic. </p>
+<p class="p">Alternatively, you may invoke solution polishing
+to improve a solution known to CPLEX. See <a class="xref" href="../heuristics/46_soln_polish.html" title="Describes solution polishing as a heuristic of the MIP optimizer.">Solution polishing</a>, also in this manual, for more
+about that way of proceeding.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__section1220902034761"><h2 class="title sectiontitle">Establishing
+starting values in a MIP start</h2><p class="p">You can establish
+MIP starting values by using the method <samp class="ph codeph">addMIPStart</samp> in
+a <strong class="ph b">Concert Technology</strong> application, or by using <samp class="ph codeph">CPXaddmipstarts</samp> in a <strong class="ph b">Callable Library</strong> application.</p>
+<p class="p">For use in the <strong class="ph b">Interactive Optimizer</strong>, or
+as an alternative approach in a Concert Technology or Callable Library
+application, you can establish MIP starting values in a formatted
+file and then read the file.</p>
+<p class="p">To read a MIP start from a formatted file, use one of these:</p>
+<ul class="ul"><li class="li"><p class="p">the method <samp class="ph codeph">readMIPStart</samp> in <strong class="ph b">Concert Technology</strong></p>
+</li>
+<li class="li"><p class="p"> the routine <samp class="ph codeph">CPXreadcopymipstarts</samp> in
+the <strong class="ph b">Callable Library</strong></p>
+ </li>
+<li class="li"><p class="p">the command <samp class="ph codeph">read</samp> in
+the <strong class="ph b">Interactive Optimizer</strong></p>
+ </li>
+</ul>
+<p class="p">You can establish MIP starting values from a file
+in either MST or SOL format. MST and SOL share the same underlying
+XML format. MST format is documented in <a class="xref" href="../../../../../FileFormats/topics/MST.html" title="The MST file format supports MIP starts.">MST file format: MIP starts</a> in the <em class="ph i">CPLEX
+File Formats Reference Manual</em>. SOL format is documented in <a class="xref" href="../../../../../FileFormats/topics/SOL.html" title="The SOL file format supports solution files.">SOL file format: solution files</a> also in the <em class="ph i">CPLEX
+File Formats Reference Manual</em>.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__SisG4XLS"><h2 class="title sectiontitle">Creating a file for
+a MIP start</h2><p class="p">At the end of a MIP optimization, when a feasible (not necessarily
+optimal) solution is still in memory, you can create an MST file for
+later use as starting values to another MIP problem. </p>
+<ul class="ul"><li class="li"><p class="p">from <strong class="ph b">Concert Technology</strong> with
+the method <samp class="ph codeph">writeMIPStarts</samp> </p>
+ </li>
+<li class="li"><p class="p">from the <strong class="ph b">Callable Library</strong> with
+the routine <samp class="ph codeph">CPXwritemipstarts</samp></p>
+ </li>
+<li class="li"><p class="p">from the <strong class="ph b">Interactive Optimizer</strong> with
+the <samp class="ph codeph">write</samp> command</p>
+ </li>
+</ul>
+<div class="note tip"><span class="tiptitle">Tip:</span>  <p class="p">Make sure that the name
+of each variable is consistent between the original model and your
+target model when you use this approach.</p>
+ </div>
+<p class="p">When
+you tell CPLEX to write a MIP start to a formatted file, you can also
+specify a degree of detail to record there, such as only values of
+discrete variables, values of all variables, and so forth. The <a class="xref" href="../../../../../Parameters/topics/WriteLevel.html" title="Sets a level of detail for CPLEX to write a file in MST or SOL format.">write level for MST, SOL files</a> is a parameter (<samp class="ph codeph">WriteLevel</samp>, <samp class="ph codeph">CPX_PARAM_WRITELEVEL</samp>),
+documented in the <em class="ph i">CPLEX Parameter Reference Manual</em>,
+to manage the level of detail.</p>
+<p class="p">When CPLEX reads from
+such a file, it processes <strong class="ph b">all</strong> the MIP starts. They
+will be processed at the next MIP optimization. Immediately after
+an optimization, the first MIP start is the MIP start corresponding
+to the incumbent solution, so if you write a file with multiple MIP
+starts, the <strong class="ph b">first</strong> MIP start will be that corresponding
+to the <strong class="ph b">incumbent</strong>.</p>
+<p class="p">Because processing
+a large number of MIP starts may be costly, CPLEX allows you to associate
+an individual <strong class="ph b">effort level</strong> with each MIP start. The
+effort level tells CPLEX how to expend its effort in processing that
+MIP start. For more detail about effort level, see <a class="xref" href="49_mipStarts.html#User_manual.uss_solveMIP.638620__section1218612714531">MIP starts and effort level</a>.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__section1218612714531"><h2 class="title sectiontitle">MIP starts
+and effort level</h2><p class="p">You may want CPLEX to process multiple MIP starts differently,
+expending more effort on some than on others. Moreover, you may want
+to limit the effort CPLEX applies to MIP starts when it transforms
+each MIP start into a feasible solution, especially if there are many
+of them. In that context, you can specify a level of effort that CPLEX
+should expend for each MIP start to transform it into a feasible solution. </p>
+<p class="p">You specify the level of effort as an argument to the method
+or routine that adds a MIP start to a model or that modifies a MIP
+start. When CPLEX writes MIP starts to a file, such as a file in MST
+format, CPLEX records the level of effort the user specified for each
+MIP start. If you have not specified an effort level, CPLEX assigns
+a default effort level.</p>
+<p class="p">Here are the levels of effort and their effect:</p>
+<ul class="ul"><li class="li"><p class="p">Level 1: CPLEX checks <strong class="ph b">feasibility</strong> of
+the corresponding MIP start. This level requires you to provide values
+for <strong class="ph b">all</strong> variables in the problem, both discrete and
+continuous. If any values are missing, CPLEX does not process this
+MIP start.</p>
+</li>
+<li class="li"><p class="p">Level 2: CPLEX solves the <strong class="ph b">fixed
+LP</strong> problem specified by the MIP start. This effort level requires
+you to provide values for all <strong class="ph b">discrete</strong> variables.
+If values for any discrete variables are missing, CPLEX does not process
+the MIP start. </p>
+</li>
+<li class="li"><p class="p">Level 3: CPLEX solves a subMIP. You must
+specify the value of at least one discrete variable at this effort
+level. </p>
+</li>
+<li class="li"><p class="p">Level 4: CPLEX attempts to repair the MIP
+start if it is infeasible, according to the parameter that sets the <a class="xref" href="../../../../../Parameters/topics/RepairTries.html" title="Limits the attempts to repair an infeasible MIP start.">number of attempts to repair infeasible MIP start</a> (<samp class="ph codeph">RepairTries</samp>, <samp class="ph codeph">CPX_PARAM_REPAIRTRIES</samp>). You must specify the value
+of at least one discrete variable at this effort level, too.</p>
+</li>
+</ul>
+<p class="p">You may specify a different level of effort for each
+MIP start, for example, differing levels of effort for the incumbent,
+for a MIP start corresponding to a solution in the solution pool,
+for a MIP start supplied by the user. By <strong class="ph b">default</strong>,
+CPLEX expends effort at level 4 for the first MIP start and at level
+1 (one) for other MIP starts. You may change that level of effort;
+you do so by means of an argument to the method or routine when you
+add a MIP start to a model or when you modify the MIP start.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__section1219737626118"><h2 class="title sectiontitle">MIP starts
+and repair tries</h2><p class="p">If the values specified in your
+MIP start do not lead directly to an integer-feasible solution, CPLEX
+applies a heuristic to try to repair the MIP start. The number of
+times that CPLEX attempts to repair a MIP start is controlled by a
+parameter, the <a class="xref" href="../../../../../Parameters/topics/RepairTries.html" title="Limits the attempts to repair an infeasible MIP start.">number of attempts to repair infeasible MIP start</a> (<samp class="ph codeph">RepairTries</samp> in
+Concert Technology, <samp class="ph codeph">CPX_PARAM_REPAIRTRIES</samp> in
+the Callable Library). If this process succeeds, the solution will
+be treated as an integer solution of the current problem.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__oTsHcX1T"><h2 class="title sectiontitle">MIP starts and the
+solution pool</h2><p class="p">If you are solving a sequence of
+problems, for example, by modifying and re-solving the model, CPLEX
+creates a MIP start corresponding to the incumbent and to each member
+of the solution pool. You may add other MIP starts which you have
+computed. CPLEX then automatically processes all of these MIP starts,
+unless you have turned off MIP starts by setting that parameter to
+0 (zero). For documentation of the MIP start parameter (<samp class="ph codeph">AdvInd</samp>, <samp class="ph codeph">CPX_PARAM_ADVIND</samp>) see <a class="xref" href="../../../../../Parameters/topics/AdvInd.html" title="If set to 1 or 2, this parameter specifies that CPLEX should use advanced starting information when it initiates optimization.">advanced start switch</a> in the <em class="ph i">CPLEX
+Parameters Reference Manual</em>. </p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__section1218614208185"><h2 class="title sectiontitle">MIP starts
+and the Interactive Optimizer</h2><p class="p">To write a particular
+MIP start to a file from the Interactive Optimizer, use the <samp class="ph codeph">write</samp> command supplying the file name, the file
+extension for MST formatted files, and the identifier of the MIP start,
+like this:</p>
+<pre class="pre codeblock"><code>write filename.mst id</code></pre>
+<p class="p">The identifier of the MIP start may be its <strong class="ph b">name</strong> or
+its <strong class="ph b">index</strong> number. In the Interactive Optimizer, MIP
+starts are named by default like this: <samp class="ph codeph">m1</samp>, <samp class="ph codeph">m2</samp>, <samp class="ph codeph">m3</samp>, and so forth (that
+is, m followed by a number). The index number of a MIP start ranges
+from 1 (one) through the number of existing MIP starts for the current
+problem.</p>
+<p class="p">To <strong class="ph b">write all</strong> existing MIP
+starts from the current session of the Interactive Optimizer to a
+formatted file, use this command:</p>
+<pre class="pre codeblock"><code>write filename.mst all</code></pre>
+<p class="p">To <strong class="ph b">delete</strong> a MIP start from the current session
+of the Interactive Optimizer, use this command, where <samp class="ph codeph">id</samp> is
+the name or index of the MIP start to delete:</p>
+<pre class="pre codeblock"><code>change delete mipstart id</code></pre>
+<p class="p">To delete a range of MIP starts, supply one the conventional
+options for a range in the Interactive Optimizer, using hyphen or
+wild card star, like these examples:</p>
+<pre class="pre codeblock"><code>change delete mipstart 5-7</code></pre>
+<pre class="pre codeblock"><code>change delete mipstart *</code></pre>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__section1304675155017"><h2 class="title sectiontitle">MIP starts
+in the C++ API</h2><p class="p">Use the method <samp class="ph codeph">IloCplex::addMIPStart</samp> to
+add a MIP start to your model. This method is not incremental. In
+other words, successive calls of this method do not add more values
+to an existing MIP start. Instead, successive calls of the method
+override any existing MIP start. That is, each call of this method
+creates a new MIP start.</p>
+<p class="p">Furthermore, this method works
+only on one-dimensional arrays. If you want to create a MIP start
+from a multidimensional array, you first must flatten the multidimensional
+array by copying the variables into a one-dimensional array before
+you call this method. Here is a sample, assuming a matrix of dimensions
+m by n, with the starting value <samp class="ph codeph">x[i][j]</samp> in <samp class="ph codeph">start[i][j]</samp>, that you can adapt to your own application.</p>
+<pre class="pre codeblock"><code>     IloNumVarArray startVar(env);
+     IloNumArray startVal(env);
+     for (int i = 0; i &lt; m; ++i)
+         for (int j = 0; j &lt; n; ++j) {
+             startVar.add(x[i][j]);
+             startVal.add(start[i][j]);
+         }
+     cplex.addMIPStart(startVar, startVal);
+     startVal.end();
+     startVar.end();</code></pre>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.638620__section1304675180798"><h2 class="title sectiontitle">MIP starts
+in the Java API</h2><p class="p">Use the method <samp class="ph codeph">IloCplex.addMIPStart</samp> to
+add a MIP start to your model. This method is not incremental. In
+other words, successive calls of this method do not add more values
+to an existing MIP start. Instead, successive calls of the method
+override any existing MIP start. That is, each call of this method
+creates a new MIP start.</p>
+<p class="p">Furthermore, this method works
+only on one-dimensional arrays. If you want to create a MIP start
+from a multidimensional array, you first must flatten the multidimensional
+array by copying the variables into a one-dimensional array before
+you call this method. Here is a sample, assuming a matrix of dimensions
+m by n, with the starting value <samp class="ph codeph">x[i][j]</samp> in <samp class="ph codeph">start[i][j]</samp>, that you can adapt to your own application.</p>
+<pre class="pre codeblock"><code>     IloNumVar[] startVar = new IloNumVar[m * n];
+     double[] startVal = new double[m * n];
+     for (int i = 0, idx = 0; i &lt; m; ++i)
+         for (int j = 0; j &lt; n; ++j) {
+             startVar[idx] = x[i][j];
+             startVal[idx] = start[i][j];
+             ++idx;
+         }
+     cplex.addMIPStart(startVar, startVal);
+     startVar = null;
+     startVal = null;</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" title="Documents the solution of mixed integer programs (MIPs) with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values.">Solving mixed integer programming problems (MIP)</a></div>
+</div>
+</div></body>
+</html>

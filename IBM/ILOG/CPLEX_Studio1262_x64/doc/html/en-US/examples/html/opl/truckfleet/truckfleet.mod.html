@@ -1,0 +1,161 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">Problem Description</font></b>
+015: <b><font color="#007D00">-------------------</font></b>
+016: <b><font color="#007D00">The problem is to deliver some orders to several clients with a single truck. </font></b>
+017: <b><font color="#007D00">Each order consists of a given quantity of a product of a certain type (called</font></b>
+018: <b><font color="#007D00">its color).</font></b>
+019: <b><font color="#007D00">The truck must be configured in order to handle one, two or three different colors of products.</font></b>
+020: <b><font color="#007D00">The cost for configuring the truck from a configuration A to a configuration B depends on A and B.</font></b>
+021: <b><font color="#007D00">The configuration of the truck determines its capacity and its loading cost. </font></b>
+022: <b><font color="#007D00">A truck can only be loaded with orders for the same customer.</font></b>
+023: <b><font color="#007D00">Both the cost (for configuring and loading the truck) and the number of travels needed to deliver all the </font></b>
+024: <b><font color="#007D00">orders must be minimized, the cost being the most important criterion. </font></b>
+025: 
+026: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+027: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+028: 
+029: <b><font color="#0000FF">int</font></b> nbTrucks       = ...; <b><font color="#007D00">//max number of travels of the truck</font></b>
+030: <b><font color="#0000FF">range</font></b> Trucks       = 1..nbTrucks;
+031: 
+032: <b><font color="#0000FF">tuple</font></b> Order {
+033:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+034:   <b><font color="#0000FF">int</font></b> customerId;
+035:   <b><font color="#0000FF">int</font></b> volume;
+036:   <b><font color="#0000FF">string</font></b> color;
+037: }
+038: {Order} Orders = ...;
+039: <b><font color="#0000FF">int</font></b> volumes[o <b><font color="#0000FF">in</font></b> Orders] = o.volume;
+040: {<b><font color="#0000FF">int</font></b>} Customers = { o.customerId | o <b><font color="#0000FF">in</font></b> Orders };
+041: 
+042: <b><font color="#0000FF">tuple</font></b> TruckConfig {
+043:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+044:   <b><font color="#0000FF">int</font></b> maxLoad;
+045:   <b><font color="#0000FF">int</font></b> cost;
+046:   {<b><font color="#0000FF">string</font></b>} allowedColors;
+047: }
+048: {TruckConfig} TruckConfigs = ...;
+049: {<b><font color="#0000FF">int</font></b>} TruckConfigIds = { t.id | t <b><font color="#0000FF">in</font></b> TruckConfigs};
+050: <b><font color="#0000FF">int</font></b> minTruckConfigId = <b><font color="#7D007D">min</font></b>(i <b><font color="#0000FF">in</font></b> TruckConfigIds) i; 
+051: <b><font color="#0000FF">int</font></b> maxTruckConfigId = <b><font color="#7D007D">max</font></b>(i <b><font color="#0000FF">in</font></b> TruckConfigIds) i; 
+052: <b><font color="#0000FF">range</font></b> TruckConfigRange = minTruckConfigId..maxTruckConfigId;
+053: <b><font color="#0000FF">int</font></b> maxTruckConfigLoad[TruckConfigIds] = [t.id : t.maxLoad | t <b><font color="#0000FF">in</font></b> TruckConfigs];
+054: <b><font color="#0000FF">int</font></b> maxLoad = <b><font color="#7D007D">max</font></b>(t <b><font color="#0000FF">in</font></b> TruckConfigIds) maxTruckConfigLoad[t]; 
+055: 
+056: <b><font color="#007D00">//cost for loading a truck of a given config</font></b>
+057: <b><font color="#0000FF">int</font></b> truckCost[TruckConfigIds] =  [t.id : t.cost | t <b><font color="#0000FF">in</font></b> TruckConfigs];
+058: 
+059: <b><font color="#007D00">//configuration of the truck</font></b>
+060: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> truckConfigs[Trucks] <b><font color="#0000FF">in</font></b> TruckConfigRange;
+061: <b><font color="#007D00">//In which truck is an order</font></b>
+062: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> where[Orders] <b><font color="#0000FF">in</font></b> Trucks;
+063: <b><font color="#007D00">//load of a truck</font></b>
+064: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> load[Trucks] <b><font color="#0000FF">in</font></b> 0..maxLoad;
+065: <b><font color="#007D00">// number of trucks used</font></b>
+066: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> numUsed <b><font color="#0000FF">in</font></b> 0..nbTrucks;
+067: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> customerOfTruck[Trucks] <b><font color="#7D007D">in </font></b>(<b><font color="#7D007D">min</font></b>(i <b><font color="#0000FF">in</font></b> Customers) i)..(<b><font color="#7D007D">max</font></b>(i <b><font color="#0000FF">in</font></b> Customers) i);
+068: 
+069: <b><font color="#0000FF">tuple</font></b> Transition {
+070:    <b><font color="#0000FF">int</font></b> src;
+071:    <b><font color="#0000FF">int</font></b> dest;
+072:    <b><font color="#0000FF">int</font></b> cost;
+073: };
+074: {Transition} costTuples = ...;
+075: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> transitionCost[Trucks] <b><font color="#0000FF">in</font></b> 0..(<b><font color="#7D007D">max</font></b>(t <b><font color="#0000FF">in</font></b> costTuples) t.cost);
+076: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> configOfContainer[Orders] <b><font color="#0000FF">in</font></b> TruckConfigRange;
+077: 
+078: <b><font color="#0000FF">execute</font></b> {
+079:   cp.param.timeLimit=20;
+080:   cp.param.logPeriod=50000;
+081:   cp.setSearchPhases(cp.factory.searchPhase(where));
+082: }
+083: 
+084: // Objective: first criterion for minimizing the cost for configuring and loading trucks 
+085: //            second criterion for minimizing the number of trucks
+086: dexpr int e1 =   sum(t in Trucks) (truckCost[truckConfigs[t]]*(load[t]!=0))
+087:   + sum(t in Trucks) transitionCost[t];
+088: dexpr int e2 = numUsed;
+089: 
+090: minimize staticLex(e1, e2);  // trying to minimize cost first
+091: //minimize staticLex(e2, e1);  // trying to minimize numUsed first
+092: subject to {
+093:   forall(t <b><font color="EA7D00">in</font></b> Trucks)
+094:     truckConfigs[t] <b><font color="EA7D00">in</font></b> TruckConfigIds;
+095:   forall(o <b><font color="EA7D00">in</font></b> Orders)
+096:     configOfContainer[o] <b><font color="EA7D00">in</font></b> TruckConfigIds;
+097:   forall(t <b><font color="EA7D00">in</font></b> Trucks)
+098:     customerOfTruck[t] <b><font color="EA7D00">in</font></b> Customers;
+099: 
+100:   forall(t <b><font color="EA7D00">in</font></b> 2..nbTrucks)
+101:     allowedAssignments(costTuples, truckConfigs[t-1], truckConfigs[t], transitionCost[t-1]);
+102: 
+103:   <b><font color="#007D00">// constrain the volume of the orders in each truck </font></b>
+104:   pack(load, where, volumes, numUsed);
+105:   forall(t <b><font color="EA7D00">in</font></b> Trucks)
+106:     load[t] &lt;= maxTruckConfigLoad[truckConfigs[t]];
+107: 
+108:   <b><font color="#007D00">// compatibility between the colors of an order and the configuration of its truck </font></b>
+109:   forall(o <b><font color="EA7D00">in</font></b> Orders) {
+110:     <b><font color="#007D00">//configOfContainer[o] in allowedContainerConfigs[o.color];</font></b>
+111:     configOfContainer[o] <b><font color="EA7D00">in</font></b> { t.id | t <b><font color="EA7D00">in</font></b> TruckConfigs : o.color <b><font color="EA7D00">in</font></b> t.allowedColors};
+112:     configOfContainer[o] == truckConfigs[where[o]];
+113:   }
+114: 
+115:   <b><font color="#007D00">// only one customer per truck </font></b>
+116:   forall(o <b><font color="EA7D00">in</font></b> Orders)
+117:     customerOfTruck[where[o]] == o.customerId;
+118: 
+119:   <b><font color="#007D00">// non used trucks are at the end</font></b>
+120:   forall(t <b><font color="EA7D00">in</font></b> 2..nbTrucks)
+121:     (load[t-1]) &gt; 0 || (load[t] == 0);
+122: 
+123:   <b><font color="#007D00">// Dominance: the non used truck keep the last used configuration</font></b>
+124:   load[1] &gt; 0;
+125:   forall(t <b><font color="EA7D00">in</font></b> 2..nbTrucks)
+126:     (load[t] &gt; 0) || (truckConfigs[t] == truckConfigs[t-1]);
+127: 
+128:   <b><font color="#007D00">//Dominance:  regroup deliveries with same configuration</font></b>
+129:   forall(t <b><font color="EA7D00">in</font></b> 2..nbTrucks-1)
+130:     (truckConfigs[t] == truckConfigs[t-1])
+131:     || and(p <b><font color="EA7D00">in</font></b> (t+1)..nbTrucks) truckConfigs[p] != truckConfigs[t-1];
+132: }
+133: 
+134: tuple solutionT{
+135:         <b><font color="#0000FF">int</font></b> truck;
+136:         <b><font color="#0000FF">int</font></b> config;
+137:         Order o;
+138: };
+139: {solutionT} solution = {&lt;t, truckConfigs[t], o&gt; | t <b><font color="EA7D00">in</font></b> Trucks : load[t]!=0, o <b><font color="EA7D00">in</font></b> Orders : where[o] == t};
+140: 
+141: execute {
+142:   writeln(<b><font color="#8A2BE2">"Configuration cost: "</font></b> + e1 +
+143:           <b><font color="#8A2BE2">" Number of Trucks: "</font></b> + numUsed);
+144:           
+145:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> t <b><font color="EA7D00">in</font></b> Trucks) {  
+146:     <b><font color="EA7D00">if</font></b> (load[t]!=0) {
+147:       write(<b><font color="#8A2BE2">"Truck "</font></b> + t + <b><font color="#8A2BE2">": Config="</font></b> + truckConfigs[t] + <b><font color="#8A2BE2">" Items= "</font></b>);
+148:       <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> o <b><font color="EA7D00">in</font></b> Orders) {
+149:         <b><font color="EA7D00">if</font></b> (where[o] == t) {
+150:           write(<b><font color="#8A2BE2">"&lt;"</font></b> + o.id + <b><font color="#8A2BE2">","</font></b> + o.color + <b><font color="#8A2BE2">","</font></b> + o.volume + <b><font color="#8A2BE2">"&gt; "</font></b>);
+151:         }
+152:       }
+153:       writeln();
+154:     }
+155:   }
+156: };
+</tt></pre>

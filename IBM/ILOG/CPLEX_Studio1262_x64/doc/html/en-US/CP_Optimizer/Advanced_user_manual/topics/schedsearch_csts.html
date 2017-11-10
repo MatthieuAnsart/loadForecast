@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Writing a constraint with interval variables" />
+<meta name="abstract" content="Constraints link specified decision variables." />
+<meta name="Description" content="Constraints link specified decision variables." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1271768850169" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<title>Writing a constraint with interval variables</title>
+</head>
+<body role="main" id="descriptiveTopic1271768850169">
+<h1 class="title topictitle1">Writing a constraint with interval variables</h1>
+<div class="body"><p class="shortdesc">Constraints link specified decision variables.</p>
+<p class="p">Writing a new constraint involving instances of <samp class="ph codeph">IlcIntervalVar</samp> involves
+the complications of managing the presence status of interval variables.
+All constraint conditions must support the notion that <span class="q">"An absent
+interval does not belong to the schedule solution."</span> In other words,
+discovering an absent interval cannot result in a filtering algorithm
+raising a failure.  </p>
+<p class="p">Consider a set of constraints defined by a condition <samp class="ph codeph">C</samp> on
+an interval variable <samp class="ph codeph">v</samp>. If, given the actual ranges
+of the start, end or length of the interval, the condition <samp class="ph codeph">C</samp> is
+violated, you must set the interval to be absent. The demon of event
+on the interval domain of <samp class="ph codeph">v</samp> should look like.  </p>
+<pre class="pre codeblock"><code>  if (v.isAbsent())
+    return;
+  else if (isViolatedC(v))
+    v.setAbsent();
+  else
+    updateIntervalDomainUnderC(v);</code></pre>
+<p class="p">where <samp class="ph codeph">isViolatedC(v)</samp> and <samp class="ph codeph">updateIntervalDomainUnderC(v)</samp> are
+member functions of the constraint class, where the latter method
+updates the start,  end and length ranges of v.  </p>
+<p class="p">Now, consider a set of constraints defined by a condition <samp class="ph codeph">C</samp> on
+a pair of interval variables <samp class="ph codeph">v1</samp> and <samp class="ph codeph">v2</samp>.
+The change in the interval domain of <samp class="ph codeph">v1</samp> has consequences
+on <samp class="ph codeph">v2</samp> if and only if presence of <samp class="ph codeph">v2</samp> implies
+presence of <samp class="ph codeph">v1</samp> (that is the case in particular if <samp class="ph codeph">v1</samp> is
+present). As a consequence, when this pairwise condition is violated,
+it can be concluded that <samp class="ph codeph">v1</samp> and <samp class="ph codeph">v2</samp> cannot
+be both present. For optional intervals, you generally know from the
+model the relationship between the presence statuses of the intervals
+in the pair; it is important to store this information in the constraint
+data structure. The demon of event on the interval domain of <samp class="ph codeph">v1</samp> would
+look like:  </p>
+<pre class="pre codeblock"><code>  if (isDone())
+    return;
+  else if (v1.isAbsent() || v2.isAbsent())
+    markDone();
+  else if (isViolatedC(v1, v2)) {
+    IlcPresenceImpliesNot(v1, v2);
+    markDone();
+  } else if (presenceImplies(v1, v2))
+    updateIntervalDomainUnderCFrom1(v1, v2);</code></pre>
+<p class="p">where <samp class="ph codeph">isDone()</samp> and <samp class="ph codeph">presenceImplies(v1,
+v2)</samp> are member functions of the constraint class.  </p>
+<p class="p">The update of the interval domain must support hypothetical reasoning.
+That is, if the presence of <samp class="ph codeph">v1</samp> implies the presence
+of <samp class="ph codeph">v2</samp>, a change in the domain interval of <samp class="ph codeph">v2</samp> may
+affect the domain interval of <samp class="ph codeph">v1</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" title="Custom constraints and goals for scheduling can be written using engine extensions.">Writing custom scheduling constraints and goals</a></div>
+</div>
+</div></body>
+</html>

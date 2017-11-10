@@ -1,0 +1,230 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/*  ----------------------------------------------------</font></b>
+013: <b><font color="#007D00"> *   OPL Model for Fleet Assignment Example</font></b>
+014: <b><font color="#007D00"> *</font></b>
+015: <b><font color="#007D00"> *   This model is described in the documentation. </font></b>
+016: <b><font color="#007D00"> *   See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+017: <b><font color="#007D00"> *</font></b>
+018: <b><font color="#007D00"> * This model is greater than the size allowed in trial mode. </font></b>
+019: <b><font color="#007D00"> * You therefore need a commercial edition of CPLEX Studio </font></b>
+020: <b><font color="#007D00"> * to run this example. </font></b>
+021: <b><font color="#007D00"> * If you are a student or teacher, you can also get a </font></b>
+022: <b><font color="#007D00"> * full version through the IBM Academic Initiative.</font></b>
+023: <b><font color="#007D00"> *</font></b>
+024: <b><font color="#007D00"> */</font></b>
+025: 
+026: <b><font color="#0000FF">int</font></b>      Horizon = 60*24*7-1;    <b><font color="#007D00">// Number of minutes in a week</font></b>
+027: <b><font color="#0000FF">int</font></b>      MaxRefuel = 20;         
+028: {<b><font color="#0000FF">string</font></b>} Airports = ...;
+029: {<b><font color="#0000FF">string</font></b>} Fleets = ...;
+030: {<b><font color="#0000FF">string</font></b>} Distance = ...;
+031: <b><font color="#0000FF">float</font></b>    MaxSpill = ...;
+032: 
+033: <b><font color="#007D00">//Characteristics of each fleet</font></b>
+034: <b><font color="#0000FF">tuple</font></b> fleetType 
+035: {
+036:   <b><font color="#0000FF">int</font></b>      aircrafts;  <b><font color="#007D00">//number of aircrafts for each fleet</font></b>
+037:   <b><font color="#0000FF">string</font></b>   dist;       <b><font color="#007D00">//long-medium-short distance flight</font></b>
+038:   <b><font color="#0000FF">int</font></b>      seats;      <b><font color="#007D00">//number of seats</font></b>
+039:   <b><font color="#0000FF">int</font></b>      refuelT;    <b><font color="#007D00">//Time on ground between flights</font></b>
+040:   <b><font color="#0000FF">int</font></b>      a;          <b><font color="#007D00">//fixed cost</font></b>
+041:   <b><font color="#0000FF">int</font></b>      b;          <b><font color="#007D00">//variable cost : total cost = a + BH * b * seats where BH is the flight time</font></b>
+042: }
+043: fleetType FleetInfo[Fleets] = ...; 
+044: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(pl <b><font color="#0000FF">in</font></b> Fleets) FleetInfo[pl].refuelT &lt;= MaxRefuel;
+045: 
+046: <b><font color="#007D00">//Flight legs</font></b>
+047: <b><font color="#0000FF">tuple</font></b> flightLegKey 
+048: {
+049:   <b><font color="#0000FF">int</font></b>       id;    <b><font color="#007D00">//flight id</font></b>
+050:   <b><font color="#0000FF">string</font></b>    depA;  <b><font color="#007D00">//departure airport</font></b>
+051:   <b><font color="#0000FF">int</font></b>       depT;  <b><font color="#007D00">//departure time </font></b>
+052:   <b><font color="#0000FF">string</font></b>    arrA;  <b><font color="#007D00">//arrival airport</font></b>
+053:   <b><font color="#0000FF">int</font></b>       arrT;  <b><font color="#007D00">//arrival time </font></b>
+054:   <b><font color="#0000FF">string</font></b>    dist;  <b><font color="#007D00">//long-medium-short distance flight</font></b>
+055:   <b><font color="#0000FF">int</font></b>       pax;   <b><font color="#007D00">//passenger demand</font></b>
+056:   <b><font color="#0000FF">int</font></b>       price; <b><font color="#007D00">//ticket price</font></b>
+057: }
+058: {flightLegKey} FlightLegs = ...; 
+059: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(fl <b><font color="#0000FF">in</font></b> FlightLegs)  0 &lt;= fl.depT;<b><font color="#007D00">// &lt;= Horizon;</font></b>
+060: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(fl <b><font color="#0000FF">in</font></b> FlightLegs)  0 &lt;= fl.arrT;<b><font color="#007D00">// &lt;= Horizon;</font></b>
+061: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(fl <b><font color="#0000FF">in</font></b> FlightLegs)  Horizon &gt;= fl.depT;
+062: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(fl <b><font color="#0000FF">in</font></b> FlightLegs)  Horizon &gt;= fl.arrT;
+063: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(fl <b><font color="#0000FF">in</font></b> FlightLegs)  fl.depT &lt; fl.arrT;
+064: 
+065: <b><font color="#0000FF">tuple</font></b> flightLeg 
+066: {
+067:   <b><font color="#0000FF">int</font></b>       id;    <b><font color="#007D00">//flight id</font></b>
+068:   <b><font color="#0000FF">string</font></b>    depA;  <b><font color="#007D00">//departure airport</font></b>
+069:   <b><font color="#0000FF">int</font></b>       depT;  <b><font color="#007D00">//departure time </font></b>
+070:   <b><font color="#0000FF">string</font></b>    arrA;  <b><font color="#007D00">//arrival airport</font></b>
+071:   <b><font color="#0000FF">int</font></b>       arrT;  <b><font color="#007D00">//arrival time </font></b>
+072:   <b><font color="#0000FF">string</font></b>    dist;  <b><font color="#007D00">//long-medium-short distance flight</font></b>
+073:   <b><font color="#0000FF">int</font></b>       pax;   <b><font color="#007D00">//passenger demand</font></b>
+074:   <b><font color="#0000FF">int</font></b>       price; <b><font color="#007D00">//ticket price</font></b>
+075: }
+076: <b><font color="#007D00">//Flow model</font></b>
+077: {flightLeg} Source = {&lt;999,<b><font color="#8A2BE2">"Source"</font></b>, f.depT-MaxRefuel,f.depA, f.depT-MaxRefuel,f.dist,0,0&gt; | f <b><font color="#0000FF">in</font></b> FlightLegs};
+078: <b><font color="#0000FF">tuple</font></b> flightLegKey2 
+079: {
+080:   <b><font color="#0000FF">int</font></b>       id;    <b><font color="#007D00">//flight id</font></b>
+081:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>    depA;  <b><font color="#007D00">//departure airport</font></b>
+082:   <b><font color="#0000FF">int</font></b>       depT;  <b><font color="#007D00">//departure time </font></b>
+083:   <b><font color="#0000FF">string</font></b>    arrA;  <b><font color="#007D00">//arrival airport</font></b>
+084:   <b><font color="#0000FF">int</font></b>       arrT;  <b><font color="#007D00">//arrival time </font></b>
+085:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>    dist;  <b><font color="#007D00">//long-medium-short distance flight</font></b>
+086:   <b><font color="#0000FF">int</font></b>       pax;   <b><font color="#007D00">//passenger demand</font></b>
+087:   <b><font color="#0000FF">int</font></b>       price; <b><font color="#007D00">//ticket price</font></b>
+088: }
+089: 
+090: {flightLegKey2} Sink = {&lt;999,f.arrA, Horizon+MaxRefuel, <b><font color="#8A2BE2">"Sink"</font></b>, Horizon+MaxRefuel,f.dist,0,0&gt; | f <b><font color="#0000FF">in</font></b> FlightLegs};
+091: {flightLeg} Flights = FlightLegs <b><font color="#0000FF">union</font></b> Source <b><font color="#0000FF">union</font></b> Sink;
+092: 
+093: <b><font color="#007D00">//One-stop flights</font></b>
+094: <b><font color="#007D00">//These are flights which are broken into 2 sub-flights, and are flown by the</font></b>
+095: <b><font color="#007D00">//same aircraft.</font></b>
+096: <b><font color="#0000FF">tuple</font></b> oneStop
+097: {
+098:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> firstId;
+099:   <b><font color="#0000FF">int</font></b> secondId;
+100: }
+101: {oneStop} OneStopFlights = ...;
+102: 
+103: <b><font color="#007D00">//Cash Direct Operating Costs</font></b>
+104: <b><font color="#007D00">//for every couple (fleet,flight) we define  cdoc = a + b*(demand-spill)*(arrTime-depTime)</font></b>
+105: <b><font color="#0000FF">int</font></b> Cost[Flights][Fleets];
+106: 
+107: <b><font color="#007D00">//Profit</font></b>
+108: <b><font color="#007D00">//for every couple (fleet,flight) we define  profit = (demand-spill)*ticket_price</font></b>
+109: <b><font color="#0000FF">int</font></b> Profit[Flights][Fleets];
+110: 
+111: <b><font color="#007D00">//Cost &amp; Profit Initialization</font></b>
+112: <b><font color="#0000FF">execute</font></b> INITIALIZE {
+113:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> fl <b><font color="EA7D00">in</font></b> Flights) {
+114:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> pl <b><font color="EA7D00">in</font></b> Fleets) {
+115:          <b><font color="EA7D00">if</font></b>(fl.depA != <b><font color="#8A2BE2">"Source"</font></b> &amp;&amp; fl.arrA != <b><font color="#8A2BE2">"Sink"</font></b>) {  
+116:             <b><font color="#007D00">//Cost vector</font></b>
+117:             <b><font color="EA7D00">if</font></b>(fl.pax &gt; FleetInfo[pl].seats) {
+118:                Cost[fl][pl] = FleetInfo[pl].a + FleetInfo[pl].b*FleetInfo[pl].seats*(fl.arrT-fl.depT);
+119:             } <b><font color="EA7D00">else</font></b> {
+120:                Cost[fl][pl] = FleetInfo[pl].a + FleetInfo[pl].b*fl.pax*(fl.arrT-fl.depT);
+121:             }
+122: 
+123:             <b><font color="#007D00">//Profit vector</font></b>
+124:             <b><font color="EA7D00">if</font></b>(fl.pax &gt; FleetInfo[pl].seats) {
+125:                Profit[fl][pl] = FleetInfo[pl].seats*fl.price;
+126:             } <b><font color="EA7D00">else</font></b> {
+127:                Profit[fl][pl] = fl.pax*fl.price;
+128:             }
+129:          } <b><font color="EA7D00">else</font></b> {
+130:             Cost[fl][pl] = 0;
+131:             Profit[fl][pl] = 0;
+132:          }
+133:       }
+134:    }
+135: }
+136: 
+137: 
+138: /*  ----------------------------------------------------
+139:  *   Variables:
+140:  *   assignment -- assignment[fl][pl] means flights[fl] is 
+141:  *         covered by a plane in fleet[pl].
+142:  *   --------------------------------------------------- */
+143: dvar boolean Assignment[Flights][Fleets];
+144: 
+145: dexpr float objective = 
+146:   sum(fl in Flights, pl in Fleets)
+147:      (-Profit[fl][pl] + Cost[fl][pl]) * Assignment[fl][pl];
+148:       
+149: minimize objective;
+150: 
+151: subject to {
+152:   <b><font color="#007D00">// Every plane of each fleet must come from the source only once.</font></b>
+153:   forall(pl <b><font color="EA7D00">in</font></b> Fleets)
+154:     ctSource: sum(fl <b><font color="EA7D00">in</font></b> Flights: fl.depA == <b><font color="#8A2BE2">"Source"</font></b>) Assignment[fl][pl] &lt;= FleetInfo[pl].aircrafts;
+155: 
+156:   <b><font color="#007D00">// Every plane of each fleet must go to the sink only once.</font></b>
+157:   forall(pl <b><font color="EA7D00">in</font></b> Fleets)
+158:     ctSink: sum(fl <b><font color="EA7D00">in</font></b> Flights: fl.arrA == <b><font color="#8A2BE2">"Sink"</font></b>) Assignment[fl][pl] &lt;= FleetInfo[pl].aircrafts;
+159: 
+160:   forall(fl <b><font color="EA7D00">in</font></b> Flights: fl.depA != <b><font color="#8A2BE2">"Source"</font></b> &amp;&amp; fl.arrA != <b><font color="#8A2BE2">"Sink"</font></b>) 
+161:     <b><font color="#007D00">// Every "real" flight must have a plane assigned to it</font></b>
+162:     sum(pl <b><font color="EA7D00">in</font></b> Fleets) Assignment[fl][pl] == 1;
+163: 
+164:   forall(pl <b><font color="EA7D00">in</font></b> Fleets, fl <b><font color="EA7D00">in</font></b> Flights: fl.depA != <b><font color="#8A2BE2">"Source"</font></b> &amp;&amp; fl.arrA != <b><font color="#8A2BE2">"Sink"</font></b>) 
+165:     <b><font color="#007D00">// The plane must be at the airport in order to use it!</font></b>
+166:     sum(prevf <b><font color="EA7D00">in</font></b> Flights: prevf.arrA == fl.depA &amp;&amp; prevf.arrT + FleetInfo[pl].refuelT &lt;= fl.depT) 
+167:       Assignment[prevf][pl] -
+168:     sum(prevf <b><font color="EA7D00">in</font></b> Flights: prevf != fl &amp;&amp; prevf.depA == fl.depA &amp;&amp; prevf.depT &lt;= fl.depT) 
+169:       Assignment[prevf][pl]
+170:     &gt;= Assignment[fl][pl];
+171:       
+172:   forall(pl <b><font color="EA7D00">in</font></b> Fleets, fl <b><font color="EA7D00">in</font></b> Flights: fl.arrA == <b><font color="#8A2BE2">"Sink"</font></b>)
+173:     <b><font color="#007D00">// The plane must be at the airport in order to use it!</font></b>
+174:     sum(prevf <b><font color="EA7D00">in</font></b> Flights: prevf.arrA == fl.depA &amp;&amp; prevf.arrT + FleetInfo[pl].refuelT &lt;= fl.depT) 
+175:       Assignment[prevf][pl] -
+176:     sum(prevf <b><font color="EA7D00">in</font></b> Flights: prevf != fl &amp;&amp; prevf.depA == fl.depA &amp;&amp; prevf.depT &lt;= fl.depT) 
+177:       Assignment[prevf][pl]
+178:     &gt;= Assignment[fl][pl];
+179:      
+180:   <b><font color="#007D00">//Type-compatibility check between fleets and flights (long/medium/short distance)</font></b>
+181:   <b><font color="#007D00">//Long-haul aircrafts can fly long, medium and short flights, medium-haul aircrafts</font></b>
+182:   <b><font color="#007D00">//can only fly medium and short flights, and so on..</font></b>
+183:   forall(fl <b><font color="EA7D00">in</font></b> Flights: fl.depA != <b><font color="#8A2BE2">"Source"</font></b> &amp;&amp; fl.arrA != <b><font color="#8A2BE2">"Sink"</font></b>)
+184:     forall(pl <b><font color="EA7D00">in</font></b> Fleets: FleetInfo[pl].dist == <b><font color="#8A2BE2">"Short"</font></b> &amp;&amp; (fl.dist == <b><font color="#8A2BE2">"Medium"</font></b> || fl.dist == <b><font color="#8A2BE2">"Long"</font></b>))
+185:       Assignment[fl][pl] == 0;
+186:   forall(fl <b><font color="EA7D00">in</font></b> Flights: fl.depA != <b><font color="#8A2BE2">"Source"</font></b> &amp;&amp; fl.arrA != <b><font color="#8A2BE2">"Sink"</font></b>)
+187:     forall(pl <b><font color="EA7D00">in</font></b> Fleets: FleetInfo[pl].dist == <b><font color="#8A2BE2">"Medium"</font></b> &amp;&amp; fl.dist == <b><font color="#8A2BE2">"Long"</font></b>)
+188:       Assignment[fl][pl] == 0;
+189: 
+190:   forall(fl <b><font color="EA7D00">in</font></b> Flights: fl.depA != <b><font color="#8A2BE2">"Source"</font></b> &amp;&amp; fl.arrA != <b><font color="#8A2BE2">"Sink"</font></b>)
+191:     <b><font color="#007D00">//MaxSpill constraint</font></b>
+192:     <b><font color="#007D00">//if MaxSpill=.1 and the demand for the flight f is 100, then the maximum no of passengers </font></b>
+193:     <b><font color="#007D00">//that can be spilled is 10 (i.e. you must use an aircraft which has seat capacity &gt;= 90 )</font></b>
+194:     ctSpill: sum(pl <b><font color="EA7D00">in</font></b> Fleets) Assignment[fl][pl]*FleetInfo[pl].seats &gt;= fl.pax*(1-MaxSpill);
+195: 
+196:   forall(pl <b><font color="EA7D00">in</font></b> Fleets) {
+197:     <b><font color="#007D00">// Planes must end the day where they started the day</font></b>
+198:     forall(ap <b><font color="EA7D00">in</font></b> Airports) {
+199:       sum(fl <b><font color="EA7D00">in</font></b> Flights: fl.depA == <b><font color="#8A2BE2">"Source"</font></b> &amp;&amp; fl.arrA == ap) Assignment[fl][pl] ==
+200:       sum(fl <b><font color="EA7D00">in</font></b> Flights: fl.depA == ap &amp;&amp; fl.arrA == <b><font color="#8A2BE2">"Sink"</font></b>) Assignment[fl][pl];
+201:     }
+202: 
+203:     <b><font color="#007D00">//One-Stop services</font></b>
+204:     <b><font color="#007D00">//force each ordered pair of forced turn flights to use the same equipment type</font></b>
+205:     forall(pair <b><font color="EA7D00">in</font></b> OneStopFlights) {
+206:       sum(f1 <b><font color="EA7D00">in</font></b> Flights: f1.id == pair.firstId) Assignment[f1][pl] ==
+207:       sum(f2 <b><font color="EA7D00">in</font></b> Flights: f2.id == pair.secondId) Assignment[f2][pl];
+208:     }
+209:   }
+210: }
+211: 
+212: tuple AssignmentSolutionT{ 
+213:         flightLegKey Flights;   
+214:         string Fleets; 
+215:         <b><font color="#0000FF">int</font></b> value; 
+216: };
+217: {AssignmentSolutionT} AssignmentSolution = {&lt;i0,i1,Assignment[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Flights,i1 <b><font color="EA7D00">in</font></b> Fleets};
+218: 
+219: 
+220: execute DISPLAY {
+221:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> fl <b><font color="EA7D00">in</font></b> Flights)
+222:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> pl <b><font color="EA7D00">in</font></b> Fleets)
+223:          <b><font color="EA7D00">if</font></b>(Assignment[fl][pl] == 1) 
+224:             writeln(<b><font color="#8A2BE2">"Assignment["</font></b>, fl, <b><font color="#8A2BE2">"]["</font></b>, pl, <b><font color="#8A2BE2">"] = "</font></b>, Assignment[fl][pl]);
+225: }
+</tt></pre>

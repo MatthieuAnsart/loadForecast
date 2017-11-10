@@ -1,0 +1,119 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/*******************************************************************************</font></b>
+013: <b><font color="#007D00">OPL Model for Air Traffic Flow Management </font></b>
+014: 
+015: <b><font color="#007D00">This is an air traffic flow management problem. In order to avoid</font></b>
+016: <b><font color="#007D00">congestion in critical air sectors, the take-off of flights is</font></b>
+017: <b><font color="#007D00">delayed.</font></b>
+018: 
+019: <b><font color="#007D00">Limitations of air capacity are expressed in terms of regulated</font></b>
+020: <b><font color="#007D00">periods, i.e. an interval with an hourly capacity rate.  Regulated</font></b>
+021: <b><font color="#007D00">air-traffic sectors have one or several regulated periods, i.e. their</font></b>
+022: <b><font color="#007D00">capacity is limited during these periods.  The flights have an</font></b>
+023: <b><font color="#007D00">expected take-off time (ETOT) which is specified in hours, minutes,</font></b>
+024: <b><font color="#007D00">and seconds and then converted into total number of minutes.  An enter</font></b>
+025: <b><font color="#007D00">event specifies that a given flight will enter a given sector at an</font></b>
+026: <b><font color="#007D00">expected time (called expected time over).</font></b>
+027: 
+028: <b><font color="#007D00">The objective is to minimize the total sum of flight delays.</font></b>
+029: 
+030: <b><font color="#007D00">*******************************************************************************/</font></b> 
+031: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+032: 
+033: <b><font color="#0000FF">int</font></b> nbOfFlights = ...;  
+034: <b><font color="#0000FF">range</font></b> Flights = 1 .. nbOfFlights;
+035: 
+036: {<b><font color="#0000FF">string</font></b>} SectorNames = ...;
+037: 
+038: <b><font color="#007D00">// times are specified in hours, minutes, seconds </font></b>
+039: <b><font color="#007D00">// (in general year, month, day are needed as well)</font></b>
+040: <b><font color="#0000FF">tuple</font></b> Time {
+041:    <b><font color="#0000FF">int</font></b> hours;
+042:    <b><font color="#0000FF">int</font></b> minutes;
+043:    <b><font color="#0000FF">int</font></b> seconds;
+044: };
+045: 
+046: <b><font color="#007D00">// limitations of air capacity are expressed in terms of regulated</font></b>
+047: <b><font color="#007D00">// periods, i.e. an interval with an hourly capacity rate</font></b>
+048: <b><font color="#0000FF">tuple</font></b> Period {
+049:    Time start;
+050:    Time end;
+051:    <b><font color="#0000FF">int</font></b> rate;
+052: };
+053: 
+054: {Period} periods[SectorNames] = ...;
+055: 
+056: <b><font color="#007D00">// an enter event specifies that a given flight will enter a given sector</font></b>
+057: <b><font color="#007D00">// at an expected time (called expected time over)</font></b>
+058: <b><font color="#0000FF">tuple</font></b> Enter { 
+059:    <b><font color="#0000FF">int</font></b> flight;
+060:    <b><font color="#0000FF">string</font></b> sector;
+061:    Time eto;
+062: };
+063: 
+064: <b><font color="#0000FF">int</font></b> nbOfEnters = ...;
+065: <b><font color="#0000FF">range</font></b> Enters = 1 .. nbOfEnters;
+066: Enter e[Enters] = ...;
+067:    
+068: <b><font color="#007D00">// flight delays will be limited to 2 hours</font></b>
+069: <b><font color="#0000FF">int</font></b> maxDelay = 120;
+070: 
+071: <b><font color="#007D00">// capacity of the resource will be made available by time steps of 10 minutes</font></b>
+072: <b><font color="#0000FF">int</font></b> timeStep = 10;
+073: 
+074: <b><font color="#007D00">// flight delays are expressed by integer variables</font></b>
+075: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> delay[Flights] <b><font color="#0000FF">in</font></b> 0 .. maxDelay;
+076: 
+077: <b><font color="#007D00">// each enter event is modelled by an activity of duration 1</font></b>
+078: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> a[Enters] <b><font color="#0000FF">size</font></b> 1;
+079: 
+080: <b><font color="#007D00">// each sector is modelled by a resource</font></b>
+081: <b><font color="#0000FF">cumulFunction</font></b> r[i <b><font color="#0000FF">in</font></b> SectorNames] = <b><font color="#7D007D">sum</font></b>(en <b><font color="#0000FF">in</font></b> Enters : e[en].sector == i) <b><font color="#7D007D">pulse</font></b>(a[en], 1);
+082: 
+083: <b><font color="#0000FF">execute</font></b> {
+084:                 cp.param.FailLimit = 20000;
+085: }
+086: 
+087: dexpr int totalDelay = sum(i in Flights) delay[i];
+088: 
+089: minimize totalDelay;
+090: constraints {
+091: 
+092:   <b><font color="#007D00">// the capacity rate is adapted to intervals of 10 minutes;</font></b>
+093:   <b><font color="#007D00">// the time scale of a resource is divided by the time step</font></b>
+094:   forall (i <b><font color="EA7D00">in</font></b> SectorNames)
+095:       forall (p <b><font color="EA7D00">in</font></b> periods[i])
+096:          alwaysIn(r[i], (p.start.hours * 60 + p.start.minutes) div timeStep,
+097:                         (p.end.hours * 60 + p.end.minutes) div timeStep,
+098:                            0,
+099:                         (p.rate * timeStep + 59) div 60);
+100: 
+101: 
+102:    <b><font color="#007D00">// a flight enters a sector at its expected time-over plus its delay;</font></b>
+103:    <b><font color="#007D00">// since the time scale of a resource is divided by the time step,</font></b>
+104:    <b><font color="#007D00">// we do the same for the start time of the activity</font></b>
+105:    forall (i <b><font color="EA7D00">in</font></b> Enters)
+106:       startOf(a[i]) == (delay[e[i].flight] + e[i].eto.hours * 60 + e[i].eto.minutes) div timeStep;
+107: 
+108:    forall(i <b><font color="EA7D00">in</font></b> SectorNames)
+109:      r[i] &lt;= nbOfFlights;
+110: }
+111: 
+112: execute {
+113:   writeln(<b><font color="#8A2BE2">"total delay = "</font></b> + totalDelay);
+114: }
+</tt></pre>

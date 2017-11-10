@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Filtering in tuples of parameters" />
+<meta name="abstract" content="OPL enables simple equality constraints to be factorized inside tuples, which is important in obtaining more readable and efficient models. In this context, slicing refers to nested iterations with filtering conditions." />
+<meta name="Description" content="OPL enables simple equality constraints to be factorized inside tuples, which is important in obtaining more readable and efficient models. In this context, slicing refers to nested iterations with filtering conditions." />
+<meta name="DC.subject" content="efficient models, models, readability, implicit slicing, slicing, explicit/implicit, tuples, of parameters, filtering, in tuples of parameters" />
+<meta name="keywords" content="efficient models, models, readability, implicit slicing, slicing, explicit/implicit, tuples, of parameters, filtering, in tuples of parameters" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_formalParam.1010977" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" />
+<title>Filtering in tuples of parameters</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_formalParam.1010977">
+<h1 class="title topictitle1">Filtering in tuples of parameters</h1>
+<div class="body conbody"><div class="abstract"><div class="shortdesc">OPL enables simple equality
+constraints to be factorized inside tuples, which is important in
+obtaining more readable and efficient models. In this context, slicing
+refers to nested iterations with filtering conditions. </div>
+ <p class="p"></p>
+ </div>
+<p class="p">Consider, for instance, a transportation problem where
+products must be shipped from one set of cities to another set of
+cities. The model may include a constraint specifying that the total
+shipments for all products transported along a connection may not
+exceed a specified limit. This can be expressed by a constraint </p>
+<p class="p exampletitle" id="usropllangref.uss_langref_formalParam.1010977__usropllangref.uss_langref_formalParam.1018327">Explicit slicing</p>
+<pre class="pre codeblock"><code>forall(c in connections) 
+   sum(&lt;p,co&gt; in routes: c == co) trans[&lt;p,c&gt;] &lt;= limit; 
+</code></pre>
+<p class="p">This constraint states that the total products shipped
+along each connection <samp class="ph codeph">c</samp> is not greater than <samp class="ph codeph">limit</samp>. OPL must scan the entire set <samp class="ph codeph">routes</samp> to
+select the tuples involving each connection. In this example, the
+expression <samp class="ph codeph">c==co</samp> is used to make slicing <em class="ph i">explicit</em>.</p>
+<p class="p">The constraint would be stated equivalently as follows:</p>
+<p class="p exampletitle" id="usropllangref.uss_langref_formalParam.1010977__usropllangref.uss_langref_formalParam.1018332">Implicit slicing</p>
+<pre class="pre codeblock"><code>forall(c in connections) 
+   sum(&lt;p,c&gt; in routes) trans[&lt;p,c&gt;] &lt;= limit; 
+</code></pre>
+<p class="p">In this constraint, the tuple <samp class="ph codeph">&lt;p,c&gt;</samp> contains
+one new parameter <samp class="ph codeph">p</samp> and uses the previously
+defined parameter <samp class="ph codeph">c</samp>. Since the value of <samp class="ph codeph">c</samp> is known, OPL uses it to index the set <samp class="ph codeph">routes</samp>, avoiding a complete scan of the set <samp class="ph codeph">routes</samp>. In this example, slicing is said to be <em class="ph i">implicit</em> because the formal parameter <samp class="ph codeph">c</samp> is
+used to declare iteration in both the <samp class="ph codeph">forall</samp> and <samp class="ph codeph">sum</samp> loops. You can also use a constant as a tuple
+item, for example <samp class="ph codeph">&lt;p,2&gt;</samp>, for implicit
+slicing.</p>
+<p class="p">In OPL 4.0 and later versions, models tend to be more
+readable when explicit slicing is used. Besides, there is no performance
+advantage in using implicit slicing over explicit slicing. </p>
+<div class="section" id="usropllangref.uss_langref_formalParam.1010977__usropllangref.uss_langref_formalParam.1018581"><h2 class="title sectiontitle">More about implicit slicing</h2><p class="p">You should be aware that the following
+statement:</p>
+<pre class="pre codeblock"><code>int array[i in set1] = ((sum(i in set2) 1 &gt;= 1) ? 1:0); </code></pre>
+<p class="p">is exactly equivalent to</p>
+<pre class="pre codeblock"><code>int array[i in set1] = ((sum(j in set2) 1 &gt;= 1) ? 1:0);</code></pre>
+<p class="p">that is, the two “i” on either side of the
+“equal” sign =, in the first statement, are not linked. This is called <em class="ph i">scope hiding</em> because the second “i” hides the first one
+in a nested scope.</p>
+<p class="p">In contrast, this
+statement</p>
+<pre class="pre codeblock"><code>int array[&lt;i,j&gt; in set1] = ((sum(&lt;i,j&gt; in set2) 1 &gt;= 1) ? 1:0);</code></pre>
+<p class="p">codes implicit slicing, which is equivalent
+to:</p>
+<pre class="pre codeblock"><code>int array[i in set1] = ((sum(j in set2 : j==i) 1 &gt;= 1) ? 1:0);</code></pre>
+<p class="p">In other words, there is no implicit slicing
+outside tuple patterns.</p>
+<p class="p">See also <a class="xref" href="../../opllanguser/topics/opl_languser_modelingtips.html" title="Describes a few recommended practices to help you write more efficient models.">Modeling tips</a> in the <em class="ph i">Language
+User’s Manual</em>. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" title="Describes basic formal parameters, tuples of parameters, and filtering in tuples of parameters.">Formal parameters</a></div>
+</div>
+</div></body>
+</html>

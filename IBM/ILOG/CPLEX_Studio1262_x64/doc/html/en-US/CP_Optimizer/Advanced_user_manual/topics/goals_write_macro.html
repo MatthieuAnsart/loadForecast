@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using ILCGOALn to define a new class of goals" />
+<meta name="abstract" content="A macro can be used to define a new class of goals." />
+<meta name="Description" content="A macro can be used to define a new class of goals." />
+<meta name="DC.subject" content="goal, defining custom" />
+<meta name="keywords" content="goal, defining custom" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizergoals.1011541" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" />
+<title>Using ILCGOALn to define a new class of goals</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizergoals.1011541">
+<h1 class="title topictitle1">Using ILCGOALn to define a new class of goals</h1>
+<div class="body"><p class="shortdesc">A macro can be used to define a new class of goals.</p>
+<p class="p">You define a goal using the macro <samp class="ph codeph">ILCGOALn</samp>.
+The definition consists of three parts: </p>
+<ul class="ul"><li class="li"><p class="p">a name for the goal, </p>
+ </li>
+<li class="li"><p class="p">a list of typed parameters, <samp class="ph codeph">n</samp> being
+the number of parameters and </p>
+</li>
+<li class="li"><p class="p">a body which defines how to execute the goal. </p>
+</li>
+</ul>
+<p class="p">For example, the following goals merely print something,
+but they are valid goal definitions:  </p>
+<pre class="pre codeblock"><code>ILCGOAL0(Print){
+  IloCP cp = getCP();
+  cp.out() &lt;&lt; "Print: executing a goal without parameters\n";
+  return 0;
+}
+ILCGOAL1(PrintX, IlcInt, x){
+  IloCP cp = getCP();
+  cp.out() &lt;&lt; "PrintX: executing a goal with one parameter\n";
+  cp.out() &lt;&lt; x &lt;&lt; std::endl;
+  return 0;
+}
+ILCGOAL2(PrintXY, IlcInt, x, IlcFloat, y){
+  IloCP cp = getCP();
+  cp.out() &lt;&lt; "PrintXY: executing a goal with two parameters\n";
+  cp.out() &lt;&lt; x &lt;&lt; std::endl;
+  cp.out() &lt;&lt; y &lt;&lt; std::endl;
+  return 0;
+}
+</code></pre>
+<p class="p">The macro for creating a goal class also generates a function
+for creating an instance of the goal. For example, the following statements
+are valid calls in the search layer to create instances of the goals
+just defined:    </p>
+<pre class="pre codeblock"><code>  IlcGoal goal = Print(cp);
+  IlcGoal goalX = PrintX(cp, 2);
+  IlcGoal goalXY = PrintXY(cp, 1, 2.);</code></pre>
+<p class="p">The goal creation function can be declared in a header
+file. Its signature has the same name and arguments as the goal, and
+it returns a pointer to an object of the type <samp class="ph codeph">IlcGoal</samp>.
+It does not execute the goal. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">Such pointers must not be stored since
+goals are automatically de-allocated by CP Optimizer after they have
+been executed. They can be passed as arguments as long as the goal
+has not yet been executed.  </p>
+ </div>
+<p class="p">For example, the following declarations are valid declarations
+of these same goals:  </p>
+<pre class="pre codeblock"><code>IlcGoal Print(IloCP cp);
+IlcGoal PrintX(IloCP cp, IlcInt x);
+IlcGoal PrintXY(IloCP cp, IlcInt x, IlcFloat y);
+</code></pre>
+<p class="p">You can also define a goal using subgoals. The following
+goal has three subgoals: </p>
+<pre class="pre codeblock"><code>ILCGOAL0(PrintAll){
+  IloCP cp = getCP();
+  return IlcAnd(Print(cp), PrintX(cp, 2), PrintXY(cp, 1, 2.));
+}
+</code></pre>
+<p class="p">The execution of the goal <samp class="ph codeph">PrintAll</samp> produces
+the following output: </p>
+<pre class="pre codeblock"><code>Print: executing a goal without parameters
+PrintX: executing a goal with one parameter
+2
+PrintXY: executing a goal with two parameters
+1
+2
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" title="A custom goal can be written using a macro.">Writing your own goal</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Cuts and goals" />
+<meta name="abstract" content="Distinguishes local cuts from global cuts and illustrates cuts added by a goal" />
+<meta name="Description" content="Distinguishes local cuts from global cuts and illustrates cuts added by a goal" />
+<meta name="DC.subject" content="goal, global cuts and, tolerance, cuts in goals and, violated constraints in goals and" />
+<meta name="keywords" content="goal, global cuts and, tolerance, cuts in goals and, violated constraints in goals and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_goals.1018412" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<title>Cuts and goals</title>
+</head>
+<body role="main" id="User_manual.uss_goals.1018412">
+<h1 class="title topictitle1">Cuts and goals</h1>
+<div class="body"><p class="shortdesc">Distinguishes local cuts from global cuts and illustrates
+cuts added by a goal</p>
+<p class="p">Goals can also be used to add global cuts. Whereas local
+cuts are respected only in a subtree, global cuts are added to the
+entire problem and are therefore respected at every node after they
+have been added.</p>
+<p class="p">Just as you can add local cuts by means of a local cut
+goal, as explained in the topic <a class="xref" href="11_local_cut_goal.html" title="Describes a local cut goal to add a cut to a node.">Local cut goal</a>,
+you can add a global cut by means of a global cut goal. A global cut
+goal is created with the method <samp class="ph codeph">IloCplex::GoalI::GlobalCutGoal</samp> 
+(<samp class="ph codeph">IloCplex.globalCutGoal</samp>  or <samp class="ph codeph">Cplex.GlobalCutGoal</samp> ).
+This method takes an instance of <samp class="ph codeph">IloRange</samp> 
+or <samp class="ph codeph">IloRangeArray</samp>  (<samp class="ph codeph">IloRange[]</samp> )
+  as its argument and returns a goal. When the goal executes, it adds
+the constraints as global cuts to the problem.</p>
+<p class="p">Example <samp class="ph codeph">ilogoalex2.cpp</samp>  shows
+the use of <samp class="ph codeph">IloCplex::GoalI::GlobalCutGoal</samp> for
+solving the <samp class="ph msgph">noswot</samp> MILP model. This
+is a relatively small model from the MIPLIB 3.0 test set, consisting
+of only 128 variables. Nonetheless, it used to be very hard to solve
+without adding special cuts.</p>
+<p class="p">Although it is now solvable directly in less than two
+minutes, the number of nodes examined is still on the order of 2.5
+billion, even for only 128 original variables. However, cuts can be
+derived, and the addition of these cuts makes the problem solvable
+in under a second with roughly 600 nodes. These cuts are: </p>
+<pre class="pre codeblock"><code>x21 - x22 &lt;= 0
+x22 - x23 &lt;= 0
+x23 - x24 &lt;= 0
+2.08*x11 + 2.98*x21 + 3.47*x31 + 2.24*x41 + 2.08*x51 +
+0.25*w11 + 0.25*w21 + 0.25*w31 + 0.25*w41 + 0.25*w51 &lt;= 20.25
+2.08*x12 + 2.98*x22 + 3.47*x32 + 2.24*x42 + 2.08*x52 +
+0.25*w12 + 0.25*w22 + 0.25*w32 + 0.25*w42 + 0.25*w52 &lt;= 20.25
+2.08*x13 + 2.98*x23 + 3.47*x33 + 2.24*x43 + 2.08*x53 +
+0.25*w13 + 0.25*w23 + 0.25*w33 + 0.25*w43 + 0.25*w53 &lt;= 20.25
+2.08*x14 + 2.98*x24 + 3.47*x34 + 2.24*x44 + 2.08*x54 +
+0.25*w14 + 0.25*w24 + 0.25*w34 + 0.25*w44 + 0.25*w54 &lt;= 20.25
+2.08*x15 + 2.98*x25 + 3.47*x35 + 2.24*x45 + 2.08*x55 +
+0.25*w15 + 0.25*w25 + 0.25*w35 + 0.25*w45 + 0.25*w55 &lt;= 16.25</code></pre>
+<p class="p">These cuts derive from interpreting the problem as a
+resource allocation model on five machines with scheduling horizon
+constraints and transaction times. The first three cuts break symmetries
+among the machines, while the others capture minimum bounds on transaction
+costs.</p>
+<p class="p">Of course, the best way to solve the <samp class="ph msgph">noswot</samp> model
+with these cuts is simply to add them to the model before calling
+the optimizer. However, for demonstration purposes here, the cuts
+are added by means of a goal. The source code of this example can
+be found in the <samp class="ph codeph">examples/src</samp> directory
+of the CPLEX distribution. The equivalent <strong class="ph b">Java</strong> implementation
+appears as <samp class="ph codeph">GoalEx2.java</samp>  in the same location.
+Likewise, there is also the <strong class="ph b">C#.NET</strong> version
+in <samp class="ph codeph">Goalex2.cs</samp>  and the <strong class="ph b">VB.NET</strong> version
+in <samp class="ph codeph">Goalex2.vb</samp> .</p>
+<p class="p">The goal <samp class="ph codeph">CutGoal</samp> in that example
+receives a list of "less than" constraints to use as global cuts and
+a tolerance value <samp class="ph codeph">eps</samp>. The constraints
+are passed to the goal as an array of <samp class="ph codeph">lhs</samp> expressions
+and an array of corresponding <samp class="ph codeph">rhs</samp> values.
+Both are initialized in function <samp class="ph codeph">makeCuts</samp>.</p>
+<p class="p">The goal <samp class="ph codeph">CutGoal</samp> checks whether
+any of the constraints passed to it are violated by more than the
+tolerance value. It adds violated constraints as global cuts. Other
+than that, it follows the branching strategy CPLEX would use on its
+own.</p>
+<p class="p">The goal starts out by checking whether the solution
+of the continuous relaxation of the current node subproblem is integer
+feasible. This check is done by the method <samp class="ph codeph">isIntegerFeasible</samp>.
+If the current solution is integer feasible, a candidate for a new
+incumbent has been found, and the goal returns the empty goal to instruct
+CPLEX to continue on its own.</p>
+<p class="p">Otherwise, the goal checks whether any of the constraints
+passed to it are violated. It computes the value of every <samp class="ph codeph">lhs</samp> 
+expression for current solution by calling <samp class="ph codeph">getValue(lhs[i])</samp>.
+The result is compared to the corresponding righthand side value <samp class="ph codeph">rhs[i]</samp>.
+If a violation of more than <samp class="ph codeph">eps</samp> is detected,
+the constraint is added as a global cut and the <samp class="ph codeph">rhs</samp> value
+will be set at <samp class="ph codeph">IloInfinity</samp> to avoid checking
+it again unnecessarily.</p>
+<p class="p">The global cut goal for <samp class="ph codeph">lhs[i]</samp>  ≤<samp class="ph codeph">rhs[i]</samp> is
+created by the method <samp class="ph codeph">GlobalCutGoal</samp>. It
+is then combined with the goal named <samp class="ph codeph">goal</samp> by
+the method <samp class="ph codeph">AndGoal</samp>, so that the new global
+cut goal will be executed first. The resulting goal is stored again
+in <samp class="ph codeph">goal</samp>. Before any global cut goals are
+added, the <samp class="ph codeph">goal</samp> is initialized as: </p>
+<pre class="pre codeblock"><code>IloCplex::Goal goal = AndGoal(BranchAsCplexGoal(getEnv()), this);</code></pre>
+<p class="p">for C++, or for Java: </p>
+<pre class="pre codeblock"><code>cplex.and(cplex.branchAsCplex(), this);</code></pre>
+<p class="p">The method <samp class="ph codeph">BranchAsCplexGoal(getEnv)</samp>  <samp class="ph codeph">(cplex.branchAsCplex</samp> in
+the Java API or <samp class="ph codeph">Cplex.BranchAsCplex</samp> in
+the .NET API) creates a goal that branches in the same way as the
+built-in branch procedure. By adding this goal, the current goal will
+be executed for the entire subtree.</p>
+<p class="p">Thus the goal returned by <samp class="ph codeph">CutGoal</samp> will
+add all currently violated constraints as global cuts one by one.
+Then it will branch in the way CPLEX would branch without any goals
+and execute the <samp class="ph codeph">CutGoal</samp> again in the child
+nodes.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" title="Documents goals and their role in a branch &amp; cut search.">Using goals</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Examining the engine log" />
+<meta name="abstract" content="Describes the contents of the CP engine log displayed in the CPLEX Studio IDE." />
+<meta name="Description" content="Describes the contents of the CP engine log displayed in the CPLEX Studio IDE." />
+<meta name="DC.subject" content="Engine Log output tab (CP engine), steel mill example" />
+<meta name="keywords" content="Engine Log output tab (CP engine), steel mill example" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/search_log_read.html#migration.uss_usrcpoptimizersearch.1027817" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_stats_CP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usroplide.uss_ide_running_cp.1021991" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_stats_CP.html" />
+<title>Examining the engine log</title>
+</head>
+<body role="main" id="usroplide.uss_ide_running_cp.1021991">
+<h1 class="title topictitle1">Examining the engine log</h1>
+<div class="body"><p class="shortdesc">Describes the contents of the CP engine log displayed in
+the CPLEX Studio IDE.</p>
+<p class="p">When you click the <span class="ph uicontrol">Engine Log</span> tab in the
+Output window, you can see the CP Optimizer log.</p>
+<div class="fig fignone" id="usroplide.uss_ide_running_cp.1021991__usroplide.uss_ide_running_cp.1022001"><span class="figcap">Figure 1. Engine Log for
+the Steel Mill example (default CP settings)</span><div class="image"><img class="image" src="../images/steelmill_enginelog2.jpg" alt="Engine log for the steel mill example" /></div></div>
+<p class="p">The first line of the log indicates the type of problem, along
+with the number of decision variables and constraints in the model.
+In the steel mill example, there is an objective included in the model,
+so the problem is reported to be a Minimization problem. When the
+model does not include an objective, the problem type is reported
+as a Satisfiability problem.</p>
+<p class="p">In this example, we have one line each 50 branches as indicated
+by the parameter set in the model <samp class="ph codeph">steelmill.mod</samp>.</p>
+<pre class="pre msgblock"><code>cp.param.LogPeriod = 50;</code></pre>
+<p class="p">The next three lines of the log provide information regarding the
+initial constraint propagation. </p>
+<p class="p">The <strong class="ph b">Initial process time</strong> is the time in seconds spent at
+the root node of the search tree where the initial propagation occurs.
+This time encompasses the time used by the optimizer to load the model,
+called extraction, and the time spent in initial propagation.</p>
+<p class="p">The value for <strong class="ph b">Log search space</strong> provides an estimate of the
+size of the depth-first search tree;  this value is the log (base
+2) of the products of the domains sizes of all the decision variables
+of the problem. Typically, the estimate of the size of the search
+tree should be smaller after the initial propagation, as choices will
+have been eliminated. However, this value is always an overestimate
+of the log of the number of remaining leaf nodes of the tree because
+it does not take into account the action of propagation of constraints
+at each node. See the <a class="xref" href="../../glossary/glossary.html#glossary">Glossary</a> for
+a definition of search space.</p>
+<p class="p">The memory used by the optimizer during the initial propagation
+is reported.  Also, any parameter change from its default is displayed
+at the head of the search log.</p>
+<p class="p">In order to interpret the remainder of the log file, you may want
+to think about the search as a binary tree.  The root of the tree
+is the starting point in the search for a solution; each branch descending
+from the root  represents an alternative choice or decision in the
+search. Each of these branches leads to a node where  constraint propagation
+during search will occur. If the branch does not lead to a failure
+and a solution is not found at a node, the node is called a choice
+point. The optimizer can make an additional decision and create two
+new alternative branches from the current node, or it can jump in
+the tree and search from another node.</p>
+<p class="p">The lines in the next section of the progress log, are displayed
+periodically during the search and describe the state of the search.
+The display frequency of the progress log can be controlled with parameters
+of the optimizer. See <a class="xref" href="opl_ide_stats_CP_change.html" title="Explains how to change a constraint programming option in the IDE.">Changing a CP parameter value</a>.</p>
+<p class="p">The progress information given in a progress log update includes:</p>
+<p class="p"><strong class="ph b">Branches</strong>: the number of branches explored in the binary
+search tree.</p>
+<p class="p"><strong class="ph b">Non-fixed</strong>: the number of uninstantiated (not fixed) model
+variables.</p>
+<p class="p"><strong class="ph b">Branch decision</strong>: the decision made at the branch currently
+under consideration by the optimizer</p>
+<p class="p"><strong class="ph b">Best</strong>: the value of the best solution found so far, in the
+case of an optimization problem.</p>
+<p class="p">The final lines of the log provide information about the entire
+search, after the search has terminated. This information about the
+search includes:</p>
+<p class="p"><strong class="ph b">Solution status</strong>: the conditions under which the search terminated.</p>
+<p class="p"><strong class="ph b">Number of branches</strong>: the number of branches explored in the
+binary search tree.</p>
+<p class="p"><strong class="ph b">Number of fails</strong>: the number of branches that did not lead
+to a solution.</p>
+<p class="p"><strong class="ph b">Total memory usage</strong>: the memory used by IBM ILOG Concert
+Technology and the IBM ILOG CP Optimizer engine</p>
+<p class="p"><strong class="ph b">Time spent in solve</strong>: the time from start to end of the search,
+displayed in seconds. This is system time and not wall-clock time.
+(CP Optimizer reports system time by default; however, the parameter <samp class="ph codeph">TimeMode</samp> allows
+you to select elapsed (wall-clock) time if you prefer.)</p>
+<p class="p"></p>
+<p class="p"><strong class="ph b">Search speed</strong>: average time spent per branch.</p>
+<p class="p">The CP Engine Log enables you to trace the propagation (see <a class="xref" href="opl_ide_stats_CP_change.html" title="Explains how to change a constraint programming option in the IDE.">Changing a CP parameter value</a>).</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_stats_CP.html" title="Shows how the IDE displays a dynamically updated progress chart for a constraint programming example that takes a few seconds to solve.">Understanding solving statistics and progress (CP models)</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../../../CP_Optimizer/User_manual/topics/search_log_read.html#migration.uss_usrcpoptimizersearch.1027817" title="The search log provides detailed information of the model and the search.">Reading a search log</a></div>
+</div>
+</div></body>
+</html>

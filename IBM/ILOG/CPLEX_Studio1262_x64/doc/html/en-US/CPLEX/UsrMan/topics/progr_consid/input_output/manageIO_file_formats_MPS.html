@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Working with MPS files" />
+<meta name="abstract" content="Describes programming considerations for working with MPS file format." />
+<meta name="Description" content="Describes programming considerations for working with MPS file format." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_file_formats_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_manageIO.1002243" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_file_formats_synopsis.html" />
+<title>Working with MPS files</title>
+</head>
+<body role="main" id="User_manual.uss_manageIO.1002243">
+<h1 class="title topictitle1">Working with MPS files</h1>
+<div class="body"><p class="shortdesc">Describes programming considerations for working with
+MPS file format.</p>
+<p class="p">The CPLEX MPS file reader is highly compatible with files
+created by other modeling systems that respect the MPS format. There
+is generally no need to modify existing problem files to use them
+with CPLEX. However, there are CPLEX-specific conventions that may
+be useful for you to know. This section explains those conventions,
+and the <em class="ph i">CPLEX File Formats Reference
+Manual</em> documents the MPS format more fully.</p>
+<div class="section" id="User_manual.uss_manageIO.1002243__User_manual.uss_manageIO.1002258"><h2 class="title sectiontitle">Free rows in MPS files</h2><p class="p">In an MPS file, CPLEX selects the first free row or N-type
+row as the objective function, and it discards all subsequent free
+rows unless it is instructed otherwise by an <samp class="ph codeph">OBJNAME</samp> section
+in the file. To retain free rows in an MPS file, reformulate them
+as equality rows with an additional free variable. For example, replace
+the free row <samp class="ph codeph">x + y</samp> by the equality
+row <samp class="ph codeph">x + y - s = 0</samp> where <samp class="ph codeph">s</samp> is
+free. Generally, the CPLEX presolver will remove rows like that before
+optimization so they will have no impact on performance.</p>
+</div>
+<div class="section" id="User_manual.uss_manageIO.1002243__User_manual.uss_manageIO.1002268"><h2 class="title sectiontitle">Ranged rows in MPS files</h2><p class="p">To handle ranged rows, CPLEX introduces a temporary range
+variable, creates appropriate bounds for this variable, and changes
+the sense of the row to an equality (that is, MPS type EQ). The added
+range variables will have the same name as the ranged row with the
+characters <samp class="ph codeph">Rg</samp> prefixed. When CPLEX generates
+solution reports, it removes these temporary range variables from
+the constraint matrix.</p>
+</div>
+<div class="section" id="User_manual.uss_manageIO.1002243__User_manual.uss_manageIO.1002278"><h2 class="title sectiontitle">Extra rim vectors in MPS files</h2><p class="p">The MPS format allows multiple righthand sides (RHSs),
+multiple bounds, and multiple range vectors. It also allows extra
+free rows. Together, these features are known as extra rim vectors.
+By default, the CPLEX MPS reader selects the first RHS, bound, and
+range definitions that it finds. The first free row (that is, N-type
+row) becomes the objective function, and the remaining free rows are
+discarded. The extra rim data are also discarded.</p>
+</div>
+<div class="section" id="User_manual.uss_manageIO.1002243__User_manual.uss_manageIO.1002289"><h2 class="title sectiontitle">Naming conventions in MPS files</h2><p class="p">CPLEX accepts any noncontrol-character within a name.
+However, CPLEX recognizes blanks (that is, spaces) as delimiters,
+so you must avoid them in names. You should also avoid <samp class="ph codeph">$</samp> (dollar
+sign) and <samp class="ph codeph">*</samp> (asterisk) as characters in
+names because they normally indicate a comment within a data record.</p>
+</div>
+<div class="section" id="User_manual.uss_manageIO.1002243__User_manual.uss_manageIO.1002297"><h2 class="title sectiontitle">Error checking in MPS files</h2><p class="p">Fairly common problems in MPS files include split vectors,
+unnamed columns, and duplicated names. CPLEX checks for these conditions
+and reports them. If repeated rows or columns occur in an MPS file,
+CPLEX reports an error and stops reading the file. You can then edit
+the MPS file to correct the source of the problem.</p>
+</div>
+<div class="section" id="User_manual.uss_manageIO.1002243__User_manual.uss_manageIO.1002306"><h2 class="title sectiontitle">Saving modified MPS files</h2><p class="p">You may often want to save a modified MPS file for later
+use. To that end, CPLEX writes out a problem exactly as it appears
+in memory. All your revisions of that problem will appear in the new
+file. One potential area for confusion occurs when a maximization
+problem is saved. Since MPS conventionally represents all problems
+as minimizations, CPLEX reverses the sign of the objective-function
+coefficients when it writes a maximization problem to an MPS file.
+When you read and optimize this new problem, the values of the variables
+will be valid for the original model. However, since the problem has
+been converted from a maximization to the equivalent minimization,
+the objective, dual, and reduced-cost values will have reversed signs.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_file_formats_synopsis.html" title="Explains programming considerations about widely used file formats.">Understanding file formats</a></div>
+</div>
+</div></body>
+</html>

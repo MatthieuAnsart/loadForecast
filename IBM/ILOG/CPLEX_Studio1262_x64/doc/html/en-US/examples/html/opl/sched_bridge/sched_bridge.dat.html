@@ -1,0 +1,140 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: 
+013: Task =  {start,a1,a2,a3,a4,a5,a6,p1,p2,ue,s1,s2,s3,s4,s5,s6,
+014:          b1,b2,b3,b4,b5,b6,ab1,ab2,ab3,ab4,ab5,ab6,m1,m2,m3,m4,m5,m6,
+015:          l,t1,t2,t3,t4,t5,ua,v1,v2,k1,k2,stop};
+016: 
+017: Resource = {excavator, piledriver, carpentry, concretemixer,
+018:             bricklaying, crane, caterpillar};
+019: 
+020: duration = #[
+021:           start : 0,
+022:           a1    : 4,
+023:           a2    : 2,
+024:           a3    : 2,
+025:           a4    : 2,
+026:           a5    : 2,
+027:           a6    : 5,
+028:           p1    : 20,
+029:           p2    : 13,
+030:           ue    : 10,
+031:           s1    : 8,
+032:           s2    : 4,
+033:           s3    : 4,
+034:           s4    : 4,
+035:           s5    : 4,
+036:           s6    : 10,
+037:           b1    : 1,
+038:           b2    : 1,
+039:           b3    : 1,
+040:           b4    : 1,
+041:           b5    : 1,
+042:           b6    : 1,
+043:           ab1    : 1,
+044:           ab2    : 1,
+045:           ab3    : 1,
+046:           ab4    : 1,
+047:           ab5    : 1,
+048:           ab6    : 1,
+049:           m1    : 16,
+050:           m2    : 8,
+051:           m3    : 8,
+052:           m4    : 8,
+053:           m5    : 8,
+054:           m6    : 20,
+055:           l    : 2,
+056:           t1    : 12,
+057:           t2    : 12,
+058:           t3    : 12,
+059:           t4    : 12,
+060:           t5    : 12,
+061:           ua    : 10,
+062:           v1    : 15,
+063:           v2    : 10,
+064:           k1    : 0,
+065:           k2    : 0,
+066:           stop    : 0
+067: ]#;
+068:      
+069: max_nf  = {
+070:      &lt;start,l,30&gt;,
+071:      &lt;a1,s1,3&gt;,
+072:      &lt;a2,s2,3&gt;,
+073:      &lt;a5,s5,3&gt;,
+074:      &lt;a6,s6,3&gt;,
+075:      &lt;p1,s3,3&gt;,
+076:      &lt;p2,s4,3&gt;
+077: };
+078: 
+079: min_sf = {
+080:      &lt;ua,m1,2&gt;,
+081:      &lt;ua,m2,2&gt;,
+082:      &lt;ua,m3,2&gt;,
+083:      &lt;ua,m4,2&gt;,
+084:      &lt;ua,m5,2&gt;,
+085:      &lt;ua,m6,2&gt;
+086: };
+087: 
+088: max_ef = {
+089:      &lt;s1,b1,4&gt;,
+090:      &lt;s2,b2,4&gt;,
+091:      &lt;s3,b3,4&gt;,
+092:      &lt;s4,b4,4&gt;,
+093:      &lt;s5,b5,4&gt;,
+094:      &lt;s6,b6,4&gt;
+095: };
+096: 
+097: min_nf = {
+098:      &lt;start,l,30&gt;
+099: };
+100: 
+101: min_af = { 
+102:      &lt;ue,s1,6&gt;,
+103:      &lt;ue,s2,6&gt;,
+104:      &lt;ue,s3,6&gt;,
+105:      &lt;ue,s4,6&gt;,
+106:      &lt;ue,s5,6&gt;,
+107:      &lt;ue,s6,6&gt;
+108: };
+109: 
+110: res = #[
+111:      crane   : {t1,t2,t3,t4,t5},
+112:      bricklaying : {m1,m2,m3,m4,m5,m6},
+113:      carpentry  : {s1,s2,s3,s4,s5,s6},
+114:      excavator : {a1,a2,a3,a4,a5,a6},
+115:      piledriver  : {p1,p2},
+116:      concretemixer  : {b1,b2,b3,b4,b5,b6},
+117:      caterpillar  : {v1,v2}
+118: ]#;
+119:  
+120: precedences = {
+121:      &lt;start,a1&gt;,&lt;start,a2&gt;,&lt;start,a3&gt;,&lt;start,a4&gt;,&lt;start,a5&gt;,
+122:      &lt;start,a6&gt;,&lt;start,ue&gt;,&lt;a1,s1&gt;,&lt;a2,s2&gt;,&lt;a5,s5&gt;,
+123:      &lt;a6,s6&gt;,&lt;a3,p1&gt;,&lt;a4,p2&gt;,&lt;p1,s3&gt;,&lt;p2,s4&gt;,
+124:      &lt;p1,k1&gt;,&lt;p2,k1&gt;,&lt;s1,b1&gt;,&lt;s2,b2&gt;,
+125:      &lt;s3,b3&gt;,&lt;s4,b4&gt;,&lt;s5,b5&gt;,&lt;s6,b6&gt;,&lt;b1,ab1&gt;,
+126:      &lt;b2,ab2&gt;,&lt;b3,ab3&gt;,&lt;b4,ab4&gt;,&lt;b5,ab5&gt;,&lt;b6,ab6&gt;,
+127:      &lt;ab1,m1&gt;,&lt;ab2,m2&gt;,&lt;ab3,m3&gt;,&lt;ab4,m4&gt;,&lt;ab5,m5&gt;,
+128:      &lt;ab6,m6&gt;,&lt;m1,t1&gt;,&lt;m2,t1&gt;,&lt;m2,t2&gt;,&lt;m3,t2&gt;,
+129:      &lt;m3,t3&gt;,&lt;m4,t3&gt;,&lt;m4,t4&gt;,&lt;m5,t4&gt;,&lt;m5,t5&gt;,
+130:      &lt;m6,t5&gt;,&lt;m1,k2&gt;,&lt;m2,k2&gt;,&lt;m3,k2&gt;,&lt;m4,k2&gt;,
+131:      &lt;m5,k2&gt;,&lt;m6,k2&gt;,&lt;l,t1&gt;,&lt;l,t2&gt;,&lt;l,t3&gt;,
+132:      &lt;l,t4&gt;,&lt;l,t5&gt;,&lt;t1,v1&gt;,&lt;t5,v2&gt;,&lt;t2,stop&gt;,
+133:      &lt;t3,stop&gt;,&lt;t4,stop&gt;,&lt;v1,stop&gt;,&lt;v2,stop&gt;,&lt;ua,stop&gt;,
+134:      &lt;k1,stop&gt;,&lt;k2,stop&gt;
+135:  };        
+</tt></pre>

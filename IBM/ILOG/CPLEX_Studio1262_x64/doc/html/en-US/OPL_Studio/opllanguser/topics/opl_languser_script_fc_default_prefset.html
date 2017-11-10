@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Setting user-defined preferences" />
+<meta name="abstract" content="How to assign an ordering to members of a conflict." />
+<meta name="Description" content="How to assign an ordering to members of a conflict." />
+<meta name="DC.subject" content="user-defined preferences, on order of constraints, in flow control scripting, CPLEX engine, conflict refinement algorithm" />
+<meta name="keywords" content="user-defined preferences, on order of constraints, in flow control scripting, CPLEX engine, conflict refinement algorithm" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_default_pref.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_conflictbasis.1019466" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_default_pref.html" />
+<title>Setting user-defined preferences</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_conflictbasis.1019466">
+<h1 class="title topictitle1">Setting user-defined preferences</h1>
+<div class="body taskbody"><p class="shortdesc">How to assign an ordering to members of a conflict.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div><p class="p">You can assign preferences to members of a conflict.
+In most cases, there is no advantage to assigning unique preferences,
+but if you know something about your model that suggests assigning
+an ordering to certain members, you can do so.</p>
+
+<p class="p">Guidelines to your choice:</p>
+<ul class="ul"><li class="li"><p class="p">A preference of -1 means that the member
+is to be absolutely excluded from the conflict.</p>
+</li>
+<li class="li"><p class="p">A preference of 0 (zero) means that
+the member is always to be included, and</p>
+</li>
+<li class="li"><p class="p">Preferences of positive value represent
+an ordering by which the conflict refiner will give preference to
+the members. A group with a higher preference is more likely to be
+included in the conflict. Preferences can thus help guide the refinement
+process toward a more desirable minimal conflict. </p>
+</li>
+</ul>
+</div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To set user-defined preferences:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Define an array of preferences in the model, as shown
+in this code:</span> <pre class="pre codeblock"><code>// Preferences are stated as data of the opl model.
+// prefs[i] will be used to represent the preference of seeing cts[i] in the conflict.
+float prefs[i in r] = i;</code></pre>
+<p class="p">The value is smaller for higher values of <samp class="ph codeph">i</samp> and
+the CPLEX conflict refinement algorithm gives precedence to lower
+values. </p>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Pass these preferences to the iterator by attaching them
+to the array of affected constraints as shown in this code:</span> <pre class="pre codeblock"><code>   // With user-defined preferences
+   writeln("With user-defined preferences");   
+   var opl2 = new IloOplModel(def, cplex);
+   opl2.generate();
+   // We attach prefs (defined as data in the opl model) as preferences 
+   // for constraints cts for the conflict refinement.
+   opl2.conflictIterator.attach(opl2.cts, opl2.prefs);
+   writeln(opl2.printConflict());        
+   opl2.end();</code></pre>
+</li>
+</ol>
+<div class="section result"><div class="tasklabel"><h2 class="sectiontitle tasklabel">Results</h2></div><p class="p">The output is then: </p>
+
+<pre class="pre codeblock"><code>With user-defined preferences
+cts[10] at 9:0-10:17 E:\opl\conflictIterator.mod
+  is in conflict.</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_default_pref.html" title="The conflictIterator example, with its model conflictIterator.mod, explains how to use the class IloOplConflictIterator to refine a conflict with user-defined preferences.">Setting preferences on the search for conflicts and relaxations</a></div>
+</div>
+</div></body>
+</html>

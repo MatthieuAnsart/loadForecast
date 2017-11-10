@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Adding a range filter" />
+<meta name="abstract" content="Also explains how to add a diversity filter." />
+<meta name="Description" content="Also explains how to add a diversity filter." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_solpool_filtering.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usroplide.uss_ide_solutionpools.148672" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_solpool_filtering.html" />
+<title>Adding a range filter</title>
+</head>
+<body role="main" id="usroplide.uss_ide_solutionpools.148672">
+<h1 class="title topictitle1">Adding a range filter</h1>
+<div class="body taskbody"><p class="shortdesc">Also explains how to add a diversity filter.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div> <p class="p">A range filter adds a constraint over
+a linear expression. You add a range filter if, for example, you have
+used the solution pool to get many solutions, but you are interested
+only in the solutions where the number of open warehouses is between
+30 and 43. The <samp class="ph codeph">warehouseCplexFilters.mod</samp> model
+has been written for this purpose as a variation of <samp class="ph codeph">scalableWarehouse.mod</samp>.
+This model contains the <samp class="ph codeph">execute</samp> block shown
+in the code extract below.</p>
+<p class="p">Preprocessing script to filter solutions
+(warehouseCplexFilters.mod)</p>
+<pre class="pre codeblock"><code>// define a range filter applied to solution pools
+execute {
+    var vars = new Array();
+    var coefs = new Array();
+    for (var w in Warehouses) {
+        vars[w-1] = Open[w];
+        coefs[w-1] = 1;
+    }
+    cplex.addRangeFilter(30, 43, vars, coefs);
+}</code></pre>
+  <p class="p">With this data instance:</p>
+  <pre class="pre codeblock"><code>int Fixed        = 30;
+int NbWarehouses = 50;
+int NbStores     = 100;</code></pre>
+ <p class="p">when
+the pool is populated, 6 solutions out of the range defined in the
+filter are removed (26 without the filter, 20 with the filter).</p>
+ <p class="p">To observe filter scripts:</p>
+ </div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Select the <samp class="ph codeph">warehouse</samp> project.</span></li>
+<li class="li step stepexpand"><span class="ph cmd">Right-click the run configuration name <span class="ph uicontrol">Filter script</span> and choose <span class="ph uicontrol">Set
+as Default</span>.</span></li>
+<li class="li step stepexpand"><span class="ph cmd">Add a settings file, as explained in <a class="xref" href="../../gsoplide/topics/opl_ide_gs_tut_add_settings_file.html" title="Explains how to add a settings file to a project so as to be able to change the values of OPL options for language output, mathematical programming, or constraint programming.">Adding a settings file</a> in <em class="ph i">Getting
+Started with the IDE</em>, to the <span class="ph uicontrol">Filter script</span> configuration.</span></li>
+<li class="li step stepexpand"><span class="ph cmd">In the settings editor, scroll down the
+option tree and click <span class="ph menucascade"><span class="ph uicontrol">Mixed
+Integer Programming</span> &gt; <span class="ph uicontrol">Solution pool</span></span>.</span></li>
+<li class="li step stepexpand"><span class="ph cmd">Check the <span class="ph uicontrol">Populate
+solution pool</span> box.</span></li>
+<li class="li step stepexpand"><span class="ph cmd">Execute the run configuration.</span> <p class="p">You can also add diversity filters using the method <samp class="ph codeph">cplex.addDiversityFilter</samp>.
+See the  <em class="ph i">IBM ILOG Script Reference
+Manual</em>.</p>
+</li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_solpool_filtering.html" title="Describes how to write filters by means of IBM ILOG Script statements.">Filtering the solution pool</a></div>
+</div>
+</div></body>
+</html>

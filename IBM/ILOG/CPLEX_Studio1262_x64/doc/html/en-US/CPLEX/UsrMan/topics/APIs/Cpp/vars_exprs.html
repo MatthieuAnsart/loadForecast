@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Defining variables and expressions: IloNumVar" />
+<meta name="abstract" content="Describes the C++ class IloNumVar." />
+<meta name="Description" content="Describes the C++ class IloNumVar." />
+<meta name="DC.subject" content="IloNumVar C++ class, variable, representing with IloNumVar (C++ API), IloConversion class (C++ API), changing type (C++ API), in expressions (C++ API), expression, building (C++ API), IloNumVarArray C++ class, IloExpr C++ class, logical expression (C++ API), logical (C++ API), linear expression (C++ API), piecewise linear, expression (C++ API), piecewise linear (C++ API), linear (C++ API)" />
+<meta name="keywords" content="IloNumVar C++ class, variable, representing with IloNumVar (C++ API), IloConversion class (C++ API), changing type (C++ API), in expressions (C++ API), expression, building (C++ API), IloNumVarArray C++ class, IloExpr C++ class, logical expression (C++ API), logical (C++ API), linear expression (C++ API), piecewise linear, expression (C++ API), piecewise linear (C++ API), linear (C++ API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/modeling_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cplusIloCplex.110579" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/modeling_synopsis.html" />
+<title>Defining variables and expressions: IloNumVar</title>
+</head>
+<body role="main" id="User_manual.uss_cplusIloCplex.110579">
+<h1 class="title topictitle1">Defining variables and expressions: IloNumVar</h1>
+<div class="body"><p class="shortdesc">Describes the C++ class IloNumVar.</p>
+<p class="p">Probably the first modeling class you will need is <samp class="ph codeph">IloNumVar</samp> .
+Objects of this class represent decision variables in a model. They
+are defined by the lower and upper bound for the variable, and a type
+which can be one of <samp class="ph codeph">ILOFLOAT</samp> , <samp class="ph codeph">ILOINT</samp> ,
+or <samp class="ph codeph">ILOBOOL</samp>  for continuous, integer, or
+Boolean variables, respectively. The following constructor creates
+an integer variable with bounds -1 and 10: </p>
+<pre class="pre codeblock"><code>IloNumVar myIntVar(env, -1, 10, ILOINT);</code></pre>
+<p class="p">The class <samp class="ph codeph">IloNumVar</samp>  provides
+methods that allow querying of the data needed to specify a variable.
+However, only bounds can be modified. Concert Technology provides
+a modeling object class <samp class="ph codeph">IloConversion</samp> 
+to change the type of a variable. This conversion allows you to use
+the same variable with different types in different models. </p>
+<p class="p">Variables are usually used to build up expressions, which
+in turn are used to define the objective or constraints of the optimization
+problem. An expression can be explicitly written, as in<samp class="ph codeph"> </samp> </p>
+<pre class="pre codeblock"><code>1*x[1] + 2*x[2] + 3*x[3] </code></pre>
+<p class="p">where <samp class="ph codeph">x</samp>  is assumed to be
+an array of variables (<samp class="ph codeph">IloNumVarArray</samp> ).
+Expressions can also be created piece by piece, with a loop:</p>
+<pre class="pre codeblock"><code>IloExpr expr(env);
+for (int i = 0; i &lt; x.getSize(); ++i)
+  expr += data[i] * x[i];</code></pre>
+<p class="p">Whenever possible, build your expressions in terms of
+data that is either integer or double-precision (64-bit) floating
+point. Single-precision (32-bit) floating point data should be avoided,
+as it can result in unnecessarily ill conditioned problems. For more
+information, refer to <a class="xref" href="../../cont_optim/simplex/20_num_difficulty.html" title="Documents CPLEX behavior with respect to numeric difficulties in LP models.">Numeric difficulties</a>.</p>
+<p class="p">While Concert Technology supports very general expressions,
+only linear, quadratic, piecewise-linear, and logical expressions
+can be used in models to be solved with <samp class="ph codeph">IloCplex</samp> .
+For more about each of those possibilities, see these topics:</p>
+<ul class="ul"><li class="li"><p class="p"> <a class="xref" href="../../cont_optim/simplex/01_simplex_title_synopsis.html" title="Documents the primal and dual simplex optimizers.">Solving LPs: simplex optimizers</a> and <a class="xref" href="../../cont_optim/barrier/01_barrier_title_synopsis.html" title="Documents solving linear programming problems by means of the CPLEX barrier optimizer.">Solving LPs: barrier optimizer</a> both discuss linear expressions.</p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../cont_optim/qp/01_QP_title_synopsis.html" title="Describes solving quadratic programming problems (QPs) with CPLEX.">Solving problems with a quadratic objective (QP)</a> discusses quadratic expressions in an objective
+function.</p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../cont_optim/qcp/01_QCP_title_synopsis.html" title="Documents the solution of quadratically constrained programming problems (QCPs), including the special case of second order cone programming problems (SOCPs).">Solving problems with quadratic constraints (QCP)</a> discusses quadratic expressions in quadratically
+constrained programming problems (QCPs), including the special case
+of second order cone programming (SOCP) problems.</p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../discr_optim/pwl/01_pwl_title_synopsis.html" title="Demonstrates the use of piecewise linear functions to solve a transportation problem.">Using piecewise linear functions in optimization: a transport example</a> introduces piecewise-linear expressions through
+a transportation example.</p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../../discr_optim/logical_constr/01_logical_constr_title_synopsis.html" title="Describes logical constraints in CPLEX with Concert Technology.">Logical constraints in optimization</a> introduces logical constraints handled by
+CPLEX. Topics following it offer examples.</p>
+</li>
+</ul>
+<p class="p">When you have finished using an expression (that is,
+you created a constraint with it) you need to delete it by calling
+its method <samp class="ph codeph">end</samp> , for example:</p>
+<pre class="pre codeblock"><code>expr.end();</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/modeling_synopsis.html" title="Introduces classes of the C++ API of Concert Technology for modeling optimization problems to be solved by IloCplex.">Modeling an optimization problem with Concert Technology</a></div>
+</div>
+</div></body>
+</html>

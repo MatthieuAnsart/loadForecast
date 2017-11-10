@@ -1,0 +1,138 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: REM ------------------------------------------------ -*- Visual Basic .Net -*-
+002: REM File: Cutstock.vb
+003: REM --------------------------------------------------------------------------
+004: REM Licensed Materials - Property of IBM
+005: REM 
+006: REM 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 
+007: REM Copyright IBM Corporation 1998, 2013. All Rights Reserved.
+008: REM
+009: REM Note to U.S. Government Users Restricted Rights:
+010: REM Use, duplication or disclosure restricted by GSA ADP Schedule
+011: REM Contract with IBM Corp.
+012: REM --------------------------------------------------------------------------
+013: 
+014: 
+015: REM --------------------------------------------------------------------------
+016: REM Visual Basic version of Cutstock.cpp of OPL distrib
+017: REM --------------------------------------------------------------------------
+018: 
+019: Imports ILOG.OPL
+020: Imports ILOG.Concert
+021: Imports ILOG.CPLEX
+022: 
+023: Module Cutstock
+024:   Const DATADIR As String = <b><font color="#8A2BE2">"../.."</font></b>
+025:   Const RC_EPS As Double = 0.000001
+026: 
+027:   Sub Main()
+028:         Dim status As Integer = 127
+029: 
+030:         Try
+031:             OplFactory.DebugMode = True
+032:             Dim oplF As OplFactory = New OplFactory
+033:             Dim errHandler As OplErrorHandler = oplF.CreateOplErrorHandler()
+034:             Dim settings As OplSettings = oplF.CreateOplSettings(errHandler)
+035: 
+036: 
+037:             REM Make master model 
+038:             Dim masterCplex As Cplex = oplF.CreateCplex()
+039:             masterCplex.SetOut(Nothing)
+040: 
+041:             Dim masterRC0 As OplRunConfiguration = oplF.CreateOplRunConfiguration(DATADIR + <b><font color="#8A2BE2">"/cutstock.mod"</font></b>, DATADIR + <b><font color="#8A2BE2">"/cutstock.dat"</font></b>)
+042:             masterRC0.Cplex = masterCplex
+043:             Dim masterDataElements As OplDataElements = masterRC0.OplModel.MakeDataElements()
+044: 
+045:             REM Prepare sub model
+046:             Dim subSource As OplModelSource = oplF.CreateOplModelSource(DATADIR + <b><font color="#8A2BE2">"/cutstock-sub.mod"</font></b>)
+047:             Dim subDef As OplModelDefinition = oplF.CreateOplModelDefinition(subSource, settings)
+048:             Dim subCplex As Cplex = oplF.CreateCplex()
+049: 
+050:             Const nbItems As Integer = 5
+051:             Dim items As IIntRange = masterCplex.IntRange(1, 5)
+052:             Dim best As Double
+053:             Dim curr As Double = Double.MaxValue
+054:             Do
+055:                 best = curr
+056: 
+057:                 masterCplex.ClearModel()
+058: 
+059:                 Dim masterRC As OplRunConfiguration = oplF.CreateOplRunConfiguration(masterRC0.OplModel.ModelDefinition, masterDataElements)
+060:                 masterRC.Cplex = masterCplex
+061:                 masterRC.OplModel.Generate()
+062: 
+063:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"Solve master."</font></b>)
+064:                 If (masterCplex.Solve()) Then
+065:                     curr = masterCplex.ObjValue
+066:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + curr.ToString(<b><font color="#8A2BE2">"F"</font></b>))
+067:                     status = 0
+068:                 Else
+069:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>)
+070:                     status = 1
+071:                 End If
+072: 
+073:                 REM prepare sub model data
+074:                 Dim subDataElements As OplDataElements = oplF.CreateOplDataElements()
+075:                 subDataElements.AddElement(masterDataElements.GetElement(<b><font color="#8A2BE2">"RollWidth"</font></b>))
+076:                 subDataElements.AddElement(masterDataElements.GetElement(<b><font color="#8A2BE2">"Size"</font></b>))
+077:                 subDataElements.AddElement(masterDataElements.GetElement(<b><font color="#8A2BE2">"Duals"</font></b>))
+078:                 REM get reduced costs and set them in sub problem
+079:                 Dim duals As INumMap = subDataElements.GetElement(<b><font color="#8A2BE2">"Duals"</font></b>).AsNumMap()
+080:                 Dim i As Integer
+081:                 For i = 1 To nbItems
+082:                     Dim forAll As IForAllRange = masterRC.OplModel.GetElement(<b><font color="#8A2BE2">"ctFill"</font></b>).AsConstraintMap().Get(i)
+083:                     duals.Set(i, masterCplex.GetDual(forAll))
+084:                 Next
+085:                 REM make sub model
+086:                 Dim subOpl As OplModel = oplF.CreateOplModel(subDef, subCplex)
+087:                 subOpl.AddDataSource(subDataElements)
+088:                 subOpl.Generate()
+089: 
+090:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"Solve sub."</font></b>)
+091:                 If (subCplex.Solve()) Then
+092:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + subCplex.ObjValue.ToString(<b><font color="#8A2BE2">"F"</font></b>))
+093:                     status = 0
+094:                 Else
+095:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>)
+096:                     status = 1
+097:                 End If
+098: 
+099:                 If (subCplex.ObjValue &gt; -RC_EPS) Then Exit Do
+100: 
+101:                 REM Add variable in master model
+102:                 Dim newFill As IIntMap = masterCplex.IntMap(items)
+103:                 For i = 1 To nbItems
+104:                     Dim coef As Integer = subCplex.GetValue(subOpl.GetElement(<b><font color="#8A2BE2">"Use"</font></b>).AsIntVarMap().Get(i))
+105:                     newFill.Set(i, coef)
+106:                 Next
+107:                 Dim buf As ITupleBuffer = masterDataElements.GetElement(<b><font color="#8A2BE2">"Patterns"</font></b>).AsTupleSet().MakeTupleBuffer(-1)
+108:                 buf.SetIntValue(<b><font color="#8A2BE2">"id"</font></b>, masterDataElements.GetElement(<b><font color="#8A2BE2">"Patterns"</font></b>).AsTupleSet().Size)
+109:                 buf.SetIntValue(<b><font color="#8A2BE2">"cost"</font></b>, 1)
+110:                 buf.SetIntMapValue(<b><font color="#8A2BE2">"fill"</font></b>, newFill)
+111:                 buf.Commit()
+112: 
+113:                 subOpl.End()
+114:                 masterRC.End()
+115:             Loop While (best &lt;&gt; curr And status = 0)
+116:             oplF.End()
+117:         Catch ex As ILOG.OPL.OplException
+118:             Console.Out.WriteLine(ex.Message)
+119:             Status = 2
+120:         Catch ex As ILOG.Concert.Exception
+121:             Console.Out.WriteLine(ex.Message)
+122:             Status = 3
+123:         Catch ex As System.Exception
+124:             Console.Out.WriteLine(ex.Message)
+125:             Status = 4
+126:         End Try
+127: 
+128:     Environment.ExitCode = status
+129:     Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>)
+130:     Console.ReadLine()
+131:   End Sub
+132: 
+133: End Module
+</tt></pre>

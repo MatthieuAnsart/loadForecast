@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling stochastic scheduling problems on disjunctive resources" />
+<meta name="abstract" content="Stochastic programming problems on disjunctive resources can be modeled using same sequence constraints." />
+<meta name="Description" content="Stochastic programming problems on disjunctive resources can be modeled using same sequence constraints." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="modelingstochasticschedulingproblemsondisjunctiveresources" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Modeling stochastic scheduling problems on disjunctive resources</title>
+</head>
+<body role="main" id="modelingstochasticschedulingproblemsondisjunctiveresources">
+<h1 class="title topictitle1">Modeling stochastic scheduling problems on disjunctive resources</h1>
+<div class="body"><p class="shortdesc">Stochastic programming problems on disjunctive resources
+can be modeled using same sequence constraints.</p>
+<p class="p">Scheduling problems often involve some uncertainty in the data
+and require computing a schedule that is, in a certain sense, robust
+with respect to these uncertainties. Data can be uncertain for several
+potential reasons such as activities taking more or less time than
+originally estimated, resource availability that is subject to variability
+(machine breakdowns, manpower absenteeism) or different unexpected
+delays (materials arriving later than planned, weather conditions),
+etc.</p>
+<div class="p"> When facing a scheduling problem with uncertainties two important
+questions should be answered first: <ol class="ol"><li class="li">Can I solve the deterministic version of the problem? Modeling
+and solving a stochastic scheduling problem is more complex than modeling
+and solving the deterministic variant of the problem where all uncertainties
+have been ruled out. Being capable of efficiently solving the deterministic
+version of the problem is always a <em class="ph i">prerequisite</em>.</li>
+<li class="li">What is a solution to the robust scheduling problem? This question
+is often harder than it seems. The traditional solution to a scheduling
+problem, in the form of fixed start and end dates for activities is
+in general too rigid and too brittle to be considered as robust. One
+generally looks for a more flexible solution that implicitly represents
+a <em class="ph i">set</em> of fully fixed schedules. The decision of which fixed
+schedule to use, that is, the selection of actual start and end dates
+for activities, is usually performed at schedule execution time. Stated
+otherwise, a solution to a robust scheduling problem is in general
+a particular <em class="ph i">execution policy</em> computed off-line that will be
+used for on-line execution.</li>
+</ol>
+</div>
+<p class="p">When the scheduling problem is dominated by disjunctive resources,
+like machines, tools or workers that can only perform one activity
+at a time, a natural representation of a flexible schedule is the
+sequence of activities on the resource. In this context, finding a
+robust schedule boils down to finding a robust allocation and sequencing
+of activities on resources.  </p>
+<p class="p">The objective function of stochastic scheduling problems is often
+related with the expectation of a certain performance criterion. Typical
+examples include minimizing the expected project makespan or project
+cost or maximizing the probability that a given level of service can
+be satisfied. </p>
+<p class="p">Most of the existing approaches for stochastic scheduling implement
+a scenario-based framework, in which the uncertainty is modeled through
+the use of a number of n scenarios. Each scenario is a deterministic
+sub-problem that represents a particular realization of the uncertainties.
+In practical applications, these scenarios may be given by a selection
+of representative past execution of the system or they may be computed
+by sampling the probability distributions of the random variables
+related with uncertainties. </p>
+<p class="p">A global model is built by aggregating these n scenarios. Some
+constraints are added to ensure that the decisions taken off-line
+in order to build a robust schedule (for instance allocation and sequencing
+decisions) are consistent across all scenarios. The global objective
+function is a combination of the individual objective function of
+each scenario. </p>
+<p class="p">CP Optimizer provides a specific constraint <samp class="ph codeph">sameSequence</samp> to
+state that two sequence variables should be ordered in the same way.
+This constraint is particularly useful in stochastic scheduling problems
+involving the creation of robust sequences on disjunctive resources.
+It will be used to state that, for a given disjunctive resource, the
+same sequencing of activities should be used across all n scenarios.
+This is illustrated in Sample 1. </p>
+<div class="p"><strong class="ph b">SAMPLE 1:</strong> Scenario-based model for a single disjunctive
+resource<pre class="pre codeblock"><code>  IloEnv env;
+  IloModel model(env);
+  IloInt n = ...; // Number of scenarios
+  IloInt m = ...; // Number of activities on the machine
+  IloIntArray2 dur = ...; // dur[i][j]: duration of activity j in scenario i
+  
+  IloIntervalVarArray2 act(env, n);        // act[i][j]: activity j in scenario i
+  IloIntervalSequenceVarArray seq(env, n); // seq[i]: sequence of activities for scenario i
+  for (IloInt i=0; i&lt;n; ++i) {
+     // Scenario i
+     act[i] = IloIntervalVarArray(env, m);
+     for (IloInt j=0; j&lt;m; ++j) {
+       act[i][j] = IloIntervalVar(env, dur[i][j]);
+     }
+     seq[i] = IloIntervalSequenceVar(env, act[i]);
+     model.add(IloNoOverlap(env, seq[i]));
+     if (0&lt;i) {
+       // Same sequence across all scenarios
+       model.add(IloSameSequence(env, seq[0], seq[i]));
+     }
+   }
+ </code></pre>
+</div>
+<p class="p">A complete example of stochastic scheduling problem is available
+in the delivered example  <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/sched_stochastic_jobshop.cpp</samp>.
+This problem is a stochastic version of the classical job-shop scheduling
+problem where the duration of activities is uncertain and the objective
+is to minimize the expected makespan. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

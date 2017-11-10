@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: controlling properties of solutions with filters" />
+<meta name="abstract" content="Illustrates filters in use in the solution pool." />
+<meta name="Description" content="Illustrates filters in use in the solution pool." />
+<meta name="DC.subject" content="range filter, example" />
+<meta name="keywords" content="range filter, example" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/36_filter_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solnpool.1049421" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/36_filter_title_synopsis.html" />
+<title>Example: controlling properties of solutions with filters</title>
+</head>
+<body role="main" id="User_manual.uss_solnpool.1049421">
+<h1 class="title topictitle1">Example: controlling properties of solutions with filters</h1>
+<div class="body"><p class="shortdesc">Illustrates filters in use in the solution pool.</p>
+<p class="p">The model in <a class="xref" href="03_eg_facility_location.html" title="Describes a model used in documentation of the solution pool.">Example: simple facility location problem</a> has
+two categories of variables. The <samp class="ph codeph">x</samp>  variables
+specifying the facilities to open are of a higher decision level than
+the <samp class="ph codeph">y</samp>  variables deciding how the goods
+are shipped from facilities to regions. Suppose, for example, that
+you want to populate the solution pool with solutions that differ
+by which facilities are opened, without specifying any specific criteria
+for the shipping decisions. The replacement strategy (shown in <a class="xref" href="35_eg_diversity.html" title="Illustrates effect on diversity of the replacement parameter of the solution pool.">Example: diverse solutions through replacement parameter</a>)
+does not allow you to specify a customized diversity measure that
+takes into account only a subset of the variables. However, this diversity
+measure expressed only over the x variables can be enforced through
+a diversity filter. </p>
+<p class="p">Suppose further that facilities 1 and 2 are open. Let
+a solution keeping those two facilities open be the reference; that
+is, the reference value for <samp class="ph codeph">x1</samp>  is 1 (one),
+for <samp class="ph codeph">x2</samp>  is 1 (one), for <samp class="ph codeph">x3</samp> 
+is 0 (zero), for <samp class="ph codeph">x4</samp>  is 0 (zero).
+Then use a diversity filter to stipulate that any solution added to
+the solution pool must differ from the reference by decisions to open
+or close at least two other facilities. The following filter file
+enforces this diversity by giving each x variable a weight of 1.0
+and specifying a minimum diversity of 2 and unlimited maximum diversity
+(that is, infinity). In other words, this diversity filter makes sure
+that solutions satisfy the following constraint:</p>
+<pre class="pre codeblock"><code>2 &lt;= 1.0 * |x1 - 1| + 1.0 * |x2 - 1| + 1.0 * |x3 - 0| + 1.0 * |x4 - 0|&lt;= infinity</code></pre>
+<p class="p">The <samp class="ph codeph">y</samp>  variables are not specified
+in the filter; hence, they are not taken into account in the diversification.</p>
+<pre class="pre codeblock"><code>NAME location
+DIVFILTER f1 2 inf
+x1 1.0 1
+x2 1.0 1
+x3 1.0 0
+x4 1.0 0
+ENDATA</code></pre>
+<p class="p">Range filters also enforce additional constraints. Suppose,
+for example, that you want to limit transportation costs to less than
+fixed costs. The following range filter enforces this restriction
+by expressing the linear constraint:</p>
+<p class="p"> <samp class="ph codeph">-infinity &lt;= 1.0 * transport - 1.0 * fixed &lt;=0</samp> </p>
+<pre class="pre codeblock"><code>NAME location
+RNGFILTER f2 -inf 0
+transport 1.0
+fixed -1.0
+ENDATA</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/36_filter_title_synopsis.html" title="Documents filters of the solution pool. Filters offer a means of controlling properties of the solutions you generate and store.">Filtering the solution pool</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,268 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+002: <b><font color="#007D00">// File: Iterators.cs</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">//-------------------------------------------------------------- -*- C# -*-</font></b>
+015: <b><font color="#007D00">// C# version of iterators.cpp of OPL distrib</font></b>
+016: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+017: 
+018: using System;
+019: using System.Collections;
+020: using ILOG.Concert;
+021: using ILOG.CPLEX;
+022: using ILOG.OPL;
+023: 
+024: namespace Iterators
+025: {
+026:     <b><font color="EA7D00">class</font></b> Iterators
+027:     {
+028:         <b><font color="#007D00">// The purpose of this sample is to check the result of filtering by iterating on the generated data element.</font></b>
+029:         <b><font color="#007D00">//</font></b>
+030:         <b><font color="#007D00">// The data element is an array of strings that is indexed by a set of strings.</font></b>
+031:         <b><font color="#007D00">// It is filled as the result of an iteration on a set of tuples that filters out the duplicates.</font></b>
+032:         <b><font color="#007D00">// It is based on the model used in "Sparsity" run configuration of the "transp" example.</font></b>
+033:         <b><font color="#007D00">//</font></b>
+034:         <b><font color="#007D00">//</font></b>
+035:         <b><font color="#007D00">// The simplified model is:</font></b>
+036:         <b><font color="#007D00">//</font></b>
+037:         <b><font color="#007D00">// {string} Products = ...;</font></b>
+038:         <b><font color="#007D00">// tuple Route { string p; string o; string d; }</font></b>
+039:         <b><font color="#007D00">// {Route} Routes = ...;</font></b>
+040:         <b><font color="#007D00">// {string} orig[p in Products] = { o | &lt;p,o,d&gt; in Routes };</font></b>
+041:         <b><font color="#007D00">//</font></b>
+042:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> sample1()
+043:         {
+044:             <b><font color="#0000FF">int</font></b> status = 127;
+045:             <b><font color="EA7D00">const</font></b> string DATADIR = <b><font color="#8A2BE2">"../.."</font></b>;
+046:             OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+047:             OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+048:             <b><font color="EA7D00">try</font></b>
+049:             {
+050: 
+051:                 OplErrorHandler errHandler = oplF.CreateOplErrorHandler(Console.Out);
+052:                 OplRunConfiguration rc = oplF.CreateOplRunConfiguration(DATADIR + <b><font color="#8A2BE2">"/transp2.mod"</font></b>, DATADIR + <b><font color="#8A2BE2">"/transp2.dat"</font></b>);
+053:                 OplModel opl = rc.GetOplModel();
+054:                 opl.Generate();
+055:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"Verification of the computation of orig: "</font></b>);
+056: 
+057:                 <b><font color="#007D00">// Get the orig, Routes, Product elements from the OplModel.</font></b>
+058:                 ISymbolSetMap orig = opl.GetElement(<b><font color="#8A2BE2">"Orig"</font></b>).AsSymbolSetMap();
+059:                 ITupleSet Routes = opl.GetElement(<b><font color="#8A2BE2">"Routes"</font></b>).AsTupleSet();
+060:                 ISymbolSet Products = opl.GetElement(<b><font color="#8A2BE2">"Products"</font></b>).AsSymbolSet();
+061: 
+062:                 Console.Out.Write(<b><font color="#8A2BE2">"Products = "</font></b>);
+063:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j = 0; j &lt;= Products.Size - 1; j++)
+064:                 {
+065:                     Console.Out.Write(Products.GetValue(j) + <b><font color="#8A2BE2">" "</font></b>);
+066:                 }
+067:                 Console.Out.WriteLine();
+068: 
+069:                 <b><font color="#007D00">// Iterate through the orig to see the result of the data element filtering.</font></b>
+070:                 IEnumerator it1 = Products.GetEnumerator();
+071:                 <b><font color="EA7D00">while</font></b> (it1.MoveNext())
+072:                 {
+073:                     string p = ((string)it1.Current);
+074:                     <b><font color="#007D00">// This is the last dimension of the array (as it is a one-dimensional array), so you can use the get method directly.</font></b>
+075:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"for p = "</font></b> + p + <b><font color="#8A2BE2">" we have "</font></b> + orig.Get(p));
+076:                 }
+077:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"---------------------"</font></b>);
+078: 
+079:                 <b><font color="#007D00">// Iterate through the TupleSet.</font></b>
+080:                 IEnumerator it2 = Routes.GetEnumerator();
+081:                 <b><font color="EA7D00">while</font></b> (it2.MoveNext())
+082:                 {
+083:                     ITuple t = ((ITuple)it2.Current);
+084:                     <b><font color="#007D00">// Get the string "p" from the tuple.</font></b>
+085:                     string p = t.GetStringValue(<b><font color="#8A2BE2">"p"</font></b>);
+086:                     <b><font color="#007D00">// if "p" is in the indexer, we will try to add the "o" string to the array.</font></b>
+087:                     <b><font color="EA7D00">if</font></b> (Products.Contains(p))
+088:                     {
+089:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"for p = "</font></b> + p + <b><font color="#8A2BE2">" we will have "</font></b> + t.GetStringValue(<b><font color="#8A2BE2">"o"</font></b>) + <b><font color="#8A2BE2">" from "</font></b> + t);
+090:                     }
+091:                 }
+092:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"---------------------"</font></b>);
+093:                 status = 0;
+094:             }
+095:             <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+096:             {
+097:                 Console.WriteLine(ex.Message);
+098:                 status = 2;
+099:             }
+100:             <b><font color="EA7D00">catch</font></b> (ILOG.Concert.Exception ex)
+101:             {
+102:                 Console.WriteLine(ex.Message);
+103:                 status = 3;
+104:             }
+105:             <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+106:             {
+107:                 Console.WriteLine(ex.Message);
+108:                 status = 4;
+109:             }
+110: 
+111:             oplF.End();
+112:             <b><font color="EA7D00">return</font></b> status;
+113:         }
+114: 
+115:         <b><font color="#007D00">// The purpose of this sample is to output a multidimensional array x[i][j] to illustrate how arrays and subarrays are managed.</font></b>
+116:         <b><font color="#007D00">// To access the elements of an array, you must first access the subarrays up to  the last dimension, then you can get the values.</font></b>
+117:         <b><font color="#007D00">//  Here, as there are two dimensions, you have to get one subarray from which you can directly get the values.</font></b>
+118:         <b><font color="#007D00">//</font></b>
+119:         <b><font color="#007D00">// The array of integers is indexed by two sets of strings..</font></b>
+120:         <b><font color="#007D00">//</font></b>
+121:         <b><font color="#007D00">// The simplified model is:</font></b>
+122:         <b><font color="#007D00">//</font></b>
+123:         <b><font color="#007D00">// {string} s1 = ...;</font></b>
+124:         <b><font color="#007D00">// {string} s2 = ...;</font></b>
+125:         <b><font color="#007D00">// {int} x[s1][s2] = ...;</font></b>
+126:         <b><font color="#007D00">//</font></b>
+127:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> sample2()
+128:         {
+129:             <b><font color="#0000FF">int</font></b> status = 127;
+130:             <b><font color="EA7D00">const</font></b> string DATADIR = <b><font color="#8A2BE2">"../.."</font></b>;
+131:             OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+132:             OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+133:             <b><font color="EA7D00">try</font></b>
+134:             {
+135:                 OplErrorHandler errHandler = oplF.CreateOplErrorHandler(Console.Out);
+136:                 OplRunConfiguration rc = oplF.CreateOplRunConfiguration(DATADIR + <b><font color="#8A2BE2">"/iterators.mod"</font></b>);
+137:                 OplModel opl = rc.GetOplModel();
+138:                 opl.Generate();
+139: 
+140:                 <b><font color="#007D00">// Get the x, s1 and s2 elements from the OplModel.</font></b>
+141:                 IIntMap x = opl.GetElement(<b><font color="#8A2BE2">"x"</font></b>).AsIntMap();
+142:                 ISymbolSet s1 = opl.GetElement(<b><font color="#8A2BE2">"s1"</font></b>).AsSymbolSet();
+143:                 ISymbolSet s2 = opl.GetElement(<b><font color="#8A2BE2">"s2"</font></b>).AsSymbolSet();
+144: 
+145:                 <b><font color="#007D00">// Iterate on the first indexer.</font></b>
+146:                 IEnumerator it1 = s1.GetEnumerator();
+147:                 <b><font color="EA7D00">while</font></b> (it1.MoveNext())
+148:                 {
+149:                     <b><font color="#007D00">// Get the second dimension array from the first dimension.</font></b>
+150:                     IIntMap sub = x.GetSub((string)it1.Current);
+151:                     <b><font color="#007D00">// Iterate on the second indexer of x (that is the indexer of the subarray).</font></b>
+152:                     IEnumerator it2 = s2.GetEnumerator();
+153:                     <b><font color="EA7D00">while</font></b> (it2.MoveNext())
+154:                     {
+155:                         <b><font color="#007D00">// This is the last dimension of the array, so you can directly use the get method.</font></b>
+156:                         Console.Out.WriteLine(it1.Current + <b><font color="#8A2BE2">" "</font></b> + it2.Current + <b><font color="#8A2BE2">" "</font></b> + sub.Get((string)it2.Current));
+157:                     }
+158:                 }
+159:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"---------------------"</font></b>);
+160:                 status = 0;
+161:             }
+162:             <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+163:             {
+164:                 Console.WriteLine(ex.Message);
+165:                 status = 1;
+166:             }
+167:             <b><font color="EA7D00">catch</font></b> (IloException ex)
+168:             {
+169:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"### exception: "</font></b> + ex.Message);
+170:                 status = 2;
+171:             }
+172:             <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+173:             {
+174:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> + ex.Message);
+175:                 status = 3;
+176:             }
+177: 
+178:             oplF.End();
+179:             <b><font color="EA7D00">return</font></b> status;
+180:         }
+181: 
+182:         <b><font color="#007D00">// The purpose of this sample is to output an array of tuples arrayT[i], </font></b>
+183:         <b><font color="#007D00">// to illustrate how tuple elements can be accessed.</font></b>
+184:         <b><font color="#007D00">// The simplified model is:</font></b>
+185:         <b><font color="#007D00">// tuple t</font></b>
+186:         <b><font color="#007D00">// {</font></b>
+187:         <b><font color="#007D00">//   int a;</font></b>
+188:         <b><font color="#007D00">//   int b;</font></b>
+189:         <b><font color="#007D00">// }</font></b>
+190:         <b><font color="#007D00">// {string} ids={"id1","id2","id3"};</font></b>
+191:         <b><font color="#007D00">// t arrayT[ids]=[&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];</font></b>
+192: 
+193:         <b><font color="EA7D00">static</font></b> String getModelTextSample3()
+194:         {
+195:             String model = <b><font color="#8A2BE2">""</font></b>;
+196:             model += <b><font color="#8A2BE2">"tuple t{int a;int b;}"</font></b>;
+197:             model += <b><font color="#8A2BE2">"{string} ids = {</font></b>\"<b><font color="#8A2BE2">id1</font></b>\"<b><font color="#8A2BE2">,</font></b>\"<b><font color="#8A2BE2">id2</font></b>\"<b><font color="#8A2BE2">, </font></b>\"<b><font color="#8A2BE2">id3</font></b>\"<b><font color="#8A2BE2">};"</font></b>;
+198:             model += <b><font color="#8A2BE2">"t arrayT[ids] = [&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];"</font></b>;
+199:             <b><font color="EA7D00">return</font></b> model;
+200:         }
+201:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> sample3()
+202:         {
+203:             <b><font color="#0000FF">int</font></b> status = 0;
+204:             OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+205:             OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+206:             <b><font color="EA7D00">try</font></b>
+207:             {
+208:                 OplErrorHandler errHandler = oplF.CreateOplErrorHandler(Console.Out);
+209:                 OplSettings settings = oplF.CreateOplSettings(errHandler);
+210:                 OplModelSource src = oplF.CreateOplModelSourceFromString(getModelTextSample3(), <b><font color="#8A2BE2">"tuple array iterator"</font></b>);
+211:                 OplModelDefinition def = oplF.CreateOplModelDefinition(src, settings);
+212:                 Cplex cplex = oplF.CreateCplex();
+213:                 OplModel opl = oplF.CreateOplModel(def, cplex);
+214:                 opl.Generate();
+215: 
+216:                 <b><font color="#007D00">// get the string set used to index the array of tuples</font></b>
+217:                 ITupleMap arrayT = opl.GetElement(<b><font color="#8A2BE2">"arrayT"</font></b>).AsTupleMap();
+218:                 ISymbolSet ids = opl.GetElement(<b><font color="#8A2BE2">"ids"</font></b>).AsSymbolSet();
+219:                 <b><font color="#007D00">// iterate on the index set to retrieve the tuples stored in the array</font></b>
+220:                 IEnumerator it = ids.GetEnumerator();
+221:                 <b><font color="EA7D00">while</font></b> (it.MoveNext())
+222:                 {
+223:                     Console.Out.Write(<b><font color="#8A2BE2">"arrayT["</font></b> + it.Current + <b><font color="#8A2BE2">"] = "</font></b>);
+224:                     IMapIndexArray id = oplF.MapIndexArray(0);
+225:                     id.Add(it.Current.ToString());
+226:                     ITuple t = arrayT.MakeTuple();
+227:                     arrayT.GetAt(id, t);
+228:                     Console.Out.WriteLine(t);
+229:                 }
+230:             }
+231:             <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+232:             {
+233:                 Console.WriteLine(ex.Message);
+234:                 status = 1;
+235:             }
+236:             <b><font color="EA7D00">catch</font></b> (IloException e)
+237:             {
+238:                 status = 2;
+239:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"### exception: "</font></b> + e.Message);
+240:             }
+241:             <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+242:             {
+243:                 status = 3;
+244:                 Console.Out.WriteLine(<b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> + ex.Message);
+245:             }
+246:             oplF.End();
+247:             <b><font color="EA7D00">return</font></b> status;
+248:         }
+249: 
+250: 
+251:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> Main(string[] args)
+252:         {
+253:             <b><font color="#0000FF">int</font></b> res1 = sample1();
+254:             <b><font color="#0000FF">int</font></b> res2 = sample2();
+255:             <b><font color="#0000FF">int</font></b> res3 = sample3();
+256: 
+257:             Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>);
+258:             Console.ReadLine();
+259: 
+260:             <b><font color="EA7D00">return</font></b> (res1 + res2 + res3);
+261:         }
+262:     }
+263: }
+</tt></pre>

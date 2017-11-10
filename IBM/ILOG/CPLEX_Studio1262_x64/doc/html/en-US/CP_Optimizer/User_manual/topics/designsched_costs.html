@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling classical scheduling costs" />
+<meta name="abstract" content="Classical scheduling costs such as makespan, earliness/tardiness, resource allocation costs and activity execution costs can be modeled efficiently in CP Optimizer." />
+<meta name="Description" content="Classical scheduling costs such as makespan, earliness/tardiness, resource allocation costs and activity execution costs can be modeled efficiently in CP Optimizer." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="g3JDl1sh" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Modeling classical scheduling costs</title>
+</head>
+<body role="main" id="g3JDl1sh">
+<h1 class="title topictitle1">Modeling classical scheduling costs</h1>
+<div class="body"><p class="shortdesc">Classical scheduling costs such as makespan, earliness/tardiness,
+resource allocation costs and activity execution costs can be modeled
+efficiently in CP Optimizer.</p>
+<p class="p paragrouptitle">Non-execution costs</p>
+<p class="p">An activity non-execution cost <em class="ph i">K</em> is modeled by an expression <em class="ph i">K * presenceOf(a)</em> if <em class="ph i">a</em> is the optional interval variable
+representing the activity.  </p>
+<p class="p paragrouptitle">Makespan</p>
+<p class="p">A makespan cost is modeled as the maximal value of the
+end of a set of interval variables. In the case of an optional interval
+variable, the value of expression <samp class="ph codeph">IloEndOf(a)</samp> is
+0 when interval <samp class="ph codeph">a</samp> is absent.  </p>
+<div class="p"><pre class="pre codeblock"><code>dvar interval act[i in 1..n];    
+dexpr int makespan = max(i in 1..n) endOf(act[i]);   
+ minimize makespan;   
+subject to {     // ...   }
+
+IloIntervalVarArray act(env,n);
+IloIntExprArray end(env);
+for (IloInt i=0; i&lt;n; i++ ) {
+  act[i] = IloIntervalVar(env);
+  ends.add(IloEndOf(act[i]);
+}
+m.add(IloMinimize(env,IloMax(ends)));
+  </code></pre>
+</div>
+<p class="p paragrouptitle">Earliness/tardiness costs</p>
+<p class="p">An earliness/tardiness cost can be modeled by a set of
+piecewise linear functions <em class="ph i">f</em> that
+represent the cost <em class="ph i">f(t)</em> of
+finishing (or starting) an activity at a date <em class="ph i">t</em>. Integer expressions <samp class="ph codeph">IloStartEval</samp> and <samp class="ph codeph">IloEndEval</samp> are
+used to evaluate the function on the start or end point of an interval
+variable. An example of earliness/tardiness cost where the cost of
+an activity is expressed as a V-shaped function evaluated at the activity
+end time follows. This sample combines the earliness/tardiness cost
+with a non-execution cost: in the example, activities are supposed
+to be optional and leaving the activity unperformed incurs a cost. </p>
+<div class="p"><pre class="pre codeblock"><code>pwlFunction etcost[i in 1..n] = piecewise{-earliW[i]-&gt;targetEnd[i]; tardiW[i]}(targetEnd[i],0); dexpr float cost = sum(i in 1..n) endEval(act[i], etcost[i], nonExecCost[i]);    
+
+IloIntArray targetEnd(env,n); // populate
+IloNumArray earliW(env,n); // populate
+IloNumArray tardiW(env,n); // populate
+IloNumArray nonExecCost(env,n); // populate
+IloNumExpr cost(env);  
+IloIntervalArray act(env,n);
+IlNumExpr cost(env);
+for (IloInt i=0; i&lt;n; i++ ) {
+  act[i] = IloIntervalVar(env);
+  act[i].setOptional();
+  IloNumToNumSegmentFunction etcost = IloPiecewiseLinearFunction(env,
+                                        IloNumArray(env,1, targetEnd[i]),
+                                        IloNumArray(env,2,-earliW[i],tardiW)
+                                        targetEnd[i],0);
+  cost += IloEndEval(act[i],etcost,nonExecCost[i]); 
+}
+m.add(IloMinimize(env,cost)); </code></pre>
+</div>
+<p class="p">When the function is very simple such as a pure tardiness
+cost and the activity is not optional, it is slightly more efficient
+to use a <samp class="ph codeph">IloMax</samp> expression rather than
+a piecewise linear function as illustrated.  </p>
+<pre class="pre codeblock"><code>IloIntArray dueDate(env,n); // populate
+IloNumArray tardiW(env,n); // populate
+IloIntervalVarArray act(env,n);
+IloNumExpr cost(env);
+for (IloInt i=0; i&lt;n; i++ ) {
+  act[i] = IloIntervalVar(env);
+  cost += tardiw[i]*IloMax(0,IloEndOf(act[i])-dueDate[i]);
+}
+m.add(IloMinimize(env,cost));
+</code></pre>
+<p class="p paragrouptitle">Resource allocation costs</p>
+<p class="p">A resource or mode allocation cost specifying a cost <samp class="ph codeph">K</samp> incurred
+by an activity executing on a particular resource or in a particular
+mode is modeled by an expression <samp class="ph codeph">K * IloPresenceOf(a)</samp> if <samp class="ph codeph">a</samp> is
+the optional interval variable representing the execution of the activity
+on the resource or in the specified mode (see <a class="xref" href="designsched_alt.html" title="The alternative constraint between interval variables should be used when an interval variable represents a set of alternative possibilities.">Different uses of the alternative constraint</a>). The following sample illustrates a simple
+resource allocation cost for an activity executing on a set of alternative
+resources.  </p>
+<div class="p"><pre class="pre codeblock"><code>IloInt nbMachines   = 5;   
+IloInt nbActivities = 10;   
+IloIntArray ptime(env,nbActivities); // populate
+IloIntArray2 allocCost(env,nbActivities);
+IloIntervalVar activity(env,nbActivities);
+IloIntervalVarArray2 actonMach(env,nbActivities);
+for (IloInt i=0; i&lt;nbActivities;i++) {
+  activity[i] = IloIntervalVar(env,ptime[i]);
+  allcost[i] = IloIntArray(env,nbMachines); // ppulate
+  actOnMach[i] = IloIntervalVarArray(env,nbMachines);
+  for (IloInt j=0; j&lt; nbMachines; j++) {
+    actOnMach[i][j] = IloIntervalVar(env);
+    actOnMach[i][j].setOptional();
+  }
+  m.add(IloAlternative(env,activity[i],actOnMach[i]));
+}
+
+IloIntervalVarArray2 resOnAct(env,nbMachines);
+for (IloInt j=0; j&lt;nbMachines; j++) {
+  resHasAct[j] = IloIntervalVarArray(env,nbActivities);
+  for (IloInt i=0; i&lt;nbActivities;i++) {
+    resHasAct[j][i] = actOnMach[i][j];
+  }
+  m.add(IloNoOverlap(env, resOnAct[j]));
+}
+
+IloIntExpr cost(env);
+for (i=0; i&lt;n; i++ )
+  for (IloInt j=0; j&lt;m; j++)
+    cost += allocCost[i][m]*IloPresenceOf(env,actOnMach[i][m]); 
+m.add(IloMinimize(env,cost)); </code></pre>
+</div>
+<p class="p paragrouptitle">Sequence-dependent setup costs</p>
+<p class="p">A sequence-dependent setup cost on a machine is usually
+expressed as a cost matrix <samp class="ph codeph">M[ti][tj]</samp> that
+gives the setup cost for the machine to switch from an activity of
+type <samp class="ph codeph">ti</samp> to an activity of type <samp class="ph codeph">tj</samp>.
+Such a setup cost can be modeled by using expressions <em class="ph i">typeOfNext</em> and <em class="ph i">typeOfPrev</em> on the sequence variable
+representing the machine as illustrated in the following sample. A
+complete example modeling a total setup cost  is available in the
+delivered example <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/sched_tcost.cpp</samp>.</p>
+<div class="p"><pre class="pre codeblock"><code>IloEnv env;  
+IloModel model(env);
+IloInt m    = ...; // Number of types { 0, 1, ..., m-1 }  
+IloInt last = m;   // Type of next for the last activity on the machine  
+IloInt abs  = m+1; // Type of next for a non-executed activity on the machine  
+
+IloIntArray2 M(env, m);  
+for (IloInt ti=0; ti&lt;m; ++ti) {  
+  M[ti]= IloIntArray(env, m+2);  
+  for (IloInt tj=0; tj&lt;m; ++tj) {  
+    M[ti][tj] = ...; // Setup cost between types ti and tj  
+  }  
+  M[ti][last] = ...; // Cost if an activity of type ti is last  
+  M[ti][abs]  = ...; // Cost if an activity of type ti is not executed  
+}  
+
+IloInt n = ...;    // Number of activities on the machine  
+IloIntervalVarArray act(env, n); // Activities on the machine  
+IloIntArray        type(env, n); // Activity types  
+
+// ...  
+
+IloIntervalSequenceVar machine(env, act, type);  
+model.add(IloNoOverlap(env, machine));  
+
+IloIntExpr totalCost(env);  
+for (IloInt i=0; i&lt;n; ++i)  
+  totalCost += M[type[i]][IloTypeOfNext(machine, act[i], last, abs)];    
+model.add(IloMinimize(env, totalCost));    
+
+IloCP cp(model);  
+cp.solve();  
+env.end();
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

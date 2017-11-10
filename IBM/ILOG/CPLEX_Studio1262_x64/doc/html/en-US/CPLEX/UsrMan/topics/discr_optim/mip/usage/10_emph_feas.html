@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Emphasizing feasibility and optimality" />
+<meta name="abstract" content="Describes the context of the MIP emphasis parameter." />
+<meta name="Description" content="Describes the context of the MIP emphasis parameter." />
+<meta name="DC.subject" content="performance, MIP, feasibility emphasis, time limit, TiLim parameter (MIP)" />
+<meta name="keywords" content="performance, MIP, feasibility emphasis, time limit, TiLim parameter (MIP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/usage/08_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.672411" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/usage/08_title_synopsis.html" />
+<title>Emphasizing feasibility and optimality</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.672411">
+<h1 class="title topictitle1">Emphasizing feasibility and optimality</h1>
+<div class="body"><p class="shortdesc">Describes the context of the MIP emphasis parameter.</p>
+<p class="p">The following topic, <a class="xref" href="../performance/12_title_synopsis.html" title="Describes features for tuning performance of the MIP optimizer.">Tuning performance features of the mixed integer optimizer</a>,
+goes into great detail about the algorithmic features, controlled
+by parameter settings, that are available in CPLEX to achieve performance
+tuning on difficult MIP models. However, there is an important parameter, <samp class="ph codeph">MIPEmphasis</samp> or <samp class="ph codeph">CPX_PARAM_MIPEMPHASIS</samp>,
+that is oriented less toward the user understanding the algorithm
+being used to solve the model, and more toward the user telling the
+algorithm something about the underlying aim of the optimization being
+run. That parameter is discussed here.</p>
+<p class="p">Optimizing a MIP model involves:</p>
+<ol class="ol"><li class="li"><p class="p">finding a succession of improving integer
+feasible solutions (that is, solutions satisfying the linear and quadratic
+constraints and the integrality conditions); while</p>
+</li>
+<li class="li"><p class="p">also working toward a proof that no
+better feasible solution exists and is undiscovered. </p>
+</li>
+</ol>
+<p class="p">For most models, a balance between these two sometimes-competing
+aims works well, and this is another way of stating the philosophy
+behind the default <samp class="ph codeph">MIPEmphasis</samp>  setting:
+it balances optimality and integer feasibility.</p>
+<p class="p">At this default <samp class="ph codeph">MIPEmphasis</samp> setting
+of <samp class="ph codeph">0</samp> (that is, <samp class="ph codeph">MIPEmphasisBalanced</samp> in
+Concert Technology or <samp class="ph codeph">CPX_MIPEMPHASIS_BALANCED</samp> in
+the Callable Library), CPLEX uses tactics intended to find a proven
+optimal solution quickly, for models of a broad range of difficulty.
+That is, considerable analysis of the model is performed before branching
+ever begins, in the expectation that the investment will result in
+a faster total run time, yet not every possible analysis is performed.
+And then branching is performed in a manner that seeks to find good
+quality feasible solutions, without sacrificing too much time that
+could be spent proving the optimality of any solution that has already
+been found.</p>
+<p class="p">In many situations, the user may want a greater emphasis
+on feasibility and less emphasis on analysis and proof of optimality.
+For example, a restrictive time limit (set by the user with the <samp class="ph codeph">TiLim</samp> parameter)
+may be in force due to a real-time application deployment, where a
+model is of sufficient difficulty that a proof of optimality is unlikely,
+and the user wants to have simply as good a solution as is practicable
+when the time limit is reached. The <samp class="ph codeph">MIPEmphasis</samp> setting
+of <samp class="ph codeph">1</samp> (<samp class="ph codeph">MIPEmphasisFeasibility</samp> 
+in Concert Technology or <samp class="ph codeph">CPX_MIPEMPHASIS_FEASIBILITY</samp> in
+the Callable Library) directs CPLEX to adopt this emphasis. Less computational
+effort is applied at the outset toward the analyses that aid in the
+eventual proof of optimality, and more effort is spent in immediately
+beginning computations that search for early (and then improved) feasible
+solutions. It is likely on most models that an eventual proof of optimality
+would take longer by setting <samp class="ph codeph">MIPEmphasis</samp> to
+1 , but since the user has given CPLEX the additional information
+that this proof is of less importance than usual, the user's needs
+will actually be met more effectively.</p>
+<p class="p">Another choice for <samp class="ph codeph">MIPEmphasis</samp> is <samp class="ph codeph">2</samp> (<samp class="ph codeph">MIPEmphasisOptimality</samp> in
+Concert Technology or, in the Callable Library, <samp class="ph codeph">CPX_MIPEMPHASIS_OPTIMALITY</samp>).
+This setting results in a greater emphasis on optimality than on feasibility.
+The search for feasible solutions is not ignored completely, but the
+balance is shifted toward moving the Best Bound (described in the
+following paragraph) more rapidly, at the likely expense of feasible
+solutions being found less rapidly, and improved feasible solutions
+less frequently, than with the default emphasis.</p>
+<p class="p">The fourth choice for <samp class="ph codeph">MIPEmphasis</samp>, <samp class="ph codeph">3</samp> (<samp class="ph codeph">MIPEmphasisBestBound</samp> in
+Concert Technology or, in the Callable Library, <samp class="ph codeph">CPX_MIPEMPHASIS_BESTBOUND</samp>)
+works exclusively at moving the <em class="ph i">Best
+Bound</em>. The Best Bound represents the objective function
+value at which an integer feasible solution could still potentially
+exist. As possibilities are eliminated, this Best Bound value will
+move in the opposite direction to that of any improving series of
+integer feasible solutions. The process of moving the Best Bound will
+eventually result in the optimal feasible solution being discovered,
+at which point the optimization is complete, and feasible solutions
+may be discovered along the way anyway, due to branches that happen
+to locate feasible solutions that do not match the Best Bound. A great
+deal of analysis may be performed on the model, beyond what is done
+with the default emphasis. Therefore, it is recommended to use this
+setting only on models that are difficult for the default emphasis,
+and for which you do not care about interim feasible solutions that
+may or may not be optimal.</p>
+<p class="p">The final choice for <samp class="ph codeph">MIPEmphasis</samp> is
+4 (<samp class="ph codeph">CPX_MIPEMPHASIS_HIDDENFEAS</samp>). It applies
+considerable additional effort toward finding high quality feasible
+solutions that are difficult to locate, and for this reason the eventual
+proof of optimality may take longer than with default settings. This
+choice is intended for use on difficult models where a proof of optimality
+is unlikely, and where emphasis 1 (one) does not deliver solutions
+of an appropriately high quality. </p>
+<p class="p">To make clear a point that has been alluded to so far:
+every choice of <samp class="ph codeph">MIPEmphasis</samp> results in
+the search algorithm proceeding in a manner that eventually will find
+and prove an optimal solution, or will prove that no integer feasible
+solution exists. The choice of emphasis only guides CPLEX to produce
+feasible solutions in a way that is in keeping with the user's particular
+purposes, but the accuracy and completeness of the algorithm is not
+sacrificed in the process.</p>
+<p class="p">The <samp class="ph codeph">MIPEmphasis</samp>  parameter
+may be set in conjunction with any other CPLEX parameters (discussed
+at length in the next section). For example, if you wish to set an
+upward branching strategy via the <samp class="ph codeph">BrDir</samp> parameter,
+this will be honored by any setting of <samp class="ph codeph">MIPEmphasis</samp>.
+Of course, certain combinations of <samp class="ph codeph">MIPEmphasis</samp> with
+other parameters may be counter-productive, such as turning off all
+cuts with emphasis <samp class="ph codeph">3</samp>, but the user has
+the option if that is what is wanted.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/usage/08_title_synopsis.html" title="Describes features of the MIP optimizer.">Using the mixed integer optimizer</a></div>
+</div>
+</div></body>
+</html>

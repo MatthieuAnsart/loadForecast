@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Reversible data" />
+<meta name="abstract" content="Reversible data objects can be used to return data to its previous state upon backtracking." />
+<meta name="Description" content="Reversible data objects can be used to return data to its previous state upon backtracking." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/goals_tips.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizergoals.1017025" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_tips.html" />
+<title>Reversible data</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizergoals.1017025">
+<h1 class="title topictitle1">Reversible data</h1>
+<div class="body"><p class="shortdesc">Reversible data objects can be used to return
+data to its previous state upon backtracking.</p>
+<p class="p">Consider an object, such as a goal, that has a data member
+with a value that is modified during the search for a solution. The
+value assigned to this data member depends on the choices and the
+hypotheses made before this assignment. </p>
+<p class="p">If those choices fail to find a solution further on, the
+optimizer backtracks, and the computed value for this data member
+is no longer valid. For that reason, this data member must be a reversible
+data member. That is, the modifier of this data member must save the
+initial value of the data member before any modification, so the optimizer
+is able to restore the value of the data member to its value before
+modification if any failure occurs later. CP Optimizer provides you
+with the predefined class <samp class="ph codeph">IlcRevInt</samp>, the
+class of reversible integers, for just such a purpose. </p>
+<p class="p">In this example is a custom goal that works to assign
+values to the variables in an array, starting at the smallest index.
+Each time the goal is executed, the index is incremented. However,
+when the optimizer backtracks, this integer is not decremented, leading
+to a situation in which some decision variables are not fixed. For
+example, the following goal will not ensure that all decision variables
+in the array are fixed when the search terminates:  </p>
+<pre class="pre codeblock"><code>ILCGOAL2(MycBadGenerate, IlcIntVarArray, x,int,index){
+  IloCP cp = getCP();
+  index++;
+  if (index &gt; x.getSize())
+    return 0;
+  return IlcAnd(IlcInstantiate(x[index-1]),this);
+}
+
+ILOCPGOALWRAPPER1(MyoBadGenerate,cp,IloIntVarArray,x) {
+  IlcInt index=0;
+  return MycBadGenerate(cp,cp.getIntVarArray(x),index);
+}
+</code></pre>
+<p class="p">In order for the state of the index to be restored when
+the optimizer backtracks, you can use an instance of an <samp class="ph codeph">IlcRevInt</samp>,
+as in the following code segment:  </p>
+<pre class="pre codeblock"><code>ILCGOAL2(MycGoodGenerate, IlcIntVarArray, x, IlcRevInt *, revIndex){
+  IloCP cp = getCP();
+  revIndex-&gt;setValue(cp,revIndex-&gt;getValue()+1);
+  if (revIndex-&gt;getValue() &gt; x.getSize())
+    return 0;
+  return IlcAnd(IlcInstantiate(x[revIndex-&gt;getValue()-1]),this);
+}
+
+ILOCPGOALWRAPPER1(MyoGoodGenerate,cp,IloIntVarArray,x) {
+  IlcRevInt* revIndex = new (cp.getHeap()) IlcRevInt(cp);
+  revIndex-&gt;setValue(cp,0);
+  return MycGoodGenerate(cp,cp.getIntVarArray(x),revIndex);
+}
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_tips.html" title="Programming tips are provided to help with writing efficient custom goals.">Programming tips</a></div>
+</div>
+</div></body>
+</html>

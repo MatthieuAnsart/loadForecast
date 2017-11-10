@@ -1,0 +1,258 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: ﻿<b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+002: <b><font color="#007D00">// File: ExcelWarehouse.cs</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+013: 
+014: using System;
+015: using System.Collections.Generic;
+016: using System.Linq;
+017: using System.Text;
+018: using System.Xml.Linq;
+019: using Excel = Microsoft.Office.Interop.Excel;
+020: using Office = Microsoft.Office.Core;
+021: using Microsoft.Office.Tools.Excel;
+022: using System.Windows.Forms;
+023: 
+024: using ILOG.Concert;
+025: using ILOG.CPLEX;
+026: using ILOG.OPL;
+027: using Exception = System.Exception;
+028: 
+029: namespace ExcelWarehouse
+030: {
+031:     <b><font color="EA7D00">public</font></b> partial <b><font color="EA7D00">class</font></b> ExcelWarehouse
+032:     {
+033:         <b><font color="EA7D00">private</font></b> Office.CommandBar AddInMenuBar;
+034:         <b><font color="EA7D00">private</font></b> Office.CommandBarButton SetupButton;
+035:         <b><font color="EA7D00">private</font></b> Office.CommandBarButton SolveButton;
+036: 
+037:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> ThisAddIn_Startup(object sender, System.EventArgs e)
+038:         {
+039:             CreateOplCommands();
+040:         }
+041:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> CreateOplCommands()
+042:         {
+043:             <b><font color="EA7D00">try</font></b> {
+044:                 <b><font color="#007D00">// new command bar for OPL:</font></b>
+045:                 AddInMenuBar = Application.CommandBars.Add(
+046:                     <b><font color="#8A2BE2">"OPL Commands"</font></b>, Office.MsoBarPosition.msoBarTop, missing, <b><font color="EA7D00">true</font></b>);
+047:                 <b><font color="#007D00">// setup button:</font></b>
+048:                 SetupButton = (Office.CommandBarButton)AddInMenuBar.Controls.Add(Office.MsoControlType.msoControlButton,
+049:                     missing, missing, missing, <b><font color="EA7D00">true</font></b>);
+050:                 SetupButton.Caption = <b><font color="#8A2BE2">"OPL Warehouse Setup"</font></b>;
+051:                 SetupButton.Style = Microsoft.Office.Core.MsoButtonStyle.msoButtonCaption;
+052:                 SetupButton.Click += <b><font color="EA7D00">new</font></b>
+053:                 Office._CommandBarButtonEvents_ClickEventHandler(SetupButton_Click);
+054: 
+055:                 <b><font color="#007D00">// solve button:</font></b>
+056:                 SolveButton = (Office.CommandBarButton)AddInMenuBar.Controls.Add(
+057:                     Office.MsoControlType.msoControlButton,
+058:                     missing, missing, missing, <b><font color="EA7D00">true</font></b>);
+059:                 SolveButton.Caption = <b><font color="#8A2BE2">"OPL Warehouse Solve"</font></b>;
+060:                 SolveButton.Style = Microsoft.Office.Core.MsoButtonStyle.msoButtonCaption;
+061:                 SolveButton.Click += <b><font color="EA7D00">new</font></b>
+062:                 Office._CommandBarButtonEvents_ClickEventHandler(SolveButton_Click);
+063:                 AddInMenuBar.Visible = <b><font color="EA7D00">true</font></b>;
+064:             }
+065:             <b><font color="EA7D00">catch</font></b> (Exception ex)
+066:             {
+067:                 MessageBox.Show(ex.Message, ex.Source, MessageBoxButtons.OK, MessageBoxIcon.Error);
+068:             }
+069:         }
+070:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> ThisAddIn_Shutdown(object sender, System.EventArgs e)
+071:         {
+072:             RemoveOPLCommands();
+073:         }
+074:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> RemoveOPLCommands()
+075:         {
+076:             SolveButton.Delete(<b><font color="EA7D00">false</font></b>);
+077:             SolveButton = <b><font color="EA7D00">null</font></b>;
+078:             SetupButton.Delete(<b><font color="EA7D00">false</font></b>);
+079:             SetupButton = <b><font color="EA7D00">null</font></b>;
+080:             AddInMenuBar = <b><font color="EA7D00">null</font></b>;
+081:         }
+082:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> SolveButton_Click(Office.CommandBarButton Ctrl, ref bool CancelDefault)
+083:         {
+084:             <b><font color="#007D00">// respond to solve button click</font></b>
+085:             Excel.Worksheet sheet = (Excel.Worksheet)<b><font color="EA7D00">this</font></b>.Application.ActiveWorkbook.ActiveSheet;
+086:             System.IO.StringWriter errHandlerErrors = <b><font color="EA7D00">new</font></b> System.IO.StringWriter();
+087:             <b><font color="EA7D00">try</font></b>
+088:             {
+089:                 setValue(sheet, <b><font color="#8A2BE2">"B9"</font></b>, <b><font color="#8A2BE2">"Computing..."</font></b>);
+090:                 SolveProblem(sheet, errHandlerErrors);
+091:                 setValue(sheet, <b><font color="#8A2BE2">"B9"</font></b>, <b><font color="#8A2BE2">"Success"</font></b>);
+092:             }
+093:             <b><font color="EA7D00">catch</font></b> (Exception ex)
+094:             {
+095:                 setValue(sheet, <b><font color="#8A2BE2">"B9"</font></b>, <b><font color="#8A2BE2">"Error:"</font></b> + ex.ToString() + <b><font color="#8A2BE2">"("</font></b> + errHandlerErrors.ToString() + <b><font color="#8A2BE2">")"</font></b>);
+096:             }
+097: 
+098:         }
+099: 
+100:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> SetupButton_Click(Office.CommandBarButton Ctrl, ref bool CancelDefault)
+101:         {
+102:             <b><font color="#007D00">// respond to setup button click</font></b>
+103:             Excel.Worksheet sheet = (Excel.Worksheet)<b><font color="EA7D00">this</font></b>.Application.ActiveWorkbook.ActiveSheet;
+104:             setValue(sheet, <b><font color="#8A2BE2">"A1"</font></b>, <b><font color="#8A2BE2">"Data used by the OPL model:"</font></b>);
+105:             setValue(sheet, <b><font color="#8A2BE2">"A2"</font></b>, <b><font color="#8A2BE2">"nbWarehouses:"</font></b>);
+106:             setValue(sheet, <b><font color="#8A2BE2">"B2"</font></b>, <b><font color="#8A2BE2">"5"</font></b>);
+107:             setValue(sheet, <b><font color="#8A2BE2">"A3"</font></b>, <b><font color="#8A2BE2">"nbStores:"</font></b>);
+108:             setValue(sheet, <b><font color="#8A2BE2">"B3"</font></b>, <b><font color="#8A2BE2">"10"</font></b>);
+109:             setValue(sheet, <b><font color="#8A2BE2">"A4"</font></b>, <b><font color="#8A2BE2">"fixed:"</font></b>);
+110:             setValue(sheet, <b><font color="#8A2BE2">"B4"</font></b>, <b><font color="#8A2BE2">"30"</font></b>);
+111:             setValue(sheet, <b><font color="#8A2BE2">"A5"</font></b>, <b><font color="#8A2BE2">"disaggregate:"</font></b>);
+112:             setValue(sheet, <b><font color="#8A2BE2">"B5"</font></b>, <b><font color="#8A2BE2">"1"</font></b>);
+113: 
+114:             setValue(sheet, <b><font color="#8A2BE2">"A8"</font></b>, <b><font color="#8A2BE2">"Result computed by the OPL model:"</font></b>);
+115:             setValue(sheet, <b><font color="#8A2BE2">"A9"</font></b>, <b><font color="#8A2BE2">"State:"</font></b>);
+116:             setValue(sheet, <b><font color="#8A2BE2">"A10"</font></b>, <b><font color="#8A2BE2">"Objective:"</font></b>);
+117: 
+118:         }
+119: 
+120:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> SolveProblem(Excel.Worksheet sheet, System.IO.StringWriter errHandlerErrors)
+121:         {
+122:             <b><font color="#007D00">// actually solve the problem with OPL</font></b>
+123:             OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+124:             OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+125:             OplErrorHandler errHandler = oplF.CreateOplErrorHandler(errHandlerErrors);
+126:             OplModelSource modelSource = oplF.CreateOplModelSourceFromString(GetModelText(), <b><font color="#8A2BE2">"warehouse"</font></b>);
+127:             OplSettings settings = oplF.CreateOplSettings(errHandler);
+128:             OplModelDefinition def = oplF.CreateOplModelDefinition(modelSource, settings);
+129:             Cplex cplex = oplF.CreateCplex();
+130:             OplModel opl = oplF.CreateOplModel(def, cplex);
+131:             OplDataSource dataSource = <b><font color="EA7D00">new</font></b> MyParams(oplF, sheet);
+132:             opl.AddDataSource(dataSource);
+133:             opl.Generate();
+134:             <b><font color="EA7D00">if</font></b> (cplex.Solve())
+135:             {
+136:                 setValue(sheet, <b><font color="#8A2BE2">"B10"</font></b>, <b><font color="#8A2BE2">""</font></b> + opl.Cplex.ObjValue);
+137:             }
+138:             <b><font color="EA7D00">else</font></b>
+139:             {
+140:                 setValue(sheet, <b><font color="#8A2BE2">"B10"</font></b>, <b><font color="#8A2BE2">"No solution"</font></b>);
+141:             }
+142:             oplF.End();
+143:         }
+144:         <b><font color="#007D00">/**</font></b>
+145: <b><font color="#007D00">         * This class feeds data to the OPL model from the appropriate cells of the </font></b>
+146: <b><font color="#007D00">         * input Excel worksheet.</font></b>
+147: <b><font color="#007D00">         */</font></b>
+148:         <b><font color="EA7D00">class</font></b> MyParams : CustomOplDataSource
+149:         {
+150:             <b><font color="EA7D00">private</font></b> Excel.Worksheet _xlDataSheet;
+151: 
+152:             <b><font color="EA7D00">public</font></b> MyParams(OplFactory oplF, Excel.Worksheet xlDataSheet)
+153:                 : base(oplF)
+154:             {
+155:                 _xlDataSheet = xlDataSheet;
+156:             }
+157: 
+158:             <b><font color="EA7D00">public</font></b> override <b><font color="#0000FF">void</font></b> CustomRead()
+159:             {
+160:                 OplDataHandler handler = <b><font color="EA7D00">this</font></b>.DataHandler;
+161: 
+162:                 <b><font color="EA7D00">try</font></b>
+163:                 {
+164:                     handler.StartElement(<b><font color="#8A2BE2">"nbWarehouses"</font></b>);
+165:                     handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, <b><font color="#8A2BE2">"B2"</font></b>)));
+166:                     handler.EndElement();
+167: 
+168:                     handler.StartElement(<b><font color="#8A2BE2">"nbStores"</font></b>);
+169:                     handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, <b><font color="#8A2BE2">"B3"</font></b>)));
+170:                     handler.EndElement();
+171: 
+172:                     handler.StartElement(<b><font color="#8A2BE2">"fixed"</font></b>);
+173:                     handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, <b><font color="#8A2BE2">"B4"</font></b>)));
+174:                     handler.EndElement();
+175: 
+176:                     handler.StartElement(<b><font color="#8A2BE2">"disaggregate"</font></b>);
+177:                     handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, <b><font color="#8A2BE2">"B5"</font></b>)));
+178:                     handler.EndElement();
+179:                 }
+180:                 <b><font color="EA7D00">catch</font></b> (System.FormatException ex)
+181:                 {
+182:                     MessageBox.Show(<b><font color="#8A2BE2">"Error in the data, please check that you're using integers only."</font></b>, <b><font color="#8A2BE2">"Data Error"</font></b>, MessageBoxButtons.OK);
+183:                 }
+184:                 <b><font color="EA7D00">catch</font></b> (Exception ex)
+185:                 {
+186:                     MessageBox.Show(<b><font color="#8A2BE2">"Exception in custom data source:"</font></b> + ex.ToString());
+187:                 }
+188:             }
+189:         }
+190: 
+191:         <b><font color="#007D00">/**</font></b>
+192: <b><font color="#007D00">         * This is the warehouse OPL model:</font></b>
+193: <b><font color="#007D00">         */</font></b>
+194:         <b><font color="EA7D00">static</font></b> String GetModelText()
+195:         {
+196:             String model = <b><font color="#8A2BE2">""</font></b>;
+197:             model += <b><font color="#8A2BE2">"int   fixed        = ...;"</font></b>;
+198:             model += <b><font color="#8A2BE2">"int   nbWarehouses = ...;"</font></b>;
+199:             model += <b><font color="#8A2BE2">"int   nbStores     = ...;"</font></b>;
+200:             model += <b><font color="#8A2BE2">"int   disaggregate = ...;"</font></b>;
+201:             model += <b><font color="#8A2BE2">"assert nbStores &gt; nbWarehouses;"</font></b>;
+202: 
+203:             model += <b><font color="#8A2BE2">"range Warehouses = 1..nbWarehouses;"</font></b>;
+204:             model += <b><font color="#8A2BE2">"range Stores     = 1..nbStores;"</font></b>;
+205: 
+206:             model += <b><font color="#8A2BE2">"int capacity[w in Warehouses] = nbStores div nbWarehouses + w mod (nbStores div nbWarehouses);"</font></b>;
+207:             model += <b><font color="#8A2BE2">"int supplyCost[s in Stores][w in Warehouses] = 1+((s+10*w) mod 100);"</font></b>;
+208: 
+209:             model += <b><font color="#8A2BE2">"dvar float open[Warehouses] in 0..1;"</font></b>;
+210:             model += <b><font color="#8A2BE2">"dvar float supply[Stores][Warehouses] in 0..1;"</font></b>;
+211: 
+212:             model += <b><font color="#8A2BE2">"minimize "</font></b>;
+213:             model += <b><font color="#8A2BE2">"sum(w in Warehouses) fixed * open[w] +"</font></b>;
+214:             model += <b><font color="#8A2BE2">"sum(w in Warehouses, s in Stores) supplyCost[s][w] * supply[s][w];"</font></b>;
+215: 
+216:             model += <b><font color="#8A2BE2">"constraints {"</font></b>;
+217:             model += <b><font color="#8A2BE2">"  forall(s in Stores)"</font></b>;
+218:             model += <b><font color="#8A2BE2">"    sum(w in Warehouses) supply[s][w] == 1;"</font></b>;
+219:             model += <b><font color="#8A2BE2">"  forall(w in Warehouses)"</font></b>;
+220:             model += <b><font color="#8A2BE2">"    sum(s in Stores) supply[s][w] &lt;= open[w]*capacity[w];"</font></b>;
+221:             model += <b><font color="#8A2BE2">"  if (disaggregate == 1) {"</font></b>;
+222:             model += <b><font color="#8A2BE2">"   forall(w in Warehouses, s in Stores)"</font></b>;
+223:             model += <b><font color="#8A2BE2">"      supply[s][w] &lt;= open[w];"</font></b>;
+224:             model += <b><font color="#8A2BE2">"  }"</font></b>;
+225:             model += <b><font color="#8A2BE2">"}"</font></b>;
+226:             <b><font color="EA7D00">return</font></b> model;
+227:         }
+228:         <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> setValue(Excel.Worksheet sheet, String cell, String value)
+229:         {
+230:             sheet.get_Range(cell, cell).set_Value(Excel.XlRangeValueDataType.xlRangeValueDefault, value);
+231:         }
+232: 
+233:         <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">private</font></b> String getValue(Excel.Worksheet sheet, String cell)
+234:         {
+235:             <b><font color="EA7D00">return</font></b> (String)sheet.get_Range(cell, cell).Text;
+236:         }
+237: 
+238: 
+239:         #region VSTO generated code
+240: 
+241:         <b><font color="#007D00">/// &lt;summary&gt;</font></b>
+242:         <b><font color="#007D00">/// Required method for Designer support - do not modify</font></b>
+243:         <b><font color="#007D00">/// the contents of this method with the code editor.</font></b>
+244:         <b><font color="#007D00">/// &lt;/summary&gt;</font></b>
+245:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">void</font></b> InternalStartup()
+246:         {
+247:             <b><font color="EA7D00">this</font></b>.Startup += <b><font color="EA7D00">new</font></b> System.EventHandler(ThisAddIn_Startup);
+248:             <b><font color="EA7D00">this</font></b>.Shutdown += <b><font color="EA7D00">new</font></b> System.EventHandler(ThisAddIn_Shutdown);
+249:         }
+250:         
+251:         #endregion
+252:     }
+253: }
+</tt></pre>

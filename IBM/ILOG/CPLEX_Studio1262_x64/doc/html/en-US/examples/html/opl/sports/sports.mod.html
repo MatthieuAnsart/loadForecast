@@ -1,0 +1,269 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+013: 
+014: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+015: 
+016: <b><font color="#007D00">Problem Description</font></b>
+017: <b><font color="#007D00">-------------------</font></b>
+018: 
+019: <b><font color="#007D00">The problem involves finding a schedule for a sports league. The league has 10 </font></b>
+020: <b><font color="#007D00">teams that play games over a season of 18 weeks. Each team has a home arena and </font></b>
+021: <b><font color="#007D00">plays each other team twice during the season, once in its home arena and once in </font></b>
+022: <b><font color="#007D00">the opposing team's home arena. For each of these games, the team playing at its </font></b>
+023: <b><font color="#007D00">home arena is referred to as the home team; the team playing at the opponent's </font></b>
+024: <b><font color="#007D00">arena is called the away team. There are 90 games altogether.</font></b>
+025: 
+026: <b><font color="#007D00">Each of the 18 weeks in the season has five identical slots to which games can be </font></b>
+027: <b><font color="#007D00">assigned. Each team plays once a week. For each pair of teams, these two teams are </font></b>
+028: <b><font color="#007D00">opponents twice in a season; these two games must be scheduled in different halves </font></b>
+029: <b><font color="#007D00">of the season. Moreover, these two games must be scheduled at least six weeks </font></b>
+030: <b><font color="#007D00">apart. A team must play at home either the first or last week but not both.</font></b>
+031: 
+032: <b><font color="#007D00">A break is a sequence of consecutive weeks in which a team plays its games either </font></b>
+033: <b><font color="#007D00">all at home or all away. No team can have a break of three or more weeks in it. The</font></b>
+034: <b><font color="#007D00">objective in this problem is to minimize the total number of breaks the teams play. </font></b>
+035: 
+036: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+037: 
+038: <b><font color="#0000FF">int</font></b> n = 10;
+039: 
+040: 
+041: <b><font color="#7D007D">assert</font></b>(n%2 == 0);
+042: 
+043: <b><font color="#0000FF">int</font></b> nbWeeks = 2 * (n - 1);
+044: <b><font color="#0000FF">int</font></b> nbGamesPerWeek = n <b><font color="#0000FF">div</font></b> 2;
+045: <b><font color="#0000FF">int</font></b> nbGames = n * (n - 1);
+046: <b><font color="#0000FF">float</font></b> mid = nbWeeks / 2 + 1;
+047: <b><font color="#0000FF">int</font></b> overlap = (n&gt;=6) ? <b><font color="#7D007D">minl</font></b>(n <b><font color="#0000FF">div</font></b> 2, 6) : 0;
+048: 
+049: 
+050: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> games[1..nbWeeks][1..nbGamesPerWeek] <b><font color="#0000FF">in</font></b> 1..nbGames;
+051: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> home[1..nbWeeks][1..nbGamesPerWeek] <b><font color="#0000FF">in</font></b> 1..n;
+052: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> away[1..nbWeeks][1..nbGamesPerWeek] <b><font color="#0000FF">in</font></b> 1..n;
+053: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> weekOfGame[1..nbGames] <b><font color="#0000FF">in</font></b>  1..nbWeeks;
+054: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> allSlots[1..nbGames] <b><font color="#0000FF">in</font></b> 1..nbGames;
+055: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> playHome[1..n][1..nbWeeks];
+056: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> allGames[1..nbGames] = <b><font color="#0000FF">all</font></b>[1..nbGames](w <b><font color="#0000FF">in</font></b> 1..nbWeeks, g <b><font color="#0000FF">in</font></b> 1..nbGamesPerWeek) games[w][g];
+057: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> teamBreaks[1..n] <b><font color="#0000FF">in</font></b> 0..nbWeeks <b><font color="#0000FF">div</font></b> 2;
+058: 
+059: <b><font color="#007D00">//</font></b>
+060: <b><font color="#007D00">// For each play slot, set up correspondance between game id,</font></b>
+061: <b><font color="#007D00">// home team, and away team</font></b>
+062: <b><font color="#0000FF">tuple</font></b> PlaySlotTuple {
+063:    <b><font color="#0000FF">int</font></b> home;
+064:    <b><font color="#0000FF">int</font></b> away;
+065:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> gameId;
+066: };
+067: 
+068: {PlaySlotTuple} playSlots = {&lt;h, a, (h-1) * (n-1) + a - (a &gt; h)&gt; | h, a <b><font color="#0000FF">in</font></b> 1..n : a != h};
+069: 
+070: 
+071: <b><font color="#0000FF">execute</font></b> {
+072:     <b><font color="EA7D00">var</font></b> f = cp.factory;
+073:     <b><font color="EA7D00">var</font></b> phase = f.searchPhase(allGames, 
+074:                               f.selectSmallest(f.varIndex(allGames)), 
+075:                               f.selectRandomValue());
+076:     cp.setSearchPhases(phase);
+077:     cp.param.timeLimit=60;
+078:     cp.param.logPeriod=10000;
+079:     cp.param.DefaultInferenceLevel=<b><font color="#8A2BE2">"Extended"</font></b>;
+080: }
+081: 
+082: 
+083: //
+084: // Objective: minimize the number of `breaks'.  A break is
+085: //            two consecutive home or away matches for a
+086: //            particular team
+087: dexpr int breakCount = sum(t in 1..n) teamBreaks[t];
+088: 
+089: 
+090: minimize breakCount;
+091: // minimize sum(t in 1..n) teamBreaks[t];
+092: subject to {
+093: 
+094:    forall(w <b><font color="EA7D00">in</font></b> 1..nbWeeks, g <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek)
+095:      allowedAssignments(playSlots, home[w][g], away[w][g], games[w][g]);
+096: 
+097: 
+098:    <b><font color="#007D00">//</font></b>
+099:    <b><font color="#007D00">// All teams play each week</font></b>
+100:    <b><font color="#007D00">//</font></b>
+101:    forall(w <b><font color="EA7D00">in</font></b> 1..nbWeeks) {
+102: 
+103:      allDifferent(append(all(g <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek) home[w][g], 
+104:                          all(g <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek) away[w][g])); 
+105:                 
+106:    }
+107:                          
+108: 
+109:     <b><font color="#007D00">//</font></b>
+110:     <b><font color="#007D00">// Dual representation: for each game id, the play slot is maintained</font></b>
+111:     <b><font color="#007D00">//</font></b>
+112:     inverse(all [1..nbGames](w <b><font color="EA7D00">in</font></b> 1..nbWeeks, g <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek) games[w][g], allSlots); 
+113:     forall(g <b><font color="EA7D00">in</font></b> 1..nbGames)
+114:       weekOfGame[g] == ((allSlots[g]-1) div nbGamesPerWeek) + 1;
+115: 
+116: 
+117:     <b><font color="#007D00">//</font></b>
+118:     <b><font color="#007D00">// Two half schedules.  Cannot play the same pair twice in the same half.</font></b>
+119:     <b><font color="#007D00">// Plus, impose a minimum number of weeks between two games involving</font></b>
+120:     <b><font color="#007D00">// the same teams (up to six weeks)</font></b>
+121:     <b><font color="#007D00">//</font></b>
+122:     forall (&lt;i,j,g1&gt; <b><font color="EA7D00">in</font></b> playSlots, &lt;j,i,g2&gt; <b><font color="EA7D00">in</font></b> playSlots  : i &lt; j) {
+123:        (weekOfGame[g1] &gt;= mid) == (weekOfGame[g2] &lt; mid); 
+124:        <b><font color="EA7D00">if</font></b> (overlap != 0)
+125:           abs(weekOfGame[g1] - weekOfGame[g2]) &gt;= overlap;
+126:     }
+127: 
+128: 
+129:                
+130:     <b><font color="#007D00">//</font></b>
+131:     <b><font color="#007D00">// Can't have three homes or three aways in a row.</font></b>
+132:     <b><font color="#007D00">//</font></b>
+133:     forall (t <b><font color="EA7D00">in</font></b> 1..n, w <b><font color="EA7D00">in</font></b> 1..nbWeeks) {
+134:        playHome[t][w] == count(all(g <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek) home[w][g], t);
+135:     }
+136: 
+137:     forall (t <b><font color="EA7D00">in</font></b> 1..n, w <b><font color="EA7D00">in</font></b> 1..nbWeeks - 2) {
+138:        1 &lt;= sum(k <b><font color="EA7D00">in</font></b> w..w+2) playHome[t][k] &lt;= 2;
+139:     }
+140:   
+141:     <b><font color="#007D00">//</font></b>
+142:     <b><font color="#007D00">// If we start the season home, we finish away and vice versa.</font></b>
+143:     <b><font color="#007D00">//</font></b>
+144:     forall(t <b><font color="EA7D00">in</font></b> 1..n)
+145:        teamBreaks[t] == sum(w <b><font color="EA7D00">in</font></b> 2..nbWeeks) (playHome[t][w-1] == playHome[t][w]);
+146:        
+147:     forall (t <b><font color="EA7D00">in</font></b> 1..n)
+148:       playHome[t][1] != playHome[t][nbWeeks];
+149: 
+150: 
+151:     <b><font color="#007D00">//</font></b>
+152:     <b><font color="#007D00">// Catalyzing constraints</font></b>
+153:     <b><font color="#007D00">//</font></b>
+154: 
+155:     <b><font color="#007D00">// Each team plays home the same number of times as away</font></b>
+156:     forall (t <b><font color="EA7D00">in</font></b> 1..n) {
+157:        sum(w <b><font color="EA7D00">in</font></b> 1..nbWeeks) playHome[t][w] == nbWeeks div 2;
+158:     }
+159: 
+160:     <b><font color="#007D00">// Breaks must be even for each team</font></b>
+161:     forall(t <b><font color="EA7D00">in</font></b> 1..n)
+162:        teamBreaks[t] % 2 == 0;
+163: 
+164: 
+165: 
+166:     <b><font color="#007D00">//    </font></b>
+167:     <b><font color="#007D00">// Symmetry breaking constraints</font></b>
+168:     <b><font color="#007D00">// </font></b>
+169:     <b><font color="#007D00">// Teams are interchangeable.  Fix first week.</font></b>
+170:     <b><font color="#007D00">// Also breaks reflection symmetry of the whole schedule.</font></b>
+171:     forall (g <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek) {
+172:        home[1][g] == g*2 - 1;
+173:        away[1][g] == g*2;
+174:     }
+175: 
+176: 
+177:     <b><font color="#007D00">// Order of games in each week in arbitrary.</font></b>
+178:     <b><font color="#007D00">// Break symmetry by forcing an order.</font></b>
+179:     forall (w <b><font color="EA7D00">in</font></b> 1..nbWeeks)
+180:       forall(g <b><font color="EA7D00">in</font></b> 2..nbGamesPerWeek)
+181:         games[w][g] &gt; games[w][g-1];
+182:        
+183: 
+184: }
+185: 
+186: int oponent[1..n][1..nbWeeks];
+187: 
+188: int breaks = sum(t in 1..n) teamBreaks[t];
+189: 
+190: 
+191: 
+192: execute {
+193:    
+194:       writeln(<b><font color="#8A2BE2">"Solution at "</font></b> + breaks);
+195:       <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> j= 1; j &lt;= nbWeeks; j++) {
+196:          write(<b><font color="#8A2BE2">"Week "</font></b> + j + <b><font color="#8A2BE2">": "</font></b>);
+197:          <b><font color="EA7D00">if</font></b> (j &lt; 10) write (<b><font color="#8A2BE2">" "</font></b>);
+198:          <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i = 1; i &lt;= nbGamesPerWeek; i++) {
+199:             <b><font color="EA7D00">if</font></b> (home[j][i] &gt;= 10) 
+200:               write(home[j][i]);
+201:             <b><font color="EA7D00">else</font></b>
+202:               write(<b><font color="#8A2BE2">" "</font></b> + home[j][i]);
+203:             write(<b><font color="#8A2BE2">"-"</font></b>);
+204:             <b><font color="EA7D00">if</font></b> (away[j][i] &gt;= 10)
+205:               write(away[j][i]);
+206:             <b><font color="EA7D00">else</font></b>
+207:               write(away[j][i] + <b><font color="#8A2BE2">" "</font></b>);
+208:             write(<b><font color="#8A2BE2">" "</font></b>);      
+209:          }
+210:          writeln();
+211:       }
+212:       writeln(<b><font color="#8A2BE2">"Team schedules"</font></b>);
+213:       <b><font color="EA7D00">for</font></b> (i = 1; i &lt;= n; i++) {
+214:          write(<b><font color="#8A2BE2">"T "</font></b> + i + <b><font color="#8A2BE2">":  "</font></b>);
+215:          <b><font color="EA7D00">var</font></b> prev = -1;
+216:          <b><font color="EA7D00">var</font></b> brks = 0;
+217:          <b><font color="EA7D00">for</font></b> (j = 1; j &lt;= nbWeeks; j++) {
+218:             <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> k = 1; k &lt;= nbGamesPerWeek; k++) {
+219:                <b><font color="EA7D00">if</font></b> (home[j][k] == i) {
+220:                   oponent[i][j] = away[j][k];
+221:                   <b><font color="EA7D00">if</font></b> (away[j][k] &gt;= 10)
+222:                     write(away[j][k] + <b><font color="#8A2BE2">"H "</font></b>)
+223:                   <b><font color="EA7D00">else</font></b>
+224:                     write(<b><font color="#8A2BE2">" "</font></b> + away[j][k] + <b><font color="#8A2BE2">"H "</font></b>);
+225:                   brks += (prev == 0);
+226:                   prev = 0;    
+227:                }
+228:                <b><font color="EA7D00">if</font></b> (away[j][k] == i) {
+229:                   oponent[i][j] = home[j][k];
+230:                   <b><font color="EA7D00">if</font></b> (home[j][k] &gt;= 10)
+231:                     write(home[j][k] + <b><font color="#8A2BE2">"A "</font></b>);
+232:                   <b><font color="EA7D00">else</font></b>
+233:                     write(<b><font color="#8A2BE2">" "</font></b> + home[j][k] + <b><font color="#8A2BE2">"A "</font></b>);
+234:                   brks += (prev == 1);
+235:                   prev = 1;
+236:                }
+237:             }
+238:          }
+239:          writeln(<b><font color="#8A2BE2">"  "</font></b> + brks + <b><font color="#8A2BE2">" breaks"</font></b>);
+240:       }
+241:       writeln();
+242: }
+243: 
+244: 
+245: 
+246: 
+247: tuple solution2DimT{
+248:         <b><font color="#0000FF">int</font></b> i;
+249:         <b><font color="#0000FF">int</font></b> j;
+250:         <b><font color="#0000FF">int</font></b> value;
+251: };
+252: tuple solution1DimT{
+253:         <b><font color="#0000FF">int</font></b> i;
+254:         <b><font color="#0000FF">int</font></b> value;
+255: };
+256: 
+257: {solution2DimT} gamesReport = {&lt;i,j, games[i][j]&gt; | i <b><font color="EA7D00">in</font></b> 1..nbWeeks, j <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek};
+258: {solution2DimT} homeReport = {&lt;i,j, home[i][j]&gt; | i <b><font color="EA7D00">in</font></b> 1..nbWeeks, j <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek};
+259: {solution1DimT} awayReport = {&lt;i, away[i][j]&gt; | i <b><font color="EA7D00">in</font></b> 1..nbWeeks, j <b><font color="EA7D00">in</font></b> 1..nbGamesPerWeek};
+260: {solution1DimT} weekOfGameReport = {&lt;i, weekOfGame[i]&gt; | i <b><font color="EA7D00">in</font></b> 1..nbGames};
+261: {solution1DimT} allSlotsReport = {&lt;i, allSlots[i]&gt; | i <b><font color="EA7D00">in</font></b> 1..nbGames};
+262: {solution2DimT} playHomeReport = {&lt;i,j, playHome[i][j]&gt; | i <b><font color="EA7D00">in</font></b> 1..n, j <b><font color="EA7D00">in</font></b> 1..nbWeeks};
+263: {solution1DimT} allGamesReport = {&lt;i, allGames[i]&gt; | i <b><font color="EA7D00">in</font></b> 1..nbGames};
+264: {solution1DimT} teamBreaksReport = {&lt;i, teamBreaks[i]&gt; | i <b><font color="EA7D00">in</font></b> 1..n};
+</tt></pre>

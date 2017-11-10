@@ -1,0 +1,196 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+013: 
+014: include <b><font color="#8A2BE2">"common.mod"</font></b>;
+015: 
+016: 
+017: 
+018: 
+019: <b><font color="#0000FF">tuple</font></b> p
+020: {
+021:    <b><font color="#0000FF">int</font></b> v[1..nbRounds];
+022: }
+023: 
+024: {p} patterns=...;
+025: <b><font color="#0000FF">int</font></b> nbPatterns=<b><font color="#7D007D">card</font></b>(patterns);
+026: <b><font color="#0000FF">range</font></b> rngPatterns= 0..nbPatterns-1;
+027: 
+028: <b><font color="#0000FF">execute</font></b>{
+029:         cp.param.Workers = 1;
+030: }
+031: 
+032: 
+033: range rngTeams= 1..nbTeams;
+034: 
+035: PairRound mirror[1..nbPairs] = ...;
+036: int rival[1..nbTeams] = [ 4, 6, 0, 1, 8, 2, 9, 5, 7];
+037: assert forall (i in 1..nbTeams: i != 3) rival[rival[i]] == i;
+038: 
+039: tuple SpecialPairs {
+040:    <b><font color="#0000FF">int</font></b>  pfirst;
+041:    <b><font color="#0000FF">int</font></b>  psecond;
+042: };
+043: {SpecialPairs} special = { &lt;6,9&gt;, &lt;2,9&gt;, &lt;4,6&gt;, &lt;2,4&gt; };
+044: {<b><font color="#0000FF">int</font></b>} round1 = {1,3,4,9};
+045: {<b><font color="#0000FF">int</font></b>} round18 = {1,2,5,9};
+046: 
+047: int patternst[i in rngRounds, j in rngPatterns] = item(patterns,j).v[i];
+048: 
+049: tuple ps
+050: {
+051:    <b><font color="#0000FF">int</font></b> v[0..nbTeams];
+052: }
+053: 
+054: {ps} patset=...;
+055: int nbPatset = card(patset)-1;
+056: range rngPatset= 0..nbPatset;
+057: 
+058: 
+059: 
+060: int patsetc[i in rngPatset,j in 1..nbTeams] = item(patset,i).v[j];
+061: 
+062: range  Gametype=0..2;  
+063: 
+064: int mtA=0;
+065: int mtB=1;
+066: int mt0=2;
+067: 
+068: int weekday[1..nbTeams,1..nbTeams] = ...;
+069: int weekend[1..nbTeams,1..nbTeams] = ...;
+070: 
+071: 
+072: dvar int alpha[1..nbTeams,1..nbRounds] in 0..nbTeams;
+073: dvar int alpha_nonz[1..nbTeams,1..nbRounds] in 1..nbTeams;
+074: dvar int beta[1..nbTeams,1..nbRounds] in Where;
+075: dvar int gamma[1..nbTeams] in 1..nbTeams;
+076: 
+077: dvar  int whichps in rngPatset;
+078: dvar  int psrows[1..nbTeams] in rngPatterns;
+079: 
+080: dvar int roundtype[11..nbRounds] in Gametype;
+081: dvar int Acount[11..nbRounds] in 0..4;
+082: dvar int Bcount[11..nbRounds] in 0..4;
+083: 
+084: dvar int obj in 0..8;
+085: 
+086: maximize obj;
+087: subject to {
+088: 
+089:    forall (t <b><font color="EA7D00">in</font></b> 1..nbTeams) {
+090:       psrows[t] == patsetc[whichps,gamma[t]];
+091:    };
+092:    forall(r <b><font color="EA7D00">in</font></b> 1..nbRounds, t <b><font color="EA7D00">in</font></b> 0..nbTeams) {
+093:       sum (j <b><font color="EA7D00">in</font></b> 1..nbTeams) (alpha[j,r] == t) &lt;= 1;
+094:    };
+095:    forall (r <b><font color="EA7D00">in</font></b> rngRounds, t1 <b><font color="EA7D00">in</font></b> 1..nbTeams, t2 <b><font color="EA7D00">in</font></b> 1..nbTeams) {
+096:       (alpha[t1,r] == t2) == (alpha[t2,r] == t1);
+097:    };
+098:    forall (r <b><font color="EA7D00">in</font></b> rngRounds, t <b><font color="EA7D00">in</font></b> 1..nbTeams) {
+099:       (alpha[t,r] == 0) == (beta[t,r] == bbye);
+100:    };
+101: 
+102:    forall (r <b><font color="EA7D00">in</font></b> rngRounds, t1 <b><font color="EA7D00">in</font></b> 1..nbTeams, t2 <b><font color="EA7D00">in</font></b> 1..nbTeams) {
+103:       (alpha[t1,r] == t2) =&gt; 
+104:           (((beta[t1,r]==home) &amp;&amp; (beta[t2,r]==away)) ||
+105:            ((beta[t1,r] == away) &amp;&amp; (beta[t2,r] == home)));
+106:    };
+107: 
+108: 
+109:    forall(t1 <b><font color="EA7D00">in</font></b> 1..nbTeams, t2 <b><font color="EA7D00">in</font></b> 0..nbTeams : t1!=t2) {
+110:       sum (r <b><font color="EA7D00">in</font></b> 1..nbRounds) (alpha[t1,r] == t2) == 2;
+111:    };
+112: 
+113:    forall(i <b><font color="EA7D00">in</font></b> 1..nbPairs, t <b><font color="EA7D00">in</font></b> 1..nbTeams) {
+114:       alpha[t,mirror[i].pfirst] == alpha[t,mirror[i].plast];
+115:    };
+116: 
+117:    forall(r <b><font color="EA7D00">in</font></b> rngRounds, t <b><font color="EA7D00">in</font></b> 1..nbTeams) {
+118:       beta[t,r] == patternst[r,psrows[t]];
+119:    };
+120: 
+121:    forall (t <b><font color="EA7D00">in</font></b> 1..nbTeams : t != 3) {
+122:       alpha[t,18] == rival[t] || (alpha[t,18] == 0) || (alpha[t,18] == 3);
+123:    };
+124:    forall (&lt;t1,t2&gt; <b><font color="EA7D00">in</font></b> special) {
+125:       sum (r <b><font color="EA7D00">in</font></b> 11..nbRounds) ( alpha[t1,r] == t2 ) &gt;= 1;
+126:    };
+127: 
+128:    forall (r <b><font color="EA7D00">in</font></b> 1..nbRounds-1, t <b><font color="EA7D00">in</font></b> rngTeams) !(
+129:       (beta[t,r] == away) &amp;&amp; (beta[t,r+1] == away) &amp;&amp;
+130:    ((alpha[t,r] == 2) || (alpha[t,r] == 6)) &amp;&amp;
+131:       ((alpha[t,r+1] == 2) || (alpha[t,r+1] == 6)) );
+132: 
+133:    forall (r <b><font color="EA7D00">in</font></b> 1..nbRounds-2, t <b><font color="EA7D00">in</font></b> rngTeams) !(
+134:       ((alpha[t,r] == 2) || (alpha[t,r] == 6) || (alpha[t,r] == 9)) &amp;&amp;
+135:       ((alpha[t,r+1] == 2) || (alpha[t,r+1] == 6) || (alpha[t,r+1] == 9)) &amp;&amp;
+136:       ((alpha[t,r+2] == 2) || (alpha[t,r+2] == 6) || (alpha[t,r+2] == 9)));
+137: 
+138:    alpha[2,11] == 6;
+139:    alpha[2,18] == 6;
+140:    alpha[1,2] == 6;
+141:    beta[2,16] == bbye;
+142:    beta[9,17] != home;
+143:    beta[9,1] == bbye;
+144:    beta[3,18] != bbye;
+145:    beta[7,18] != bbye;
+146:    beta[6,1] != bbye;
+147:    forall (t <b><font color="EA7D00">in</font></b> round1) {
+148:      beta[t,1] != away;
+149:    };
+150:    forall (t <b><font color="EA7D00">in</font></b> round18) {
+151:      beta[t,18] != away;
+152:    };
+153: 
+154:    forall (t <b><font color="EA7D00">in</font></b> 1..nbTeams, r <b><font color="EA7D00">in</font></b> 1..nbRounds) {
+155:       (alpha[t,r] &gt; 0) =&gt; (alpha_nonz[t,r] == alpha[t,r]);
+156:       (alpha[t,r] == 0) =&gt; (alpha_nonz[t,r] == t);
+157:    };
+158: 
+159: 
+160:    forall (j <b><font color="EA7D00">in</font></b> 11..nbRounds : j % 2 == 1 ) {
+161:       Acount[j] == (sum (t <b><font color="EA7D00">in</font></b> 1..nbTeams) (
+162:          (beta[t,j] == home) &amp;&amp; (weekday[t,alpha_nonz[t,j]] == mtA)));
+163:       Bcount[j] == sum (t <b><font color="EA7D00">in</font></b> 1..nbTeams) (
+164:          (beta[t,j] == home) &amp;&amp; (weekday[t,alpha_nonz[t,j]] == mtB)); 
+165:    };
+166:    forall (j <b><font color="EA7D00">in</font></b> 11..nbRounds: j % 2 == 0) {
+167:       Acount[j] == sum (t <b><font color="EA7D00">in</font></b> 1..nbTeams) (
+168:         (beta[t,j] == home) &amp;&amp; (weekend[t,alpha_nonz[t,j]] == mtA));
+169:       Bcount[j] == sum (t <b><font color="EA7D00">in</font></b> 1..nbTeams) (
+170:          (beta[t,j] == home) &amp;&amp; (weekend[t,alpha_nonz[t,j]] == mtB));
+171:    };
+172:    forall (j <b><font color="EA7D00">in</font></b> 11..nbRounds) {
+173:       ((Acount[j] &gt;= 1) || (Bcount[j] == 2)) =&gt; roundtype[j] == mtA;
+174:       ((Acount[j] == 0) &amp;&amp; (Bcount[j] == 1)) =&gt; roundtype[j] == mtB;
+175:       ((Acount[j] == 0) &amp;&amp; (Bcount[j] == 0)) =&gt; roundtype[j] == mt0;
+176:    }; 
+177:    obj == sum (r <b><font color="EA7D00">in</font></b> 11..nbRounds) (roundtype[r] == mtA) -
+178:          2*( sum (r <b><font color="EA7D00">in</font></b> 11..nbRounds) (roundtype[r] == mt0));
+179: 
+180: 
+181: };
+182: 
+183: int res[j in 1..nbTeams,k in 1..nbRounds]=
+184: (beta[j,k]==home)?(alpha[j][k]):
+185: ((beta[j,k]==away)?(-alpha[j][k]):0);
+186: 
+187: execute
+188: {
+189:  writeln(res);  
+190: }
+191:    
+</tt></pre>

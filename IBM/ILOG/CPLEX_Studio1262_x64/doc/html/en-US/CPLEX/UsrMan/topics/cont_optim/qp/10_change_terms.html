@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Changing quadratic terms" />
+<meta name="abstract" content="Defines quadratic algebraic term and quadratic matrix." />
+<meta name="Description" content="Defines quadratic algebraic term and quadratic matrix." />
+<meta name="DC.subject" content="changing, quadratic coefficients, quadratic coefficient, CPXchgqpcoef routine, changing quadratic terms, setExpr method, IloObjective class, setExpr method in QP term, CPXchgqpcoef routine, example, problem type, zeroed_qp, qp, changing to zeroed_qp, changing to qp" />
+<meta name="keywords" content="changing, quadratic coefficients, quadratic coefficient, CPXchgqpcoef routine, changing quadratic terms, setExpr method, IloObjective class, setExpr method in QP term, CPXchgqpcoef routine, example, problem type, zeroed_qp, qp, changing to zeroed_qp, changing to qp" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveQP.637726" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<title>Changing quadratic terms</title>
+</head>
+<body role="main" id="User_manual.uss_solveQP.637726">
+<h1 class="title topictitle1">Changing quadratic terms</h1>
+<div class="body conbody"><div class="abstract"><div class="shortdesc">Defines quadratic algebraic term and quadratic
+matrix.</div>
+ <p class="p">CPLEX distinguishes between a <em class="ph i">quadratic
+algebraic term</em> and a <em class="ph i">quadratic matrix  coefficient</em>. The
+quadratic algebraic terms are the coefficients that appear in the
+algebraic  expression defined as part of the CPLEX LP format. The
+quadratic matrix coefficients  appear in Q. The quadratic coefficient
+of an off-diagonal term must be distributed within the Q matrix, and
+it is always one-half the value of the quadratic algebraic term. </p>
+ </div>
+<p class="p">To clarify that terminology, consider this example:</p>
+<p class="p">Minimize a + b  + 1/2(a<sup class="ph sup">2</sup> + 4ab + 7b<sup class="ph sup">2</sup>)</p>
+<p class="p">subject to a + b <samp class="ph codeph">≥</samp> 10</p>
+<p class="p">with these bounds a <samp class="ph codeph">≥</samp> 0 and b <samp class="ph codeph">≥</samp> 0</p>
+<p class="p">The off-diagonal quadratic algebraic term in that example is 4,
+so the quadratic matrix Q is </p>
+<div class="image"><img class="image" src="../../../images/solveQP2.gif" alt="solveQP2.gif" /></div><ul class="ul"><li class="li"><p class="p">In a QP, you can change the quadratic matrix coefficients in
+the <strong class="ph b">Interactive Optimizer</strong> by using the command <samp class="ph codeph">change qpterm</samp> . </p>
+ </li>
+<li class="li"><p class="p">From the <strong class="ph b">Callable Library</strong>, use the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/qpapi/chgqpcoef.html" title="The routine CPXXchgqpcoef/CPXchgqpcoef changes the coefficient in the quadratic objective of a quadratic problem (QP) corresponding to the variable pair (i,j) to the value newvalue.">CPXchgqpcoef</a></samp> to
+change quadratic matrix coefficients.</p>
+</li>
+<li class="li"><p class="p"><strong class="ph b">Concert Technology</strong> does not support direct editing of
+expressions other than linear expressions. Consequently, to change
+a quadratic objective function, you need to create an expression with
+the modified quadratic objective and use the <samp class="ph codeph">setExpr</samp> 
+method of <samp class="ph codeph">IloObjective</samp> to install it.</p>
+</li>
+</ul>
+<p class="p">Changing an off-diagonal element changes the corresponding symmetric
+element as well. In other words, if a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/qpapi/chgqpcoef.html" title="The routine CPXXchgqpcoef/CPXchgqpcoef changes the coefficient in the quadratic objective of a quadratic problem (QP) corresponding to the variable pair (i,j) to the value newvalue.">CPXchgqpcoef</a></samp> changes
+Q<sub class="ph sub">ij</sub> to a value, it also changes Q<sub class="ph sub">ji</sub> to that
+same value.</p>
+<p class="p">To change the off-diagonal quadratic term from 4 to 6, for example,
+use this sequence of commands in the <strong class="ph b">Interactive Optimizer</strong>:
+ </p>
+<pre class="pre codeblock"><code>CPLEX&gt; change qpterm
+Change which quadratic term ['variable' 'variable']: a b
+Present quadratic term of variable 'a', variable 'b' is 4.000000.
+Change quadratic term of variable 'a', variable 'b' to what: 6.0
+Quadratic term of variable 'a', variable 'b' changed to 6.000000.</code></pre>
+<p class="p">From the <strong class="ph b">Callable Library</strong>, the <samp class="ph codeph">CPXchgqpcoef</samp> 
+call to change the off-diagonal term from <samp class="ph codeph">4</samp> to <samp class="ph codeph">6</samp> would
+change both of the off-diagonal matrix coefficients from <samp class="ph codeph">2</samp> to <samp class="ph codeph">3</samp>.
+Thus, the indices would be <samp class="ph codeph">0</samp> and <samp class="ph codeph">1</samp>,
+and the new matrix coefficient value would be 3.</p>
+<p class="p">If you have entered a linear problem without any quadratic terms
+in the <strong class="ph b">Interactive Optimizer</strong>, and you want to create quadratic
+terms, you must first change the problem type to QP. To do so, use
+the command <samp class="ph codeph">change problem qp</samp>. This command will
+create an empty quadratic matrix with Q = 0.</p>
+<p class="p">By changing quadratic terms, you may affect the convexity of the
+objective function.  If you change a quadratic term so that the resulting
+matrix is no longer convex in the case of a minimization problem or
+concave in the case of a maximization problem, you must set the <a class="xref" href="../../../../Parameters/topics/OptimalityTarget.html" title="Specifies type of optimality that CPLEX targets (optimal convex or first-order satisfaction) as it searches for a solution">optimality target</a> parameter
+(<samp class="ph codeph">CPX_PARAM_OPTIMALITYTARGET</samp>, <samp class="ph codeph">OptimalityTarget</samp>)
+to ask CPLEX to return either a solution that satisfies first-order optimality
+conditions or a globally optimal solution. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" title="Describes solving quadratic programming problems (QPs) with CPLEX.">Solving problems with a quadratic objective (QP)</a></div>
+</div>
+</div></body>
+</html>

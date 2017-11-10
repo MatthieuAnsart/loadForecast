@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Transport types for the remote object: MPI" />
+<meta name="abstract" content="Documents the message passing interface (MPI), a transport protocol supporting the remote object." />
+<meta name="Description" content="Documents the message passing interface (MPI), a transport protocol supporting the remote object." />
+<meta name="DC.subject" content="remote object, transport types, transport protocol, message passing interface (MPI), examples, remote object and" />
+<meta name="keywords" content="remote object, transport types, transport protocol, message passing interface (MPI), examples, remote object and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/02_ref_man_transport_types.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="refManRemoteObjTransportTypes" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/02_ref_man_transport_types.html" />
+<title>Transport types for the remote object: MPI</title>
+</head>
+<body role="main" id="refManRemoteObjTransportTypes">
+<h1 class="title topictitle1">Transport types for the remote object: MPI</h1>
+<div class="body"><p class="shortdesc">Documents the message passing interface (MPI), a transport protocol supporting the remote object.</p>
+<p class="p">To use the Message Passing Interface (MPI), you must configure MPI to start the CPLEX 
+executable with the argument <samp class="ph codeph">-worker=mpi</samp> on all machines being used.
+Optionally, you can also pass arguments to specify a log file and to extend the 
+paths searched during dynamic loading of libraries (that is, the <samp class="ph codeph">libpath</samp> 
+environment variable).</p>
+<p class="p">If the <samp class="ph codeph">transport</samp> argument to 
+<span class="keyword apiname">CPXXopenCPLEXremote</span> is <samp class="ph codeph">mpitransport</samp>,  
+then CPLEX assumes that it is running in an application of the message passing interface (MPI) 
+and uses MPI to communicate between processes. The MPI transport 
+understands the following arguments:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">-remoterank=%d</samp></p>
+<p class="p">Specifies the MPI rank of the remote 
+    end to which CPLEX connects. The new remote object instance will be created on 
+    the machine identified by this rank. This argument is required.
+    </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">-libpath=%s</samp></p>
+<p class="p">Adds a directory to the list 
+    of directories searched when dynamic libraries are loaded. This argument is optional. 
+    This argument can be repeated. 
+    </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">-forcemt</samp></p>
+<p class="p">Specifies that CPLEX should use 
+    multiple threads in the worker, regardless of the policy with respect to 
+    multiple threads in the MPI library.
+    </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">-nothreads</samp></p>
+<p class="p">Specifies that CPLEX should use 
+    exactly one thread in the worker.
+    </p>
+</li>
+</ul>
+<p class="p"><strong class="ph b">Example: MPI configuration file</strong></p>
+<p class="p">Here are the contents of a MPI configuration file for one master with two workers.</p>
+<pre class="pre codeblock"><code>  -np 1 ./my-master
+  -np 1 /opt/COS/cplex/bin/cplex -worker=mpi -logfile=server0.log
+  -np 1 /opt/COS/cplex/bin/cplex -worker=mpi -logfile=server1.log</code></pre>
+<p class="p">With that configuration, you must then create two environments on master, like this:</p>
+<pre class="pre codeblock"><code> CPXENVptr env[2];
+ int i;
+ for (i = 0; i &lt; 2; ++i) {
+    int status;
+    char rank[32];
+    char const *argv[1] = { rank };
+
+    sprintf (rank, "-remoterank=%d", i + 1);
+    env[i] = CPXXopenCPLEXremote ("mpitransport", 1, argv, &amp;status);
+ }</code></pre>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"> The Message Passing Interface (MPI) transport protocol is available for most 
+ (not all) combinations of machine, operating system, compiler. On combinations for 
+ which the MPI transport is provided, it was tested with OpenMPI V1.6. 
+ The OpenMPI library for testing was configured with the following command-line argument:
+ </p>
+
+ <p class="p"><samp class="ph codeph">--enable-mpi-thread-multiple</samp></p>
+
+ <p class="p">MPI is not available for CPLEX V12.6.0 on Windows platforms.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/02_ref_man_transport_types.html" title="Documents the transport protocols supporting the remote object.">Transport types for the remote object</a></div>
+</div>
+</div></body>
+</html>

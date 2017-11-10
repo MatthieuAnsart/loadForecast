@@ -1,0 +1,220 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Interval variables in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a
+                href="interval_variables.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="56"><div
+                class="section-title1">Interval variables in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                    href="pwl_and_sw_functions.html">PREVIOUS</a> <a
+                href="constraints_basic.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%"><tr><td><a
+                            href="interval_variables.html#57">Basic interval variables</a></td></tr><tr><td><a
+                            href="interval_variables.html#49">Intensity and size and forbidden values</a></td></tr><tr><td><a
+                            href="interval_variables.html#52">Expressions over Interval Variables</a></td></tr><tr><td><a
+                href="interval_variables.html#58">Display of interval variable domain</a></td></tr></table><div
+                    class="section-body"><div class="section"><a
+                            name="57"><div
+                        class="section-title2">Basic interval variables</div>
+</a><div
+                            class="section-body"><p>Informally speaking, an interval variable represents an interval of time during which something
+happens (a task or an activity is carried out) and whose position in time is an unknown of the
+scheduling problem. An interval is characterized by a start value, an end value and a size. An
+important additional feature of interval variables is the fact that they can be optional; in other
+words, one can decide not to consider them in the solution schedule. This concept is crucial in
+applications that present at least some of the following features:</p><ul>
+<li>optional activities (operations, tasks) that can be left unperformed (with an impact on
+       the cost) : typical examples are externalized, maintenance, or control tasks,</li><li>activities that can execute on a set of alternative resources (machines, manpower) with
+       possibly different characteristics (speed, calendar) and compatibility constraints,</li><li>operations that can be processed in different temporal modes (for instance in series or
+       in parallel),</li><li>alternative modes for executing a given activity where each mode specifying a particular combination
+       of resources,</li><li>alternative processes for executing a given production order where a process being specified
+       as a sequence of operations requiring resources,</li><li>hierarchical description of a project as a work-breakdown structure with tasks decomposed
+       into sub-tasks, part of the project being optional (with an impact on the cost if
+       unperformed), etc.</li>
+</ul><p>More formally, an <strong>interval variable </strong><em>a</em> is a variable whose domain <em>dom(a)</em> is a subset of</p><img
+                            src="images/int_var1.png"
+                                alt="image" /><p>An interval variable is said to be fixed if its domain is reduced to a singleton, i.e., if <img
+                                src="images/a_underscore.png"
+                                    alt="image" /> 
+denotes a fixed interval variable:</p><ul>
+<li>interval is <strong>absent</strong>: <img
+                                    src="images/a_underscore.png"
+                                    alt="image" /> =  <img
+                                    src="images/perp.png"
+                                    alt="image" /> ; or</li><li>interval is <strong>present</strong>: <img
+                                    src="images/a_underscore.png"
+                                alt="image" /> = [<em>s</em>,<em>e</em>)</li>
+</ul><p>Absent interval variables have special meaning. Informally speaking, an absent interval
+variable is not considered by any constraint or expression on interval variables that it is involved in.
+For example, if an absent interval variable is used in a <code>noOverlap</code> constraint, the constraint
+will behave as if the interval was never specified to the constraint. If an absent interval variable
+<em>a</em> is used in a precedence constraint between interval variables <em>a</em> and <em>b</em> this 
+constraint does not impact interval variable <em>b</em>. Each constraint specifies how it handles absent interval 
+variables.</p><p>In this document, the semantics of constraints defined over interval variables is described
+by the properties that fixed intervals must have in order the constraint to be true. If a fixed
+interval <img
+                                src="images/a_underscore.png"
+                                alt="image" /> is present and such that 
+<img
+                                src="images/a_underscore.png"
+                                alt="image" /> = [<em>s</em>, <em>e</em>), we will 
+denote <em>s</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />) its integer start value 
+<em>s</em>, <em>e</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />)
+its integer end value <em>e</em> and <em>l</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />) 
+its positive integer length defined as
+<em>e</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />)-<em>s</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />). 
+The presence status <em>x</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />) will be equal to 1. 
+For a fixed interval that is absent, 
+<em>x</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />) = 0 and the start, end, and length are undefined.</p><p>Until a solution is found it may not be known whether an interval will be present or not.
+In this case we say that the interval is optional. To be precise, an interval is said to be absent
+when <em>dom</em>(<em>a</em>) = {<img
+                                src="images/perp.png"
+                                alt="image" />}, present when <img
+                                src="images/perp.png" alt="image" /><img
+                                src="images/notin.png"
+                                    alt="image" /><em>dom</em>(<em>a</em>) and optional in all other cases.</p><p>The start and end of an interval variable must be in <code>[<a
+                                    href="macros/IloIntervalMin.html">IloIntervalMin</a>..<a
+                                href="macros/IloIntervalMax.html">IloIntervalMax</a>]</code>.</p><p>All constraints involving interval variables cannot be used in logical constraints of CP 
+Optimizer (see <a
+                                href="functions/operator_dif.html">operator!</a>, <a
+                    href="functions/operator_or_or.html">operator||</a>) except for the presence constraint. 
+The reason is that any logical constraint involving interval variables
+must be captured by the presence Boolean value on the interval handled by the <em>presenceOf</em> constraint.
+The constraints having this limitation are precedence constraints, constraints <em>forbidStart</em>, <em>forbidEnd</em>, 
+<em>forbidExtent</em> and constraints on groups of interval variables such as <em>span</em>, <em>synchronize</em> 
+and <em>alternative</em>.</p></div></div><div
+                        class="section"><a name="49"><div
+                        class="section-title2">Intensity and size and forbidden values</div>
+</a><div
+                                class="section-body"><p>Sometimes the intensity of &ldquo;work&rdquo; is not the same during the whole interval. For example let&rsquo;s
+consider a worker who does not work during weekends (his work intensity during weekends is
+0%) and on Friday he works only for half a day (his intensity during Friday is 50%). For this
+worker, 7 man-days work will span for longer than just 7 days. In this example 7 man-days
+represent what we call the size of the interval: that is, the length of the interval would be if
+the intensity function was always at 100%.</p><p>To model such situations, you can specify a range for the size of an interval variable and an
+integer <strong>stepwise intensity function</strong>&nbsp; whose step bounds are integer <em>F</em> 
+(see <a
+                                href="pwl_and_sw_functions.html">Piecewise linear and stepwise functions in CP Optimizer</a>). 
+For a fixed present interval <img
+                                src="images/a_underscore.png"
+                            alt="image" /> the following
+relation will be enforced at any solution between the start, end, size <em>sz</em> of the interval and the
+integer granularity <em>G</em> (by default, the intensity function is expressed as a percentage so the
+granularity <em>G</em> is 100):</p><img
+                            src="images/int_var2.png"
+                                alt="image" /><p>The length of the interval will be at least long enough to cover the work requirements
+given by the interval size, taking into account the intensity function. However, any
+over-estimation is always strictly less than one work unit.</p><p>If no intensity is specified, it is assumed to be the constant full intensity function 
+(<img
+                                src="images/forall.png"
+                            alt="image" /><em>t</em>, <em>F</em>(<em>t</em>) = 100%) so in that case <em>sz</em>(<em>a</em>) = <em>l</em>(<em>a</em>). 
+Note that the size is not defined for absent intervals.</p><p><strong>Important: The intensity step function F is a stepwise function with integer values
+and is not allowed to exceed the granularity (100 by default).</strong></p><p>Figure 2 depicts an interval variable of size 14 and an associated intensity function. A
+valid solution is represented where the interval starts at 10 and ends at 27. In this case,</p><img
+                            src="images/int_var3.png"
+                            alt="image" /><p /><img
+                            src="images/intensity.png"
+                                    alt="image" /><p>It may be necessary to state that an interval cannot start, cannot end, or cannot overlap a set
+of fixed dates. CP Optimizer provides the following constraints for modeling it. Let <em>a</em> denote
+a fixed interval and <em>F</em> an integer stepwise function.</p><ul>
+<li><strong>Forbidden start constraint</strong>: The constraint 
+        <em>forbidStart(</em><img
+                                    src="images/a_underscore.png"
+                                    alt="image" /><em>, F)</em>, states that whenever
+        the interval is present, it cannot start at a value <em>t</em> where <em>F(t)</em> = 0.
+    </li><li><strong>Forbidden end constraint</strong>: The constraint 
+        <em>forbidEnd(</em><img
+                                    src="images/a_underscore.png"
+                                    alt="image" /><em>, F)</em>, states that whenever
+        the interval is present, it cannot end at a value <em>t</em> where <em>F(t - 1)</em> = 0.
+    </li><li><strong>Forbidden extent constraint</strong>: The constraint 
+        <em>forbidExtent(</em><img
+                                    src="images/a_underscore.png"
+                                alt="image" /><em>, F)</em>, states that whenever
+        the interval is present, it cannot overlap a point <em>t</em> where <em>F(t)</em> = 0.
+    </li>
+</ul><p>More formally:</p><p><img
+                                src="images/forbid.png"
+                    alt="image" /></p></div></div><div
+                        class="section"><a name="52"><div
+                        class="section-title2">Expressions over Interval Variables</div>
+</a><div
+                                class="section-body"><p>This section shows how to create numerical expressions from interval variables. These expressions
+can be used to:</p><ul>
+<li>define a term for the cost function and</li><li>connect interval variables to integer and floating point expressions.</li>
+</ul><p>Integer expressions <em>startOf</em>, <em>endOf</em>, <em>lengthOf</em>, and <em>sizeOf</em> provide access to the different
+attributes of an interval variable. However special care must be taken for optional intervals:
+in this case an integer value <em>absVal</em> must be specified which represents the value of the expression
+when the interval is absent. If this value is omitted, it is assumed to be 0.</p><p>Numerical expressions (<em>startEval</em>, <em>endEval</em>, <em>lengthEval</em>, <em>sizeEval</em>) allow you to evaluate a piecewise
+linear function (see <a
+                                href="pwl_and_sw_functions.html">Piecewise linear and stepwise functions in CP Optimizer</a>) on a given bound of an interval. Like for the above expressions,
+a numerical value <em>absVal</em> can be specified that represents the value of the expression when the
+interval is absent. If this value is omitted, it is assumed to be 0.</p><p>Let <img
+                                src="images/a_underscore.png"
+                            alt="image" /> denote a fixed interval variable. The semantics of these expressions are given in Table 2.</p><img
+                            src="images/int_var4.png"
+                    alt="image" /></div></div><div class="section"><a
+                            name="58"><div
+                        class="section-title2">Display of interval variable domain</div>
+</a><div
+                            class="section-body"><p>The domain of an interval variable is displayed as shown in this example:</p><pre
+                            class="sample">
+A1[0..1: 10..990 -- (5..10)5..990 --&gt; 25..1000] 
+</pre><p>
+After the name of the interval variable (here <code>A1</code>), the first range (here 0..1) represents 
+the domain of the Boolean presence status of the interval variable. Thus 0..1 represents an optional 
+interval variable whose status has still not been fixed: 0 for an absent interval variable and 1 for a present interval variable.</p><p>
+The remaining fields describe the position of the interval variable, it is omitted if the interval 
+variable is absent as this information is not relevant in this case. Thus, an absent interval variable is displayed as: 
+</p><pre
+                            class="sample">
+A1[0] 
+</pre><p>When the interval variable is possibly present:</p><ul>
+<li> the first range in the remaining fields represents the domain of the interval start</li><li> the second range (between parentheses) represents the domain of the interval size</li><li> the third range represents the domain of the interval length</li><li> the fourth and last range represents the domain of the interval end</li>
+</ul><p>Note that the second range may be omitted in case the size and length of the interval variable are necessarily equal. </p><p>When the values are fixed, the ranges min..max are replaced by a single value. For instance, the following  display represents a fixed interval variable of size 5 that is present, starts at 10 and ends at 35: </p><pre
+                class="sample">
+A1[1: 10 -- (5)25 --&gt; 35] 
+</pre></div></div></div><div
+                    align="right"><a
+                    href="pwl_and_sw_functions.html">PREVIOUS</a> <a href="constraints_basic.html">NEXT</a></div></div></body>
+</html>

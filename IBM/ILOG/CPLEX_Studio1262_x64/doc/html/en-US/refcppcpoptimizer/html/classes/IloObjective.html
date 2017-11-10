@@ -1,0 +1,563 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloObjective</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloObjective.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloObjective</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/ilolinear.h</span></div><div><img
+                src="IloObjective.png" border="0"
+                usemap="#svg_map_IloObjective"
+                    alt="Map of IloObjective"><map
+                        name="svg_map_IloObjective"><area
+                        href="../classes/IloObjective.html" shape="rect"
+                        alt="IloObjective"
+                        coords="10.0,37.6357421875,83.0,55.271484375" /><area
+                        href="../classes/IloObjective.html" shape="rect"
+                        alt="IloObjective"
+                        coords="10.0,37.6357421875,83.0,55.271484375" /><area
+                        href="../classes/IloExtractable.html"
+                        shape="rect" alt="IloExtractable"
+            coords="56.5,10.0,129.5,27.6357421875" /></map></img></div>
+An instance of this class is an objective in a model.
+    <div
+                    class="description"><p>An objective consists of its sense
+ (specifying whether it is a minimization or maximization)
+ and an expression.  The expression may be a constant, a numeric 
+ expression or a multiple criteria expression. </p><p>An objective belongs to the environment that the variables
+ in its expression belong to. Generally, you will create an
+ objective, add it to a model, and extract the model
+ for an algorithm.</p><p>Most member functions in this class contain
+ <code>assert</code> statements. For an
+ explanation of the macro <code>NDEBUG</code>
+ (a way to turn on or turn off these
+ <code>assert</code> statements),  see the concept
+ <a
+                        href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p><p><strong>What Is Extracted</strong></p><p>All the variables (that is, instances of
+ <code><a
+                        href="../classes/IloNumVar.html">IloNumVar</a></code> or one of its subclasses) in the
+ objective (an instance of <code>IloObjective</code>)
+ will be extracted when an algorithm such as <code>IloCplex</code>,
+ documented in the <em>CPLEX C++ API Reference Manual</em>,
+ extracts the objective.</p><p><strong>Multiple Objectives</strong></p><p>For some optimization problems, a single objective function is not sufficient: 
+ several criteria are required to express precisely the problem. The different 
+ criteria are generally contradictory and a tradeoff between the different criteria
+ must be found. Concert Technology allows the user to define a multicriteria
+ objective, and to specify which kind of tradeoff between the criteria he wants.
+ Basically, a multicriteria objective is constructed with 3 elements: an array of expressions
+ representing the different criteria, the sense of the optimization, specifying whether 
+ the criteria are to be minimized or maximized, a policy to find the tradeoff between 
+ the criteria. Concert Technology uses instances of the class <code>IloMultiCriterionExpr</code>
+ for regrouping the array of criteria and the tradeoff policy. An instance of 
+ <code>IloMultiCriterionExpr</code> is created by a function like <code>IloStaticLex</code>
+ and can be given as parameter to a function like <code>IloMaximize</code> that specifies 
+ the sense of optimization and build a multicriteria objective. </p><p>Multicriteria objectives are available in <code>IloCP</code> but are not 
+ available in <code>IloCplex</code>. </p><p>You may create more than one objective in a model,
+ for example, by creating more than one group.
+ However, certain algorithms, such as an instance of
+ <code>IloCplex</code>, will throw an exception
+ (on a platform that supports C++
+ exceptions, when exceptions are enabled)
+ if you attempt to extract more than one objective at a time. </p><p>Also see the functions <code><a
+                        href="../functions/IloMaximize.html">IloMaximize</a></code> and
+ <code><a
+                        href="../functions/IloMinimize.html">IloMinimize</a></code>
+ for &ldquo;short cuts&rdquo; to create objectives.</p><p><strong>Normalizing Linear Expressions: Reducing the Terms</strong></p><p><em>Normalizing</em> is sometimes known
+ as <em>reducing the terms</em> of a linear expression.</p><p>Linear expressions consist of terms made up of constants
+ and variables related by arithmetic operations;
+ for example, x + 3y is a linear expression of two terms
+ consisting of two variables. In some linear expressions,
+ a given variable may appear
+ in more than one term, for example, x + 3y +2x.
+ Concert Technology has more than one
+ way of dealing with linear expressions in this respect,
+ and you control which way
+ Concert Technology treats linear expressions from your application.</p><p>In one mode (the default mode), Concert Technology
+ analyzes expressions that your
+ application passes it and attempts to reduce them
+ so that a given variable appears in
+ only one term in the expression.
+ You set this mode with the member function
+ <code><a
+                        href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a></code>.</p><p>Certain constructors and member functions in this class
+ check this setting in the model and behave accordingly:
+ they attempt to reduce expressions. This mode may require
+ more time during preliminary computation,
+ but it avoids the possibility of an assertion
+ failing for certain member functions of this class in case of duplicates.</p><p>In the other mode, Concert Technology <strong>assumes</strong>
+ that no variable appears in more than
+ one term in any of the linear expressions
+ that your application passes to Concert
+ Technology. We call this mode assume no duplicates.
+ You set this mode with the member function
+ <code><a
+            href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a></code>.</p><p>Certain constructors and member functions in this class
+ check this setting in the model and behave accordingly:
+ they assume that no variable appears in more than one
+ term in an expression. This mode may save time during computation,
+ but it entails the risk that an expression may contain one or more
+ variables, each of which appears in one or more terms.
+ This situation will cause certain <code>assert</code> statements in
+ Concert Technology to fail if you do not compile with the
+ flag <code>-DNDEBUG</code>.
+ </p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../functions/IloMaximize.html">IloMaximize</a>, <a
+                href="../functions/IloMinimize.html">IloMinimize</a>, <a
+                href="../classes/IloModel.html">IloModel</a>, <a
+            href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_getConstant">getConstant</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_getExpr">getExpr</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloObjectiveI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_getImpl">getImpl</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloExpr_LinearIterator.html">IloExpr::LinearIterator</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_getLinearIterator">getLinearIterator</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloExpr_QuadIterator.html">IloExpr::QuadIterator</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_getQuadIterator">getQuadIterator</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_getSense">getSense</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_IloObjective">IloObjective</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_IloObjective">IloObjective</a>(IloObjectiveI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_IloObjective">IloObjective</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                            href="../typedefs/IloNum.html">IloNum</a> constant=0.0, <a
+                    href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> sense=Minimize, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_IloObjective">IloObjective</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, const <a
+                            href="../classes/IloNumExprArg.html">IloNumExprArg</a> expr, <a
+                    href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> sense=Minimize, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_IloObjective">IloObjective</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                            href="../classes/IloMultiCriterionExpr.html">IloMultiCriterionExpr</a> moExpr, <a
+                    href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> sense, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloAddValueToObj</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_operator()">operator()</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> value)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloAddValueToObj</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_operator()">operator()</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_setConstant">setConstant</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> constant)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloObjective.html#method_setExpr">setExpr</a>(const  IloNumExprArg)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_setLinearCoef">setLinearCoef</a>(const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../typedefs/IloNum.html">IloNum</a> value)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_setLinearCoefs">setLinearCoefs</a>(const <a
+                            href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars, const <a
+                    href="../classes/IloNumArray.html">IloNumArray</a> values)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_setQuadCoef">setQuadCoef</a>(const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var1, const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var2, <a
+                    href="../typedefs/IloNum.html">IloNum</a> value)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloObjective.html#method_setSense">setSense</a>(<a
+            href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> sense)</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloExtractable.html">IloExtractable</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloExtractable.html#method_asConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_asConstraint">asConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_asIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asIntExpr">asIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asModel"></a><a
+                            href="../classes/IloExtractable.html#method_asModel">asModel</a>, <a
+                            href="../classes/IloExtractable.html#method_asNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asNumExpr">asNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asObjective"></a><a
+                            href="../classes/IloExtractable.html#method_asObjective">asObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_asVariable"></a><a
+                            href="../classes/IloExtractable.html#method_asVariable">asVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_end"></a><a
+                            href="../classes/IloExtractable.html#method_end">end</a>, <a
+                            href="../classes/IloExtractable.html#method_getEnv"></a><a
+                            href="../classes/IloExtractable.html#method_getEnv">getEnv</a>, <a
+                            href="../classes/IloExtractable.html#method_getId"></a><a
+                            href="../classes/IloExtractable.html#method_getId">getId</a>, <a
+                            href="../classes/IloExtractable.html#method_getImpl"></a><a
+                            href="../classes/IloExtractable.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloExtractable.html#method_getName"></a><a
+                            href="../classes/IloExtractable.html#method_getName">getName</a>, <a
+                            href="../classes/IloExtractable.html#method_getObject"></a><a
+                            href="../classes/IloExtractable.html#method_getObject">getObject</a>, <a
+                            href="../classes/IloExtractable.html#method_IloExtractable"></a><a
+                            href="../classes/IloExtractable.html#method_IloExtractable">IloExtractable</a>, <a
+                            href="../classes/IloExtractable.html#method_isConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_isConstraint">isConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_isIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isIntExpr">isIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isModel"></a><a
+                            href="../classes/IloExtractable.html#method_isModel">isModel</a>, <a
+                            href="../classes/IloExtractable.html#method_isNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isNumExpr">isNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isObjective"></a><a
+                            href="../classes/IloExtractable.html#method_isObjective">isObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_isVariable"></a><a
+                            href="../classes/IloExtractable.html#method_isVariable">isVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_removeFromAll"></a><a
+                            href="../classes/IloExtractable.html#method_removeFromAll">removeFromAll</a>, <a
+                            href="../classes/IloExtractable.html#method_setLocation"></a><a
+                            href="../classes/IloExtractable.html#method_setLocation">setLocation</a>, <a
+                            href="../classes/IloExtractable.html#method_setName"></a><a
+                            href="../classes/IloExtractable.html#method_setName">setName</a>, <a
+                            href="../classes/IloExtractable.html#method_setObject"></a><a
+            href="../classes/IloExtractable.html#method_setObject">setObject</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                        colspan="2">Inner Enumeration</th></tr><tr><td><a
+            href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a></td><td>
+Specifies objective as minimization or maximization.
+        </td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloObjective">IloObjective</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloObjective</span>()</div><div
+                class="description">
+ This constructor creates an empty handle. You must initialize it before you use it. 
+        </div><hr /><h3><a
+            name="method_IloObjective">IloObjective</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloObjective</span>(IloObjectiveI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description">
+ This constructor creates a handle object from a pointer to an implementation object.  
+        </div><hr /><h3><a
+            name="method_IloObjective">IloObjective</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloObjective</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">constant</span>=<span
+                class="parameter-name">0.0</span>, <a
+                href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> <span
+                class="parameter-name">sense</span>=<span
+                class="parameter-name">Minimize</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an objective
+ consisting of a <code>constant</code> and
+ belonging to <code>env</code>. The sense of the objective (whether it is a
+ minimization or maximization) is specified by <code>sense</code>;
+ by default, it is a minimization.
+ You may supply a <code>name</code> for the objective; by default, its
+ <code>name</code> is the empty string.
+ This constructor is useful when you want to
+ create an empty objective and fill it later by column-wise modeling.</p></div><hr /><h3><a
+            name="method_IloObjective">IloObjective</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloObjective</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+                class="parameter-name">expr</span>, <a
+                href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> <span
+                class="parameter-name">sense</span>=<span
+                class="parameter-name">Minimize</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an objective to add to a model from
+ <code>expr</code>.</p><p>After you create an objective from an expression with this constructor,
+ you must use the member function <code>add</code> explicitly to add your
+ objective to your model or to a group in order for the objective to be taken
+ into account. </p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                        class="noteText">
+ When it accepts an expression as an argument, this constructor checks
+ the setting of <a
+                href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a> to determine whether
+ to assume the expression has already been reduced or to reduce the expression
+ before using it.
+ </div></div></div><hr /><h3><a
+            name="method_IloObjective">IloObjective</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloObjective</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../classes/IloMultiCriterionExpr.html">IloMultiCriterionExpr</a> <span
+                class="parameter-name">moExpr</span>, <a
+                href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> <span
+                class="parameter-name">sense</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an objective to add to a model from
+ <code>moExpr</code>.</p><p>After you create an objective from multiple criteria expressed as
+ an instance of IloMultiCriterionExpr with this constructor,
+ you must use the member function <code>add</code> explicitly to add your
+ objective to your model or to a group in order for the objective to be taken
+ into account. </p></div><hr /><h3><a
+            name="method_getConstant">getConstant</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getConstant</span>() const</div><div
+                class="description"><p>This member function returns the constant term from the expression of the
+ invoking objective.</p></div><hr /><h3><a
+            name="method_getExpr">getExpr</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+            class="function-name">getExpr</span>() const</div><div
+                class="description"><p>This member function returns the expression of the invoking
+ <code>IloObjective</code> object.</p></div><hr /><h3><a
+            name="method_getImpl">getImpl</a></h3><div
+                class="prototype">public IloObjectiveI * <span
+            class="function-name">getImpl</span>() const</div><div
+                class="description">
+ This member function returns a pointer to the implementation object of the invoking handle.  
+        </div><hr /><h3><a
+            name="method_getLinearIterator">getLinearIterator</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloExpr_LinearIterator.html">IloExpr::LinearIterator</a> <span
+            class="function-name">getLinearIterator</span>() const</div><div
+                class="description"><p>This member function creates and returns an interator
+ to traverse linear expressions in the invoking objective.</p></div><hr /><h3><a
+            name="method_getQuadIterator">getQuadIterator</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloExpr_QuadIterator.html">IloExpr::QuadIterator</a> <span
+            class="function-name">getQuadIterator</span>() const</div><div
+                class="description"><p>This member function creates and returns an interator
+ to traverse quadratic expressions in the 
+ invoking objective.</p></div><hr /><h3><a
+            name="method_getSense">getSense</a></h3><div
+                class="prototype">public <a
+                href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> <span
+            class="function-name">getSense</span>() const</div><div
+                class="description"><p>This member function returns the sense of the invoking objective,
+ specifying whether the objective is a minimization (<code>Minimize</code>)
+ or a maximization (<code>Maximize</code>).</p></div><hr /><h3><a
+            name="method_operator()">operator()</a></h3><div
+                class="prototype">public IloAddValueToObj <span
+                class="function-name">operator()</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>)</div><div
+                    class="description"><p>This casting operator uses a floating-point <code>value</code> to create an
+ instance of <code>IloAddNumVar</code> or one of its subclasses and to add that
+ <code>value</code> to that instance. See the concept <a
+                href="../column-wisemodeling.html">Column-Wise Modeling in CPLEX</a>
+ for an explanation of how to use this operator in column-wise modeling.</p><p>Not for use with CP Optimizer.</p></div><hr /><h3><a
+            name="method_operator()">operator()</a></h3><div
+                class="prototype">public IloAddValueToObj <span
+            class="function-name">operator()</span>()</div><div
+                    class="description"><p>This casting operator uses a floating-point <code>value</code> to create an
+ instance of <code>IloAddNumVar</code> or one of its subclasses and to add that
+ <code>value</code> to that instance. If no argument is given, it assumes 1.0. See the
+ concept <a
+                href="../column-wisemodeling.html">Column-Wise Modeling in CPLEX</a>
+ for an explanation of how to use this operator in column-wise modeling.</p><p>Not for use with CP Optimizer.</p></div><hr /><h3><a
+            name="method_setConstant">setConstant</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setConstant</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">constant</span>)</div><div
+                class="description"><p>This member function sets <code>constant</code> as the constant term in the
+ invoking objective, and it creates the appropriate instance of the undocumented class
+ <code>IloChange</code> to notify algorithms about this change of an extractable object
+ in the model.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setConstant</code> notifies Concert Technology algorithms
+ about this change of this invoking object.
+ </div></div></div><hr /><h3><a
+            name="method_setExpr">setExpr</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setExpr</span>(const  <span
+            class="parameter-name">IloNumExprArg</span>)</div><div
+                class="description"><p>This member function sets the expression of the invoking
+ <code>IloObjective</code> object.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setExpr</code> notifies
+ Concert Technology algorithms
+ about this change of this invoking object.
+ </div></div></div><hr /><h3><a
+            name="method_setLinearCoef">setLinearCoef</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLinearCoef</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>)</div><div
+                class="description"><p>This member function sets <code>value</code> as the linear coefficient of the
+ variable <code>var</code> in the invoking objective, and it creates the appropriate
+ instance of the undocumented class <code>IloChange</code> to notify algorithms about
+ this change of an extractable object in the model.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setLinearCoef</code> notifies Concert Technology algorithms
+ about this change of this invoking object.
+ </div></div><p>If you attempt to use <code>setLinearCoef</code> on a nonlinear expression, it will
+ throw an exception on platforms that support C++ exceptions when exceptions are
+ enabled.</p></div><hr /><h3><a
+            name="method_setLinearCoefs">setLinearCoefs</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLinearCoefs</span>(const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+                class="parameter-name">vars</span>, const <a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+            class="parameter-name">values</span>)</div><div
+                class="description"><p>For each of the variables in <code>vars</code>, this member function sets the
+ corresponding value of <code>values</code> (whether integer or floating-point) as its
+ linear coefficient in the invoking objective, and it creates the appropriate instance
+ of the undocumented class <code>IloChange</code> to notify algorithms about this
+ change of an extractable object in the model.  </p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setLinearCoefs</code> notifies Concert Technology algorithms
+ about this change of this invoking object.
+ </div></div><p>If you attempt to use <code>setLinearCoef</code> on a non linear expression,
+ Concert Technology will throw an exception on platforms that support C++ exceptions
+ when exceptions are enabled.</p></div><hr /><h3><a
+            name="method_setQuadCoef">setQuadCoef</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setQuadCoef</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var1</span>, const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var2</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>)</div><div
+                class="description"><p>This member function assigns <code>value</code> 
+ as the quadratidc coefficient of the
+ term <code>var1*var2</code> in the invoking objective, 
+ and it creates the appropriate
+ instance of the undocumented class <code>IloChange</code> 
+ to notify algorithms about
+ this change of an extractable object in the model.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setQuadCoef</code> 
+ notifies Concert Technology algorithms
+ about this change of this invoking object.
+ </div></div><p>If you attempt to use <code>setQuadCoef</code> on a 
+ general nonlinear expression, it will throw an 
+ exception on platforms that support C++ exceptions when exceptions are
+ enabled.</p></div><hr /><h3><a
+            name="method_setSense">setSense</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setSense</span>(<a
+                href="../enumerations/IloObjective_Sense.html">IloObjective::Sense</a> <span
+            class="parameter-name">sense</span>)</div><div
+                class="description"><p>This member function sets <code>sense</code>
+ to specify whether the invoking
+ objective is a maximization (<code>Maximize</code>) or minimization
+ (<code>Minimize</code>), and it creates the appropriate instance
+ of the undocumented
+ class <code>IloChange</code> to notify algorithms
+ about this change of an extractable object in the model. </p><div
+                    class="note"><div class="noteTitle">Note</div><div
+            class="noteText">
+ The member function <code>setSense</code>
+ notifies Concert Technology algorithms about
+ this change of this invoking object.
+ </div></div></div><hr /><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Inner Enumeration Detail</th></tr></table><h1><a
+            name="enumeration_Sense">Enumeration Sense</a></h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilconcert/ilolinear.h</span></div>
+Specifies objective as minimization or maximization.
+        <div
+                        class="description"><p>An instance of the class <code><a
+            href="../classes/IloObjective.html">IloObjective</a></code>
+ represents an objective in a model. This nested enumeration is limited
+ in scope to that class, and its values specify the sense of an
+ objective; that is, whether it is a minimization
+ (<code>Minimize</code>) or a maximization (<code>Maximize</code>).</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+            href="../classes/IloObjective.html">IloObjective</a></p><table
+            border="1" cellspacing="0" width="100%"><tr><th
+            colspan="0">Fields</th></tr></table><br /><table border="0"
+            width="100%" cellpadding="5" cellspacing="0"><tr><td
+                    valign="top" align="left"
+                    width="20%"><code>Minimize = 1</code></td><td
+                    valign="top" align="left">&nbsp;</td></tr><tr><td
+                    valign="top" align="left"
+                    width="20%"><code>Maximize = -1</code></td><td
+                    valign="top" align="left">&nbsp;</td></tr></table><br /></body>
+</html>

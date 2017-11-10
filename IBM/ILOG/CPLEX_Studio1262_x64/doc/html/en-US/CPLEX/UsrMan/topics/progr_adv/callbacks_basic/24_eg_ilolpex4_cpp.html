@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: deriving the simplex callback ilolpex4.cpp" />
+<meta name="abstract" content="Illustrates derivation of a simplex callback in the C++ API." />
+<meta name="Description" content="Illustrates derivation of a simplex callback in the C++ API." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callbacks.1008145" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<title>Example: deriving the simplex callback ilolpex4.cpp</title>
+</head>
+<body role="main" id="User_manual.uss_callbacks.1008145">
+<h1 class="title topictitle1">Example: deriving the simplex callback ilolpex4.cpp</h1>
+<div class="body"><p class="shortdesc">Illustrates derivation of a simplex callback in the C++
+API.</p>
+<p class="p">Example <samp class="ph codeph">ilolpex4.cpp</samp> demonstrates
+the use of the simplex callback to print logging information at each
+iteration. It is a modification of example <samp class="ph codeph">ilolpex1.cpp</samp>,
+so this discussion concentrates on the differences. The following
+code:  </p>
+<pre class="pre codeblock"><code>ILOSIMPLEXCALLBACK0(MyCallback) {
+  cout &lt;&lt; "Iteration " &lt;&lt; getNiterations() &lt;&lt; ": ";
+  if ( isFeasible() ) {
+    cout &lt;&lt; "Objective = " &lt;&lt; getObjValue() &lt;&lt; endl;
+  } 
+  else {
+    cout &lt;&lt; "Infeasibility measure = " &lt;&lt; getInfeasibility() &lt;&lt; endl;
+  } 
+}</code></pre>
+<p class="p">defines the callback <samp class="ph codeph">MyCallback</samp> 
+without arguments with the code enclosed in the outer <samp class="ph codeph">{}</samp> .
+In <strong class="ph b">Java</strong>, the same callback is defined
+like this:  </p>
+<pre class="pre codeblock"><code>static class MyCallback extends IloCplex.ContinuousCallback {
+   public void main() throws IloException {
+      System.out.print("Iteration " + getNiterations() + ": ");
+      if ( isFeasible() )
+         System.out.println("Objective = " + getObjValue());
+      else
+         System.out.println("Infeasibility measure = " 
+                             + getInfeasibility());
+   }
+}</code></pre>
+<p class="p">The callback prints the iteration number. Then, depending
+on whether the current solution is feasible or not, it prints the
+objective value or infeasibility measure. The methods <samp class="ph codeph">getNiterations</samp>, <samp class="ph codeph">isFeasible</samp>, <samp class="ph codeph">getObjValue</samp>,
+and <samp class="ph codeph">getInfeasibility</samp> are methods provided
+in the base class of the callback,<samp class="ph codeph"> IloCplex::ContinuousCallbackI</samp> 
+(<samp class="ph codeph">IloCplex.ContinuousCallback</samp> or <samp class="ph codeph">Cplex.ContinuousCallback</samp>).
+See the<em class="ph i"> Reference Manual of the C++
+API</em> for the complete list of methods provided for
+each callback class. </p>
+<p class="p">Here is the previous sample of code, with the macro <samp class="ph codeph">ILOSIMPLEXCALLBACK0</samp> 
+expanded: </p>
+<pre class="pre codeblock"><code>class MyCallbackI : public IloCplex::SimplexCallbackI {
+void main();
+  IloCplex::CallbackI* duplicateCallback() const {
+    return (new (getEnv()) MyCallbackI(*this));
+  }
+}; 
+IloCplex::Callback MyCallback(IloEnv env) {
+  return (IloCplex::Callback(new (env) MyCallbackI()));
+}
+
+void MyCallbackI::main() {
+  cout &lt;&lt; "Iteration " &lt;&lt; getNiterations() &lt;&lt; ": ";
+  if ( isFeasible() ) {
+    cout &lt;&lt; "Objective = " &lt;&lt; getObjValue() &lt;&lt; endl;
+  }
+  else {
+    cout &lt;&lt; "Infeasibility measure = " &lt;&lt; getInfeasibility() &lt;&lt; endl;
+  }
+}</code></pre>
+<p class="p">The <samp class="ph codeph">0</samp>  (zero) in the macro
+indicates that no arguments are passed to the constructor of the callback.
+For callbacks requiring up to 7 arguments, similar macros are defined
+where the <samp class="ph codeph">0</samp>  is replaced by the number
+of arguments, ranging from 1 through 7. For an example using the cut
+callback, see <a class="xref" href="30_eg_iloadmipex5_cpp.html" title="Illustrates callbacks to control cuts in the C++ API.">Example: controlling cuts iloadmipex5.cpp</a>.
+If you need more than 7 arguments, you will need to derive your callback
+class yourself without the help of a macro. </p>
+<p class="p">After the callback <samp class="ph codeph">MyCallback</samp> 
+is defined, it can be used with the line:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">cplex.use(MyCallback(env));</samp> in
+C++</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">cplex.use(new MyCallback());</samp> in
+Java</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">cplex.Use(new MyCallback());</samp> in
+.NET</p>
+</li>
+</ul>
+<p class="p">In the case of C++, the function <samp class="ph codeph">MyCallback</samp> creates
+an instance of the implementation class <samp class="ph codeph">MyCallbackI</samp>.
+A handle to this implementation object is passed to the method <samp class="ph codeph">IloCplex::use</samp>. </p>
+<p class="p">If your application defines more than one simplex callback
+object (possibly with different subclasses), only the last one passed
+to CPLEX with the <samp class="ph codeph">use</samp> method is actually
+used during simplex. On the other hand, <samp class="ph codeph">IloCplex</samp> can
+manage one callback for each callback class at the same time. For
+example, a simplex callback and a MIP callback can be used at the
+same time.</p>
+<p class="p">The complete program, <samp class="ph codeph">ilolpex4.cpp</samp>,
+appears online in the standard distribution at <em class="ph i">yourCPLEXinstallation</em><samp class="ph codeph">/examples/src</samp>.
+In the same location, there are also samples in Java (<samp class="ph codeph">LPex4.java</samp>)
+and in the .NET API (<samp class="ph codeph">LPex4.cs</samp> and <samp class="ph codeph">LPex4.vb</samp>).</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" title="Introduces optimization callbacks.">Using optimization callbacks</a></div>
+</div>
+</div></body>
+</html>

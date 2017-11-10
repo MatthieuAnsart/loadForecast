@@ -1,0 +1,158 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/******************************************************************************</font></b>
+013: <b><font color="#007D00"> * </font></b>
+014: <b><font color="#007D00"> * OPL Model for Airline Yield Management</font></b>
+015: <b><font color="#007D00"> * Deterministic LP formulation</font></b>
+016: <b><font color="#007D00"> * </font></b>
+017: <b><font color="#007D00"> *</font></b>
+018: <b><font color="#007D00"> * </font></b>
+019: <b><font color="#007D00"> * This model is greater than the size allowed in trial mode. </font></b>
+020: <b><font color="#007D00"> * You therefore need a commercial edition of CPLEX Studio to run this example. </font></b>
+021: <b><font color="#007D00"> * If you are a student or teacher, you can also get a full version through</font></b>
+022: <b><font color="#007D00"> * the IBM Academic Initiative.</font></b>
+023: <b><font color="#007D00">******************************************************************************/</font></b>
+024: 
+025: <b><font color="#007D00">/*</font></b>
+026: <b><font color="#007D00">  This model is described in the documentation. </font></b>
+027: <b><font color="#007D00">See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+028: <b><font color="#007D00">  </font></b>
+029: <b><font color="#007D00">  Examples of the proper data format appear below.</font></b>
+030: <b><font color="#007D00">  </font></b>
+031: <b><font color="#007D00">Flight Leg:</font></b>
+032: <b><font color="#007D00">   &lt;5,   "ABZ", 1165, "SVG", 1376,144&gt;</font></b>
+033: <b><font color="#007D00">   </font></b>
+034: <b><font color="#007D00">   Flt. ID = 5</font></b>
+035: <b><font color="#007D00">   Origin    = "ABZ" (city code)</font></b>
+036: <b><font color="#007D00">   Departure Time (in minutes) = 1165</font></b>
+037: <b><font color="#007D00">   Destination = "SVG" (city cod)</font></b>
+038: <b><font color="#007D00">   Arrival Time (in minutes) = 1376</font></b>
+039: <b><font color="#007D00">   Aircraft Capacity = 144</font></b>
+040: <b><font color="#007D00">   </font></b>
+041: <b><font color="#007D00">Itinerary:</font></b>
+042: <b><font color="#007D00">   &lt; 1, 3, {0, 3, 4}, 30, 110&gt;</font></b>
+043: <b><font color="#007D00">   </font></b>
+044: <b><font color="#007D00">   Itinerary Num. = 1</font></b>
+045: <b><font color="#007D00">   Number of Flight Legs = 3</font></b>
+046: <b><font color="#007D00">   Flight Leg ID #1 = 0</font></b>
+047: <b><font color="#007D00">   Flight Leg ID #2 = 3</font></b>
+048: <b><font color="#007D00">   Flight Leg ID #3 = 4</font></b>
+049: <b><font color="#007D00">   Expected Demand = 30</font></b>
+050: <b><font color="#007D00">   fare = 110   </font></b>
+051: <b><font color="#007D00">*/</font></b>
+052: 
+053: <b><font color="#007D00">// Flight Leg structure </font></b>
+054: <b><font color="#0000FF">tuple</font></b> flightLeg 
+055: {
+056:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b>        FltID;             <b><font color="#007D00">//flight ID</font></b>
+057:   <b><font color="#0000FF">string</font></b>     Origin;            <b><font color="#007D00">//Originating Airport</font></b>
+058:   <b><font color="#0000FF">int</font></b>        Dept;              <b><font color="#007D00">//Departure Time</font></b>
+059:   <b><font color="#0000FF">string</font></b>     Destination;       <b><font color="#007D00">//Destination Airport</font></b>
+060:   <b><font color="#0000FF">int</font></b>        Arrt;              <b><font color="#007D00">//Arrival Time</font></b>
+061:   <b><font color="#0000FF">int</font></b>        Cap;               <b><font color="#007D00">//Capacity</font></b>
+062: }
+063: 
+064: <b><font color="#007D00">// Set of Scheduled Flight Legs</font></b>
+065: {flightLeg} FlightLegs = ...; 
+066: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(fl <b><font color="#0000FF">in</font></b> FlightLegs)  fl.Dept &lt;= fl.Arrt;
+067: 
+068: {<b><font color="#0000FF">int</font></b>} LegIDSet = {fl.FltID | fl <b><font color="#0000FF">in</font></b> FlightLegs};
+069: 
+070: <b><font color="#007D00">// Make sure there are no duplicate flight IDs!</font></b>
+071: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">card</font></b>(LegIDSet) == <b><font color="#7D007D">card</font></b>(FlightLegs);
+072: 
+073: flightLeg ArrayOfFlightLegs[LegIDSet] =
+074:  [fl.FltID : fl | fl <b><font color="#0000FF">in</font></b> FlightLegs];
+075: 
+076: 
+077: <b><font color="#007D00">// Maximum time that passenger is willing to wait between connecting flights</font></b>
+078: <b><font color="#0000FF">int</font></b> MaxWaitTime = ...;
+079: 
+080: <b><font color="#007D00">// Itinerary structure - Unlimited number of legs in itinerary</font></b>
+081: <b><font color="#0000FF">tuple</font></b> itinerary
+082: {
+083:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> ItinID;            <b><font color="#007D00">//Itinerary ID</font></b>
+084:   <b><font color="#0000FF">int</font></b> NumLegs;           <b><font color="#007D00">//Number of legs in Itinerary    </font></b>
+085:   {<b><font color="#0000FF">int</font></b>} LegIDs;          <b><font color="#007D00">//Set of Legs in Itinerary</font></b>
+086:   <b><font color="#0000FF">float</font></b> dmd;             <b><font color="#007D00">//Expected Demand</font></b>
+087:   <b><font color="#0000FF">float</font></b> fare;            <b><font color="#007D00">//fare</font></b>
+088: }
+089: 
+090: <b><font color="#007D00">// Set of desired Itineraries</font></b>
+091: {itinerary} Itineraries = ...; 
+092: 
+093: {<b><font color="#0000FF">int</font></b>} ItinIDSet = {it.ItinID | it <b><font color="#0000FF">in</font></b> Itineraries};
+094: 
+095: <b><font color="#007D00">// Make sure there are no duplicate itinerary numbers!</font></b>
+096: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">card</font></b>(ItinIDSet) == <b><font color="#7D007D">card</font></b>(Itineraries);
+097: 
+098: <b><font color="#0000FF">int</font></b> Maxis[i <b><font color="#0000FF">in</font></b> Itineraries] = <b><font color="#7D007D">max</font></b>(g <b><font color="#0000FF">in</font></b> i.LegIDs) ArrayOfFlightLegs[g].Dept;
+099: 
+100: <b><font color="#007D00">// An assertion ensuring that all itineraries are feasible             </font></b>
+101: <b><font color="#0000FF">assert</font></b>
+102:     <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Itineraries, f1 <b><font color="#0000FF">in</font></b> i.LegIDs: ArrayOfFlightLegs[f1].Dept &lt; Maxis[i])
+103:     1 ==
+104:         <b><font color="#7D007D">sum</font></b>(f2 <b><font color="#0000FF">in</font></b> i.LegIDs:
+105:              f1 != f2 &amp;&amp;
+106:              ArrayOfFlightLegs[f2].Origin == ArrayOfFlightLegs[f1].Destination &amp;&amp;
+107:              ArrayOfFlightLegs[f1].Arrt &lt;= ArrayOfFlightLegs[f2].Dept &amp;&amp;
+108:              ArrayOfFlightLegs[f2].Dept &lt;= ArrayOfFlightLegs[f1].Arrt + MaxWaitTime
+109: )
+110:             1;
+111: 
+112: <b><font color="#007D00">/******************************************************************************</font></b>
+113: <b><font color="#007D00"> * MODEL DECLARATIONS</font></b>
+114: <b><font color="#007D00"> ******************************************************************************/</font></b>
+115: 
+116: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+   Allocation[it <b><font color="#0000FF">in</font></b> Itineraries] <b><font color="#0000FF">in</font></b> 0..it.dmd;  <b><font color="#007D00">// allocation level to itinerary        </font></b>
+117: 
+118: <b><font color="#007D00">/******************************************************************************</font></b>
+119: <b><font color="#007D00"> * MODEL</font></b>
+120: <b><font color="#007D00"> ******************************************************************************/</font></b>
+121: 
+122: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> TotalAllocation =
+123:   <b><font color="#7D007D">sum</font></b>(it <b><font color="#0000FF">in</font></b> Itineraries) it.fare*Allocation[it];
+124: 
+125: <b><font color="#0000FF">maximize</font></b> TotalAllocation;
+126:     
+127: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+128:   <b><font color="#7D007D">forall</font></b>(fl <b><font color="#0000FF">in</font></b> FlightLegs) 
+129:     ctCapLimit: 
+130:       <b><font color="#7D007D">sum</font></b>(it <b><font color="#0000FF">in</font></b> Itineraries: fl.FltID <b><font color="#0000FF">in</font></b> it.LegIDs) Allocation[it] &lt;= fl.Cap;
+131: }
+132: 
+133: 
+134: <b><font color="#0000FF">tuple</font></b> itineraryT{
+135:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> ItinID;        <b><font color="#007D00">//Itinerary ID</font></b>
+136:   <b><font color="#0000FF">int</font></b> NumLegs;           <b><font color="#007D00">//Number of legs in Itinerary    </font></b>
+137:   <b><font color="#0000FF">float</font></b> dmd;             <b><font color="#007D00">//Expected Demand</font></b>
+138:   <b><font color="#0000FF">float</font></b> fare;            <b><font color="#007D00">//fare</font></b>
+139: }
+140: <b><font color="#0000FF">tuple</font></b> AllocationSolutionT{ 
+141:         itineraryT Itineraries;         
+142:         <b><font color="#0000FF">float</font></b> value; 
+143: };
+144: {AllocationSolutionT} AllocationSolution = {&lt;&lt;i0.ItinID, i0.NumLegs, i0.dmd, i0.fare&gt;,Allocation[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Itineraries};
+145: <b><font color="#0000FF">execute</font></b>{ 
+146:         writeln(AllocationSolution);
+147: }
+148: 
+149: execute DISPLAY {
+150:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> fl <b><font color="EA7D00">in</font></b> FlightLegs)
+151:       <b><font color="EA7D00">if</font></b>(ctCapLimit[fl].dual &gt; 0.001)
+152:          writeln(<b><font color="#8A2BE2">"ctCapLimit["</font></b>, fl, <b><font color="#8A2BE2">"].dual = "</font></b>, ctCapLimit[fl].dual);
+153: }
+</tt></pre>

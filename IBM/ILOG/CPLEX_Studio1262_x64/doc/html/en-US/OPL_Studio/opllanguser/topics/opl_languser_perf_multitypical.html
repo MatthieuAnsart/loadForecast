@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="A typical problem to solve" />
+<meta name="abstract" content="The problem is to calculate the tangency portfolio for a given set of possible investment assets." />
+<meta name="Description" content="The problem is to calculate the tangency portfolio for a given set of possible investment assets." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_perf_multi.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1270730030989" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_perf_multi.html" />
+<title>A typical problem to solve</title>
+</head>
+<body role="main" id="descriptiveTopic1270730030989">
+<h1 class="title topictitle1">A typical problem to solve</h1>
+<div class="body"><p class="shortdesc">The problem is to calculate the tangency portfolio for a given set of possible investment assets.</p>
+<p class="p paragrouptitle">What is the efficient frontier?</p>
+<p class="p">You need to find the efficient frontier of a given set of investment assets. You can find an article on this subject here: <a class="xref" href="http://en.wikipedia.org/wiki/Modern_portfolio_theory#The_efficient_frontier" target="_blank" title="(Opens in a new tab or window)">http://en.wikipedia.org/wiki/Modern_portfolio_theory#The_efficient_frontier</a>.</p>
+<p class="p">Let <em class="ph i">I</em> be a given set of investment assets, indexed by <em class="ph i">i=1..I</em>. The ROI vector for those investments is a random variable vector <em class="ph i">R</em>. The random variable for investment asset <em class="ph i">i</em> is <em class="ph i">R(i)</em>. The expected values are <em class="ph i">E(R(i))=r(i)</em> and the covariance matrix for <em class="ph i">R</em> is <em class="ph i">COV</em>. For each investment, we assume we know its expected return <em class="ph i">r(i)</em>, and we also know <em class="ph i">COV</em> the covariance of <em class="ph i">R</em>. So for each <em class="ph i">i,j</em> investment, <em class="ph i">COV(i,j)</em> is the covariance of <em class="ph i">R(i)</em> with <em class="ph i">R(j)</em>, and <em class="ph i">COV(i,i)</em> is the variance of <em class="ph i">R(i)</em>.</p>
+<p class="p">An investor is interested in investing her wealth, 100, by mixing the various assets and obtaining a portfolio whose risk is lower than any of the individual investment assets. She does this by playing on the negative covariance of the combined assets. This mix is represented by the vector <em class="ph i">(X1,…, Xi,…XI)</em>.</p>
+<div class="p"><div class="fig fignone"><div class="image"><img class="image" src="../images/efficient_frontier_equation.jpg" alt="Equation to maximize ROI and minimize risk in the investment assets example" /></div></div>
+</div>
+<p class="p">Unfortunately, the two objectives are contradictory, because maximize <em class="ph i">TR</em> also maximizes <em class="ph i">TV</em> and vice versa. So the idea is to find a compromise <em class="ph i">ρ</em>, and maximize <em class="ph i">TR-(ρ/2).TV</em>.</p>
+<p class="p">When <em class="ph i">ρ=0</em>, it means that the investor is not concerned about risk, when <em class="ph i">ρ=1</em>, it means that both objectives are equally important. The <em class="ph i">½</em> coefficient is a normalization factor. Beyond <em class="ph i">ρ=1</em>, it means that minimizing the risk is more important than maximizing the return on investment. In this problem, we are only interested in <em class="ph i">ρ in [0,1]</em>. </p>
+<p class="p"><em class="ph i">r</em> represents the <em class="ph i">variance penalty</em>.</p>
+<p class="p">In modern portfolio theory, the set of all possible <em class="ph i">(TV,TR)</em> for a given investment asset set <em class="ph i">I</em> is called the “possible portfolio set”. The upper edge of this region of space <em class="ph i">(TV,TR)</em> is more interesting than any point below because it allows better expected return on investment for a given risk <em class="ph i">TV</em>, so any investor would want to choose a point on this frontier.</p>
+<p class="p"><div class="image"><img class="image" src="../images/efficient_frontier_graph.jpg" alt="Graph of possible portfolio set" /></div></p>
+<p class="p">(The graph is from the article <a class="xref" href="http://en.wikipedia.org/wiki/Modern_portfolio_theory#The_efficient_frontier" target="_blank" title="(Opens in a new tab or window)">http://en.wikipedia.org/wiki/Modern_portfolio_theory#The_efficient_frontier</a>.)</p>
+<p class="p">When we maximize <em class="ph i">TR-ρTV</em> for a given <em class="ph i">ρ</em>, under the constraints expressed by the equations above, we indeed obtain a point on the efficient frontier. Note that <em class="ph i">TV</em> is a quadratic term, and <em class="ph i">TV</em> is convex because <em class="ph i">COV</em> is a semi-positive, as defined by a covariance matrix (all <em class="ph i">Xi</em> are in <em class="ph i">[0,100]</em>). So quadratic programming addresses this problem.</p>
+<p class="p paragrouptitle">Calculating the efficient frontier</p>
+<p class="p">In order to calculate <em class="ph i">N</em> points on the efficient frontier, we vary <em class="ph i">ρ</em> from 0 to 1, by increments of <em class="ph i">1/(N-1)</em>. That is:</p>
+<div class="p"><div class="fig fignone"><div class="image"><img class="image" src="../images/efficient_frontier_npoints.jpg" alt="Equation to calculate the efficient frontier" /></div></div>
+</div>
+<p class="p paragrouptitle">Calculating the tangency portfolio</p>
+<p class="p">The <em class="ph i">N</em> optimal points resulting from the optimization problems stated above, and noted <em class="ph i">(TVp,TRp)</em>, are on the efficiency frontier.</p>
+<p class="p">The tangency portfolio is of interest to the investor. Let <em class="ph i">RFR</em> be the best risk free investment asset known. This means that <em class="ph i">TV=0</em> for <em class="ph i">RFR</em>. Point <em class="ph i">(0,RFR)</em> can be plotted on the diagram above. The tangency portfolio <em class="ph i">(TVt,TRt)</em> is defined by the intersection of the efficiency frontier with the tangent straight line including the risk free point. This point has the best marginal gain ratio <img class="image" src="../images/tangency_portfolio_marginal_gain_ratio.jpg" alt="Formula for the best marginal gain ratio" /> of any possible portfolio <em class="ph i">(TV,TR) </em> and will be chosen by our investor. It can be calculated with precision <em class="ph i">N</em> with our <em class="ph i">N</em> points <em class="ph i">(TVp,TRp)</em>.</p>
+<p class="p">We choose <em class="ph i">q</em> in <em class="ph i">{1,..N}</em> such that <img class="image" src="../images/tangency_portfolio_maximal.jpg" alt="Maximal marginal gain ratio" /> is maximal.</p>
+<p class="p">All <em class="ph i">N</em> optimization problems <em class="ph i">p</em> are independent and thus can be treated in parallel.</p>
+<p class="p">In the following flowchart, the input data is taken from the example:</p>
+<p class="p"><samp class="ph codeph">&lt;Install_dir\opl\examples\opl_interfaces\java\ConcurrentProcessing\portfolio.mod</samp></p>
+<div class="fig fignone"><span class="figcap">Figure 1. How to calculate the tangency point</span><div class="image"><img class="image" src="../images/tangency_portfolio_flowchart.jpg" alt="Flow chart showing how to calculate the tangency point" /></div></div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_perf_multi.html" title="An example is provided to illustrate how to use multi-threading to solve models more quickly.">Multi-threading</a></div>
+</div>
+</div></body>
+</html>

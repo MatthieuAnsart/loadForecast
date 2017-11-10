@@ -1,0 +1,181 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: ﻿REM ----------------------------------------------- -*- Visual Basic .Net -*-
+002: REM File: ExcelWarehouse.vb
+003: REM -------------------------------------------------------------------------
+004: REM Licensed Materials - Property of IBM
+005: REM 
+006: REM 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 
+007: REM Copyright IBM Corporation 1998, 2013. All Rights Reserved.
+008: REM
+009: REM Note to U.S. Government Users Restricted Rights:
+010: REM Use, duplication or disclosure restricted by GSA ADP Schedule
+011: REM Contract with IBM Corp.
+012: REM -------------------------------------------------------------------------
+013: 
+014: Imports System.IO
+015: Imports System.Windows.Forms
+016: Imports ILOG.Concert
+017: Imports ILOG.CPLEX
+018: Imports ILOG.OPL
+019: 
+020: Public Class ExcelWarehouse
+021:     Private AddInMenuBar As Office.CommandBar
+022:     Private SetupButton As Office.CommandBarButton
+023:     Private SolveButton As Office.CommandBarButton
+024: 
+025:     Private Sub ThisAddIn_Startup() Handles Me.Startup
+026:         CreateOplCommands()
+027:     End Sub
+028: 
+029:     Private Sub SetupButton_Click(ByVal Ctrl As Office.CommandBarButton, ByRef CancelDefault As Boolean)
+030:         <b><font color="#8A2BE2">' respond to setup button click</font></b>
+031: <b><font color="#8A2BE2">        Dim sheet As Excel.Worksheet = CType(Me.Application.ActiveWorkbook.ActiveSheet, Excel.Worksheet)</font></b>
+032: <b><font color="#8A2BE2">        setValue(sheet, "A1", "Data used by the OPL model:")</font></b>
+033: <b><font color="#8A2BE2">        setValue(sheet, "A2", "nbWarehouses:")</font></b>
+034: <b><font color="#8A2BE2">        setValue(sheet, "B2", "5")</font></b>
+035: <b><font color="#8A2BE2">        setValue(sheet, "A3", "nbStores:")</font></b>
+036: <b><font color="#8A2BE2">        setValue(sheet, "B3", "10")</font></b>
+037: <b><font color="#8A2BE2">        setValue(sheet, "A4", "fixed:")</font></b>
+038: <b><font color="#8A2BE2">        setValue(sheet, "B4", "30")</font></b>
+039: <b><font color="#8A2BE2">        setValue(sheet, "A5", "disaggregate:")</font></b>
+040: <b><font color="#8A2BE2">        setValue(sheet, "B5", "1")</font></b>
+041: <b><font color="#8A2BE2">        setValue(sheet, "A8", "Result computed by the OPL model:")</font></b>
+042: <b><font color="#8A2BE2">        setValue(sheet, "A9", "State:")</font></b>
+043: <b><font color="#8A2BE2">        setValue(sheet, "A10", "Objective:")</font></b>
+044: <b><font color="#8A2BE2">    End Sub</font></b>
+045: <b><font color="#8A2BE2">    Private Sub CreateOplCommands()</font></b>
+046: <b><font color="#8A2BE2">        Try</font></b>
+047: <b><font color="#8A2BE2">            '</font></b> <b><font color="EA7D00">new</font></b> command bar <b><font color="EA7D00">for</font></b> OPL
+048:             AddInMenuBar = Application.CommandBars.Add(<b><font color="#8A2BE2">"OPL Commands"</font></b>, Office.MsoBarPosition.msoBarTop, , True)
+049:             <b><font color="#8A2BE2">' setup button</font></b>
+050: <b><font color="#8A2BE2">            SetupButton = CType(AddInMenuBar.Controls.Add(Office.MsoControlType.msoControlButton, , , , True), Office.CommandBarButton)</font></b>
+051: <b><font color="#8A2BE2">            SetupButton.Caption = "OPL Warehouse Setup"</font></b>
+052: <b><font color="#8A2BE2">            SetupButton.Style = Microsoft.Office.Core.MsoButtonStyle.msoButtonCaption</font></b>
+053: <b><font color="#8A2BE2">            AddHandler SetupButton.Click, AddressOf Me.SetupButton_Click</font></b>
+054: <b><font color="#8A2BE2">            '</font></b> solve button:
+055:             SolveButton = CType(AddInMenuBar.Controls.Add(Office.MsoControlType.msoControlButton, , , , True), Office.CommandBarButton)
+056:             SolveButton.Caption = <b><font color="#8A2BE2">"OPL Warehouse Solve"</font></b>
+057:             SolveButton.Style = Microsoft.Office.Core.MsoButtonStyle.msoButtonCaption
+058:             AddHandler SolveButton.Click, AddressOf Me.SolveButton_Click
+059: 
+060:             AddInMenuBar.Visible = True
+061:         Catch ex As Exception
+062:             MessageBox.Show(ex.Message, ex.Source, MessageBoxButtons.OK, MessageBoxIcon.Error)
+063:         End Try
+064:     End Sub
+065:     Private Sub ThisAddIn_Shutdown() Handles Me.Shutdown
+066:         RemoveOplCommands()
+067:     End Sub
+068:     Private Sub RemoveOplCommands()
+069:         SolveButton.Delete(False)
+070:         SolveButton = Nothing
+071:         SetupButton.Delete(False)
+072:         SetupButton = Nothing
+073:         AddInMenuBar = Nothing
+074:     End Sub
+075: 
+076:     Private Sub SolveButton_Click(ByVal Ctrl As Office.CommandBarButton, ByRef CancelDefault As Boolean)
+077:         <b><font color="#8A2BE2">' respond to solve button click</font></b>
+078: <b><font color="#8A2BE2">        Dim sheet As Excel.Worksheet = CType(Me.Application.ActiveWorkbook.ActiveSheet, Excel.Worksheet)</font></b>
+079: <b><font color="#8A2BE2">        Dim errHandlerErrors As StringWriter = New StringWriter()</font></b>
+080: <b><font color="#8A2BE2">        Try</font></b>
+081: <b><font color="#8A2BE2">            setValue(sheet, "B9", "Computing...")</font></b>
+082: <b><font color="#8A2BE2">            SolveProblem(sheet, errHandlerErrors)</font></b>
+083: <b><font color="#8A2BE2">            setValue(sheet, "B9", "Success")</font></b>
+084: <b><font color="#8A2BE2">        Catch ex As Exception</font></b>
+085: <b><font color="#8A2BE2">            setValue(sheet, "B9", "Error:" + ex.ToString() + "(" + errHandlerErrors.ToString() + ")")</font></b>
+086: <b><font color="#8A2BE2">        End Try</font></b>
+087: <b><font color="#8A2BE2">    End Sub</font></b>
+088: <b><font color="#8A2BE2">    Private Sub setValue(ByVal sheet As Excel.Worksheet, ByVal cell As String, ByVal value As String)</font></b>
+089: <b><font color="#8A2BE2">        Dim range As Excel.Range = sheet.Range(cell, cell)</font></b>
+090: <b><font color="#8A2BE2">        range.Value = value</font></b>
+091: <b><font color="#8A2BE2">    End Sub</font></b>
+092: <b><font color="#8A2BE2">    Private Sub SolveProblem(ByVal sheet As Excel.Worksheet, ByVal errHandlerErrors As StringWriter)</font></b>
+093: <b><font color="#8A2BE2">        '</font></b> actually solve the problem with OPL
+094:         OplFactory.DebugMode = True
+095:         Dim oplF As OplFactory = New OplFactory()
+096:         Dim errHandler As OplErrorHandler = oplF.CreateOplErrorHandler(errHandlerErrors)
+097:         Dim modelSource As OplModelSource = oplF.CreateOplModelSourceFromString(GetModelText(), <b><font color="#8A2BE2">"warehouse"</font></b>)
+098:         Dim settings As OplSettings = oplF.CreateOplSettings(errHandler)
+099:         Dim def As OplModelDefinition = oplF.CreateOplModelDefinition(modelSource, settings)
+100:         Dim cplex As Cplex = oplF.CreateCplex()
+101:         Dim opl As OplModel = oplF.CreateOplModel(def, cplex)
+102:         Dim dataSource As OplDataSource = New MyParams(oplF, sheet)
+103:         opl.AddDataSource(dataSource)
+104:         opl.Generate()
+105:         If (cplex.Solve()) Then
+106:             setValue(sheet, <b><font color="#8A2BE2">"B10"</font></b>, <b><font color="#8A2BE2">""</font></b> + opl.Cplex.ObjValue.ToString)
+107:         Else
+108:             setValue(sheet, <b><font color="#8A2BE2">"B10"</font></b>, <b><font color="#8A2BE2">"No solution"</font></b>)
+109:         End If
+110:         oplF.End()
+111:     End Sub
+112: 
+113:     Function GetModelText() As String
+114:         Dim model As String
+115:         model = <b><font color="#8A2BE2">"int   fixed        = ...;"</font></b> &amp; vbCrLf &amp; _
+116:                 <b><font color="#8A2BE2">"int   nbWarehouses = ...;"</font></b> &amp; vbCrLf &amp; _
+117:                 <b><font color="#8A2BE2">"int   nbStores     = ...;"</font></b> &amp; vbCrLf &amp; _
+118:                 <b><font color="#8A2BE2">"int   disaggregate = ...;"</font></b> &amp; vbCrLf &amp; _
+119:                 <b><font color="#8A2BE2">"assert nbStores &gt; nbWarehouses;"</font></b> &amp; vbCrLf &amp; _
+120:                 <b><font color="#8A2BE2">"range Warehouses = 1..nbWarehouses;"</font></b> &amp; vbCrLf &amp; _
+121:                 <b><font color="#8A2BE2">"range Stores     = 1..nbStores;"</font></b> &amp; vbCrLf &amp; _
+122:                 <b><font color="#8A2BE2">"int capacity[w in Warehouses] = nbStores div nbWarehouses + w mod (nbStores div nbWarehouses);"</font></b> &amp; vbCrLf &amp; _
+123:                 <b><font color="#8A2BE2">"int supplyCost[s in Stores][w in Warehouses] = 1+((s+10*w) mod 100);"</font></b> &amp; vbCrLf &amp; _
+124:                 <b><font color="#8A2BE2">"dvar float open[Warehouses] in 0..1;"</font></b> &amp; vbCrLf &amp; _
+125:                 <b><font color="#8A2BE2">"dvar float supply[Stores][Warehouses] in 0..1;"</font></b> &amp; vbCrLf &amp; _
+126:                 <b><font color="#8A2BE2">"minimize "</font></b> &amp; vbCrLf &amp; _
+127:                 <b><font color="#8A2BE2">"sum(w in Warehouses) fixed * open[w] +"</font></b> &amp; vbCrLf &amp; _
+128:                 <b><font color="#8A2BE2">"sum(w in Warehouses, s in Stores) supplyCost[s][w] * supply[s][w];"</font></b> &amp; vbCrLf &amp; _
+129:                 <b><font color="#8A2BE2">"constraints {"</font></b> &amp; vbCrLf &amp; _
+130:                 <b><font color="#8A2BE2">"  forall(s in Stores)"</font></b> &amp; vbCrLf &amp; _
+131:                 <b><font color="#8A2BE2">"    sum(w in Warehouses) supply[s][w] == 1;"</font></b> &amp; vbCrLf &amp; _
+132:                 <b><font color="#8A2BE2">"  forall(w in Warehouses)"</font></b> &amp; vbCrLf &amp; _
+133:                 <b><font color="#8A2BE2">"    sum(s in Stores) supply[s][w] &lt;= open[w]*capacity[w];"</font></b> &amp; vbCrLf &amp; _
+134:                 <b><font color="#8A2BE2">"  if (disaggregate == 1) {"</font></b> &amp; vbCrLf &amp; _
+135:                 <b><font color="#8A2BE2">"   forall(w in Warehouses, s in Stores)"</font></b> &amp; vbCrLf &amp; _
+136:                 <b><font color="#8A2BE2">"      supply[s][w] &lt;= open[w];"</font></b> &amp; vbCrLf &amp; _
+137:                 <b><font color="#8A2BE2">"  }"</font></b> &amp; vbCrLf &amp; _
+138:                 <b><font color="#8A2BE2">"}"</font></b>
+139:         Return model
+140:     End Function
+141: 
+142:     Friend Class MyParams
+143:         Inherits CustomOplDataSource
+144: 
+145:         Private _xlDataSheet As Excel.Worksheet
+146:         Friend Sub New(ByVal oplF As OplFactory, ByVal xlDataSheet As Excel.Worksheet)
+147:             MyBase.New(oplF)
+148:             _xlDataSheet = xlDataSheet
+149:         End Sub
+150:         Private Function getValue(ByVal sheet As Excel.Worksheet, ByVal cell As String) As String
+151:             Return sheet.Range(cell, cell).Value.ToString
+152:             <b><font color="#8A2BE2">'Return sheet.get_Range(cell, cell).Text.ToString</font></b>
+153: <b><font color="#8A2BE2">        End Function</font></b>
+154: <b><font color="#8A2BE2">        Public Overrides Sub CustomRead()</font></b>
+155: 
+156: <b><font color="#8A2BE2">            Dim handler As OplDataHandler = DataHandler</font></b>
+157: 
+158: <b><font color="#8A2BE2">            handler.StartElement("nbWarehouses")</font></b>
+159: <b><font color="#8A2BE2">            handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B2")))</font></b>
+160: <b><font color="#8A2BE2">            handler.EndElement()</font></b>
+161: 
+162: <b><font color="#8A2BE2">            handler.StartElement("nbStores")</font></b>
+163: <b><font color="#8A2BE2">            handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B3")))</font></b>
+164: <b><font color="#8A2BE2">            handler.EndElement()</font></b>
+165: 
+166: <b><font color="#8A2BE2">            handler.StartElement("fixed")</font></b>
+167: <b><font color="#8A2BE2">            handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B4")))</font></b>
+168: <b><font color="#8A2BE2">            handler.EndElement()</font></b>
+169: 
+170: <b><font color="#8A2BE2">            handler.StartElement("disaggregate")</font></b>
+171: <b><font color="#8A2BE2">            handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B5")))</font></b>
+172: <b><font color="#8A2BE2">            handler.EndElement()</font></b>
+173: <b><font color="#8A2BE2">        End Sub</font></b>
+174: <b><font color="#8A2BE2">    End Class</font></b>
+175: 
+176: <b><font color="#8A2BE2">End Class</font></b>
+</tt></pre>

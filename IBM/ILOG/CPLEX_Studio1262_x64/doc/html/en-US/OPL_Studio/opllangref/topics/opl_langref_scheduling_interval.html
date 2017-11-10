@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Interval variables" />
+<meta name="abstract" content="Describes a basic building block of scheduling, the interval." />
+<meta name="Description" content="Describes a basic building block of scheduling, the interval." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_scheduling.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="YpSwtjg7" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_scheduling.html" />
+<title>Interval variables</title>
+</head>
+<body role="main" id="YpSwtjg7">
+<h1 class="title topictitle1">Interval variables</h1>
+<div class="body"><p class="shortdesc">Describes a basic building block of scheduling, the <em class="ph i">interval</em>.</p>
+<p class="p">Informally speaking, an interval variable represents
+an interval of time during which something happens (a task, an activity
+is carried out) and whose position in time is an unknown of the scheduling
+problem. An interval is characterized by a start value, an end value
+and a size. An important feature of interval variables is the fact
+that they can be optional; that is, one can decide not to consider
+them in the solution schedule. This concept is crucial in applications
+that present at least some of the following features:</p>
+<ul class="ul"><li class="li"><p class="p">optional activities (operations, tasks)
+that can be left unperformed (with an impact on the cost); examples
+include externalized, maintenance or control tasks</p>
+</li>
+<li class="li"><p class="p">activities that can execute on a set
+of alternative resources (machines, manpower) with possibly different
+characteristics (speed, calendar) and compatibility constraints</p>
+</li>
+<li class="li"><p class="p">operations that can be processed in
+different temporal modes (for instance in series or in parallel)</p>
+</li>
+<li class="li"><p class="p">alternative modes for executing a given
+activity, each mode specifying a particular combination of resources</p>
+</li>
+<li class="li"><p class="p">alternative processes for executing
+a given production order, a process being specified as a sequence
+of operations requiring resources</p>
+</li>
+<li class="li"><p class="p">hierarchical description of a project
+as a work-breakdown structure with tasks decomposed into sub-tasks,
+part of the project being optional (with an impact on the cost if
+unperformed), and so forth.</p>
+</li>
+</ul>
+<p class="p">Formally, an interval variable <em class="ph i">a</em> is a variable whose domain <em class="ph i">dom</em>(<em class="ph i">a</em>) is a subset of <img class="image" src="../images/int_var1.jpg" alt="int_var1" />. An interval variable is said to be <em class="ph i">fixed</em> if its domain is reduced to
+a singleton; that is, if <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" /> denotes a fixed interval variable:</p>
+<ul class="ul"><li class="li"><p class="p">interval is absent: <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />= <img class="image" src="../images/perpendic.jpg" alt="perpendic" />; or </p>
+</li>
+<li class="li"><p class="p">interval is present: <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />= [s,e) </p>
+</li>
+</ul>
+<p class="p">Absent interval variables have special meaning. Informally
+speaking, an absent interval variable is not considered by any constraint
+or expression on interval variables it is involved in. For example,
+if an absent interval variable is used in a <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_noOverlap.html" title="OPL constraint (scheduling) used to prevent intervals in a sequence from overlapping and (optionally) to enforce a minimal distance between consecutive intervals.">noOverlap</a> constraint, the constraint will behave as
+if the interval was never specified to the constraint. If an absent
+interval variable <em class="ph i">a</em> is used in a precedence constraint between interval variables <em class="ph i">a</em> and <em class="ph i">b</em> this constraint does not impact interval variable <em class="ph i">b</em>. Each constraint specifies how
+it handles absent interval variables.</p>
+<p class="p">The semantics of constraints defined over interval variables
+is described by the properties that fixed intervals must have in order
+the constraint to be true. If a fixed interval <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />is present and such that  <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" /> = [<em class="ph i">s,
+e</em>), we will denote <em class="ph i">s</em>( <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />) its integer start value <em class="ph i">s</em>, <em class="ph i">e</em>( <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />) its integer end value <em class="ph i">e</em> and <em class="ph i">l</em>( <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />) its positive integer length defined as <em class="ph i">e</em>( <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />)−<em class="ph i">s</em>( <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />). The presence status <em class="ph i">x</em>( <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />) will be equal to 1. For a fixed interval
+that is absent, <em class="ph i">x</em>( <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />) = 0 and the start, end and length are
+undefined.</p>
+<p class="p">Until a solution is found it may not be known whether
+an interval will be present or not. In this case we say that the interval
+is optional. To be precise, an interval is said to be absent when <em class="ph i">dom</em>(<em class="ph i">a</em>) = {<img class="image" src="../images/perpendic.jpg" alt="perpendic" />}, present when <img class="image" src="../images/int_var8.jpg" alt="int_var8" /><em class="ph i">dom</em>(<em class="ph i">a</em>) and optional
+in all other cases.</p>
+<div class="section" id="YpSwtjg7__IWghCh5g"><h2 class="title sectiontitle">Intensity and size</h2><p class="p">Sometimes the intensity of “work” is not
+the same during the whole interval. For example let’s consider
+a worker who does not work during weekends (his work intensity during
+weekends is 0%) and on Friday he works only for half a day (his intensity
+during Friday is 50%). For this worker, 7 man-days of work will span
+for longer than just 7 days. In this example 7 man-days represents
+what we call the <em class="ph i">size</em> of the interval; that is, what the length of the interval would
+be if the intensity function was always at 100%.</p>
+<p class="p">To model such situations, you can specify a range for
+the <em class="ph i">size</em> of an interval
+variable and an integer <em class="ph i">stepwise</em> <em class="ph i">intensity</em> <em class="ph i">function</em> <em class="ph i">F</em>. For a fixed present interval <img class="image" src="../images/a_underscore.jpg" alt="a_underscore" />the following relation will be enforced
+at any solution between the start, end, size <em class="ph i">sz</em> of the interval and the integer
+granularity <em class="ph i">G</em> (by
+default, the intensity function is expressed as a percentage so the
+granularity <em class="ph i">G</em> is
+100):</p>
+<div class="image"><img class="image" src="../images/int_var2.jpg" alt="int_var2" /></div><p class="p">That is, the length of the interval will be at least
+long enough to cover the work requirements given by the interval size,
+taking into account the intensity function. However, any over-estimation
+is always strictly less than one work unit. </p>
+<p class="p">If no intensity is specified, it is supposed to be the
+constant full intensity function <img class="image" src="../images/int_var9.jpg" alt="int_var9" />= 100% so in that case <em class="ph i">sz</em>(<em class="ph i">a</em>) = <em class="ph i">l</em>(<em class="ph i">a</em>). Note that
+the size is not defined for absent intervals.</p>
+<div class="note important"><span class="importanttitle">Important:</span> <p class="p">The intensity step function <em class="ph i">F </em>should be a stepwise function with integer values
+and is not allowed to exceed the granularity (100 by default). </p>
+</div>
+<p class="p">The following figure depicts an interval variable of
+size 14 with its intensity function. A valid solution is represented
+where the interval starts at 10 and ends at 27. Indeed in this case:</p>
+<div class="image"><img class="image" src="../images/int_var3.jpg" alt="int_var3" /></div><div class="image"><img class="image" src="../images/intensity.jpg" alt="intensity" /></div></div>
+<div class="section" id="YpSwtjg7__OnPCeLxj"><h2 class="title sectiontitle">OPL formulation</h2><p class="p">Typically, the problem structure will indicate if an
+interval can be optional or not, and the keyword <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_optional.html" title="OPL keyword (CP, scheduling) used to declare an interval as optional.">optional</a> is used (or not) in the definition of the
+interval variable. In the case where the optionality depends on input
+data, you can specify a boolean parameter to the optionality field: <samp class="ph codeph">optional</samp>(<samp class="ph codeph">true</samp>) being equivalent
+to <samp class="ph codeph">optional</samp> and <samp class="ph codeph">optional</samp>(<samp class="ph codeph">false</samp>) being equivalent to the omission
+of <samp class="ph codeph">optional</samp>.</p>
+<p class="p">A window [<em class="ph i">StartMin</em>,<em class="ph i">EndMax</em>] can be
+specified to restrict the position of the interval variable. By default,
+an interval variable will start after 0 and end before <em class="ph i">maxint</em>/2. The fixed size or the size
+range for the interval is specified with the <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_size.html" title="OPL keyword (CP, scheduling) for defining interval size.">size</a> keyword. Note that these bounds are taken
+into account only when the interval variable is present in the final
+schedule, that is, they allow specifying conditional bounds on the
+interval variable <em class="ph i">would the interval
+be present in the final schedule</em>. For absent intervals,
+they are just ignored.</p>
+<pre class="pre msgblock"><code>dvar interval a [optional[(IsOptional)]]
+                [in StartMin..EndMax]
+                [size SZ | in SZMin .. SZMax]
+                [intensity F]
+
+Where:
+
+int IsOptional, StartMin, EndMax, SZ, SZMin, SZMax;
+stepFunction F;
+-maxint/2 + 1 &lt;= StartMin &lt;= maxint/2 - 1
+-maxint/2 + 1 &lt;= EndMax &lt;= maxint/2 - 1
+0 &lt;= SZ &lt;= maxint/2 - 1
+0 &lt;= SZMin &lt;= maxint/2 - 1
+0 &lt;= SZMax &lt;= maxint/2 - 1</code></pre>
+</div>
+<div class="section" id="YpSwtjg7__P3qoC5S2"><h2 class="title sectiontitle">Examples</h2><p class="p">For examples of using <em class="ph i">interval</em>, see the CP keywords <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_interval.html" title="OPL keyword (CP, scheduling) for interval variables.">interval</a>, <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_optional.html" title="OPL keyword (CP, scheduling) used to declare an interval as optional.">optional</a>, <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_size.html" title="OPL keyword (CP, scheduling) for defining interval size.">size</a>, and <a class="xref" href="../../opllang_quickref/topics/tlr_oplsch_intensity.html" title="OPL keyword (CP, scheduling) for determining intensity of an interval variable.">intensity</a> in the <em class="ph i">OPL
+Language Quick Reference</em>.</p>
+</div>
+<div class="section" id="YpSwtjg7__HYFtleIo"><h2 class="title sectiontitle">Display of interval variable domain</h2><p class="p">The domain of an interval variable is displayed as shown
+in this example:  </p>
+<p class="p">A1[0..1: 10..990 -- (5..10)5..990 --&gt; 25..1000]  </p>
+<p class="p">After the name of the interval variable (here A1), the
+first range (here 0..1) represents the domain of the boolean presence
+status of the interval variable. Thus 0..1 represents an optional
+interval variable whose status has still not been fixed, 0 an absent
+interval variable and 1 a present interval variable.  </p>
+<p class="p">The remaining fields describe the position of the interval
+variable, it is omitted if the interval variable is absent as this
+information is not relevant in this case. Thus, an absent interval
+variable is displayed as:  </p>
+<p class="p">A1[0]  </p>
+<p class="p">When the interval variable is possibly present:</p>
+<p class="p"> - the first range in the remaining fields represents
+the domain of the interval start </p>
+<p class="p">- the second range (between parenthesis) represents the
+domain of the interval size </p>
+<p class="p">- the third range represents the domain of the interval
+length </p>
+<p class="p">- the fourth and last range represents the domain of
+the interval end  </p>
+<p class="p">Note that the second range may be omitted in case the
+size and length of the interval variable are necessarily equal.  </p>
+<p class="p">When the values are fixed, the ranges <em class="ph i">min</em>..<em class="ph i">max</em> are replaced by a single value. For instance,
+the following display represents a fixed interval variable of size
+5 that is present, starts at 10 and ends at 35:  </p>
+<p class="p">A1[1: 10 -- (5)25 --&gt; 35] </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_scheduling.html" title="Describes how to model scheduling problems in OPL.">Scheduling</a></div>
+</div>
+</div></body>
+</html>

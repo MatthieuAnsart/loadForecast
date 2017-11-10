@@ -1,0 +1,306 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2015. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: include <b><font color="#8A2BE2">"FlightPairing_data.mod"</font></b>;
+013: include <b><font color="#8A2BE2">"PairingGeneration_data.mod"</font></b>;
+014: 
+015:  <b><font color="#007D00">/// The main loop</font></b>
+016:  
+017:  
+018: {TPairingLeg}  pairingLegs;
+019: {TPairingCost} pairingCosts;
+020: {<b><font color="#0000FF">int</font></b>} bestCoveredFlights;
+021: 
+022:  <b><font color="#0000FF">main</font></b> {
+023:    includeScript(<b><font color="#8A2BE2">"helpers.js"</font></b>);
+024:    <b><font color="EA7D00">var</font></b> retcode = 0;
+025: 
+026:    <b><font color="EA7D00">var</font></b> MAX_INITIAL_PAIRINGS_PER_FLIGHT         = <b><font color="#0000FF">thisOplModel</font></b>.PairingGenerationData.NumberOfInitialPairings;   <b><font color="#007D00">// Initial pairings to cover each flight</font></b>
+027:    <b><font color="EA7D00">var</font></b> PrintPeriod  = 20;   <b><font color="#007D00">// Print frequency</font></b>
+028:    <b><font color="EA7D00">var</font></b> isdebug = <b><font color="#0000FF">thisOplModel</font></b>.PairingGenerationData.DebugMode &gt;= 1;
+029:    
+030:    <b><font color="EA7D00">var</font></b> time  = 0;          <b><font color="#007D00">// Procedure time</font></b>
+031:    <b><font color="EA7D00">var</font></b> date0;
+032:    <b><font color="EA7D00">var</font></b> totalTime;            <b><font color="#007D00">// Total computation time </font></b>
+033: 
+034:    <b><font color="#007D00">/******************************************************************************</font></b>
+035: <b><font color="#007D00">    * INITIALIZATION:</font></b>
+036: <b><font color="#007D00">    * Generate initial pairings that cover all flights</font></b>
+037: <b><font color="#007D00">    ******************************************************************************/</font></b>
+038:    <b><font color="EA7D00">var</font></b> generateOnePairingSource = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"GenerateOnePairing.mod"</font></b>);
+039:    <b><font color="EA7D00">var</font></b> generateOnePairingDef    = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(generateOnePairingSource);
+040:    <b><font color="EA7D00">var</font></b> masterDataSource         = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"FlightPairing.dat"</font></b>);
+041:    <b><font color="EA7D00">var</font></b> generationDataSource     = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"PairingGeneration.dat"</font></b>);
+042:    <b><font color="#007D00">// Load pairing cover model</font></b>
+043:    <b><font color="EA7D00">var</font></b> generatePairingConfig =
+044:       <b><font color="EA7D00">new</font></b> IloOplRunConfiguration(<b><font color="#8A2BE2">"GenerateOnePairing.mod"</font></b>, <b><font color="#8A2BE2">"FlightPairing.dat"</font></b>, <b><font color="#8A2BE2">"PairingGeneration.dat"</font></b>);
+045:    <b><font color="EA7D00">var</font></b> generatePairingModel = generatePairingConfig.oplModel;
+046:    
+047:    <b><font color="#007D00">// to set the forcedCoveredFligh, I must use a data elements!!!</font></b>
+048:    <b><font color="EA7D00">var</font></b> dummyGenerationData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+049:    dummyGenerationData.forcedCoveredFlight = -1;
+050:    generatePairingModel.addDataSource(dummyGenerationData);
+051:    <b><font color="#007D00">///</font></b>
+052:    generatePairingModel.generate();
+053:    <b><font color="EA7D00">var</font></b> generatePairingData  = generatePairingModel.dataElements;
+054:    
+055:    <b><font color="EA7D00">var</font></b> allFlights = generatePairingData.flights;
+056:    <b><font color="EA7D00">var</font></b> nbFlights  = generatePairingData.flights.size;
+057:    <b><font color="EA7D00">var</font></b> maxNbLegs  = generatePairingData.parameters.maxNbLegs;
+058:    
+059:    writeln(<b><font color="#8A2BE2">"* starting CP search for initial pairings"</font></b>, <b><font color="#8A2BE2">", #flights="</font></b>, nbFlights, <b><font color="#8A2BE2">", #initial="</font></b>, MAX_INITIAL_PAIRINGS_PER_FLIGHT);
+060:    date0 = <b><font color="EA7D00">new</font></b> Date();
+061:    <b><font color="#007D00">// Indices for master problem</font></b>
+062:    <b><font color="EA7D00">var</font></b> legs  = <b><font color="#0000FF">thisOplModel</font></b>.pairingLegs;
+063:    <b><font color="EA7D00">var</font></b> costs = <b><font color="#0000FF">thisOplModel</font></b>.pairingCosts;
+064:    <b><font color="EA7D00">var</font></b> totalNumberOfColumns = 0;
+065: 
+066:    <b><font color="#007D00">// Now, generate pairings for every flight</font></b>
+067:    <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> f=1; f &lt;= nbFlights; f++) {
+068:      <b><font color="EA7D00">var</font></b> initialCP =  <b><font color="EA7D00">new</font></b> IloCP();
+069:      initialCP.param.Workers = 1;
+070:      
+071:      <b><font color="#007D00">// IloOplModel</font></b>
+072:      <b><font color="EA7D00">var</font></b> localGeneratePairingModel = <b><font color="EA7D00">new</font></b> IloOplModel(generateOnePairingDef, initialCP);
+073:      localGeneratePairingModel.addDataSource(masterDataSource);
+074:      localGeneratePairingModel.addDataSource(generationDataSource);
+075:      <b><font color="EA7D00">var</font></b> flightGenerationData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+076:      flightGenerationData.forcedCoveredFlight = f;
+077:      localGeneratePairingModel.addDataSource( flightGenerationData );
+078:     
+079:      localGeneratePairingModel.generate();     
+080:      <b><font color="EA7D00">var</font></b> localNumberOfPairings = 0;
+081: 
+082:      <b><font color="#007D00">/// --- search loop for covering pairings</font></b>
+083:      <b><font color="#007D00">//initialCP.param.RandomSeed = f;</font></b>
+084:      initialCP.startNewSearch();
+085:      <b><font color="EA7D00">while</font></b> (initialCP.next()) {
+086:        <b><font color="#007D00">// Add the pairing to the list</font></b>
+087:        <b><font color="EA7D00">var</font></b> currentPairingIndex = totalNumberOfColumns;
+088:        <b><font color="#007D00">/// 1. store the cost</font></b>
+089:        costs.add( currentPairingIndex, localGeneratePairingModel.costVar );
+090:        <b><font color="#007D00">/// 2. store the actual legs as triplets &lt;#p, #l, flight&gt;</font></b>
+091:        <b><font color="#007D00">///</font></b>
+092:        <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> l=1; l &lt;= maxNbLegs; ++l) {   
+093:          <b><font color="EA7D00">var</font></b> flightRank  = localGeneratePairingModel.flightVars[l];
+094:          <b><font color="EA7D00">var</font></b> isActualLeg = localGeneratePairingModel.isActualLeg[l];
+095:          <b><font color="#007D00">//writeln("-- flight covered: ", f, ", #leg: ", l, ", f=", flightIndex);</font></b>
+096:          <b><font color="EA7D00">if</font></b> ( isActualLeg &lt; 0.1 ) <b><font color="EA7D00">break</font></b>;  <b><font color="#007D00">/// stop at dummy legs.</font></b>
+097:             
+098:          <b><font color="#007D00">/// BEWARE: variable is 1..F, but Opl.item() has C-convention</font></b>
+099:          legs.add(currentPairingIndex, l , flightRank);
+100:        }<b><font color="#007D00">//for           </font></b>
+101:        ++localNumberOfPairings;
+102:        ++totalNumberOfColumns;
+103:          
+104:        <b><font color="EA7D00">if</font></b> (localNumberOfPairings &gt;= MAX_INITIAL_PAIRINGS_PER_FLIGHT) 
+105:          <b><font color="EA7D00">break</font></b>;
+106:      }<b><font color="#007D00">//while</font></b>
+107:      
+108:      initialCP.endSearch();
+109:      <b><font color="EA7D00">if</font></b> ( 0 == localNumberOfPairings) {
+110:          writeln(<b><font color="#8A2BE2">"** ERROR: cannot find any pairing for flight: "</font></b>, f, <b><font color="#8A2BE2">" final problem will be infeasible"</font></b>);
+111:          Opl.fail();
+112:          retcode = -2;
+113: 
+114:      } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( localNumberOfPairings &lt; MAX_INITIAL_PAIRINGS_PER_FLIGHT ) {
+115:        <b><font color="#007D00">///  !!!</font></b>
+116:        <b><font color="#007D00">/// This may be a problem: cannot find MAX_PAIRINGS pairings</font></b>
+117:        <b><font color="#007D00">/// only a subset..        </font></b>
+118:        writeln(<b><font color="#8A2BE2">"* warning: cannot find "</font></b>, MAX_INITIAL_PAIRINGS_PER_FLIGHT, <b><font color="#8A2BE2">" pairings, only: "</font></b>, localNumberOfPairings);
+119:      }              
+120:      <b><font color="EA7D00">if</font></b> ( (f% PrintPeriod) == 0) {
+121:        writeln(<b><font color="#8A2BE2">"-- initial generation: "</font></b>, Opl.floor( (100 * f)/nbFlights +.5), <b><font color="#8A2BE2">"%, #columns: "</font></b>, totalNumberOfColumns, <b><font color="#8A2BE2">", time="</font></b>, getElapsedTime(date0));
+122:      }
+123:    }
+124:   
+125:    writeln(<b><font color="#8A2BE2">"* end initial pairings phase"</font></b>, <b><font color="#8A2BE2">", #columns="</font></b>, totalNumberOfColumns, <b><font color="#8A2BE2">", time="</font></b>, getElapsedTime(date0), <b><font color="#8A2BE2">"s."</font></b>);
+126:    
+127:    <b><font color="#007D00">/// for debug purpose, write initial pairings to a file.</font></b>
+128:    <b><font color="EA7D00">if</font></b> ( <b><font color="#0000FF">thisOplModel</font></b>.PairingGenerationData.PrintFiles ) {
+129:      print_initial_pairings(legs, costs,  <b><font color="#8A2BE2">"initial_pairings.dat"</font></b>);
+130:    }     
+131:    
+132:    <b><font color="#007D00">///</font></b>
+133:    <b><font color="#007D00">/// main loop stuff</font></b>
+134:    <b><font color="EA7D00">var</font></b> lastLPObjective = -1;
+135:    <b><font color="EA7D00">var</font></b> currentLPObjective = 999999999;
+136:    <b><font color="EA7D00">var</font></b> lastDualHash     = -1;
+137:    <b><font color="EA7D00">var</font></b> currentDualHash  = 999999999;
+138:    <b><font color="EA7D00">var</font></b> nbIterations = 0;
+139:    <b><font color="EA7D00">var</font></b> MAX_NB_ITERATIONS = 30;
+140:    <b><font color="EA7D00">var</font></b> NB_RANDOM_COLUMNS = <b><font color="#0000FF">thisOplModel</font></b>.PairingGenerationData.NumberOfRandomColumns;
+141:    <b><font color="EA7D00">var</font></b> lpCoveringSource  = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"LPCovering.mod"</font></b>);
+142:    <b><font color="EA7D00">var</font></b> lpCoveringDef     = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(lpCoveringSource);
+143:    <b><font color="EA7D00">var</font></b> mipCoveringSource = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"MIPCovering.mod"</font></b>);
+144:    <b><font color="EA7D00">var</font></b> mipCoveringDef    = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(mipCoveringSource);
+145:    
+146:    <b><font color="EA7D00">var</font></b> generateRandomSource = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"GenerateOnePairingWithMaxCost.mod"</font></b>);
+147:    <b><font color="EA7D00">var</font></b> generateRandomDef    = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(generateRandomSource);
+148:   
+149:    <b><font color="EA7D00">var</font></b> currentGenCost    = 999999999;
+150:    <b><font color="EA7D00">var</font></b> currentGenLength  = 8;
+151:    <b><font color="EA7D00">var</font></b> randomCP = <b><font color="EA7D00">new</font></b> IloCP;
+152:    randomCP.param.Workers = 1; <b><font color="#007D00">// why???</font></b>
+153:     
+154:    writeln(<b><font color="#8A2BE2">"* starting main loop, max iters="</font></b>, MAX_NB_ITERATIONS, <b><font color="#8A2BE2">", #random="</font></b>, NB_RANDOM_COLUMNS);
+155:    <b><font color="EA7D00">while</font></b> (nbIterations &lt;= MAX_NB_ITERATIONS ) {
+156:      ++nbIterations;
+157:      <b><font color="#007D00">// the LP covering model.</font></b>
+158:      <b><font color="EA7D00">var</font></b> lpCoveringCplex  = <b><font color="EA7D00">new</font></b> IloCplex();  
+159:      <b><font color="EA7D00">var</font></b> lpCoveringModel  = <b><font color="EA7D00">new</font></b> IloOplModel(lpCoveringDef, lpCoveringCplex);
+160:      lpCoveringModel.addDataSource(masterDataSource);
+161:      lpCoveringModel.addDataSource(generationDataSource);
+162:      
+163:      <b><font color="EA7D00">var</font></b> dynamicPairingData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+164:      dynamicPairingData.pairingLegs = legs;
+165:      dynamicPairingData.pairingCosts = costs;
+166:      lpCoveringModel.addDataSource(dynamicPairingData);
+167:    
+168:      lpCoveringModel.generate();
+169:    
+170:      <b><font color="#007D00">//writeln("-- starting lp covering model solve");</font></b>
+171:      <b><font color="EA7D00">var</font></b> lpCoveringOk = lpCoveringCplex.solve();
+172:      <b><font color="EA7D00">if</font></b> ( !lpCoveringOk ) {
+173:        writeln(<b><font color="#8A2BE2">"ERROR: lp covering model fails, stopping"</font></b>);
+174:        retcode = -2;    
+175:        <b><font color="EA7D00">break</font></b>;
+176:          
+177:      }
+178:      writeln(nbIterations, <b><font color="#8A2BE2">"&gt; LP covering finds objective of: "</font></b>, lpCoveringCplex.getObjValue());
+179:      lpCoveringModel.postProcess();
+180:      
+181:      currentLPObjective = lpCoveringCplex.getObjValue();
+182:      currentDualHash    = lpCoveringModel.dualHash;
+183:      <b><font color="EA7D00">if</font></b> ( lastDualHash &gt;= 0) {
+184:        <b><font color="#007D00">//var delta = Opl.abs(currentLPObjective-lastLPObjective);</font></b>
+185:        <b><font color="EA7D00">var</font></b> delta = Opl.abs(currentDualHash-lastDualHash);
+186:        <b><font color="EA7D00">if</font></b> ( delta &lt;= 0.001) {
+187:          <b><font color="#007D00">//writeln("* LP covering does not improve, stopping, delta=", delta);</font></b>
+188:          writeln(<b><font color="#8A2BE2">"* LP covering does not improve, stopping..."</font></b>);
+189:          <b><font color="EA7D00">break</font></b>;     
+190:        };
+191:      }
+192:      
+193:      <b><font color="#007D00">///</font></b>
+194:      <b><font color="#007D00">/// generate best pairing.</font></b>
+195: 
+196:      <b><font color="EA7D00">var</font></b> bestPairingCP = <b><font color="EA7D00">new</font></b> IloCP();
+197:      bestPairingCP.param.branchLimit = <b><font color="#0000FF">thisOplModel</font></b>.PairingGenerationData.SlaveModelBranchLimit;
+198:      bestPairingCP.param.Workers = 1;
+199:      <b><font color="EA7D00">var</font></b> bestPairingSource = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"GenerateBestPairing.mod"</font></b>);
+200:      <b><font color="EA7D00">var</font></b> bestPairingDef    = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(bestPairingSource);
+201:      <b><font color="EA7D00">var</font></b> bestPairingModel  = <b><font color="EA7D00">new</font></b> IloOplModel(bestPairingDef, bestPairingCP);
+202:      <b><font color="#007D00">/// master data</font></b>
+203:      bestPairingModel.addDataSource(masterDataSource);
+204:      bestPairingModel.addDataSource(generationDataSource);
+205:      <b><font color="#007D00">/// dynamic data</font></b>
+206:      <b><font color="EA7D00">var</font></b> dynamicBestPairingData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+207:      dynamicBestPairingData.coverct_duals = lpCoveringModel.coverCtDuals;
+208:      <b><font color="#007D00">//for (var d in lpCoveringModel.coverCtDuals) {</font></b>
+209:      <b><font color="#007D00">//   writeln (d.flightIndex, " = ", d.coverCtDual);         </font></b>
+210:      <b><font color="#007D00">//}</font></b>
+211:      bestPairingModel.addDataSource(dynamicBestPairingData);
+212:    
+213:      bestPairingModel.generate();
+214:    
+215:      <b><font color="EA7D00">var</font></b> bestOK = bestPairingCP.solve();
+216:      <b><font color="EA7D00">if</font></b> ( !bestOK ) {
+217:        writeln(<b><font color="#8A2BE2">"** ERROR: generation of new column pairing FAILS"</font></b>);
+218:        Opl.fail();
+219:        retcode = -4;
+220:      }
+221:      <b><font color="EA7D00">if</font></b> ( isdebug ) {
+222:        writeln(<b><font color="#8A2BE2">"-- best pairing model succeeds, obj="</font></b>, bestPairingCP.getObjValue());
+223:      }       
+224:      bestPairingModel.postProcess();
+225:      currentGenCost = bestPairingModel.genCost.cost;
+226:      <b><font color="EA7D00">var</font></b> newLegs = bestPairingModel.genLegs;
+227:      currentGenLength = newLegs.size;
+228:      
+229:      <b><font color="EA7D00">var</font></b> newPairingId = <b><font color="#0000FF">thisOplModel</font></b>.pairingCosts.size;
+230:     
+231:    
+232:      <b><font color="#0000FF">thisOplModel</font></b>.pairingCosts.addOnly(newPairingId, currentGenCost);
+233:      <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> l <b><font color="EA7D00">in</font></b> newLegs) {
+234:        <b><font color="#0000FF">thisOplModel</font></b>.pairingLegs.addOnly(newPairingId, l.legRank, l.flightRank); 
+235:      }
+236:      <b><font color="#007D00">//writeln("-- new number of pairings: ", thisOplModel.pairingCosts.size);</font></b>
+237:      
+238:      <b><font color="#007D00">/// try adding random columns.</font></b>
+239:      <b><font color="#007D00">//randomCP.clear();</font></b>
+240:      <b><font color="EA7D00">var</font></b> generateRandomPairingModel = <b><font color="EA7D00">new</font></b> IloOplModel(generateRandomDef, randomCP);
+241:      generateRandomPairingModel.addDataSource(masterDataSource);
+242:      generateRandomPairingModel.addDataSource(generationDataSource);
+243:      <b><font color="#007D00">// dynamic data</font></b>
+244:      <b><font color="EA7D00">var</font></b> generateRandomData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+245:      generateRandomData.tabuLength = currentGenLength;
+246:      generateRandomData.costMax = currentGenCost;
+247:      generateRandomData.forcedCoveredFlights = <b><font color="#0000FF">thisOplModel</font></b>.bestCoveredFlights;
+248:      generateRandomPairingModel.addDataSource(generateRandomData);
+249:      generateRandomPairingModel.generate();
+250:      <b><font color="EA7D00">var</font></b> nbRandom = 0;
+251:      <b><font color="EA7D00">while</font></b> ( nbRandom &lt;=  NB_RANDOM_COLUMNS) {
+252:         randomCP.param.RandomSeed = nbRandom;
+253:         <b><font color="EA7D00">if</font></b> ( randomCP.solve() ) {
+254:            generateRandomPairingModel.postProcess();
+255:            <b><font color="#007D00">// extract</font></b>
+256:            <b><font color="EA7D00">var</font></b> randomCost = generateRandomPairingModel.genCost.cost;
+257:            <b><font color="EA7D00">var</font></b> randomLegs = generateRandomPairingModel.genLegs;
+258:            
+259:            <b><font color="EA7D00">var</font></b> newPairingId = <b><font color="#0000FF">thisOplModel</font></b>.pairingCosts.size;
+260:            <b><font color="#0000FF">thisOplModel</font></b>.pairingCosts.addOnly(newPairingId, randomCost);
+261:            <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> rl <b><font color="EA7D00">in</font></b> randomLegs) {
+262:              <b><font color="#0000FF">thisOplModel</font></b>.pairingLegs.addOnly(newPairingId, rl.legRank, rl.flightRank); 
+263:            }  
+264:            ++nbRandom;           
+265:         } <b><font color="EA7D00">else</font></b> {
+266:           <b><font color="EA7D00">break</font></b>;            
+267:         }       
+268:       }
+269:       <b><font color="#007D00">//writeln("-- new number of pairings: ", thisOplModel.pairingCosts.size, ", #random=", nbRandom);</font></b>
+270:      
+271:      lastLPObjective = currentLPObjective;
+272:      lastDualHash    = currentDualHash;
+273:      <b><font color="#007D00">// twist again...</font></b>
+274:    }
+275:    <b><font color="#007D00">///now run the MIP covering stuff</font></b>
+276:    <b><font color="EA7D00">var</font></b> mipCoveringCplex  = <b><font color="EA7D00">new</font></b> IloCplex();  
+277:    <b><font color="EA7D00">var</font></b> mipCoveringModel  = <b><font color="EA7D00">new</font></b> IloOplModel(mipCoveringDef, mipCoveringCplex);
+278:    mipCoveringModel.addDataSource(masterDataSource);
+279:    mipCoveringModel.addDataSource(generationDataSource);
+280:      
+281:    <b><font color="EA7D00">var</font></b> dynamicPairingData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+282:    dynamicPairingData.pairingLegs = legs;
+283:    dynamicPairingData.pairingCosts = costs;
+284:    mipCoveringModel.addDataSource(dynamicPairingData);
+285:    
+286:    mipCoveringModel.generate();
+287:    <b><font color="EA7D00">var</font></b> mipOk = mipCoveringCplex.solve();
+288:    <b><font color="EA7D00">if</font></b> ( !mipOk ) {
+289:       writeln(<b><font color="#8A2BE2">"ERROR: MIP covering model fails, stop"</font></b>);
+290:       retcode = -8;
+291:       Opl.fail(); 
+292:    } <b><font color="EA7D00">else</font></b> {
+293:      writeln(<b><font color="#8A2BE2">"* final MIP covering: "</font></b>, mipCoveringCplex.getObjValue());
+294:      mipCoveringModel.postProcess();
+295:    }
+296:    
+297:    
+298:    <b><font color="#007D00">// return code is 0 if ok, else negative....</font></b>
+299:    writeln(<b><font color="#8A2BE2">"* main script returns with code: "</font></b>, retcode)
+300:    retcode; 
+301:  }
+</tt></pre>

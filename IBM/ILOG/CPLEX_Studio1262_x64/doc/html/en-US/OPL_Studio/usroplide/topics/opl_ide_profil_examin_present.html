@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Presenting the scalable run configuration" />
+<meta name="abstract" content="Discusses the model scalableWarehouse.mod." />
+<meta name="Description" content="Discusses the model scalableWarehouse.mod." />
+<meta name="DC.subject" content="profiling model execution, scalable warehouse example, examples, scalable warehouse, warehouse example, scalableWarehouse.mod, model for the warehouse problem, files, scalableWarehouse example, code samples, scalableWarehouse.mod" />
+<meta name="keywords" content="profiling model execution, scalable warehouse example, examples, scalable warehouse, warehouse example, scalableWarehouse.mod, model for the warehouse problem, files, scalableWarehouse example, code samples, scalableWarehouse.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_profil_examin.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usroplide.uss_ide_profiling.139344" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_profil_examin.html" />
+<title>Presenting the scalable run configuration</title>
+</head>
+<body role="main" id="usroplide.uss_ide_profiling.139344">
+<h1 class="title topictitle1">Presenting the scalable run configuration</h1>
+<div class="body"><p class="shortdesc">Discusses the model <samp class="ph codeph">scalableWarehouse.mod</samp>.</p>
+<p class="p">The warehouse location model is described in detail in <a class="xref" href="../../usroplexamples/topics/opl_mp_examples_warehouse.html" title="Describes examples that involve warehouse location and planning, a typical discrete optimization problem; that is, an application of integer programming.">Warehouse location problems</a> in the <em class="ph i">Samples</em> manual.
+It includes a run configuration <span class="ph uicontrol">Scalable data</span> defined
+by the model <a class="xref" href="../../../examples/html/opl/warehouse/scalableWarehouse.mod.html">scalableWarehouse.mod</a> supplied
+with the <samp class="ph codeph">warehouse</samp> project at the following
+location:</p>
+<p class="p"> <samp class="ph codeph">&lt;Install_dir&gt;\opl\examples\opl\warehouse\</samp> </p>
+<p class="p">where <samp class="ph codeph">&lt;Install_dir&gt;</samp> is
+your installation directory.</p>
+<p class="p">There is no data file in that configuration. The scalable data is declared in the
+<samp class="ph codeph">scalableWarehouse.mod</samp> model, as shown below.</p>
+<p class="p">Use the <span class="ph menucascade"><span class="ph uicontrol">File</span> &gt; <span class="ph uicontrol">New</span> &gt; <span class="ph uicontrol">Example</span></span> menu command to open the <span class="ph uicontrol">warehouse</span> example.</p>
+<p class="p">The IDE displays the project in the OPL Projects Navigator.
+Open the model in the editing area.</p>
+<div class="example" id="usroplide.uss_ide_profiling.139344__usroplide.uss_ide_profiling.140605"><h2 class="title sectiontitle">Model of the scalableWarehouse example (<samp class="ph codeph">scalableWarehouse.mod</samp>)</h2><pre class="pre codeblock"><code>int Fixed        = 10;
+int NbWarehouses = 50;
+int NbStores     = 200;
+
+assert( NbStores &gt; NbWarehouses );
+
+range Warehouses = 1..NbWarehouses;
+range Stores     = 1..NbStores;
+int Capacity[w in Warehouses] = 
+  NbStores div NbWarehouses + 
+  w % ( NbStores div NbWarehouses );
+int SupplyCost[s in Stores][w in Warehouses] = 
+  1 + ( ( s + 10 * w ) % 100 );
+dvar int Open[Warehouses] in 0..1;
+dvar float Supply[Stores][Warehouses] in 0..1;
+dexpr int TotalFixedCost = sum( w in Warehouses ) Fixed * Open[w];
+dexpr float TotalSupplyCost = sum( w in Warehouses, s in Stores )  SupplyCost[s][w] * Supply[s][w];
+minimize TotalFixedCost + TotalSupplyCost;
+
+subject to {
+  forall( s in Stores )
+    ctStoreHasOneWarehouse: 
+      sum( w in Warehouses ) 
+        Supply[s][w] == 1;
+  forall( w in Warehouses )
+    ctOpen:
+      sum( s in Stores ) 
+        Supply[s][w] &lt;= Open[w] * Capacity[w];
+}
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_profil_examin.html" title="In addition to time and memory consumption, the Profiler table displays the extraction and solving phases of the model execution. This part of the tutorial uses the scalable configuration of the warehouse example to demonstrate this.">Examining model extraction and solving</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,214 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+002: <b><font color="#007D00">// File: CustomDataSource.cs</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">//-------------------------------------------------------------- -*- C# -*-</font></b>
+015: <b><font color="#007D00">// C# version of customdatasource.cpp of OPL distrib</font></b>
+016: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+017: using System;
+018: using ILOG.Concert;
+019: using ILOG.CPLEX;
+020: using ILOG.OPL;
+021: 
+022: namespace CustomDataSource
+023: {
+024:     <b><font color="EA7D00">class</font></b> Warehouse
+025:     {
+026:         <b><font color="#007D00">/// &lt;summary&gt;</font></b>
+027:         <b><font color="#007D00">/// The main entry point for the application.</font></b>
+028:         <b><font color="#007D00">/// &lt;/summary&gt;</font></b>
+029:         [STAThread]
+030:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">void</font></b> Main(string[] args)
+031:         {
+032:             <b><font color="#0000FF">int</font></b> status = 127;
+033:             <b><font color="EA7D00">const</font></b> string DATADIR = <b><font color="#8A2BE2">"../.."</font></b>;
+034:             <b><font color="EA7D00">try</font></b>
+035:             {
+036:                 OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+037:                 OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+038:                 OplErrorHandler errHandler = oplF.CreateOplErrorHandler(Console.Out);
+039:                 OplModelSource modelSource = oplF.CreateOplModelSource(DATADIR + <b><font color="#8A2BE2">"/customDataSource.mod"</font></b>);
+040:                 OplSettings settings = oplF.CreateOplSettings(errHandler);
+041:                 OplModelDefinition def = oplF.CreateOplModelDefinition(modelSource, settings);
+042:                 Cplex cplex = oplF.CreateCplex();
+043:                 OplModel opl = oplF.CreateOplModel(def, cplex);
+044:                 OplDataSource dataSource = <b><font color="EA7D00">new</font></b> MyCustomDataSource(oplF);
+045:                 opl.AddDataSource(dataSource);
+046:                 opl.Generate();
+047:                 oplF.End();
+048:                 status = 0;
+049:             }
+050:             <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+051:             {
+052:                 Console.WriteLine(ex.Message);
+053:                 status = 2;
+054:             }
+055:             <b><font color="EA7D00">catch</font></b> (ILOG.Concert.Exception ex)
+056:             {
+057:                 Console.WriteLine(ex.Message);
+058:                 status = 3;
+059:             }
+060:             <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+061:             {
+062:                 Console.WriteLine(ex.Message);
+063:                 status = 4;
+064:             }
+065: 
+066:             Environment.ExitCode = status;
+067: 
+068:             Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>);
+069:             Console.ReadLine();
+070:         }
+071: 
+072: 
+073:         internal <b><font color="EA7D00">class</font></b> MyCustomDataSource : CustomOplDataSource
+074:         {
+075:             internal MyCustomDataSource(OplFactory oplF)
+076:                 : base(oplF)
+077:             {
+078:             }
+079:             <b><font color="EA7D00">public</font></b> override <b><font color="#0000FF">void</font></b> CustomRead()
+080:             {
+081:                 OplDataHandler handler = DataHandler;
+082: 
+083:                 <b><font color="#007D00">// initialize the int 'simpleInt'</font></b>
+084:                 handler.StartElement(<b><font color="#8A2BE2">"anInt"</font></b>);
+085:                 handler.AddIntItem(3);
+086:                 handler.EndElement();
+087: 
+088:                 <b><font color="#007D00">// initialize the int array 'simpleIntArray'</font></b>
+089:                 handler.StartElement(<b><font color="#8A2BE2">"anIntArray"</font></b>);
+090:                 handler.StartArray();
+091:                 handler.AddIntItem(1);
+092:                 handler.AddIntItem(2);
+093:                 handler.AddIntItem(3);
+094:                 handler.EndArray();
+095:                 handler.EndElement();
+096: 
+097:                 <b><font color="#007D00">// initialize int array indexed by float 'anArrayIndexedByFloat'</font></b>
+098:                 handler.StartElement(<b><font color="#8A2BE2">"anArrayIndexedByFloat"</font></b>);
+099:                 handler.StartIndexedArray();
+100:                 handler.SetItemNumIndex(2.0);
+101:                 handler.AddIntItem(1);
+102:                 handler.SetItemNumIndex(2.5);
+103:                 handler.AddIntItem(2);
+104:                 handler.SetItemNumIndex(1.0);
+105:                 handler.AddIntItem(3);
+106:                 handler.SetItemNumIndex(1.5);
+107:                 handler.AddIntItem(4);
+108:                 handler.EndIndexedArray();
+109:                 handler.EndElement();
+110: 
+111:                 <b><font color="#007D00">// initialize int array indexed by string 'anArrayIndexedByString'</font></b>
+112:                 handler.StartElement(<b><font color="#8A2BE2">"anArrayIndexedByString"</font></b>);
+113:                 handler.StartIndexedArray();
+114:                 handler.SetItemStringIndex(<b><font color="#8A2BE2">"idx1"</font></b>);
+115:                 handler.AddIntItem(1);
+116:                 handler.SetItemStringIndex(<b><font color="#8A2BE2">"idx2"</font></b>);
+117:                 handler.AddIntItem(2);
+118:                 handler.EndIndexedArray();
+119:                 handler.EndElement();
+120: 
+121:                 <b><font color="#007D00">// initialize a tuple in the order the components are declared</font></b>
+122:                 handler.StartElement(<b><font color="#8A2BE2">"aTuple"</font></b>);
+123:                 handler.StartTuple();
+124:                 handler.AddIntItem(1);
+125:                 handler.AddNumItem(2.3);
+126:                 handler.AddStringItem(<b><font color="#8A2BE2">"not named tuple"</font></b>);
+127:                 handler.EndTuple();
+128:                 handler.EndElement();
+129: 
+130:                 <b><font color="#007D00">// initialize a tuple using tuple component names.</font></b>
+131:                 handler.StartElement(<b><font color="#8A2BE2">"aNamedTuple"</font></b>);
+132:                 handler.StartNamedTuple();
+133:                 handler.SetItemName(<b><font color="#8A2BE2">"f"</font></b>);
+134:                 handler.AddNumItem(3.45);
+135:                 handler.SetItemName(<b><font color="#8A2BE2">"s"</font></b>);
+136:                 handler.AddStringItem(<b><font color="#8A2BE2">"named tuple"</font></b>);
+137:                 handler.SetItemName(<b><font color="#8A2BE2">"i"</font></b>);
+138:                 handler.AddIntItem(99);
+139:                 handler.EndNamedTuple();
+140:                 handler.EndElement();
+141: 
+142:                 <b><font color="#007D00">// initialize the tuple set 'simpleTupleSet'</font></b>
+143:                 handler.StartElement(<b><font color="#8A2BE2">"aTupleSet"</font></b>);
+144:                 handler.StartSet();
+145:                 <b><font color="#007D00">// first tuple</font></b>
+146:                 handler.StartTuple();
+147:                 handler.AddIntItem(1);
+148:                 handler.AddNumItem(2.5);
+149:                 handler.AddStringItem(<b><font color="#8A2BE2">"a"</font></b>);
+150:                 handler.EndTuple();
+151:                 <b><font color="#007D00">// second element</font></b>
+152:                 handler.StartTuple();
+153:                 handler.AddIntItem(3);
+154:                 handler.AddNumItem(4.1);
+155:                 handler.AddStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+156:                 handler.EndTuple();
+157:                 handler.EndSet();
+158:                 handler.EndElement();
+159: 
+160:                 <b><font color="#007D00">// initialize element 3 and 2 of the tuple array 'simpleTupleArray' in that particular order</font></b>
+161:                 handler.StartElement(<b><font color="#8A2BE2">"aTupleArray"</font></b>);
+162:                 handler.StartIndexedArray();
+163:                 <b><font color="#007D00">// initialize 3rd cell</font></b>
+164:                 handler.SetItemIntIndex(3);
+165:                 handler.StartTuple();
+166:                 handler.AddIntItem(1);
+167:                 handler.AddNumItem(2.5);
+168:                 handler.AddStringItem(<b><font color="#8A2BE2">"a"</font></b>);
+169:                 handler.EndTuple();
+170:                 <b><font color="#007D00">// initialize second cell</font></b>
+171:                 handler.SetItemIntIndex(2);
+172:                 handler.StartTuple();
+173:                 handler.AddIntItem(3);
+174:                 handler.AddNumItem(4.1);
+175:                 handler.AddStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+176:                 handler.EndTuple();
+177:                 handler.EndIndexedArray();
+178:                 handler.EndElement();
+179: 
+180:                 <b><font color="#007D00">// initialize int array indexed by tuple set 'anArrayIndexedByTuple'</font></b>
+181:                 handler.StartElement(<b><font color="#8A2BE2">"anArrayIndexedByTuple"</font></b>);
+182:                 handler.StartIndexedArray();
+183:                 handler.StartItemTupleIndex();
+184:                 handler.AddIntItem(3);
+185:                 handler.AddNumItem(4.1);
+186:                 handler.AddStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+187:                 handler.EndItemTupleIndex();
+188:                 handler.AddIntItem(1);
+189:                 handler.EndIndexedArray();
+190:                 handler.EndElement();
+191: 
+192:                 <b><font color="#007D00">// initialize a 2-dimension int array 'a2DIntArray'</font></b>
+193:                 handler.StartElement(<b><font color="#8A2BE2">"a2DIntArray"</font></b>);
+194:                 handler.StartArray();
+195:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 1; i &lt;= 2; i++)
+196:                 {
+197:                     handler.StartArray();
+198:                     <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j = 1; j &lt;= 3; j++)
+199:                         handler.AddIntItem(i * 10 + j);
+200:                     handler.EndArray();
+201:                 }
+202:                 handler.EndArray();
+203:                 handler.EndElement();
+204: 
+205:             }
+206:         }
+207:     }
+208: }
+209: 
+</tt></pre>

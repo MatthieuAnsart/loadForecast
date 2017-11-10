@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="A typical integer program: the knapsack problem" />
+<meta name="abstract" content="Presents the model and data files." />
+<meta name="Description" content="Presents the model and data files." />
+<meta name="DC.subject" content="code samples, knapsack.mod, knapsack.dat" />
+<meta name="keywords" content="code samples, knapsack.mod, knapsack.dat" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_IP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_shortTour.1082101" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_IP.html" />
+<title>A typical integer program: the knapsack problem</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_shortTour.1082101">
+<h1 class="title topictitle1">A typical integer program: the knapsack problem</h1>
+<div class="body"><p class="shortdesc">Presents the model and data files.</p>
+<p class="p">A typical example of integer programs is the knapsack problem,
+which can be intuitively understood as follows. We have a knapsack
+with a fixed capacity (an integer) and a number of items. Each item
+has an associated weight (an integer) and an associated value (another
+integer). The problem consists of filling the knapsack without exceeding
+its capacity, while maximizing the overall value of its contents.
+A multi-knapsack problem is similar to the knapsack problem, except
+that there are multiple features for the object (e.g., weight and
+volume) and multiple capacity constraints. The example below, <samp class="ph codeph">knapsack.mod</samp>,
+depicts a model for the multi-knapsack problem, while <a class="xref" href="opl_languser_shortTour_IP_typical.html#usropllangtut.uss_langtut_shortTour.1082101__usropllangtut.uss_langtut_shortTour.1055687">Data for the multi-knapsack problem (knapsack.dat)</a> describes
+an instance of the problem.</p>
+<div class="example" id="usropllangtut.uss_langtut_shortTour.1082101__usropllangtut.uss_langtut_shortTour.1005922"><h2 class="title sectiontitle">A
+multi-knapsack model (<span class="ph filepath">knapsack.mod</span>)</h2><pre class="pre codeblock"><code>int NbItems = ...;
+int NbResources = ...;
+range Items = 1..NbItems;
+range Resources = 1..NbResources;
+int Capacity[Resources] = ...;
+int Value[Items] = ...;
+int Use[Resources][Items] = ...;
+int MaxValue = max(r in Resources) Capacity[r];
+
+
+dvar int Take[Items] in 0..MaxValue;
+
+maximize
+  sum(i in Items) Value[i] * Take[i];
+  
+subject to {
+  forall( r in Resources )
+    ct:
+      sum( i in Items ) 
+        Use[r][i] * Take[i] &lt;= Capacity[r];
+}</code></pre>
+</div>
+<p class="p">This model has several novel features. It represents items and
+resources not by string sets but rather by integers. In other words,
+the items (respectively the resources) are represented by successive
+integers starting at 1. The instructions </p>
+<pre class="pre codeblock"><code>int NbItems = ...;
+int NbResources = ...;
+range Items = 1..NbItems;
+range Resources = 1..NbResources;</code></pre>
+<p class="p">declare the number of items and the number of resources, as well
+as two ranges, <samp class="ph codeph">Items</samp> and <samp class="ph codeph">Resources</samp>,
+to represent the set of items and the set of resources.</p>
+<p class="p">The next three instructions </p>
+<pre class="pre codeblock"><code>int Capacity[Resources] = ...;
+int Value[Items] = ...;
+int Use[Resources][Items] = ...;</code></pre>
+<p class="p">are similar to the data declarations presented in <a class="xref" href="opl_languser_shortTour_LP_elements.html#usropllangtut.uss_langtut_shortTour.1005545">Data declarations</a> and
+the subsequent sections. The array <samp class="ph codeph">Capacity</samp> represents
+the capacity of the resources, the array <samp class="ph codeph">Value</samp> the
+value of each item, and <samp class="ph codeph">Use[r][i]</samp> the use of resource <samp class="ph codeph">r</samp> by
+item <samp class="ph codeph">i</samp>. </p>
+<p class="p">The next instruction </p>
+<pre class="pre codeblock"><code>int MaxValue = max(r in Resources) Capacity[r];</code></pre>
+<p class="p">is more interesting. It declares an integer <samp class="ph codeph">MaxValue</samp> whose
+value is given by an expression. OPL and IBM ILOG Script have many
+features for computing and preprocessing data, since this is fundamental
+in simplifying and improving the efficiency of many models. </p>
+<p class="p">The instruction</p>
+<pre class="pre codeblock"><code>
+dvar int Take[Items] in 0..MaxValue;</code></pre>
+<p class="p">declares the problem variables: <samp class="ph codeph">take[Items]</samp> represents
+the number of times item <samp class="ph codeph">i</samp> is selected in the solution.
+The variable is of type integer and is restricted to range in <samp class="ph codeph">0..MaxValue</samp>. </p>
+<p class="p">The rest of the statement is rather standard and should raise no
+difficulty. <a class="xref" href="opl_languser_shortTour_IP_typical.html#usropllangtut.uss_langtut_shortTour.1082101__usropllangtut.uss_langtut_shortTour.1055687">Data for the multi-knapsack problem (knapsack.dat)</a> describes
+an instance of the problem. </p>
+<div class="example" id="usropllangtut.uss_langtut_shortTour.1082101__usropllangtut.uss_langtut_shortTour.1055687"><h2 class="title sectiontitle">Data
+for the multi-knapsack problem (<span class="ph filepath">knapsack.dat</span>)</h2><pre class="pre codeblock"><code>NbResources = 7;
+NbItems = 12;
+Capacity = [ 18209, 7692, 1333, 924, 26638, 61188, 13360 ];
+Value = [ 96, 76, 56, 11, 86, 10, 66, 86, 83, 12, 9, 81 ];
+Use = [
+      [ 19,   1,  10,  1,   1,  14, 152, 11,  1,   1, 1, 1 ],
+      [  0,   4,  53,  0,   0,  80,   0,  4,  5,   0, 0, 0 ],
+      [  4, 660,   3,  0,  30,   0,   3,  0,  4,  90, 0, 0],
+      [  7,   0,  18,  6, 770, 330,   7,  0,  0,   6, 0, 0],
+      [  0,  20,   0,  4,  52,   3,   0,  0,  0,   5, 4, 0],
+      [  0,   0,  40, 70,   4,  63,   0,  0, 60,   0, 4, 0],
+      [  0,  32,   0,  0,   0,   5,   0,  3,  0, 660, 0, 9]];</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_shortTour.1082101__usropllangtut.uss_langtut_shortTour.1059923"><h2 class="title sectiontitle">A
+solution to knapsack.mod</h2><p class="p">For
+the instance of the problem specified in <a class="xref" href="opl_languser_shortTour_IP_typical.html#usropllangtut.uss_langtut_shortTour.1082101__usropllangtut.uss_langtut_shortTour.1055687">Data for the multi-knapsack problem (knapsack.dat)</a>,
+here are the final solution and the solutions that satisfy all the
+constraints but are not the best with respect to the objective function:</p>
+<pre class="pre codeblock"><code>Feasible solution with objective 261890.0000:
+  take = [0 0 0 154 0 0 0 912 333 0 6505 1180];
+
+Feasible solution with objective 261916.0000:
+  take = [0 0 0 153 0 0 0 912 333 0 6499 1180];
+
+Final solution with objective 261916.0000:
+  take = [0 0 0 154 0 0 0 913 333 0 6499 1180];</code></pre>
+<p class="p">Although
+integer programs are, in general, substantially harder to solve than
+linear programs, they have also been the topic of intensive investigation.
+OPL recognizes when a statement is an integer programming model and
+uses CPLEX algorithms to solve it.</p>
+<div class="note note"><span class="notetitle">Note:</span> The results of objectives
+may vary, according to the machine and the version of CPLEX used.</div>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_IP.html" title="Explains what integer programming is and describes the knapsack problem.">Integer programming: the knapsack problem</a></div>
+</div>
+</div></body>
+</html>

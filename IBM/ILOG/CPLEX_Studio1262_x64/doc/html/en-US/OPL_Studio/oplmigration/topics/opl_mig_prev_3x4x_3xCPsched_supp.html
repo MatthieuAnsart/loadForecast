@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Support for fine-grained scheduling" />
+<meta name="abstract" content="Provides an overview of the new scheduling features in OPL 6.x." />
+<meta name="Description" content="Provides an overview of the new scheduling features in OPL 6.x." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1204283536952" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched.html" />
+<title>Support for fine-grained scheduling</title>
+</head>
+<body role="main" id="descriptiveTopic1204283536952">
+<h1 class="title topictitle1">Support for fine-grained scheduling</h1>
+<div class="body"><p class="shortdesc">Provides an overview of the new scheduling features in
+OPL 6.x.</p>
+<p class="p">With OPL 6.x, fine-grained scheduling support is being
+reintroduced into OPL. This scheduling support differs from OPL 3.7
+in both modeling and solving. The aspects of the modeling language
+dedicated to fine-grained scheduling have been simplified and made
+more uniform and cohesive. The goals of this effort are: </p>
+<ul class="ul"><li class="li"><p class="p">to make the modeling language easier
+to learn and remember, and</p>
+</li>
+<li class="li"><p class="p">to facilitate the modeling of problems
+where execution alternatives or optional activities are present.</p>
+</li>
+</ul>
+<p class="p">The process of solving these fine-grained scheduling
+problems follows the "automatic search" paradigm of CP Optimizer,
+where a powerful automatic search process solves the problem, reducing
+or obviating the need to code search procedures, as was the case in
+OPL 3.7.  High-level parameters allow aspects of the search engine
+to be controlled.</p>
+<p class="p paragrouptitle">Modeling</p>
+<p class="p">Two sections are provided in the OPL 6.x documentation
+that describe how to model fine-grained scheduling problems in OPL:</p>
+<ul class="ul"><li class="li"><p class="p">The tutorial <a class="xref" href="../../scheduling_gs/topics/opl_gs_scheduling.html" title="With IBM ILOG CPLEX Studio you can develop scheduling models and solve them using the IBM ILOG CP Optimizer engine. This section of the documentation provides a series of tutorials on how to use the scheduling features of CP Optimizer in CPLEX Studio.">Getting Started with Scheduling in CPLEX Studio</a> describes how to build up a model piece by
+piece.</p>
+</li>
+<li class="li"><p class="p">The <a class="xref" href="../../opllangref/topics/opl_langref_scheduling.html" title="Describes how to model scheduling problems in OPL.">Scheduling</a> section in the <em class="ph i">Language Reference Manual</em> is more technical in
+nature, giving formal semantics for each language construct. The main
+aspects of the language are <em class="ph i">interval
+variables</em> (time periods over which some operations
+occur), <em class="ph i">functions</em> (piecewise linear and step-based), <em class="ph i">binary ordering constraints</em> (precedences), <em class="ph i">sequence variables</em> (to represent
+successor and predecessor relations), and <em class="ph i">function expressions</em> (which represent the usage
+of a resource over time).</p>
+<p class="p">These concepts
+are introduced progressively in the <em class="ph i">Getting Started with Scheduling</em> tutorial. </p>
+</li>
+</ul>
+<p class="p">The following models of some classic scheduling problems,
+not mentioned in <em class="ph i">Getting Started with
+Scheduling</em>, are also supplied:</p>
+<ul class="ul"><li class="li"><p class="p"><span class="ph filepath">sched_jobshop</span>: Job-Shop Scheduling Problem</p>
+</li>
+<li class="li"><p class="p"><span class="ph filepath">sched_jobshopflex</span>: Flexible Job-Shop Scheduling Problem</p>
+</li>
+<li class="li"><p class="p"><span class="ph filepath">sched_flowshop</span>: Flow-Shop Scheduling Problem</p>
+</li>
+<li class="li"><p class="p"><span class="ph filepath">sched_rcpsp</span>: Resource-Constrained Project Scheduling Problem</p>
+</li>
+<li class="li"><p class="p"><span class="ph filepath">sched_rcpspmm</span>: Multi-Mode Resource-Constrained Project Scheduling Problem</p>
+</li>
+</ul>
+<p class="p">An additional extremely important aspect of the language
+is that the optionality of an interval variable (and by extension,
+the activities carried out over that interval) is a fundamental part
+of the language. An important characteristic of scheduling problems
+is that activities may be optional and/or there may be alternative
+modes of execution. </p>
+<p class="p">In the language, this is captured by the notion of a
+boolean presence status of each interval. OPL provides constraints
+such as <samp class="ph codeph">alternative</samp> or <samp class="ph codeph">span</samp> which directly exploit the idea of optional intervals. </p>
+<p class="p">These constraints make it considerably easier (compared
+to OPL 3.7) to express complex processes involving alternative modes,
+alternative recipes or hierarchical problems with work breakdown structures.
+ See, for instance, the model for the Multi-Mode Resource-Constrained
+Project Scheduling Problem (<span class="ph filepath">sched_rcpspmm</span>).  The automatic search within CP Optimizer decides (according to
+cost criteria) which optional interval variables will be present in
+the final solution.</p>
+<p class="p paragrouptitle">Search controls</p>
+<p class="p">The inference aspects of the parts of the search engine
+dedicated to structures found in scheduling can be controlled via
+the parameters:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">CumulFunctionInferenceLevel</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">IntervalSequenceInferenceLevel</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">NoOverlapInferenceLevel</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">PrecedenceInferenceLevel</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">StateFunctionInferenceLevel</samp></p>
+</li>
+</ul>
+<p class="p">with available settings of Low, Basic, Medium, and Extended.
+For example, in an <samp class="ph codeph">execute</samp> block before
+the constraints are specified, you can write:</p>
+<div class="p"><pre class="pre codeblock"><code>execute {
+  cp.param.NoOverlapInferenceLevel = "Extended";
+}</code></pre>
+</div>
+<p class="p paragrouptitle">Semantic equivalences between OPL 3.7 and OPL 6.x</p>
+<p class="p">These notes will help you determine whether you can try
+to migrate an existing scheduling application developed in OPL 3.7
+to OPL 6.x and if so, the way in which to do it.  If you are not aware
+of the differences in "core" CP support between OPL 3.7 and OPL 6.x,
+we suggest that you read the OPL <em class="ph i">Release
+Notes</em> for those versions before beginning any migration
+effort.</p>
+<p class="p">The notes here describe equivalent models in OPL 3.7
+and OPL 6.x, which should help you to migrate your OPL 3.7 model to
+OPL 6.x.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched.html" title="Provides a quick-reference list of the changes you need to make to an existing OPL 3.x model that uses CP Scheduling for it to be compatible with OPL 6.x.">Migration from OPL 3.x (CP Scheduling projects)</a></div>
+</div>
+</div></body>
+</html>

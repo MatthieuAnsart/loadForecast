@@ -1,0 +1,320 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloSemiContVar</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert.cplex/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloSemiContVar.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloSemiContVar</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/iloexpression.h</span></div><div><img
+                src="IloSemiContVar.png" border="0"
+                usemap="#svg_map_IloSemiContVar"
+                    alt="Map of IloSemiContVar"><map
+                        name="svg_map_IloSemiContVar"><area
+                        href="../classes/IloSemiContVar.html"
+                        shape="rect" alt="IloSemiContVar"
+                        coords="10.0,92.9072265625,91.0,110.54296875" /><area
+                        href="../classes/IloSemiContVar.html"
+                        shape="rect" alt="IloSemiContVar"
+                        coords="10.0,92.9072265625,91.0,110.54296875" /><area
+                        href="../classes/IloNumVar.html" shape="rect"
+                        alt="IloNumVar"
+                        coords="60.5,65.271484375,141.5,82.9072265625" /><area
+                        href="../classes/IloNumExprArg.html"
+                        shape="rect" alt="IloNumExprArg"
+                        coords="111.0,37.6357421875,192.0,55.271484375" /><area
+                        href="../classes/IloExtractable.html"
+                        shape="rect" alt="IloExtractable"
+            coords="161.5,10.0,242.5,27.6357421875" /></map></img></div>
+For IBM ILOG CPLEX: instance represents a constrained semicontinuous variable.
+    <div
+                        class="description"><p>An instance of this class represents a constrained semicontinuous variable in a
+ Concert Technology model. Semicontinuous variables derive from
+ <code>IloNumVar</code>, the class of numeric variables. </p><p>A semicontinuous variable may be 0 (zero) or it may take a value within
+ an interval defined by its semicontinuous lower and upper
+ bound. Conventionally, semicontinuous variables are defined as
+ floating-point variables, but you can designate an instance of
+ <code>IloSemiContVar</code> as integer by using the type specification it
+ inherits from <code><a
+                href="../classes/IloNumVar.html">IloNumVar</a></code>. In that case,
+ Concert Technology will impose an integrality constraint on the
+ semicontinuous variable for you, thus further restricting the feasible set
+ of values to 0 (zero) and the integer values in the interval defined by the
+ semicontinuous lower and upper bound. The semi-continuous lower bound (sclb) 
+ must be greater than or equal to 0 (zero). An attempt to use a negative 
+ value for the semi-continuous lower bound (sclb) will result in that 
+ bound being treated as 0 (zero). </p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                        class="noteText">When numeric bounds are given to an integer variable (an instance of
+ <code>IloIntVar</code> or
+ <code>IloNumVar</code> with <code>Type = Int</code>)
+ in the constructors or via a modifier
+ (<code>setUB</code>, <code>setLB</code>,
+ <code>setBounds</code>), they are inwardly rounded
+ to an integer value. <code>LB</code>
+ is rounded up and <code>UB</code> is rounded down.</div></div><p>In an instance of <code><a
+                href="../classes/IloNumVar.html">IloNumVar</a></code>,
+ <code>lb</code> denotes the lower bound of the variable, and <code>ub</code>
+ denotes its upper bound.  In an instance of the derived class
+ <code>IloSemiContVar</code>, <code>sclb</code> denotes the semicontinuous
+ lower bound.</p><p>In formal terms, if <code>lb &lt;= 0</code>, then a semicontinuous
+ variable is a numeric variable with the feasible set of <code>{0, [sclb,
+ ub]}</code>, where <code>0 &lt; sclb &lt; ub</code>; otherwise, for other
+ values of <code>lb</code>, the feasible set of a semicontinuous variable is
+ the intersection of the interval <code>[lb, ub]</code> with the set
+ <code>{0, [sclb, ub]}</code>. The semicontinuous lower bound
+ <code>sclb</code> may differ from the lower bound of an ordinary numeric
+ variable in that the semicontinuous variable is restricted to the
+ semicontinuous region. For example, the table below shows you the
+ bounds of a semicontinuous variable and the corresponding feasible
+ region. </p><p><strong>Examples of bounds on semicontinuous variables and their
+ feasible regions</strong></p><table
+                    border="1"><tr><th>These conditions </th><th>define these feasible regions </th></tr><tr><td><code>lb == ub &lt; sclb</code></td><td><code>{0}</code> if <code>lb==ub==0</code> or empty set if
+ <code>lb==ub!=0</code></td></tr><tr><td><code>lb &lt;= 0 &lt; sclb &lt; ub</code></td><td><code>{0, [sclb, ub]}</code></td></tr><tr><td><code>0  &lt; lb &lt; sclb &lt; ub</code></td><td><code>[sclb, ub]</code></td></tr><tr><td><code>0  &lt; sclb &lt; lb &lt; ub</code></td><td><code>[lb, ub]</code></td></tr></table><p>Most member functions in this class contain <code>assert</code>
+ statements. For an explanation of the macro <code>NDEBUG</code> (a way to
+ turn on or turn off these <code>assert</code> statements), see the concept
+ <a
+            href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+            href="../classes/IloNumVar.html">IloNumVar</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloSemiContVarI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSemiContVar.html#method_getImpl">getImpl</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSemiContVar.html#method_getSemiContLB">getSemiContLB</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSemiContVar.html#method_IloSemiContVar">IloSemiContVar</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSemiContVar.html#method_IloSemiContVar">IloSemiContVar</a>(IloSemiContVarI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSemiContVar.html#method_IloSemiContVar">IloSemiContVar</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                            href="../typedefs/IloNum.html">IloNum</a> sclb, <a
+                            href="../typedefs/IloNum.html">IloNum</a> ub, <a
+                    href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> type=ILOFLOAT, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSemiContVar.html#method_IloSemiContVar">IloSemiContVar</a>(const IloAddNumVar &amp; var, <a
+                            href="../typedefs/IloNum.html">IloNum</a> sclb, <a
+                            href="../typedefs/IloNum.html">IloNum</a> ub, <a
+                    href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> type=ILOFLOAT, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSemiContVar.html#method_setSemiContLB">setSemiContLB</a>(<a
+            href="../typedefs/IloNum.html">IloNum</a> sclb) const</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloNumVar.html">IloNumVar</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloNumVar.html#method_getImpl"></a><a
+                            href="../classes/IloNumVar.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloNumVar.html#method_getLB"></a><a
+                            href="../classes/IloNumVar.html#method_getLB">getLB</a>, <a
+                            href="../classes/IloNumVar.html#method_getPossibleValues"></a><a
+                            href="../classes/IloNumVar.html#method_getPossibleValues">getPossibleValues</a>, <a
+                            href="../classes/IloNumVar.html#method_getType"></a><a
+                            href="../classes/IloNumVar.html#method_getType">getType</a>, <a
+                            href="../classes/IloNumVar.html#method_getUB"></a><a
+                            href="../classes/IloNumVar.html#method_getUB">getUB</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_IloNumVar"></a><a
+                            href="../classes/IloNumVar.html#method_IloNumVar">IloNumVar</a>, <a
+                            href="../classes/IloNumVar.html#method_setBounds"></a><a
+                            href="../classes/IloNumVar.html#method_setBounds">setBounds</a>, <a
+                            href="../classes/IloNumVar.html#method_setLB"></a><a
+                            href="../classes/IloNumVar.html#method_setLB">setLB</a>, <a
+                            href="../classes/IloNumVar.html#method_setPossibleValues"></a><a
+                            href="../classes/IloNumVar.html#method_setPossibleValues">setPossibleValues</a>, <a
+                            href="../classes/IloNumVar.html#method_setUB"></a><a
+            href="../classes/IloNumVar.html#method_setUB">setUB</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloNumExprArg.html#method_getImpl"></a><a
+                            href="../classes/IloNumExprArg.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg"></a><a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg">IloNumExprArg</a>, <a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg"></a><a
+            href="../classes/IloNumExprArg.html#method_IloNumExprArg">IloNumExprArg</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloExtractable.html">IloExtractable</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloExtractable.html#method_asConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_asConstraint">asConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_asIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asIntExpr">asIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asModel"></a><a
+                            href="../classes/IloExtractable.html#method_asModel">asModel</a>, <a
+                            href="../classes/IloExtractable.html#method_asNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asNumExpr">asNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asObjective"></a><a
+                            href="../classes/IloExtractable.html#method_asObjective">asObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_asVariable"></a><a
+                            href="../classes/IloExtractable.html#method_asVariable">asVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_end"></a><a
+                            href="../classes/IloExtractable.html#method_end">end</a>, <a
+                            href="../classes/IloExtractable.html#method_getEnv"></a><a
+                            href="../classes/IloExtractable.html#method_getEnv">getEnv</a>, <a
+                            href="../classes/IloExtractable.html#method_getId"></a><a
+                            href="../classes/IloExtractable.html#method_getId">getId</a>, <a
+                            href="../classes/IloExtractable.html#method_getImpl"></a><a
+                            href="../classes/IloExtractable.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloExtractable.html#method_getName"></a><a
+                            href="../classes/IloExtractable.html#method_getName">getName</a>, <a
+                            href="../classes/IloExtractable.html#method_getObject"></a><a
+                            href="../classes/IloExtractable.html#method_getObject">getObject</a>, <a
+                            href="../classes/IloExtractable.html#method_IloExtractable"></a><a
+                            href="../classes/IloExtractable.html#method_IloExtractable">IloExtractable</a>, <a
+                            href="../classes/IloExtractable.html#method_isConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_isConstraint">isConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_isIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isIntExpr">isIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isModel"></a><a
+                            href="../classes/IloExtractable.html#method_isModel">isModel</a>, <a
+                            href="../classes/IloExtractable.html#method_isNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isNumExpr">isNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isObjective"></a><a
+                            href="../classes/IloExtractable.html#method_isObjective">isObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_isVariable"></a><a
+                            href="../classes/IloExtractable.html#method_isVariable">isVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_removeFromAll"></a><a
+                            href="../classes/IloExtractable.html#method_removeFromAll">removeFromAll</a>, <a
+                            href="../classes/IloExtractable.html#method_setLocation"></a><a
+                            href="../classes/IloExtractable.html#method_setLocation">setLocation</a>, <a
+                            href="../classes/IloExtractable.html#method_setName"></a><a
+                            href="../classes/IloExtractable.html#method_setName">setName</a>, <a
+                            href="../classes/IloExtractable.html#method_setObject"></a><a
+            href="../classes/IloExtractable.html#method_setObject">setObject</a></code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloSemiContVar">IloSemiContVar</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloSemiContVar</span>()</div><div
+                class="description">
+ This constructor creates an empty handle. You must initialize it before you use it. 
+        </div><hr /><h3><a
+            name="method_IloSemiContVar">IloSemiContVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSemiContVar</span>(IloSemiContVarI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description">
+ This constructor creates a handle object from a pointer to an implementation object.  
+        </div><hr /><h3><a
+            name="method_IloSemiContVar">IloSemiContVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSemiContVar</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">sclb</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">ub</span>, <a
+                href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> <span
+                class="parameter-name">type</span>=<span
+                class="parameter-name">ILOFLOAT</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an instance of <code>IloSemiContVar</code> from
+ its <code>sclb</code> (that is, its semicontinuous lower bound) and its
+ upper bound <code>ub</code>. By default, its type is floating-point, but you
+ can use <code>ILOINT</code> to specify integer; in that case, Concert
+ Technology will impose an integrality constraint on the variable. The value
+ for <code>lb</code> is set to zero.</p></div><hr /><h3><a
+            name="method_IloSemiContVar">IloSemiContVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSemiContVar</span>(const IloAddNumVar &amp; <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">sclb</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">ub</span>, <a
+                href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> <span
+                class="parameter-name">type</span>=<span
+                class="parameter-name">ILOFLOAT</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an instance of <code>IloSemiContVar</code> from
+ the prototype <code>var</code>.</p></div><hr /><h3><a
+            name="method_getImpl">getImpl</a></h3><div
+                class="prototype">public IloSemiContVarI * <span
+            class="function-name">getImpl</span>() const</div><div
+                class="description">
+ This member function returns a pointer to the implementation object of the invoking handle.  
+        </div><hr /><h3><a
+            name="method_getSemiContLB">getSemiContLB</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getSemiContLB</span>() const</div><div
+                class="description"><p>This member function returns the semicontinuous lower bound (that is, its
+ <code>sclb</code>) of the invoking semicontinuous variable.</p></div><hr /><h3><a
+            name="method_setSemiContLB">setSemiContLB</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setSemiContLB</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">sclb</span>) const</div><div
+                class="description"><p>This member function makes <code>sclb</code> the semicontinuous lower
+ bound of the invoking semicontinuous variable. </p><div
+                    class="note"><div class="noteTitle">Note</div><div class="noteText"> The member function <code>setSemiContinuousLb</code> notifies Concert
+ Technology algorithms about this change of this invoking object.  </div></div></div><hr /></body>
+</html>

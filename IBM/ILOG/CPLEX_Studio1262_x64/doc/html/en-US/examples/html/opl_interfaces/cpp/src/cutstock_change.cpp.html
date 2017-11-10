@@ -1,0 +1,155 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+002: <b><font color="#007D00">// File: cutstock_change.cpp</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">/////////////////////////////////////////////////////////////////////////////// </font></b>
+013: 
+014: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+015: 
+016: #define RC_EPS 1.0e-6
+017: 
+018: #ifdef ILO_WINDOWS
+019: #define DIRSEP <b><font color="#8A2BE2">"</font></b>\\<b><font color="#8A2BE2">"</font></b>
+020: #else
+021: #define DIRSEP <b><font color="#8A2BE2">"/"</font></b>
+022: #endif
+023: #ifndef DATADIR
+024: #define DATADIR <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b>  DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">"opl"</font></b> DIRSEP
+025: #endif
+026: 
+027: ILOSTLBEGIN
+028: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+029:     IloEnv env;
+030:     IloInt i;
+031: 
+032:     <b><font color="#0000FF">int</font></b> status = 127;
+033:     <b><font color="EA7D00">try</font></b> {
+034:         IloNum best;
+035:         IloNum curr = IloInfinity;
+036: 
+037:         IloOplErrorHandler handler(env,cout);
+038: 
+039:         IloOplRunConfiguration masterRC(env,
+040:             DATADIR <b><font color="#8A2BE2">"cutstock"</font></b> DIRSEP <b><font color="#8A2BE2">"cutstock_change.mod"</font></b>,
+041:             DATADIR <b><font color="#8A2BE2">"cutstock"</font></b> DIRSEP <b><font color="#8A2BE2">"cutstock_change.dat"</font></b>);
+042:         masterRC.setErrorHandler(handler);
+043:         IloCplex masterCplex(env);
+044:         masterCplex.setOut(env.getNullStream());
+045:         masterRC.setCplex(masterCplex);
+046:         IloOplModel masterOpl = masterRC.getOplModel();
+047:         masterOpl.generate();
+048: 
+049:         IloOplDataElements masterDataElements = masterOpl.makeDataElements();
+050:         IloInt nWdth = masterDataElements.getElement(<b><font color="#8A2BE2">"Amount"</font></b>).asIntMap().getSize();
+051:         IloNumVarArray masterVars(env);
+052:         IloNumVarMap cuts = masterOpl.getElement(<b><font color="#8A2BE2">"Cut"</font></b>).asNumVarMap();
+053:         <b><font color="EA7D00">for</font></b> (i=1; i&lt;=nWdth; i++) {
+054:             masterVars.add(cuts.get(i));
+055:         }
+056: 
+057:                 IloOplSettings settings(env,handler);
+058:                 IloOplModelSource subSource(env, DATADIR <b><font color="#8A2BE2">"cutstock"</font></b> DIRSEP <b><font color="#8A2BE2">"cutstock-sub.mod"</font></b>);
+059:                 IloOplModelDefinition subDef(subSource,settings);
+060:                 IloCplex subCplex(env);
+061: 
+062:         <b><font color="EA7D00">do</font></b> {
+063:             best = curr;
+064: 
+065:             cout &lt;&lt; <b><font color="#8A2BE2">"Solve master."</font></b> &lt;&lt; endl;
+066:             <b><font color="EA7D00">if</font></b> ( masterCplex.solve() ) {
+067:                 curr = masterCplex.getObjValue() ;
+068:                 cout &lt;&lt; endl
+069:                     &lt;&lt; <b><font color="#8A2BE2">"MASTER OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; curr
+070:                     &lt;&lt; endl;
+071:                 status = 0;
+072:             } <b><font color="EA7D00">else</font></b> {
+073:                 cout &lt;&lt; <b><font color="#8A2BE2">"No solution!"</font></b> &lt;&lt; endl;
+074:                 status = 1;
+075:             }
+076: 
+077:             <b><font color="#007D00">// get reduced costs and set them in sub problem</font></b>
+078: 
+079:             <b><font color="#007D00">// make sub model</font></b>
+080:                         subCplex.setOut(env.getNullStream());
+081:                         IloOplModel subOpl(subDef,subCplex);
+082:                         IloOplDataElements subDataElements(env);
+083:                         subDataElements.addElement(masterRC.getOplModel().getElement(<b><font color="#8A2BE2">"RollWidth"</font></b>));
+084:                         subDataElements.addElement(masterRC.getOplModel().getElement(<b><font color="#8A2BE2">"Size"</font></b>));
+085:                         subDataElements.addElement(masterRC.getOplModel().getElement(<b><font color="#8A2BE2">"Duals"</font></b>));
+086: 
+087:             IloConstraintMap FillCt = masterOpl.getElement(<b><font color="#8A2BE2">"ctFill"</font></b>).asConstraintMap();
+088:             IloNumMap duals = subDataElements.getElement(<b><font color="#8A2BE2">"Duals"</font></b>).asNumMap();
+089:             <b><font color="EA7D00">for</font></b> (i=1; i&lt;nWdth+1; i++) {
+090:                 IloForAllRange far = FillCt.get(i);
+091:                 duals.set(i, masterCplex.getDual(far));
+092:             }
+093: 
+094:                         subOpl.addDataSource(subDataElements);
+095:             subOpl.generate();
+096: 
+097:             cout &lt;&lt; <b><font color="#8A2BE2">"Solve sub."</font></b> &lt;&lt; endl;
+098:             <b><font color="EA7D00">if</font></b> ( subCplex.solve() ) {
+099:                 cout &lt;&lt; endl
+100:                     &lt;&lt; <b><font color="#8A2BE2">"SUB OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2)
+101:                     &lt;&lt; subCplex.getObjValue()
+102:                     &lt;&lt; endl;
+103:                 status = 0;
+104:             } <b><font color="EA7D00">else</font></b> {
+105:                 cout &lt;&lt; <b><font color="#8A2BE2">"No solution!"</font></b> &lt;&lt; endl;
+106:                 status = 1;
+107:             }
+108: 
+109:             <b><font color="EA7D00">if</font></b> (subCplex.getObjValue() &gt; -RC_EPS) <b><font color="EA7D00">break</font></b>;
+110: 
+111:             <b><font color="#007D00">// Add variable in master model</font></b>
+112: 
+113:             IloNumVar newVar(env, 0, IloIntMax);
+114:             IloObjective masterObj = masterOpl.getObjective();
+115:             masterObj.setLinearCoef(newVar, 1);
+116:             IloIntVarMap Use = subOpl.getElement(<b><font color="#8A2BE2">"Use"</font></b>).asIntVarMap();
+117:             <b><font color="EA7D00">for</font></b> (i=1; i&lt;nWdth+1; i++) {
+118:                 IloNum coef = subCplex.getValue(Use.get(i));
+119:                 IloForAllRange far = FillCt.get(i);
+120:                 far.setLinearCoef(newVar, coef);
+121:             }
+122:             masterVars.add(newVar);
+123: 
+124:             subOpl.end();
+125:         } <b><font color="EA7D00">while</font></b> ( best != curr &amp;&amp; status == 0);
+126: 
+127:         masterOpl.getModel().add(IloConversion(env, masterVars, ILOINT));
+128:         <b><font color="EA7D00">if</font></b> ( masterCplex.solve() ) {
+129:             cout &lt;&lt; endl
+130:                 &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; masterCplex.getObjValue()
+131:                 &lt;&lt; endl;
+132:         }
+133:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+134:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+135:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+136:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+137:         e.print(cout);
+138:         status = 2;
+139:     } <b><font color="EA7D00">catch</font></b> (...) {
+140:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+141:         status = 3;
+142:     }
+143: 
+144:     env.end();
+145: 
+146:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+147:     getchar();
+148: 
+149:     <b><font color="EA7D00">return</font></b> status;
+150: }
+</tt></pre>

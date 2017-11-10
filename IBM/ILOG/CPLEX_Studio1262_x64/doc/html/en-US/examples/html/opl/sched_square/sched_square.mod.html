@@ -1,0 +1,51 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: <b><font color="#0000FF">int</font></b> SizeSquare = 112;
+15: <b><font color="#0000FF">int</font></b> NbSquares  = 21;
+16: 
+17: <b><font color="#0000FF">execute</font></b>{
+18:         }
+19: 
+20: range Squares = 1..NbSquares;
+21: 
+22: int Size[Squares] = [50,42,37,35,33,29,27,25,24,19,18,17,16,15,11,9,8,7,6,4,2];
+23: 
+24: dvar interval x[s in Squares] in 0..SizeSquare size Size[s];
+25: dvar interval y[s in Squares] in 0..SizeSquare size Size[s];
+26: 
+27: cumulFunction rx = sum(s in Squares) pulse(x[s], Size[s]);
+28: cumulFunction ry = sum(s in Squares) pulse(y[s], Size[s]);
+29: 
+30: execute {
+31:   <b><font color="EA7D00">var</font></b> f = cp.factory;
+32:   cp.setSearchPhases(f.searchPhase(x),   
+33:                      f.searchPhase(y));
+34: };
+35: 
+36: constraints {
+37:    alwaysIn(rx,0,SizeSquare,SizeSquare,SizeSquare);
+38:    alwaysIn(ry,0,SizeSquare,SizeSquare,SizeSquare);
+39:    forall(ordered i, j <b><font color="EA7D00">in</font></b> Squares)
+40:      endOf(x[i]) &lt;= startOf(x[j]) ||
+41:      endOf(x[j]) &lt;= startOf(x[i]) ||
+42:      endOf(y[i]) &lt;= startOf(y[j]) ||
+43:      endOf(y[j]) &lt;= startOf(y[i]);
+44: };
+45: 
+46: 
+</tt></pre>

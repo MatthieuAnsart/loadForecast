@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Types and declarations" />
+<meta name="abstract" content="Lists the changes to types and declarations in OPL 4." />
+<meta name="Description" content="Lists the changes to types and declarations in OPL 4." />
+<meta name="DC.subject" content="data, declaration, declaring, data types, enumerated values, ranges, float+, OPL keyword, int+, OPL keyword, Boolean variables, variables, Boolean, literal strings, arrays, conversion to a set of integers" />
+<meta name="keywords" content="data, declaration, declaring, data types, enumerated values, ranges, float+, OPL keyword, int+, OPL keyword, Boolean variables, variables, Boolean, literal strings, arrays, conversion to a set of integers" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_mod.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplrelnotes.uss_reln_from37to40.1027898" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_mod.html" />
+<title>Types and declarations</title>
+</head>
+<body role="main" id="oplrelnotes.uss_reln_from37to40.1027898">
+<h1 class="title topictitle1">Types and declarations</h1>
+<div class="body"><p class="shortdesc">Lists the changes to types and declarations in OPL 4.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_mod.html" title="Describes the changes made to the syntax and types to improve the consistency of the modeling language.">The modeling language</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022795"><h2 class="title topictitle2">Enumerated values</h2>
+<div class="body"><p class="p">The type <samp class="ph codeph">enum</samp> is not supported
+in OPL 4. Use set of strings <samp class="ph codeph">{string}</samp> instead. </p>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022795__oplrelnotes.uss_reln_from37to40.1027151"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">You wrote in the model file:</p>
+<pre class="pre codeblock"><code>enum Components ...;</code></pre>
+<p class="p">and in the data file:</p>
+<pre class="pre codeblock"><code>Components = { nitrogen, hydrogen, chlorine };</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022795__oplrelnotes.uss_reln_from37to40.1027161"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You write:</p>
+<pre class="pre codeblock"><code>{string} Components = ...;
+Components = { "nitrogen", "hydrogen", "chlorine" }; </code></pre>
+<p class="p">and in the data file:</p>
+<pre class="pre codeblock"><code>Components = { "nitrogen" "hydrogen" "chlorine" };</code></pre>
+<p class="p">Note that the comma “<samp class="ph codeph">,</samp>” between the items is no longer required in the data file,
+though it does work in order to provide greater compatibility with
+OPL 3.</p>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022795__oplrelnotes.uss_reln_from37to40.1027156"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">You wrote:</p>
+<pre class="pre codeblock"><code>enum Components { nitrogen, hydrogen, chlorine };</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022795__oplrelnotes.uss_reln_from37to40.1027170"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You write in the model file:</p>
+<pre class="pre codeblock"><code>{string} Components = { "nitrogen", "hydrogen", "chlorine" }; </code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022814"><h2 class="title topictitle2">Ranges</h2>
+<div class="body"><p class="p">A range is now a value and no longer a type. </p>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022814__oplrelnotes.uss_reln_from37to40.1022816"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">It was possible to use a range as a type, for example:</p>
+<pre class="pre codeblock"><code>range Workers 1..nbWorkers;
+{ Workers } qualified[Tasks] = ...;
+range Obj 0..(n*n);
+var Obj obj;</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022814__oplrelnotes.uss_reln_from37to40.1022820"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You must use one of the standard types when declaring
+data or a decision variable, as in:</p>
+<pre class="pre codeblock"><code>range Workers = 1..nbWorkers;
+{int} qualified[Tasks] = ...;
+range Obj = 0..(n*n);
+dvar int obj in Obj;</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022825"><h2 class="title topictitle2">float+, int+</h2>
+<div class="body"><p class="p">Use these types for decision variables only. They can
+be seen as shortcuts for domain specifications. For example:</p>
+<pre class="pre codeblock"><code>dvar float+ myVar;</code></pre>
+<p class="p">is equivalent to </p>
+<pre class="pre codeblock"><code>dvar float myVar in 0..infinity;</code></pre>
+<p class="p"> <samp class="ph codeph">float+</samp> and <samp class="ph codeph">int+</samp> are no longer supported  for data declaration. Use assert statements
+to check the domains of data.</p>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022825__oplrelnotes.uss_reln_from37to40.1022831"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">It was possible to declare:</p>
+<pre class="pre codeblock"><code>int+ nonnegArray[1..10]= ...;</code></pre>
+<p class="p">and the system raised an error if an initialization with
+a negative value is attempted.</p>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022825__oplrelnotes.uss_reln_from37to40.1022835"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">The corresponding declaration is:</p>
+<pre class="pre codeblock"><code>int nonnegArray[1..10]= ...;</code></pre>
+<p class="p">and the test can be done as</p>
+<pre class="pre codeblock"><code>assert forall (i in 1..10) nonnegArray[i] &gt;= 0;</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022838"><h2 class="title topictitle2">Boolean variables</h2>
+<div class="body"><p class="p">The keyword <samp class="ph codeph">boolean</samp> can be
+used as a shortcut to Boolean variables. For example:</p>
+<pre class="pre codeblock"><code>dvar boolean myVar;</code></pre>
+<p class="p">is short for </p>
+<pre class="pre codeblock"><code>dvar int myVar in 0..1;</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022844"><h2 class="title topictitle2">Literal strings</h2>
+<div class="body"><p class="p">Backslash '\' in string literals needs to be escaped,
+in model and data files. </p>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022844__oplrelnotes.uss_reln_from37to40.1027179"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">You wrote:</p>
+<pre class="pre codeblock"><code>... "c:\mydata\manufact.dat" ...</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022844__oplrelnotes.uss_reln_from37to40.1027188"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You write:</p>
+<pre class="pre codeblock"><code>... "c:\\mydata\\manufact.dat" ...</code></pre>
+<p class="p">End of line within a string literal needs to be escaped. </p>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022844__oplrelnotes.uss_reln_from37to40.1027197"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">You wrote:</p>
+<pre class="pre codeblock"><code>... "SELECT a FROM table
+     WHERE ... "</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022844__oplrelnotes.uss_reln_from37to40.1027202"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You write:</p>
+<pre class="pre codeblock"><code>... "SELECT a FROM table \
+     WHERE ... "</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022855"><h2 class="title topictitle2">Arrays</h2>
+<div class="body"><p class="p">Multidimensional arrays are now arrays of arrays. Replace <samp class="ph codeph">[i,j]</samp>  with <samp class="ph codeph">[i][j]</samp> .</p>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022855__oplrelnotes.uss_reln_from37to40.1027214"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">You wrote:</p>
+<pre class="pre codeblock"><code>[i,j] 
+int myarray[R, 1..5]; 
+myarray[2, 3];</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022855__oplrelnotes.uss_reln_from37to40.1027209"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You write:</p>
+<pre class="pre codeblock"><code>[i][j] 
+int myarray[R][1..5]; 
+myarray[2][3];</code></pre>
+<p class="p">When declaring generated arrays using the compatibility
+syntax <samp class="ph codeph">[,]</samp> all the dimensions need to be
+qualifiers. For example:</p>
+<p class="p">In OPL 3, it was possible to initialize a multidimensional
+array like this:</p>
+<pre class="pre codeblock"><code>int myArray[i in R,j in S] = i;</code></pre>
+<p class="p">In OPL 4, this syntax remains valid for compatibility
+reasons, but the exact syntax is:</p>
+<pre class="pre codeblock"><code>int myArray[i in R][S] = i; </code></pre>
+<p class="p">Note that the following code is not correct:</p>
+<pre class="pre codeblock"><code>int myArray[i in R,S] = i; </code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022869"><h2 class="title topictitle2">Grouped declarations</h2>
+<div class="body"><p class="p">ILOG OPL Development Studio supports single-identifier
+declarations only. Comma-separated declarations for identifiers of
+the same type are no longer supported. For example, replace</p>
+<pre class="pre codeblock"><code>int a,b;</code></pre>
+<p class="p">with</p>
+<pre class="pre codeblock"><code>int a;
+int b;</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022876"><h2 class="title topictitle2">Conversion from a range to a set of integers</h2>
+<div class="body"><div class="section" id="oplrelnotes.uss_reln_from37to40.1022876__oplrelnotes.uss_reln_from37to40.1022877"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">You could initialize an integer set from a range, like
+this: </p>
+<pre class="pre codeblock"><code>{int} intSet = 1..13;</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022876__oplrelnotes.uss_reln_from37to40.1027225"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You need to use the <samp class="ph codeph">asSet</samp> method
+explicitly:</p>
+<pre class="pre codeblock"><code>{int} intSet = asSet(1..13);</code></pre>
+<p class="p">because OPL 4 does not support implicit type conversions. </p>
+</div>
+</div>
+</div>
+</body>
+</html>

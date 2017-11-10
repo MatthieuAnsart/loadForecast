@@ -1,0 +1,92 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+13: 
+14: <b><font color="#007D00">Problem Description</font></b>
+15: <b><font color="#007D00">-------------------</font></b>
+16: 
+17: <b><font color="#007D00">This is a problem of building five houses. The masonry, roofing,</font></b>
+18: <b><font color="#007D00">painting, etc. must be scheduled. Some tasks must necessarily take</font></b>
+19: <b><font color="#007D00">place before others and these requirements are expressed through</font></b>
+20: <b><font color="#007D00">precedence constraints.</font></b>
+21: 
+22: <b><font color="#007D00">A pool of two workers is available for building the houses. For a</font></b>
+23: <b><font color="#007D00">given house, some tasks (namely: plumbing, ceiling and painting)</font></b>
+24: <b><font color="#007D00">require the house to be clean whereas other tasks (namely: masonry,</font></b>
+25: <b><font color="#007D00">carpentry, roofing and windows) put the house in a dirty state. A</font></b>
+26: <b><font color="#007D00">transition time of 1 is needed to clean the house so to change from</font></b>
+27: <b><font color="#007D00">state 'dirty' to state 'clean'.</font></b>
+28: 
+29: <b><font color="#007D00">The objective is to minimize the makespan.</font></b>
+30: 
+31: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+32: 
+33: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+34: 
+35: <b><font color="#0000FF">int</font></b> NbHouses  = ...; 
+36: <b><font color="#0000FF">int</font></b> NbWorkers = ...;
+37: <b><font color="#0000FF">range</font></b> Houses = 1..NbHouses;
+38: 
+39: {<b><font color="#0000FF">string</font></b>} AllStates = ...;
+40: {<b><font color="#0000FF">string</font></b>} TaskNames = ...;
+41: 
+42: <b><font color="#0000FF">int</font></b> Duration[t <b><font color="#0000FF">in</font></b> TaskNames] = ...;
+43: 
+44: <b><font color="#0000FF">int</font></b> Index[s <b><font color="#0000FF">in</font></b> AllStates] = <b><font color="#7D007D">ord</font></b>(AllStates, s);
+45: 
+46: <b><font color="#0000FF">tuple</font></b> Precedence {
+47:    <b><font color="#0000FF">string</font></b> pre;
+48:    <b><font color="#0000FF">string</font></b> post;
+49: };
+50: 
+51: {Precedence} Precedences = ...;
+52: 
+53: <b><font color="#0000FF">tuple</font></b> StateRequirement {
+54:   <b><font color="#0000FF">string</font></b> task;
+55:   <b><font color="#0000FF">string</font></b> state;
+56: };
+57: {StateRequirement} States = ...;
+58: 
+59: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> task[h <b><font color="#0000FF">in</font></b> Houses][t <b><font color="#0000FF">in</font></b> TaskNames] <b><font color="#0000FF">size</font></b> Duration[t];
+60: 
+61: <b><font color="#0000FF">cumulFunction</font></b> workers = <b><font color="#7D007D">sum </font></b>(h <b><font color="#0000FF">in</font></b> Houses, t <b><font color="#0000FF">in</font></b> TaskNames)
+62:   <b><font color="#7D007D">pulse</font></b>(task[h][t], 1);
+63: 
+64: <b><font color="#0000FF">tuple</font></b> triplet { <b><font color="#0000FF">int</font></b> loc1; <b><font color="#0000FF">int</font></b> loc2; <b><font color="#0000FF">int</font></b> value; }; 
+65: {triplet} ttime = { 
+66:   &lt;Index[<b><font color="#8A2BE2">"dirty"</font></b>], Index[<b><font color="#8A2BE2">"clean"</font></b>], 1&gt;,
+67:   &lt;Index[<b><font color="#8A2BE2">"clean"</font></b>], Index[<b><font color="#8A2BE2">"dirty"</font></b>], 0&gt;
+68: };
+69: 
+70: <b><font color="#0000FF">stateFunction</font></b> state[h <b><font color="#0000FF">in</font></b> Houses] <b><font color="#0000FF">with</font></b> ttime;
+71: 
+72: <b><font color="#0000FF">execute</font></b> {
+73:                 cp.param.FailLimit = 10000;
+74: }
+75: 
+76: minimize max(h in Houses) endOf(task[h]["moving"]);
+77: subject to {
+78:   forall(h <b><font color="EA7D00">in</font></b> Houses) {
+79:     forall(p <b><font color="EA7D00">in</font></b> Precedences) {
+80:       endBeforeStart(task[h][p.pre], task[h][p.post]);
+81:     }
+82:     forall(s <b><font color="EA7D00">in</font></b> States) {
+83:       alwaysEqual(state[h], task[h][s.task], Index[s.state]);
+84:     }
+85:   }
+86:   workers &lt;= NbWorkers;
+87: }
+</tt></pre>

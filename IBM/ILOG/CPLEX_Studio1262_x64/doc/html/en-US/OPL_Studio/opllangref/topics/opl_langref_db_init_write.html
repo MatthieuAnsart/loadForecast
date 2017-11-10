@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Writing to a database" />
+<meta name="abstract" content="Explains the process of writing to a database from OPL." />
+<meta name="Description" content="Explains the process of writing to a database from OPL." />
+<meta name="DC.subject" content="updating a database, databases, writing to" />
+<meta name="keywords" content="updating a database, databases, writing to" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_db_init.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datasources.1056070" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_db_init.html" />
+<title>Writing to a database</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datasources.1056070">
+<h1 class="title topictitle1">Writing to a database</h1>
+<div class="body"><p class="shortdesc">Explains the process of writing to a database
+from OPL.</p>
+<p class="p">Publishing results to a database is similar to parameterized
+data initialization. Here is an example extracted from the <samp class="ph codeph">oil</samp> code sample:</p>
+<p class="p">All database publishing requests are carried out during
+postprocessing, if a solution is available. Such requests are processed
+in the order declared in the <span class="ph filepath">.dat</span> file(s).
+If your RDMBS supports transactions, every single publishing request
+is sent within its own transaction.</p>
+<div class="section" id="usropllangref.uss_langref_datasources.1056070__usropllangref.uss_langref_datasources.1060168"><h2 class="title sectiontitle">Adding rows</h2><ol class="ol"><li class="li"><p class="p">Write in the model file:</p>
+ <pre class="pre codeblock"><code>tuple result {
+  string oil;
+  string gas;
+  float blend;
+  float a;
+}
+
+{result} Result = 
+  { &lt;o,g,Blend[o][g],a[g]&gt; | o in Oils, g in Gasolines };</code></pre>
+ </li>
+<li class="li"><p class="p">Write in the data file:</p>
+ <pre class="pre codeblock"><code>DBExecute(db,"drop table Result");
+DBExecute(db,"create table Result(oil varchar(10), gas varchar(10), blend real, a real)");
+Result to DBUpdate(db,"INSERT INTO Result(oil,gas,blend,a) VALUES(?,?,?,?)");</code></pre>
+ </li>
+</ol>
+<p class="p">In this example, you use:</p>
+<ul class="ul"><li class="li"><p class="p">a <samp class="ph codeph">DBExecute</samp> statement
+to send SQL DDL (data definition language) instructions to the Relational
+Database Management Server (RDBMS) </p>
+</li>
+<li class="li"><p class="p">a <samp class="ph codeph">DBUpdate</samp> statement
+to modify the data (see <a class="xref" href="opl_langref_db_init_write.html#usropllangref.uss_langref_datasources.1056070__usropllangref.uss_langref_datasources.1060173">Updating existing rows</a>).</p>
+ </li>
+</ul>
+<p class="p">More generally, the keyword <samp class="ph codeph">DBExecute</samp> enables
+you to carry out administration tasks on data tables, whereas the
+keyword <samp class="ph codeph">DBUpdate</samp> modifies the contents of
+data tables.</p>
+<p class="p">The OPL result publisher will iterate
+on the items in the set <samp class="ph codeph">result</samp> and bind
+the component values to the SQL statement parameters in the declared
+order. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">OPL supports the same element
+types for reading as for database publishing. </p>
+ </div>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1056070__usropllangref.uss_langref_datasources.1060173"><h2 class="title sectiontitle">Updating existing rows</h2><p class="p">To update existing
+rows in a database instead of adding new ones, use an SQL update statement. </p>
+<p class="p">For example, to multiply by 2 the blends for Super:</p>
+<ol class="ol"><li class="li"><p class="p">Add the following lines in the <span class="ph filepath">.mod</span> file:</p>
+ <pre class="pre codeblock"><code>tuple Result2 {
+float blend;
+float a;
+string oil;
+string gas;
+}
+{Result2} result2 = { &lt;2*blend[o]["Super"],a["Super"],o,"Super"&gt; | o in 
+Oils};</code></pre>
+ </li>
+<li class="li"><p class="p">Write an SQL update statement like this:</p>
+ <pre class="pre codeblock"><code>result2 to DBUpdate(db,
+"UPDATE Result SET blend=? , a=? WHERE oil=? AND gas=?");</code></pre>
+ </li>
+</ol>
+<p class="p">See also <a class="xref" href="../../opllanguser/topics/opl_languser_script_fc_multiple_stepsget.html" title="Defines data elements and explains how to access them.">Getting the data elements from an IloOplModel instance</a> in the <em class="ph i">Language
+User’s Manual</em> for details about data publishers and postprocessing.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1056070__usropllangref.uss_langref_datasources.1056865"><h2 class="title sectiontitle">Deleting elements</h2><p class="p">It is
+also possible to delete elements from a database. For instance, the
+instructions</p>
+<pre class="pre codeblock"><code>/* .mod file */
+{string} NamesToDelete = ...;
+/* .dat file */
+NamesToDelete to DBUpdate(db,"delete from PEOPLE where NAME = ?");</code></pre>
+<p class="p">delete from the relation table PEOPLE all
+the tuples whose names are in <samp class="ph codeph">NamesToDelete</samp>.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">The syntax of the actual queries may differ
+from one database system to another. </p>
+ </div>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_db_init.html" title="Describes how to connect to one or several relational databases, how to read from such databases using traditional SQL queries, and to write the results back to the connected database.">Database initialization</a></div>
+</div>
+</div></body>
+</html>

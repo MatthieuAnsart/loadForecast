@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The constraint propagation algorithm" />
+<meta name="abstract" content="The constraint propagation algorithm is straightforward in principle. When the domain of a decision variable is modified, the constraints containing that variable are examined to determine whether any values in the domains of other decision variables are now inconsistent." />
+<meta name="Description" content="The constraint propagation algorithm is straightforward in principle. When the domain of a decision variable is modified, the constraints containing that variable are examined to determine whether any values in the domains of other decision variables are now inconsistent." />
+<meta name="DC.subject" content="constraint, propagation, event" />
+<meta name="keywords" content="constraint, propagation, event" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/csts.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizercsts.1010731" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts.html" />
+<title>The constraint propagation algorithm</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizercsts.1010731">
+<h1 class="title topictitle1">The constraint propagation algorithm</h1>
+<div class="body"><p class="shortdesc">The constraint propagation algorithm is straightforward
+in principle. When the domain of a decision variable is modified,
+the constraints containing that variable are examined to determine
+whether any values in the domains of other decision variables are
+now inconsistent.</p>
+<p class="p">To see how the propagation algorithm works with constraints,
+consider the constraint x &lt;= y, written with the following fragment
+of code:  </p>
+<pre class="pre codeblock"><code>  IlcIntVar x(cp,0,3), y(cp,0,2); 
+  cp.add( x &lt;= y ); </code></pre>
+<p class="p">When this constraint is added to the optimizer, the invariant
+expressed in the previous section becomes active and reduces the domain
+of x by removing the value 3. For the moment, that is all that can
+be deduced from the constraint. Since the constraint has to be taken
+into account by CP Optimizer every time one of the variables in it
+is modified, the constraint itself is physically attached to these
+two variables. </p>
+<p class="p">CP Optimizer has been designed to automate and to optimize
+the reduction of the domains of decision variables. The CP Optimizer
+propagation algorithm for that purpose is straightforward in principle.
+When the domain of a decision variable is modified, the constraints
+containing that variable are examined to determine whether any values
+in the domains of other decision variables are now inconsistent. If
+this is the case, necessary domain reductions are carried out in turn. </p>
+<p class="p">The examination of the constraints incident on a variable
+is triggered by any modification of that variable. There are several
+different kinds of modifications, depending on the class of variable
+under consideration. Those modifications are referred to as propagation
+events. </p>
+<p class="p">For the class of decision variables, there are, in fact,
+these propagation events: </p>
+<ul class="ul"><li class="li"><p class="p"><strong class="ph b">value</strong> means
+that a value has been assigned to the decision variable, that is,
+the variable has been fixed; </p>
+</li>
+<li class="li"><p class="p"><strong class="ph b">range</strong> indicates
+that the minimum of the domain has increased or the maximum of the
+domain has decreased;</p>
+</li>
+<li class="li"><p class="p"><strong class="ph b">domain</strong> indicates
+that the domain of the decision variable has been modified. </p>
+</li>
+</ul>
+<p class="p">When you define a new class of constraint, you must also
+define the propagation events for that class of constraint. You do
+so by means of the pure virtual member function, <samp class="ph codeph">post</samp>. </p>
+<p class="p">Sometimes more than one event can be triggered after
+a variable modification. Specifically, the value event is always accompanied
+by the range and domain events. Likewise, a range event is always
+accompanied by a domain event. </p>
+<p class="p">Consider a search decision variable, <em class="ph i">var</em>, with a domain containing only
+two values, <em class="ph i">value1</em> and <em class="ph i">value2</em>, where <em class="ph i">value1 &lt; value2</em>. If you add a
+constraint that <em class="ph i">var != value1</em>,
+three events are triggered: </p>
+<ul class="ul"><li class="li"><p class="p">the domain event is triggered since <em class="ph i">value1</em> is actually removed from the
+domain of <em class="ph i">var</em>; </p>
+</li>
+<li class="li"><p class="p">the range event is triggered since the
+minimal boundary of the domain of <em class="ph i">var</em> has
+been increased; </p>
+</li>
+<li class="li"><p class="p">the value event is triggered since the
+variable is fixed by the reduction of its domain to a single value. </p>
+</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts.html" title="New, custom constraints can be written using engine extensions.">Writing complex custom constraints</a></div>
+</div>
+</div></body>
+</html>

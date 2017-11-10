@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Integer relaxation" />
+<meta name="abstract" content="Presents a model that shows how to relax integer constraints then undo the relaxation." />
+<meta name="Description" content="Presents a model that shows how to relax integer constraints then undo the relaxation." />
+<meta name="DC.subject" content="decision variables, integer, relaxing, relaxations, of integer decision variables, integer decision variables, relaxation, IloOplModel class, convertAllIntVars method, unconvertAllIntVars method, code samples, convert_example.mod" />
+<meta name="keywords" content="decision variables, integer, relaxing, relaxations, of integer decision variables, integer decision variables, relaxation, IloOplModel class, convertAllIntVars method, unconvertAllIntVars method, code samples, convert_example.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1055578" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" />
+<title>Integer relaxation</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1055578">
+<h1 class="title topictitle1">Integer relaxation</h1>
+<div class="body"><p class="shortdesc">Presents a model that shows how to relax integer
+constraints then undo the relaxation.</p>
+<p class="p">OPL allows relaxation of integer constraints on decision
+variables. With OPL, there is a simple way to relax all integer decision
+variables at once and to convert a MIP problem to an LP problem: just
+call the method <samp class="ph codeph">IloOplModel.convertAllIntVars</samp> as
+shown in the model below, <samp class="ph codeph">convert_example.mod</samp>.</p>
+<p class="p">The inverse operation is also available. To undo integer
+relaxation, call the method <samp class="ph codeph">IloOplModel.unconvertAllIntVars</samp>. </p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1055578__usropllangtut.uss_langtut_linearInteger.1059661"><h2 class="title sectiontitle">Relaxing an integer constraint and undoing relaxation (<samp class="ph codeph">convert_example.mod</samp>)</h2><pre class="pre codeblock"><code>dvar int x in 0..10;
+
+
+minimize x;
+subject to {
+  ct :   
+    x &gt;= 1/2;
+}
+
+main {
+  var status = 0;
+  thisOplModel.generate();
+  if (cplex.solve()) {
+    writeln("Integer Model");   
+    writeln("OBJECTIVE: ",cplex.getObjValue());   
+    if (cplex.getObjValue() != 1) {
+      status = -1;
+    }
+  } 
+
+  thisOplModel.convertAllIntVars();
+  if (cplex.solve()) {
+    writeln("Relaxed Model");   
+    writeln("OBJECTIVE: ",cplex.getObjValue());  
+    if (cplex.getObjValue() != 0.5) {
+      status = -1;
+    }
+  } 
+   
+  thisOplModel.unconvertAllIntVars();
+  if (cplex.solve()) {
+    writeln("Unrelaxed Model");   
+    writeln("OBJECTIVE: ",cplex.getObjValue());
+    if (cplex.getObjValue() != 1) {
+      status = -1;
+    }
+  } 
+  status;
+}
+</code></pre>
+</div>
+<p class="p">Both methods are available for flow control scripting,
+and in the C++, Java™,
+and .NET Interfaces. </p>
+<div class="section" id="usropllangtut.uss_langtut_linearInteger.1055578__usropllangtut.uss_langtut_linearInteger.1055725"><h2 class="title sectiontitle">For more information</h2><p class="p">For details on scripting,
+see <a class="xref" href="opl_languser_script.html" title="After an introduction to scripting, provides tutorials for flow control and multiple searches, flow control and column generation, and for changing default behaviors in flow control.">IBM ILOG Script for OPL</a>.</p>
+<p class="p">For
+details on the API, see each <em class="ph i">Interfaces Reference Manual</em>.</p>
+<p class="p">To learn more about what MIP relaxation is and how to use
+it, see the CPLEX® documentation
+or consult a textbook about linear-programming.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" title="Defines integer programming and describes a set covering problem, a warehouse location problem, a fixed-charge problem, and integer relaxation.">Integer programming</a></div>
+</div>
+</div></body>
+</html>

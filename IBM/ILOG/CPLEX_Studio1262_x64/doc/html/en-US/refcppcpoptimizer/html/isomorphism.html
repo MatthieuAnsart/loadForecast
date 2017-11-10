@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Isomorphism constraint</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="isomorphism.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="76"><div
+                class="section-title1">Isomorphism constraint</div>
+</a><div
+                    align="right"><a
+                    href="state_functions.html">PREVIOUS</a> <a
+                href="sched_search_api.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%"><tr><td><a
+                            href="isomorphism.html#77">Semantics</a></td></tr><tr><td><a
+                            href="isomorphism.html#78">OPL formulation</a></td></tr><tr><td><a
+                href="isomorphism.html#79">Examples</a></td></tr></table><div
+                    class="section-body"><div class="section"><a
+                            name="77"><div
+                        class="section-title2">Semantics</div>
+</a><div
+                                class="section-body"><p>This section describes the <strong>isomorphism</strong> constraint between two sets of interval variables.
+</p><p>In the same manner that the inverse constraint constrains two arrays of integer variables, the isomorphism 
+constraint constrains two arrays of interval variables. The isomorphism constraint &quot;synchronizes&quot; the presence of
+each index pair of interval variables in the two arrays.The isomorphism constraint is used 
+when a set of operations is subject to two independent scheduling models.</p><p>For example:</p><ul>
+<li>Suppose there exist complex patterns on operations sequenced on machines.
+The first model is typically an alternative of interval variables between interval sequence 
+variables (one per machine). The second model declares a precedence chain of 
+interval variables (one per machine). An isomorphism constraint can be use to enforce the
+absolute position of an operation or the relative position between two operations.</li><li> Suppose there is a schedule of loading operations in a transportation port with a 
+loading policy for each transportation vessel. A first model describes the shared port equipment
+(such as cranes) in a resource constrained scheduling model. The second model
+describes the vessel loading plan of the vessel holds (such as first the bow, then the stern) 
+in a load balancing model.</li>
+</ul><p> 
+Consider two sets of interval variables, 
+<em>A=</em><img
+                                src="images/a0toan1_set.png"
+                                alt="image" /> and <em>B=</em><img
+                                src="images/b0tobn1_set.png"
+                                alt="image" />.
+This constraint states that, in a solution, there is
+a 1-to-1 correspondence between the present intervals of <em>A</em> and the present intervals of <em>B</em>; two
+intervals in correspondence have the same start and end values. The isomorphism constraint
+is useful to enforce some patterns of constraints on a set of interval variables (see the example
+blelow).</p><p>More formally, let <em>P(A) = {a</em><img
+                                src="images/isin.png"
+                                alt="image" /><em>A, x(</em><img
+                                src="images/a_underscore.png"
+                                alt="image" /><em>)=1}</em>
+and <em>P(B) = {b</em><img
+                                src="images/isin.png"
+                                alt="image" /><em>B, x(</em><img
+                                src="images/b_underscore.png"
+                                alt="image" /><em>)=1}</em>. 
+The  <strong>isomorphism constraint</strong>&nbsp;<em>isomorphic(A,B)</em> holds if and only if:</p><p><img
+                                src="images/isomorphism1.png"
+                                alt="image" /></p><p>The constraint can be passed an additional set of <em>|A|</em> integer variables <em>V=</em><img
+                                src="images/v0tovn1_set.png"
+                                alt="image" /> 
+with domain in <em>[0, |B|</em><img
+                                src="images/union.png"
+                                alt="image" /><em>{</em><img
+                                src="images/epsilon.png"
+                                alt="image" /><em>}</em>] that describes the bijective function 
+<em>f</em> at the solution: the constraint <em>isomorphic(A,B,F)</em> holds if and only if:</p><p><img
+                                src="images/isomorphism2.png"
+                                alt="image" /></p><p>In other words, <em>V</em> is an indexer that gives the position of a present interval in <em>A</em>, as an ordered set, of its corresponding present interval in <em>B</em>, as an ordered set. The position of
+an absent interval of <em>A</em> is, by convention, set to <img
+                                src="images/epsilon.png"
+                            alt="image" />.</p><p>The isomorphism constraint is illustrated in the figure.</p><img
+                            src="images/isomorphism3.png"
+                    alt="image" /></div></div><div class="section"><a
+                            name="78"><div
+                        class="section-title2">OPL formulation</div>
+</a><div
+                            class="section-body"><p>The construct below is a constraint:</p><p><code>isomorphism(A, B [, F, eps]);</code></p><p>where</p><pre
+                    class="sample">
+dvar interval A[]; // Array of size n
+dvar interval B[]; // Array of size n
+dvar int V[];      // Array of size n
+int eps;           // Integer Escape Value
+  </pre><p><strong>Important:</strong> The constraint <code>isomorphism</code> cannot be used in logical constraints.</p></div></div><div
+                        class="section"><a name="79"><div
+                        class="section-title2">Examples</div>
+</a><div
+                                class="section-body"><p>A set of <code>n</code> activities <code>a[1],...,a[n]</code> is to be sequenced on a worker, 
+each activity <code>a[i]</code> has a nominal duration <code>NDur[i]</code>. There is a position-based learning 
+effect: as the worker is executing the activities, it is learning so that if activity <code>a[i]</code> is 
+executed in position <code>j</code> in the sequence, its actual duration will be 
+<em>max (NDur[i], 2 x NDur[i] x</em><img
+                                src="images/alphaj1.png"
+                                alt="image" /><em>)</em> where
+<img
+                                src="images/alpha.png"
+                                alt="image" /><img src="images/isin.png"
+                            alt="image" /><em>[0,1]</em> is the learning index. 
+Other components of the problem are that each task
+cannot start before its release date, can be delayed from its tardiness date against a
+linear cost and is eventually abandoned for a cost of <em>NDur[i]</em>.</p><p>Besides the <code>n</code> real activities <code>a[i]</code> modeled as interval variables, the model below
+introduces a chain of slots <code>s[j]</code> on the worker that represents the sequence of activities
+of the worker. Slot intervals <code>s[j]</code> will give the position of the <code>j</code>th activity executed
+by the worker. The mapping between the two sets of intervals is achieved by using an
+isomorphism constraint.</p><pre
+                class="sample">
+int n = ...;                // Number of activities
+float alpha = ...;          // Learning factor in [0, 1]
+int NDur[i in 1..n] = ...;  // Nominal duration
+int Rd[i in 1..n] = ...;    // start date release date
+int Dd[i in 1..n] = ...;    // end date tardy date
+
+dvar interval a[i in 1..n] optional; // Real activities
+dvar interval s[j in 1..n] optional; // Consecutive slots on machine
+dvar int p[i in 1..n] in 1..n; // Mapping slot and activity
+
+minimize sum(i in 1..n) maxl(0, endOf(a[i], 2*Dd[i]) - Dd[i]);
+subject to {
+  noOverlap(a);
+  isomorphism(s,a,p,0); // 0: position for absent activity
+  forall (i in 1..n-1) {
+    endBeforeStart(a[i+1], a[i]);
+    presenceOf(a[i + 1]) &lt;= presenceOf(a[i]);
+  }
+  forall (i in 1..n) {
+    startOf(a[i], Rd[i]) &gt;= Rd[i];
+    sizeOf(a[i], NDur[i])== maxl(NDur[i],
+       ftoi(round(2*NDur[i]*pow(alpha,p[i]))));
+  }
+} 
+</pre></div></div></div><div
+                    align="right"><a
+                    href="state_functions.html">PREVIOUS</a> <a href="sched_search_api.html">NEXT</a></div></div></body>
+</html>

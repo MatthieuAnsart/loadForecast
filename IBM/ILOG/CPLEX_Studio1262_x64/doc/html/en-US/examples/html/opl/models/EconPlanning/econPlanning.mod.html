@@ -1,0 +1,134 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// Problem 9 from Model Building in Mathematical Programming, 3rd ed.</font></b>
+013: <b><font color="#007D00">//   by HP Williams</font></b>
+014: <b><font color="#007D00">// Economic Planning </font></b>
+015: <b><font color="#007D00">// </font></b>
+016: <b><font color="#007D00">//This model is described in the documentation. </font></b>
+017: <b><font color="#007D00">//See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+018: 
+019: {<b><font color="#0000FF">string</font></b>} Ind = ...;
+020: 
+021: <b><font color="#0000FF">int</font></b> NbYears = ...;
+022: <b><font color="#0000FF">range</font></b> Years = 1..NbYears;
+023: 
+024: <b><font color="#0000FF">float</font></b> Input_output[Ind][Ind] = ...;
+025: <b><font color="#0000FF">float</font></b> Input_addcap[Ind][Ind] = ...;
+026: <b><font color="#0000FF">float</font></b> Exdem[Ind] = ...;
+027: <b><font color="#0000FF">float</font></b> Manpower_out[Ind] = ...;
+028: <b><font color="#0000FF">float</font></b> Manpower_cap[Ind] = ...;
+029: <b><font color="#0000FF">float</font></b> LimManpower = ...;
+030: <b><font color="#0000FF">float</font></b> InitCap[Ind] = ...;
+031: <b><font color="#0000FF">float</font></b> InitStock[Ind] = ...;
+032: <b><font color="#0000FF">float</font></b> InputStatic[Ind] = ...;
+033: <b><font color="#0000FF">int</font></b>  Obj1 = 0;
+034: <b><font color="#0000FF">int</font></b>  Obj2 = 0;
+035: <b><font color="#0000FF">int</font></b>  Obj3 = 1;
+036: 
+037: <b><font color="#0000FF">range</font></b> R = 1..NbYears+2;
+038: <b><font color="#0000FF">range</font></b> R1= 0..NbYears;
+039: 
+040: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Output[i <b><font color="#0000FF">in</font></b> Ind][y <b><font color="#0000FF">in</font></b> R];
+041: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Stock[i <b><font color="#0000FF">in</font></b> Ind][y <b><font color="#0000FF">in</font></b> R];
+042: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Addcap[Ind][R];
+043: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Cap[Ind][Years];
+044: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ ManpowerUsed[R1];
+045: 
+046: 
+047: <b><font color="#0000FF">maximize</font></b>
+048:   Obj1 * (<b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Ind) Cap[i][NbYears]) +
+049:   Obj2 * (<b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Ind, y <b><font color="#0000FF">in</font></b> 4..5) Output[i][y]) +  
+050:   Obj3 * (<b><font color="#7D007D">sum</font></b>(y <b><font color="#0000FF">in</font></b> Years) ManpowerUsed[y]);
+051: 
+052: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+053:   <b><font color="#007D00">// Year 0</font></b>
+054:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Ind){
+055:     <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Ind) Input_output[i][j] * Output[j][1]
+056:       + <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Ind) Input_addcap[i][j] * Addcap[j][2]
+057:         &lt;= InitStock[i] - Stock[i][1];
+058:     Output[i][1]&lt;=InitCap[i];
+059:   };
+060: 
+061:   <b><font color="#007D00">// Total output</font></b>
+062:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Ind, y <b><font color="#0000FF">in</font></b> Years)
+063:     <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Ind) Input_output[i][j] * Output[j][y+1]
+064:       + <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Ind) Input_addcap[i][j] * Addcap[j][y+2]
+065:         &lt;= Output[i][y] + Stock[i][y] - Stock[i][y+1] - Exdem[i] * (1-Obj2);
+066: 
+067:   <b><font color="#007D00">// Manpower</font></b>
+068:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> 0..NbYears)
+069:     <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Ind) Manpower_out[j] * Output[j][y+1]
+070:       + <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Ind) Manpower_cap[j] * Addcap[j][y+2] 
+071:         == ManpowerUsed[y];
+072:          
+073:   <b><font color="#7D007D">if </font></b>( Obj3 &lt; 1 ) {
+074:     <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> 0..NbYears)
+075:        ManpowerUsed[y] &lt;= LimManpower;
+076:   };
+077: 
+078:   <b><font color="#007D00">// Productive capacity</font></b>
+079:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Ind, y <b><font color="#0000FF">in</font></b> Years) {
+080:     Cap[i][y] == InitCap[i] + <b><font color="#7D007D">sum</font></b>(k <b><font color="#0000FF">in</font></b> Years: k &lt;= y) Addcap[i][k]; 
+081:     Output[i][y] &lt;= Cap[i][y]; 
+082:   };
+083:    
+084: 
+085:   <b><font color="#007D00">// Initial stocks</font></b>
+086:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Ind) {     
+087:     Addcap[i][1] == 0.0;
+088:   }; 
+089:   
+090:   <b><font color="#007D00">// Horizon conditions</font></b>
+091:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Ind) {
+092:     Output[i][NbYears+1] &gt;= InputStatic[i];
+093:     Output[i][NbYears+2] &gt;= InputStatic[i];
+094:     Addcap[i][NbYears+1] == 0.00;
+095:     Addcap[i][NbYears+2] == 0.0;
+096:   };
+097: 
+098: };
+099: 
+100: 
+101: <b><font color="#0000FF">tuple</font></b> CapSolutionT{ 
+102:         <b><font color="#0000FF">string</font></b> Ind; 
+103:         <b><font color="#0000FF">int</font></b> Years; 
+104:         <b><font color="#0000FF">float</font></b> value; 
+105: };
+106: {CapSolutionT} CapSolution = {&lt;i0,i1,Cap[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Ind,i1 <b><font color="#0000FF">in</font></b> Years};
+107: <b><font color="#0000FF">tuple</font></b> OutputSolutionT{ 
+108:         <b><font color="#0000FF">string</font></b> Ind; 
+109:         <b><font color="#0000FF">int</font></b> R; 
+110:         <b><font color="#0000FF">float</font></b> value; 
+111: };
+112: {OutputSolutionT} OutputSolution = {&lt;i0,i1,Output[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Ind,i1 <b><font color="#0000FF">in</font></b> R};
+113: <b><font color="#0000FF">tuple</font></b> ManpowerUsedSolutionT{ 
+114:         <b><font color="#0000FF">int</font></b> R1; 
+115:         <b><font color="#0000FF">float</font></b> value; 
+116: };
+117: {ManpowerUsedSolutionT} ManpowerUsedSolution = {&lt;i0,ManpowerUsed[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> R1};
+118: <b><font color="#0000FF">tuple</font></b> AddcapSolutionT{ 
+119:         <b><font color="#0000FF">string</font></b> Ind; 
+120:         <b><font color="#0000FF">int</font></b> R; 
+121:         <b><font color="#0000FF">float</font></b> value; 
+122: };
+123: {AddcapSolutionT} AddcapSolution = {&lt;i0,i1,Addcap[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Ind,i1 <b><font color="#0000FF">in</font></b> R};
+124: <b><font color="#0000FF">tuple</font></b> StockSolutionT{ 
+125:         <b><font color="#0000FF">string</font></b> Ind; 
+126:         <b><font color="#0000FF">int</font></b> R; 
+127:         <b><font color="#0000FF">float</font></b> value; 
+128: };
+129: {StockSolutionT} StockSolution = {&lt;i0,i1,Stock[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Ind,i1 <b><font color="#0000FF">in</font></b> R};
+</tt></pre>

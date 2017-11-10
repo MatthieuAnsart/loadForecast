@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Setting the initial solution" />
+<meta name="abstract" content="Shows how to use a value array." />
+<meta name="Description" content="Shows how to use a value array." />
+<meta name="DC.subject" content="classes, IloOplCplexVectors, arrays, constraint-value pair (IBM ILOG Script), value arrays, constraint arrays, CPLEX engine, setting an initial solution, initial solution, solutions, passing an initial solution to CPLEX, IloOplCplexVectors class, main, IBM ILOG Script block, warmstart example" />
+<meta name="keywords" content="classes, IloOplCplexVectors, arrays, constraint-value pair (IBM ILOG Script), value arrays, constraint arrays, CPLEX engine, setting an initial solution, initial solution, solutions, passing an initial solution to CPLEX, IloOplCplexVectors class, main, IBM ILOG Script block, warmstart example" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_default_init.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_conflictbasis.1017957" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_default_init.html" />
+<title>Setting the initial solution</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_conflictbasis.1017957">
+<h1 class="title topictitle1">Setting the initial solution</h1>
+<div class="body"><p class="shortdesc">Shows how to use a value array.</p>
+<p class="p">The class that enables you to pass an initial solution
+to the CPLEX MIP algorithm is <span class="keyword apiname">IloOplCplexVectors</span>.
+You can control the part of the model to be set with an initial solution
+by attaching a pair of elements made up of a constraint array and
+a value array. The value array is defined in the model.</p>
+<pre class="pre codeblock"><code>// The following array of values (defined as data) will be used as 
+// a starting solution to warm-start the CPLEX search.
+float values[i in r] = (i==5)? 10 : 0;</code></pre>
+<p class="p">The second part of the <samp class="ph codeph">main</samp> block
+illustrates how to use it.</p>
+<pre class="pre codeblock"><code>  // Setting initial solution
+  writeln("Setting initial solution");
+  var cplex2 = new IloCplex();
+  var opl2 = new IloOplModel(def, cplex2);
+  opl2.generate();
+  var vectors = new IloOplCplexVectors();
+  // We attach the values (defined as data) as starting solution
+  // for the variables x.
+  vectors.attach(opl2.x,opl2.values);
+  vectors.setVectors(cplex2);   
+  cplex2.solve();   
+  writeln(opl2.printSolution());</code></pre>
+<p class="p">The solution is then:</p>
+<pre class="pre codeblock"><code>Setting an initial solution
+x = [0 0 0 0 10 0 0 0 0 0];
+y = [1 2 3 4 5 6 7 8 9 10];</code></pre>
+<p class="p">The CPLEX log reports:</p>
+<p class="p"><samp class="ph msgph">MIP start values provide initial solution
+with objective 65.0000</samp> </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_default_init.html" title="Uses the warmstart example and its model warmstart.mod to show how you can use the IBM ILOG Script extension class IloOplCplexVectors to set up an initial solution for CPLEX on a specific part of the model.">Setting an initial solution for the CPLEX engine</a></div>
+</div>
+</div></body>
+</html>

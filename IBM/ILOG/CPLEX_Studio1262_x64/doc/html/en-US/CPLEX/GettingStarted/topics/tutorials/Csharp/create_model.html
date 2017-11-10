@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Use classes of Concert Technology for .NET users to build a model for the problem." />
+<meta name="Description" content="Use classes of Concert Technology for .NET users to build a model for the problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/Csharp/Csharp_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_csharpStart.1017353" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Csharp/Csharp_synopsis.html" />
+<title>Model</title>
+</head>
+<body role="main" id="Getting_started.uss_csharpStart.1017353">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Use classes of Concert Technology for .NET users to build
+a model for the problem.</p>
+<p class="p">After you have written a description of the problem,
+you can use classes of Concert Technology for .NET users with CPLEX
+to build a model.</p>
+<div class="section" id="Getting_started.uss_csharpStart.1017353__Getting_started.uss_csharpStart.1020396"><h2 class="title sectiontitle">Step 2: Open the file</h2><p class="p">Open the file <em class="ph i">yourCPLEXhome</em> <samp class="ph codeph">\examples\src\tutorials\LPex1lesson.cs</samp> in your integrated development environment, such as Microsoft Visual
+Studio. </p>
+</div>
+<div class="section" id="Getting_started.uss_csharpStart.1017353__Getting_started.uss_csharpStart.1017769"><h2 class="title sectiontitle">Step 3: Create the model object</h2><p class="p">Go to the comment <strong class="ph b">Step 3</strong> in that file, and add this statement to create the <samp class="ph codeph">Cplex</samp>  model for your application. </p>
+<pre class="pre codeblock"><code>    Cplex cplex = new Cplex();
+</code></pre>
+<p class="p">That statement creates an empty instance of the class <samp class="ph codeph">Cplex</samp> . In the next steps, you will add methods that
+make it possible for your application populate the model with data,
+either by rows, by columns, or by nonzeros.</p>
+</div>
+<div class="section" id="Getting_started.uss_csharpStart.1017353__Getting_started.uss_csharpStart.1020440"><h2 class="title sectiontitle">Step 4: Populate the model by rows</h2><p class="p">Now go to the comment <strong class="ph b">Step
+4</strong> in that file, and add these lines to create a
+method to populate the empty model with data by rows.  </p>
+<pre class="pre codeblock"><code>   internal static void PopulateByRow(IMPModeler model,
+                                      INumVar[][] var,
+                                      IRange[][] rng) {
+     double[] lb = {0.0, 0.0, 0.0};
+     double[] ub = {40.0, 
+                    System.Double.MaxValue, 
+                    System.Double.MaxValue};
+     INumVar[] x  = model.NumVarArray(3, lb, ub);
+     var[0] = x;
+    
+     double[] objvals = {1.0, 2.0, 3.0};
+     model.AddMaximize(model.ScalProd(x, objvals));
+    
+     rng[0] = new IRange[2];
+     rng[0][0] = model.AddLe(model.Sum(model.Prod(-1.0, x[0]),
+                                       model.Prod( 1.0, x[1]),
+                                       model.Prod( 1.0, x[2])), 20.0);
+     rng[0][1] = model.AddLe(model.Sum(model.Prod( 1.0, x[0]),
+                                       model.Prod(-3.0, x[1]),
+                                       model.Prod( 1.0, x[2])), 30.0);
+   }
+</code></pre>
+<p class="p">Those lines populate the model with data specific to
+this particular example. However, you can see from its use of the
+interface <samp class="ph codeph">IMPModeler</samp>  how to add <em class="ph i">ranged constraint</em>s to a model. <samp class="ph codeph">IMPModeler</samp>  is the Concert Technology interface typically
+used to build math programming (MP) matrix models. You will see its
+use again in Step 5 and Step 6.</p>
+</div>
+<div class="section" id="Getting_started.uss_csharpStart.1017353__Getting_started.uss_csharpStart.1017839"><h2 class="title sectiontitle">Step 5: Populate the model by columns</h2><p class="p">Go to the comment <strong class="ph b">Step 5</strong> in the file, and add these lines to create a method to populate
+the empty model with data by columns.  </p>
+<pre class="pre codeblock"><code>   internal static void PopulateByColumn(IMPModeler model,
+                                INumVar[][] var,
+                                IRange[][] rng) {
+      IObjective obj = model.AddMaximize();
+    
+      rng[0] = new IRange[2];
+      rng[0][0] = model.AddRange(-System.Double.MaxValue, 20.0);
+      rng[0][1] = model.AddRange(-System.Double.MaxValue, 30.0);
+    
+      IRange r0 = rng[0][0];
+      IRange r1 = rng[0][1];
+    
+      var[0] = new INumVar[3];
+      var[0][0] = model.NumVar(model.Column(obj,  1.0).And(
+                               model.Column(r0,  -1.0).And(
+                               model.Column(r1,   1.0))),
+                               0.0, 40.0);
+      var[0][1] = model.NumVar(model.Column(obj,  2.0).And(
+                               model.Column(r0,   1.0).And(
+                               model.Column(r1,  -3.0))),
+                               0.0, System.Double.MaxValue);
+      var[0][2] = model.NumVar(model.Column(obj,  3.0).And(
+                               model.Column(r0,   1.0).And(
+                               model.Column(r1,   1.0))),
+                               0.0, System.Double.MaxValue);
+   }
+</code></pre>
+<p class="p">Again, those lines populate the model with data specific
+to this problem. From them you can see how to use the interface <samp class="ph codeph">IMPModeler</samp>  to add <em class="ph i">columns</em> to an empty model. </p>
+<p class="p">While for many examples population by rows may seem most
+straightforward and natural, there are some models where population
+by columns is a more natural or more efficient approach to implement.
+For example, problems with network structure typically lend themselves
+well to modeling by column. Readers familiar with matrix algebra may
+view the method <samp class="ph codeph">populateByColumn</samp>  as the
+transpose of <samp class="ph codeph">populateByRow</samp> .</p>
+<p class="p">In this approach, range objects are created for modeling
+by column with only their lower and upper bound. No <em class="ph i">expressions</em> over variables are given
+because building them at this point would be impossible since the
+variables have not been created yet. Similarly, the objective function
+is created only with its intended optimization sense, and without
+any expression. </p>
+<p class="p">Next the variables are created and installed in the existing
+ranges and objective. These newly created variables are introduced
+into the ranges and the objective by means of column objects, which
+are implemented in the class <samp class="ph codeph">IColumn</samp>. Objects
+of this class are created with the methods <samp class="ph codeph">Cplex.Column</samp>, and can be linked together with the method <samp class="ph codeph">IColumn.And</samp> to form aggregate <samp class="ph codeph">IColumn</samp> objects.</p>
+<p class="p">An <samp class="ph codeph">IColumn</samp>  object created
+with the method <samp class="ph codeph">ICplex.Column</samp> contains
+information about how to use this column to introduce a new variable
+into an existing modeling object. For example if <samp class="ph codeph">obj</samp>  is an <samp class="ph codeph">IObjective</samp>  object, <samp class="ph codeph">cplex.Column(obj, 2.0)</samp>  creates an <samp class="ph codeph">IColumn</samp>  object containing the information to install a new variable in
+the expression of the <samp class="ph codeph">IObjective</samp>  object <samp class="ph codeph">obj</samp>  with a linear coefficient of <samp class="ph codeph">2.0</samp> . Similarly, for an <samp class="ph codeph">IRange</samp>  constraint <samp class="ph codeph">rng</samp> , the method call <samp class="ph codeph">cplex.Column(rng,
+-1.0)</samp>  creates an <samp class="ph codeph">IColumn</samp>  object containing the information to install a new variable into
+the expression of <samp class="ph codeph">rng</samp> , as a linear term
+with coefficient <samp class="ph codeph">-1.0</samp> .</p>
+<p class="p">In short, when you use a modeling-by-column approach,
+new columns are created and installed as variables in all existing
+modeling objects where they are needed. To do this with Concert Technology,
+you create an <samp class="ph codeph">IColumn</samp>  object for every
+modeling object in which you want to install a new variable, and link
+them together with the method <samp class="ph codeph">IColumn.And</samp> . </p>
+</div>
+<div class="section" id="Getting_started.uss_csharpStart.1017353__Getting_started.uss_csharpStart.1017847"><h2 class="title sectiontitle">Step 6: Populate the model by nonzeros</h2><p class="p">Go to the comment <strong class="ph b">Step 6</strong> in the file, and add these lines to create a method to populate
+the empty model with data by nonzeros.  </p>
+<pre class="pre codeblock"><code>    internal static void PopulateByNonzero(IMPModeler model,
+                                 INumVar[][] var,
+                                 IRange[][] rng) {
+      double[]    lb = {0.0, 0.0, 0.0};
+      double[]    ub = {40.0, System.Double.MaxValue, System.Double.MaxValue};
+      INumVar[] x  = model.NumVarArray(3, lb, ub);
+      var[0] = x;
+    
+      double[] objvals = {1.0, 2.0, 3.0};
+      model.Add(model.Maximize(model.ScalProd(x, objvals)));
+    
+      rng[0] = new IRange[2];
+      rng[0][0] = model.AddRange(-System.Double.MaxValue, 20.0);
+      rng[0][1] = model.AddRange(-System.Double.MaxValue, 30.0);
+    
+      rng[0][0].Expr = model.Sum(model.Prod(-1.0, x[0]),
+                                 model.Prod( 1.0, x[1]),
+                                 model.Prod( 1.0, x[2]));
+      rng[0][1].Expr = model.Sum(model.Prod( 1.0, x[0]),
+                                 model.Prod(-3.0, x[1]),
+                                 model.Prod( 1.0, x[2]));
+   }
+</code></pre>
+<p class="p">In those lines, you can see how to populate an empty
+model with data indicating the nonzeros of the constraint matrix.
+Those lines first create objects for the objective and the ranges
+without expressions. They also create variables without columns; that
+is, variables with only their bounds. Then those lines create <em class="ph i">expressions</em> over the objective, ranges,
+and variables and add the expressions to the model.</p>
+</div>
+<div class="section" id="Getting_started.uss_csharpStart.1017353__Getting_started.uss_csharpStart.1018016"><h2 class="title sectiontitle">Step 7: Add an interface</h2><p class="p">Go to the comment <strong class="ph b">Step 7</strong> in the file, and add these lines to create a method that tells a
+user how to invoke this application.  </p>
+<pre class="pre codeblock"><code> internal static void Usage() {
+    System.Console.WriteLine(“usage:   LPex1 &lt;option&gt;”);
+    System.Console.WriteLine(“options: -r   build model row by row”);
+    System.Console.WriteLine(“options: -c   build model column by column”);
+    System.Console.WriteLine(“options: -n   build model nonzero by nonzero”);
+ }
+</code></pre>
+</div>
+<div class="section" id="Getting_started.uss_csharpStart.1017353__Getting_started.uss_csharpStart.1018041"><h2 class="title sectiontitle">Step 8: Add a command evaluator</h2><p class="p">Go to the comment <strong class="ph b">Step 8</strong> in the file, and add these lines to create a switch statement that
+evaluates the command that a user of your application might enter.
+ </p>
+<pre class="pre codeblock"><code>         switch ( args[0].ToCharArray()[1] ) {
+         case ‘r’: PopulateByRow(cplex, var, rng);
+                   break;
+         case ‘c’: PopulateByColumn(cplex, var, rng);
+                   break;
+         case ‘n’: PopulateByNonzero(cplex, var, rng);
+                   break;
+         default:  Usage();
+                   return;
+         }
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Csharp/Csharp_synopsis.html" title="CPLEX applications written in C#.NET use Concert Technology in the .NET framework.">.NET tutorial</a></div>
+</div>
+</div></body>
+</html>

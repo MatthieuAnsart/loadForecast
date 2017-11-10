@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Adding extractable objects: both ways" />
+<meta name="abstract" content="Describes alternative ways to add columns to the model." />
+<meta name="Description" content="Describes alternative ways to add columns to the model." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/06_model_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingColumnGen.1003324" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/06_model_title_synopsis.html" />
+<title>Adding extractable objects: both ways</title>
+</head>
+<body role="main" id="User_manual.uss_usingColumnGen.1003324">
+<h1 class="title topictitle1">Adding extractable objects: both ways</h1>
+<div class="body"><p class="shortdesc">Describes alternative ways to add columns to the model.</p>
+<p class="p">In a Concert Technology application, there are two ways
+of adding extractable objects to a model: by means of a template function
+(<samp class="ph codeph">IloAdd</samp>) or by means of a method of the
+model (<samp class="ph codeph">IloModel::add</samp>). In this example,
+you see both ways.</p>
+<div class="section" id="User_manual.uss_usingColumnGen.1003324__User_manual.uss_usingColumnGen.1007939"><h2 class="title sectiontitle">Using a template to add objects</h2><p class="p">When an objective is added to the model, the application
+needs to keep a handle to the objective <samp class="ph codeph">RollsUsed</samp> because it is needed when the application generates columns. For
+that purpose, the application relies on the template function <samp class="ph codeph">IloAdd</samp>, like this:  </p>
+<pre class="pre codeblock"><code>IloObjective   RollsUsed = IloAdd(cutOpt, IloMinimize(env));</code></pre>
+<p class="p">Apart from the fact that it preserves type information,
+that single line is equivalent to these lines:  </p>
+<pre class="pre codeblock"><code>IloObjective RollsUsed = IloMinimize(env);
+cutOpt.add(RollsUsed);</code></pre>
+<p class="p">Likewise, the application adds an array of constraints
+to the model. These constraints are needed later in column generation
+as well, so the application again uses <samp class="ph codeph">IloAdd</samp> again to add the array <samp class="ph codeph">Fill</samp> to the model.
+ </p>
+<pre class="pre codeblock"><code>IloRangeArray  Fill = IloAdd(cutOpt,
+                             IloRangeArray(env, amount, IloInfinity));</code></pre>
+<p class="p">That statement creates <samp class="ph codeph">amount.getSize</samp> range constraints. Constraint <samp class="ph codeph">Fill[i]</samp>has a lower bound of <samp class="ph codeph">amount[i]</samp>and an upper
+bound of <samp class="ph codeph">IloInfinity</samp>.</p>
+</div>
+<div class="section" id="User_manual.uss_usingColumnGen.1003324__User_manual.uss_usingColumnGen.1007940"><h2 class="title sectiontitle">Using a method to add objects</h2><p class="p">It is also possible to add objects to your model by means
+of the method <samp class="ph codeph">IloModel::add</samp>. This example
+uses that approach for the submodel in this line:  </p>
+<pre class="pre codeblock"><code>patGen.add(IloScalProd(size, Use) &lt;= rollWidth);</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/06_model_title_synopsis.html" title="Describes column generation in this application with generalizations about other applications.">Developing the model: building and modifying</a></div>
+</div>
+</div></body>
+</html>

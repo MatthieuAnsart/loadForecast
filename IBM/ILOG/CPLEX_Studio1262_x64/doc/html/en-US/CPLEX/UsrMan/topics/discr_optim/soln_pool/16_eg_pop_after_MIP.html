@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: using populate after MIP optimization" />
+<meta name="abstract" content="Illustrates contrast between MIP optimization and the populate procedure." />
+<meta name="Description" content="Illustrates contrast between MIP optimization and the populate procedure." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/13_pop_vs_accum_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solnpool.1048877" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/13_pop_vs_accum_title_synopsis.html" />
+<title>Example: using populate after MIP optimization</title>
+</head>
+<body role="main" id="User_manual.uss_solnpool.1048877">
+<h1 class="title topictitle1">Example: using populate after MIP optimization</h1>
+<div class="body"><p class="shortdesc">Illustrates contrast between MIP optimization and the
+populate procedure.</p>
+<p class="p">After invoking MIP Optimization, you can generate additional
+solutions with populate. You can use this possibility to get a few
+additional solutions quickly if the solutions obtained during MIP
+Optimization are not satisfactory. However, as explained in <a class="xref" href="15_adv.html" title="Explains when to invoke the populate procedure.">Advanced use: interaction of MIP optimization and populate</a>,
+the sequence MIP Optimization followed by populate is especially useful
+to control the parameters and the stopping criteria of each phase
+of populate.</p>
+<p class="p">Consider again the model in <a class="xref" href="03_eg_facility_location.html" title="Describes a model used in documentation of the solution pool.">Example: simple facility location problem</a>.
+Suppose that the transportations costs are subject to fluctuations,
+and consequently it does not make sense to spend time optimizing the
+model exactly to optimality. You can set the MIP gap tolerance (<a class="xref" href="../../../../Parameters/topics/EpAGap.html" title="Sets an absolute tolerance on the gap between the best integer objective and the objective of the best node remaining.">absolute MIP gap tolerance</a>: <samp class="ph codeph">EpAGap</samp>, <samp class="ph codeph">CPX_PARAM_EPAGAP</samp>; <a class="xref" href="../../../../Parameters/topics/EpGap.html" title="Sets a relative tolerance on the gap between the best integer objective and the objective of the best node remaining.">relative MIP gap tolerance</a> <samp class="ph codeph">EpGap</samp>, <samp class="ph codeph">CPX_PARAM_EPGAP</samp>)
+to a value higher than the default (in this example: 5%) so that the
+MIP optimization, which constitutes the first phase of populate, stops
+earlier. Then, populate will go immediately into the second phase,
+so it can start producing solutions sooner.</p>
+<p class="p">The commands to reproduce this situation looks like this
+in the Interactive Optimizer: </p>
+<pre class="pre codeblock"><code>read location.lp
+set mip pool intensity 2
+set mip tolerances mipgap 0.05
+mipopt
+populate</code></pre>
+<p class="p">MIP optimization (as executed by <samp class="ph codeph">mipopt</samp> 
+in the Interactive Optimizer) shows these results:  </p>
+<pre class="pre codeblock"><code>Solution pool: 3 solutions saved.
+
+MIP - Integer optimal, tolerance (0.05/1e-06): Objective = 4.9900000000e+02
+Current MIP best bound =  4.7976250000e+02 (gap = 19.2375, 3.86%)
+Solution time =    0.05 sec.  Iterations = 135  Nodes = 11 (6)
+</code></pre>
+<p class="p">Populate (following <samp class="ph codeph">mipopt</samp> 
+in the Interactive Optimizer) shows results like these: </p>
+<pre class="pre codeblock"><code>Solution pool: 23 solutions saved.
+
+Populate - Populate solution limit exceeded, integer feasible:
+Objective =  4.9900000000e+02
+Current MIP best bound =  4.9278787879e+02 (gap = 6.21212, 1.24%)
+Solution time =    0.05 sec.  Iterations = 271  Nodes = 261 (53)
+</code></pre>
+<p class="p">In this example, the <a class="xref" href="../../../../Parameters/topics/SolnPoolIntensity.html" title="Controls the trade-off between the number of solutions generated for the solution pool and the amount of time or memory consumed.">solution pool intensity</a> (<samp class="ph codeph">SolnPoolIntensity</samp>, <samp class="ph codeph">CPX_PARAM_SOLNPOOLINTENSITY</samp>)
+is set to 2 because the default automatic value of this parameter
+for the sequence MIP optimization followed by populate is not the
+fastest possible setting for generating a large number of solutions.
+If you use this sequence of commands to control precisely the behavior
+of the optimizer in the first and second phase of populate, it is
+a good idea to reset the pool intensity parameter yourself, rather
+than relying on its default value.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/13_pop_vs_accum_title_synopsis.html" title="Explains differences between accumulating incumbents and generating multiple solutions in the solution pool.">Choosing whether to accumulate or populate</a></div>
+</div>
+</div></body>
+</html>

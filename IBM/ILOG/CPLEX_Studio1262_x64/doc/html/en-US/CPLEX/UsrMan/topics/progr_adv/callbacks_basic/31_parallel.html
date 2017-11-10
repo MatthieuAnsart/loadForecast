@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Interaction between callbacks and parallel optimizers" />
+<meta name="abstract" content="Describes interaction of callbacks with parallel optimizers." />
+<meta name="Description" content="Describes interaction of callbacks with parallel optimizers." />
+<meta name="DC.subject" content="CPXcreateprob, callbacks, environment and, environment, callbacks and, threads and, threads, parallelism and, parallelism" />
+<meta name="keywords" content="CPXcreateprob, callbacks, environment and, environment, callbacks and, threads and, threads, parallelism and, parallelism" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callbacks.1045870" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<title>Interaction between callbacks and parallel optimizers</title>
+</head>
+<body role="main" id="User_manual.uss_callbacks.1045870">
+<h1 class="title topictitle1">Interaction between callbacks and parallel optimizers</h1>
+<div class="body"><p class="shortdesc">Describes interaction of callbacks with parallel optimizers.</p>
+<p class="p">When you use callback routines, and invoke the parallel
+implementation of CPLEX optimizers, you need to be aware that the
+CPLEX environment passed to the callback routine corresponds to an
+individual CPLEX thread rather than to the original environment created.
+CPLEX frees this environment when finished with the thread. This convention
+does not affect most uses of the callback function. However, keep
+in mind that CPLEX associates problem objects, parameter settings,
+and message channels with the environment that specifies them. CPLEX
+therefore frees these items when it removes that environment; if the
+callback uses routines like <samp class="ph codeph">CPXcreateprob</samp>, <samp class="ph codeph">CPXcloneprob</samp>,
+or <samp class="ph codeph">CPXgetchannels</samp>, those objects remain
+allocated only as long as the associated environment does. (You should
+not change parameters from within a callback.) So, applications that
+access CPLEX objects in the callback should use the original environment
+you created if they need to access these objects outside the scope
+of the callback function. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> Using a callback can implicitly cause CPLEX to switch to single-threaded 
+solves at default parameter settings. See the documentation of 
+<a class="xref" href="../../../../Parameters/topics/Threads.html" title="Sets the default number of parallel threads that will be invoked by any CPLEX parallel optimizer.">global thread count</a>
+(<span class="keyword apiname">CPX_PARAM_THREADS</span>, <span class="keyword apiname">Threads</span>) in the 
+reference manual <em class="ph i">Parameters of CPLEX</em> 
+for further details about this issue.</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" title="Introduces optimization callbacks.">Using optimization callbacks</a></div>
+</div>
+</div></body>
+</html>

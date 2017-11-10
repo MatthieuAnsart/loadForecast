@@ -1,0 +1,303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IlcIntExp</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IlcIntExp.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IlcIntExp</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+                class="include-file">&lt;ilcp/cpext.h&gt; </span></div><div><img
+                src="IlcIntExp.png" border="0"
+                usemap="#svg_map_IlcIntExp" alt="Map of IlcIntExp"><map
+                        name="svg_map_IlcIntExp"><area
+                        href="../classes/IlcIntExp.html" shape="rect"
+                        alt="IlcIntExp"
+                        coords="10.0,10.0,57.0,27.6357421875" /><area
+                        href="../classes/IlcIntVar.html" shape="rect"
+                        alt="IlcIntVar"
+                        coords="43.5,37.6357421875,90.5,55.271484375" /><area
+                        href="../classes/IlcIntExp.html" shape="rect"
+                        alt="IlcIntExp"
+            coords="10.0,10.0,57.0,27.6357421875" /></map></img></div>
+The class for representing integer expressions.
+    <div
+                    class="description"><p>In a typical application exploiting CP Optimizer, the unknowns of the problem
+ will be expressed as constrained variables. The most commonly used class of
+ constrained variables is the class of constrained <em>integer</em>
+ variables. <code>IlcIntExp</code>, the class of constrained integer
+ expressions, is the root class of a group of classes for expressing
+ constraints on integer variables.</p><p>Most member functions in this class contain <code>assert</code>
+ statements. For an explanation of the macro <code>NDEBUG</code> (a way to
+ turn on or turn off these <code>assert</code> statements), see the concept
+ <a
+                            href="../assert-and-ndebug.html">Assert and NDEBUG</a>. </p><p><strong>Domain</strong></p><p>The domain of a constrained integer expression is <em>computed</em> from
+ the domains of its subexpressions. For example, the domain of the expression
+ <code>x+y</code> contains the range <code>[x.getMin()+y.getMin(),
+ x.getMax()+y.getMax()]</code>.</p><p>A constrained integer variable is a constrained expression that
+ <em>stores</em> its domain instead of computing it from its subexpressions.
+ The domain of a constrained integer variable contains values of type
+ <code>IlcInt</code>. This domain is represented by an interval when the
+ values are consecutive or by an enumeration of integers otherwise.</p><p>Constrained integer variables can be combined with arithmetic operators
+ to yield constrained integer expressions. Each constrained integer
+ expression has a minimum and a maximum. We say that the expression is
+ <em>fixed</em> if its minimum equals its maximum.</p><p>The domain of a constrained integer expression can be reduced to the
+ point of being empty. In such a case, failure occurs since no solution is
+ then possible.</p><p><strong>Expression versus Variable</strong></p><p><code>IlcIntVar</code> is a subclass deriving from
+ <code>IlcIntExp</code>. Another way to describe this is that a
+ constrained variable is a constrained expression that happens to store its
+ domain. You can convert a constrained integer expression (which computes its
+ domain) into a constrained integer variable (which stores its domain) by
+ either of two means: by the casting constructor of
+ <code>IlcIntVar</code> or by the assignment operator of
+ <code>IlcIntVar</code>.</p><p><strong>Overflow and Underflow</strong></p><p>CP Optimizer manages integer overflow and underflow in these ways:</p><ul>
+<li>The arithmetic operators
+ <code>+</code>, <code>*</code>, <code>-</code>, <code>/</code> do not cause
+ overflow in CP Optimizer.</li><li>The member function <code><a
+                            href="../classes/IlcIntExp.html#method_getSize">IlcIntExp::getSize</a></code> returns <code><a
+                            href="../variables/IloIntMax.html">IloIntMax</a></code> whenever <code>
+ max - min</code> is greater than <code><a
+                            href="../variables/IloIntMax.html">IloIntMax</a></code>.</li><li>If an integer expression overflows negatively (that is, if a bound is
+ less than <code><a
+                            href="../variables/IloIntMin.html">IloIntMin</a></code>), then CP Optimizer replaces that bound by
+ <code><a
+                            href="../variables/IloIntMin.html">IloIntMin</a></code>.</li><li>If an integer expression overflows positively (that is, if a bound is
+ greater than <code><a
+                            href="../variables/IloIntMax.html">IloIntMax</a></code>) then CP Optimizer replaces that bound by
+ <code><a
+                            href="../variables/IloIntMax.html">IloIntMax</a></code>.</li><li>the CP Optimizer engine evaluates the expression <code>
+ 0/0</code> as the interval <code>
+ [<a
+                            href="../variables/IloIntMin.html">IloIntMin</a>..<a
+                    href="../variables/IloIntMax.html">IloIntMax</a>]</code>.</li>
+</ul><p><strong>Backtracking and Reversibility</strong></p><p>All the member functions and operators defined for this class and capable
+ of modifying constrained variables are <em>reversible</em>. In particular,
+ the changes made by constraint-posting functions are made with reversible
+ assignments. Thus, the value, the domain, and the constraints posted on any
+ constrained variable are restored when CP Optimizer backtracks.</p><p><strong>Modifiers</strong></p><p>For modifiers of <code>IlcIntExp</code>, see the concept 
+ <a
+                    href="../propagationevents.html">Propagation events in CP Optimizer</a>.</p><p>For more information, see the concept 
+ <a
+            href="../propagation.html">Propagation in CP Optimizer</a>.</p><p>A modifier is a member function that reduces the domain of a constrained
+ integer expression, if it can. The modifier is not stored, in contrast to a
+ constraint. If the constrained integer expression is a constrained integer
+ variable, the modifications due to the modifier call are stored in its
+ domain. Otherwise, the effect of the modifier is propagated to the
+ subexpressions of the constrained integer expression. If the domain becomes
+ empty, a failure is triggered by a call to the member function
+ <code>IloCP::fail</code>. Modifiers are usually used to define new
+ <em>classes</em> of constraints.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../functions/IlcAbs.html">IlcAbs</a>, <a
+                href="../classes/IlcIntExpIterator.html">IlcIntExpIterator</a>, <a
+                href="../classes/IlcIntSet.html">IlcIntSet</a>, <a
+                href="../classes/IlcIntVar.html">IlcIntVar</a>, <a
+                href="../classes/IlcIntVarArray.html">IlcIntVarArray</a>, <a
+                href="../functions/IlcMax.html">IlcMax</a>, <a
+                href="../functions/IlcMin.html">IlcMin</a>, <a
+                href="../functions/IlcScalProd.html">IlcScalProd</a>, <a
+                href="../functions/IlcSquare.html">IlcSquare</a>, <a
+                href="../functions/IlcSum.html">IlcSum</a>, <a
+                href="../functions/operator_plus.html">operator+</a>, <a
+                href="../functions/operator_div.html">operator/</a>, <a
+                href="../functions/operator_mult.html">operator*</a>, <a
+                href="../functions/operator_min.html">operator-</a>, <a
+            href="../functions/operator_inf_inf.html">operator&lt;&lt;</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcInt.html">IlcInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcIntExp.html#method_getMax">getMax</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcInt.html">IlcInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcIntExp.html#method_getMin">getMin</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcInt.html">IlcInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcIntExp.html#method_getSize">getSize</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcInt.html">IlcInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcIntExp.html#method_getValue">getValue</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcIntExp.html#method_IlcIntExp">IlcIntExp</a>(<a
+                    href="../classes/IlcConstraint.html">IlcConstraint</a> bexp)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcBool.html">IlcBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcIntExp.html#method_isFixed">isFixed</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcIntExp.html#method_setMax">setMax</a>(<a
+                    href="../typedefs/IlcInt.html">IlcInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcIntExp.html#method_setMin">setMin</a>(<a
+                    href="../typedefs/IlcInt.html">IlcInt</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcIntExp.html#method_setRange">setRange</a>(<a
+                            href="../typedefs/IlcInt.html">IlcInt</a> min, <a
+                    href="../typedefs/IlcInt.html">IlcInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcIntExp.html#method_setValue">setValue</a>(<a
+            href="../typedefs/IlcInt.html">IlcInt</a> value) const</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IlcIntExp">IlcIntExp</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IlcIntExp</span>(<a
+                href="../classes/IlcConstraint.html">IlcConstraint</a> <span
+            class="parameter-name">bexp</span>)</div><div
+                class="description"><p>A constrained Boolean expression in CP Optimizer can be seen as a 0-1 (that
+ is, binary) constrained integer expression where <code>IlcFalse</code>
+ corresponds to 0, and <code>IlcTrue</code> corresponds to 1. This
+ constructor creates a constrained integer expression which is equal
+ to the truth value of the argument <code>bexp</code>. In other words,
+ you can use this constructor to cast a constraint to a constrained
+ integer expression.</p><p>Such a constrained integer expression can then be used like any
+ other constrained integer expression. It is thus possible to express
+ sums of constraints. For example, the following code expresses the idea
+ that three variables cannot all be equal.</p><pre
+                class="sample">
+ m.add((x != y) + (y != z) + (z != x) &gt;= 2);</pre></div><hr /><h3><a
+            name="method_getMax">getMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="function-name">getMax</span>() const</div><div
+                class="description"><p>This member function returns the maximum of the domain of the
+ invoking object.</p></div><hr /><h3><a
+            name="method_getMin">getMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="function-name">getMin</span>() const</div><div
+                class="description"><p>This member function returns the minimum of the domain of the
+ invoking object.</p></div><hr /><h3><a
+            name="method_getSize">getSize</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="function-name">getSize</span>() const</div><div
+                        class="description"><p>This member function returns the number of elements in the domain of
+ the invoking expression. In particular, it returns 1 if the invoking
+ constrained integer expression is fixed, and it returns
+ <code><a
+                        href="../variables/IloIntMax.html">IloIntMax</a></code> whenever <code>max - min</code>
+ is greater than <code><a
+                href="../variables/IloIntMax.html">IloIntMax</a></code>.</p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="function-name">getValue</span>() const</div><div
+                class="description"><p>This member function returns the value of the invoking constrained
+ integer expression if that object is fixed; otherwise, CP Optimizer will
+ throw an exception (an instance of
+ <code>IloCP::Exception</code>). To avoid errors with
+ <code>getValue</code>, you can test expressions by means of
+ <code>isFixed</code>.</p></div><hr /><h3><a
+            name="method_isFixed">isFixed</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcBool.html">IlcBool</a> <span
+            class="function-name">isFixed</span>() const</div><div
+                class="description"><p>This member function returns <code>IlcTrue</code> if the invoking
+ constrained integer expression is fixed, that is, if its minimum equals
+ its maximum. Otherwise, the member function returns
+ <code>IlcFalse</code>.</p></div><hr /><h3><a
+            name="method_setMax">setMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMax</span>(<a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function removes all the elements that are greater than
+ <code>max</code> from the domain of the invoking constrained expression.
+ If the domain thus becomes empty, then the member function
+ <code>IloCP::fail</code> is called. Otherwise, if the domain is
+ modified, the range and domain propagation events are generated.
+ Moreover, if the invoking constrained integer expression becomes
+ fixed, then the value propagation event is also generated. The
+ effects of this member function are reversible.</p></div><hr /><h3><a
+            name="method_setMin">setMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMin</span>(<a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function removes all the elements that are less than
+ <code>min</code> from the domain of the invoking constrained expression.
+ If the domain thus becomes empty, then the member function
+ <code>IloCP::fail</code> is called. Otherwise, if the domain is
+ modified, the range and domain propagation events are generated.
+ Moreover, if the invoking constrained integer expression becomes
+ fixed, then the value propagation event is also generated. The
+ effects of this member function are reversible.</p></div><hr /><h3><a
+            name="method_setRange">setRange</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setRange</span>(<a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+                class="parameter-name">min</span>, <a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function removes all the elements that are either less
+ than <code>min</code> or greater than <code>max</code> from the domain
+ of the invoking constrained expression. If the domain thus becomes empty,
+ then the member function <code>IloCP::fail</code> is called. Otherwise,
+ if the domain is modified, the propagation events <code>range</code> and
+ <code>domain</code> are generated. Moreover, if the invoking constrained
+ integer expression becomes fixed, then the value propagation event is
+ also generated. The effects of this member function are reversible.</p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(<a
+                href="../typedefs/IlcInt.html">IlcInt</a> <span
+            class="parameter-name">value</span>) const</div><div class="description"><p>This member function removes all the elements that are different
+ from<code> value</code> from the domain of the invoking constrained
+ integer expression. This has two possible outcomes:</p><ul>
+<li>If <code>
+ value</code> was not in the domain of the invoking constrained
+ integer expression, the domain becomes empty, and the member
+ function <code>
+ IloCP::fail</code> is called.</li><li>If <code>
+ value</code> was in the domain, then <code>
+ value</code> becomes the value of the expression, and the value,
+ range, and domain propagation events are generated.</li>
+</ul><p>The effects of this member function are reversible.</p></div><hr /></body>
+</html>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Selecting an optimizer" />
+<meta name="abstract" content="Select an optimizer in a C++ application on the basis of the problem type." />
+<meta name="Description" content="Select an optimizer in a C++ application on the basis of the problem type." />
+<meta name="DC.subject" content="MIP, solving (C++ API), choosing, optimizer (C++ API), optimizer, syntax for choosing (C++ API), LP, root (C++ API), root LP, solving, root LP (C++ API), node (C++ API), node LP, node LP (C++ API), IloCplex class (C++ API), setParam method, QP, applicable algorithms (C++ API), solving pure (C++ API)" />
+<meta name="keywords" content="MIP, solving (C++ API), choosing, optimizer (C++ API), optimizer, syntax for choosing (C++ API), LP, root (C++ API), root LP, solving, root LP (C++ API), node (C++ API), node LP, node LP (C++ API), IloCplex class (C++ API), setParam method, QP, applicable algorithms (C++ API), solving pure (C++ API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/Cplusplus/cpp_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_cplusStart.1000372" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Cplusplus/cpp_synopsis.html" />
+<title>Selecting an optimizer</title>
+</head>
+<body role="main" id="Getting_started.uss_cplusStart.1000372">
+<h1 class="title topictitle1">Selecting an optimizer</h1>
+<div class="body"><p class="shortdesc">Select an optimizer in a C++ application on the
+basis of the problem type.</p>
+<p class="p">  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a> 
+treats all problems it solves as Mixed Integer Programming (MIP) problems.
+The algorithm used by <samp class="ph codeph">IloCplex</samp> for solving
+MIP is known as dynamic search or branch and cut (referred to in some
+contexts as branch and bound) and is documented in more detail in
+the <em class="ph i">CPLEX User’s Manual</em>. For this tutorial, it is
+sufficient to know that this algorithm consists of solving a sequence
+of LPs, QPs, or QCPs that are generated in the course of the algorithm.
+The first LP, QP, or QCP to be solved is known as the root, while
+all the others are referred to as nodes and are derived from the root
+or from other nodes. If the model extracted to the <samp class="ph codeph">cplex</samp> object
+is a pure LP, QP, or QCP (no integer variables), then it will be fully
+solved at the root.</p>
+<p class="p">As mentioned in <a class="xref" href="../../preface/chooseOptimizer.html" title="Introduces the options available in CPLEX.">Optimizer options</a>, various optimizer
+options are provided for solving LPs, QPs, and QCPs. While the default
+optimizer works well for a wide variety of models, <samp class="ph codeph">IloCplex</samp> allows
+you to control which option to use for solving the root and for solving
+the nodes, respectively, by the following methods:</p>
+<pre class="pre codeblock"><code>void IloCplex::setParam(IloCplex::RootAlg, alg)
+void IloCplex::setParam(IloCplex::NodeAlg, alg)</code></pre>
+<p class="p">where  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html" title="(Opens in a new tab or window)">IloCplex::Algorithm</a> 
+is an enumeration type. It defines the following symbols with their
+meaning: </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table listing optimizers with a brief description." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top">  <samp class="ph codeph">IloCplex::AutoAlg</samp>  </td>
+<td class="entry" valign="top"> allow CPLEX to choose the algorithm  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">  <samp class="ph codeph">IloCplex::Dual</samp>  </td>
+<td class="entry" valign="top"> use the dual simplex algorithm </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">  <samp class="ph codeph">IloCplex::Primal</samp>  </td>
+<td class="entry" valign="top"> use the primal simplex algorithm </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">  <samp class="ph codeph">IloCplex::Barrier</samp>  </td>
+<td class="entry" valign="top"> use the barrier algorithm </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">  <samp class="ph codeph">IloCplex::Network</samp>  </td>
+<td class="entry" valign="top"> use the network simplex algorithm for the embedded
+network </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">  <samp class="ph codeph">IloCplex::Sifting</samp>  </td>
+<td class="entry" valign="top"> use the sifting algorithm </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">  <samp class="ph codeph">IloCplex::Concurrent</samp>  </td>
+<td class="entry" valign="top"> allow CPLEX to use multiple algorithms on multiple
+computer processors </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">For QP models, only the <samp class="ph codeph">AutoAlg</samp>, <samp class="ph codeph">Dual</samp>, <samp class="ph codeph">Primal</samp>, <samp class="ph codeph">Barrier</samp>, and <samp class="ph codeph">Network</samp> algorithms
+are applicable. </p>
+<p class="p">Set the root algorithm argument to select the optimizer
+that CPLEX uses to solve a pure LP or QPs. The example <samp class="ph codeph">ilolpex2.cpp</samp> illustrates
+this practice.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Cplusplus/cpp_synopsis.html" title="This tutorial shows you how to write C++ applications using CPLEX with Concert Technology. In this tutorial you will learn about:">C++ tutorial</a></div>
+</div>
+</div></body>
+</html>

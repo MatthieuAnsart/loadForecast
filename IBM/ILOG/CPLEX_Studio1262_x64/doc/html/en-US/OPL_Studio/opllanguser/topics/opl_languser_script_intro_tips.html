@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="A few tips on scripting" />
+<meta name="abstract" content="Comments on various characteristics of IBM ILOG Script for OPL of which you should be aware when writing script statements." />
+<meta name="Description" content="Comments on various characteristics of IBM ILOG Script for OPL of which you should be aware when writing script statements." />
+<meta name="DC.subject" content="tips for scripting, scripting, tips" />
+<meta name="keywords" content="tips for scripting, scripting, tips" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_intro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_script_intro.1015634" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_intro.html" />
+<title>A few tips on scripting</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_script_intro.1015634">
+<h1 class="title topictitle1">A few tips on scripting</h1>
+<div class="body"><p class="shortdesc">Comments on various characteristics of IBM® ILOG® Script
+for OPL of which you should be aware when writing script statements.</p>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1015634__usropllangtut.uss_langtut_script_intro.1015622"><h2 class="title sectiontitle">The
+OPL interpreter</h2><p class="p"></p>
+<p class="p">The
+OPL interpreter performs the following tasks:</p>
+<ul class="ul"><li class="li"><p class="p">declarations: types, names for data and decision variables </p>
+</li>
+<li class="li"><p class="p">instantiation </p>
+ </li>
+<li class="li"><p class="p">data sources: data given in files or other sources </p>
+</li>
+<li class="li"><p class="p">preprocessing: scripting blocks </p>
+ </li>
+<li class="li"><p class="p">modeling: objective and constraints </p>
+ </li>
+<li class="li"><p class="p">postprocessing</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1015634__usropllangtut.uss_langtut_script_intro.1013727"><h2 class="title sectiontitle">Script
+variables</h2><p class="p">Script
+variables declared in one <samp class="ph codeph">execute</samp> block are not visible
+in other <samp class="ph codeph">execute</samp> blocks.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1015634__usropllangtut.uss_langtut_script_intro.1014088"><h2 class="title sectiontitle">Processing
+order</h2><p class="p">After the declarations, all the data
+sources are processed. Preprocessing is done before modeling. Postprocessing
+is available after a solution is found. However, some postprocessing
+instructions are not triggered unless the <span class="keyword apiname">postProcess</span> method
+is explicitly called on the model object. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">When the “Force
+element usage” option is turned off (the default value), all the declared
+elements are instantiated “on demand”, that is, when they are first
+used and the interpreter issues warnings for unused elements. When
+you turn this option on, all elements are used and no warning message
+is issued. </p>
+ </div>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1015634__usropllangtut.uss_langtut_script_intro.1013675"><h2 class="title sectiontitle">Data
+initialization</h2><p class="p">If you declare the data of your project internally
+in the model file (as opposed to externally in a data file), you cannot
+access it later by means of a script statement such as:</p>
+<pre class="pre codeblock"><code> myData.myArray_inMod[1] = 2; </code></pre>
+<p class="p">Otherwise,
+OPL throws an error message because data elements only hold external
+data elements declared using the <samp class="ph codeph">=... (ellipsis)</samp> syntax
+and read from a <samp class="ph codeph">.dat</samp> file or other data source.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1015634__usropllangtut.uss_langtut_script_intro.1011123"><h2 class="title sectiontitle">Control
+on the solve operation</h2><p class="p">The solve operation is performed
+by the flow control in a <samp class="ph codeph">main</samp> block, via the <samp class="ph codeph">oplrun</samp> command,
+or in the IDE.</p>
+<p class="p">A specific API is provided to enable advanced
+users to control these tasks. Please refer to the <span class="ph filepath">oplrunsample.cpp</span> example.
+This file is at the following location: </p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl_interfaces\cpp\src</span> </p>
+<p class="p">where <samp class="ph codeph">&lt;Install_dir&gt;</samp> is
+your installation directory.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Solutions after the solve operation</h2><p class="p"><samp class="ph codeph">NumVar</samp> and <samp class="ph codeph">NumExpr</samp> objects
+are automatically converted to numbers after a solve, whatever the
+context.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1015634__usropllangtut.uss_langtut_script_intro.1015223"><h2 class="title sectiontitle">Ending
+objects</h2><p class="p">In preprocessing, postprocessing, or flow control
+context, you can end the OPL elements you don’t need to reduce overall
+memory consumption.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1015634__usropllangtut.uss_langtut_script_intro.1013204"><h2 class="title sectiontitle">Debugging</h2><p class="p">To
+improve the response time of your script blocks, OPL provides the
+Profiler as a debugging tool. See <a class="xref" href="../../usroplide/topics/opl_ide_profil.html" title="Explains how the IDE Profiler table can help you improve your model to make it run faster while consuming less memory.">Profiling the execution of a model</a> for more
+information on how to identify the blocks that are good candidates
+for improvement.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_intro.html" title="Defines IBM ILOG Script as a scripting language and describes the situations in which it is used: preprocessing, postprocessing, and flow control. Also provides programming tips and warns you of pitfalls to avoid.">Introduction to scripting</a></div>
+</div>
+</div></body>
+</html>

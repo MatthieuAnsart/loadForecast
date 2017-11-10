@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using the Callable Library" />
+<meta name="abstract" content="This C application solves the model in this way.." />
+<meta name="Description" content="This C application solves the model in this way.." />
+<meta name="DC.subject" content="Callable Library, example model" />
+<meta name="keywords" content="Callable Library, example model" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_ataglance.1010084" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<title>Using the Callable Library</title>
+</head>
+<body role="main" id="Getting_started.uss_ataglance.1010084">
+<h1 class="title topictitle1">Using the Callable Library</h1>
+<div class="body"><p class="shortdesc">This C application solves the model in this way..</p>
+<p class="p">Here is a C application using the CPLEX Callable Library
+to solve the example. An expanded form of this example is discussed
+in detail in <a class="xref" href="../CallableLibrary/synopsis.html" title="Applications written in C use the CPLEX Callable Library (C API).">Callable Library tutorial</a>. </p>
+<pre class="pre codeblock"><code>#include &lt;ilcplex/cplex.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+#define NUMROWS    2
+#define NUMCOLS    3
+#define NUMNZ      6
+
+int
+main (int argc, char **argv)
+{
+   int       status = 0;
+   CPXENVptr env = NULL;
+   CPXLPptr  lp  = NULL;
+
+   double   obj[NUMCOLS];
+   double   lb[NUMCOLS];
+   double   ub[NUMCOLS];
+   double   x[NUMCOLS];
+   int      rmatbeg[NUMROWS];
+   int      rmatind[NUMNZ];
+   double   rmatval[NUMNZ];
+   double   rhs[NUMROWS];
+   char     sense[NUMROWS];
+
+   int      solstat;
+   double   objval;
+
+   env = CPXopenCPLEX (&amp;status);
+   if ( env == NULL ) {
+      char  errmsg[1024];
+      fprintf (stderr, "Could not open CPLEX environment.\n");
+      CPXgeterrorstring (env, status, errmsg);
+      fprintf (stderr, "%s", errmsg);
+      goto TERMINATE;
+   }</code></pre>
+<pre class="pre codeblock"><code>   lp = CPXcreateprob (env, &amp;status, "lpex1");
+   if ( lp == NULL ) {
+      fprintf (stderr, "Failed to create LP.\n");
+      goto TERMINATE;
+   }
+
+   CPXchgobjsen (env, lp, CPX_MAX);
+
+       obj[0] = 1.0;      obj[1] = 2.0;           obj[2] = 3.0;
+        lb[0] = 0.0;       lb[1] = 0.0;           lb[2]  = 0.0;
+        ub[0] = 40.0;      ub[1] = CPX_INFBOUND;  ub[2]  = CPX_INFBOUND;
+
+   status = CPXnewcols (env, lp, NUMCOLS, obj, lb, ub, NULL, NULL);
+   if ( status ) {
+      fprintf (stderr, "Failed to populate problem.\n");
+      goto TERMINATE;
+   }
+
+   rmatbeg[0] = 0;
+   rmatind[0] = 0;     rmatind[1] = 1;    rmatind[2] = 2;  sense[0] = 'L';
+   rmatval[0] = -1.0;  rmatval[1] = 1.0;  rmatval[2] = 1.0;  rhs[0] = 20.0;
+
+   rmatbeg[1] = 3;
+   rmatind[3] = 0;    rmatind[4] = 1;    rmatind[5] = 2;     sense[1] = 'L';
+   rmatval[3] = 1.0;  rmatval[4] = -3.0; rmatval[5] = 1.0;   rhs[1]   = 30.0;
+
+   status = CPXaddrows (env, lp, 0, NUMROWS, NUMNZ, rhs, sense, rmatbeg,
+                        rmatind, rmatval, NULL, NULL);
+   if ( status ) {
+      fprintf (stderr, "Failed to populate problem.\n");
+      goto TERMINATE;
+   }
+
+   status = CPXlpopt (env, lp);
+   if ( status ) {
+      fprintf (stderr, "Failed to optimize LP.\n");
+      goto TERMINATE;
+   }
+
+   status = CPXsolution (env, lp, &amp;solstat, &amp;objval, x, NULL, NULL, NULL);
+   if ( status ) {
+      fprintf (stderr, "Failed to obtain solution.\n");
+      goto TERMINATE;
+   }
+   printf ("\nSolution status = %d\n", solstat);
+   printf ("Solution value  = %f\n", objval);
+   printf ("Solution        = [%f, %f, %f]\n\n", x[0], x[1], x[2]);</code></pre>
+<pre class="pre codeblock"><code>TERMINATE:
+
+   if ( lp != NULL ) {
+      status = CPXfreeprob (env, &amp;lp);
+      if ( status ) {
+         fprintf (stderr, "CPXfreeprob failed, error code %d.\n", status);
+      }
+   }
+
+   if ( env != NULL ) {
+      status = CPXcloseCPLEX (&amp;env);
+      if ( status ) {
+         char  errmsg[1024];
+         fprintf (stderr, "Could not close CPLEX environment.\n");
+         CPXgeterrorstring (env, status, errmsg);
+         fprintf (stderr, "%s", errmsg);
+      }
+   }
+
+   return (status);
+
+}  /* END main */</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" title="This example solves an LP model to contrast CPLEX components.">Solving an LP with CPLEX</a></div>
+</div>
+</div></body>
+</html>

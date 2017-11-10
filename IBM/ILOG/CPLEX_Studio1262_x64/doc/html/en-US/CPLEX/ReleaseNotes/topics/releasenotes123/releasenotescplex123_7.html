@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="String comparisons: impact of encoding on existing applications" />
+<meta name="abstract" content="Suggests ways to evaluate impact of new encoding parameters on existing applications." />
+<meta name="Description" content="Suggests ways to evaluate impact of new encoding parameters on existing applications." />
+<meta name="DC.subject" content="string comparison" />
+<meta name="keywords" content="string comparison" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1301384634880" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" />
+<title>String comparisons: impact of encoding on existing applications</title>
+</head>
+<body role="main" id="descriptiveTopic1301384634880">
+<h1 class="title topictitle1">String comparisons: impact of encoding on existing applications</h1>
+<div class="body"><p class="shortdesc">Suggests ways to evaluate impact of new encoding parameters
+on existing applications.</p>
+<p class="p">CPLEX V12.3 offers new parameters to control encoding
+of file names and other data passed between your application and the
+APIs of CPLEX. For more about these new parameters, see the topic <a class="xref" href="releasenotescplex123_2.html#Release_notes.uss_relnotescplex.1009061__section1299681055028">Globalization: new parameters for encoding</a> in these release notes. </p>
+<p class="p"> In the context of these new parameters, CPLEX V12.3
+respects these conventions:</p>
+<ul class="ul"><li class="li"><p class="p">CPLEX V12.3 passes file names to your
+operating system intact, with no change, up to the terminating 0-byte. </p>
+</li>
+<li class="li"><p class="p">CPLEX V12.3 also passes encodings (that
+is, the name of a code page, such as the string <samp class="ph codeph">UTF-8</samp>)
+in tact, up to the terminating 0-byte.</p>
+</li>
+</ul>
+<p class="p">As a result of modifications in CPLEX V12.3 with respect
+to encoding of strings passed to the APIs and retrieved from the APIs,
+comparison of a string, such as a variable name, in a user’s
+application, with the apparently same string retrieved from the API
+can give surprising results. In particular, the conventional system
+function <samp class="ph codeph">strcmp</samp> can return unexpected results
+due to differences in encoding (that is, code pages) and its lack
+of awareness of normalization.</p>
+<p class="p">To avoid misleading comparisons by <samp class="ph codeph">strcmp</samp> especially
+with respect to <strong class="ph b">names of variables</strong>,
+the following alternative strategies exist. These alternative strategies
+are listed in order, starting from the best to the most problematic. </p>
+<ol class="ol"><li class="li"><p class="p">Use the <strong class="ph b">index</strong> of
+the variable, rather than its name (a string) for comparison. The
+index of a variable is unique and does not risk misleading results
+from a comparison of strings, regardless of encoding. </p>
+</li>
+<li class="li"><p class="p">Use a <strong class="ph b">normalization</strong>-aware
+string comparison instead.  International Components for Unicode (ICU)
+offers functions for string comparison; those ICU functions are aware
+of normalization; consequently, their comparison of strings, such
+as variable names, will return reliable results. (The conventional <samp class="ph codeph">strcmp</samp> is
+not normalization-aware.)</p>
+</li>
+<li class="li"><p class="p">Normalize strings by means of Normalized
+Form C (<strong class="ph b">NFC</strong>) in your application
+before you compare them.</p>
+</li>
+<li class="li"><p class="p">As soon as you introduce a variable
+to CPLEX (for example, when you add the variable to your model), normalize
+its name immediately in your application by retrieving its name from
+CPLEX; store that normalized name for comparisons with <samp class="ph codeph">strcmp</samp>.</p>
+</li>
+</ol>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">Two strings that look identical on a display may not
+compare as equal since the stored representation can be different.
+For example, data tagged with a UTF-8 or UTF-16 CCSID can contain
+combining characters. Combining characters allow a resulting character
+to be composed of more than one character. After the first character
+of the compound character, one of many different non-spacing characters
+(such as umlauts and accents) can follow in the data string. If the
+resulting character is one that is already defined in the character
+set, <strong class="ph b">normalization</strong> of the string
+results in multiple combining-characters being replaced by the value
+of the defined character. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" title="Users of prior versions must first apply the conversion notes accompanying previous versions of this product before upgrading to this new version.">Conversion notes for all users</a></div>
+</div>
+</div></body>
+</html>

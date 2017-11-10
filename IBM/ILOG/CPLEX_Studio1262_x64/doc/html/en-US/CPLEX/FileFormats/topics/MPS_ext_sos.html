@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Special ordered sets (SOS) in MPS files" />
+<meta name="abstract" content="The CPLEX extensions of MPS file format support special ordered sets (SOSs)." />
+<meta name="Description" content="The CPLEX extensions of MPS file format support special ordered sets (SOSs)." />
+<meta name="DC.subject" content="SOS, in MPS file format, MPS file format, SOS in" />
+<meta name="keywords" content="SOS, in MPS file format, MPS file format, SOS in" />
+<meta name="DC.Relation" scheme="URI" content="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="File_formats_reference.uss_reffileformatscplex.156747" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" />
+<title>Special ordered sets (SOS) in MPS files</title>
+</head>
+<body role="main" id="File_formats_reference.uss_reffileformatscplex.156747">
+<h1 class="title topictitle1">Special ordered sets (SOS) in MPS files</h1>
+<div class="body"><p class="shortdesc">The CPLEX extensions of MPS file format support special
+ordered sets (SOSs).</p>
+<p class="p">If you use the CPLEX mixed
+integer optimizer (that is, the MIP optimizer), then you may define
+special ordered sets (SOS) in MPS format.</p>
+<p class="p">The convention for SOS uses set declaration lines and
+member declaration lines, both of which begin in column 2 or
+beyond. In a set declaration line, columns 2 and 3 specify S1
+or S2. Optionally, the name of a set is specified in column 4.
+In a member declaration line, column 5 or beyond specifies a variable
+name. Note that in an MPS file, the SOS section must follow the BOUNDS
+section.</p>
+<p class="p">If weighting information is provided, it follows the
+member name in a member declaration line.</p>
+<p class="p">In the following example, an SOS section is placed after
+the BOUNDS section: </p>
+<pre class="pre codeblock"><code>NAME
+ROWS
+ N  obj     
+ L  c1      
+ L  c2      
+ E  c3      
+COLUMNS
+    x1        obj                 -1   c1                  -1
+    x1        c2                   1
+    x2        obj                 -2   c1                   1
+    x2        c2                  -3   c3                   1
+    x3        obj                 -3   c1                   1
+    x3        c2                   1
+    x4        obj                 -1   c1                  10
+    x4        c3                 -3.5
+RHS
+    rhs       c1                  20   c2                  30
+BOUNDS
+ UP BOUND     x1                  40
+ LI BOUND     x4                   2
+ UI BOUND     x4                   3
+SOS
+ S1 set1
+    x1                  10000
+    x2                  20000
+    x4                  40000
+ENDATA</code></pre>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.156747__File_formats_reference.uss_reffileformatscplex.156821"><h2 class="title sectiontitle">'MARKER' lines for SOS in MPS files</h2><p class="p"> <samp class="ph codeph">'MARKER'</samp>  lines are used
+to delimit SOS in the <samp class="ph codeph">COLUMNS</samp>  section
+of an MPS file, much like using integer markers. (The single quotation
+mark before and after the term is necessary.) The names of the sets
+are specified in the second field, starting in column 4 or beyond.
+Names of sets must be unique. The <samp class="ph codeph">'MARKER'</samp> 
+lines must come in pairs of an <samp class="ph codeph">'SOSORG'</samp> 
+and <samp class="ph codeph">'SOSEND</samp> ' surrounding the columns that
+are in the SOS. Optionally, in Field 1 of a <samp class="ph codeph">'MARKER' . . . 'SOSORG'</samp> 
+line, either S1 or S2 may be specified to indicate the type of the
+SOS. An SOS<samp class="ph codeph"> 'MARKER'</samp>  line without an S1
+or S2 indicator is assumed to denote an S1 set. Members of an
+SOS may or may not be integer or binary variables.</p>
+<p class="p">There is no requirement that there be a constraint that
+all members of an SOS sum to 1.0 (nor is any such constraint implicit).
+However, providing such a constraint in your formulation may be desirable
+as it may strengthen the LP relaxation of the mixed integer problem,
+as for example in the case of an S1 set consisting of binary variables.</p>
+<p class="p">In the following example, the excerpt from the COLUMNS
+section of an MPS file defines an SOS Type 1 set consisting of <samp class="ph codeph">x5</samp> and <samp class="ph codeph">x6</samp>.
+which may be continuous or integer variables.  </p>
+<pre class="pre codeblock"><code> S1 NAME1     ‘MARKER’                 ‘SOSORG’
+    x5        obj               -9     c1     5
+    x5        c2                3
+    x6        obj               -6     c1      8
+    x6        c3                -4.5
+    NAME1     ‘MARKER’                 ‘SOSEND’</code></pre>
+<p class="p">The SOS <samp class="ph codeph">'MARKER'</samp>  lines can
+appear between integer <samp class="ph codeph">'MARKER'</samp>  lines
+(if all members of the SOS are integer), or integer <samp class="ph codeph">'MARKER'</samp> 
+lines can appear between SOS <samp class="ph codeph">'MARKER' </samp> lines
+(if some members of the SOS are non-integer).</p>
+<p class="p">The MARKER format cannot accommodate overlapping SOSs.
+That is, a variable cannot be a member of two special ordered sets.
+Overlapping SOSs can, however, be specified by the CPLEX SOS format, documented
+in <a class="xref" href="MPS_ext_sos.html" title="The CPLEX extensions of MPS file format support special ordered sets (SOSs).">Special ordered sets (SOS) in MPS files</a>.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.156747__File_formats_reference.uss_reffileformatscplex.172622"><h2 class="title sectiontitle">REFROW section for SOS in MPS files</h2><p class="p">A <samp class="ph codeph">REFROW</samp>  section may be included
+immediately before the <samp class="ph codeph">ROWS</samp>  section. It
+consists of exactly one record line with the name of the reference
+row starting in Field 2. The specified row must also be defined in
+the <samp class="ph codeph">ROWS</samp>  section. The nonzeros of the
+reference row are used as weights within an SOS. All weights within
+one SOS must be unique values. A <samp class="ph codeph">REFROW</samp> 
+section is optional; if no reference row is specified, the weighting
+values 1, . . . , n is given to the n members
+of an SOS in the order in which they are read. In other words, without
+specific reference row information, it is assumed that the user has
+ordered the SOS variables in ascending order with respect to some
+relevant criterion (for example, in importance, capacity, objective
+weighting, or cost).</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" title="CPLEX extends the MPS standard in several ways.">Special records in MPS files: CPLEX extensions</a></div>
+</div>
+</div></body>
+</html>

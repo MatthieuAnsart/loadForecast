@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Inference levels" />
+<meta name="abstract" content="CP Optimizer provides tuning parameters which are used to adjust the constraint propagation inference levels." />
+<meta name="Description" content="CP Optimizer provides tuning parameters which are used to adjust the constraint propagation inference levels." />
+<meta name="DC.subject" content="domain reduction, inference level, inference level, default" />
+<meta name="keywords" content="domain reduction, inference level, inference level, default" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerpropagate.1018718" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<title>Inference levels</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerpropagate.1018718">
+<h1 class="title topictitle1">Inference levels</h1>
+<div class="body"><p class="shortdesc">CP Optimizer provides tuning parameters which
+are used to adjust the constraint propagation inference levels.</p>
+<p class="p">The inference level of a constraint, that is, the strength
+of the domain reduction is achieves, is controlled by tuning parameters.
+There is a parameter for each specialized constraint whose inference
+level can be changed. </p>
+<p class="p">In the <strong class="ph b">C++ API</strong>, these parameters are:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">IloCP::AllDiffInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::DistributeInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::CountInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::SequenceInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::AllMinDistanceInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::ElementInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::PrecedenceInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::IntervalSequenceInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::NoOverlapInferenceLevel</samp>,</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::CumulFunctionInferenceLevel</samp> and</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloCP::StateFunctionInferenceLevel</samp>.</p>
+ </li>
+</ul>
+<p class="p">For the <strong class="ph b">Java™ API</strong>,
+the inference level parameter for the all different constraint is
+ <samp class="ph codeph">IloCP.IntParam.AllDiffInferenceLevel</samp>. For
+the <strong class="ph b">C# API</strong>, the inference level for the all different
+constraint is<samp class="ph codeph"> CP.IntParam.AllDiffInferenceLevel</samp>.
+The parameters in the <strong class="ph b">C# API</strong> and the <strong class="ph b">Java API</strong> for the other specialized
+constraints are similarly formed.</p>
+<p class="p">The effects of changing the values of these inference
+level parameters will be described in the following sections. </p>
+<p class="p">In the <strong class="ph b">C++ API</strong>, the possible values of
+these parameters are:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph"> IloCP::Default</samp>,</p>
+ </li>
+<li class="li"><p class="p">  <samp class="ph codeph">IloCP::Low</samp>,</p>
+ </li>
+<li class="li"><p class="p">  <samp class="ph codeph">IloCP::Basic</samp>,</p>
+ </li>
+<li class="li"><p class="p">  <samp class="ph codeph">IloCP::Medium</samp> and</p>
+ </li>
+<li class="li"><p class="p">  <samp class="ph codeph">IloCP::Extended</samp>.</p>
+ </li>
+</ul>
+<p class="p">For the <strong class="ph b">Java API</strong>,
+the default value is  <samp class="ph codeph">IloCP.ParameterValues.Default</samp>.
+For the <strong class="ph b">C# API</strong>, the default inference level is<samp class="ph codeph"> CP.ParameterValues.Default</samp>. </p>
+<p class="p">The strength of the domain reduction increases as the
+parameter value moves from the low value to the extended value. Consider
+the following model written in the <strong class="ph b">C++ API</strong> where the
+variables of an array must be all different: </p>
+<pre class="pre codeblock"><code>    IloIntVarArray x(env);
+    x.add(IloIntVar(env,  1, 2));
+    x.add(IloIntVar(env,  1, 2));
+    x.add(IloIntVar(env,  0, 2));
+    x.add(IloIntVar(env,  IloIntArray(env, 4, 1, 2, 4, 6, 8)));
+    x.add(IloIntVar(env,  IloIntArray(env, 4, 1, 2, 4, 6, 8)));
+    x.add(IloIntVar(env,  1, 9));
+    x.add(IloIntVar(env,  8, 8));
+    IloModel model(env);
+    model.add(IloAllDiff(env, x));
+</code></pre>
+<p class="p">Setting the inference level of the all different constraints
+to the basic level and propagating: </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::AllDiffInferenceLevel, IloCP::Basic);
+    if ( cp.propagate() )
+      cp.out() &lt;&lt; " Domains of x are " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+    else
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+</code></pre>
+<p class="p">produces the output: </p>
+<pre class="pre codeblock"><code> Domains of x are [[1..2] [1..2] [0..2] [1..2 4 6] [1..2 4 6] [1..7 9] [8]]
+</code></pre>
+<p class="p">The basic level of the all different constraint reduces
+the domain of variables by eliminating the value of fixed variables
+(here <samp class="ph codeph">x[6]</samp>) from the domain of other variables
+(here <samp class="ph codeph">x[3]</samp>,<samp class="ph codeph"> x[4]</samp> and <samp class="ph codeph">x[5]</samp>).</p>
+<p class="p">When the inference level is set to the medium level, the
+bounds of the decision variables are reduced further: </p>
+<pre class="pre codeblock"><code> Domains of x are [[1..2] [1..2] [0] [4 6] [4 6] [3..7 9] [8]]
+</code></pre>
+<p class="p">The values 1 and 2 are shared by the two decision variables <samp class="ph codeph">x[0]</samp> and <samp class="ph codeph">x[2]</samp> and thus
+cannot appear in the domains of any other variables. This reasoning
+is applied to reduce bounds of the decision variables. Finally, the
+extended inference level achieves full domain reduction: </p>
+<pre class="pre codeblock"><code> Domains of x are [[1..2] [1..2] [0] [4 6] [4 6] [3 5 7 9] [8]]
+</code></pre>
+<p class="p">More domain reduction involves more computation time,
+thus there is a trade-off when solving a problem.</p>
+<p class="p">By default, the value of each of inference level is the
+default level. This level forces the inference level of the constraints
+to be the value of the parameter (in the <strong class="ph b">C++ API</strong>) <samp class="ph codeph">IloCP::DefaultInferenceLevel</samp>. Changing the value
+of this parameter is a way to change the inference level of several
+constraint types at the same time. The possible values of this parameter
+are all of the inference levels except for the default level. Its
+default value is the basic level.</p>
+<p class="p">In the <strong class="ph b">C++ API</strong>, the code: </p>
+<pre class="pre codeblock"><code>  cp.setParameter(IloCP::DefaultInferenceLevel, IloCP::Extended);
+</code></pre>
+<p class="p">specifies that the inference level of any constraint type
+whose inference level is unchanged (or set to the default level) is
+the extended level. </p>
+<p class="p">In the <strong class="ph b">Java API</strong>,
+the code for setting the default inference level to the extended level
+is: </p>
+<pre class="pre codeblock"><code>      cp.setParameter(IloCP.IntParam.DefaultInferenceLevel, 
+                      IloCP.ParameterValues.Extended);
+</code></pre>
+<p class="p">In the <strong class="ph b">C# API</strong>, the code for setting the
+default inference level to the extended level is: </p>
+<pre class="pre codeblock"><code>      cp.SetParameter(CP.IntParam.DefaultInferenceLevel, 
+                      CP.ParameterValues.Extended);
+</code></pre>
+<p class="p">In the following sections, information about the domain
+reduction achieved by specialized constraints with respect to their
+inference levels is provided.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" title="CP Optimizer provides tailored constraint propagation algorithms for specialized constraints and expressions.">Propagation of specialized constraints and expressions</a></div>
+</div>
+</div></body>
+</html>

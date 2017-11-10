@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IlcFloatExp</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IlcFloatExp.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IlcFloatExp</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+                class="include-file">&lt;ilcp/cpext.h&gt; </span></div><div><img
+                src="IlcFloatExp.png" border="0"
+                usemap="#svg_map_IlcFloatExp"
+                    alt="Map of IlcFloatExp"><map
+                        name="svg_map_IlcFloatExp"><area
+                        href="../classes/IlcFloatExp.html" shape="rect"
+                        alt="IlcFloatExp"
+                        coords="10.0,10.0,68.0,27.6357421875" /><area
+                        href="../classes/IlcFloatVar.html" shape="rect"
+                        alt="IlcFloatVar"
+                        coords="49.0,37.6357421875,107.0,55.271484375" /><area
+                        href="../classes/IlcFloatExp.html" shape="rect"
+                        alt="IlcFloatExp"
+            coords="10.0,10.0,68.0,27.6357421875" /></map></img></div>
+The class for representing constrained floating-point expressions.
+    <div
+                    class="description"><p>The class <code>IlcFloatExp</code> is the root for constrained
+ floating-point expressions. A constrained floating-point expression computes
+ its domain from the domains of its subexpressions. </p><p>In fact, a constrained floating-point <em>variable</em> itself is a
+ constrained floating-point <em>expression</em>: the class
+ <code>IlcFloatVar</code> is a subclass of <code>IlcFloatExp</code>, so a
+ constrained floating-point variable is simply a constrained floating-point
+ expression whose domain is stored. Since the number of elements in the
+ domain of a constrained continuous floating-point variable is very high
+ (typically millions), there is usually an <em>interval</em> associated with
+ the variable to represent its domain.</p><p>Most member functions in this class contain <code>assert</code>
+ statements. For an explanation of the macro <code>NDEBUG</code> (a way to
+ turn on or turn off these <code>assert</code> statements), see the concept
+ <a
+                    href="../assert-and-ndebug.html">Assert and NDEBUG</a>. </p><p><strong>Precision</strong></p><p>In CP Optimizer, all computations on floating-point values are computed in
+ <em>double precision</em> mode, that is, 64 bits on most
+ hardware.</p><p>A <em>relative precision</em> is associated with each
+ constrained floating-point expression in CP Optimizer. This relative precision is
+ taken into account during constraint propagation: if the size of the
+ interval associated with a floating-point expression is less than the
+ precision associated with that expression, then we consider the expression
+ as fixed to the mean value in that interval. In other words, the expression
+ is fixed to the average value in a such an interval. Consequently, in this
+ context, precision represents a degree of uncertainty about this value. More
+ formally, we say that a constrained floating-point variable <code>x</code>
+ with a precision indicated by <code>precision</code> is <em>fixed</em> when
+ its associated interval is bounded by <code>min</code> and <code>max</code>
+ such that <code>((max - min)/(max{1, |min|}) &lt;= precision</code>.</p><p>The smaller the precision of a variable, the more precise are
+ computations with it, but such computations can take more time, of
+ course.</p><p><strong>Domain</strong></p><p>The domain of a constrained floating-point expression (an instance of
+ <code>IlcFloatExp</code>) is <em>computed</em> from the domains of its
+ subexpressions. For example, if <code>x</code> and <code>y</code> are both
+ instances of <code>IlcFloatExp</code>, then the domain of <code>x+y</code>
+ contains the range <code>[x.getMin()+y.getMin(),
+ x.getMax()+y.getMax()]</code>. (In contrast, the domain of a constrained
+ floating-point variable (an instance of <code>IlcFloatVar</code>) is
+ stored.) The domain of a constrained floating-point expression can be
+ reduced to the point of being empty. In such a case, <em>failure</em> is
+ triggered since no solution is then possible.</p><p><strong>Checking Overflow and Underflow</strong></p><p>CP Optimizer explicitly checks <em>floating-point</em> computations for
+ overflow and underflow.</p><p>IEEE 754 is a standard proposed by the Institute of Electrical and
+ Electronics Engineers, Inc. for computing floating-point arithmetic. The
+ implementation of floating-point numbers in CP Optimizer conforms to
+ this standard.</p><p><strong>Backtracking and Reversibility</strong></p><p>All the member functions and operators defined for this class and capable
+ of modifying constrained variables are <em>reversible</em>. In particular,
+ the changes made by constraint-posting functions are made with reversible
+ assignments. Thus, the value, the domain, and the constraints posted on any
+ constrained variable are restored when CP Optimizer backtracks.</p><p>For more information, see the concept 
+ <a
+            href="../propagation.html">Propagation in CP Optimizer</a>.</p><p>A modifier is a member function that reduces the domain of a constrained
+ floating-point expression, if it can. The modifier is not stored, in
+ contrast to a constraint. If the constrained floating-point expression is a
+ constrained floating-point variable, the modifications due to the modifier
+ call are stored in its domain. Otherwise, the effect of the modifier is
+ propagated to the subexpressions of the constrained floating-point
+ expression. If the domain becomes empty, failure occurs. Modifiers are
+ usually used to define new <em>classes</em> of constraints.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../functions/IlcAbs.html">IlcAbs</a>, <a
+                href="../classes/IlcFloatVar.html">IlcFloatVar</a>, <a
+                href="../functions/IlcMax.html">IlcMax</a>, <a
+                href="../functions/IlcMin.html">IlcMin</a>, <a
+                href="../functions/IlcSquare.html">IlcSquare</a>, <a
+                href="../functions/operator_plus.html">operator+</a>, <a
+                href="../functions/operator_min.html">operator-</a>, <a
+                href="../functions/operator_mult.html">operator*</a>, <a
+                href="../functions/operator_div.html">operator/</a>, <a
+            href="../functions/operator_inf_inf.html">operator&lt;&lt;</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatExp.html#method_display">display</a>(ostream &amp; str) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatExp.html#method_getMax">getMax</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatExp.html#method_getMin">getMin</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatExp.html#method_getPrecision">getPrecision</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatExp.html#method_getSize">getSize</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatExp.html#method_IlcFloatExp">IlcFloatExp</a>(<a
+                    href="../classes/IlcIntExp.html">IlcIntExp</a> exp)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcBool.html">IlcBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatExp.html#method_isFixed">isFixed</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcBool.html">IlcBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatExp.html#method_isInDomain">isInDomain</a>(<a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatExp.html#method_setMax">setMax</a>(<a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatExp.html#method_setMin">setMin</a>(<a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatExp.html#method_setPrecision">setPrecision</a>(<a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a> p) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatExp.html#method_setRange">setRange</a>(<a
+                            href="../typedefs/IlcFloat.html">IlcFloat</a> min, <a
+            href="../typedefs/IlcFloat.html">IlcFloat</a> max) const</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IlcFloatExp">IlcFloatExp</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IlcFloatExp</span>(<a
+                href="../classes/IlcIntExp.html">IlcIntExp</a> <span
+            class="parameter-name">exp</span>)</div><div
+                class="description"><p>A constrained integer expression in CP Optimizer can be seen as a constrained floating-point
+ expression since integers can be converted to floating-point values. This constructor is
+ for casting a constrained integer expression into a constrained floating-point expression.
+ This constructor creates a constrained floating-point expression which is constrained to be
+ equal to the constrained integer expression <code>exp</code>. In other words, you can use
+ this constructor to define a constrained floating-point expression to be equal to a constrained
+ integer expression. Such a floating-point expression can then be used like any other constrained
+ floating-point expression. It is thus possible to combine integers and floating-point expressions
+ within a constraint.</p><p>Usually, casting a constrained integer expression to a constrained floating-point expression
+ is done automatically by the compiler, so you should not need to use this constructor.
+ You should use it only if your compiler warns you that something is wrong when you combine
+ constrained floating-point and integer expressions.</p></div><hr /><h3><a
+            name="method_display">display</a></h3><div
+                class="prototype">public void <span
+                class="function-name">display</span>(ostream &amp; <span
+            class="parameter-name">str</span>) const</div><div
+                class="description"><p>This member function puts the invoking object on the output stream indicated by its argument.</p></div><hr /><h3><a
+            name="method_getMax">getMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getMax</span>() const</div><div
+                class="description"><p>This member function returns the maximum value of the invoking object.</p></div><hr /><h3><a
+            name="method_getMin">getMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getMin</span>() const</div><div
+                class="description"><p>This member function returns the minimum value of the invoking object.</p></div><hr /><h3><a
+            name="method_getPrecision">getPrecision</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getPrecision</span>() const</div><div
+                    class="description"><p>This member function returns the precision of the invoking constrained floating-point
+ expression. We say that a constrained floating-point variable <code>x</code> with a precision
+ indicated by <code>precision</code> is <em>fixed</em> when its associated interval is bounded
+ by <code>min</code> and <code>max</code> such that <img
+                    src="images/IlcFloatExpa.gif"
+                alt="image" /></p><p>The smaller the precision of a variable, the more precise are computations with it, but such
+ computations can take more time, of course.</p></div><hr /><h3><a
+            name="method_getSize">getSize</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getSize</span>() const</div><div
+                class="description"><p>This member function returns the width of the domain of the invoking constrained floating-point
+ expression. By width of the domain, we mean the difference between the two boundaries of the domain.</p></div><hr /><h3><a
+            name="method_isFixed">isFixed</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcBool.html">IlcBool</a> <span
+            class="function-name">isFixed</span>() const</div><div
+                class="description"><p>This member function returns <code>IlcTrue</code> if the invoking constrained floating-point
+ expression is fixed to a value. Otherwise, the member function returns <code>IlcFalse</code>.</p></div><hr /><h3><a
+            name="method_isInDomain">isInDomain</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcBool.html">IlcBool</a> <span
+                class="function-name">isInDomain</span>(<a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function returns <code>IlcTrue</code> if <code>value</code> is in the domain of
+ the invoking constrained floating-point expression. Otherwise, the member function returns <code>IlcFalse</code>.</p></div><hr /><h3><a
+            name="method_setMax">setMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMax</span>(<a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function removes all the elements that are greater than <code>max</code> from
+ the domain of the invoking constrained expression. If the domain thus becomes empty, then the
+ function <code>IlcFail</code> is called. Otherwise, if the domain is modified, the propagation
+ event <code>range</code> is generated. Moreover, if the invoking constrained floating-point
+ expression becomes fixed, then the propagation event <code>value</code> is also generated.
+ The effects of this member function are reversible.</p></div><hr /><h3><a
+            name="method_setMin">setMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMin</span>(<a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function removes all the elements that are less than <code>min</code> from
+ the domain of the invoking constrained expression. If the domain thus becomes empty, then t
+ he function <code>IlcFail</code> is called. Otherwise, if the domain is modified, the propagation
+ event <code>range</code> is generated. Moreover, if the invoking constrained floating-point
+ expression becomes fixed, then the propagation event <code>value</code> is also generated.
+ The effects of this member function are reversible.</p></div><hr /><h3><a
+            name="method_setPrecision">setPrecision</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setPrecision</span>(<a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="parameter-name">p</span>) const</div><div
+                class="description"><p>This member function sets the precision of the invoking constrained floating-point expression.
+ This is a non-reversible action.</p></div><hr /><h3><a
+            name="method_setRange">setRange</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setRange</span>(<a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+                class="parameter-name">min</span>, <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="parameter-name">max</span>) const</div><div class="description"><p>This member function removes all the elements that are either less than <code>min</code> or
+ greater than <code>max</code> from the domain of the invoking constrained expression. If the
+ domain thus becomes empty, then a failure occurs. Otherwise, if the
+ domain is modified, the propagation event <code>range</code> is generated. Moreover, if the
+ invoking constrained floating-point expression becomes fixed, then the propagation event
+ <code>value</code> is also generated. The effects of this member function are reversible.</p></div><hr /></body>
+</html>

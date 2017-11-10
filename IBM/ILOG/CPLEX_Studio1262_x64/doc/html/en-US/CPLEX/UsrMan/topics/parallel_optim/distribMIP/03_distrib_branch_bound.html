@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Special characteristics of distributed branch and bound" />
+<meta name="abstract" content="Distinguishes distributed branch and bound from conventional branch and bound in shared memory." />
+<meta name="Description" content="Distinguishes distributed branch and bound from conventional branch and bound in shared memory." />
+<meta name="DC.subject" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, branch and bound, search tree management and, search tree, distributed MIP and" />
+<meta name="keywords" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, branch and bound, search tree management and, search tree, distributed MIP and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="distributedBrAndBndusr" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<title>Special characteristics of distributed branch and bound</title>
+</head>
+<body role="main" id="distributedBrAndBndusr">
+<h1 class="title topictitle1">Special characteristics of distributed branch and bound</h1>
+<div class="body"><p class="shortdesc">Distinguishes distributed branch and bound from conventional branch and bound in shared memory.</p>
+<p class="p">The topic 
+<a class="xref" href="02_intro.html" title="Introduces the algorithm for optimization of a mixed integer program (MIP) in a distributed computing environment.">Distributed optimization of MIPs: the algorithm</a>
+outlined the algorithm underlying distributed parallel MIP in CPLEX. </p>
+<p class="p">This topic continues the description of distributed parallel MIP by distinguishing 
+the special characteristics of distributed parallel 
+branch and bound from conventional branch and bound algorithms in shared memory.</p>
+<div class="section"><h2 class="title sectiontitle">Search tree</h2>
+<p class="p">Distributed parallel branch and bound is similar to conventional, shared-memory branch and bound. 
+They differ greatly, however, in their management of the search tree.  In a conventional, 
+shared-memory branch and bound, the search tree resides on a single machine, on disk or in 
+shared memory. In contrast, distributed parallel branch and bound literally distributes 
+the search tree across a cluster of machines.</p>
+
+<p class="p">In the CPLEX implementation of distributed parallel branch and bound, the master keeps a 
+number of nodes of the global search tree. If a worker becomes idle, the master sends some 
+of those nodes to that worker. The worker then starts branch and bound on those nodes. 
+However, the worker does <strong class="ph b">not</strong> simply solve a node, create some new nodes in doing so, 
+and send them all back to the master.  Instead, the worker considers the search tree node 
+received from the master as a new MIP. The worker presolves that MIP and finds an optimal 
+solution for that node using branch and bound.  In other words, a worker not only solves a 
+single node; in fact, the worker solves an entire subtree rooted at that node.</p>
+
+<p class="p">While this distributed parallel branch and bound algorithm is running, the master can 
+ask a worker to provide some open nodes (that is, unsolved nodes). The master can then 
+use these nodes to assign work to idle workers. To satisfy such a request from the master, 
+a worker picks a few open nodes from its current tree. Because the current tree in a worker 
+is a subtree of the global tree (indeed, it is the subtree rooted at the node sent to the 
+worker), every node in that subtree is also a node in the global tree. </p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Stopping criterion</h2>
+<p class="p">The distributed parallel branch and bound algorithm stops if all the nodes of the global search tree 
+have been processed or if it reaches a limit set by the user.  Such limits include a time limit, 
+a limit on the number of nodes processed, a limit on the number of solutions found, or other similar 
+criteria.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Opportunistic distributed parallel MIP</h2>
+<p class="p">The distributed parallel MIP algorithm supports <strong class="ph b">opportunistic</strong> 
+multi-threading. Specifically, if you set the 
+<a class="xref" href="../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a>
+to the value -1 (symbolic name <span class="keyword apiname">Opportunistic or CPX_PARALLEL_OPPORTUNISTIC</span>), 
+CPLEX will opportunistically execute the 
+distributed mixed integer programming (MIP) algorithm in parallel.</p>
+ 
+<p class="p">The name of the parallel mode switch varies according to the 
+application programming interface (API) that you choose to use:</p>
+
+<ul class="ul"><li class="li">In the C++ API, use the parameter <span class="keyword apiname">IloCplex::Param::Parallel</span></li>
+<li class="li">In the Java API, use the parameter <span class="keyword apiname">IloCplex.Param.Parallel</span></li>
+<li class="li">In the .NET API, use the parameter <span class="keyword apiname">Cplex.Param.Parallel</span></li>
+<li class="li">In the Callable Library (C API) API, use the parameter <span class="keyword apiname">CPXPARAM_Parallel</span></li>
+<li class="li">In the Python API, use the parameter <span class="keyword apiname">parameters.parallel</span></li>
+<li class="li">In the MATLAB API, use the parameter <span class="keyword apiname">Cplex.Param.parallel</span></li>
+<li class="li">In the Interactive Optimizer, use the command <span class="keyword apiname">set</span> 
+with the option <span class="keyword apiname">parallel</span> and the value -1.</li>
+</ul>
+
+<p class="p">For more information about multi-threading applications, see 
+<a class="xref" href="../multi_threaded_parallel/01_parallel_title_synopsis.html" title="Documents the CPLEX multithreaded parallel optimizers.">Multithreaded parallel optimizers</a>
+in the <em class="ph i">CPLEX User's Manual</em>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: using callbacks lpex4.c" />
+<meta name="abstract" content="Illustrates callbacks in the C API." />
+<meta name="Description" content="Illustrates callbacks in the C API." />
+<meta name="DC.subject" content="CPX_PARAM_SCRIND, example with callbacks, CPXgeterrorstring routine, callback, using status variables, status variables, using, CPXgetcallbackinfo routine, CPXlpopt routine, CPXsetlpcallbackfunc routine, graphic user interface (GUI), graphic user interface and, displaying, optimization progress, optimization, stopping, interrupting, stopping criterion, callbacks and" />
+<meta name="keywords" content="CPX_PARAM_SCRIND, example with callbacks, CPXgeterrorstring routine, callback, using status variables, status variables, using, CPXgetcallbackinfo routine, CPXlpopt routine, CPXsetlpcallbackfunc routine, graphic user interface (GUI), graphic user interface and, displaying, optimization progress, optimization, stopping, interrupting, stopping criterion, callbacks and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callbacks.1008469" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<title>Example: using callbacks lpex4.c</title>
+</head>
+<body role="main" id="User_manual.uss_callbacks.1008469">
+<h1 class="title topictitle1">Example: using callbacks lpex4.c</h1>
+<div class="body"><p class="shortdesc">Illustrates callbacks in the C API.</p>
+<p class="p">This example shows you how to use callbacks effectively with routines
+from the Callable Library. It is based on <samp class="ph codeph">lpex1.c</samp>,
+a program from the manual <em class="ph i">Getting Started</em>. This example about
+callbacks differs from that simpler one in several ways:</p>
+<ul class="ul"><li class="li"><p class="p">To make the output more interesting, this example optimizes
+a slightly different linear program.</p>
+ </li>
+<li class="li"><p class="p">The CPLEX screen indicator (that is, the <a class="xref" href="../../../../Parameters/topics/SCRIND.html" title="Decides whether or not results are displayed on screen in an application of the C API.">messages to screen switch</a> <samp class="ph codeph">CPX_PARAM_SCRIND</samp>)
+is not turned on. Only the callback function produces output. Consequently,
+this program calls <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/geterrorstring.html" title="The routine CPXXgeterrorstring/CPXgeterrorstring returns an error message string corresponding to an error code.">CPXgeterrorstring</a></samp> to
+retrieve any error messages and then prints them. After the <samp class="ph codeph">TERMINATE:</samp> 
+label, the program uses separate status variables so that if an error
+occurred earlier, its error status will not be lost or destroyed by
+freeing the problem object and closing the CPLEX environment. <a class="xref" href="29_eg_lpex4_c.html#User_manual.uss_callbacks.1008469__User_manual.uss_callbacks.1008499" title="A two-column table showing possible status values and their meaning in this example.">Table 1</a> summarizes
+those status variables.  </p>
+ <div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible status values and their meaning in this example." id="User_manual.uss_callbacks.1008469__User_manual.uss_callbacks.1008499" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Status variables in <samp class="ph codeph">lpex4.c</samp> </span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d470272e116"> Variable </th>
+<th class="entry" align="left" valign="top" id="d470272e118"> Represents status returned by this routine </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d470272e116 ">  <samp class="ph codeph">frstatus</samp>  </td>
+<td class="entry" valign="top" headers="d470272e118 "> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/freeprob.html" title="The routine CPXXfreeprob/CPXfreeprob removes the specified CPLEX problem object from the CPLEX environment and frees the associated memory used internally by CPLEX.">CPXfreeprob</a></samp> 
+ </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d470272e116 ">  <samp class="ph codeph">clstatus</samp>  </td>
+<td class="entry" valign="top" headers="d470272e118 "> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/closeCPLEX.html" title="This routine frees all of the data structures associated with CPLEX.">CPXcloseCPLEX</a></samp> 
+ </td>
+</tr>
+</tbody>
+</table>
+</div>
+ </li>
+<li class="li"><p class="p">The function <samp class="ph codeph">mycallback</samp>  at the end of the
+program is called by the optimizer. This function tests whether the
+primal simplex optimizer has been called. If so, then a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getcallbackinfo.html" title="The routine CPXXgetcallbackinfo/CPXgetcallbackinfo accesses information about the current optimization process from within a user-written callback function.">CPXgetcallbackinfo</a></samp> gets
+the following information:</p>
+ <ul class="ul"><li class="li"><p class="p">iteration count;</p>
+ </li>
+<li class="li"><p class="p">feasibility indicator;</p>
+ </li>
+<li class="li"><p class="p">sum of infeasibilities (if infeasible);</p>
+ </li>
+<li class="li"><p class="p">objective value (if feasible).</p>
+ <p class="p">The function then prints
+these values to indicate progress.</p>
+ </li>
+</ul>
+ </li>
+<li class="li"><p class="p">Before the program calls <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/lpopt.html" title="At any time after a linear program has been created via a call to CPXXcreateprob/CPXcreateprob, the routine CPXXlpopt/CPXlpopt finds a solution to that problem using one of the CPLEX linear optimizers.">CPXlpopt</a></samp>,
+the default optimizer from the Callable Library, it sets the callback
+function by calling <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setlpcallbackfunc.html" title="The routine CPXXsetlpcallbackfunc/CPXsetlpcallbackfunc modifies the user-written callback routine to be called after each iteration during the optimization of a linear program, and also periodically during the CPLEX presolve algorithm.">CPXsetlpcallbackfunc</a></samp>.
+It unsets the callback immediately after optimization.</p>
+ </li>
+</ul>
+<p class="p">This callback function offers a model for graphic user interfaces
+that display optimization progress as well as those GUIs that allow
+a user to interrupt and stop optimization. If you want to provide
+your end-user a facility like that to interrupt and stop optimization,
+then you should make <samp class="ph codeph">mycallback</samp>  return a nonzero
+value to indicate the end-user interrupt.</p>
+<p class="p">The complete program <samp class="ph codeph">lpex4.c</samp> appears online in
+the standard distribution at <em class="ph i">yourCPLEXinstallation</em> <samp class="ph codeph">/examples/src</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" title="Introduces optimization callbacks.">Using optimization callbacks</a></div>
+</div>
+</div></body>
+</html>

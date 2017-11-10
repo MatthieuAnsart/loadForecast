@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The search process" />
+<meta name="abstract" content="How to influence the default search of CP Optimizer." />
+<meta name="Description" content="How to influence the default search of CP Optimizer." />
+<meta name="DC.subject" content="CP Optimizer, setting parameters with script statements, constraint programming, changing parameters with script statements, constraint programming, defining search phases, search phases" />
+<meta name="keywords" content="CP Optimizer, setting parameters with script statements, constraint programming, changing parameters with script statements, constraint programming, defining search phases, search phases" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_shortTour.1078082" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>The search process</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_shortTour.1078082">
+<h1 class="title topictitle1">The search process</h1>
+<div class="body"><p class="shortdesc">How to influence the default search of CP Optimizer.</p>
+<p class="p">Constraint programming techniques have been seen for a
+long time as harder to use than mathematical programming because it
+was sometimes necessary to define search procedures using complex
+syntaxes and concepts. Now the IBM® ILOG® CP Optimizer engine includes
+a powerful default search. This means that without giving any particular
+indication on how the solution or optimal solution is to be found,
+some combinations of techniques are used with default behaviors so
+that good solutions are quickly found for a wide variety of problems.</p>
+<p class="p">However, you can influence the search process by:</p>
+<ul class="ul"><li class="li"><p class="p">Changing CP parameters</p>
+ </li>
+<li class="li"><p class="p">Defining search phases</p>
+ </li>
+</ul>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1078090"><h2 class="title topictitle2">Changing CP parameters</h2>
+<div class="body"><p class="p">You can change CP Optimizer parameters by means of script
+statements. See <a class="xref" href="opl_languser_script_intro_prechange.html#usropllangtut.uss_langtut_script_intro.1013498">Changing CP parameters</a>.</p>
+<div class="section" id="usropllangtut.uss_langtut_shortTour.1078090__usropllangtut.uss_langtut_shortTour.1082278"><h3 class="title sectiontitle">Setting limits</h3><p class="p">Limits are just a particular
+type of parameters you can change with a certain impact on the search
+process. You can set a limit on the number of failures during the
+search or on the time spent searching. Here are examples on how to
+change these parameters :</p>
+<pre class="pre codeblock"><code>execute {
+   cp.param.FailLimit = 500;
+   cp.param.TimeLimit = 20;
+}</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_shortTour.1078090__usropllangtut.uss_langtut_shortTour.1078119"><h3 class="title sectiontitle">Changing the search behavior</h3><p class="p">You can also
+change the search behavior by using CP parameters to change the nature
+of the search. The CP Optimizer engine includes several different
+methods to search for solutions. Some parameters enable you to decide
+which search method to use exactly. This is useful in some cases.
+The default search uses default combinations that are proven to be
+the best choice on average. However, better combinations can be found
+on particular cases. Here are examples on how to change such parameters:</p>
+<pre class="pre codeblock"><code>execute {
+   cp.param.searchType = "multiPoint";
+   writeln("Search type is " + cp.param.searchType);
+   cp.param.DefaultInferenceLevel = "Extended";
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1078131"><h2 class="title topictitle2">Defining search phases</h2>
+<div class="body"><p class="p">Sometimes, the default search may not be capable of finding
+good enough values in an appropriate amount of time. By changing parameters,
+you can modify slightly how these default algorithms work. When this
+is not sufficient, you can also help the engine by providing some
+indications on the structure of the search space. The default search
+algorithm can use them efficiently to find good solutions. This is
+referred to as <span class="q">"search phases"</span>.</p>
+<p class="p">For example, in the steel mill code sample, the preprocessing
+part indicates that the engine must start instantiating the <samp class="ph codeph">where</samp> variables.</p>
+<pre class="pre codeblock"><code>execute {
+   var f = cp.factory;
+   cp.setSearchPhases(f.searchPhase(where));
+}</code></pre>
+<p class="p">In each phase, you can use search modifiers to apply specific
+settings that will be local to the search phase. To this effect, you
+specify which ones are used on which variables at each phase.</p>
+<p class="p">The syntax to apply search modifiers in a phase is:</p>
+<pre class="pre codeblock"><code>var phase1 = searchPhase(variable_array_from_model,
+                               variable_selector,
+                               value_selector);</code></pre>
+<p class="p">You can have as many phases as you want. You tell the
+CP Optimizer engine the phases to use with the syntax:</p>
+<pre class="pre codeblock"><code>cp.setSearchPhases(phase1, phase2);</code></pre>
+<p class="p">See <a class="xref" href="opl_languser_script_in_cp.html" title="Explains how to use IBM ILOG Script statements to set parameters that control propagation and search and to define search phases.">Using IBM ILOG Script in constraint programming</a> and <a class="xref" href="../../usroplide/topics/opl_ide_stats_CP.html" title="Shows how the IDE displays a dynamically updated progress chart for a constraint programming example that takes a few seconds to solve.">Understanding solving statistics and progress (CP models)</a>.</p>
+</div>
+</div>
+</body>
+</html>

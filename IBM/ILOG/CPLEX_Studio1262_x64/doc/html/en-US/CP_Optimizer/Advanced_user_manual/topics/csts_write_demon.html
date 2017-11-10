@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using demons to propagate selectively" />
+<meta name="abstract" content="Using demons to propagate selectively can improve performance." />
+<meta name="Description" content="Using demons to propagate selectively can improve performance." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizercsts.1018049" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<title>Using demons to propagate selectively</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizercsts.1018049">
+<h1 class="title topictitle1">Using demons to propagate selectively</h1>
+<div class="body"><p class="shortdesc">Using demons to propagate selectively can improve performance.</p>
+<p class="p">Consider the <samp class="ph codeph">DiffConstrantI</samp> example;
+each time one of its variables is fixed, <samp class="ph codeph">isFixed</samp> is
+checked against the two variables. As another example, consider an <samp class="ph codeph">IloAllDifferent</samp> constraint
+which strives to make every decision variable in an array be assigned
+a different value. If the propagate function was written similarly
+to the one above, it would have to check to see if each variable in
+the array has been fixed, which would not be efficient. You can avoid
+these redundant tests by using intermediate demons, that is, by posting
+different demons on the different variables.</p>
+<p class="p">You add two member functions to the class <samp class="ph codeph">DiffConstraintI</samp>,
+each of them responsible for the propagation of the constraint on
+one variable when the other is fixed. Here is the modification.  </p>
+<pre class="pre codeblock"><code>class DiffConstraintI : public IlcConstraintI {
+    IlcIntVar _x, _y;
+  public:
+    DiffConstraintI(IloCP cp, IlcIntVar x, IlcIntVar y);
+    ~DiffConstraintI(){}; // empty destructor
+
+    virtual void propagate ();
+    virtual void post();
+    virtual IlcBool isViolated() const;
+    virtual IlcConstraintI * makeOpposite() const;
+    virtual void metaPostDemon(IlcDemonI* ct);
+    void xDemon(){
+        _y.removeValue(_x.getValue());
+    }
+    void yDemon(){
+        _x.removeValue(_y.getValue());
+    }
+};
+</code></pre>
+<p class="p">Now you need to define intermediate demons on variables
+that call the new member functions. You do that in this way.  </p>
+<pre class="pre codeblock"><code>ILCCTDEMON0(DiffConstraintI_xDemon,DiffConstraintI,xDemon);
+ILCCTDEMON0(DiffConstraintI_yDemon,DiffConstraintI,yDemon);
+</code></pre>
+<p class="p">Finally, you change the <samp class="ph codeph">post</samp> member
+function to take this modification into account, like this:  </p>
+<pre class="pre codeblock"><code>void DiffConstraintI::post(){
+    _x.whenValue(DiffConstraintI_xDemon(getCP(),this));
+    _y.whenValue(DiffConstraintI_yDemon(getCP(),this));
+}
+</code></pre>
+<p class="p">This new version of the <samp class="ph codeph">DiffConstraintI</samp> is
+faster that the previous one since the <samp class="ph codeph">isFixed</samp> tests
+in <samp class="ph codeph">propagate</samp> are avoided. The price to
+pay for this efficiency is the memory used by the two intermediate
+demons. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" title="A custom constraint can be written using engine extensions.">Writing your own constraint</a></div>
+</div>
+</div></body>
+</html>

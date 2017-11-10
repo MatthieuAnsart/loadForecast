@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>ILCGOAL0</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../macros/ILCGOAL0.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Macro ILCGOAL0</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+            class="prototype">ILCGOAL0(name)</div><div
+            class="prototype">ILCGOAL1(name, t1, nA1)</div><div
+            class="prototype">ILCGOAL2(name, t1, nA1, t2, nA2)</div><div
+            class="prototype">ILCGOAL3(name, t1, nA1, t2, nA2, t3, nA3)</div><div
+            class="prototype">ILCGOAL4(name, t1, nA1, t2, nA2, t3, nA3, t4, nA4)</div><div
+            class="prototype">ILCGOAL5(name, t1, nA1, t2, nA2, t3, nA3, t4, nA4, t5, nA5)</div><div
+            class="prototype">ILCGOAL6(name, t1, nA1, t2, nA2, t3, nA3, t4, nA4, t5, nA5, t6, nA6)</div>
+Macro for creating a new goal class.
+      <div
+                        class="description"><p>This macro defines a goal class named <code>nameI</code> with <em>n</em>
+ data members. When <em>n</em> is greater than 0 (zero), the types and names
+ of the data members must be supplied as arguments to the macro. Each data
+ member is defined by its type <code>T</code><em>i</em> and a name
+ <code>data</code><em>i</em>. The call to the macro must be followed
+ immediately by the body of the <code>execute</code> member function of the
+ goal class being defined. Besides the definition of the class
+ <code>nameI</code>, this macro also defines a function named
+ <code>name</code> whose first argument is <code>IloCP cp</code>, and the
+ <em>n</em> following ones correspond to the <em>n</em> data members. This
+ function creates an instance of the class <code>nameI</code>, fills the data
+ members with its <em>n</em> last arguments, and returns an instance of the
+ class <code><a
+                href="../classes/IlcGoal.html">IlcGoal</a></code> that points to it. </p><p>You are not obliged to use this macro to define goals. When the macro
+ seems too restrictive for your purposes, we recommend that you define a goal
+ class directly.</p><p>Since the argument <code>name</code> is used to name the goal class, it
+ is not possible to use the same name for several goal definitions.</p><p><strong>Examples</strong>:</p><p>Here's how to define a goal with one data member:</p><pre
+                class="sample">
+ ILCGOAL1(PrintX, IlcInt, x){
+   IloCP cp = getCP();
+   cp.out() &lt;&lt; &quot;PrintX: a goal with one data member&quot; &lt;&lt; std::endl;
+   cp.out() &lt;&lt; x &lt;&lt; std::endl;
+   return 0;
+ }</pre><p>This macro generates code similar to the following lines:</p><pre
+                class="sample">
+ class PrintXI : public IlcGoalI {
+   public:
+     IlcInt x;
+     PrintXI(IloCP cp, IlcInt);
+     IlcGoal execute();
+ };
+ PrintXI::PrintXI(IloCP cp, IlcInt arg1)
+   :IlcGoalI(cp), x(arg1){}
+ IlcGoal PrintX(IloCP cp, IlcInt x){
+   return new (cp.getHeap()) PrintXI(cp, x);
+ }
+ IlcGoal PrintXI :: execute() {
+   IloCP cp = getCP();
+   cp.out() &lt;&lt; &quot;PrintX: a goal with one data member&quot; &lt;&lt; std::endl;
+   cp.out() &lt;&lt; x &lt;&lt; std::endl;
+   return 0;
+ }</pre><p>The following statement creates an instance of the class
+ <code>PrintXI</code> and returns a handle that points to it.</p><pre
+            class="sample">
+ PrintX(cp, 2);
+ </pre></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IlcGoal.html">IlcGoal</a>, <a href="../classes/IlcGoalI.html">IlcGoalI</a></p></body>
+</html>

@@ -1,0 +1,160 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// Problem Description : workforce scheduling problem.</font></b>
+013: <b><font color="#007D00">//</font></b>
+014: <b><font color="#007D00">// A set of resources (tuple ResourceDat) of different types are available to perform some requests.</font></b>
+015: <b><font color="#007D00">// Different types are requests are considered (tuple RequestType). </font></b>
+016: <b><font color="#007D00">// A given type of request can be decomposed into a set of tasks (tuple Recipe) and </font></b>
+017: <b><font color="#007D00">// some temporal dependencies between those tasks (tuple Dependency).</font></b>
+018: <b><font color="#007D00">// Each task is associated a processing time (tuple Task) and a set of resource requirements (tuple Requirement).</font></b>
+019: <b><font color="#007D00">// A requirement consists of a task type, a resource type and a quantity </font></b>
+020: <b><font color="#007D00">// (number of resources of the specified type to be used for executing this type of task).</font></b>
+021: <b><font color="#007D00">//</font></b>
+022: <b><font color="#007D00">// The objective is to schedule a set of requests with individual due dates so as to minimize the total tardiness. </font></b>
+023: <b><font color="#007D00">//</font></b>
+024: <b><font color="#007D00">// Model and Constraints</font></b>
+025: <b><font color="#007D00">//</font></b>
+026: <b><font color="#007D00">// Each request, task and possible allocation of a task to a resource for a requirement </font></b>
+027: <b><font color="#007D00">// is modeled as an interval variable. </font></b>
+028: <b><font color="#007D00">// A request spans its tasks. </font></b>
+029: <b><font color="#007D00">// Allocations are optional.</font></b>
+030: <b><font color="#007D00">// Each requirement posts a generalized alternative constraints between </font></b>
+031: <b><font color="#007D00">// the task and the set of possible allocations for this requirement. </font></b>
+032: <b><font color="#007D00">// The cardinality of this generalized alternative is the number of required resources. </font></b>
+033: <b><font color="#007D00">//</font></b>
+034: <b><font color="#007D00">// Each resource is a sequence of its non-overlaping allocations.</font></b>
+035: <b><font color="#007D00">//</font></b>
+036: <b><font color="#007D00">// The objective is to minimize total tardiness.</font></b>
+037: <b><font color="#007D00">//</font></b>
+038: <b><font color="#007D00">// Redundant cumul.</font></b>
+039: <b><font color="#007D00">//</font></b>
+040: <b><font color="#007D00">// In this model, a redundant cumul function is used to globally constrain </font></b>
+041: <b><font color="#007D00">// the number of resource of a certain type simultaneously used by the tasks. </font></b>
+042: <b><font color="#007D00">// This cumul is limited by the number of resources of the resource type.</font></b>
+043: <b><font color="#007D00">// These redundant cumuls may help in some models as they enforce a stronger inference </font></b>
+044: <b><font color="#007D00">// in the engine while the whole set of resources for the tasks is still not completely chosen. </font></b>
+045: <b><font color="#007D00">// For more complex problems, e.g resources with several resource types / skills, </font></b>
+046: <b><font color="#007D00">// other partitions of the resource set may define efficient redundant cumul. </font></b>
+047: 
+048: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+049: 
+050: <b><font color="#007D00">// Data for resources, requests and tasks</font></b>
+051: 
+052: <b><font color="#0000FF">tuple</font></b> ResourceDat {
+053:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+054:   <b><font color="#0000FF">string</font></b>  type;
+055:   <b><font color="#0000FF">string</font></b> name;
+056: };
+057: 
+058: <b><font color="#0000FF">tuple</font></b> RequestDat {
+059:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+060:   <b><font color="#0000FF">string</font></b>  type;
+061:   <b><font color="#0000FF">int</font></b>     duedate;
+062:   <b><font color="#0000FF">string</font></b>  name;
+063: };
+064: 
+065: <b><font color="#0000FF">tuple</font></b> TaskDat {
+066:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+067:   <b><font color="#0000FF">string</font></b>  type;
+068:   <b><font color="#0000FF">int</font></b>     ptime;
+069:   <b><font color="#0000FF">string</font></b>  name;
+070: };
+071: 
+072: {RequestDat}  requests  = ...;
+073: {ResourceDat} resources = ...;
+074: {TaskDat}     tasks     = ...;
+075: 
+076: {<b><font color="#0000FF">string</font></b>} resourceTypes = { r.type | r <b><font color="#0000FF">in</font></b> resources };
+077: 
+078: <b><font color="#007D00">// Data for template recipes, dependencies and requirements</font></b>
+079: 
+080: <b><font color="#0000FF">tuple</font></b> Recipe {
+081:   <b><font color="#0000FF">string</font></b> request;
+082:   <b><font color="#0000FF">string</font></b> task;
+083: };
+084: 
+085: <b><font color="#0000FF">tuple</font></b> Dependency {
+086:   <b><font color="#0000FF">string</font></b> request;
+087:   <b><font color="#0000FF">string</font></b> taskb;
+088:   <b><font color="#0000FF">string</font></b> taska;
+089:   <b><font color="#0000FF">int</font></b>    delay;
+090: };
+091: 
+092: <b><font color="#0000FF">tuple</font></b> Requirement {
+093:   <b><font color="#0000FF">string</font></b> task;
+094:   <b><font color="#0000FF">string</font></b> resource;
+095:   <b><font color="#0000FF">int</font></b>    quantity;
+096: };
+097: 
+098: {Recipe}      recipes      = ...;
+099: {Dependency}  dependencies = ...;
+100: {Requirement} requirements = ...;
+101: 
+102: <b><font color="#007D00">// Set of operations (tasks of a request) and allocations (operation on a possible resource)</font></b>
+103: 
+104: <b><font color="#0000FF">tuple</font></b> Operation {
+105:   RequestDat request;
+106:   TaskDat    task;
+107: };
+108: 
+109: <b><font color="#0000FF">tuple</font></b> Allocation {
+110:   Operation   dmd;
+111:   Requirement req;
+112:   ResourceDat resource;
+113: };
+114: 
+115: {Operation} operations = 
+116:   { &lt;r, t&gt; | r <b><font color="#0000FF">in</font></b> requests,  m <b><font color="#0000FF">in</font></b> recipes, t <b><font color="#0000FF">in</font></b> tasks : 
+117:    r.type == m.request &amp;&amp; t.type == m.task};
+118: 
+119: {Allocation} allocs = 
+120:   { &lt;o, m, r&gt; | o <b><font color="#0000FF">in</font></b> operations, m <b><font color="#0000FF">in</font></b> requirements, r <b><font color="#0000FF">in</font></b> resources : 
+121:    o.task.type == m.task &amp;&amp; r.type == m.resource};
+122: 
+123: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> tirequests[requests];
+124: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> tiops[o <b><font color="#0000FF">in</font></b> operations] <b><font color="#0000FF">size</font></b> o.task.ptime;
+125: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> tiallocs[allocs] <b><font color="#0000FF">optional</font></b>;
+126: 
+127: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">sequence</font></b> workers[r <b><font color="#0000FF">in</font></b> resources] <b><font color="#0000FF">in</font></b> <b><font color="#7D007D">all</font></b>(a <b><font color="#0000FF">in</font></b> allocs: a.resource == r) tiallocs[a];
+128: 
+129: <b><font color="#0000FF">int</font></b> levels[rt <b><font color="#0000FF">in</font></b> resourceTypes] = <b><font color="#7D007D">sum</font></b>(r <b><font color="#0000FF">in</font></b> resources : r.type == rt) 1;
+130: 
+131: <b><font color="#0000FF">cumulFunction</font></b> cumuls[rt <b><font color="#0000FF">in</font></b> resourceTypes] =
+132:   <b><font color="#7D007D">sum</font></b>(rc <b><font color="#0000FF">in</font></b> requirements, o <b><font color="#0000FF">in</font></b> operations : rc.resource == rt &amp;&amp; o.task.type == rc.task) <b><font color="#7D007D">pulse</font></b>(tiops[o], rc.quantity);
+133: 
+134: <b><font color="#0000FF">minimize</font></b> <b><font color="#7D007D">sum</font></b>(t <b><font color="#0000FF">in</font></b> requests) <b><font color="#7D007D">maxl</font></b>(0, <b><font color="#7D007D">endOf</font></b>(tirequests[t]) - t.duedate);
+135: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+136:   <b><font color="#7D007D">forall</font></b>(r <b><font color="#0000FF">in</font></b> requests) {
+137:     <b><font color="#7D007D">span</font></b>(tirequests[r], <b><font color="#7D007D">all</font></b>(o <b><font color="#0000FF">in</font></b> operations : o.request == r) tiops[o]);
+138:     <b><font color="#7D007D">forall </font></b>(o <b><font color="#0000FF">in</font></b> operations : o.request == r) {
+139:       <b><font color="#7D007D">forall </font></b>(rc <b><font color="#0000FF">in</font></b> requirements : rc.task == o.task.type) {
+140:         <b><font color="#7D007D">alternative</font></b>(tiops[o], <b><font color="#7D007D">all</font></b>(a <b><font color="#0000FF">in</font></b> allocs : a.req == rc &amp;&amp; a.dmd == o) tiallocs[a], rc.quantity);
+141:       }        
+142:       <b><font color="#7D007D">forall</font></b>(tc <b><font color="#0000FF">in</font></b> dependencies: tc.request == r.type &amp;&amp; tc.taskb == o.task.type) {
+143:         <b><font color="#7D007D">forall</font></b>(o2 <b><font color="#0000FF">in</font></b> operations : o2.request == r &amp;&amp; tc.taska == o2.task.type) {
+144:           <b><font color="#7D007D">endBeforeStart</font></b>(tiops[o], tiops[o2], tc.delay);    
+145:         }
+146:       }
+147:     }   
+148:   }
+149:   <b><font color="#7D007D">forall</font></b>(r <b><font color="#0000FF">in</font></b> resources) {
+150:     <b><font color="#7D007D">noOverlap</font></b>(workers[r]);
+151:   }    
+152:   <b><font color="#7D007D">forall</font></b>(r <b><font color="#0000FF">in</font></b> resourceTypes: levels[r] &gt; 1) {
+153:     cumuls[r] &lt;= levels[r];
+154:   }    
+155: };
+</tt></pre>

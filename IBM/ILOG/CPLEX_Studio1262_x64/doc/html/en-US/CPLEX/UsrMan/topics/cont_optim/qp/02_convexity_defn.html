@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Distinguishing between convex and nonconvex QPs" />
+<meta name="abstract" content="Explains how to determine the convexity of a quadratic program." />
+<meta name="Description" content="Explains how to determine the convexity of a quadratic program." />
+<meta name="DC.subject" content="QP, problem formulation, indefinite, separable, nonseparable, minimization, convex QPs, maximization, concave QPs, semi-definite, positive and objective, positive semi-definite, objective, negative and objective, negative semi-definite objective, PSD, positive semi-definite in objective function" />
+<meta name="keywords" content="QP, problem formulation, indefinite, separable, nonseparable, minimization, convex QPs, maximization, concave QPs, semi-definite, positive and objective, positive semi-definite, objective, negative and objective, negative semi-definite objective, PSD, positive semi-definite in objective function" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveQP.636168" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<title>Distinguishing between convex and nonconvex QPs</title>
+</head>
+<body role="main" id="User_manual.uss_solveQP.636168">
+<h1 class="title topictitle1">Distinguishing between convex and nonconvex QPs</h1>
+<div class="body"><p class="shortdesc">Explains how to determine the convexity of a quadratic program.</p>
+<p class="p">Conventionally, a quadratic program (QP) is formulated
+this way:</p>
+<p class="p">Minimize    1/2 x<sup class="ph sup">T</sup>Qx + c<sup class="ph sup">T</sup>x</p>
+<p class="p">subject to   Ax ~ b</p>
+<p class="p">with these bounds l <samp class="ph codeph">≤</samp> x <samp class="ph codeph">≤</samp> u</p>
+<p class="p">where the relation ~ may be any combination of equal
+to, less than or equal to, greater than or equal to, or range constraints.
+As in other problem formulations, l indicates lower and u upper bounds.
+Q is a matrix of objective function coefficients. That is, the elements
+Q<sub class="ph sub">jj</sub> are the coefficients of the
+quadratic terms x<sub class="ph sub">j</sub><sup class="ph sup">2</sup>,
+and the elements Q<sub class="ph sub">ij</sub> and Q<sub class="ph sub">ji</sub> are
+summed together to be the coefficient of the term x<sub class="ph sub">i</sub>x<sub class="ph sub">j</sub>. </p>
+<p class="p">IBM ILOG
+CPLEX distinguishes between two kinds of Q matrices: </p>
+<ul class="ul"><li class="li"><p class="p">In a <em class="ph i">separable</em> problem,
+only the diagonal terms of the matrix are defined; all off-diagonal
+terms of the matrix are zero.</p>
+</li>
+<li class="li"><p class="p">In a <em class="ph i">nonseparable</em> problem,
+at least one off-diagonal term of the matrix is nonzero.</p>
+</li>
+</ul>
+<p class="p">CPLEX can solve minimization problems having a convex
+quadratic objective function. Equivalently, it can solve maximization
+problems having a concave quadratic objective function. All linear
+objective functions satisfy this property for both minimization and
+maximization. However, you cannot always assume this property in the
+case of a quadratic objective function. </p>
+<p class="p">CPLEX can also compute points that satisfy <em class="ph i">first-order optimality conditions</em> of
+models with arbitrary quadratic objective functions.  These models
+include minimization problems with a concave objective function, maximization
+problems with a convex objective function, and either minimization
+or maximization problems with objective functions that are neither
+convex nor concave.  Such points may not be the globally optimal solution
+to the model.</p>
+<p class="p">Intuitively, recall that any point on the line between
+two arbitrary points of a convex function will be above that function.
+In more formal terms, a continuous segment (that is, a straight line)
+connecting two arbitrary points on the graph of the objective function
+will not go below the objective of a minimization problem, and equivalently,
+the straight line will not go above the objective of a maximization
+problem. The image <a class="xref" href="02_convexity_defn.html#User_manual.uss_solveQP.636168__User_manual.uss_solveQP.645373">Figure 1</a> illustrates
+this intuitive idea for an objective function in one variable. It
+is possible for a quadratic function in more than one variable to
+be neither convex nor concave.</p>
+<div class="fig fignone" id="User_manual.uss_solveQP.636168__User_manual.uss_solveQP.645373"><span class="figcap">Figure 1. Minimize a convex objective function, maximize a concave
+objective function</span><div class="image"><img class="image" src="../../../images/solveQPn.gif" alt="solveQPn.gif" /></div></div>
+<p class="p">In formal terms, the question of whether a quadratic
+objective function is convex or concave is equivalent to whether the
+matrix Q is positive semi-definite or negative semi-definite. For
+convex QPs, Q must be positive semi-definite; that is, x<sup class="ph sup">T</sup>Qx <samp class="ph codeph">≥</samp> 0
+for every vector x, whether or not x is feasible. For concave maximization
+problems, the requirement is that Q must be negative semi-definite;
+that is, x<sup class="ph sup">T</sup>Qx <samp class="ph codeph">≤</samp> 0
+for every vector x. It is conventional to use the same term, positive
+semi-definite, abbreviated PSD, for both cases, on the assumption
+that a maximization problem with a negative semi-definite Q can be
+transformed into an equivalent PSD.</p>
+<p class="p">For a separable function, to determine the convexity of a problem, 
+it is sufficient to check whether
+the individual diagonal elements of the matrix Q are of the correct
+sign. For the nonseparable case, it may be less easy to decide in advance
+the convexity of Q. However, CPLEX detects this property during the
+early stages of optimization.</p>
+<p class="p">By default, CPLEX terminates if the quadratic objective
+term in a QP is found to be non PSD. In such a case, in order to instruct 
+CPLEX not to terminate, you must set the 
+<a class="xref" href="../../../../Parameters/topics/OptimalityTarget.html" title="Specifies type of optimality that CPLEX targets (optimal convex or first-order satisfaction) as it searches for a solution">optimality target</a> parameter.
+The value that you set for that parameter depends on the type of results that you expect.
+If you would like CPLEX to compute a point that satisfies <strong class="ph b">first-order 
+optimality conditions</strong> (that is, a local optimum), then you set the parameter to 
+the value  <span class="keyword apiname">CPX_SOLUTIONTARGET_FIRSTORDER</span>.
+If you would like CPLEX to find a <strong class="ph b">global optimum</strong>, then you set the parameter to 
+the value  <span class="keyword apiname">CPX_SOLUTIONTARGET_OPTIMALGLOBAL</span>.</p>
+<p class="p">For a more complete explanation of quadratic programming
+generally, a textbook, such as one of those listed in <a class="xref" href="../../preface/biblio.html" title="Recommends further reading about related topics.">Further reading</a> of
+the preface of this manual, may be helpful.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" title="Describes solving quadratic programming problems (QPs) with CPLEX.">Solving problems with a quadratic objective (QP)</a></div>
+</div>
+</div></body>
+</html>

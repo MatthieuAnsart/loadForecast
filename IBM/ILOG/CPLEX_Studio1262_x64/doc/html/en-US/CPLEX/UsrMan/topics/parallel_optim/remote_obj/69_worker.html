@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Code running on the remote worker machines" />
+<meta name="abstract" content="Explains an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="Description" content="Explains an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="DC.subject" content="remote worker, distributed concurrent MIP, remote worker and, mixed integer program (MIP), concurrent optimization, remote worker side" />
+<meta name="keywords" content="remote worker, distributed concurrent MIP, remote worker and, mixed integer program (MIP), concurrent optimization, remote worker side" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="workerRemoteObj" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<title>Code running on the remote worker machines</title>
+</head>
+<body role="main" id="workerRemoteObj">
+<h1 class="title topictitle1">Code running on the remote worker machines</h1>
+<div class="body"><p class="shortdesc">Explains an example of distributed concurrent optimization of a mixed integer program.</p>
+<p class="p">In an application that sets up a master on 
+a local machine and multiple workers on remote machines, the <strong class="ph b">binary</strong> file running on 
+each worker machine is the <samp class="ph codeph">cplex</samp> binary file that was started from the master 
+with an appropriate option to designate the worker and the communication protocol. For example, 
+in <span class="ph filepath">parmipopt.c</span> sample, the command-line option to the 
+<samp class="ph codeph">cplex</samp> binary file looks like this:
+<samp class="ph codeph">-worker=<em class="ph i">transport</em></samp>
+where <samp class="ph codeph"><em class="ph i">transport</em></samp> specifies the transport communication protocol.</p>
+<p class="p">The command-line of the invocation of the <samp class="ph codeph">cplex</samp> binary file in that example 
+also includes another option to specify and load a user-defined function. In the example 
+<span class="ph filepath">parmipopt.c</span>, the user function code is compiled whenever the macro 
+<samp class="ph codeph">COMPILE_USERFUNCTION</samp> is defined. It entails the following functions:</p>
+<ul class="ul"><li class="li"><strong class="ph b">REGISTER_USERFUNCTION</strong> is invoked when the shared object containing the 
+<samp class="ph codeph">userfunction</samp> code is loaded. It simply registers the function named 
+<samp class="ph codeph">userfunction</samp> as a CPLEX remote object user function; it does so 
+by means of <span class="keyword apiname">CPXXsetuserfunction</span>.
+(The topic 
+<a class="xref" href="06_user_function.html" title="Documents user functions for the remote object.">User functions to run user-defined code on the remote machine</a>
+introduces the idea of user functions in general and outlines their registration.)</li>
+<li class="li"><strong class="ph b">infocallback</strong> is a MIP informational callback. In the example, it is installed by 
+the function named <samp class="ph codeph">userfunction</samp>. The callback keeps track of the currently 
+best known primal and dual bounds as well as the current deterministic time. 
+Whenever a change in a primal or dual bound is observed, an info message (that is, a 
+status message) with the new bound is sent to the master. Every time the callback is invoked, 
+it sends an info message with the current deterministic time to the master.
+(The topic 
+<a class="xref" href="08_status_msgs.html" title="Documents status messages from the remote object to the local (master) machine.">Sending status messages to the master</a> 
+introduces the idea of info messages and explains their use in general terms.)</li>
+<li class="li"><strong class="ph b">userfunction</strong> is invoked whenever the master issues a call to 
+<span class="keyword apiname">CPXXuserfunction</span>. Depending on the identifier, 
+it performs setup operations (such as registering the MIP informational callback),  
+or it carries out cleanup operations.</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" title="Introduces an example of distributed concurrent optimization of a mixed integer program.">Example: distributed concurrent MIP</a></div>
+</div>
+</div></body>
+</html>

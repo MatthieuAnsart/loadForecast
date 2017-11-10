@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Deleting a constraint" />
+<meta name="abstract" content="Shows the effect of deleting a constraint from a conflict." />
+<meta name="Description" content="Shows the effect of deleting a constraint from a conflict." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_refineConflict.1044404" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" />
+<title>Deleting a constraint</title>
+</head>
+<body role="main" id="User_manual.uss_refineConflict.1044404">
+<h1 class="title topictitle1">Deleting a constraint</h1>
+<div class="body"><p class="shortdesc">Shows the effect of deleting a constraint from a conflict.</p>
+<p class="p">For the sake of explanation, assume that a managerial
+decision is made to cancel the training in this period. To implement
+that decision, try entering this command:</p>
+<p class="p"> <samp class="ph codeph">change delete constraint c8</samp> </p>
+<p class="p">Now re-optimize. Unfortunately, even removing c8 does
+not make it possible to reach an optimum, as you see from these results
+of optimization:  </p>
+<pre class="pre codeblock"><code>Constraints 'c5' and 'c9' are inconsistent.
+Presolve time =    0.00 sec.  
+MIP - Integer infeasible.
+Current MIP best bound is infinite.
+Solution time =    0.00 sec.  Iterations = 0  Nodes = 0</code></pre>
+<p class="p">Perhaps presolve has identified a source of infeasibility,
+but if you run the <samp class="ph codeph">conflict</samp> command again,
+you see these results:  </p>
+<pre class="pre codeblock"><code>Refine conflict on 13 members...  
+ Iteration  Max Members  Min Members
+         1           12            0
+         2            9            0
+         3            6            0
+         4            4            0
+         5            3            0
+         6            3            1
+         7            3            2
+         8            3            3 
+Minimal conflict:    2 linear constraint(s)
+                     1 lower bound(s)
+                     0 upper bound(s)
+Conflict computation time =    0.00 sec.  Iterations = 8</code></pre>
+<p class="p">Now view the entire conflict with this command:</p>
+<p class="p"> <samp class="ph codeph">display conflict all</samp>   </p>
+<pre class="pre codeblock"><code>Minimize
+ obj:
+Subject To
+ c5:     0.2 x2 + x3 + 0.5 x4 + 0.5 x5 + 0.2 x7 + 0.5 x8 + x10 - service = 0
+ c                   x4 +   x5 +           x8            &lt;= 1
+ sum_eq: 0.2 x2 + x3 + 0.5 x4 + 0.5 x5 + 0.2 x7 + 0.5 x8 + x10 - service = 0
+Bounds
+ 0 &lt;= x2 &lt;= 1
+ 0 &lt;= x3 &lt;= 1
+ 0 &lt;= x4 &lt;= 1
+ 0 &lt;= x5 &lt;= 1
+ 0 &lt;= x7 &lt;= 1
+ 0 &lt;= x8 &lt;= 1
+ 0 &lt;= x10 &lt;= 1
+      service &gt;= 3.2
+Binaries
+ x2  x3  x4  x5  x7  x8  x10</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" title="Interprets the conflict detected by the conflict refiner in the Interactive Optimizer.">Interpreting conflict</a></div>
+</div>
+</div></body>
+</html>

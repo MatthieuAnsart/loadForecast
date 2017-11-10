@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Tuples of parameters" />
+<meta name="abstract" content="OPL allows tuples of formal parameters to be created in aggregate operators, forall statements, and generic sets." />
+<meta name="Description" content="OPL allows tuples of formal parameters to be created in aggregate operators, forall statements, and generic sets." />
+<meta name="DC.subject" content="formal parameters, tuples, of parameters, aggregate operators, generic sets, efficient models, models, readability" />
+<meta name="keywords" content="formal parameters, tuples, of parameters, aggregate operators, generic sets, efficient models, models, readability" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_formalParam.1017946" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" />
+<title>Tuples of parameters</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_formalParam.1017946">
+<h1 class="title topictitle1">Tuples of parameters</h1>
+<div class="body conbody"><div class="abstract"><span class="shortdesc">OPL allows tuples of formal
+parameters to be created in aggregate operators, <samp class="ph codeph">forall</samp> statements,
+and generic sets.</span>
+ </div>
+<p class="p">The code sample below
+states the precedence constraints between tasks. The constraint declaration
+requires explicit accesses to the fields of the tuple to state the
+constraints. In addition, the field <samp class="ph codeph">before</samp> is
+accessed twice. An alternative way to state the same constraint is
+to use a tuple of formal parameters, as shown in the last line of
+the code sample,
+precluding the need to access the tuple fields explicitly. The tuple <samp class="ph codeph">&lt;p in Prec&gt;</samp> in the <samp class="ph codeph">forall</samp> quantifier
+contains two components that are successively given the values of
+the fields of each tuple in <samp class="ph codeph">Prec</samp>.</p>
+<p class="p exampletitle" id="usropllangref.uss_langref_formalParam.1017946__usropllangref.uss_langref_formalParam.1018961">Tuple of formal parameters</p>
+<pre class="pre codeblock"><code>int minTime=7*60;
+int maxTime=9*60;
+
+{string} Tasks = { "Make dinner","Have dinner","Clean post dinner" };
+tuple Precedence {
+   string pre;
+   string post;
+}
+
+{Precedence} Prec = { 
+   &lt;"Make dinner","Have dinner"&gt;,
+   &lt;"Have dinner","Clean post dinner"&gt;
+};
+
+int Duration[Tasks]= [20,60,10];
+
+dvar int Start[Tasks] in minTime..maxTime;
+
+subject to {
+ forall(p in Prec) Start[p.post] &gt;= Start[p.pre] + Duration[p.pre];  
+} </code></pre>
+<p class="p">More generally, an expression </p>
+<pre class="pre codeblock"><code>p in S </code></pre>
+<p class="p">where <samp class="ph codeph">S</samp> is a set of tuples containing <em class="ph i">n</em> fields, can be replaced by a formal parameter expression </p>
+<pre class="pre codeblock"><code>&lt;p1,...,pn&gt; in S </code></pre>
+<p class="p">that contains <em class="ph i">n</em> formal parameters. Each
+time a tuple <samp class="ph codeph">r</samp> is selected from <samp class="ph codeph">S</samp>, its fields are assigned to the corresponding
+formal parameters. This functionality is often useful in producing
+more readable models. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" title="Describes basic formal parameters, tuples of parameters, and filtering in tuples of parameters.">Formal parameters</a></div>
+</div>
+</div></body>
+</html>

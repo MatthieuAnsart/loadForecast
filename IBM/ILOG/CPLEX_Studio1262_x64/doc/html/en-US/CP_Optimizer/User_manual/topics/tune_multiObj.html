@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving lexicographic multi-objective problems" />
+<meta name="abstract" content="Providing a starting point can sometimes help the optimizer produce solutions more quickly." />
+<meta name="Description" content="Providing a starting point can sometimes help the optimizer produce solutions more quickly." />
+<meta name="DC.subject" content="starting points" />
+<meta name="keywords" content="starting points" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/tune.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1267469329964" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/tune.html" />
+<title>Solving lexicographic multi-objective problems</title>
+</head>
+<body role="main" id="descriptiveTopic1267469329964">
+<h1 class="title topictitle1">Solving lexicographic multi-objective problems</h1>
+<div class="body"><p class="shortdesc">Providing a starting point can sometimes help
+the optimizer produce solutions more quickly.</p>
+<p class="p">There are cases where better solutions can be produced
+more quickly by providing a starting point, an instance of <samp class="ph codeph">IloSolution</samp>, to the optimizer. In goal programming,
+the multi-objective optimization problem may involve a lexically ordered
+set of objective functions <em class="ph i">(f1,f2,...,fn)</em>. It could
+be, for example, a detailed scheduling problem for which the main
+objective, <em class="ph i">f1</em>, is to minimize resource allocation
+costs whereas a secondary objective, <em class="ph i">f2</em>, is to minimize
+the makespan of the schedule given an optimal or good resource allocation
+cost. In this case, the problem can be solved in n successive steps:
+first, minimize objective <em class="ph i">f1</em> to produce a solution <em class="ph i">sol1</em>, then, add a constraint to avoid deteriorating <em class="ph i">f1</em> and solve the problem with objective function <em class="ph i">f2</em> using <em class="ph i">sol1</em> as a starting point to
+produce a solution <em class="ph i">sol2</em>, etc. The solution to a given
+step is a feasible solution for the next step. Setting a starting
+point may improve the performance of the optimizer engine. A typical
+code in the C++ API for implementing a multi-objective problem using
+starting points would be similar to:</p>
+<p class="p"></p>
+<pre class="pre codeblock"><code>IloEnv env;
+IloModel model(env);
+IloInt n = ...;
+IloIntervalVarArray activities(env, n);
+// ...
+
+IloIntExpr f1 = ...;
+IloIntExpr f2 = ...;
+IloObjective obj1 = IloMinimize(env, f1);
+IloObjective obj2 = IloMinimize(env, f2);
+IloCP cp(model);
+
+// Minimize f1
+model.add(obj1);
+cp.solve();
+
+// Store solution
+IloSolution sol1(env);
+for (IloInt i=0; i&lt;n; ++i) {
+  // For illustration purpose, we only save start values
+  sol1.setStart(activities[i], cp.getStart(activities[i]));
+}
+
+// Change objective
+model.remove(obj1);
+model.add(f1 &lt;= cp.getValue(f1)); // f1 should not worsen
+model.add(obj2);
+
+// Minimize f2 using sol1 as starting point
+cp.setStartingPoint(sol1);
+cp.solve();</code></pre>
+<p class="p"></p>
+<p class="p">The starting point provided to the engine does not have
+to specify a value for each decision variable (it can specify a range
+of values or no information at all) and does not have to be a feasible
+solution for the problem being solved. If the starting point provides
+a fixed value for each decision variable of the problem and if it
+is feasible, the CP Optimizer search will first visit this solution
+when traversing the search space. In all other cases, the information
+contained in the starting point is used as a guideline for the search
+but there is no guarantee that the solutions traversed by the search
+will be "close" to the starting point solution.  </p>
+<p class="p">Note: the starting point information is used by the restart
+and multi-point search types only. It is not used by the depth-first
+search.</p>
+<p class="p">To set a starting point in the <strong class="ph b">C++ API</strong> of
+CP Optimizer, you use the method <samp class="ph codeph">IloCP::setStartingPoint</samp>.</p>
+<p class="p">To set a starting point in the <strong class="ph b">Java™ API</strong> of CP Optimizer, you use the method <samp class="ph codeph">IloCP.setStartingPoint</samp>.</p>
+<p class="p">To set a starting point in the <strong class="ph b">C# API</strong> of
+CP Optimizer, you use the method <samp class="ph codeph">CP.SetStartingPoint</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/tune.html" title="CP Optimizer provides a variety of search algorithms for solving constraint programming problems.">Tuning the CP Optimizer search</a></div>
+</div>
+</div></body>
+</html>

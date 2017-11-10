@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Formulating a network problem" />
+<meta name="abstract" content="Defines the characteristics of a network flow model." />
+<meta name="Description" content="Defines the characteristics of a network flow model." />
+<meta name="DC.subject" content="problem formulation, network-flow, network, tail, node, from, head, to, arc, modeling variables, objective value, network flows and, objective function, source, supply, sink, demand, transshipment, infeasibility in, infeasibility, network flow, network optimizer, feasibility, progress toward" />
+<meta name="keywords" content="problem formulation, network-flow, network, tail, node, from, head, to, arc, modeling variables, objective value, network flows and, objective function, source, supply, sink, demand, transshipment, infeasibility in, infeasibility, network flow, network optimizer, feasibility, progress toward" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveNet.638795" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" />
+<title>Formulating a network problem</title>
+</head>
+<body role="main" id="User_manual.uss_solveNet.638795">
+<h1 class="title topictitle1">Formulating a network problem</h1>
+<div class="body conbody"><div class="abstract"><div class="shortdesc">Defines the characteristics of a network flow model.</div>
+
+<p class="p">A network-flow problem finds the minimal-cost flow through
+a network, where a network  consists of a set N of nodes and a set
+A of arcs connecting the nodes. An arc a in the set A is  an ordered
+pair (i, j) where i and j are nodes in the set N; node i is called
+the tail or the from- node and node j is called the head or the to-node
+of the arc a. Not all the pairs of nodes in a  set N are necessarily
+connected by arcs in the set A. More than one arc may connect a pair
+of  nodes; in other words, a1 = (i, j) and a2 = (i, j)
+may be two different arcs in A, both  connecting the nodes i and j
+in N. </p>
+</div>
+<p class="p">Each arc <samp class="ph codeph">a</samp>  may be associated
+with four values:</p>
+<ul class="ul"><li class="li"><p class="p"> <em class="ph i">x</em> <sub class="ph sub">a</sub> is
+the flow value, that is, the amount passing through the arc <em class="ph i">a</em> from its tail (or from-node) to
+its head (or to-node). The flow values are the modeling variables
+of a network-flow problem. Negative values are allowed; a negative
+flow value indicates that there is flow from the head to the tail.</p>
+</li>
+<li class="li"><p class="p"> <em class="ph i">l</em> <sub class="ph sub">a</sub>,
+the lower bound, sets the minimum flow allowed through the arc <em class="ph i">a</em>. By default, the lower bound on
+an arc is 0 (zero).</p>
+</li>
+<li class="li"><p class="p"> <em class="ph i">u</em> <sub class="ph sub">a</sub>,
+the upper bound, sets the maximum flow allowed through the arc <em class="ph i">a</em>. By default, the upper bound on
+an arc is positive infinity.</p>
+</li>
+<li class="li"><p class="p"> <em class="ph i">c</em> <sub class="ph sub">a</sub>,
+the objective value, specifies the contribution to the objective function
+of one unit of flow through the arc.</p>
+</li>
+</ul>
+<p class="p">Each node <em class="ph i">n</em>  is
+associated with one value:</p>
+<ul class="ul"><li class="li"><p class="p"> <em class="ph i">s</em> <sub class="ph sub">n</sub> is
+the supply value at node n. </p>
+</li>
+</ul>
+<p class="p">By convention, a node with strictly positive supply value
+(that is, <em class="ph i">s</em> <sub class="ph sub">n</sub> <em class="ph i"> &gt; 0</em>) is called a <em class="ph i">supply</em> node or a <em class="ph i">source</em>, and a node with strictly
+negative supply value (that is, <em class="ph i">s</em> <sub class="ph sub">n</sub> <em class="ph i"> &lt; 0</em>) is called a <em class="ph i">demand</em> node or a <em class="ph i">sink</em>. A node where <em class="ph i">s</em> <sub class="ph sub">n</sub> <em class="ph i"> = 0</em> is called a <em class="ph i">transshipment</em> node. The sum of all
+supplies must match the sum of all demands; if not, then the network
+flow problem is <em class="ph i">infeasible</em>.</p>
+<p class="p"> <em class="ph i">T</em> <sub class="ph sub">n</sub> is
+the set of arcs whose tails are node <em class="ph i">n</em>; <em class="ph i">H</em> <sub class="ph sub">n</sub> is
+the set of arcs whose heads are node <em class="ph i">n</em>.
+The usual form of a network problem looks like this:  </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" role="presentation" class="table presentation NoBorder" rules="none" frame="void" border="0"><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> Minimize (or maximize)  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> <img class="image" src="../../../images/solveNetm.gif" alt="solveNetm.gif" />  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> subject to  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> <img class="image" src="../../../images/solveNet2.gif" alt="solveNet2.gif" />  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> with these bounds  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> <img class="image" src="../../../images/solveNet3.gif" alt="solveNet3.gif" />  </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">That is, for each node, the net flow entering and leaving
+the node must equal its supply value, and all flow values must be
+within their bounds. The solution of a network-flow problem is an
+assignment of flow values to arcs (that is, the modeling variables)
+to satisfy the problem formulation. A flow that satisfies the constraints
+and bounds is <em class="ph i">feasible</em>. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" title="Documents the CPLEX network optimizer.">Solving network-flow problems</a></div>
+</div>
+</div></body>
+</html>

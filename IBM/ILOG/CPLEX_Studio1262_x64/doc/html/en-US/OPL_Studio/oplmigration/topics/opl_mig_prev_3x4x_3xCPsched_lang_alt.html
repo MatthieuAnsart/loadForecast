@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Alternative interval variables" />
+<meta name="abstract" content="Explains the use of alternate interval variables in OPL 6.x." />
+<meta name="Description" content="Explains the use of alternate interval variables in OPL 6.x." />
+<meta name="DC.subject" content="scheduling alternate internal variables, migration" />
+<meta name="keywords" content="scheduling alternate internal variables, migration" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched_lang.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1204287711436" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched_lang.html" />
+<title>Alternative interval variables</title>
+</head>
+<body role="main" id="descriptiveTopic1204287711436">
+<h1 class="title topictitle1">Alternative interval variables</h1>
+<div class="body"><p class="shortdesc">Explains the use of alternate interval variables in OPL
+6.x.</p>
+<p class="p">In OPL 3.7, the concept of alternative resource (<samp class="ph codeph">AlternativeResources</samp>) represented a set of alternative
+unary resources that can be required by an activity. This concept
+is not sufficient for applications that involve alternatives of other
+types of resources or alternatives of more complex processes. </p>
+<p class="p">OPL 6.x introduces the more general notions of optional
+interval variable and alternative constraint between interval variables.
+ </p>
+<p class="p">An alternative of <samp class="ph codeph">m</samp> unary
+resources:</p>
+<div class="section" id="descriptiveTopic1204287711436__section1204289406637"><h2 class="title sectiontitle">In OPL 3.7</h2><pre class="pre codeblock"><code>  int n = ...;
+  int m = ...;
+  Activity acts[1..n](10);
+  UnaryResource res[1..m];
+  AlternativeResources s(res);
+  solve {
+    forall(i in 1..n)
+      acts[i] requires s;
+  };</code></pre>
+</div>
+<div class="section" id="descriptiveTopic1204287711436__section1204289411309"><h2 class="title sectiontitle">In OPL 6.x</h2><pre class="pre codeblock"><code>  using CP;
+  int n = ...;
+  int m = ...;
+  dvar interval acts[1..n] size 10;
+  dvar interval actOnRes[1..n][1..m] optional;
+  constraints {
+    forall(i in 1..n)
+      alternative(acts[i], all(j in 1..m) actOnRes[i][j]);
+    forall(j in 1..m)
+      noOverlap(all(i in 1..n) actOnRes[i][j]);
+  }</code></pre>
+<p class="p">In this context, an OPL 3.7 constraint: </p>
+<pre class="pre codeblock"><code>    activityHasSelectedResource(acts[i],s,res[j])</code></pre>
+<p class="p">would be modeled in OPL 6.x by a constraint: </p>
+<pre class="pre codeblock"><code>    presenceOf(actOnRes[i][j])</code></pre>
+<p class="p">The advantage of the new concept is that the optional
+interval variables in the alternative can be used by any other constraint
+or expression on interval variables. In particular, an optional interval
+variable in an alternative can represent a complex process involving
+subordinate activities with precedence and other constraints between
+them.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched_lang.html" title="Describes the language elements affected by the changes to scheduling in OPL 6.x.">Individual language elements</a></div>
+</div>
+</div></body>
+</html>

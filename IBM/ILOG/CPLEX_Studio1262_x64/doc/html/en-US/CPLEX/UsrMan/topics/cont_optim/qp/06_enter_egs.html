@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Examples for entering QPs" />
+<meta name="abstract" content="Demonstrates ways to enter the objective function of a quadratic program." />
+<meta name="Description" content="Demonstrates ways to enter the objective function of a quadratic program." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/03_enter_QP__title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveQP.654512" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/03_enter_QP__title_synopsis.html" />
+<title>Examples for entering QPs</title>
+</head>
+<body role="main" id="User_manual.uss_solveQP.654512">
+<h1 class="title topictitle1">Examples for entering QPs</h1>
+<div class="body"><p class="shortdesc">Demonstrates ways to enter the objective function of
+a quadratic program.</p>
+<p class="p">CPLEX LP format requires the factor of 1/2 to be specified
+explicitly in the file.</p>
+<pre class="pre codeblock"><code>    Minimize
+     obj: [ 100 x1 ^2 - 200 x1 * x2 + 100 x2 ^2 ] / 2</code></pre>
+<p class="p"> <samp class="ph codeph">MPS</samp>  format for this same
+objective function contains the following block.</p>
+<pre class="pre codeblock"><code>QMATRIX
+    x1        x1                 100
+    x1        x2                -100
+    x2        x1                -100
+    x2        x2                 100</code></pre>
+<p class="p">A C++ Concert program having such an objective function
+might include the following code. </p>
+<pre class="pre codeblock"><code>model.add(IloMinimize(env, 0.5 * (100*x[0]*x[0] + 
+                                  100*x[1]*x[1] -
+                                  200*x[0]*x[1])));</code></pre>
+<p class="p">Or since the algebraic view is supported, the factor
+of one-half could be simplified as in the following equivalent expression:</p>
+<pre class="pre codeblock"><code>model.add(IloMinimize(env, (50*x[0]*x[0] + 
+                            50*x[1]*x[1] - 
+                            100*x[0]*x[1])));</code></pre>
+<p class="p">A similar Java program using Concert might express it
+this way: </p>
+<pre class="pre codeblock"><code>IloNumExpr x00 = model.prod(100, x[0], x[0]);
+IloNumExpr x11 = model.prod(100, x[1], x[1]);
+IloNumExpr x01 = model.prod(-200, x[0], x[1]);
+IloNumExpr Q   = model.prod(0.5, model.sum(x00, x11, x01));
+model.add(model.minimize(Q));</code></pre>
+<p class="p">Again, the user may choose to simplify that expression
+algebraically if that suits the purposes of the application better.</p>
+<p class="p">Finally, a Callable Library application in C might construct
+the quadratic objective function in a way similar to the following lines: </p>
+<pre class="pre codeblock"><code>zqmatbeg[0] = 0; zqmatbeg[1] = 2;
+zqmatcnt[0] = 2; zqmatcnt[1] = 2;
+
+zqmatind[0] = 0;     zqmatind[2] = 0;
+zqmatval[0] = 100.0; zqmatval[2] = -100.0; 
+zqmatind[1] = 1;     zqmatind[3] = 1;
+zqmatval[1] =-100.0; zqmatval[3] = 100.0;
+
+CPXcopyquad (env, lp, qmatbeg, qmatcnt, qmatind, qmatval);</code></pre>
+<p class="p">To re-emphasize the point about the factor of 1/2 in
+any of these methods: if that objective function is evaluated with
+a solution of <samp class="ph codeph">x1 = 1.000000</samp> and <samp class="ph codeph">x2
+= 3.000000</samp>, the result is <samp class="ph codeph">200</samp>,
+not <samp class="ph codeph">400</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/03_enter_QP__title_synopsis.html" title="Documents the two views of quadratic objective functions supported by CPLEX: a matrix view and an algebraic view.">Entering QPs</a></div>
+</div>
+</div></body>
+</html>

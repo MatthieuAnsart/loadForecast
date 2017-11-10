@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Performance tips" />
+<meta name="abstract" content="Contains a checklist of modeling best practices." />
+<meta name="Description" content="Contains a checklist of modeling best practices." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_perf.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplports.uss_ports_perf.1012344" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_perf.html" />
+<title>Performance tips</title>
+</head>
+<body role="main" id="oplports.uss_ports_perf.1012344">
+<h1 class="title topictitle1">Performance tips</h1>
+<div class="body"><p class="shortdesc">Contains a checklist of modeling best practices.</p>
+<p class="p">Here is a check list for quick reference:</p>
+<ul class="ul"><li class="li"><p class="p">Use the profiler to detect <samp class="ph codeph">execute</samp> blocks
+that run for a long time during the preprocessing phase. See <a class="xref" href="../../usroplide/topics/opl_ide_profil.html" title="Explains how the IDE Profiler table can help you improve your model to make it run faster while consuming less memory.">Profiling the execution of a model</a> in <em class="ph i">IDE
+Tutorials</em>.</p>
+</li>
+<li class="li"><p class="p">If you observe that the execution of a model
+is slow because the <samp class="ph codeph">main</samp> scripting block
+loads many engine instances or submodels, you can improve this by
+turning off the OPL Language option <span class="ph uicontrol">Update charts
+and statistics in main</span>. See <a class="xref" href="../../oplparams/topics/opl_params_langoptions.html" title="Presents each individual OPL Language option you can set in the settings editor.">OPL language options</a> in <em class="ph i">IDE
+Reference</em>.</p>
+</li>
+<li class="li"><p class="p">In pre- or postprocessing script statements,
+do not initialize array elements to zero, OPL does that for you. See
+the note in <a class="xref" href="opl_languser_script_intro_preinit.html" title="The recommended method is to use a generic indexed array.">Initializing arrays</a> in the <em class="ph i">Language
+User’s Manual</em>.</p>
+ </li>
+<li class="li"><p class="p">To initialize arrays, prefer generic indexed
+arrays rather than an <samp class="ph codeph">execute INITIALIZE</samp> block.
+See <a class="xref" href="../../opllangref/topics/opl_langref_data_init_arrays.html#usropllangref.uss_langref_datasources.1064637__section1326898893369">As generic indexed arrays</a> in
+the <em class="ph i">Language Reference Manual</em>.</p>
+</li>
+<li class="li"><p class="p">Avoid dummy formal parameters for tuple components.
+See <a class="xref" href="../../opllangref/topics/opl_langref_formalParams.html" title="Describes basic formal parameters, tuples of parameters, and filtering in tuples of parameters.">Formal parameters</a> in the <em class="ph i">Language
+Reference Manual</em>.</p>
+</li>
+<li class="li"><p class="p">Cache results for <span class="keyword apiname">find()</span> lookup.</p>
+</li>
+<li class="li"><p class="p">Calculate iteration sets for conditional
+blocks.</p>
+</li>
+<li class="li"><p class="p">Declare local script variables using the
+keyword <samp class="ph codeph">var</samp>. See <a class="xref" href="../../opllangref/topics/opl_langref_script_struct_statements_decl.html" title="Provides a reference for the syntax of script variable declarations in OPL.">Declaration of script variables</a> in the <em class="ph i">Language
+Reference Manual</em>.</p>
+</li>
+<li class="li"><p class="p">In CP models with customized search strategies,
+consider the order of search phases. See <a class="xref" href="opl_languser_script_in_cp_searchmulti.html" title="Explain how to pass several search phases to the engine.">Multiple search phases</a> in the <em class="ph i">Language
+User’s Manual</em>.</p>
+ </li>
+<li class="li"><p class="p">Constraint labels may have a significant
+performance and memory cost. See <a class="xref" href="../../opllangref/topics/opl_langref_constraints_labels.html" title="Explains why label constraints, the benefits, costs, and limitations, how to label constraints, how to use indexed labels, and how to deal with compatibility between constraint names and labels.">Constraint labels</a> in the <em class="ph i">Language
+Reference Manual</em>.</p>
+ </li>
+<li class="li"><p class="p">To improve the performance of a model from
+the IDE, use the Tune Model button. See <a class="xref" href="../../usroplide/topics/opl_ide_perf.html" title="Describes how to improve the combination of parameters for the CPLEX part of an OPL model.">Using the performance tuning tool</a> in <em class="ph i">IDE
+Tutorials</em>.</p>
+</li>
+<li class="li"><p class="p">Using sorted versus ordered sets affects
+the memory consumption and the speed of execution but the effect is
+different depending on what operations are carried out on the sets.
+It is therefore not possible to give general recommendations on when
+to use sorted sets rather than ordered sets.</p>
+ </li>
+<li class="li"><p class="p">Using slicing rather than <samp class="ph codeph">if</samp> statements
+usually saves time and memory. For example, in the following code
+lines</p>
+ <pre class="pre codeblock"><code>int n=1000; 
+
+dvar int x[1..n][1..n];
+
+subject to
+{
+    
+ct1:forall(i in 1..n,j in 1..n:i==4 &amp;&amp; j==5) x[i][j]==5;
+ct2:forall(i in 1..n,j in 1..n) if (i==4) if (j==5) x[i][j]==5;
+
+} </code></pre>
+ <p class="p">the <samp class="ph codeph">ct1</samp> constraint
+is 60 times faster and lighter in memory than <samp class="ph codeph">ct2</samp>.</p>
+ </li>
+</ul>
+<p class="p">To write efficient models, see also <a class="xref" href="opl_languser_modelingtips.html" title="Describes a few recommended practices to help you write more efficient models.">Modeling tips</a> in the <em class="ph i">Language
+User’s Manual</em>.</p>
+<p class="p">To control memory consumption. See <a class="xref" href="opl_languser_perf_mem.html" title="Explains how OPL uses and allocates memory, and suggests actions to improve memory usage, mostly for data structures, object termination, engine parameters, and oplrun.">Memory usage</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_perf.html" title="You can improve the modeling and the solving time of your models, and the ability to find satisfactory solutions to a problem expressed in a model.">Performance and memory usage</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modifying data from “main” scripting" />
+<meta name="abstract" content="Data elements can be modified and then used as a data source for another model." />
+<meta name="Description" content="Data elements can be modified and then used as a data source for another model." />
+<meta name="DC.subject" content="modifying data from “main” scripting, scalar data and scripting, external data, and scripting" />
+<meta name="keywords" content="modifying data from “main” scripting, scalar data and scripting, external data, and scripting" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_mulmod.1013911" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" />
+<title>Modifying data from “main” scripting</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_mulmod.1013911">
+<h1 class="title topictitle1">Modifying data from “main” scripting</h1>
+<div class="body"><p class="shortdesc">Data elements can be modified and then used as
+a data source for another model.</p>
+<p class="p">You can access and modify data in the data elements obtained
+from the current OPL model, as follows:</p>
+<pre class="pre codeblock"><code>data.capacity["flour"] = capFlour;</code></pre>
+<p class="p">Then, the value of the variable <samp class="ph codeph">capacity["flour"]</samp> is
+modified in the structure of the data elements. </p>
+<p class="p">Note, however, the following restrictions:</p>
+<ol class="ol"><li class="li"><p class="p">Scalar data, whether in the <samp class="ph codeph">.mod </samp> file
+or the <samp class="ph codeph">.dat</samp> file, cannot be modified via
+scripting.</p>
+</li>
+<li class="li"><p class="p">You can use data elements to add new elements,
+but only for scalar types.</p>
+</li>
+<li class="li"><p class="p">Only <em class="ph i">external</em> data can be
+modified by script. If, in the <samp class="ph codeph">.mod</samp> file,
+you have, for example:</p>
+ <pre class="pre codeblock"><code>int arr[1..3] = [1,2,3];</code></pre>
+ <p class="p">you cannot modify the array <samp class="ph codeph">arr</samp>.
+You need to declare it as:</p>
+ <pre class="pre codeblock"><code>int arr[1..3] = ...;</code></pre>
+ <p class="p">and initialize it externally.</p>
+ <p class="p">So you would
+need to create a <samp class="ph codeph">.dat</samp> file that contains
+the data to update, except for scalar data. The scalars that need
+to be updated would not be initialized in the <samp class="ph codeph">.mod</samp>,
+or in a <samp class="ph codeph">.dat</samp>, but in a new instance of <samp class="ph codeph">OplDataElements</samp> that you can then add as a data
+source:</p>
+ <pre class="pre codeblock"><code>float maxOfx = ...;
+.
+.
+main { 
+.
+.
+  var data = new IloOplDataSource("basicmodel.dat");
+  var opl = new IloOplModel(def,cplex);
+  var data2 = new IloOplDataElements();
+  data2.maxOfx=11;
+  opl.addDataSource(data);
+  opl.addDataSource(data2);
+  opl.generate();
+.
+.
+} </code></pre>
+ </li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" title="Provides more detail on each step of the procedure summary.">Detailed steps</a></div>
+</div>
+</div></body>
+</html>

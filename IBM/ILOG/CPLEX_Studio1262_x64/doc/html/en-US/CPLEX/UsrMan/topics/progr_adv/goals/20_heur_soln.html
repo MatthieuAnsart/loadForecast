@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Injecting heuristic solutions" />
+<meta name="abstract" content="Defines heuristic solutions and describes the injection of a heuristic solution by a goal." />
+<meta name="Description" content="Defines heuristic solutions and describes the injection of a heuristic solution by a goal." />
+<meta name="DC.subject" content="goal, solution injection by, heuristic, solutions" />
+<meta name="keywords" content="goal, solution injection by, heuristic, solutions" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_goals.1019401" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<title>Injecting heuristic solutions</title>
+</head>
+<body role="main" id="User_manual.uss_goals.1019401">
+<h1 class="title topictitle1">Injecting heuristic solutions</h1>
+<div class="body"><p class="shortdesc">Defines heuristic solutions and describes the injection
+of a heuristic solution by a goal.</p>
+<p class="p">At any time in the execution of a goal, you may find
+that, for example, by slightly manipulating the current node subproblem
+solution, you may construct a solution to your model. Such solutions
+are called <em class="ph i">heuristic solutions</em>,
+and a procedure that generates them is called a <em class="ph i">heuristic</em>.</p>
+<p class="p">Heuristic solutions can be injected into the branch &amp; cut
+search by creating a solution goal with the method <samp class="ph codeph">IloCplex::GoalI::SolutionGoal</samp> (<samp class="ph codeph">IloCplex.solutionGoal</samp> or <samp class="ph codeph">Cplex.SolutionGoal</samp>).
+Such a goal can be returned typically as a subgoal of an And goal
+much like global cut goals.</p>
+<p class="p">When CPLEX executes a solution goal, it does not immediately
+use the specified solution as a potential new incumbent. The reason
+is that with goals, part of the model may be specified via global
+cuts or through specialized branching strategies. Thus the solution
+needs first to be tested for feasibility with respect to the entire
+model, including any part of the model specified through goals.</p>
+<p class="p">To test whether an injected solution is feasible, CPLEX
+first creates a subnode of the current node. This subnode will of
+course inherit the goal stack from its parent. In addition, the solution
+goal will push local cuts onto the stack of the subnode such that
+all variables are fixed to the values of the injected solution.</p>
+<p class="p">By processing this subnode as the next node, CPLEX makes
+sure that either the solution is feasible with respect to all goals
+or otherwise it is discarded. Goals that have been executed so far
+are either reflected as global cuts or by the local cuts that are
+active at the current node. Thus, if the relaxation remains feasible
+after the variable fixings have been added, the feasibility of these
+goals is certain.</p>
+<p class="p">If at that point the goal stack is not empty, the goals
+on the goal stack need to be checked for feasibility as well. Thus
+by continuing to execute the goals from the goal stack, CPLEX will
+either prove feasibility of the solution with respect to the remaining
+goals or, in case the relaxation becomes infeasible, decide it really
+is infeasible and discard the solution. The rest of the branch &amp; cut
+search remains unaffected by all of this.</p>
+<p class="p">The benefit of this approach is that your heuristic need
+not be aware of the entire model including all its parts that might
+be implemented via goals. Your heuristic can still safely be used,
+as CPLEX will make sure of feasibility for the entire model. However,
+there are some performance considerations to observe. If parts of
+the model specified with goals are dominant, heuristic solutions you
+generate might need to be rejected so frequently that you do not get
+enough payoff for the work of running the heuristic. Also, your heuristic
+should account for the global and local cuts that have been added
+at the node where you run your heuristic so that a solution candidate
+is not rejected right away and the work wasted.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" title="Documents goals and their role in a branch &amp; cut search.">Using goals</a></div>
+</div>
+</div></body>
+</html>

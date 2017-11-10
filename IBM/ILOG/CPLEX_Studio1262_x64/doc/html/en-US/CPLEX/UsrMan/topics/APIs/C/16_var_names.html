@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Variable names and calling conventions" />
+<meta name="abstract" content="Describes the coding practices of the C API with respect to variable names and calling conventions." />
+<meta name="Description" content="Describes the coding practices of the C API with respect to variable names and calling conventions." />
+<meta name="DC.subject" content="call by value (C API), CPXgetx routine, CPXgetx routine" />
+<meta name="keywords" content="call by value (C API), CPXgetx routine, CPXgetx routine" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callableLibrary.638509" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<title>Variable names and calling conventions</title>
+</head>
+<body role="main" id="User_manual.uss_callableLibrary.638509">
+<h1 class="title topictitle1">Variable names and calling conventions</h1>
+<div class="body"><p class="shortdesc">Describes the coding practices of the C API with respect
+to variable names and calling conventions.</p>
+<p class="p">Routines in the Callable Library obey the C programming convention
+of call by value (as opposed to call by reference, for example, in
+FORTRAN and BASIC). If a routine in the Callable Library needs the
+address of a variable in order to change the value of the variable,
+then that fact is documented in the <em class="ph i">Callable Library Reference
+Manual</em> by the suffix <samp class="ph codeph">_p</samp> in the argument name
+in the synopsis of the routine. In C, you create such values by means
+of the <samp class="ph codeph">&amp;</samp>  operator to take the address of a variable
+and to pass this address to the Callable Library routine.</p>
+<p class="p">For example, let’s look at the synopses for two routines, <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getobjval.html" title="The routine CPXXgetobjval/CPXgetobjval accesses the solution objective value.">CPXgetobjval</a></samp> and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getx.html" title="The routine CPXXgetx/CPXgetx accesses the solution values for a range of problem variables.">CPXgetx</a></samp>,
+as they are documented in the <em class="ph i">Callable Library Reference Manual</em> to
+clarify this calling convention. Here is the synopsis of the routine <samp class="ph codeph">CPXgetobjval</samp>:</p>
+<pre class="pre codeblock"><code>int CPXgetobjval (CPXCENVptr env, CPXCLPptr lp, double *objval_p);</code></pre>
+<p class="p">In that routine, the third argument is a pointer to a variable
+of type <samp class="ph codeph">double</samp> . To call this routine from C, declare:
+ </p>
+<pre class="pre codeblock"><code>double objval;</code></pre>
+<p class="p">Then call <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getobjval.html" title="The routine CPXXgetobjval/CPXgetobjval accesses the solution objective value.">CPXgetobjval</a></samp> in
+this way: </p>
+<pre class="pre codeblock"><code>status = CPXgetobjval (env, lp, &amp;objval);</code></pre>
+<p class="p">In contrast, here is the synopsis of the routine <samp class="ph codeph">CPXgetx</samp></p>
+<pre class="pre codeblock"><code>int CPXgetx (CPXENV env, CPXLPptr lp, double *x, int begin, int end);</code></pre>
+<p class="p">You call it by creating a double-precision array by means of either
+one of two methods. The first method dynamically allocates the array,
+like this:</p>
+<pre class="pre codeblock"><code>double *x = NULL;
+x = (double *) malloc (100*sizeof(double));</code></pre>
+<p class="p">The second method declares the array as a local variable, like
+this:</p>
+<pre class="pre codeblock"><code>double x[100];</code></pre>
+<p class="p">Then to see the optimal values for columns 5 through 104, for example,
+you could write this:  </p>
+<pre class="pre codeblock"><code>status = CPXgetx (env, lp, x, 5, 104);</code></pre>
+<p class="p">The parameter <samp class="ph codeph">objval_p</samp>  in the synopsis of <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getobjval.html" title="The routine CPXXgetobjval/CPXgetobjval accesses the solution objective value.">CPXgetobjval</a></samp> and
+the parameter <samp class="ph codeph">x</samp> in the synopsis of <samp class="ph codeph">CPXgetx</samp> are
+both of type <samp class="ph codeph">(double *)</samp>. However, the suffix <samp class="ph codeph">_p</samp> in
+the parameter <samp class="ph codeph">objval_p</samp> indicates that you should
+use an address of a single variable in one call, while the lack of <samp class="ph codeph">_p</samp> in <samp class="ph codeph">x</samp> indicates
+that you should pass an array in the other.</p>
+<p class="p">For guidance about how to pass values to CPLEX routines from application
+languages such as FORTRAN or BASIC that conventionally call by reference,
+see <a class="xref" href="29_FORTRAN.html#User_manual.uss_callableLibrary.639197__User_manual.uss_callableLibrary.639207">Call by reference</a> in
+this manual, and consult the documentation for those languages.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" title="Lists some of the programming practices the CPLEX team observes in developing and maintaining the Callable Library (C API).">CPLEX programming practices</a></div>
+</div>
+</div></body>
+</html>

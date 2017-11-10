@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The element expression" />
+<meta name="abstract" content="The constraint propagation algorithm for element expressions reduces domains efficiently." />
+<meta name="Description" content="The constraint propagation algorithm for element expressions reduces domains efficiently." />
+<meta name="DC.subject" content="domain reduction, element expression" />
+<meta name="keywords" content="domain reduction, element expression" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerpropagate.1018803" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<title>The element expression</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerpropagate.1018803">
+<h1 class="title topictitle1">The element expression</h1>
+<div class="body"><p class="shortdesc">The constraint propagation algorithm for element expressions
+reduces domains efficiently.</p>
+<p class="p">The element expression indexes an array of values with
+a decision variable. This expression is used to associate a cost or
+a distance to the value of a variable, for example. </p>
+<p class="p">Suppose there is a decision variable x that chooses a
+delivery customer and suppose that the distances to the customers
+are: </p>
+<ul class="ul"><li class="li"><p class="p">7 for customer 1,</p>
+</li>
+<li class="li"><p class="p">12 for customer 2,</p>
+</li>
+<li class="li"><p class="p">5 for customer 3 and </p>
+</li>
+<li class="li"><p class="p">21 for customer 4.</p>
+</li>
+</ul>
+<p class="p">If the variable y is to be equal to the distance of the
+chosen customer, you can write:  </p>
+<pre class="pre codeblock"><code>    IloIntArray distance(env, 4, 7, 12, 5, 21);
+    model.add(y == IloElement(distance, x));
+</code></pre>
+<p class="p">This constraint states that <em class="ph i">y</em> is
+equal to the <em class="ph i">x</em>-th
+element of the distance array. In the <strong class="ph b">C++
+API</strong>, another way to state the same constraint is
+to write:  </p>
+<pre class="pre codeblock"><code>    model.add(y == distance[x]);
+</code></pre>
+<p class="p">This constraint achieves full domain reduction. In other
+words, after domain reduction, for each value of <em class="ph i">x</em> there is a value for <em class="ph i">y</em> that satisfies the constraint and
+vice-versa. </p>
+<p class="p">Here is an example of a model with one element expression: </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 3);
+    IloIntVar y(env, 0, 20);
+    IloModel model(env);
+    model.add(y == IloElement(IloIntArray(env, 4, 7, 12, 5, 21), x));
+    IloCP cp(model);
+    if ( cp.propagate() ) {
+      cp.out() &lt;&lt; " Domains reduced: " &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of x is " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of y is " &lt;&lt; cp.domain(y) &lt;&lt; std::endl;
+    } else
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+</code></pre>
+<p class="p">Running this code produces the output: </p>
+<pre class="pre codeblock"><code> Domains reduced:
+ Domain of x is [0..2]
+ Domain of y is [5 7 12]
+</code></pre>
+<p class="p">The value 3 is removed from the domain of <em class="ph i">x</em> because the fourth element in the
+array is 21, which does not belong to the domain of <em class="ph i">y</em>. The domain of <em class="ph i">y</em> is reduced to the set of values
+that are indexed by values of <em class="ph i">x</em>,
+that is 5, 7 and 12.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" title="CP Optimizer provides tailored constraint propagation algorithms for specialized constraints and expressions.">Propagation of specialized constraints and expressions</a></div>
+</div>
+</div></body>
+</html>

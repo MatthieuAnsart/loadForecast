@@ -1,0 +1,194 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*/</font></b> 
+010: 
+011: <b><font color="#007D00">//-------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">//Java version of warehouse.cpp of OPL distrib</font></b>
+013: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+014: package warehouse;
+015: 
+016: import ilog.concert.*;
+017: import ilog.cplex.*;
+018: import ilog.opl.*;
+019: 
+020: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> Warehouse
+021: {
+022:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">class</font></b> MyParams <b><font color="EA7D00">extends</font></b> IloCustomOplDataSource
+023:     {
+024:         <b><font color="#0000FF">int</font></b> _nbWarehouses;
+025:         <b><font color="#0000FF">int</font></b> _nbStores;
+026:         <b><font color="#0000FF">int</font></b> _fixed;
+027:         <b><font color="#0000FF">int</font></b> _disaggregate;
+028: 
+029:         MyParams(IloOplFactory oplF,<b><font color="#0000FF">int</font></b> nbWarehouses,<b><font color="#0000FF">int</font></b> nbStores,<b><font color="#0000FF">int</font></b> fixed,<b><font color="#0000FF">int</font></b> disaggregate)
+030:         {
+031:             <b><font color="EA7D00">super</font></b>(oplF);
+032:             _nbWarehouses = nbWarehouses;
+033:             _nbStores = nbStores;
+034:             _fixed = fixed;
+035:             _disaggregate = disaggregate;
+036:         }
+037: 
+038:         <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> customRead()
+039:         {
+040:             IloOplDataHandler handler = getDataHandler();
+041: 
+042:             handler.startElement(<b><font color="#8A2BE2">"nbWarehouses"</font></b>);
+043:             handler.addIntItem(_nbWarehouses);
+044:             handler.endElement();
+045: 
+046:             handler.startElement(<b><font color="#8A2BE2">"nbStores"</font></b>);
+047:             handler.addIntItem(_nbStores);
+048:             handler.endElement();
+049: 
+050:             handler.startElement(<b><font color="#8A2BE2">"fixed"</font></b>);
+051:             handler.addIntItem(_fixed);
+052:             handler.endElement();
+053: 
+054:             handler.startElement(<b><font color="#8A2BE2">"disaggregate"</font></b>);
+055:             handler.addIntItem(_disaggregate);
+056:             handler.endElement();
+057:         }
+058:     };
+059: 
+060:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception
+061:     {
+062:       <b><font color="#0000FF">int</font></b> status = 127;
+063:       <b><font color="EA7D00">try</font></b> {
+064:         <b><font color="#0000FF">int</font></b> nbWarehouses=-1;
+065:         <b><font color="#0000FF">int</font></b> nbStores=-1;
+066:         <b><font color="#0000FF">int</font></b> fixed=-1;
+067:         <b><font color="#0000FF">int</font></b> disaggregate=-1;
+068:         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;args.length; i++)
+069:         {
+070:             <b><font color="EA7D00">if</font></b> ( <b><font color="#8A2BE2">"-h"</font></b>.equals(args[i]) ) {
+071:                 usage();
+072:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (<b><font color="#8A2BE2">"fixed"</font></b>.equals(args[i])) {
+073:                 <b><font color="EA7D00">if</font></b> (i==args.length) {
+074:                     usage();
+075:                 }
+076:                 fixed=Integer.parseInt(args[++i]);
+077:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( <b><font color="#8A2BE2">"nbWarehouses"</font></b>.equals(args[i]) ) {
+078:                 <b><font color="EA7D00">if</font></b> ( i==args.length ) {
+079:                     usage();
+080:                 }
+081:                 nbWarehouses=Integer.parseInt(args[++i]);
+082:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( <b><font color="#8A2BE2">"nbStores"</font></b>.equals(args[i]) ) {
+083:                 <b><font color="EA7D00">if</font></b> ( i==args.length ) {
+084:                     usage();
+085:                 }
+086:                 nbStores=Integer.parseInt(args[++i]);
+087:             } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( <b><font color="#8A2BE2">"disaggregate"</font></b>.equals(args[i]) ) {
+088:                 <b><font color="EA7D00">if</font></b> ( i==args.length ) {
+089:                     usage();
+090:                 }
+091:                 disaggregate=Integer.parseInt(args[++i]);
+092:             } <b><font color="EA7D00">else</font></b> {
+093:                 <b><font color="EA7D00">break</font></b>;
+094:             }
+095:         }
+096: 
+097:         <b><font color="EA7D00">if</font></b> ( fixed==-1 || nbWarehouses==-1 || nbStores==-1 || disaggregate==-1 ) {
+098:             usage();
+099:         }
+100: 
+101:         IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+102:         IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+103:         IloOplErrorHandler errHandler = oplF.createOplErrorHandler(System.out);
+104:         IloOplModelSource modelSource=oplF.createOplModelSourceFromString(getModelText(),<b><font color="#8A2BE2">"warehouse"</font></b>);
+105:         IloOplSettings settings = oplF.createOplSettings(errHandler);
+106:         IloOplModelDefinition def=oplF.createOplModelDefinition(modelSource,settings);
+107:         IloCplex cplex = oplF.createCplex();
+108:         IloOplModel opl=oplF.createOplModel(def,cplex);
+109: 
+110:         IloOplDataSource dataSource=<b><font color="EA7D00">new</font></b> MyParams(oplF,nbWarehouses,nbStores,fixed,disaggregate);
+111:         opl.addDataSource(dataSource);
+112:         opl.generate();
+113:         <b><font color="EA7D00">if</font></b> ( cplex.solve() )
+114:         {
+115:             System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.getCplex().getObjValue());
+116:             opl.postProcess();
+117:             opl.printSolution(System.out);
+118:             status = 0;
+119:         } <b><font color="EA7D00">else</font></b> {
+120:             System.out.println(<b><font color="#8A2BE2">"No solution!"</font></b>);
+121:             status = 1;
+122:         }
+123: 
+124:         oplF.end();
+125:       } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+126:           System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+127:           ex.printStackTrace();
+128:           status = 2;
+129:       } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+130:           System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+131:           ex.printStackTrace();
+132:           status = 3;
+133:       } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+134:           System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+135:           ex.printStackTrace();
+136:           status = 4;
+137:       }
+138:       System.exit(status);
+139:     }
+140: 
+141:         <b><font color="EA7D00">static</font></b> String getModelText()
+142:     {
+143:         String model=<b><font color="#8A2BE2">""</font></b>;
+144:         model+=<b><font color="#8A2BE2">"int   fixed        = ...;"</font></b>;
+145:         model+=<b><font color="#8A2BE2">"int   nbWarehouses = ...;"</font></b>;
+146:         model+=<b><font color="#8A2BE2">"int   nbStores     = ...;"</font></b>;
+147:         model+=<b><font color="#8A2BE2">"int   disaggregate = ...;"</font></b>;
+148:                 model+=<b><font color="#8A2BE2">"assert nbStores &gt; nbWarehouses;"</font></b>;
+149: 
+150:         model+=<b><font color="#8A2BE2">"range Warehouses = 1..nbWarehouses;"</font></b>;
+151:         model+=<b><font color="#8A2BE2">"range Stores     = 1..nbStores;"</font></b>;
+152: 
+153:         model+=<b><font color="#8A2BE2">"int capacity[w in Warehouses] = nbStores div nbWarehouses + w mod (nbStores div nbWarehouses);"</font></b>;
+154:         model+=<b><font color="#8A2BE2">"int supplyCost[s in Stores][w in Warehouses] = 1+((s+10*w) mod 100);"</font></b>;
+155: 
+156:         model+=<b><font color="#8A2BE2">"dvar boolean open[Warehouses];"</font></b>;
+157:         model+=<b><font color="#8A2BE2">"dvar boolean supply[Stores][Warehouses];"</font></b>;
+158: 
+159:         model+=<b><font color="#8A2BE2">"minimize "</font></b>;
+160:         model+=<b><font color="#8A2BE2">"sum(w in Warehouses) fixed * open[w] +"</font></b>;
+161:         model+=<b><font color="#8A2BE2">"sum(w in Warehouses, s in Stores) supplyCost[s][w] * supply[s][w];"</font></b>;
+162: 
+163:         model+=<b><font color="#8A2BE2">"constraints {"</font></b>;
+164:         model+=<b><font color="#8A2BE2">"  forall(s in Stores)"</font></b>;
+165:         model+=<b><font color="#8A2BE2">"    sum(w in Warehouses) supply[s][w] == 1;"</font></b>;
+166:         model+=<b><font color="#8A2BE2">"  forall(w in Warehouses)"</font></b>;
+167:         model+=<b><font color="#8A2BE2">"    sum(s in Stores) supply[s][w] &lt;= open[w]*capacity[w];"</font></b>;
+168:         model+=<b><font color="#8A2BE2">"  if (disaggregate == 1) {"</font></b>;
+169:         model+=<b><font color="#8A2BE2">"   forall(w in Warehouses, s in Stores)"</font></b>;
+170:         model+=<b><font color="#8A2BE2">"      supply[s][w] &lt;= open[w];"</font></b>;
+171:         model+=<b><font color="#8A2BE2">"  }"</font></b>;
+172:         model+=<b><font color="#8A2BE2">"}"</font></b>;
+173:         <b><font color="EA7D00">return</font></b> model;
+174:     }
+175: 
+176:     <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">void</font></b> usage() {
+177:         System.err.println();
+178:         System.err.println(<b><font color="#8A2BE2">"Usage: warehouse [-h] parameters"</font></b>);
+179:         System.err.println(<b><font color="#8A2BE2">"  -h  this help message"</font></b>);
+180:         System.err.println(<b><font color="#8A2BE2">"  parameters "</font></b>);
+181:         System.err.println(<b><font color="#8A2BE2">"    nbWarehouses &lt;value&gt; "</font></b>);
+182:         System.err.println(<b><font color="#8A2BE2">"    nbStores &lt;value&gt; "</font></b>);
+183:         System.err.println(<b><font color="#8A2BE2">"    fixed &lt;value&gt; "</font></b>);
+184:         System.err.println(<b><font color="#8A2BE2">"    disaggregate &lt;value&gt; "</font></b>);
+185:         System.err.println();
+186:         System.exit(0);
+187:     }
+188: }
+189: 
+</tt></pre>

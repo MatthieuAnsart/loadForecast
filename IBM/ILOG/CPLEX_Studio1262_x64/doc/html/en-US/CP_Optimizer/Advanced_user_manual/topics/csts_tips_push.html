@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Pushing constraints" />
+<meta name="abstract" content="Pushing constraints makes it possible that a constraint is not propagated after each modification of each decision variable; rather, it is propagated after all its variables have been propagated." />
+<meta name="Description" content="Pushing constraints makes it possible that a constraint is not propagated after each modification of each decision variable; rather, it is propagated after all its variables have been propagated." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/csts_tips.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizercsts.1017289" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_tips.html" />
+<title>Pushing constraints</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizercsts.1017289">
+<h1 class="title topictitle1">Pushing constraints</h1>
+<div class="body"><p class="shortdesc">Pushing constraints makes it possible that a constraint
+is not propagated after each modification of each decision variable;
+rather, it is propagated after all its variables have been propagated.</p>
+<p class="p">Suppose that there is a constraint <em class="ph i">C</em> involving the decision variables <em class="ph i">x</em>, <em class="ph i">y</em>, <em class="ph i">z</em> and <em class="ph i">t</em>.
+Suppose that x is modified, then <em class="ph i">C</em> is
+propagated. Now if the modification of x leads to a modification of <em class="ph i">y</em>, <em class="ph i">z</em> and <em class="ph i">t</em>, then these decision variables
+will be propagated and each of those variables will propagate <em class="ph i">C</em> again, even if these variables
+have not been modified by constraints other than <em class="ph i">C</em>.</p>
+<p class="p">Imagine that you want to avoid these repeated propagations
+because you know that the <samp class="ph codeph">propagate</samp> member
+function of <em class="ph i">C</em> is
+costly. Also imagine that you want to propagate <em class="ph i">C</em> once for all the modifications
+of the variables involved in <em class="ph i">C</em> but
+not for the modifications of each variable individually. </p>
+<p class="p">There is a mechanism in CP Optimizer that meets these
+aims. It is possible to have constraints that are not propagated within
+demons. Such a constraint is not propagated after each modification
+of each decision variable; rather, it is propagated after all its
+variables have been propagated.</p>
+<p class="p">In fact, in CP Optimizer there are two mechanisms for
+propagating the modifications of variables.</p>
+<ul class="ul"><li class="li"><p class="p">First Level: When a decision variable
+is modified, all the demons linked to this variable are called. This
+mechanism is repeated while there is a variable for which all the
+demons have not yet been called. </p>
+</li>
+<li class="li"><p class="p">Second Level: The <samp class="ph codeph">propagate</samp> function
+of some constraint known as a global constraint is called. </p>
+</li>
+</ul>
+<p class="p">If, after the termination of a <samp class="ph codeph">propagate</samp> member
+function, a variable has been modified, then constraint propagation
+immediately return to the first level. This means that the process
+at the first level has greatest priority.</p>
+<p class="p">In the second level, a global constraint (say, <samp class="ph codeph">ct</samp>)
+is pushed by a call to the <samp class="ph codeph">push</samp> member
+function.</p>
+<p class="p">This member function indicates to CP Optimizer that <samp class="ph codeph">ct</samp> is
+a global constraint and must be propagated by the second level mechanism.
+This member function must be called within a demon.</p>
+<p class="p">Consider the following example simplified for illustration:
+you want to define the constraint <em class="ph i">x
++ y = s</em> without considering modifications of <em class="ph i">s</em>. </p>
+<p class="p">The code of that constraint could be something like this:
+   </p>
+<pre class="pre codeblock"><code>class MySumConstraintI : public IlcConstraintI {
+    IlcIntVar _x, _y, _s;
+public:
+    MySumConstraintI(IloCP cp, IlcIntVar x, IlcIntVar y, IlcIntVar s);
+    ~MySumConstraintI(){}; // empty destructor
+
+    virtual void propagate ();
+    virtual void post();
+    void pushDemon();
+};
+</code></pre>
+<pre class="pre codeblock"><code>void MySumConstraintI::propagate () {
+  IlcInt m;
+  // compute the min of s
+  m =_x.getMin() + _y.getMin();
+  _s.setMin(m);
+  // compute the max of s
+  m=_x.getMax() + _y.getMax();
+  _s.setMax(m);
+}
+</code></pre>
+<p class="p">A demon for each variable <samp class="ph codeph">x</samp> and <samp class="ph codeph">y</samp> is
+added and that demon is triggered when the boundary of either variable
+is modified (that is, when a range event occurs).  </p>
+<pre class="pre codeblock"><code>void MySumConstraintI::post(){
+  _x.whenRange(MySumConstraintI_pushDemon(getCP(),this));
+  _y.whenRange(MySumConstraintI_pushDemon(getCP(),this));
+}
+</code></pre>
+<p class="p">Now here is the code for the demon: </p>
+<pre class="pre codeblock"><code>ILCCTDEMON0(MySumConstraintI_pushDemon, MySumConstraintI, pushDemon);
+void MySumConstraintI::pushDemon() {
+  push();
+}
+</code></pre>
+<p class="p">How does this tactic differ from the conventional propagation
+mechanism? In this case, the demon will be called, but the propagate
+member function of <samp class="ph codeph">MySumConstraintI</samp> will
+not be called immediately. Rather, <samp class="ph codeph">ct</samp> is
+pushed. When there are no more demons to trigger, then the constraints
+that have been pushed will be called. Furthermore, in this way, a
+constraint will be propagated only once even if it has been pushed
+several times.</p>
+<p class="p">If you want to refine the propagation mechanism, for
+example, if you want to treat the variables that have been modified
+in a special way, you have to manage that treatment by using internal
+data structures within the constraint. For example, suppose that if <samp class="ph codeph">x</samp> is
+modified, you want to call your own function <samp class="ph codeph">propagateX()</samp> and
+if <samp class="ph codeph">y</samp> has been modified, you want to call
+your own <samp class="ph codeph">propagateY()</samp>. To do so, you add
+reversible Boolean data members to <samp class="ph codeph">MySumConstraintI</samp>,
+like this: </p>
+<pre class="pre codeblock"><code>    IlcRevBool _xIsModified;
+    IlcRevBool _yIsModified;
+</code></pre>
+<p class="p">Now you define special demons for <samp class="ph codeph">x</samp> and
+for <samp class="ph codeph">y</samp>, like this: </p>
+<pre class="pre codeblock"><code>ILCCTDEMON0(MySumConstraintI_xDemon, MySumConstraintI, xDemon);
+ILCCTDEMON0(MySumConstraintI_yDemon, MySumConstraintI, yDemon);
+void MySumConstraintI::xDemon() {
+  memorizeThatXisModified();
+  push();
+}
+void MySumConstraintI::yDemon() {
+  memorizeThatYisModified();
+  push();
+</code></pre>
+<p class="p">Now the propagate member function will look like this:
+ </p>
+<pre class="pre codeblock"><code>void MySumConstraintI::propagateX () {
+  IlcInt m;
+  // compute the min of s
+  m =_x.getMin() + _y.getMin();
+  _s.setMin(m);
+  // compute the max of s
+  m=_x.getMax() + _y.getMax();
+  _s.setMax(m);
+}
+void MySumConstraintI::propagateY () {
+  IlcInt m;
+  // compute the min of s
+  m =_x.getMin() + _y.getMin();
+  _s.setMin(m);
+  // compute the max of s
+  m=_x.getMax() + _y.getMax();
+  _s.setMax(m);
+}
+void MySumConstraintI::propagate(){
+  if (_xIsModified){
+    propagateX();
+    _xIsModified.setValue(getCP(),IlcFalse);
+  }
+  if (_yIsModified){
+    propagateY();
+    _yIsModified.setValue(getCP(),IlcFalse);
+  }
+}
+</code></pre>
+<p class="p">Thus you have created a global constraint that will be
+propagated only once and propagated only after the propagation of
+variables in that constraint. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_tips.html" title="Programming tips for writing constraints are provided.">Programming tips</a></div>
+</div>
+</div></body>
+</html>

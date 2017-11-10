@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modifying the model" />
+<meta name="abstract" content="Describes modification of a model in the Java API." />
+<meta name="Description" content="Describes modification of a model in the Java API." />
+<meta name="DC.subject" content="model, modifying (Java API), modifying, model (Java API), IloModel class, add method (Java API), remove method (Java API), IloMPModeler class (Java API), delete method, variable, deleting (Java API), deleting, variables (Java API), changing, bounds setLB (Java API), bounds setUB (Java API), model setLinearCoef (Java API), type, conversion (Java API), IloConversion class (Java API), tolerance, integrality, example (Java API)" />
+<meta name="keywords" content="model, modifying (Java API), modifying, model (Java API), IloModel class, add method (Java API), remove method (Java API), IloMPModeler class (Java API), delete method, variable, deleting (Java API), deleting, variables (Java API), changing, bounds setLB (Java API), bounds setUB (Java API), model setLinearCoef (Java API), type, conversion (Java API), IloConversion class (Java API), tolerance, integrality, example (Java API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_javaIloCplex.1019126" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" />
+<title>Modifying the model</title>
+</head>
+<body role="main" id="User_manual.uss_javaIloCplex.1019126">
+<h1 class="title topictitle1">Modifying the model</h1>
+<div class="body"><p class="shortdesc">Describes modification of a model in the Java API.</p>
+<p class="p">An important feature of CPLEX is that you can modify
+a previously created model to consider different scenarios. Furthermore,
+depending on the optimization model and algorithm used, CPLEX will
+save as much information from a previous solution as possible when
+optimizing a modified model.</p>
+<p class="p">The most important modification method is <samp class="ph codeph">IloModel.add</samp>,
+for adding modeling objects to the active model. Conversely, you can
+use <samp class="ph codeph">IloModel.remove</samp> to remove a modeling
+object from a model, if you have previously added that object.</p>
+<p class="p">When you add a modeling object such as a ranged constraint
+to a model, all the variables used by that modeling object implicitly
+become part of the model as well. However, when you remove a modeling
+object, no variables are implicitly removed from the model. Instead,
+variables can only be explicitly removed from a model by calling <samp class="ph codeph">IloMPModeler.delete</samp>.
+(The interface <samp class="ph codeph">IloMPModeler</samp> derives from
+the class <samp class="ph codeph">IloModel</samp>, among others. It is
+implemented by the class <samp class="ph codeph">IloCplex</samp>.) This
+call will cause the specified variables to be deleted from the model,
+and thus from all modeling objects in the model that are using these
+variables. In other words, deleting variables from a model may implicitly
+modify other modeling objects in that model.</p>
+<p class="p">The API of specific modeling objects may provide modification
+methods. For example, you can change variable bounds by using the
+methods <samp class="ph codeph">IloNumVar.setLB</samp> and <samp class="ph codeph">IloNumVar.setUB</samp>.
+Similarly, you can change the bounds of ranged constraints by using <samp class="ph codeph">IloRange.setLB</samp> and <samp class="ph codeph">IloRange.setUB</samp>.</p>
+<p class="p">Because not all the optimizers that implement the <samp class="ph codeph">IloModeler</samp> interface
+support the ability to modify a model, modification methods are implemented
+in <samp class="ph codeph">IloMPModeler</samp>. These methods are for
+manipulating the linear expressions in ranged constraints and objective
+functions used with <samp class="ph codeph">IloCplex</samp>. The methods <samp class="ph codeph">IloMPModeler.setLinearCoef</samp>, <samp class="ph codeph">IloMPModeler.setLinearCoefs</samp>,
+and <samp class="ph codeph">IloMPModeler.addToExpr</samp> apply in this
+situation.</p>
+<p class="p">The type of a variable cannot be changed. However, it
+can be overwritten for a particular model by adding an <samp class="ph codeph">IloConversion</samp> object,
+which allows you to specify new types for variables within that model.
+When CPLEX finds a conversion object in the active model, it uses
+the variable types specified in the conversion object instead of the
+original type specified for the optimization. For example, in a model
+containing the following lines, CPLEX will only generate solutions
+where variable <samp class="ph codeph">x</samp> is an integer (within
+tolerances), yet the type returned by <samp class="ph codeph">x.getType</samp> will
+remain <samp class="ph codeph">IloNumVarType.Float</samp>. </p>
+<pre class="pre codeblock"><code>IloNumVar x = cplex.numVar(0.0, 1.0);  
+cplex.add(cplex.conversion(x, IloNumVarType.Int));</code></pre>
+<p class="p">A variable can be used only in at most one conversion
+object, or the model will no longer be unambiguously defined. This
+convention does not imply that the type of a variable can be changed
+only once and never again after that. Instead, you can remove the
+conversion object and add a new one to implement consecutive variable
+type changes. To remove the conversion object, use the method <samp class="ph codeph">IloModel.remove</samp> .</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" title="Explores the features CPLEX offers to Java users to solve mathematical programming problems.">Concert Technology for Java users</a></div>
+</div>
+</div></body>
+</html>

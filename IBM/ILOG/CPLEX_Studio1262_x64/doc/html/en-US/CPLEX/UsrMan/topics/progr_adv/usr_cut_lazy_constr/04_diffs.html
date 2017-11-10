@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Differences between user cuts and lazy constraints" />
+<meta name="abstract" content="Distinguishes user cuts from lazy constraints." />
+<meta name="Description" content="Distinguishes user cuts from lazy constraints." />
+<meta name="DC.subject" content="optimality-based cut, symmetry-breaking constraint, user cut pool, contrasting lazy constraint pool and, lazy constraint pool, contrasting user cut pool and, when CPLEX checks, example, lazy constraint callback, user cut callback" />
+<meta name="keywords" content="optimality-based cut, symmetry-breaking constraint, user cut pool, contrasting lazy constraint pool and, lazy constraint pool, contrasting user cut pool and, when CPLEX checks, example, lazy constraint callback, user cut callback" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cbAndLcPools.1018643" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" />
+<title>Differences between user cuts and lazy constraints</title>
+</head>
+<body role="main" id="User_manual.uss_cbAndLcPools.1018643">
+<h1 class="title topictitle1">Differences between user cuts and lazy constraints</h1>
+<div class="body"><p class="shortdesc">Distinguishes user cuts from lazy constraints.</p>
+<p class="p">Cuts may resemble ordinary constraints, but are conventionally
+defined to mean those which can change the feasible space of the continuous
+relaxation but do not rule out any feasible integer solution that
+the rest of the model permits. A collection of cuts, therefore, involves
+an element of freedom: whether or not to apply them, individually
+or collectively, during the optimization of a MIP model; the formulation
+of the model remains correct whether or not the cuts are included.
+This degree of freedom means that if valid and necessary constraints
+are mis-identified by the user and passed to CPLEX as user cuts, unpredictable
+and possibly incorrect results could occur.</p>
+<p class="p">By contrast, lazy constraints represent simply one portion
+of the constraint set, and the model would be incomplete (and possibly
+would deliver incorrect answers) in their absence. CPLEX always makes
+sure that lazy constraints are satisfied before producing any solution
+to a MIP model. Needed lazy constraints are also kept in effect after
+the MIP optimization terminates, for example, when you change the
+problem type to fixed-integer and re-optimize with a continuous optimizer.</p>
+<p class="p">Another important difference between pools of user cuts
+and pools of lazy constraints lies in the timing by which these pools
+are applied. CPLEX may check user cuts for violation and apply them
+at any stage of the optimization. Conversely, it does not guarantee
+to check them at the time an integer-feasible solution candidate has
+been identified. Lazy constraints are only (and always) checked when
+an integer-feasible solution candidate has been identified, and of
+course, any of these constraints that turn out to be violated will
+then be applied to the full model.</p>
+<p class="p">Cuts that are based on <strong class="ph b">optimality</strong> and that <strong class="ph b">remove</strong> 
+integer feasible solutions without removing all optimal solutions 
+are known as <strong class="ph b">optimality-based cuts</strong>. Optimality-based cuts 
+do not fit the definition of either a user cut nor a lazy constraint. 
+For example, <strong class="ph b">symmetry-breaking constraints</strong> are sometimes known as 
+optimality-based cuts because symmetry-breaking constraints can remove integer 
+feasible solutions without removing all optimal solutions.  
+Symmetry-breaking constraints are <strong class="ph b">not</strong> user cuts in the sense addressed here. 
+Symmetry-breaking constraints are not necessarily lazy constraints either. However, CPLEX
+can support optimality-based cuts as lazy constraints.  
+If you add an optimality-based cut as a lazy constraint in your model, you can also add it to
+the user cut pool.  This practice of adding an optimality-based cut as a lazy 
+constraint and simultaneously adding it to the user cut pool makes sure 
+that CPLEX checks the optimality-based cut at each node relaxation as well as 
+when CPLEX finds an integer feasible solution.</p>
+<p class="p">Another way of comparing these two types of pools is to
+note that the user designates constraints as lazy in the strong hope
+and expectation that they will not need to be applied, thus saving
+computation time by their absence from the working problem. In practice,
+it is relatively costly (for a variety of reasons) to apply a lazy
+constraint after a violation is identified, and so the user should
+err on the side of caution when deciding whether a constraint should
+be marked as lazy. In contrast, user cuts may be more liberally added
+to a model because CPLEX is not obligated to use any of them and can
+apply its own rules to govern their efficient use.</p>
+<p class="p">CPLEX offers an <strong class="ph b">example</strong> that highlights the difference between 
+pools of user cuts and lazy constraints. The example demonstrates 
+lazy constraint callbacks to separate integer feasible LP solutions and 
+user cut callbacks to separate fractional infeasible LP solutions in a 
+Benders decomposition of an asymmetric travelling salesperson problem.</p>
+<ul class="ul"><li class="li">In the Callable Library, see <span class="ph filepath">xbendersatsp.c</span> (64-bit) and 
+<span class="ph filepath">bendersatsp.c</span> (32-bit).</li>
+<li class="li">In the C++ API, see <span class="ph filepath">ilobendersatsp.cpp</span>.</li>
+<li class="li">In the Java API, see <span class="ph filepath">BendersATSP.java</span>.</li>
+<li class="li">In the C#.NET API, see <span class="ph filepath">BendersATSP.cs</span>.</li>
+<li class="li">In the VB.NET API, see <span class="ph filepath">BendersATSP.vb</span>.</li>
+<li class="li">In the Python API, see <span class="ph filepath">bendersatsp.py</span>.</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" title="Documents pools of user-defined cuts and lazy constraints.">User-cut and lazy-constraint pools</a></div>
+</div>
+</div></body>
+</html>

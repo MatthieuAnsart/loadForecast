@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Callbacks, threads, and parallel execution" />
+<meta name="abstract" content="Behavior of parallel execution in the presence of multiple threads and callbacks now conforms to documentation." />
+<meta name="Description" content="Behavior of parallel execution in the presence of multiple threads and callbacks now conforms to documentation." />
+<meta name="DC.subject" content="release notes CPLEX V12.5.1, threads, callbacks, parallel execution" />
+<meta name="keywords" content="release notes CPLEX V12.5.1, threads, callbacks, parallel execution" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/convertCppAPI.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ConversionNotesCppThreadsCallbacksParallel" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/convertCppAPI.html" />
+<title>Callbacks, threads, and parallel execution</title>
+</head>
+<body role="main" id="ConversionNotesCppThreadsCallbacksParallel">
+<h1 class="title topictitle1">Callbacks, threads, and parallel execution</h1>
+<div class="body"><p class="shortdesc">Behavior of parallel execution in the presence of multiple threads and 
+ callbacks now conforms to documentation.</p>
+<p class="p">This conversion note highlights changes in CPLEX V12.5.1 that can impact 
+existing applications using threads and callbacks in deterministic parallel execution.</p>
+<div class="section"><h2 class="title sectiontitle">Corrected behavior</h2>
+<p class="p">Users who set the threads parameter 
+(<a class="xref" href="../../../Parameters/topics/Threads.html" title="Sets the default number of parallel threads that will be invoked by any CPLEX parallel optimizer.">global thread count</a>) 
+to a value strictly greater than 1 (one) in order to invoke 
+deterministic parallel optimization in the presence of control callbacks 
+will observe that CPLEX invokes a different clone of the callback object 
+for each thread now (as documented). </p>
+
+<p class="p">Furthermore, the methods 
+<span class="keyword apiname">IloCplex::MIPCallbackInfoI::getMyThreadNum</span> and 
+<span class="keyword apiname">IloCplex::MIPCallbackInfoI::getUserThreads</span> now 
+return the correct index identifying the thread currently executing; that is, 
+these methods return consistent data now (as documented).</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Context</h2>
+<p class="p">In previous releases of CPLEX, the method 
+<span class="keyword apiname">IloCplex::MIPCallbackInfoI::getMyThreadNum</span> 
+to access the index identifying the thread currently executing 
+in an application of multiple threads in deterministic parallel 
+always returned 0 (zero) 
+and the method 
+<span class="keyword apiname">IloCplex::MIPCallbackInfoI::getUserThreads</span> 
+always returned 1 (one) in the presence of a control callback, 
+while the same callback was being invoked on all threads.
+This anomaly has been corrected in CPLEX V12.5.1.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/convertCppAPI.html" title="Changes in the Concert C++ API can impact existing applications.">Conversion notes for users of the Concert C++ API</a></div>
+</div>
+</div></body>
+</html>

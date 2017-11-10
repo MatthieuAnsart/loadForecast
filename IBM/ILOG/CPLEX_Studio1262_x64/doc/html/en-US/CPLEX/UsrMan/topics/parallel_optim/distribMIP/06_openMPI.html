@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using Open MPI with distributed parallel MIP" />
+<meta name="abstract" content="Shows how to run distributed parallel MIP with Open MPI transport protocol." />
+<meta name="Description" content="Shows how to run distributed parallel MIP with Open MPI transport protocol." />
+<meta name="DC.subject" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, Open MPI transport protocol, Open MPI" />
+<meta name="keywords" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, Open MPI transport protocol, Open MPI" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="openMPIdistribMIP" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<title>Using Open MPI with distributed parallel MIP</title>
+</head>
+<body role="main" id="openMPIdistribMIP">
+<h1 class="title topictitle1">Using Open MPI with distributed parallel MIP</h1>
+<div class="body"><p class="shortdesc">Shows how to run distributed parallel MIP with Open MPI transport protocol.</p>
+<p class="p">This topic shows how to run distributed parallel MIP optimization with the Open 
+Message Passing Interface, also known as Open MPI, as the transport protocol 
+to manage communication between the master and workers.</p>
+<div class="section"><h2 class="title sectiontitle">Prerequisites</h2>
+
+<ul class="ul"><li class="li">Your CPLEX installation</li>
+<li class="li">A network share or other network file-sharing system, such as Network File System (NFS), 
+accessible for all the machines, both master and workers, that you plan to use; 
+for clarification about this prerequisite, see
+<a class="xref" href="05_howToGeneralities.html" title="Consider these general observations before you attempt the following instructions.">Before you begin</a>, 
+especially the point about a "network share" not being a hard requirement.
+</li>
+<li class="li">Your Open Message Passing Interface (Open MPI) installation 
+in <samp class="ph codeph">$MPIDIR</samp></li>
+</ul>
+
+<p class="p">MPI is not available for CPLEX V12.6.0 on Windows platforms.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Procedure</h2>
+
+<ol class="ol"><li class="li"><p class="p">Find the <samp class="ph codeph">bin</samp> folder or directory of your CPLEX installation.</p>
+</li>
+<li class="li"><p class="p">Put the <samp class="ph codeph">cplex</samp> binary file and object files (that is, all files in  
+<samp class="ph codeph">bin</samp>) on the accessible network share. On many platforms, the object files 
+are designated by the <samp class="ph codeph">.so</samp> file extension. On Windows platforms, these 
+equivalent files are designated by the <samp class="ph codeph">.dll</samp> file extension. On MacOS, 
+the files are designated by the <samp class="ph codeph">.dyld</samp> file extension.</p>
+
+<p class="p">For the purpose of this example, all the 
+files from the <samp class="ph codeph">bin</samp> directory of your CPLEX installation are now in 
+<samp class="ph codeph">/nfs/CPLEX</samp>.</p>
+ </li>
+<li class="li">Edit the following script to specify your master and workers 
+as well as the paths to libraries in your installation. 
+<pre class="pre codeblock"><code>
+ $MPIDIR/bin/mpirun \
+-x "LD_LIBRARY_PATH=/nfs/CPLEX:$MPIDIR/lib" \
+-tag-output \
+-host host1 -host host2 -host host3 \
+/nfs/CPLEX/cplex \
+-mpi \
+-libpath="$MPIDIR/lib" \
+-mpilib="$MPIDIR/lib/libmpi.so" \
+-mpiapi="openmpi" 
+</code></pre>
+
+
+<p class="p">In that script, the argument <samp class="ph codeph">-x "LD_LIBRARY_PATH=/nfs/CPLEX:$MPIDIR/lib"</samp> 
+sets the environment variable so that the runtime linker can easily find 
+the CPLEX remote object and the MPI libraries. For more information about the CPLEX 
+remote object, see the topic 
+<a class="xref" href="../remote_obj/00_remote_obj_synopsis.html" title="Introduces the remote object available in CPLEX for distributed parallel optimization.">Remote object for distributed parallel optimization</a> 
+in the <em class="ph i">CPLEX User's Manual</em>.</p>
+
+<p class="p">The arguments following <samp class="ph codeph">-mpi</samp> are required only 
+if you have installed more than one MPI library or 
+if your MPI library is not installed in the standard location.</p>
+
+<p class="p">That sample script creates an MPI cluster of three machines, with <samp class="ph codeph">host1</samp> 
+as master and <samp class="ph codeph">host2</samp> and <samp class="ph codeph">host3</samp> as workers.</p>
+</li>
+<li class="li"><p class="p">Create a Virtual Machine Configuration file, <samp class="ph codeph">configuration.vmc</samp>,  
+to define the available workers. Here is a sample of such a file for this example.</p>
+
+<pre class="pre codeblock"><code>
+&lt;?xml version="1.0"?&gt;
+&lt;vmc&gt;
+  &lt;machine name="host2"&gt;
+    &lt;transport type="MPI"&gt;
+      &lt;rank value="1"/&gt;
+    &lt;/transport&gt;
+  &lt;/machine&gt;
+
+  &lt;machine name="host3"&gt;
+    &lt;transport type="MPI"&gt;
+       &lt;rank value="2"/&gt;
+    &lt;/transport&gt;
+  &lt;/machine&gt;
+&lt;/vmc&gt;
+</code></pre>
+</li>
+<li class="li">On the master (<samp class="ph codeph">host1</samp> in this example), start a session in the 
+CPLEX Interactive Optimizer.</li>
+<li class="li">In your interactive session, execute the command to read the configuration file that 
+you created.
+<pre class="pre codeblock"><code>CPLEX&gt; read configuration.vmc</code></pre>
+
+
+<p class="p">After that <samp class="ph codeph">read</samp> command, CPLEX is set up for 
+solving distributed parallel MIP models.</p>
+</li>
+<li class="li"><p class="p">Still in your interactive session, enter a model or read it from a file, 
+and then solve it, like this:</p>
+ 
+<pre class="pre codeblock"><code>CPLEX&gt; read model.lp
+CPLEX&gt; mipopt</code></pre>
+</li>
+<li class="li">All the usual commands of the Interactive Optimizer are available 
+to access and analyze your results.</li>
+</ol>
+</div>
+<div class="section"><h2 class="title sectiontitle">A convenient short-cut in the Interactive Optimizer</h2>
+<div class="p">A Virtual Machine Configuration file can contain redundant information.  Consequently, 
+if all the machines in the MPI cluster are available for distributed parallel MIP optimization, 
+and the master is the process with rank=0 (zero), then CPLEX can automatically construct 
+a Virtual Machine Configuration from the MPI environment. Instead of reading a configuration 
+through the command:
+<pre class="pre codeblock"><code>CPLEX&gt; read configuration.vmc</code></pre>
+
+you can instead issue the command:
+<pre class="pre codeblock"><code>CPLEX&gt; set distmip config mpi</code></pre>
+
+That command creates a Virtual Machine Configuration internally that represents the full MPI 
+cluster in which CPLEX is running.</div>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

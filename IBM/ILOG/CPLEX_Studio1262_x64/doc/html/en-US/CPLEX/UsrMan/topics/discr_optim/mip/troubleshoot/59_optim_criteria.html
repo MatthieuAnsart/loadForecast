@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Time wasted on overly tight optimality criteria" />
+<meta name="abstract" content="Describes the effect of optimality tolerance on performance." />
+<meta name="Description" content="Describes the effect of optimality tolerance on performance." />
+<meta name="DC.subject" content="optimality tolerance, when to change, relative optimality tolerance, definition, tolerance, relative optimality, relative, absolute optimality tolerance, absolute optimality, absolute, relative optimality default, optimality, default (MIP), relative, default, EpGap parameter, gap, gap, changing relative or absolute, EpAGap parameter, objective near zero and, relative objective difference, absolute objective difference, in MIP performance, objective difference, parameter, optimality cutoff, cutoff parameters, minimization, upper cutoff parameter, maximization, lower cutoff parameter" />
+<meta name="keywords" content="optimality tolerance, when to change, relative optimality tolerance, definition, tolerance, relative optimality, relative, absolute optimality tolerance, absolute optimality, absolute, relative optimality default, optimality, default (MIP), relative, default, EpGap parameter, gap, gap, changing relative or absolute, EpAGap parameter, objective near zero and, relative objective difference, absolute objective difference, in MIP performance, objective difference, parameter, optimality cutoff, cutoff parameters, minimization, upper cutoff parameter, maximization, lower cutoff parameter" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.647126" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<title>Time wasted on overly tight optimality criteria</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.647126">
+<h1 class="title topictitle1">Time wasted on overly tight optimality criteria</h1>
+<div class="body"><p class="shortdesc">Describes the effect of optimality tolerance on performance.</p>
+<p class="p">Sometimes CPLEX finds a good integer solution early,
+but must examine many additional nodes to prove that the solution is optimal.
+You can speed up the process in such a case if you are willing to
+change the optimality tolerance. CPLEX supports two kinds of tolerance:</p>
+<ul class="ul"><li class="li"><p class="p">Relative optimality tolerance 
+guarantees that a solution lies within a certain percentage of the optimal solution.
+Relative optimality tolerance is regulated by the parameter <samp class="ph codeph">CPX_PARAM_EPGAP, EpGap</samp>.</p>
+</li>
+<li class="li"><p class="p">Absolute optimality tolerance guarantees
+that a solution lies within a certain absolute range of the optimal
+solution. Absolute optimality tolerance is regulated by the parameter <samp class="ph codeph">CPX_PARAM_EPAGAP, EpAGap</samp>.</p>
+</li>
+</ul>
+<p class="p">The default relative optimality tolerance is 0.0001.
+At this tolerance, the final integer solution is guaranteed to be
+within 0.01% of the optimal value. Of course, many formulations of
+integer or mixed integer programs do not require such tight tolerance,
+so requiring CPLEX to seek integer solutions that meet this tolerance
+in those cases is wasted computation. If you can accept greater optimality
+tolerance in your model, then you should change the parameter <samp class="ph codeph">EpGap</samp>.</p>
+<p class="p">If, however, you know that the objective values of your
+problem are near zero, then you should change the absolute gap because
+percentages of very small numbers are less useful as optimality tolerance.
+Change the parameter <samp class="ph codeph">EpAGap</samp> in this case.</p>
+<p class="p">To speed up the proof of optimality, you can set objective
+difference parameters, both relative and absolute. Setting these parameters
+helps when there are many integer solutions with similar objective
+values. For example, setting the <samp class="ph codeph">ObjDif</samp> parameter
+to <samp class="ph codeph">100.0</samp> makes CPLEX skip any potential
+solution with its objective value within 100.0 units of the best integer
+solution so far. Or, setting the <samp class="ph codeph">RelObjDif</samp> 
+to <samp class="ph codeph">0.01</samp> would mean that CPLEX would skip
+any potential new solution that is not at least 1% better than the
+incumbent solution. Naturally, since this objective difference setting
+may make CPLEX skip an interval where the true integer optimum may
+be found, the objective difference setting weakens the guarantee of
+optimality. </p>
+<p class="p">Cutoff parameters can also be helpful in restricting
+the search for optimality, for example, when you already know 
+solutions that have an objective value 
+worse than a given value, or when you know that there are solutions within
+a certain distance of the initial relaxation of your problem. 
+In such a case, you can readily set 
+the upper cutoff parameter for minimization problems
+and the lower cutoff parameter for maximization problems. Set the
+parameters <samp class="ph codeph">CutUp</samp>  and <samp class="ph codeph">CutLo</samp> ,
+respectively, to establish a cutoff value.</p>
+<p class="p">When you set a MIP cutoff value, CPLEX searches with
+the same solution strategy as though it had already found an integer
+solution, using a node selection strategy that differs from the one
+it uses before a first solution has been found.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" title="Describes symptoms of performance problems in MIP optimization and recommends remedies.">Troubleshooting MIP performance problems</a></div>
+</div>
+</div></body>
+</html>

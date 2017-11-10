@@ -1,0 +1,377 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Interval variable sequencing in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a
+                href="interval_sequence.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="61"><div
+                class="section-title1">Interval variable sequencing in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                    href="constraints_groups.html">PREVIOUS</a> <a
+                href="cumul_functions.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%"><tr><td><a
+                            href="interval_sequence.html#62">Interval sequence variables</a></td></tr><tr><td><a
+                            href="interval_sequence.html#63">No overlap constraint</a></td></tr><tr><td><a
+                            href="interval_sequence.html#64">Same-sequence and same-common-subsequence constraints</a></td></tr><tr><td><a
+                            href="interval_sequence.html#65">Expressions for getting the type of a next/prev interval</a></td></tr><tr><td><a
+                href="interval_sequence.html#66">Expressions for getting the bounds of next/previous interval</a></td></tr></table><div
+                    class="section-body"><div class="section"><a
+                            name="62"><div
+                        class="section-title2">Interval sequence variables</div>
+</a><div
+                                class="section-body"><p>An <em>interval sequence variable</em> is defined on a set of interval variables <em>A</em>. Informally speaking,
+the value of an interval sequence variable represents a total ordering of the interval variables
+of <em>A</em>. Note that any absent interval variables are not considered in the ordering.
+</p><p>More formally, an <strong>interval sequence variable</strong>&nbsp; <em>p</em> on a set interval variables <em>A</em> represents
+a decision variable whose possible values are all the permutations of the intervals of <em>A</em>. 
+Let <img
+                                src="images/k_A_underscore.png"
+                                alt="image" /> be a set of fixed intervals and <em>n</em> denote 
+the cardinality of <img
+                                src="images/k_A_underscore.png"
+                                alt="image" />. 
+A permutation &pi; of <img
+                                src="images/k_A_underscore.png"
+                                alt="image" /> is a
+function &pi; : <img
+                                src="images/k_A_underscore.png"
+                                alt="image" /><img
+                                src="images/rarr2.png"
+                                alt="image" /> 
+{ <img
+                                src="images/perp.png"
+                                alt="image" /> } <img
+                                src="images/cup.png"
+                                alt="image" /> [1, <em>n</em>] 
+such that if we denote length(&pi;) = |{<img
+                                src="images/a_underscore.png"
+                                alt="image" /><img src="images/isin.png"
+                                alt="image" /><img
+                                src="images/k_A_underscore.png"
+                                alt="image" />, <em>x</em>(<img
+                                src="images/a_underscore.png"
+                                alt="image" />)}| the number
+of present intervals:</p><p><img
+                                src="images/sequence2.png"
+                            alt="image" /></p><p>Note that the sequence alone does not enforce any constraint on the relative position of
+interval end-points. For instance, an interval variable <em>a</em> could be sequenced before an interval
+variable <em>b</em> in a sequence <em>p</em> without any impact on the relative position between the start/end
+points of <em>a</em> and <em>b</em> (<em>a</em> could still be fixed to start after the end of <em>b</em>). This is because different
+semantics can be used to define how a sequence constrains the positions of intervals. We will
+see later how the <em>noOverlap</em> constraint implements one of these possible semantics.</p><p>The following constraints are available on sequence variables:</p><ul>
+<li><em>first(p, a)</em> states that if interval <em>a</em> is present, it will be the first interval of the
+        sequence <em>p</em>.</li><li><em>last(p, a)</em> states that if interval <em>a</em> is present, it will be the last interval of the sequence
+        <em>p</em>.</li><li><em>before(p, a, b)</em> states that if both intervals <em>a</em> and <em>b</em> are present, <em>a</em> will appear before
+        <em>b</em> in the sequence <em>p</em>.</li><li><em>prev(p, a, b)</em> states that if both intervals <em>a</em> and <em>b</em> are present then <em>a</em> will be just before <em>b</em>
+        in the sequence <em>p</em>. In other words, it will appear before <em>b</em> and no other interval will be sequenced
+        between <em>a</em> and <em>b</em> in the sequence.</li>
+</ul><p>The formal semantics of these basic constraints are given in Table 3.</p><img
+                            src="images/interval_sequence1.png"
+                                alt="image" /><p>The sequence variable also allows the association of a fixed integer type with each interval variable
+in the sequence. In particular, these integers are used by the <em>noOverlap</em> constraint (see below) and the <em>typeOfNext</em>/<em>Prev</em>
+integer expressions (see below).
+<em>T(p, a)</em> denotes the fixed integer type of interval variable <em>a</em> in the sequence variable <em>p</em>.</p><p>The constraints involving interval variables and interval sequence variables cannot be used in logical constraints of CP 
+Optimizer (see <a
+                                href="functions/operator_dif.html">operator!</a>, <a
+                    href="functions/operator_or_or.html">operator||</a>). The reason is that any logical constraint involving interval variables
+must be captured via the presence Boolean value on the interval handled by the <em>presenceOf</em> constraint.
+The constraints having this limitation are the ordering constraints on a sequrnce (first, last, previous and before) and the 
+<em>noOverlap</em> constraint.</p></div></div><div
+                        class="section"><a name="63"><div
+                        class="section-title2">No overlap constraint</div>
+</a><div
+                                class="section-body"><p>The <strong>noOverlap</strong> constraint on an interval sequence variable <em>p</em> states that the sequence defines
+a chain of non-overlapping intervals, and any interval in the chain is constrained to end before
+the start of the next interval in the chain. This constraint is typically useful for modeling
+disjunctive resources.</p><p>More formally, the condition for a permutation value &pi; for sequence <em>p</em> to satisfy the
+<em>noOverlap</em> constraint is defined as:</p><p><img
+                                src="images/no_overlap.png"
+                                alt="image" /></p><p>A sequence variable together with a no-overlap constraint using it are illustrated in Figure 4.</p><p><img
+                                src="images/sequence.png"
+                                alt="image" /></p><p>If a transition distance matrix <em>M</em> is specified, it defines the minimal distance that must
+separate two consecutive intervals in the sequence. Two versions of the constraint
+are available: one that enforces the transition distance between each interval and its next interval in the sequence
+(<em>Next</em>), and the other that enforces the transition distance between
+each interval and all its successors in the sequence (<em>After</em>).</p><p>More formally, if <em>T(p,a)</em> denotes the integer type of interval <em>a</em> in the sequence variable <em>p</em>:</p><p><img
+                                src="images/no_overlap2.png"
+                                alt="image" /></p><p>
+Note that if the transition matrix <em>M</em> satisfies the triangular inequality, the semantics of the
+two versions of the constraint <img
+                                src="images/no_overlap_next.png"
+                                alt="image" /> and 
+<img
+                                src="images/no_overlap_after.png"
+                                alt="image" /> are the same. If <em>M</em> does 
+not satisfy the triangular inequality, 
+constraint <img
+                                src="images/no_overlap_after.png"
+                                alt="image" /> is stronger than 
+<img
+                                src="images/no_overlap_next.png"
+                    alt="image" />.
+</p></div></div><div
+                        class="section"><a name="64"><div
+                        class="section-title2">Same-sequence and same-common-subsequence constraints</div>
+</a><div
+                                class="section-body"><p>The <strong>sameSequence</strong> and <strong>sameCommonSubsequence</strong> constraints are binary constraints
+on a pair of sequence variables <img
+                                src="images/p1.png"
+                                alt="image" /> and <img
+                                src="images/p2.png"
+                                alt="image" />. These constraints state that the relative position
+of some related subsets of interval variables is the same in both sequences: typically, if <em>a</em> is
+before <em>b</em> in sequence <img
+                                src="images/p1.png"
+                                alt="image" /> then the interval related to 
+<em>a</em> is before the interval related to <em>b</em> in
+sequence <img
+                                src="images/p2.png"
+                                alt="image" />. Here are two examples of use-cases where these constraints are useful:</p><ul>
+<li>First in/first out and no-bypass constraints. In some physical systems like trains on a
+single line railway or items on a conveyor belt, bypassing is not possible and items
+must enter and exit a given section of the system in the same order. If entering
+and exiting the sections or the junctions of the system is modeled by two related interval
+variables, those constraints can be modeled by <em>sameSequence</em> constraints (or
+<em>sameCommonSubsequence</em> constraints if the items do not follow the same path) on the
+sequences of entering and exiting intervals. A classical example of such a constraint is
+the permutation flow-shop scheduling problem.
+</li><li>Scenario-Based approaches for scheduling with uncertainties. In presence of uncertainties
+(for instance, uncertain activity durations) one may be interested in building
+sequences of activities on unary resources that optimize some robustness or statistical
+criterion (for instance the expected makespan). A scenario is a sub-model that defines a
+particular realization of the uncertainties in the environment. As one must find robust
+sequences that optimize some criterion over all scenarios, the different sequences of a
+given unary resource across all scenarios are linked with <em>sameSequence</em> constraints.
+</li>
+</ul><p>A constraint <em>sameCommonSubsequence</em>(<img
+                                src="images/p1p2B1B2.png"
+                                alt="image" />)
+is defined on two sequence variables <img
+                                src="images/p1.png"
+                                alt="image" /> (defined on a set of interval
+variables <img
+                                src="images/A1.png"
+                                alt="image" />) and <img
+                                src="images/p2.png"
+                                alt="image" /> (defined on a 
+set of interval variables <img
+                                src="images/A2.png"
+                                alt="image" />) with two arrays of interval variables
+<img
+                                src="images/B1.png"
+                                alt="image" /> and <img
+                                src="images/B2.png"
+                                alt="image" /> of identical size and such 
+that <img
+                                src="images/B1inA1.png"
+                                alt="image" />. The constraint states that the sub-sequences defined by
+<img
+                                src="images/p1.png"
+                                alt="image" /> and <img
+                                src="images/p2.png"
+                                alt="image" /> by only considering the pairs of
+present intervals (<img
+                                src="images/B1iB2i.png"
+                                alt="image" />) are identical modulo the mapping between 
+intervals <img
+                                src="images/B1i.png"
+                                alt="image" />
+and <img
+                                src="images/B2i.png"
+                                alt="image" />.</p><p>For instance, let's suppose sequence variable <img
+                                src="images/p1.png"
+                                alt="image" /> defined on interval 
+variables <em>{a,b,c,d,e,f}</em> and sequence variable <img
+                                src="images/p2.png"
+                                alt="image" /> defined on interval
+variables <em>{u,v,w,x,y,z}</em> with a constraint <em>sameCommonSubsequence</em>(<img
+                                src="images/p1.png" alt="image" />,
+<img
+                                src="images/p2.png"
+                                alt="image" />,<em>[a,c,d,e,f],[u,w,v,x,y]</em>). Assuming in a solution, interval 
+variables <em>d</em> and <em>y</em> are absent while all the other interval variables are present. The pair
+of permutations <img
+                                src="images/pi1.png"
+                                alt="image" /><em>=(c,f,a,e,b)</em> and 
+<img
+                                src="images/pi2.png"
+                                alt="image" /><em>=(w,v,u,x)</em> satisfies the <em>sameCommonSubsequence</em> constraints.
+Indeed if one only considers pairs of present intervals, the mapping <img
+                                src="images/B1B2.png"
+                                alt="image" /> maps
+<em>[a,c,e]</em> with <em>[u,w,x]</em>. Subsequence of <img
+                                src="images/pi1.png"
+                                alt="image" /> over
+<em>{a,c,e}</em> is <em>(c,a,e)</em>, subsequence of <img
+                                src="images/pi2.png"
+                                alt="image" /> over
+<em>{u,w,x}</em> is <em>(w,u,x)</em> and one can see that the two subsequences are the same modulo the
+mapping.
+</p><p>More formally, let <em>n</em> denote the size of both interval variable arrays <img
+                                src="images/B1.png"
+                                alt="image" />
+and <img
+                                src="images/B2.png"
+                                alt="image" />. The condition for permutations <img
+                                src="images/pi1.png"
+                                alt="image" /> and
+<img
+                                src="images/pi2.png"
+                                alt="image" /> of sequencing variables <img
+                                src="images/p1.png"
+                                alt="image" /> and
+<img
+                                src="images/p2.png"
+                                alt="image" /> to satisfy constraint 
+<em>sameCommonSubsequence</em>(<img
+                                src="images/pi1pi2B1B2.png"
+                                alt="image" />)
+is defined as:</p><p><img
+                                src="images/sameSeq1.png"
+                                alt="image" /></p><p>A constraint <em>sameSequence</em>(<img
+                                src="images/p1p2B1B2.png"
+                                alt="image" />) is defined on two sequence
+variables of identical size <img
+                                src="images/p1.png"
+                                alt="image" /> (defined on a set of interval variables
+<img
+                                src="images/A1.png"
+                                alt="image" />) and <img
+                                src="images/p2.png"
+                                alt="image" /> (defined on a set of interval 
+variables <img
+                                src="images/A2.png"
+                                alt="image" />) with two arrays of interval variables <img
+                                src="images/B1.png"
+                                alt="image" />
+and <img
+                                src="images/B2.png"
+                                alt="image" /> that are an ordering of sets <img
+                                src="images/A1.png"
+                                alt="image" />
+and <img
+                                src="images/A2.png"
+                                alt="image" />. The constraint states that sequences <img
+                                src="images/p1.png"
+                                alt="image" />
+and <img
+                                src="images/p2.png"
+                                alt="image" /> are identical modulo a mapping between intervals 
+<img
+                                src="images/B1i.png"
+                                alt="image" /> and <img
+                                src="images/B2i.png"
+                                alt="image" />. A <em>sameSequence</em>
+constraint is stronger than a <em>sameCommonSubsequence</em>
+constraint; it additionally imposes that arrays <img
+                                src="images/B1.png"
+                                alt="image" /> and
+<img
+                                src="images/B2.png"
+                                alt="image" /> contain all the definition intervals
+of their relative sequence variables and that the presence status of mapped interval variables 
+<img
+                                src="images/B1i.png"
+                                alt="image" /> and <img
+                                src="images/B2i.png"
+                                alt="image" /> is the same.</p><p>More formally, let <em>n</em> denote the size of both sequence variables. The condition for permutations
+<img
+                                src="images/pi1.png"
+                                alt="image" /> and <img
+                                src="images/pi2.png"
+                                alt="image" /> of the sequence variables
+<img
+                                src="images/p1.png"
+                                alt="image" /> and <img
+                                src="images/p2.png"
+                                alt="image" /> to satisfy constraint
+<em>sameSequence</em>(<img
+                                src="images/pi1pi2B1B2.png"
+                                alt="image" />) is defined as:</p><p><img
+                                src="images/sameSeq2.png"
+                                alt="image" /></p><p>when parameters <img
+                                src="images/B1.png"
+                                alt="image" /> and <img
+                                src="images/B2.png"
+                                alt="image" /> are
+omitted in the definition of the above constraints, we assume <img
+                                src="images/B1.png"
+                                alt="image" />
+and <img
+                                src="images/B2.png"
+                                alt="image" /> are the definition intervals of <img
+                                src="images/p1.png"
+                                alt="image" />
+and <img
+                                src="images/p2.png"
+                    alt="image" />, following the order of definition of interval variables in the 
+sequence.</p></div></div><div
+                        class="section"><a name="65"><div
+                        class="section-title2">Expressions for getting the type of a next/prev interval</div>
+</a><div
+                                class="section-body"><p>Two integer expressions are available to get the type of the interval that is next (resp. previous) 
+to a given interval variable <em>a</em> in a sequence <em>p</em>. When interval <em>a</em> is absent or is the
+last (resp. first) interval of the sequence, specific values can be provided for these integer
+expressions.</p><p>More formally, let &pi; be the permutation value of a fixed sequence variable <em>p</em>, and 
+<img
+                                src="images/a_underscore.png"
+                                alt="image" /> be the value
+of a fixed interval variable <em>a</em> in the fixed sequence variable <em>p</em>.</p><p>If <img
+                                src="images/a_underscore.png"
+                                alt="image" /> is present and is not the last interval 
+in &pi;, we denote <img
+                                src="images/next_func.png"
+                                alt="image" /> the unique interval 
+that is next to <img
+                                src="images/a_underscore.png"
+                                alt="image" /> in &pi;.</p><p><img
+                                src="images/next_func2.png"
+                                alt="image" /></p><p>If <img
+                                src="images/a_underscore.png"
+                                alt="image" /> is present and is not the first interval in &pi;, we 
+denote <img
+                                src="images/prev_func.png"
+                                alt="image" /> the unique interval 
+that is previous to <img
+                                src="images/a_underscore.png"
+                                alt="image" /> in &pi;.</p><p><img
+                                src="images/prev_func2.png"
+                    alt="image" /></p></div></div><div
+                        class="section"><a name="66"><div
+                        class="section-title2">Expressions for getting the bounds of next/previous interval</div>
+</a><div
+                                class="section-body"><p>Integer expressions <em>startOfNext</em>, <em>endOfNext</em>, <em>lengthOfNext</em>, <em>sizeOfNext</em>, 
+<em>startOfPrev</em>, <em>endOfPrev</em>, <em>lengthOfPrev</em>, and <em>sizeOfPrev</em> provide  access to 
+the different attributes of the interval that is next (resp. previous) to a given interval variable <em>a</em> 
+in a sequence <em>p</em>. When interval <em>a</em> is absent or is the last (resp. first) interval of the 
+sequence, specific values can be provided for these integer expressions.</p><p>The semantics of these expressions are given in the table below.</p><p><img
+                                src="images/nextprev_table.png"
+                alt="image" /></p></div></div></div><div
+                    align="right"><a
+                    href="constraints_groups.html">PREVIOUS</a> <a href="cumul_functions.html">NEXT</a></div></div></body>
+</html>

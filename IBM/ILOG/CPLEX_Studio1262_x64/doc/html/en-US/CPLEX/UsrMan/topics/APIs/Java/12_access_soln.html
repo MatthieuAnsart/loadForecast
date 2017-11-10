@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Accessing solution information" />
+<meta name="abstract" content="Describes the information available in the Java API about a solution." />
+<meta name="Description" content="Describes the information available in the Java API about a solution." />
+<meta name="DC.subject" content="slack, accessing in constraints in active model (Java API), solving, diet problem (Java API)" />
+<meta name="keywords" content="slack, accessing in constraints in active model (Java API), solving, diet problem (Java API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_javaIloCplex.1018414" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" />
+<title>Accessing solution information</title>
+</head>
+<body role="main" id="User_manual.uss_javaIloCplex.1018414">
+<h1 class="title topictitle1">Accessing solution information</h1>
+<div class="body"><p class="shortdesc">Describes the information available in the Java API about
+a solution.</p>
+<p class="p">If a solution has been found with the <samp class="ph codeph">solve</samp> method,
+you access it and then query it using a variety of methods. The objective
+function can be accessed by the call: </p>
+<pre class="pre codeblock"><code>double objval = cplex.getObjValue();</code></pre>
+<p class="p">The values of individual modeling variables for the solution
+are accessed by the methods <samp class="ph codeph">IloCplex.getValue</samp>,
+for example: </p>
+<pre class="pre codeblock"><code>double x1 = cplex.getValue(var1);</code></pre>
+<p class="p">Frequently, solution values for an array of variables
+are needed. Rather than your having to implement a loop to query the
+solution values variable by variable, use the method <samp class="ph codeph">IloCplex.getValues</samp> to
+do so with only one function call, like this: </p>
+<pre class="pre codeblock"><code>double[] x = cplex.getValues(vars);</code></pre>
+<p class="p">Similarly,you query slack values for the constraints
+in the active model by means of the methods <samp class="ph codeph">IloCplex.getSlack</samp> or <samp class="ph codeph">IloCplex.getSlacks</samp> .</p>
+<p class="p">These ideas apply to solvingand printing the solution
+to the diet problem as well.</p>
+<pre class="pre codeblock"><code>IloCplex     cplex = new IloCplex();
+IloNumVar[]  Buy   = new IloNumVar[nFoods];
+
+if ( byColumn ) buildModelByColumn(cplex, data, Buy, varType);
+   else buildModelByRow (cplex, data, Buy, varType);
+
+      // Solve model
+ 
+      if ( cplex.solve() ) { 
+        System.out.println();
+        System.out.println(“Solution status = “ + cplex.getStatus());
+        System.out.println();
+        System.out.println(“ cost = “ + cplex.getObjValue());
+        for (int i = 0; i &lt; nFoods; i++) {
+          System.out.println(“ Buy” + i + “ = “ + 
+                             cplex.getValue(Buy[i]));
+        }
+        System.out.println();
+      }
+</code></pre>
+<p class="p">These lines of code start by creating a new <samp class="ph codeph">IloCplex</samp> object
+and passing it, along with the raw data in another object, either
+to the method <samp class="ph codeph">buildModelByColumn</samp> or to
+the method <samp class="ph codeph">buildModelByRow</samp>. The array of
+variables returned by it is saved as the array <samp class="ph codeph">Buy</samp>.
+Then the method <samp class="ph codeph">solve</samp> optimizes the active
+model and, upon success, the application prints solution information.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" title="Explores the features CPLEX offers to Java users to solve mathematical programming problems.">Concert Technology for Java users</a></div>
+</div>
+</div></body>
+</html>

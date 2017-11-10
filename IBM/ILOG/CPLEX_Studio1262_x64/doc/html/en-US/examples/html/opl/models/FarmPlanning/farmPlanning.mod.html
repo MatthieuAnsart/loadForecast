@@ -1,0 +1,294 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// Problem 8 from Model Building in Mathematical Programming, 3rd ed.</font></b>
+013: <b><font color="#007D00">//   by HP Williams</font></b>
+014: <b><font color="#007D00">//</font></b>
+015: <b><font color="#007D00">// Farm Planning </font></b>
+016: <b><font color="#007D00">//This model is described in the documentation. </font></b>
+017: <b><font color="#007D00">//See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+018: 
+019: 
+020: <b><font color="#0000FF">int</font></b> NbLands = ...;
+021: <b><font color="#0000FF">range</font></b> Lands = 1..NbLands;
+022: 
+023: <b><font color="#0000FF">int</font></b> NbYears = ...;
+024: <b><font color="#0000FF">range</font></b> Years = 1..NbYears;
+025: 
+026: <b><font color="#0000FF">int</font></b> NbAges = ...;
+027: <b><font color="#0000FF">range</font></b> Ages = 1..NbAges;
+028: <b><font color="#007D00">// Heifers are cows up to age 2</font></b>
+029: <b><font color="#007D00">// Productive cows are past heifer age but not yet at selling age</font></b>
+030: <b><font color="#0000FF">range</font></b> CowAges = 2..NbAges-1;
+031: 
+032: <b><font color="#0000FF">float</font></b> InitCows[Ages] = ...;
+033: <b><font color="#0000FF">float</font></b> HeifSurvival = ...;
+034: <b><font color="#0000FF">float</font></b> CowSurvival = ...;
+035: <b><font color="#0000FF">float</font></b> CalfRate = ...;
+036: <b><font color="#0000FF">float</font></b> HeifFraction = ...;
+037: <b><font color="#0000FF">float</font></b> InitCap = ...;
+038: <b><font color="#0000FF">float</font></b> GrPerCow = ...;
+039: <b><font color="#0000FF">float</font></b> SbPerCow = ...;
+040: <b><font color="#0000FF">float</font></b> GrPerAcre[Lands] = ...;
+041: <b><font color="#0000FF">float</font></b> GrAcre[Lands] = ...;
+042: <b><font color="#0000FF">float</font></b> SbPerAcre = ...;
+043: <b><font color="#0000FF">float</font></b> HeifAcre = ...;
+044: <b><font color="#0000FF">float</font></b> CowAcre = ...;
+045: <b><font color="#0000FF">float</font></b> Acres = ...;
+046: <b><font color="#0000FF">float</font></b> HeifLabor = ...;
+047: <b><font color="#0000FF">float</font></b> CowLabor = ...;
+048: <b><font color="#0000FF">float</font></b> Labor = ...;
+049: <b><font color="#0000FF">float</font></b> GrLabor = ...;
+050: <b><font color="#0000FF">float</font></b> SbLabor = ...;
+051: <b><font color="#0000FF">float</font></b> DownCowChg = ...;
+052: <b><font color="#0000FF">float</font></b> UpCowChg = ...;
+053: <b><font color="#0000FF">float</font></b> BullockSellPrice = ...;
+054: <b><font color="#0000FF">float</font></b> HeifSellPrice = ...;
+055: <b><font color="#0000FF">float</font></b> CowSellPrice = ...;
+056: <b><font color="#0000FF">float</font></b> MilkPerCowPrice = ...;
+057: <b><font color="#0000FF">float</font></b> GrSellPrice = ...;
+058: <b><font color="#0000FF">float</font></b> SbSellPrice = ...;
+059: <b><font color="#0000FF">float</font></b> GrBuyPrice = ...;
+060: <b><font color="#0000FF">float</font></b> SbBuyPrice = ...;
+061: <b><font color="#0000FF">float</font></b> LbrFixCost = ...;
+062: <b><font color="#0000FF">float</font></b> LbrCost = ...;
+063: <b><font color="#0000FF">float</font></b> HeifCost = ...;
+064: <b><font color="#0000FF">float</font></b> CowCost = ...;
+065: <b><font color="#0000FF">float</font></b> GrGrowCost = ...;
+066: <b><font color="#0000FF">float</font></b> SbGrowCost = ...;
+067: <b><font color="#0000FF">int</font></b>   LoanTerm = ...;
+068: <b><font color="#0000FF">float</font></b> Repay = ...;
+069: 
+070: <b><font color="#0000FF">float</font></b> InitCowsTotal = <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> CowAges) InitCows[j];
+071: 
+072: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ GrGrow[l <b><font color="#0000FF">in</font></b> Lands][y <b><font color="#0000FF">in</font></b> Years] <b><font color="#0000FF">in</font></b> 0..GrPerAcre[l]*GrAcre[l];
+073: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ GrBuy[Years];
+074: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ GrSell[Years];
+075: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ SbGrow[Years];
+076: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ SbBuy[Years];
+077: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ SbSell[Years];
+078: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Lbr[Years];
+079: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ CapAdd[Years];
+080: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ HeifSell[Years];
+081: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Cow[Ages,Years];
+082: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ CowT[Years];
+083: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Heif[Years];
+084: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Pr[Years];
+085: 
+086: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> objective =
+087:   <b><font color="#7D007D">sum</font></b>(y <b><font color="#0000FF">in</font></b> Years) Pr[y]
+088:     - Repay * (<b><font color="#7D007D">sum</font></b>(y <b><font color="#0000FF">in</font></b> Years) ((LoanTerm-NbYears-1+y) * CapAdd[y]));
+089: 
+090: <b><font color="#0000FF">maximize</font></b> objective;
+091: 
+092: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+093:   <b><font color="#007D00">// Add a Total cows variable</font></b>
+094:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+095:     ctTotCow: CowT[y] == <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> CowAges) Cow[j][y];
+096: 
+097:   <b><font color="#007D00">// Continuity - cows move from one age to the next</font></b>
+098:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> 1..NbYears-1) {
+099:     Cow[1][y+1] == HeifSurvival * Heif[y];
+100:     Cow[2][y+1] == HeifSurvival * Cow[1][y];
+101:     <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> CowAges)
+102:       Cow[j+1][y+1] == CowSurvival * Cow[j][y];
+103:   }
+104: 
+105:   <b><font color="#007D00">// Sell heifers as newborns</font></b>
+106:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+107:     ctHeifNew:  Heif[y] == CalfRate * HeifFraction * CowT[y] - HeifSell[y];
+108: 
+109:   <b><font color="#007D00">// Initial conditions</font></b>
+110:   Cow[1][1] == HeifSurvival * InitCows[1];
+111:   Cow[2][1] == HeifSurvival * InitCows[2];
+112:   <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> 3..NbAges)
+113:     Cow[j][1] == CowSurvival * InitCows[j];
+114:  
+115:   <b><font color="#007D00">// Accomodation</font></b>
+116:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+117:     ctAccom: Heif[y] + Cow[1][y] + CowT[y]
+118:        &lt;= InitCap + <b><font color="#7D007D">sum</font></b>(k <b><font color="#0000FF">in</font></b> Years: k &lt;= y) CapAdd[k];
+119: 
+120:   <b><font color="#007D00">// Grain consumption</font></b>
+121:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+122:     ctGrainCon: CowT[y] * GrPerCow &lt;= 
+123:        <b><font color="#7D007D">sum</font></b>(l <b><font color="#0000FF">in</font></b> Lands) GrGrow[l,y] + GrBuy[y] - GrSell[y];
+124:           
+125:   <b><font color="#007D00">// Sugar beet consumption</font></b>
+126:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+127:     ctSugBeet: CowT[y] * SbPerCow &lt;=
+128:        SbGrow[y] + SbBuy[y] - SbSell[y];
+129: 
+130:   <b><font color="#007D00">// Acreage</font></b>
+131:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+132:     ctAcreage: <b><font color="#7D007D">sum</font></b>(l <b><font color="#0000FF">in</font></b> Lands) 1.0/GrPerAcre[l] * GrGrow[l][y] 
+133:        + 1.0/SbPerAcre * SbGrow[y] + HeifAcre * Heif[y]
+134:        + HeifAcre * Cow[1][y] 
+135:        + CowAcre * CowT[y] &lt;= Acres; 
+136: 
+137:   <b><font color="#007D00">// Labor</font></b>
+138:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+139:     ctLabor: HeifLabor * Heif[y] + HeifLabor * Cow[1][y]
+140:     + CowLabor * CowT[y]
+141:     + GrLabor * (<b><font color="#7D007D">sum</font></b>(l <b><font color="#0000FF">in</font></b> Lands) 1.0/GrPerAcre[l] * GrGrow[l][y])
+142:     + SbLabor * 1.0 / SbPerAcre * SbGrow[y]
+143:     &lt;= Labor + Lbr[y];
+144: 
+145:   <b><font color="#007D00">// End total</font></b>
+146:   ctEndTot: InitCowsTotal * (1.0 - DownCowChg) 
+147:       &lt;= CowT[NbYears]
+148:       &lt;= InitCowsTotal * (1.0 + UpCowChg);
+149: 
+150:   <b><font color="#007D00">// Profit</font></b>
+151:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Years)
+152:     ctProfit: Pr[y] == BullockSellPrice * CalfRate * (1.0 - HeifFraction) * CowT[y] 
+153:              + HeifSellPrice * HeifSell[y]
+154:              + CowSellPrice * Cow[NbAges][y]
+155:              + MilkPerCowPrice * CowT[y] 
+156:              + GrSellPrice * GrSell[y]
+157:              + SbSellPrice * SbSell[y]
+158:              - GrBuyPrice * GrBuy[y]
+159:              - SbBuyPrice * SbBuy[y]
+160:              - LbrCost * Lbr[y]
+161:              - LbrFixCost
+162:              - HeifCost * Heif[y]
+163:              - HeifCost * Cow[1][y]
+164:              - CowCost * CowT[y]
+165:              - GrGrowCost * (<b><font color="#7D007D">sum</font></b>(l <b><font color="#0000FF">in</font></b> Lands) 1.0/GrPerAcre[l] * GrGrow[l][y])
+166:              - SbGrowCost * (1.0/SbPerAcre) * SbGrow[y]
+167:              - Repay * (<b><font color="#7D007D">sum</font></b>(k <b><font color="#0000FF">in</font></b> Years: k&lt;=y) CapAdd[k]);
+168: 
+169:   <b><font color="#007D00">// Profit can never be negative--variable declared &gt;= 0 above</font></b>
+170: }
+171: 
+172: <b><font color="#0000FF">execute</font></b> DISPLAY {   
+173:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> y <b><font color="EA7D00">in</font></b> Years)
+174:     <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> l <b><font color="EA7D00">in</font></b> Lands)
+175:       <b><font color="EA7D00">if</font></b>(GrGrow[l][y] &gt;= 1e-6)
+176:         writeln(<b><font color="#8A2BE2">"GrGrow["</font></b>, l, <b><font color="#8A2BE2">"]["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, GrGrow[l][y]);
+177:             
+178:   writeln();
+179:             
+180:   <b><font color="EA7D00">for</font></b>(y <b><font color="EA7D00">in</font></b> Years)
+181:     <b><font color="EA7D00">if</font></b>(SbGrow[y] &gt;= 1e-6)
+182:       writeln(<b><font color="#8A2BE2">"SbGrow["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, SbGrow[y]);
+183:          
+184:   writeln();
+185:          
+186:   <b><font color="EA7D00">for</font></b>(y <b><font color="EA7D00">in</font></b> Years)
+187:     <b><font color="EA7D00">if</font></b>(GrBuy[y] &gt;= 1e-6)
+188:       writeln(<b><font color="#8A2BE2">"GrBuy["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, GrBuy[y]);
+189:          
+190:   writeln();
+191:    
+192:   <b><font color="EA7D00">for</font></b>(y <b><font color="EA7D00">in</font></b> Years)
+193:     <b><font color="EA7D00">if</font></b>(SbBuy[y] &gt;= 1e-6)
+194:       writeln(<b><font color="#8A2BE2">"SbBuy["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, SbBuy[y]);
+195:    
+196:   writeln();
+197:         
+198:   <b><font color="EA7D00">for</font></b>(y <b><font color="EA7D00">in</font></b> Years)
+199:     <b><font color="EA7D00">if</font></b>(GrSell[y] &gt;= 1e-6)
+200:       writeln(<b><font color="#8A2BE2">"GrSell["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, GrSell[y]);
+201:    
+202:   writeln();
+203:          
+204:   <b><font color="EA7D00">for</font></b>(y <b><font color="EA7D00">in</font></b> Years)
+205:     <b><font color="EA7D00">if</font></b>(SbSell[y] &gt;= 1e-6)
+206:       writeln(<b><font color="#8A2BE2">"SbSell["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, SbSell[y]);
+207:    
+208:   writeln();
+209:          
+210:   <b><font color="EA7D00">for</font></b>(y <b><font color="EA7D00">in</font></b> Years)
+211:     <b><font color="EA7D00">if</font></b>(HeifSell[y] &gt;= 1e-6)
+212:       writeln(<b><font color="#8A2BE2">"HeifSell["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, HeifSell[y]);
+213:    
+214:   writeln();
+215:          
+216:   <b><font color="EA7D00">for</font></b>(y <b><font color="EA7D00">in</font></b> Years)
+217:     writeln(<b><font color="#8A2BE2">"Pr["</font></b>, y, <b><font color="#8A2BE2">"] = "</font></b>, Pr[y]);
+218: }
+219: 
+220: 
+221: tuple PrSolutionT{ 
+222:         <b><font color="#0000FF">int</font></b> Years; 
+223:         <b><font color="#0000FF">float</font></b> value; 
+224: };
+225: {PrSolutionT} PrSolution = {&lt;i0,Pr[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+226: tuple CapAddSolutionT{ 
+227:         <b><font color="#0000FF">int</font></b> Years; 
+228:         <b><font color="#0000FF">float</font></b> value; 
+229: };
+230: {CapAddSolutionT} CapAddSolution = {&lt;i0,CapAdd[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+231: tuple CowTSolutionT{ 
+232:         <b><font color="#0000FF">int</font></b> Years; 
+233:         <b><font color="#0000FF">float</font></b> value; 
+234: };
+235: {CowTSolutionT} CowTSolution = {&lt;i0,CowT[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+236: tuple CowSolutionT{ 
+237:         <b><font color="#0000FF">int</font></b> Ages; 
+238:         <b><font color="#0000FF">int</font></b> Years; 
+239:         <b><font color="#0000FF">float</font></b> value; 
+240: };
+241: {CowSolutionT} CowSolution = {&lt;i0,i1,Cow[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Ages,i1 <b><font color="EA7D00">in</font></b> Years};
+242: tuple HeifSolutionT{ 
+243:         <b><font color="#0000FF">int</font></b> Years; 
+244:         <b><font color="#0000FF">float</font></b> value; 
+245: };
+246: {HeifSolutionT} HeifSolution = {&lt;i0,Heif[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+247: tuple HeifSellSolutionT{ 
+248:         <b><font color="#0000FF">int</font></b> Years; 
+249:         <b><font color="#0000FF">float</font></b> value; 
+250: };
+251: {HeifSellSolutionT} HeifSellSolution = {&lt;i0,HeifSell[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+252: tuple GrGrowSolutionT{ 
+253:         <b><font color="#0000FF">int</font></b> Lands; 
+254:         <b><font color="#0000FF">int</font></b> Years; 
+255:         <b><font color="#0000FF">float</font></b> value; 
+256: };
+257: {GrGrowSolutionT} GrGrowSolution = {&lt;i0,i1,GrGrow[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Lands,i1 <b><font color="EA7D00">in</font></b> Years};
+258: tuple GrBuySolutionT{ 
+259:         <b><font color="#0000FF">int</font></b> Years; 
+260:         <b><font color="#0000FF">float</font></b> value; 
+261: };
+262: {GrBuySolutionT} GrBuySolution = {&lt;i0,GrBuy[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+263: tuple GrSellSolutionT{ 
+264:         <b><font color="#0000FF">int</font></b> Years; 
+265:         <b><font color="#0000FF">float</font></b> value; 
+266: };
+267: {GrSellSolutionT} GrSellSolution = {&lt;i0,GrSell[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+268: tuple SbGrowSolutionT{ 
+269:         <b><font color="#0000FF">int</font></b> Years; 
+270:         <b><font color="#0000FF">float</font></b> value; 
+271: };
+272: {SbGrowSolutionT} SbGrowSolution = {&lt;i0,SbGrow[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+273: tuple SbBuySolutionT{ 
+274:         <b><font color="#0000FF">int</font></b> Years; 
+275:         <b><font color="#0000FF">float</font></b> value; 
+276: };
+277: {SbBuySolutionT} SbBuySolution = {&lt;i0,SbBuy[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+278: tuple SbSellSolutionT{ 
+279:         <b><font color="#0000FF">int</font></b> Years; 
+280:         <b><font color="#0000FF">float</font></b> value; 
+281: };
+282: {SbSellSolutionT} SbSellSolution = {&lt;i0,SbSell[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+283: tuple LbrSolutionT{ 
+284:         <b><font color="#0000FF">int</font></b> Years; 
+285:         <b><font color="#0000FF">float</font></b> value; 
+286: };
+287: {LbrSolutionT} LbrSolution = {&lt;i0,Lbr[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+288: 
+289: 
+</tt></pre>

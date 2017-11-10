@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using the Java code from OPL" />
+<meta name="abstract" content="Explains how to import Java classes and how to call Java from OPL." />
+<meta name="Description" content="Explains how to import Java classes and how to call Java from OPL." />
+<meta name="DC.subject" content="Java, knapsack algorithm, using the code from OPL" />
+<meta name="keywords" content="Java, knapsack algorithm, using the code from OPL" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_knap.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_externalfunctions.1019977" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_knap.html" />
+<title>Using the Java code from OPL</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_externalfunctions.1019977">
+<h1 class="title topictitle1">Using the Java code from OPL</h1>
+<div class="body"><p class="shortdesc">Explains how to import Java classes and how to
+call Java from OPL.</p>
+<p class="p">Two IBM ILOG Script functions enable you to call Java
+external functions from OPL models in IBM ILOG Script statements.</p>
+<p class="p">The successive steps are:</p>
+<ol class="ol"><li class="li"><p class="p">Importing Java classes</p>
+ </li>
+<li class="li"><p class="p">Calling Java</p>
+ </li>
+</ol>
+<p class="p">Then, learn more about <a class="xref" href="opl_languser_extfunc_knapusejava.html#usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020561">Translation of parameters and results</a> and <a class="xref" href="opl_languser_extfunc_knapusejava.html#usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020580">Creation of the Java Virtual Machine (JVM)</a>.</p>
+<div class="section" id="usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020519"><h2 class="title sectiontitle">Importing Java classes</h2><p class="p">The
+function</p>
+<p class="p"><samp class="ph codeph">IloOplImportJava(&lt;directory or
+path to jar file&gt;);</samp> </p>
+<p class="p">imports the classes
+into the given directory or JAR file in IBM ILOG Script, so that they
+can be called. The path can be either absolute or relative to the
+directory of the model file.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020525"><h2 class="title sectiontitle">Calling Java</h2><p class="p">The function</p>
+<p class="p"><span class="keyword apiname">&lt;Script object or Java object&gt;=IloOplCallJava(&lt;class
+name&gt; or &lt;Java object&gt;,&lt;method name&gt;,[&lt;method signature&gt;
+or ""],[&lt;parameters&gt;,...]);</span> </p>
+<p class="p">enables
+you to call static methods, constructors, and instance methods.</p>
+<p class="p">The method signature is only needed when there is an ambiguity
+(method overloading), that is when several methods have the same name
+but different signatures. It is a string with the JNI signature, something
+like:</p>
+<p class="p"><span class="keyword apiname">"(Lilog/opl/IloOplModel;ILjava/lang/String;)V"</span></p>
+<p class="p">for a method taking an <span class="keyword apiname">IloOplModel</span> instance
+and a String as parameters.</p>
+<p class="p">Therefore, you can call:</p>
+<pre class="pre codeblock"><code>// static method:
+var result=IloOplCallJava("mypackage.MyClass","myStaticMethod","",15);
+
+// create instance:
+var myObject=IloOplCallJava("mypackage.MyClass","&lt;init&gt;","","init param");
+
+// call method on instance (two syntaxes are possible):
+var mySubObject=IloOplCallJava(myObject,"getSubObject","");
+or
+var mySubObject=myObject.getSubObject();</code></pre>
+<p class="p">The classes are looked for in the JAR files
+or on the paths specified by the <span class="keyword apiname">IloOplImportJava</span> instance
+(see <a class="xref" href="opl_languser_extfunc_knapusejava.html#usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020519">Importing Java classes</a> above).</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020561"><h2 class="title sectiontitle">Translation of parameters and results</h2><p class="p">Both the parameters and the results of the call are translated
+from IBM ILOG Script to Java (and conversely) as needed. </p>
+<p class="p">The rules are as follows:</p>
+<ul class="ul"><li class="li"><p class="p">Simple data types (numbers, strings, Booleans)
+are translated back and forth.</p>
+ <ul class="ul"><li class="li"><p class="p">A Java method taking a string can be called
+with an IBM ILOG Script string.</p>
+</li>
+<li class="li"><p class="p">A Java method returning a string appears
+as returning an IBM ILOG Script string.</p>
+</li>
+</ul>
+ </li>
+<li class="li"><p class="p">Arrays are also translated back and forth
+between Java and IBM ILOG Script arrays.</p>
+ </li>
+<li class="li"><p class="p">Some known types that have representations
+in both IBM ILOG Script and Java are also translated back and forth,
+so that:</p>
+ <ul class="ul"><li class="li"><p class="p">A Java method taking an <span class="keyword apiname">IloOplModel</span> object
+can be called with an IBM ILOG Script model such as <samp class="ph codeph">thisOplModel</samp>.</p>
+ </li>
+<li class="li"><p class="p">A Java method returning a custom Java data
+source appears as returning an IBM ILOG Script data source, which
+enables you to add it to the model using regular script statements.</p>
+ </li>
+</ul>
+ </li>
+<li class="li"><p class="p">Unknown Java types (created by Java code)
+are represented as special <samp class="ph codeph">JavaRef</samp> objects
+in IBM ILOG Script so that you can call any methods on them and pass
+them as parameters in subsequent calls. </p>
+ <ul class="ul"><li class="li"><p class="p">A Java method returning a Java object of
+class <samp class="ph codeph">MyClass</samp> appears as returning a special <samp class="ph codeph">JavaRef</samp> object from IBM ILOG Script.</p>
+ </li>
+<li class="li"><p class="p">You can call methods on that <samp class="ph codeph">JavaRef</samp> object
+(syntax: <samp class="ph codeph">myObject.myMethod()</samp>), or pass it
+as a parameter to other Java calls (which will see a normal Java object
+of class <samp class="ph codeph">MyClass</samp>).</p>
+ </li>
+</ul>
+ </li>
+</ul>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_externalfunctions.1019977__usropllangtut.uss_langtut_externalfunctions.1020580"><h2 class="title sectiontitle">Creation of the Java Virtual Machine (JVM)</h2><p class="p">When the calls are executed:</p>
+<ul class="ul"><li class="li"><p class="p">Either there is a JVM running: this is the
+case for ODM Enterprise applications, the IDE in ODM Enterprise mode,
+custom Java applications. Then, the call is performed within the current
+JVM.</p>
+</li>
+<li class="li"><p class="p">Or there is no JVM running: this is the case
+for the IDE in pure OPL mode and for oplrun. Then, a new JVM is created.</p>
+</li>
+</ul>
+<p class="p">The JVM is initialized at the first call. To create
+the JVM, the runtime process must find both the Java home and the
+OPL home to access the OPL <samp class="ph codeph">.jar</samp> file. If
+ODM Enterprise is installed, the process must also find the ODM Enterprise
+home to access the ODM Enterprise <samp class="ph codeph">.jar</samp> files,
+so that the ODM Enterprise scripting works. These environment variables
+are detected automatically. See the <em class="ph i">Java API Reference
+Manual </em>for details.</p>
+<p class="p">If a new JVM is created, it receives the value of the environment
+variable <samp class="ph codeph">ODMS_JAVA_ARGS</samp> as parameter, if
+this variable is defined. This variable is also already taken into
+account if the JVM is started by the IDE (IDE in ODM Enterprise mode)
+or in an ODM Enterprise application. This enables you to customize
+the way in which the JVM is created, for example by adding more virtual
+memory, customizing the default classpath, and so on. </p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_externalfunctions.1019977__MZwnLkhf"><h2 class="title sectiontitle">Deploying OPL models
+with external Java function calls on Linux</h2><p class="p">When deploying OPL models that make external Java function
+on Linux platforms, the following information might be useful:</p>
+<ol class="ol"><li class="li"><p class="p">The environment variable <samp class="ph codeph">JAVA_HOME</samp> need
+to be defined. OPL will load a JVM from <samp class="ph codeph">JAVA_HOME</samp> for
+the external Java function calls. When the models are solved by a
+Java Application, the JVM for the Java application and the JVM for
+the external Java functions calls must be the same version. </p>
+</li>
+<li class="li"><p class="p">A JVM might have multiple modes, such as
+client, server, etc. When the models are solved by a Java Application,
+the JVM for the Java application and the JVM for the external Java
+functions calls must also be in the same mode. The default mode of
+JVM OPL chooses to load for external Java function calls will be printed
+to standard output when a model with external Java function calls
+is solved by <samp class="ph codeph">oplrun</samp> (OPL 5.x) or <samp class="ph codeph">oplrunjava</samp> (OPL 6.x).</p>
+</li>
+<li class="li"><p class="p">If you want to use a different mode of JVM
+other than the default mode, you will need to use the environment
+variable <samp class="ph codeph">ODMS_JVM_LIBRARY_OVERRIDE</samp> to override
+the default selection. The value of <samp class="ph codeph">ODMS_JVM_LIBRARY_OVERRIDE</samp> should
+be the relative path of <span class="ph filepath">libjvm.so</span> from
+the JRE root path. For example, defining <samp class="ph codeph">ODMS_JVM_LIBRARY_OVERRIDE</samp> as <span class="ph filepath">/lib/i386/server/libjvm.so</span> will cause OPL to load
+a 32-bit server JVM.</p>
+ </li>
+</ol>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_knap.html" title="Presents the problem, the code sample, the location of the files, a summary of the procedure, and the detailed steps.">Using an external knapsack algorithm</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example of a propagator" />
+<meta name="abstract" content="An example of a propagator is provided for illustrative purposes." />
+<meta name="Description" content="An example of a propagator is provided for illustrative purposes." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerprop.1026347" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<title>Example of a propagator</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerprop.1026347">
+<h1 class="title topictitle1">Example of a propagator</h1>
+<div class="body"><p class="shortdesc">An example of a propagator is provided for illustrative
+purposes.</p>
+<p class="p">While the example in the previous section illustrates
+the mechanics of writing a propagator, the example is not realistic.
+As a more realistic example of a propagator, consider the case in
+which the model contains an array of decision variables and a decision
+variable that needs to be constrained to take the value of the index
+of any element that has been assigned a value that is the minimal
+value of the elements in the array. First, the propagator must be
+informed of the array of decision variables and the decision variable
+that is constrained to be an appropriate index of the array. Thus
+the constructor is:  </p>
+<pre class="pre codeblock"><code>ArgMinI::ArgMinI(IloIntVar y, IloIntVarArray x) : 
+  IloPropagatorI(y.getEnv()), _y(y), _x(x) {
+  addVar(y); 
+  for (IloInt i=0; i&lt; x.getSize(); i++)
+    addVar(x[i]);
+}
+</code></pre>
+<p class="p">The <samp class="ph codeph">execute</samp> method of the
+propagator first ensures that the domain of the decision variable
+representing the index is within the range of indices of the array.
+The method then examines the decision variables in the array and determines
+the minimal upper bound of the domains of all the elements of the
+array. It also determines, for those elements whose indices are in
+the domain of <samp class="ph codeph">_y</samp>, the minimal value of
+the currently possible values, called the minimal active lower bound.</p>
+<p class="p">If there is any decision variable in the array whose
+domain is strictly greater than the calculated minimal upper bound,
+then it cannot be an element that takes the minimal value in the array.
+In this case, the value of the index is removed from the domain of
+the decision variable <samp class="ph codeph">_y</samp>. </p>
+<p class="p">Then, if there is an index that is not in the domain
+of the decision variable <samp class="ph codeph">_y</samp>, the decision
+variable at that index cannot take values smaller than the minimal
+active lower bound, and the minimum of the domain of that variable
+is set to the minimal active lower bound.</p>
+<p class="p">Putting together the pieces, the <samp class="ph codeph">execute</samp> method
+is:  </p>
+<pre class="pre codeblock"><code>void ArgMinI::execute() { 
+  IloInt i;
+  setRange(_y, 0, _x.getSize()-1);
+  IloInt minUpperBound = IloIntMax;
+  IloInt minActiveLowerBound = IloIntMax;
+  for (i = 0; i &lt; _x.getSize(); i++) {
+    if (minUpperBound &gt; getMax(_x[i]))
+      minUpperBound = getMax(_x[i]);
+    if (isInDomain(_y, i) &amp;&amp; minActiveLowerBound &gt; getMin(_x[i]))
+      minActiveLowerBound = getMin(_x[i]);
+  }
+  for (i = 0; i &lt; _x.getSize(); i++)
+    if (minUpperBound &lt; getMin(_x[i]))
+      removeValue(_y,i);
+
+  for (i=0; i &lt; _x.getSize(); i++)
+    if (!isInDomain(_y, i)) 
+      setMin(_x[i],minActiveLowerBound);
+}
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" title="A constraint propagator is a simple way to define a custom constraint, that is, one where you define the domain reduction rules.">Using constraint propagators</a></div>
+</div>
+</div></body>
+</html>

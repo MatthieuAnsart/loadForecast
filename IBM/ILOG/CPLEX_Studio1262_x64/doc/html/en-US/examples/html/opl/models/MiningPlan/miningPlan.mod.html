@@ -1,0 +1,116 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// Problem 7 from Model Building in Mathematical Programming, 3rd ed.</font></b>
+013: <b><font color="#007D00">//   by HP Williams</font></b>
+014: <b><font color="#007D00">// </font></b>
+015: <b><font color="#007D00">// Mining </font></b>
+016: <b><font color="#007D00">//</font></b>
+017: <b><font color="#007D00">// This model is described in the documentation. </font></b>
+018: <b><font color="#007D00">//See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+019: 
+020: <b><font color="#0000FF">int</font></b> NbMines = ...;
+021: <b><font color="#0000FF">range</font></b> Mines = 1..NbMines;
+022: 
+023: <b><font color="#0000FF">int</font></b> NbYears = ...;
+024: <b><font color="#0000FF">range</font></b> Years = 1..NbYears;
+025: <b><font color="#0000FF">range</font></b> Years2 = 2..NbYears;
+026: 
+027: <b><font color="#0000FF">float</font></b> Royalties[Mines] = ...;
+028: <b><font color="#0000FF">float</font></b> LimExtract[Mines] = ...;
+029: <b><font color="#0000FF">float</font></b> LimWork = ...;
+030: <b><font color="#0000FF">float</font></b> OreQual[Mines] = ...;
+031: <b><font color="#0000FF">float</font></b> BlendQual[Years] = ...;
+032: <b><font color="#0000FF">float</font></b> BlendPrice = ...;
+033: <b><font color="#0000FF">float</font></b> DiscountRate = ...;
+034: <b><font color="#0000FF">float</font></b> DiscountFactor[Years];
+035: 
+036: <b><font color="#0000FF">execute</font></b> INITIALIZE {
+037:    DiscountFactor[1] = 1.0;
+038:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> y <b><font color="EA7D00">in</font></b> Years2)
+039:       DiscountFactor[y] = DiscountFactor[y-1]*(1.0-DiscountRate);
+040: }
+041:                            
+042: dvar boolean Work[Mines,Years];
+043: dvar boolean Open[Mines,Years];
+044: dvar float+ Ore[m in Mines][y in Years] in 0..LimExtract[m];
+045: dvar float+ Blend[Years];
+046: 
+047: dexpr float Objective = 
+048:   sum(y in Years) (BlendPrice * DiscountFactor[y] * Blend[y]  
+049:    - sum(m in Mines) Royalties[m] * DiscountFactor[y] * Open[m][y]);
+050: 
+051: maximize Objective;
+052: 
+053: subject to {
+054:   <b><font color="#007D00">// Maximum yearly capacity </font></b>
+055:   forall(m <b><font color="EA7D00">in</font></b> Mines, y <b><font color="EA7D00">in</font></b> Years)
+056:    ctMaxYearCap: Ore[m][y] &lt;= LimExtract[m] * Work[m][y];
+057: 
+058:   <b><font color="#007D00">// Limit on mines worked in a year</font></b>
+059:   forall(y <b><font color="EA7D00">in</font></b> Years)
+060:     ctMinLim: sum(m <b><font color="EA7D00">in</font></b> Mines) Work[m][y] &lt;= LimWork;
+061: 
+062:   <b><font color="#007D00">// Closed mines cannot be worked</font></b>
+063:   forall(m <b><font color="EA7D00">in</font></b> Mines, y <b><font color="EA7D00">in</font></b> Years)
+064:     ctClosedMine: Work[m][y] &lt;= Open[m][y];
+065:    
+066:   <b><font color="#007D00">// Once closed, a mine stays closed</font></b>
+067:   forall(m <b><font color="EA7D00">in</font></b> Mines, y <b><font color="EA7D00">in</font></b> 1..NbYears-1)
+068:     ctStaysClosed: Open[m][y+1] &lt;= Open[m][y];
+069:  
+070:   <b><font color="#007D00">// Quality requirement on blended ore</font></b>
+071:   forall(y <b><font color="EA7D00">in</font></b> Years)
+072:     ctQuality: sum(m <b><font color="EA7D00">in</font></b> Mines) OreQual[m] * Ore[m][y] == BlendQual[y] * Blend[y];
+073: 
+074:   <b><font color="#007D00">// Balance constraint</font></b>
+075:   forall(y <b><font color="EA7D00">in</font></b> Years)
+076:     ctBalance: sum(m <b><font color="EA7D00">in</font></b> Mines) Ore[m][y] == Blend[y];
+077:      
+078:   Work[2][3]==0;
+079:   Work[1][2]==0;
+080:   Work[2][1]==0;
+081:   Work[4][4]==1;
+082:   Work[4][3]==0;
+083:   Work[3][4]==0;
+084:   Work[4][5]==0;
+085: }
+086: 
+087: 
+088: tuple BlendSolutionT{ 
+089:         <b><font color="#0000FF">int</font></b> Years; 
+090:         <b><font color="#0000FF">float</font></b> value; 
+091: };
+092: {BlendSolutionT} BlendSolution = {&lt;i0,Blend[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Years};
+093: tuple OpenSolutionT{ 
+094:         <b><font color="#0000FF">int</font></b> Mines; 
+095:         <b><font color="#0000FF">int</font></b> Years; 
+096:         <b><font color="#0000FF">int</font></b> value; 
+097: };
+098: {OpenSolutionT} OpenSolution = {&lt;i0,i1,Open[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Mines,i1 <b><font color="EA7D00">in</font></b> Years};
+099: tuple OreSolutionT{ 
+100:         <b><font color="#0000FF">int</font></b> Mines; 
+101:         <b><font color="#0000FF">int</font></b> Years; 
+102:         <b><font color="#0000FF">float</font></b> value; 
+103: };
+104: {OreSolutionT} OreSolution = {&lt;i0,i1,Ore[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Mines,i1 <b><font color="EA7D00">in</font></b> Years};
+105: tuple WorkSolutionT{ 
+106:         <b><font color="#0000FF">int</font></b> Mines; 
+107:         <b><font color="#0000FF">int</font></b> Years; 
+108:         <b><font color="#0000FF">int</font></b> value; 
+109: };
+110: {WorkSolutionT} WorkSolution = {&lt;i0,i1,Work[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Mines,i1 <b><font color="EA7D00">in</font></b> Years};
+111: 
+</tt></pre>

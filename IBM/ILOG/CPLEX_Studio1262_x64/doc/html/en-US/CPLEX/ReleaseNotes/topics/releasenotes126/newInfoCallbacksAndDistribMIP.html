@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Informational callbacks and distributed MIP" />
+<meta name="abstract" content="Documents informational callbacks in CPLEX V12.6.0 to support distributed parallel optimization of mixed integer programs (MIP)." />
+<meta name="Description" content="Documents informational callbacks in CPLEX V12.6.0 to support distributed parallel optimization of mixed integer programs (MIP)." />
+<meta name="DC.subject" content="release notes CPLEX V12.6.0, informational callbacks, distributed MIP and callbacks, callback, informational, distributed parallel optimization and, distributed MIP, distributed parallel optimization, informational callbacks and" />
+<meta name="keywords" content="release notes CPLEX V12.6.0, informational callbacks, distributed MIP and callbacks, callback, informational, distributed parallel optimization and, distributed MIP, distributed parallel optimization, informational callbacks and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newDistribMIP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="NewInfoCallbacksAndDistribMIP126" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newDistribMIP.html" />
+<title>Informational callbacks and distributed MIP</title>
+</head>
+<body role="main" id="NewInfoCallbacksAndDistribMIP126">
+<h1 class="title topictitle1">Informational callbacks and distributed MIP</h1>
+<div class="body"><p class="shortdesc">Documents informational callbacks in CPLEX V12.6.0 to support 
+distributed parallel optimization of mixed integer programs (MIP).</p>
+<p class="p">As announced in 
+<a class="xref" href="newDistribMIP.html" title="Announces distributed parallel MIP optimization">Distributed parallel MIP optimization</a> in these release notes,
+CPLEX V12.6.0 can solve mixed integer programming (MIP) models in parallel in a 
+distributed computing environment. To support this new feature, CPLEX extended 
+informational callbacks to take into consideration some of the special characteristics 
+of a distributed computing environment. Generally, informational callbacks work 
+with distributed parallel optimization (in particular, with distributed MIP) as 
+with other MIP optimizations.</p>
+<div class="section"><h2 class="title sectiontitle">Examples of informational callbacks and distributed MIP</h2>
+
+<p class="p">New examples illustrate how to apply an informational callback in an 
+application of distributed parallel MIP optimization.</p>
+
+<ul class="ul"><li class="li">For users of the Callable Library (C API), see <span class="ph filepath">xdistmipex2.c</span>.</li>
+<li class="li">For users of the C++ API, see <span class="ph filepath">ilodistmipex2.cpp</span>.</li>
+<li class="li">For users of the Java API, see <span class="ph filepath">DistMIPEx2.java</span>.</li>
+<li class="li">For users of the Python API, see <span class="ph filepath">distmipex2.py</span>.</li>
+<li class="li">For users of MATLAB (Cplex class API), see <span class="ph filepath">distmipex2.m</span>.</li>
+<li class="li">For users of the C#.NET API, see <span class="ph filepath">DistMIPEx2.cs</span>.</li>
+</ul>
+</div>
+<div class="section"><h2 class="title sectiontitle">Special considerations about informational callbacks and distributed MIP</h2>
+
+<p class="p">Because of the distributed aspects of such an application, special 
+considerations apply to informational callbacks in a distributed MIP application. 
+For example, the informational callback is called only at synchronization points 
+during distributed MIP optimization; that is, less frequently than in 
+conventional MIP optimization in shared memory. (There are other differences 
+as well that arise from the different topology of distributed parallel optimization.)</p>
+
+<div class="p">Specifically, when you query certain information by means of 
+<a class="xref" href="../../../../refcallablelibrary/cpxapi/getcallbackinfo.html" title="The routine CPXXgetcallbackinfo/CPXgetcallbackinfo accesses information about the current optimization process from within a user-written callback function.">CPXXgetcallbackinfo and CPXgetcallbackinfo</a> 
+in the Callable Library (C API), the following considerations apply:
+
+    <ul class="ul"><li class="li">Queries about cut counts, such as 
+    <span class="keyword apiname">CPX_CALLBACK_INFO_COVER_COUNT</span>, always 
+    return 0 (zero).</li>
+<li class="li">Queries about MIP kappa statistics, such as 
+    <span class="keyword apiname">CPX_CALLBACK_INFO_KAPPA_MAX</span>, 
+    result in the error message <span class="keyword apiname">CPXERR_NO_KAPPASTATS</span>.</li>
+<li class="li">The number of threads, 
+    as queried by <span class="keyword apiname">CPX_CALLBACK_INFO_USER_THREADS</span>, is 
+    always 1 (one).
+    </li>
+<li class="li">The user thread index as identified by 
+    <span class="keyword apiname">CPX_CALLBACK_INFO_MY_THREAD_NUM</span> is always 0 (zero).
+    </li>
+<li class="li">Queries about the current node count, the number of 
+    nodes left, and the iteration count all return correct values during 
+    distributed MIP tree search (that is, branch and bound) after ramp up terminates.
+    However, during ramp up, the following queries always return 0 (zero):
+        <ul class="ul"><li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODE_COUNT</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODE_COUNT_LONG</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODES_LEFT</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODES_LEFT_LONG</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_MIP_ITERATIONS</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_MIP_ITERATIONS_LONG</span></li>
+</ul>
+
+    </li>
+</ul>
+</div>
+
+<div class="p">Similar considerations apply to analogous queries in other APIs of CPLEX V12.6.0. 
+For example, in the C++ API, special considerations about informational callbacks 
+and distributed MIP apply to these methods of the class 
+<span class="keyword apiname">IloCplex::MIPInfoCallbackI</span>:
+    <ul class="ul"><li class="li"><span class="keyword apiname">getNcuts</span> always returns 0 (zero).</li>
+<li class="li"><span class="keyword apiname">getQuality</span>  throws an exception to convey the error message 
+        <span class="keyword apiname">CPXERR_NO_KAPPASTATS</span>.</li>
+<li class="li"><span class="keyword apiname">getUserThreads</span> always returns 1 (one).</li>
+<li class="li"><span class="keyword apiname">getMyThreadNum</span> always returns 0 (zero).</li>
+<li class="li"><span class="keyword apiname">getNnodes</span> returns 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">getNremainingNodes</span> returns 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">getNiterations</span> returns 0 (zero) during ramp up.</li>
+</ul>
+</div>
+
+<div class="p">Likewise, in the Java API, special considerations about informational callbacks 
+and distributed MIP apply to these methods of the class 
+<span class="keyword apiname">IloCplex.MIPInfoCallback</span>:
+    <ul class="ul"><li class="li"><span class="keyword apiname">getNcuts</span> always returns 0 (zero).</li>
+<li class="li"><span class="keyword apiname">getQuality</span>  raises an exception to convey the error message 
+        <span class="keyword apiname">CPXERR_NO_KAPPASTATS</span>.</li>
+<li class="li"><span class="keyword apiname">getUserThreads</span> always returns 1 (one).</li>
+<li class="li"><span class="keyword apiname">getMyThreadNum</span> always returns 0 (zero).</li>
+<li class="li"><span class="keyword apiname">getNnodes</span> returns 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">getNremainingNodes</span> returns 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">getNiterations</span> returns 0 (zero) during ramp up.</li>
+</ul>
+</div>
+
+<div class="p">In the .NET API, special considerations about informational callbacks 
+and distributed MIP apply to these Members (methods or properties) of the class 
+<span class="keyword apiname">Cplex.MIPInfoCallback</span> and its derivatives:
+    <ul class="ul"><li class="li"><span class="keyword apiname">GetNcuts</span> always returns 0 (zero).</li>
+<li class="li"><span class="keyword apiname">GetQuality</span>  raises an exception to convey the error message 
+        <span class="keyword apiname">CPXERR_NO_KAPPASTATS</span>.</li>
+<li class="li"><span class="keyword apiname">UserThreads</span> always remains 1 (one).</li>
+<li class="li"><span class="keyword apiname">MyThreadNum</span> always remains 0 (zero).</li>
+<li class="li"><span class="keyword apiname">Nnodes</span> (number of nodes) remains 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">NremainingNodes</span> remains 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">Niterations</span> remains 0 (zero) during ramp up.</li>
+</ul>
+</div>
+
+<div class="p">In the Python API as well, special considerations about informational callbacks 
+and distributed MIP apply to these methods:
+    <ul class="ul"><li class="li"><span class="keyword apiname">get_num_cuts</span> always returns 0 (zero).</li>
+<li class="li"><span class="keyword apiname">get_float_quality</span>  raises an exception to convey the error message 
+        <span class="keyword apiname">CPXERR_NO_KAPPASTATS</span>.</li>
+<li class="li"><span class="keyword apiname">get_num_nodes</span> returns 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">get_num_remaining_nodes</span> returns 0 (zero) during ramp up.</li>
+<li class="li"><span class="keyword apiname">get_num_iterations</span> returns 0 (zero) during ramp up.</li>
+</ul>
+</div>
+
+<p class="p">For users of MATLAB, similar special considerations about informational callbacks 
+and distributed MIP also apply.  For example, the MATLAB information object (passed 
+to an informational callback during distributed MIP) reports the NumNodes property 
+as 0 (zero) during ramp up, but reports accurately after ramp up terminates. 
+The NumIterations property remains 0 (zero) during ramp up, too, but it is also reported 
+accurately after ramp up terminates. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newDistribMIP.html" title="Announces distributed parallel MIP optimization">Distributed parallel MIP optimization</a></div>
+</div>
+</div></body>
+</html>

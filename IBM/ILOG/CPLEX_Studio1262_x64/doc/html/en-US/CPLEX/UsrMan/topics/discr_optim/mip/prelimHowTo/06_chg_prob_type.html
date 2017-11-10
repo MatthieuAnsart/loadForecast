@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Changing problem type in MIPs" />
+<meta name="abstract" content="Describes means of changing the type of a MIP model; also specifies how CPLEX determines the type of a MIP model." />
+<meta name="Description" content="Describes means of changing the type of a MIP model; also specifies how CPLEX determines the type of a MIP model." />
+<meta name="DC.subject" content="Interactive Optimizer, changing problem type (MIP)" />
+<meta name="keywords" content="Interactive Optimizer, changing problem type (MIP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/prelimHowTo/03_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.672122" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/prelimHowTo/03_title_synopsis.html" />
+<title>Changing problem type in MIPs</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.672122">
+<h1 class="title topictitle1">Changing problem type in MIPs</h1>
+<div class="body"><p class="shortdesc">Describes means of changing the type of a MIP model;
+also specifies how CPLEX determines the type of a MIP model.</p>
+<p class="p">Concert Technology applications treat all models as capable
+of containing integer variables, and thus these variable declarations
+may be added or deleted at will. When extracting a model with integer
+variables, CPLEX in <strong class="ph b">Concert Technology</strong> will
+automatically detect the model as a MIP and make the required adjustments
+to internal data structures.</p>
+<p class="p">However, the other ways of using CPLEX, the <strong class="ph b">Callable
+Library</strong> and the <strong class="ph b">Interactive Optimizer</strong>,
+require an explicit declaration of a problem type to distinguish continuous
+LPs, QPs, and QCPs from MIPs. Techniques to declare the problem type
+with the Callable Library and the Interactive Optimizer are discussed
+in this topic.</p>
+<p class="p">When you enter a problem, CPLEX detects the problem type
+from the available information. If the problem is read from a file
+(<samp class="ph codeph">LP</samp>, <samp class="ph codeph">MPS</samp>, or <samp class="ph codeph">SAV</samp> format,
+for example), or entered interactively, the problem type is discovered
+according to <a class="xref" href="06_chg_prob_type.html#User_manual.uss_solveMIP.672122__User_manual.uss_solveMIP.686994" title="A six-column table. The first column lists types of problems. Other columns specify whether a type of problem supports a given characteristic: whether the problem has no integer variables; whether the problem has integer variables; whether the problem has no quadratic terms in the objective; whether the problem has quadratic terms in the objective; whether the problem has no quadratic terms among the coefficients of the constraints; whether the problem has quadratic terms among the coefficients of the constraints.">Table 1</a>. </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A six-column table. The first column lists types of problems. Other columns specify whether a type of problem supports a given characteristic: whether the problem has no integer variables; whether the problem has integer variables; whether the problem has no quadratic terms in the objective; whether the problem has quadratic terms in the objective; whether the problem has no quadratic terms among the coefficients of the constraints; whether the problem has quadratic terms among the coefficients of the constraints." id="User_manual.uss_solveMIP.672122__User_manual.uss_solveMIP.686994" class="table PlainHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Definitions of problem types</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d420703e59"> Problem Type </th>
+<th class="entry" align="left" valign="top" id="d420703e61"> No Integer Variables </th>
+<th class="entry" align="left" valign="top" id="d420703e63"> Has Integer Variables </th>
+<th class="entry" align="left" valign="top" id="d420703e65"> No Quadratic Terms in the Objective Function </th>
+<th class="entry" align="left" valign="top" id="d420703e67"> Has Quadratic Terms in the Objective Function </th>
+<th class="entry" align="left" valign="top" id="d420703e69"> Has Quadratic Terms in Constraints </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d420703e59 ">  <samp class="ph codeph">lp</samp>  </td>
+<td class="entry" valign="top" headers="d420703e61 "> X </td>
+<td class="entry" valign="top" headers="d420703e63 "> </td>
+<td class="entry" valign="top" headers="d420703e65 "> X </td>
+<td class="entry" valign="top" headers="d420703e67 "> </td>
+<td class="entry" valign="top" headers="d420703e69 "> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d420703e59 ">  <samp class="ph codeph">qp</samp>  </td>
+<td class="entry" valign="top" headers="d420703e61 "> X </td>
+<td class="entry" valign="top" headers="d420703e63 "> </td>
+<td class="entry" valign="top" headers="d420703e65 "> </td>
+<td class="entry" valign="top" headers="d420703e67 "> X </td>
+<td class="entry" valign="top" headers="d420703e69 "> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d420703e59 ">  <samp class="ph codeph">qcp</samp>  </td>
+<td class="entry" valign="top" headers="d420703e61 "> X </td>
+<td class="entry" valign="top" headers="d420703e63 "> </td>
+<td class="entry" valign="top" headers="d420703e65 "> </td>
+<td class="entry" valign="top" headers="d420703e67 "> possibly </td>
+<td class="entry" valign="top" headers="d420703e69 "> X </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d420703e59 ">  <samp class="ph codeph">milp</samp>  </td>
+<td class="entry" valign="top" headers="d420703e61 "> </td>
+<td class="entry" valign="top" headers="d420703e63 "> X </td>
+<td class="entry" valign="top" headers="d420703e65 "> X </td>
+<td class="entry" valign="top" headers="d420703e67 "> </td>
+<td class="entry" valign="top" headers="d420703e69 "> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d420703e59 ">  <samp class="ph codeph">miqp</samp>  </td>
+<td class="entry" valign="top" headers="d420703e61 "> </td>
+<td class="entry" valign="top" headers="d420703e63 "> X </td>
+<td class="entry" valign="top" headers="d420703e65 "> </td>
+<td class="entry" valign="top" headers="d420703e67 "> X </td>
+<td class="entry" valign="top" headers="d420703e69 "> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d420703e59 ">  <samp class="ph codeph">miqcp</samp>  </td>
+<td class="entry" valign="top" headers="d420703e61 "> </td>
+<td class="entry" valign="top" headers="d420703e63 "> X </td>
+<td class="entry" valign="top" headers="d420703e65 "> </td>
+<td class="entry" valign="top" headers="d420703e67 "> possibly </td>
+<td class="entry" valign="top" headers="d420703e69 "> X </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">However, if you enter a problem with no integer variables,
+so that its problem type is initially <samp class="ph codeph">lp</samp>, <samp class="ph codeph">qp</samp>,
+or <samp class="ph codeph">qcp</samp>, and you then wish to modify the
+problem to contain integer variables, this modification is accomplished
+by first changing the problem type to <samp class="ph codeph">milp</samp>, <samp class="ph codeph">miqp</samp>,
+or <samp class="ph codeph">miqcp</samp> . Conversely, if you have entered
+an MILP, MIQP, or MIQCP model and wish to remove all the integer declarations
+and thus convert the model to a continuous formulation, you can change
+the problem type to <samp class="ph codeph">lp</samp>, <samp class="ph codeph">qp</samp>,
+or <samp class="ph codeph">qcp</samp>. Note that deleting each of the
+integer variable declarations individually still leaves the problem
+type as <samp class="ph codeph">milp</samp>, <samp class="ph codeph">miqp</samp>,
+or <samp class="ph codeph">miqcp</samp>, although in most instances the
+distinction between this problem and its continuous counterpart is
+somewhat arbitrary in terms of the steps that will be taken to solve
+it.</p>
+<p class="p">Thus, when using the <strong class="ph b">Interactive Optimizer</strong>,
+you use the command <samp class="ph codeph">change problem</samp> with
+one of the following options: </p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">milp</samp>, <samp class="ph codeph">miqp</samp>,
+or <samp class="ph codeph">miqcp</samp> </p>
+<p class="p">specifying
+that you want CPLEX to treat the problem as an MILP, MIQP, or MIQCP,
+respectively. This change in problem type makes the model ready for
+declaration of the integer variables via subsequent <samp class="ph codeph">change
+type</samp>  commands. If you change the problem to be an MIQP 
+or MIQCP 
+and there are not already quadratic terms 
+in the objective function or among the constraints, 
+the Interactive Optimizer creates an empty quadratic matrix, ready
+for populating via the <samp class="ph codeph">change qpterm</samp>  command.</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">lp</samp>, <samp class="ph codeph">qcp</samp>,
+or <samp class="ph codeph">qp</samp> </p>
+<p class="p">specifying
+that you want all integer declarations removed from the variables
+in the problem. If you choose the <samp class="ph codeph">qp</samp>  or 
+<samp class="ph codeph">qcp</samp>problem
+type and there are not already quadratic terms 
+in the objective function or among the constraints,
+the Interactive Optimizer creates an empty quadratic matrix, ready
+for populating via the <samp class="ph codeph">change qpterm</samp>  command.</p>
+</li>
+</ul>
+<p class="p">From the <strong class="ph b">Callable Library</strong>,
+use the routine <samp class="ph codeph">CPXchgprobtype</samp> to change
+the problem type to <samp class="ph codeph">CPXPROB_MILP, CPXPROB_MIQP, </samp>or <samp class="ph codeph">CPXPROB_MIQCP</samp> for
+the MILP, MIQP, and MIQCP case respectively, and then assign integer
+declarations to the variables through the <samp class="ph codeph">CPXcopyctype</samp> function.
+Conversely, remove all integer declarations from the problem by using <samp class="ph codeph">CPXchgprobtype</samp> 
+with problem type <samp class="ph codeph">CPXPROB_LP, CPXPROB_QP, </samp>or <samp class="ph codeph">CPXPROB_QCP</samp>.</p>
+<p class="p">At the end of a MIP optimization, the optimal values
+for the variables are directly available. However, you may wish to
+obtain information about the LP, QP, or QCP associated with this optimal
+solution (for example, to know the reduced costs for the continuous
+variables of the problem at this solution). To do this, you must change
+the problem to be of type Fixed, either <samp class="ph codeph">fixed_milp </samp> for
+the MILP case or <samp class="ph codeph">fixed_miqp</samp>  for the MIQP
+case. The fixed MIP is the continuous problem in which the integer
+variables are fixed at the values they attained in the best integer
+solution. After changing the problem type, you can then call any of
+the continuous optimizers to re-optimize, and then display solution
+information for the continuous form of the problem. If you then wish
+to change the problem type back to the associated <samp class="ph codeph">milp </samp>or <samp class="ph codeph">miqp</samp>,
+you can do so without loss of information in the model. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/prelimHowTo/03_title_synopsis.html" title="When you are optimizing a MIP, there are a few preliminary issues that you need to consider to get the most out of CPLEX. The following sections cover such topics as entering variable types, displaying MIPs in the Interactive Optimizer, detecting the problem type, and switching to the fixed form of your problem.">Preliminary issues</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,196 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+002: <b><font color="#007D00">// File: warehouse.cpp</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">/////////////////////////////////////////////////////////////////////////////// </font></b>
+013: 
+014: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+015: 
+016: <b><font color="#007D00">/* --------------------------------------------------------------------------</font></b>
+017: <b><font color="#007D00"> * USAGE EXAMPLE:</font></b>
+018: <b><font color="#007D00"> * warehouse fixed 30 nbWarehouses 5 nbStores 10 disaggregate 1</font></b>
+019: <b><font color="#007D00"> * --------------------------------------------------------------------------</font></b>
+020: <b><font color="#007D00"> */</font></b>
+021: 
+022: #include <b><font color="#8A2BE2">&lt;sstream&gt;</font></b>
+023: 
+024: ILOSTLBEGIN
+025: 
+026: <b><font color="EA7D00">class</font></b> MyParams: <b><font color="EA7D00">public</font></b> IloOplDataSourceBaseI {
+027:     <b><font color="#0000FF">int</font></b> _nbWarehouses;
+028:     <b><font color="#0000FF">int</font></b> _nbStores;
+029:     <b><font color="#0000FF">int</font></b> _fixed;
+030:     IloBool _disaggregate;
+031: 
+032:     <b><font color="#0000FF">void</font></b> usage();
+033: <b><font color="EA7D00">public</font></b>:
+034:     MyParams(IloEnv&amp; env, <b><font color="#0000FF">int</font></b> argc, <b><font color="#0000FF">char</font></b>* argv[]);
+035:     <b><font color="#0000FF">void</font></b> read() <b><font color="EA7D00">const</font></b>;
+036: };
+037: <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">char</font></b>* getModelText();
+038: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+039:         IloEnv env;
+040:     
+041: 
+042:     <b><font color="#0000FF">int</font></b> status = 127;
+043:     <b><font color="EA7D00">try</font></b> {
+044:         IloOplErrorHandler handler(env,cout);
+045:         std::istringstream in( getModelText() );
+046:         IloOplModelSource modelSource(env,in,<b><font color="#8A2BE2">"warehouse"</font></b>);
+047:         IloOplSettings settings(env,handler);
+048:         IloOplModelDefinition def(modelSource,settings);
+049:         IloCplex cplex(env);
+050:         IloOplModel opl(def,cplex);
+051:         MyParams params(env,argc,argv);
+052:         IloOplDataSource dataSource(&amp;params);
+053:         opl.addDataSource(dataSource);
+054:         opl.generate();
+055:         <b><font color="EA7D00">if</font></b> ( cplex.solve() ) {
+056:             cout &lt;&lt; endl
+057:                 &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; opl.getCplex().getObjValue()
+058:                 &lt;&lt; endl;
+059:             opl.postProcess();
+060:             opl.printSolution(cout);
+061:             status = 0;
+062:         } <b><font color="EA7D00">else</font></b> {
+063:             cout &lt;&lt; <b><font color="#8A2BE2">"No solution!"</font></b> &lt;&lt; endl;
+064:             status = 1;
+065:         }
+066:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+067:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+068:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+069:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+070:         e.print(cout);
+071:         status = 2;
+072:     } <b><font color="EA7D00">catch</font></b> (...) {
+073:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+074:         status = 3;
+075:     }
+076: 
+077:     env.end();
+078: 
+079:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+080:     getchar();
+081:     
+082:     <b><font color="EA7D00">return</font></b> status;
+083: }
+084: <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">char</font></b>* getModelText() {
+085:     <b><font color="EA7D00">return</font></b> (<b><font color="#0000FF">char</font></b>*)<b><font color="#8A2BE2">"\</font></b>
+086: <b><font color="#8A2BE2">           int   fixed        = ...; \</font></b>
+087: <b><font color="#8A2BE2">           int   nbWarehouses = ...; \</font></b>
+088: <b><font color="#8A2BE2">           int   nbStores     = ...; \</font></b>
+089: <b><font color="#8A2BE2">           int   disaggregate = ...; \</font></b>
+090: <b><font color="#8A2BE2">           \</font></b>
+091: <b><font color="#8A2BE2">           assert nbStores &gt; nbWarehouses; \</font></b>
+092: <b><font color="#8A2BE2">           \</font></b>
+093: <b><font color="#8A2BE2">           range Warehouses = 1..nbWarehouses; \</font></b>
+094: <b><font color="#8A2BE2">           range Stores     = 1..nbStores; \</font></b>
+095: <b><font color="#8A2BE2">           \</font></b>
+096: <b><font color="#8A2BE2">           int capacity[w in Warehouses] = nbStores div nbWarehouses + w mod (nbStores div nbWarehouses); \</font></b>
+097: <b><font color="#8A2BE2">           int supplyCost[s in Stores][w in Warehouses] = 1+((s+10*w)%100); \</font></b>
+098: <b><font color="#8A2BE2">           \</font></b>
+099: <b><font color="#8A2BE2">           dvar boolean open[Warehouses]; \</font></b>
+100: <b><font color="#8A2BE2">           dvar boolean supply[Stores][Warehouses]; \</font></b>
+101: <b><font color="#8A2BE2">           \</font></b>
+102: <b><font color="#8A2BE2">           minimize \</font></b>
+103: <b><font color="#8A2BE2">           sum(w in Warehouses) fixed * open[w] + \</font></b>
+104: <b><font color="#8A2BE2">           sum(w in Warehouses, s in Stores) supplyCost[s][w] * supply[s][w]; \</font></b>
+105: <b><font color="#8A2BE2">           \</font></b>
+106: <b><font color="#8A2BE2">           constraints { \</font></b>
+107: <b><font color="#8A2BE2">             forall(s in Stores) \</font></b>
+108: <b><font color="#8A2BE2">               sum(w in Warehouses) supply[s][w] == 1; \</font></b>
+109: <b><font color="#8A2BE2">             forall(w in Warehouses) \</font></b>
+110: <b><font color="#8A2BE2">               sum(s in Stores) supply[s][w] &lt;= open[w]*capacity[w]; \</font></b>
+111: <b><font color="#8A2BE2">             if (disaggregate == 1) { \</font></b>
+112: <b><font color="#8A2BE2">               forall(w in Warehouses, s in Stores) \</font></b>
+113: <b><font color="#8A2BE2">                 supply[s][w] &lt;= open[w]; \</font></b>
+114: <b><font color="#8A2BE2">             } \</font></b>
+115: <b><font color="#8A2BE2">           } \</font></b>
+116: <b><font color="#8A2BE2">           "</font></b>;
+117: }
+118: 
+119: MyParams::MyParams(IloEnv&amp; env, <b><font color="#0000FF">int</font></b> argc, <b><font color="#0000FF">char</font></b>* argv[]):IloOplDataSourceBaseI(env) {
+120:     _nbWarehouses = 5;
+121:     _nbStores = 10;
+122:     _fixed = 30;
+123:     _disaggregate = 1;
+124: 
+125:     <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=1; i&lt;argc; i++) {
+126:         <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-h"</font></b>,argv[i])==0 ) {
+127:             usage();
+128:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"fixed"</font></b>,argv[i])==0 ) {
+129:             <b><font color="EA7D00">if</font></b> ( i==argc ) {
+130:                 usage();
+131:             }
+132:             _fixed=atoi(argv[++i]);
+133:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"nbWarehouses"</font></b>,argv[i])==0 ) {
+134:             <b><font color="EA7D00">if</font></b> ( i==argc ) {
+135:                 usage();
+136:             }
+137:             _nbWarehouses=atoi(argv[++i]);
+138:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"nbStores"</font></b>,argv[i])==0 ) {
+139:             <b><font color="EA7D00">if</font></b> ( i==argc ) {
+140:                 usage();
+141:             }
+142:             _nbStores=atoi(argv[++i]);
+143:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"disaggregate"</font></b>,argv[i])==0 ) {
+144:             <b><font color="EA7D00">if</font></b> ( i==argc ) {
+145:                 usage();
+146:             }
+147:             _disaggregate=atoi(argv[++i]);
+148:         } <b><font color="EA7D00">else</font></b> {
+149:             <b><font color="EA7D00">break</font></b>;
+150:         }
+151:     }
+152: 
+153:         cout &lt;&lt; <b><font color="#8A2BE2">"Using parameters: "</font></b> &lt;&lt; endl
+154:                 &lt;&lt; <b><font color="#8A2BE2">"    nbWarehouses "</font></b> &lt;&lt; _nbWarehouses &lt;&lt; endl
+155:                 &lt;&lt; <b><font color="#8A2BE2">"    nbStores     "</font></b> &lt;&lt; _nbStores &lt;&lt; endl
+156:                 &lt;&lt; <b><font color="#8A2BE2">"    fixed        "</font></b> &lt;&lt; _fixed &lt;&lt; endl
+157:                 &lt;&lt; <b><font color="#8A2BE2">"    disaggregate "</font></b> &lt;&lt; _disaggregate &lt;&lt; endl
+158:                 &lt;&lt; endl;
+159: }
+160: 
+161: <b><font color="#0000FF">void</font></b> MyParams::usage() {
+162:         cerr &lt;&lt; endl
+163:                 &lt;&lt; <b><font color="#8A2BE2">"Usage: warehouse [-h] parameters"</font></b> &lt;&lt; endl
+164:                 &lt;&lt; <b><font color="#8A2BE2">"  -h "</font></b> &lt;&lt; <b><font color="#8A2BE2">"this help message"</font></b> &lt;&lt; endl
+165:                 &lt;&lt; <b><font color="#8A2BE2">"  parameters "</font></b> &lt;&lt; endl
+166:                 &lt;&lt; <b><font color="#8A2BE2">"    nbWarehouses &lt;value&gt; "</font></b> &lt;&lt; endl
+167:                 &lt;&lt; <b><font color="#8A2BE2">"    nbStores     &lt;value&gt; "</font></b> &lt;&lt; endl
+168:                 &lt;&lt; <b><font color="#8A2BE2">"    fixed        &lt;value&gt; "</font></b> &lt;&lt; endl
+169:                 &lt;&lt; <b><font color="#8A2BE2">"    disaggregate &lt;value&gt; "</font></b> &lt;&lt; endl
+170:                 &lt;&lt; endl;
+171:     exit(0);
+172: }
+173: <b><font color="#0000FF">void</font></b> MyParams::read() <b><font color="EA7D00">const</font></b> {
+174:     IloOplDataHandler handler = getDataHandler();
+175: 
+176:     handler.startElement(<b><font color="#8A2BE2">"nbWarehouses"</font></b>);
+177:     handler.addIntItem(_nbWarehouses);
+178:     handler.endElement();
+179: 
+180:     handler.startElement(<b><font color="#8A2BE2">"nbStores"</font></b>);
+181:     handler.addIntItem(_nbStores);
+182:     handler.endElement();
+183: 
+184:     handler.startElement(<b><font color="#8A2BE2">"fixed"</font></b>);
+185:     handler.addIntItem(_fixed);
+186:     handler.endElement();
+187: 
+188:     handler.startElement(<b><font color="#8A2BE2">"disaggregate"</font></b>);
+189:     handler.addIntItem(_disaggregate);
+190:     handler.endElement();
+191: }
+</tt></pre>

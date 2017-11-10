@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Running out of memory" />
+<meta name="abstract" content="Describes remedies for limited memory." />
+<meta name="Description" content="Describes remedies for limited memory." />
+<meta name="DC.subject" content="MIP, memory problems and, managing, memory (MIP), memory management, MIPs and, basis, unexplored nodes in tree (MIP)" />
+<meta name="keywords" content="MIP, memory problems and, managing, memory (MIP), memory management, MIPs and, basis, unexplored nodes in tree (MIP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.647315" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<title>Running out of memory</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.647315">
+<h1 class="title topictitle1">Running out of memory</h1>
+<div class="body"><p class="shortdesc">Describes remedies for limited memory.</p>
+<p class="p">A very common difficulty with MIPs is running out of
+memory. This problem almost always occurs when the branch &amp; cut
+tree becomes so large that insufficient memory remains to solve a
+continuous LP, QP, or QCP subproblem. (In the rare case that the dimensions
+of a very large model are themselves the main contributor to memory
+consumption, you can try adjusting the memory emphasis parameter,
+as described in <a class="xref" href="../../../cont_optim/simplex/19_mem.html" title="Documents CPLEX behavior in limited memory for LP models.">Lack of memory</a>.)
+As memory gets tight, you may observe warning messages from CPLEX
+as it attempts various operations in spite of limited memory. In such
+a situation, if CPLEX does not find a solution shortly, it terminates
+the process with an error message.</p>
+<p class="p">The information about a tree that CPLEX accumulates in
+memory can be substantial. In particular, CPLEX saves a basis for
+every unexplored node. Furthermore, when CPLEX uses the best bound
+or best estimate strategies of node selection, the list of unexplored
+nodes itself can become very long for large or difficult problems.
+How large the unexplored node list can be depends on the actual amount
+of memory available, the size of the problem, and algorithm selected.</p>
+<p class="p">A less frequent cause of memory consumption is the generation
+of cutting planes. Gomory fractional cuts, and, in rare instances,
+Mixed Integer Rounding cuts, are the ones most likely to be dense
+and thus use significant memory at default automatic settings. You
+can try turning off these cuts, or any of the cuts you see listed
+as being generated for your model (in the cuts summary at the end
+of the node log), or simply all cuts, through the use of parameter
+settings discussed in the section on cuts in this manual; doing this
+carries the risk that this will make the model harder to solve and
+only delay the eventual exhaustion of available memory during branching.
+Since generation of cutting planes is not a frequent cause of memory
+consumption, apply these recommendations only as a last resort, after
+trying to resolve the problem with less drastic measures.</p>
+<p class="p">Certainly, if you increase the amount of available memory,
+you extend the problem-solving capability of CPLEX. Unfortunately,
+when a problem fails because of insufficient memory, it is difficult
+to project how much further the process needed to go and how much
+more memory is needed to solve the problem. For these reasons, the
+following suggestions aim at avoiding memory failure whenever possible
+and recovering gracefully otherwise.</p>
+<div class="section" id="User_manual.uss_solveMIP.647315__User_manual.uss_solveMIP.647341"><h2 class="title sectiontitle">Reset the tree memory parameter</h2>
+
+
+
+
+<p class="p">To avoid a failure due to running out of memory, set
+the working memory parameter, <samp class="ph codeph">WorkMem</samp>,
+to a value significantly lower than the available memory on your computer
+(in megabytes), to instruct CPLEX to begin compressing the storage
+of nodes before it consumes all of available memory. See the related topic 
+<a class="xref" href="61_mem_gone.html#User_manual.uss_solveMIP.647315__User_manual.uss_solveMIP.647357">Use node files for storage</a>,
+for other choices of what should happen when <samp class="ph codeph">WorkMem</samp> is
+exceeded. That topic explains how to tell CPLEX that it should
+use disk for working storage.</p>
+
+<p class="p">Because the storage of nodes can require a lot of space,
+it may also be advisable to set a tree limit on the size of the entire
+tree being stored so that not all of your disk will be filled up with
+working storage. The call to the MIP optimizer will be stopped after
+the size of the tree exceeds the value of <samp class="ph codeph">TreLim</samp>,
+the tree limit parameter. At default settings, the limit is infinity
+(1e+75), but you can set it to a lower value (in megabytes).</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.647315__User_manual.uss_solveMIP.647357"><h2 class="title sectiontitle">Use node files for storage</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p class="p">As noted in <a class="xref" href="../performance/24_node_files.html" title="Describes a storage feature for nodes of the search.">Using node files</a>,
+CPLEX offers a node-file storage-feature to store some parts of the
+branch &amp; cut tree in files as it progresses through
+its search. This feature allows CPLEX to explore more nodes within
+a smaller amount of computer memory. It also includes several options
+to reduce the use of physical memory. Importantly, it entails only
+a very small increase in runtime. In terms of performance, node-file
+storage offers a much better option than relying on generic swap space
+managed by your operating system.</p>
+
+<p class="p">This feature is especially helpful when you are using
+steepest-edge pricing as the subproblem simplex pricing strategy because
+pricing information itself consumes a great deal of memory.  </p>
+
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">Try node files whenever the MIP optimizer terminates
+with the condition "out of memory" and the node count is greater than
+zero. The message in such a situation looks like the following sample
+output. </p>
+</div>
+
+<pre class="pre codeblock"><code>Clique cuts applied:  30 
+CPLEX Error  1001: Out of memory.  
+Consider using CPLEX node files to reduce memory usage.  
+MIP-Error termination, integer feasible:  Objective =    5.6297000000e+04 
+Current MIP best bound =    5.5731783224e+04 (gap = 565.217, 1.00%)  </code></pre>
+
+<p class="p">Several parameters control the use of
+node files. They are:</p>
+
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="../../../../../Parameters/topics/WorkMem.html" title="Specifies an upper limit on the amount of central memory, in megabytes, that CPLEX is permitted to use for working memory.">memory available for working storage</a>: <samp class="ph codeph">WorkMem</samp> in
+Concert Technology or <samp class="ph codeph">CPX_PARAM_WORKMEM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../../../Parameters/topics/NodeFileInd.html" title="Used when working memory (CPX_PARAM_WORKMEM, WorkMem) has been exceeded by the size of the tree.">node storage file switch</a>: <samp class="ph codeph">NodeFileInd</samp> in
+Concert Technology or <samp class="ph codeph">CPX_PARAM_NODEFILEIND</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../../../Parameters/topics/TreLim.html" title="Sets an absolute upper limit on the size (in megabytes, uncompressed) of the branch-and-cut tree.">tree memory limit</a>: <samp class="ph codeph">TreLim</samp> in
+Concert Technology or <samp class="ph codeph">CPX_PARAM_TRELIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../../../Parameters/topics/WorkDir.html" title="Specifies the name of an existing directory into which CPLEX may store temporary working files.">directory for working files</a> <samp class="ph codeph">WorkDir</samp> in
+Concert Technology or <samp class="ph codeph">CPX_PARAM_WORKDIR</samp> in
+the Callable Library</p>
+</li>
+</ul>
+
+<p class="p">CPLEX uses node file storage most effectively when the
+amount of working memory is reasonably large so that it does not have
+to create node files too frequently. The default value of the 
+<samp class="ph codeph">WorkMem</samp> parameter
+is 2048 megabytes (that is, 2 gigabytes). Setting it to higher values, even on a machine with
+very large memory, can be expected to result in only marginally improved
+efficiency. However, if your machine has less than 2 gigabytes of RAM, 
+it is advisable to reduce this setting by at least 128 MB
+to avoid defeating the purpose of node files,
+a situation that would occur if your application inadvertently triggers
+the swap space of your operating system.</p>
+<p class="p">When tree storage size exceeds the limit defined by <samp class="ph codeph">WorkMem</samp>,
+and if the tree-memory limit has not been exceeded, then what happens
+next is decided by the setting of the <a class="xref" href="../../../../../Parameters/topics/NodeFileInd.html" title="Used when working memory (CPX_PARAM_WORKMEM, WorkMem) has been exceeded by the size of the tree.">node storage file switch</a> (<samp class="ph codeph">NodeFileInd</samp> in
+Concert Technology or <samp class="ph codeph">CPX_PARAM_NODEFILEIND</samp> in
+the Callable Library). If that parameter is set to zero, then optimization
+proceeds with the tree stored in memory until CPLEX reaches the <a class="xref" href="../../../../../Parameters/topics/TreLim.html" title="Sets an absolute upper limit on the size (in megabytes, uncompressed) of the branch-and-cut tree.">tree memory limit</a> (<samp class="ph codeph">TreLim</samp> in
+Concert Technology or <samp class="ph codeph">CPX_PARAM_TRELIM</samp> in
+the Callable Library). If the node file indicator is set to <samp class="ph codeph">1</samp> (the
+default), then a fast compression algorithm is used on the nodes to
+try to conserve memory, without resorting to writing the node files
+to disk. If the parameter is set to 2, then node files are written
+to disk. If the parameter is set to 3, then nodes are both compressed
+(as in option 1) and written to disk (as in option 2). <a class="xref" href="61_mem_gone.html#User_manual.uss_solveMIP.647315__User_manual.uss_solveMIP.653681" title="A three-column table showing possible values, their effect, and comments.">Table 1</a> summarizes
+these different options. </p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three-column table showing possible values, their effect, and comments." id="User_manual.uss_solveMIP.647315__User_manual.uss_solveMIP.653681" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Parameter values for node file storage</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="33.33333333333333%" id="d423159e329"> Value </th>
+<th class="entry" align="left" valign="top" width="33.33333333333333%" id="d423159e331"> Meaning </th>
+<th class="entry" align="left" valign="top" width="33.33333333333333%" id="d423159e333"> Comments </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d423159e329 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e331 "> no node files </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e333 "> optimization continues </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d423159e329 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e331 "> node file in memory and compressed </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e333 "> optimization continues (default) </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d423159e329 ">  <samp class="ph codeph">2</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e331 "> node file on disk </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e333 "> files created in temporary directory </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d423159e329 ">  <samp class="ph codeph">3</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e331 "> node file on disk and compressed </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d423159e333 "> files created in temporary directory </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Among the memory conservation tactics employed by CPLEX
+when the memory emphasis parameter has been set, the maximum setting
+for the node file indicator is automatically chosen, so that node-file
+storage will go to disk. You may still wish to adjust the working
+memory or tree limit parameters to fit the capabilities of your computer.</p>
+<p class="p">In cases where node files are written to disk, CPLEX
+will create a temporary subdirectory under the directory specified
+by the <a class="xref" href="../../../../../Parameters/topics/WorkDir.html" title="Specifies the name of an existing directory into which CPLEX may store temporary working files.">directory for working files</a> parameter
+(<samp class="ph codeph">WorkDir</samp> in Concert Technology or <samp class="ph codeph">CPX_PARAM_WORKDIR</samp> in
+the Callable Library). The directory named by this parameter must
+exist before CPLEX attempts to create node files. By default, the
+value of this parameter is “.”, which means the current
+working directory.</p>
+<p class="p">CPLEX creates the temporary directory by means of system
+calls. If the system environment variable is set (on Windows platforms,
+the environment variable <samp class="ph codeph">TMP</samp>; on UNIX platforms,
+the environment variable <samp class="ph codeph">TMPDIR</samp>), then
+the system ignores the CPLEX node-file directory parameter and creates
+the temporary node-file directory in the location indicated by its
+system environment variable. Furthermore, if the directory specified
+in the CPLEX node-file directory parameter is invalid (for example,
+if it contains illegal characters, or if the directory does not allow
+write access), then the system chooses a location according to its
+own logic.</p>
+<p class="p">The temporary directory created for node file storage
+will have a name prefixed by <samp class="ph codeph">cpx</samp>. The files
+within it will also have names prefixed by <samp class="ph codeph">cpx</samp>.</p>
+<p class="p">CPLEX automatically removes the files and their temporary
+directory when it frees the branch &amp; cut tree:</p>
+<ul class="ul"><li class="li"><p class="p">in the Interactive Optimizer, </p>
+
+<ul class="ul"><li class="li"><p class="p">at problem modification;</p>
+</li>
+<li class="li"><p class="p">at normal termination; </p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">from Concert Technology,</p>
+
+<ul class="ul"><li class="li"><p class="p">when you call <samp class="ph codeph">env.end</samp> </p>
+</li>
+<li class="li"><p class="p">when you modify the extracted model</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">from the Callable Library, </p>
+
+<ul class="ul"><li class="li"><p class="p">when you call a problem modification
+routine;</p>
+</li>
+<li class="li"><p class="p">when you call <samp class="ph codeph">CPXfreeprob</samp> .</p>
+</li>
+</ul>
+</li>
+</ul>
+<p class="p">If a program terminates abnormally, the files are not
+removed.</p>
+<p class="p">Node files could grow very large. Use the <a class="xref" href="../../../../../Parameters/topics/TreLim.html" title="Sets an absolute upper limit on the size (in megabytes, uncompressed) of the branch-and-cut tree.">tree memory limit</a> parameter
+(<samp class="ph codeph">TreLim</samp>, <samp class="ph codeph">CPX_PARAM_TRELIM</samp>)
+to limit the size of the tree so that it does not exceed available
+disk space, when you choose settings 2 or 3 in the <a class="xref" href="../../../../../Parameters/topics/NodeFileInd.html" title="Used when working memory (CPX_PARAM_WORKMEM, WorkMem) has been exceeded by the size of the tree.">node storage file switch</a> (<samp class="ph codeph">NodeFileInd</samp>, <samp class="ph codeph">CPX_PARAM_NODEFILEIND</samp>).
+It is usually better to let CPLEX terminate the run gracefully, with
+whatever current feasible solution has been found, than to trigger
+an error message or even a program abort.</p>
+<p class="p">When CPLEX uses node-file storage, the sequence of nodes
+processed may differ from the sequence in which nodes are processed
+without node-file storage. Nodes in node-file storage are not accessible
+to user-written callback routines.</p>
+</div>
+<div class="section" id="User_manual.uss_solveMIP.647315__User_manual.uss_solveMIP.647482"><h2 class="title sectiontitle">Change algorithms</h2><p class="p">The best approach to reduce memory use is to modify the
+solution process. Here are some ways to do so:</p>
+<ul class="ul"><li class="li"><p class="p">Switch the node selection strategy to
+best estimate, or more drastically to depth-first, as explained in <a class="xref" href="../performance/20_node_seln.html#User_manual.uss_solveMIP.684651__User_manual.uss_solveMIP.676690" title="A three-column table showing possible values of their parameter, their symbolic name, and their meaning.">Table 1</a>.
+Depth-first search rarely generates a long, memory-consuming list
+of unexplored nodes since CPLEX dives deeply into the tree instead
+of jumping around. A narrowly focused search, like depth-first, also
+often results in faster processing times for individual nodes. However,
+overall solution time is generally much worse than with best-bound
+node selection because each branch is searched exhaustively to its
+deepest level before it is fathomed in favor of better branches.</p>
+</li>
+<li class="li"><p class="p">Another memory-conserving strategy is
+to use strong branching for variable selection; that is, set the <a class="xref" href="../../../../../Parameters/topics/VarSel.html" title="Sets the rule for selecting the branching variable at the node which has been selected for branching.">MIP variable selection strategy</a> parameter
+(<samp class="ph codeph">VarSel</samp>, <samp class="ph codeph">CPX_PARAM_VARSEL</samp>)
+to the value <samp class="ph codeph">3</samp>. Strong branching requires
+substantial computational effort at each node to decide the best branching
+variable. As a result, it generates fewer nodes and thus makes less
+overall demand on memory. Often, strong branching is faster as well.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" title="Describes symptoms of performance problems in MIP optimization and recommends remedies.">Troubleshooting MIP performance problems</a></div>
+</div>
+</div></body>
+</html>

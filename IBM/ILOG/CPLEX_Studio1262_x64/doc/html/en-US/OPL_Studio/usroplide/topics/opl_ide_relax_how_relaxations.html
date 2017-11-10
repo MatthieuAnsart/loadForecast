@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Relaxations" />
+<meta name="abstract" content="A relaxation is a sufficient minimal change, to make a model feasible." />
+<meta name="Description" content="A relaxation is a sufficient minimal change, to make a model feasible." />
+<meta name="DC.subject" content="relaxation, preferences, definition, attach method for relaxationIterator, relaxationIterator.attach" />
+<meta name="keywords" content="relaxation, preferences, definition, attach method for relaxationIterator, relaxationIterator.attach" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_relax_how.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usroplide.uss_ide_relaxation.139443" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_relax_how.html" />
+<title>Relaxations</title>
+</head>
+<body role="main" id="usroplide.uss_ide_relaxation.139443">
+<h1 class="title topictitle1">Relaxations</h1>
+<div class="body"><p class="shortdesc">A relaxation is a sufficient minimal change, to make
+a model feasible.</p>
+<p class="p">In this context, a relaxation is a modified model where
+some bounds (of variables and/or constraints) have been made wider
+than in the first version. For example, an integer variable with the
+original bound <samp class="ph codeph">[0,100]</samp> could be relaxed
+to <samp class="ph codeph">[0,200]</samp>, or a range constraint <samp class="ph codeph">expr &lt;=
+10</samp> could be relaxed to <samp class="ph codeph">expr &lt;= 12</samp>. </p>
+<p class="p">The relaxation search process looks for a way to make
+the model and its data more flexible so that the problem becomes feasible
+while keeping modifications to a minimum. In other words, the suggested
+relaxation in the <strong class="ph b">Relaxations</strong> tab
+is a <strong class="ph b">sufficient minimal change</strong> to
+make the model feasible.</p>
+<p class="p">When you use the method <samp class="ph codeph">relaxationIterator.attach</samp>,
+you quit the default relaxation level, so all relaxation preferences
+have to be stated explicitly, for both constraints and decision variables.
+The <samp class="ph codeph">attach</samp> function allows you to set the
+relaxation preference for constraints and decision variables (first
+argument: single constraint or array of constraints). The preference
+is a numerical scalar or array (depending on the first argument),
+and, in the case of an array, has the same size as the array in the
+first argument. For details of the <samp class="ph codeph">attach</samp> function,
+see <samp class="ph codeph">IloOplRelaxationIterator</samp>, in the Reference
+Manuals for C++, Java, C#, and ILOG Script.</p>
+<div class="section" id="usroplide.uss_ide_relaxation.139443__usroplide.uss_ide_relaxation.142279"><h2 class="title sectiontitle">More about constraint relaxation</h2><p class="p">More specifically, only constraints that have been labeled
+are taken into account for possible relaxation and conflicts. As variables
+are systematically named, they are always considered by the search
+process. Constraints, however, may be unlabeled. If you choose not
+to label the constraints in your model, they will not be taken into
+account for relaxation or conflict search. In this case, only the
+variables will be affected by the relaxation process, which may lead
+to surprising suggestions. Moreover, some existing conflicts may not
+be found. This is another reason why labeling constraints is a recommended
+practice (see <a class="xref" href="../../opllangref/topics/opl_langref_constraints_labels.html" title="Explains why label constraints, the benefits, costs, and limitations, how to label constraints, how to use indexed labels, and how to deal with compatibility between constraint names and labels.">Constraint labels</a> in the <em class="ph i">Language Reference Manual</em>).</p>
+</div>
+<div class="section" id="usroplide.uss_ide_relaxation.139443__QXHG2hHO"><h2 class="title sectiontitle">Example</h2><pre class="pre codeblock"><code>dvar int x in 1..2; 
+dvar int y[1..2] in 1..2; 
+dvar float+ z[1..3] in 1..2; 
+int prio[1..2] = [1,1]; 
+float prio2[1..3] = [2.0,2.0,2.0]; 
+float priozero[1..2] = [0,0]; 
+constraint ct[1..2];  
+
+subject to 
+{ 
+ct1: x&gt;=3; 
+ct2: y[1]+y[2] &gt;= 5; 
+forall (i in 1..2) ct[i]: z[i] + z[i+1] &gt;= 5;
+}  
+
+main { 
+ thisOplModel.generate();
+ 
+ thisOplModel.relaxationIterator.attach(thisOplModel.ct1,0);    
+ thisOplModel.relaxationIterator.attach(thisOplModel.x,1);
+ 
+ thisOplModel.relaxationIterator.attach(thisOplModel.ct2,0);  
+ thisOplModel.relaxationIterator.attach(thisOplModel.y,thisOplModel.prio);
+ 
+  thisOplModel.relaxationIterator.attach(thisOplModel.ct,thisOplModel.priozero);
+ thisOplModel.relaxationIterator.attach(thisOplModel.z,thisOplModel.prio2);
+ 
+  var relax = thisOplModel.printRelaxation().substring(2,26);
+  writeln(relax);
+  if(relax=="No relaxations available") fail();
+}</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_relax_how.html" title="Relaxations and conflicts both express the infeasibility of a model and propose steps towards feasibility. After you have had hands-on experience with the nurse scheduling example, learn how to differentiate between Relaxations and Conflicts.">How relaxation and conflict search works</a></div>
+</div>
+</div></body>
+</html>

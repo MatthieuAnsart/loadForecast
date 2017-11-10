@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling elements of the inventory problem" />
+<meta name="abstract" content="Examines some modeling aspects specific to constraint programming and discusses the CP Optimizer." />
+<meta name="Description" content="Examines some modeling aspects specific to constraint programming and discusses the CP Optimizer." />
+<meta name="DC.subject" content="models, defining for CP, solving engine, specifying, specialized constraints, in inventory matching problem, constraints, packing constraint, constraint programming, writing modeling constraints and specialized constraints" />
+<meta name="keywords" content="models, defining for CP, solving engine, specifying, specialized constraints, in inventory matching problem, constraints, packing constraint, constraint programming, writing modeling constraints and specialized constraints" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_shortTour.1078026" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Modeling elements of the inventory problem</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_shortTour.1078026">
+<h1 class="title topictitle1">Modeling elements of the inventory problem</h1>
+<div class="body"><p class="shortdesc">Examines some modeling aspects specific to constraint
+programming and discusses the CP Optimizer.</p>
+<p class="p">This section:</p>
+<ul class="ul"><li class="li"><p class="p">examines some modeling aspects that
+are specific to constraint programming:</p>
+
+<ul class="ul"><li class="li"><p class="p">specialized constraints</p>
+</li>
+<li class="li"><p class="p">aggregate <samp class="ph codeph">or</samp> /<samp class="ph codeph">and</samp> </p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">focuses on the search for solutions
+and how the CP Optimizer engine can be tuned to find better and faster
+solutions:</p>
+
+<ul class="ul"><li class="li"><p class="p">changing constraint programming parameters</p>
+</li>
+<li class="li"><p class="p">using search phases to describe a more
+specific search</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">explains how you can run this model
+from the CPLEX Studio IDE and how some specific IDE features work
+in the constraint programming context.</p>
+</li>
+</ul>
+<p class="p">The CP Optimizer engine can currently solve any model
+than can be solved by the CPLEX engine, provided that all the decision
+variables are discrete. This means that any modeling object (constraint
+or expressions) in OPL can be interpreted by this engine. The reverse
+is not true: some of the new global expressions and constraints can
+be used only in a CP model to be solved with the CP Optimizer engine.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1078042"><h2 class="title topictitle2">The solving engine</h2>
+<div class="body"><p class="p">By default (that is, if nothing different is specified),
+OPL uses the CPLEX engine to solve an OPL model. To specify that you
+want your model to be solved by the CP Optimizer engine, you must
+start the model with this statement:</p>
+<pre class="pre codeblock"><code>using CP;</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1078048"><h2 class="title topictitle2">The OPL model</h2>
+<div class="body"><p class="p">You do not need to learn any new syntax to develop a
+CP model. The organization of an OPL model for CP does not change.
+You define and manipulate data and decision variables in the same
+way. For example, to define an array of integer decision variables
+indexed by integers from <samp class="ph codeph">1</samp> to <samp class="ph codeph">nbOrders</samp> and
+taking values between <samp class="ph codeph">1</samp> and <samp class="ph codeph">nbSlabs</samp>,
+you can write:</p>
+<pre class="pre codeblock"><code>dvar int where[1..nbOrders] in 1..nbSlabs;</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1078058"><h2 class="title topictitle2">Modeling constraints and specialized constraints</h2>
+<div class="body"><p class="p">As for any OPL model, constraints are stated in a <samp class="ph codeph">constraints
+{}</samp> or <samp class="ph codeph">subject to {}</samp> block.
+When the model is solved by the CP Optimizer engine, you can include
+some specialized constraints in this set of modeling constraints.
+For example, in the steel mill example, there is a packing constraint.</p>
+<pre class="pre codeblock"><code>subject to {  
+  packCt: pack(load, where, weight);</code></pre>
+<p class="p">This <samp class="ph codeph">pack</samp> constraint is a
+simple but powerful one-dimensional packing constraint. It constrains
+the way coils are associated with slabs with respect to the weights
+of the coils and the capacity of the slabs. More precisely, the decision
+variable <samp class="ph codeph">where[i]</samp> states with which slab
+coil <samp class="ph codeph">i</samp> is to be associated. The decision
+variable <samp class="ph codeph">load[j]</samp> represents the total weight
+of all the coils associated with slab <samp class="ph codeph">j</samp>,
+using the values from the array weights as data. In this case, the
+loads are constrained by the maximum value of <samp class="ph codeph">maxLoad</samp> which
+is used as upper bound to create the load variables.</p>
+<div class="section" id="usropllangtut.uss_langtut_shortTour.1078058__usropllangtut.uss_langtut_shortTour.1078068"><h3 class="title sectiontitle">The "all" syntax</h3><p class="p">In the steel mill example, the arrays of values and decision
+variables used in the specialized constraint are modeling arrays.
+They make sense as a whole and have been named in the model. Sometimes,
+you will want to apply a specialized constraint to a set of variables
+that is not defined as a named array of variables, but that is made
+of dynamically collected variables. The <samp class="ph codeph">all</samp> keyword
+is the syntax that enables you to collect variables dynamically in
+an array. This syntax is important for CP models. It is not illustrated
+in the steel mill example. See <a class="xref" href="../../opllang_quickref/topics/tlr_opl_all.html" title="OPL keyword that allows you to use only part of an array with functions that take array parameters.">all</a> in the <em class="ph i">Language
+Quick Reference</em> for a complete description.</p>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1078071"><h2 class="title topictitle2">Aggregate and/or</h2>
+<div class="body"><p class="p">The other constraint of the model illustrates how to
+use the aggregate <samp class="ph codeph">or</samp> constraint.</p>
+<pre class="pre codeblock"><code>  forall(s in 1..nbSlabs)
+    colorCt: sum (c in 1..nbColors) (or(o in 1..nbOrders : colors[o] == c) (where[o] == s)) &lt;= 2; </code></pre>
+<p class="p">You use this constraint just as the usual <samp class="ph codeph">forall</samp> constraint
+or <samp class="ph codeph">sum</samp> expression. The <samp class="ph codeph">or</samp> constraint
+can express a complex combination of constraints in one single statement.
+As a result of the expressiveness of the OPL language, the steel mill
+model uses only two OPL constraints to represent a very complete and
+realistic model.</p>
+</div>
+</div>
+</body>
+</html>

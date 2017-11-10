@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="New features in the Callable Library: 64-bit integer counters" />
+<meta name="abstract" content="Describes the new feature supporting much larger models and recommends migration paths for those users who plan to apply the new feature." />
+<meta name="Description" content="Describes the new feature supporting much larger models and recommends migration paths for those users who plan to apply the new feature." />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_1.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Release_notes.uss_relnotescplex.1031909" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_1.html" />
+<title>New features in the Callable Library: 64-bit integer counters</title>
+</head>
+<body role="main" id="Release_notes.uss_relnotescplex.1031909">
+<h1 class="title topictitle1">New features in the Callable Library: 64-bit integer counters</h1>
+<div class="body"><p class="shortdesc">Describes the new feature supporting much larger models
+and recommends migration paths for those users who plan to apply the
+new feature.</p>
+<p class="p">CPLEX V12.3 offers <strong class="ph b">64-bit integer</strong> counters in the Callable
+Library (C API). This new feature allows models in which the number
+of nonzero coefficients exceeds the number previously available. In
+previous versions of CPLEX, for example, the practical number of nonzero
+coefficients in a model was no more than 2,100,000,000, regardless
+of whether the operating system supported 32 or 64 bits. With the
+new 64-bit API, models with as many as 9e<sup class="ph sup">18</sup> nonzero coefficients
+ (approximately 9,223,372,036,800,000,000) are limited only by the
+memory available on your computer. CPLEX V12.3 also offers other,
+correspondingly large counters for the number of iterations, number
+of nodes processed, indices of nodes, number of aggregations, and
+so forth.</p>
+<p class="p">For clarity in these release notes, “32-bit API” refers to the
+existing Callable Library (C API) of previous versions of CPLEX. Likewise,
+“64-bit API” refers to the implementation of this new feature. The
+familiar 32-bit API is still available, as well as its familiar include
+file <span class="ph filepath">cplex.h</span>. Each of the routines in the 32-bit
+API has been duplicated by a new routine, prefixed by <samp class="ph codeph">CPXX</samp> (for <em class="ph i">CPLEX
+extended</em>) and declared in a new header file, <span class="ph filepath">cplexx.h</span>.
+For example, the existing 32-bit routine <samp class="ph codeph">CPXsolution</samp> declared
+in <span class="ph filepath">cplex.h</span> now has a new corresponding 64-bit
+routine <samp class="ph codeph">CPXXsolution</samp> declared in <span class="ph filepath">cplexx.h</span> .
+Another <strong class="ph b">new include file</strong>, <span class="ph filepath">cpxconst.h</span>,
+declares the common constants that routines declared in either <span class="ph filepath">cplex.h</span> or <span class="ph filepath">cplexx.h</span> require;
+they implicitly include <samp class="ph codeph">cpxconst.h</samp>.</p>
+<p class="p">Your application of the Callable Library (C API) can mix and match
+routines from both the 32-bit and 64-bit APIs of CPLEX V12.3, if necessary
+to adapt an existing application. However, recommended practice for
+new applications is to use the new 64-bit API.</p>
+<div class="section" id="Release_notes.uss_relnotescplex.1031909__section1299763975083"><h2 class="title sectiontitle">No changes for 32-bit applications</h2><p class="p">Your
+existing 32-bit applications continue to run as expected on existing
+models with no modification. CPLEX V12.3 automatically takes advantage
+of the new 64-bit feature where possible. However, if you would like
+to adapt your application or your models to include a very large number
+of nonzero coefficients, then consider the new 64-bit API.</p>
+<p class="p">For
+example, if your application does not pass in or query more than two
+billion (that is, 2<sup class="ph sup">31</sup>) nonzeros at a time in such routines
+as <samp class="ph codeph">CPXaddrows</samp> or <samp class="ph codeph">CPXaddcols</samp>, then
+you can continue using the 32-bit API unchanged.</p>
+<p class="p">Likewise, if
+your application includes CPLEX parameters for which specified values
+are no more than <samp class="ph codeph">INT_MAX</samp>, then you can continue using
+the 32-bit API unchanged.</p>
+<p class="p">However, if your application assigns
+a very large value to a CPLEX integer parameter (for example, a value
+greater than or equal to <samp class="ph codeph">INT_MAX</samp>), then you need
+to use the new 64-bit API. For a list of which new routines to use
+with respect to these large-valued parameters, see the topic <a class="xref" href="releasenotescplex123_23.html#Release_notes.uss_relnotescplex.1031909__section1300618636884">Possible changes in CPLEX extended parameters</a> in
+these release notes.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031909__section1299763985801"><h2 class="title sectiontitle">Recommended changes for
+64-bit applications</h2><p class="p">To take advantage of the 64-bit API
+of CPLEX V12.3 in your applications of the Callable Library (C API),
+you simply include the new header file <span class="ph filepath">cplexx.h</span>,
+which implicitly includes <span class="ph filepath">cpxconst.h</span>; then use
+new routines introduced in these header files; that is, routines prefixed
+by <samp class="ph codeph">CPXX</samp>. </p>
+<p class="p"> In
+the new 64-bit API, integers are replaced by new symbols.</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">CPX_APIMODEL</samp> specifies to the CPLEX Callable
+Library (C API)  whether to anticipate a small (fewer than two billion
+nonzero coefficients) or a large model. CPLEX V12.3 then chooses the <strong class="ph b">types</strong> of
+counters for dimensions, number of rows, number of columns, number
+of nonzero coefficients, buffer sizes, lengths of names, and other
+counters appropriately. Normally, by default, CPLEX V12.3 discerns
+these types from your operating system and automatically chooses appropriately.
+However, if you need to <strong class="ph b">control bit-length of integers</strong> explicitly,
+use values of this symbol in your application to specify a large or
+small model.</p>
+ <div class="note tip"><span class="tiptitle">Tip:</span>  <p class="p"><samp class="ph codeph">CPX_APIMODEL</samp> affects
+only the API, not the library. Internally, the library always uses
+32-bit nonzero counters on 32-bit ports and 64-bit nonzero counters
+on 64-bit ports. <samp class="ph codeph">CPX_APIMODEL</samp> allows you to specify
+which types to use when your application interacts with the library.
+If the data types requested by <samp class="ph codeph">CPX_APIMODEL</samp> are different
+from the types used internally, then the library will perform appropriate
+transformations.</p>
+ </div>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXCNT</samp> specifies the integer type that <span class="ph filepath">cplexx.h</span> uses
+to pass potentially large <strong class="ph b">counters</strong>, such as number of nodes,
+number of iterations, and so forth, to the CPLEX Callable Library
+(C API) or to read such data from the library. The type of <samp class="ph codeph">CPXCNT</samp> is
+64-bit integer.</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXDIM</samp> specifies the integer type that <span class="ph filepath">cplexx.h</span> uses
+to pass <strong class="ph b">dimensions</strong> of a model, such as row indices, column
+counts, and so forth, to the CPLEX Callable Library (C API) or to
+read such data from the library. The type of <samp class="ph codeph">CPXDIM</samp> is
+32-bit integer.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXNNZ</samp> specifies the integer type that <span class="ph filepath">cplexx.h</span> uses
+to pass the number of <strong class="ph b">nonzero coefficients</strong> to the CPLEX Callable
+Library (C API) or to read such data from it. The actual type of <samp class="ph codeph">CPXNNZ</samp> depends
+on the current setting of <samp class="ph codeph">CPX_APIMODEL</samp>.</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXSIZE</samp> specifies a <strong class="ph b">signed</strong> integer
+to represent the size in bytes (not characters) of <strong class="ph b">names</strong> associated
+with the model, its variables, and its constraints. Technically, <samp class="ph codeph">CPXSIZE</samp> is
+a signed integer type of the same width as <samp class="ph codeph">size_t</samp>.
+It is defined in <samp class="ph codeph">cpxconst.h</samp>, which in turn is included
+by <samp class="ph codeph">cplex.h</samp> and <samp class="ph codeph">cplexx.h</samp> appropriately.</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_BIGINT</samp> specifies the upper limit for CPLEX
+parameters of type <samp class="ph codeph">CPXINT</samp>.</p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_BIGLONG</samp> specifies the upper limit for
+CPLEX parameters of type <samp class="ph codeph">CPX_PARAMTYPE_LONG</samp>; that
+is, those parameters accepting <samp class="ph codeph">CPXLONG</samp> as a value.</p>
+</li>
+</ul>
+<p class="p">If you want to adapt your existing applications to take advantage
+of 64-bit counters, for example, to solve models with more than two
+billion nonzero coefficients, and you want to do so in a way that
+is portable in future applications, use those symbols (<samp class="ph codeph">typedef</samp>s
+and <samp class="ph codeph">macro</samp>s) in your application to support such portability.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span>  <p class="p">Code that you write using these new symbols takes best
+advantage of the address space on your platform, whether your platform
+is 32-bit or 64-bit.</p>
+ </div>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031909__section1300618636884"><h2 class="title sectiontitle">Possible changes in CPLEX
+extended parameters</h2><p class="p">Certain parameters that accept an integer
+value have been extended by a change in their type. This extension
+supports much greater number of nodes, number of nonzero coefficients,
+number of iterations, and so forth. CPLEX V12.3 offers new features
+to manage these new, larger integer parameters; these new features
+seek to minimize the inconvenience of this change in type for users
+of previous versions of CPLEX. The following notes explain the impact
+of this extension of integer parameters to much greater values.</p>
+<p class="p">Specifically,
+the new 64-bit API extends the possible value of certain CPLEX parameters
+in CPLEX V12.3 by changing the type of the parameter in a transparent
+way. These parameters (which formerly accepted values of type <samp class="ph codeph">int</samp>)
+are now themselves of type <samp class="ph codeph">CPX_PARAMTYPE_LONG</samp>. This
+new symbol enables code that you write using this symbol to take advantage
+fully of the address space on your platform, whether your platform
+is 32-bit or 64-bit. The table <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300702477401">Table 2</a> lists
+those parameters extended by this change on all platforms. The table <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300706463231">Table 3</a> lists
+the parameters that depend on your declaration as 32-bit or 64-bit
+of the symbol <samp class="ph codeph">CPXNNZ</samp> (the number of nonzeros); the
+compile-time value of this symbol depends on your port, that is, your
+combination of compiler and operating system.</p>
+<p class="p">Parameters of
+this new 64-bit type can still be controlled through the 32-bit API
+as long as the values do not exceed <samp class="ph codeph">INT_MAX</samp>. If you
+set a <samp class="ph codeph">LONG</samp> parameter by means of the 32-bit API to
+a value greater than or equal to <samp class="ph codeph">CPX_BIGINT</samp> as a
+representation of infinity, then CPLEX V12.3 will quietly transform
+this symbol into <samp class="ph codeph">CPX_BIGLONG</samp>, the value that denotes
+infinity (approximately 9e+18). </p>
+<p class="p">To use control parameters that
+accept values greater than <samp class="ph codeph">INT_MAX</samp> in your application
+of the 32-bit API, use these new routines from the 64-bit API instead:</p>
+<ul class="ul"><li class="li"><p class="p"><span class="keyword apiname">CPXXsetlongparam</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXXgetlongparam</span></p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXXinfolongparam</span></p>
+</li>
+</ul>
+<p class="p paragrouptitle">C API: changes for large integer
+parameters</p>
+<p class="p">In the Callable Library, you can still invoke these
+existing 32-bit routines on all parameter types.</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">CPXsetintparam</samp></p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXgetintparam</samp></p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXinfointparam</samp> </p>
+ </li>
+</ul>
+<p class="p">This invocation of the existing 32-bit routines (<samp class="ph codeph">CPXsetintparam</samp>, <samp class="ph codeph">CPXgetintparam</samp>, <samp class="ph codeph">CPXinfointparam</samp>)
+will not fail, but silent <strong class="ph b">truncation</strong> can occur if the parameter
+is in fact of type <samp class="ph codeph">LONG</samp> and the result cannot be
+represented by a 32-bit number. </p>
+<p class="p">New 32-bit routines treat parameters
+of type <samp class="ph codeph">CPX_PARAMTYPE_LONG</samp> correctly:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">CPXsetlongparam</samp></p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXgetlongparam</samp></p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">CPXinfolongparam</samp></p>
+ </li>
+</ul>
+<p class="p">You can, if necessary, also invoke these new routines for
+long parameters on parameters of type <samp class="ph codeph">CPX_PARAMTYPE_INT</samp>.
+These new long parameter routines work correctly there. This practice
+of invoking the new routines for long parameters on parameters of
+type  <samp class="ph codeph">CPX_PARAMTYPE_INT</samp> is <strong class="ph b">not</strong> recommended,
+but the practice is allowed for convenience with respect to parameters
+in the table <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300706463231">Table 3</a>.
+For parameters in that table, this practice (allowed but not recommended)
+treats each parameter in a way that does not depend on the actual
+port (combination of compiler and operating system) in use.</p>
+<p class="p paragrouptitle" id="Release_notes.uss_relnotescplex.1031909__paragroup1300716830422">C++ API:
+changes for large integer parameters</p>
+<p class="p">In CPLEX V12.3 in the C++
+API, the parameters listed in the tables <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300702477401">Table 2</a> and <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300706463231">Table 3</a> have
+all migrated from the enumeration <samp class="ph codeph">IloCplex::IntParam</samp> to
+a new enumeration, <samp class="ph codeph">IloCplex::LongParam</samp>. </p>
+<p class="p">The
+parameters listed in the table <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300706463231">Table 3</a> are
+managed correctly and transparently by the C++ API. That is, the user
+does not need to worry about the actual type of the parameter. Existing
+code compiles without change. However, CPLEX silently truncates a
+long parameter value when it is obliged to assign the value to a variable
+of type <samp class="ph codeph">int</samp>. Consequently, you should carefully check
+your code in this respect and migrate as appropriate.</p>
+<p class="p paragrouptitle" id="Release_notes.uss_relnotescplex.1031909__paragroup1300716822141">Java API:
+changes for large integer parameters</p>
+<p class="p">In CPLEX V12.3, in the
+Java API, the parameters listed in the tables <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300702477401">Table 2</a> and <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300706463231">Table 3</a> have
+migrated from the class <samp class="ph codeph">IloCplex.IntParam</samp> to the
+new class <samp class="ph codeph">IloCplex.LongParam</samp>. Existing code still
+compiles without change, but CPLEX silently truncates long parameter
+values when it is obliged to assign the value to a variable of type <samp class="ph codeph">int</samp>.
+Consequently, it is a good idea to migrate from those members to the
+new members as appropriate in your application; for example, if your
+application uses a very large value for any of the parameters listed
+in those two tables, then you should migrate to the new, longer type
+of value for that parameter.</p>
+<p class="p paragrouptitle" id="Release_notes.uss_relnotescplex.1031909__paragroup1300716814063">.NET API: changes for large integer parameters</p>
+<p class="p">In
+CPLEX V12.3, in the .NET API, the parameters listed in the tables <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300702477401">Table 2</a> and <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300706463231">Table 3</a> have
+migrated from the class <samp class="ph codeph">Cplex.IntParam</samp> to the new
+class <samp class="ph codeph">Cplex.LongParam</samp>. Existing code still compiles
+without change, but CPLEX silently truncates long parameter values
+when it is obliged to assign the value to a variable of type <samp class="ph codeph">int</samp>.
+Consequently, it is a good idea to migrate from those members to the
+new members as appropriate in your application; for example, if your
+application uses a very large value for any of the parameters listed
+in those two tables, then you should migrate to the new, longer type
+of value for that parameter.</p>
+<p class="p paragrouptitle" id="Release_notes.uss_relnotescplex.1031909__paragroup1300716802454">Python API: changes for large integer
+parameters</p>
+<p class="p">In CPLEX V12.3, in the Python API, the parameters
+listed in the tables <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300702477401">Table 2</a> and <a class="xref" href="releasenotescplex123_4.html#Release_notes.uss_relnotescplex.1030684__table1300706463231">Table 3</a> are
+managed appropriately and transparently without change in your application.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031909__section1300646345857"><h2 class="title sectiontitle">Larger buffer size for messages</h2><p class="p">CPLEX
+V12.3 offers a new constant <samp class="ph codeph">CPXMESSAGEBUFSIZE</samp> (value
+1024) which declares a new, larger size of buffer for messages. This
+constant specifies the maximum size in bytes of a message that can
+be sent through a single call of the routine <span class="keyword apiname">CPXmsg</span> or
+its companion in the 64-bit API <span class="keyword apiname">CPXXmsg</span>. The new
+constant symbol also specifies the maximum length of a string that
+is passed to a channel callback function by CPLEX by means of  the
+routine <span class="keyword apiname">CPXaddfuncdest</span> or its companion in the
+64-bit API <span class="keyword apiname">CPXXaddfuncdest</span>. See the reference manual
+of the Callable Library (C API) about these routines which can use
+this new, larger size in messages.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1031909__section1300958758252"><h2 class="title sectiontitle">C API: CPXgetcallbacknodex
+and unbounded rays</h2><p class="p">The <strong class="ph b">documentation</strong> of the routine <span class="keyword apiname">CPXgetcallbacknodex</span> in
+the Callable Library (C API) of CPLEX V12.3 has improved. This routine
+returns an unbounded ray in the case of an unbounded node. This behavior
+is the <strong class="ph b">same behavior</strong> as in previous versions of the product,
+but now better documented as a new feature for users who were not
+aware of it. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_1.html" title="These release notes highlight improvements and new features of CPLEX, the optimization engine for mathematical programming in IBM ILOG CPLEX Optimization Studio V12.3. Please review these notes before using CPLEX V12.3.">Release notes for CPLEX V12.3</a></div>
+</div>
+</div></body>
+</html>

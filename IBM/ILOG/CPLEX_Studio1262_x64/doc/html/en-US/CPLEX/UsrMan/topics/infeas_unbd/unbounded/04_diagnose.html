@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Diagnosing unboundedness" />
+<meta name="abstract" content="Explains typical messages related to unboundedness and suggests ways to access further information." />
+<meta name="Description" content="Explains typical messages related to unboundedness and suggests ways to access further information." />
+<meta name="DC.subject" content="diagnosing, unboundedness" />
+<meta name="keywords" content="diagnosing, unboundedness" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/unbounded/01_unbnded_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_unboundedness.686233" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/unbounded/01_unbnded_title_synopsis.html" />
+<title>Diagnosing unboundedness</title>
+</head>
+<body role="main" id="User_manual.uss_unboundedness.686233">
+<h1 class="title topictitle1">Diagnosing unboundedness</h1>
+<div class="body"><p class="shortdesc">Explains typical messages related to unboundedness and
+suggests ways to access further information.</p>
+<p class="p">You may be able to diagnose the cause of unboundedness by examining
+the output from the optimizer that detected the unboundedness. For
+example, if the preprocessing at the beginning of optimization made
+a series of reductions and then stopped with a message like this:</p>
+<p class="p"> <samp class="ph codeph">Primal unbounded due to dual bounds, variable 'x1'.</samp> </p>
+<p class="p">it makes sense to look at your formulation, paying particular attention
+to variable <samp class="ph codeph">x1</samp> and its interactions. Perhaps <samp class="ph codeph">x1</samp> never
+intersects less-than-or-equal-to constraints with a positive coefficient
+(or, greater-than-or-equal-to constraints with a negative coefficient),
+and by inspection you can see that nothing prevents <samp class="ph codeph">x1</samp> 
+from going to infinity. </p>
+<p class="p">Similarly, the primal simplex optimizer may terminate with a message
+like this:</p>
+<p class="p"> <samp class="ph codeph">Diverging variable = x2</samp> </p>
+<p class="p">In such a case, you should focus attention on <samp class="ph codeph">x2</samp>.
+(The dual simplex and barrier optimizers work differently than primal;
+they do not detect unboundedness in this way.) Unfortunately, the
+variable which is reported in one of these ways may or may not be
+a direct cause of the unboundedness, because of the many algebraic
+manipulations performed by the optimizer along the way.</p>
+<p class="p">An approach to diagnosis that is related to the technique discussed
+in <a class="xref" href="03_avoid.html" title="Suggests ways to eliminate unboundedness from a model.">Avoiding unboundedness in a model</a> is to temporarily
+assign finite bounds to all variables. By solving the modified model
+and discovering which variables have solution values at these artificial
+bounds, you may be able to trace the cause through the constraints
+involving those variables.</p>
+<p class="p">Since an unbounded outcome means that an unbounded ray exists,
+one approach to diagnosis is to display this ray. In <strong class="ph b">Concert Technology</strong>,
+use the method <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getRay" title="(Opens in a new tab or window)">getRay</a>; in the <strong class="ph b">Callable
+Library</strong> use the advanced routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getray.html" title="The routine CPXXgetray/CPXgetray finds an unbounded direction (also known as a ray) for a linear program where the CPLEX simplex optimizer concludes that the LP is unbounded (solution status CPX_STAT_UNBOUNDED).">CPXgetray</a></samp>.
+The relationship of the variables in this ray may give you guidance
+as to the cause of unboundedness.</p>
+<p class="p">If you are familiar with LP theory, then you might consider transforming
+your model to the associated dual formulation. This transformation
+can be accomplished, for example, by writing out the model in DUA
+format and then reading it back in.  (See the <em class="ph i">CPLEX File Formats
+Reference Manual</em> for a brief description of DUA as a file format.)
+ </p>
+<div class="p">Another way to transform your model to its associated dual formulation
+is first to enter your model in the Interactive Optimizer and then
+to use the following series of commands to write out the dual formulation
+of your model to a file in PRE format. <pre class="pre codeblock"><code>set preprocessing dual 1      \\ presolve the primal and pass the dual to the optimizer
+set preprocessing presolve 0  \\ turn off presolve
+set preprocessing reduce 0    \\no primal or dual reductions
+write dual.pre  </code></pre>
+ </div>
+<p class="p">The dual model of an unbounded model will be infeasible. And that
+means that you can use the conflict refiner to reduce the infeasible
+model to a minimal conflict. (See <a class="xref" href="../conflict_refiner/01_ref_confl_title_synopsis.html" title="Describes the conflict refiner, a feature for diagnosing the cause of infeasibility in a model, whether continuous or discrete, whether linear or quadratic.">Diagnosing infeasibility by refining conflicts</a> for
+more about the conflict refiner.) It is possible that the smaller
+model will allow you to identify the source of the (dual) infeasibility
+more easily than the full model allows.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/unbounded/01_unbnded_title_synopsis.html" title="Discusses tactics to diagnose the cause of an unbounded outcome in the optimization of a model and suggests ways to avoid an unbounded outcome.">Managing unboundedness</a></div>
+</div>
+</div></body>
+</html>

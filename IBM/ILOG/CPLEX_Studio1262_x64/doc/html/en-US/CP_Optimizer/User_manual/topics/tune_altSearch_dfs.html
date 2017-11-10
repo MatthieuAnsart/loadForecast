@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Depth-first search" />
+<meta name="abstract" content="Depth-first search is a tree search algorithm such that each fixing, or instantiation, of a decision variable can be thought of as a branch in a search tree." />
+<meta name="Description" content="Depth-first search is a tree search algorithm such that each fixing, or instantiation, of a decision variable can be thought of as a branch in a search tree." />
+<meta name="DC.subject" content="search type, depth-first" />
+<meta name="keywords" content="search type, depth-first" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/tune_altSearch.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizertune.1013884" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/tune_altSearch.html" />
+<title>Depth-first search</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizertune.1013884">
+<h1 class="title topictitle1">Depth-first search</h1>
+<div class="body"><p class="shortdesc">Depth-first search is a tree search algorithm such that
+each fixing, or instantiation, of a decision variable can be thought
+of as a branch in a search tree. </p>
+<p class="p">The depth-first search type applies constructive search directly.
+Depth-first search is a tree search algorithm such that each fixing,
+or instantiation, of a decision variable can be thought of as a branch
+in a search tree. The optimizer works on the subtree of one branch
+until it has found a solution or has proven that there is no solution
+in that subtree. The optimizer will not move to work on another section
+of the tree until the current one has been fully explored.</p>
+<p class="p"> This type of search is quite useful while debugging your model
+and tuning the search, but generally will be less efficient than restart
+search because it does not easily recover from poor branching decisions.
+   </p>
+<p class="p">Consider the optimization model implemented with the C++ API of
+Concert Technology: </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 7, "x");
+    IloIntVar y(env, 0, 7, "y");
+    IloIntVar z(env, 0, 7, "z");
+    IloIntVarArray all(env, 3, x, y, z);
+    model.add(IloMinimize(env, IloSum(all)));
+    model.add(IloAllDiff(env, all));
+    model.add(y == IloElement(IloIntArray(env, 7, 3, 7, 8, 8, 0, 1, 4), x));
+</code></pre>
+<p class="p">Depth-first search can be applied to this problem with the following
+code: </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::SearchType, IloCP::DepthFirst);
+    if (cp.solve()){
+      cp.out() &lt;&lt; " An optimal solution has been found"
+               &lt;&lt; ", objective value = " &lt;&lt; cp.getObjValue()
+               &lt;&lt; ", x = " &lt;&lt; cp.getValue(x)
+               &lt;&lt; ", y = " &lt;&lt; cp.getValue(y)
+               &lt;&lt; ", z = " &lt;&lt; cp.getValue(z) &lt;&lt; std::endl;
+  }
+</code></pre>
+<p class="p">Running this code produces the output: </p>
+<pre class="pre codeblock"><code> ! ----------------------------------------------------------------------------
+ ! Minimization problem - 3 variables, 2 constraints
+ ! SearchType           = DepthFirst
+ ! Initial process time : 0.00s (0.00s extraction + 0.00s propagation)
+ !  . Log search space  : 8.8 (before), 7.6 (after)
+ !  . Memory usage      : 319.2 kB (before), 319.2 kB (after)
+ ! Using parallel search with 2 workers.
+ ! ----------------------------------------------------------------------------
+ !          Best Branches  Non-fixed    W       Branch decision
+ *             4        4 0.00s         1            -
+ ! ----------------------------------------------------------------------------
+ ! Search terminated normally, 1 solution found.
+ ! Best objective         : 4 (optimal - effective tol. is 0)
+ ! Number of branches     : 8
+ ! Number of fails        : 3
+ ! Total memory usage     : 989.1 kB (983.7 kB CP Optimizer + 5.5 kB Concert)
+ ! Time spent in solve    : 0.00s (0.00s engine + 0.00s extraction)
+ ! Search speed (br. / s) : 800.0
+ ! ----------------------------------------------------------------------------
+ An optimal solution has been found, objective value = 4, x = 0, y = 3, z = 1</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/tune_altSearch.html" title="The alternative search types include depth-first search, restart search and multi-point search.">Using alternative search types</a></div>
+</div>
+</div></body>
+</html>

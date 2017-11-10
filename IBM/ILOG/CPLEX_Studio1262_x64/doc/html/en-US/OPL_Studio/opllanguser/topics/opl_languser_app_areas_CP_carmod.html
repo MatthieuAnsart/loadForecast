@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Enhancing the model" />
+<meta name="abstract" content="Shows how to declare a search phase or use the pack constraint." />
+<meta name="Description" content="Shows how to declare a search phase or use the pack constraint." />
+<meta name="DC.subject" content="car sequencing example, enhancing the model" />
+<meta name="keywords" content="car sequencing example, enhancing the model" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_car.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_cp.1073924" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_car.html" />
+<title>Enhancing the model</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_cp.1073924">
+<h1 class="title topictitle1">Enhancing the model</h1>
+<div class="body"><p class="shortdesc">Shows how to declare a search phase or use the pack constraint.</p>
+<p class="p">You can enhance the <span class="ph filepath">carseq.mod</span> model
+in two ways:</p>
+<ul class="ul"><li class="li"><p class="p">Declare a search phase</p>
+</li>
+<li class="li"><p class="p">Use the <samp class="ph codeph">pack</samp> constraint</p>
+</li>
+</ul>
+<div class="section" id="usropllangtut.uss_langtut_cp.1073924__usropllangtut.uss_langtut_cp.1074003"><h2 class="title sectiontitle">Search phase</h2><p class="p">You can declare a search phase that </p>
+<ul class="ul"><li class="li"><p class="p">Branches on the slot variables in sequence</p>
+</li>
+<li class="li"><p class="p">Allocates more complex cars first</p>
+</li>
+</ul>
+<p class="p">The <samp class="ph codeph">valueEval</samp> expression defines
+the cars that are hard to sequence (for the search phases). The larger
+the value, the harder it is to sequence a car. For each car type,
+the measure is a combination of how difficult the option requirements
+are to satisfy, and of the number of cars to build.</p>
+<pre class="pre codeblock"><code>int values[i in 0..nbConfs] = i;
+int valueEval[i in 0..nbConfs] = sum(o in Options) option[o,maxl(i,1)]*
+             (capacity[o].u div capacity[o].l)*(i!=0)+
+             (demand[maxl(i, 1)]*nbConfs*(i!=0)) div nbSlots + (i &gt; 0);
+</code></pre>
+<p class="p">The <samp class="ph codeph">execute</samp> block defines
+the search phase.</p>
+<p class="p">The <samp class="ph codeph">selectSmallest</samp> function
+decides the type of car in the order of the sequence.</p>
+<p class="p">The <samp class="ph codeph">selectLargest</samp> function
+selects first the cars that are considered hard to sequence.</p>
+<pre class="pre codeblock"><code>execute {
+   var f = cp.factory;
+
+   var phase1 = f.searchPhase(slot, 
+              f.selectSmallest(f.varIndex(slot)), 
+              f.selectLargest(f.explicitValueEval(values, valueEval, 0)));
+                                                                                                     
+   cp.setSearchPhases(phase1);
+   
+}</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_cp.1073924__usropllangtut.uss_langtut_cp.1074020"><h2 class="title sectiontitle">The pack constraint</h2><p class="p">For more efficiency, you can also enhance the car sequencing
+model by modeling the <samp class="ph codeph">demandCt</samp> constraint
+as the specialized constraint <samp class="ph codeph">pack</samp>, which
+expresses the same constraint but propagates better.</p>
+<pre class="pre codeblock"><code>demandCt: pack(demandV, slot, one);</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_car.html" title="Demonstrates how to use the pack constraint and search phases to improve the efficiency of a sequencing model.">The car sequencing example</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Different uses of the alternative constraint" />
+<meta name="abstract" content="The alternative constraint between interval variables should be used when an interval variable represents a set of alternative possibilities." />
+<meta name="Description" content="The alternative constraint between interval variables should be used when an interval variable represents a set of alternative possibilities." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="LBzXiwJC" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Different uses of the alternative constraint</title>
+</head>
+<body role="main" id="LBzXiwJC">
+<h1 class="title topictitle1">Different uses of the alternative constraint</h1>
+<div class="body"><p class="shortdesc">The alternative constraint between interval variables
+should be used when an interval variable represents a set of alternative
+possibilities.</p>
+<p class="p">The alternative constraint between interval variables
+should be used when an interval variable represents a set of alternative
+possibilities, such as an activity that can be executed in a number
+of possible modes, or a discrete set of possible positions in time.
+ </p>
+<p class="p">A common case is an activity <samp class="ph codeph">a</samp> that
+requires a resource among a set of candidate resources <span class="keyword cmdname">R={r_1,...,r_m}</span>.
+An optional interval <samp class="ph codeph">a_i</samp>, <samp class="ph codeph">1&lt;=i&lt;=m</samp> can
+be defined that represents the possible selection of resource <samp class="ph codeph">r_i</samp> in
+the alternative resource set, <samp class="ph codeph">R</samp>. Then,
+an alternative constraint <samp class="ph codeph">IloAlternative(env,a,[a_i])</samp> will
+enforce that if <samp class="ph codeph">a</samp> is present, then one
+and only one of the <samp class="ph codeph">a_i</samp> will be present.
+This case is illustrated here with disjunctive resources (for more
+details on how to model disjunctive resources, see <a class="xref" href="designsched_cap.html" title="Classical finite capacity resources such as disjunctive/unary resources, non-renewable/discrete resources, and renewable/producible/consumable resources can be modeled efficiently in CP Optimizer.">Modeling classical finite capacity resources</a>).   </p>
+<pre class="pre codeblock"><code>IloInt nbMachines   = 5;
+IloInt nbActivities = 10;
+IloIntArray2 ptime = ...; // data from file
+IloIntervalVarArray activity(env,nbActivities);
+IloIntervalVarArray2 actOnMach(env,nbActivities);
+for (IloInt i=0; i &lt; nbActivities; i++) {
+  activity[i] = IloIntervalVar(env);
+  actOnMach[i] = IloIntervalVarArray(env, actOnMach);
+  for (IloInt j=0; j &lt; nbMachines; j++) {
+    actOnMach[i][j] = IloIntervalVar(env,ptime[i][j]); 
+    actOnMach[i][j].setOptional();
+  }
+  m.add(IloAlternative(env,activity[i], actOnMach[i]));
+}
+IloIntervalVarArray2 machHasAct(env,nbMachines);
+for (IloInt j=0; j &lt; nbMachines; j++){
+  machHasAct[j] = IloIntervalVarArray(env, nbActivities);
+  for (IloInt i=0; i &lt; nbActivities; i++)
+    machHasAct[j][i] = actOnMach[i][j]; 
+  m.add(IloNoOverlap(env,machHasAct[j]));
+}</code></pre>
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">In this sample, the processing time of the activity depends
+on the machine. A more complex use-case is the one of alternative
+resource modes where a resource mode specifies a conjunctive set of
+resources to be used, this case is illustrated in the delivered example
+on Multi-Mode Resource Constrained Project Scheduling (<samp class="ph codeph">sched_rcpcpmm</samp>).
+In some situations, it may be useful to add redundant constraints
+in the model so as to increase inference on alternative constraints
+(see Increasing inference on alternative constraints in the engine).
+ </p>
+</div>
+<p class="p">Another use of the alternative constraint is to state
+that an activity must execute within a set of alternative time windows.
+Consider a worker that can perform its activities in a set of at most <em class="ph i">n</em> flexible shifts with specific constraints
+on the shift duration and minimal resting time between two consecutive
+shifts. Each shift of the worker can be modeled as an (optional) interval
+variable. The set of <em class="ph i">n</em> shifts
+forms a chain of <em class="ph i">n</em> optional
+interval variables (see <a class="xref" href="designsched_opt.html" title="Though there are various methods for modeling a chains of optional interval variables, an efficient method is recommended.">Chains of optional intervals</a>) and each activity is an alternative among
+a set of <em class="ph i">n</em> optional
+activities, one for each possible shift. Each shift spans the set
+of all possible activities executing in this shift. This type of model
+must be used with care because it multiplies the number of interval
+variables. It is useful when the time-windows where the activities
+must be placed are not fixed. If the time-windows are fixed, it is
+better to use an <samp class="ph codeph">IloForbidExtent</samp> constraint
+when it makes sense (see <a class="xref" href="designsched_cal.html" title="Resource calendars can be modeled using a stepwise function that describes the intensity of &#34;work&#34; over time.">Modeling resource calendars</a>).</p>
+<pre class="pre codeblock"><code>IloInt nbActivities = 100;
+IloInt nbShifts = 5;
+IloInt maxShiftDuration  = 600;
+IloInt minInterShiftRest = 480;
+IloIntervalVarArray activity(env,nbActivities);
+IloIntervalVarArray2 actInShift(env,nbActivities);
+for (IloInt i=0; i&lt;nbActivities; i++) {
+  activity[i] = IloIntervalVar(env,10);
+  actInShift[i] = IloIntervalVarArray(env,nbShifts);
+  for (IloInt s=0; s&lt;nbShifts; s++) {
+    actInShift[i][s] = IloIntervalVar(env);
+    actInShift[i][s].setOptional();
+  }
+  m.add(IloAlternative(env,activity[i],actInShift[i]));
+}
+IloIntervalVarArray shifts(env,nbShifts);
+IloIntervalVarArray2 shiftActs(env,nbShifts);
+for (IloInt s=0; s&lt;nbShifts; s++) {
+  shifts[s] = IloIntervalVar(env,0,maxShiftDuration,IloTrue);
+  shiftActs[s] = IloIntervalVarArray(env,nbActivities);
+  for (IloInt i=0; i&lt;nbActivities; i++)
+    shiftActs[s][i] = actInShift[i][s];
+  m.add(IloSpan(env, shift[s], shiftActs[s]));
+  if (s&gt;0) {
+    m.add(IloEndBeforeStart(env, shift[s-1], shift[s], minInterShiftRest));
+    m.add(IloIfThen(env, IloPresenceOf(env,shift[s]), IloPresenceOf(env,shift[s-1])));
+  }
+}</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

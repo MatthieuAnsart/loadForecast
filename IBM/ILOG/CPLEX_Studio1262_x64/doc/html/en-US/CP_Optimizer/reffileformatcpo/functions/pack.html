@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="pack" />
+<meta name="abstract" content="Maintains the load on a set of containers given objects sizes and assignments." />
+<meta name="Description" content="Maintains the load on a set of containers given objects sizes and assignments." />
+<meta name="DC.subject" content="pack" />
+<meta name="keywords" content="pack" />
+<meta name="DC.Relation" scheme="URI" content="distribute.html" />
+<meta name="DC.Relation" scheme="URI" content="count.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="pack" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<title>pack</title>
+</head>
+<body role="main" id="pack">
+<h1 class="title topictitle1">pack</h1>
+<div class="body refbody"><p class="shortdesc">Maintains the load on a set of containers given objects sizes and assignments.</p>
+<div class="section" id="pack__Syntax"><h2 class="title sectiontitle">Syntax</h2>
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/070_Types.html#Type_constraint">constraint</a> <strong class="ph b">pack</strong>(<a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intExprArray">intExprArray</a> load, <a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intExprArray">intExprArray</a> where, <a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intArray">intArray</a> size, <a class="xref" href="../syntax/070_Types.html#Expression_types__intExpr">intExpr</a> used)
+<a class="xref" href="../syntax/070_Types.html#Type_constraint">constraint</a> <strong class="ph b">pack</strong>(<a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intExprArray">intExprArray</a> load, <a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intExprArray">intExprArray</a> where, <a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intArray">intArray</a> size)</code></pre>
+</div>
+<div class="section" id="pack__Parameters"><h2 class="title sectiontitle">Parameters</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">load</samp>: An array of integer expressions, each element representing the load (total size of the objects inside) the corresponding container.
+  </li>
+<li class="li">    <samp class="ph codeph">where</samp>: An array of integer expressions, each element representing in which container the corresponding object is placed.
+  </li>
+<li class="li">    <samp class="ph codeph">size</samp>: An array of integers, each element representing the size of the corresponding object.
+  </li>
+<li class="li">    <samp class="ph codeph">used</samp> (optional): An integer expression indicating the number of used containers.  That is, the number of containers with at least one object inside.
+  </li>
+</ul>
+
+</div>
+<div class="section" id="pack__Description"><h2 class="title sectiontitle">Description</h2>
+<p class="p">The <samp class="ph codeph"><a class="xref" href="pack.html" title="Maintains the load on a set of containers given objects sizes and assignments.">pack</a></samp> constraint is used to represent sub-problems where the requirement
+is to assign objects to containers such that the capacities or minimum fill levels of the containers are respected.  Let's assume we have <samp class="ph codeph">n</samp> objects
+and <samp class="ph codeph">m</samp> containers.  The sizes of the array arguments of <samp class="ph codeph"><a class="xref" href="pack.html" title="Maintains the load on a set of containers given objects sizes and assignments.">pack</a></samp> must correspond
+to these constants.  That is, <samp class="ph codeph">load</samp> must be of size <samp class="ph codeph">m</samp>, whereas <samp class="ph codeph">where</samp>
+and <samp class="ph codeph">size</samp> must be of size <samp class="ph codeph">n</samp>.
+Given assignments to the <samp class="ph codeph">where</samp> expressions,
+the <samp class="ph codeph"><a class="xref" href="pack.html" title="Maintains the load on a set of containers given objects sizes and assignments.">pack</a></samp> constraint will calculate the values of the <samp class="ph codeph">load</samp> and <samp class="ph codeph">used</samp>
+expressions.</p>
+
+
+<p class="p">All counting is done from 0, and so
+the interpretation of 5 being assigned to <samp class="ph codeph">where[3]</samp> is that object 3
+(the 4th object) is placed into container 5 (the 6th container). This will be
+reflected by the inclusion of the size of object 3 (<samp class="ph codeph">size[3]</samp>) being
+included in the calculation of the value of <samp class="ph codeph">load[5]</samp>.</p>
+
+
+<p class="p">Naturally, all the arguments (with the exception of <samp class="ph codeph">size</samp>) can
+be constrained by additional constraints.  The most common form is to limit
+the capacity of a container.  For example, to limit container 2
+to a capacity of 15, one would write <samp class="ph codeph">load[2] &lt;= 15</samp>.  Minimum fill level
+requirements can also be specified this way: for example <samp class="ph codeph">load[2] &gt;= 12</samp>.
+Other more esoteric constraints are possible, for example to say that only
+an even number of containers can be used: <samp class="ph codeph">(used % 2) == 0</samp>.  If <samp class="ph codeph">used</samp>
+is omitted from the signature, then it will not be possible to specifically
+constrain the number of containers used.</p>
+
+</div>
+<div class="section" id="pack__Example"><h2 class="title sectiontitle">Example</h2>
+<p class="p">A decomposition of the <samp class="ph codeph"><a class="xref" href="pack.html" title="Maintains the load on a set of containers given objects sizes and assignments.">pack</a></samp> constraint with <samp class="ph codeph">n=3</samp> and <samp class="ph codeph">m=2</samp>
+could be written as follows.  Please note that this form will result in
+less inference being made by CP Optimizer during search than using <samp class="ph codeph"><a class="xref" href="pack.html" title="Maintains the load on a set of containers given objects sizes and assignments.">pack</a></samp>:</p>
+
+
+<pre class="pre codeblock"><code><span class="ph commentemph">// Must use at least one container and can't use more than exists</span>
+used &gt;= 1;
+used &lt;= 2;
+
+<span class="ph commentemph">// Loads are non-negative and limited to total object size</span>
+load[0] &gt;= 0;
+load[0] &lt;= <a class="xref" href="sum.html" title="Returns the sum of the input.">sum</a>(size);
+load[1] &gt;= 0;
+load[1] &lt;= <a class="xref" href="sum.html" title="Returns the sum of the input.">sum</a>(size);
+
+<span class="ph commentemph">// Objects must be placed in one of the containers</span>
+where[0] &gt;= 0;
+where[0] &lt;= 1;
+where[1] &gt;= 0;
+where[1] &lt;= 1;
+where[2] &gt;= 0;
+where[2] &lt;= 1;
+
+<span class="ph commentemph">// Load maintenance</span>
+load[0] == <a class="xref" href="scalProd.html" title="Returns the scalar product of two vectors.">scalProd</a>(size, [where[0] == 0, where[1] == 0, where[2] == 0]);
+load[1] == <a class="xref" href="scalProd.html" title="Returns the scalar product of two vectors.">scalProd</a>(size, [where[0] == 1, where[1] == 1, where[2] == 1]);
+
+<span class="ph commentemph">// Used</span>
+used == (<a class="xref" href="count.html" title="Returns the number of occurrences of a given value found in a given integer expression array.">count</a>(where, 0) != 0) + (<a class="xref" href="count.html" title="Returns the number of occurrences of a given value found in a given integer expression array.">count</a>(where, 1) != 0);</code></pre>
+</div>
+<div class="section" id="pack__Requirements"><h2 class="title sectiontitle">Requirements</h2>
+<ul class="ul"><li class="li">    The <samp class="ph codeph">where</samp> and <samp class="ph codeph">size</samp> arrays must be the same size.
+  </li>
+<li class="li">    Elements of the <samp class="ph codeph">size</samp> array must be non-negative, but may be zero.  Placing a zero-sized object in a container still counts as using the container.  That is, a container can be considered used even if its load is zero.
+  </li>
+<li class="li">    The sum of the elements of the <samp class="ph codeph">size</samp> array must be no larger than <samp class="ph codeph"><a class="xref" href="../syntax/040_Constants.html#Constants__intmax">intmax</a></samp>.
+  </li>
+</ul>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="distribute.html" title="Calculate and/or constrain the distribution of values taken by an array of integer expressions.">distribute</a></div>
+<div><a class="link" href="count.html" title="Returns the number of occurrences of a given value found in a given integer expression array.">count</a></div>
+</div>
+</div></body>
+</html>

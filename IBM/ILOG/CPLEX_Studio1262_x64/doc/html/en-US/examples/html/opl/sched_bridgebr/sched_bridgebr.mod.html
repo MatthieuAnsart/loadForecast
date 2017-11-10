@@ -1,0 +1,88 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: {<b><font color="#0000FF">string</font></b>} Task  = ...;
+15: {<b><font color="#0000FF">string</font></b>} Resource  = ...;
+16: 
+17: <b><font color="#0000FF">tuple</font></b> Distance {
+18:   <b><font color="#0000FF">string</font></b> pre;
+19:   <b><font color="#0000FF">string</font></b> post;
+20:   <b><font color="#0000FF">int</font></b>    dist;
+21: };
+22: 
+23: <b><font color="#0000FF">tuple</font></b> Precedence {
+24:   <b><font color="#0000FF">string</font></b> pre;
+25:   <b><font color="#0000FF">string</font></b> post;
+26: };
+27: 
+28: <b><font color="#0000FF">int</font></b> taskDuration[Task] = ...;
+29: {Distance} max_nf = ...;
+30: {Distance} min_sf = ...;
+31: {Distance} max_ef = ...;
+32: {Distance} min_nf = ...;
+33: {Distance} min_af = ...;
+34: {<b><font color="#0000FF">string</font></b>} tasksOnResource[Resource] = ...;
+35: {Precedence} precedences = ...;
+36: 
+37: {<b><font color="#0000FF">string</font></b>} TasksNotBreakable = { <b><font color="#8A2BE2">"ue"</font></b>, <b><font color="#8A2BE2">"ua"</font></b>, <b><font color="#8A2BE2">"ab1"</font></b>, <b><font color="#8A2BE2">"ab2"</font></b>, <b><font color="#8A2BE2">"ab3"</font></b>, <b><font color="#8A2BE2">"ab4"</font></b>, <b><font color="#8A2BE2">"ab5"</font></b>, <b><font color="#8A2BE2">"ab6"</font></b>, <b><font color="#8A2BE2">"l"</font></b> };
+38: 
+39: <b><font color="#0000FF">int</font></b> NbWeeks = 52;
+40: 
+41: <b><font color="#0000FF">stepFunction</font></b> weekDays = <b><font color="#7D007D">stepwise</font></b>(i <b><font color="#0000FF">in</font></b> 0..NbWeeks-1, p <b><font color="#0000FF">in</font></b> 0..1) { 100*p -&gt; (7*i)+(5*p) ; 0 };
+42: <b><font color="#0000FF">stepFunction</font></b> allDays  = <b><font color="#0000FF">stepwise</font></b> { 100 -&gt; 0; 100 };
+43: 
+44: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> a[t <b><font color="#0000FF">in</font></b> Task] 
+45:   <b><font color="#0000FF">size</font></b> taskDuration[t] 
+46:   <b><font color="#7D007D">intensity </font></b>(t <b><font color="#0000FF">in</font></b> TasksNotBreakable) ? allDays : weekDays; 
+47: 
+48: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">sequence</font></b> resourceUsage[r <b><font color="#0000FF">in</font></b> Resource] <b><font color="#0000FF">in</font></b> <b><font color="#7D007D">all</font></b>(t <b><font color="#0000FF">in</font></b> tasksOnResource[r]) a[t]; 
+49: 
+50: <b><font color="#0000FF">execute</font></b> {
+51:                 cp.param.FailLimit = 10000;
+52: }
+53: 
+54: minimize max(t in Task) endOf(a[t]);
+55: 
+56: subject to {  
+57:   forall(t <b><font color="EA7D00">in</font></b> Task: t not <b><font color="EA7D00">in</font></b> TasksNotBreakable) {
+58:     forbidStart(a[t], weekDays);
+59:     forbidEnd(a[t],   weekDays);
+60:   }
+61: 
+62:   forall(r <b><font color="EA7D00">in</font></b> Resource)
+63:     noOverlap(resourceUsage[r]);
+64: 
+65:   forall(t <b><font color="EA7D00">in</font></b> precedences ) 
+66:     endBeforeStart(a[t.pre], a[t.post]); 
+67:   
+68:   forall( t <b><font color="EA7D00">in</font></b> max_nf )
+69:     startBeforeEnd(a[t.post], a[t.pre], -t.dist);
+70:   
+71:   forall(t <b><font color="EA7D00">in</font></b> max_ef )
+72:     endBeforeEnd( a[t.post],  a[t.pre], - t.dist); 
+73:   
+74:   forall( t <b><font color="EA7D00">in</font></b> min_af )
+75:     startBeforeStart(a[t.pre], a[t.post], t.dist);   
+76:   
+77:   forall( t <b><font color="EA7D00">in</font></b> min_sf )
+78:     endBeforeStart(a[t.post], a[t.pre], -t.dist);
+79:   
+80:   forall( t <b><font color="EA7D00">in</font></b> min_nf )
+81:     endBeforeStart(a[t.pre], a[t.post], t.dist);
+82:   
+83: };
+</tt></pre>

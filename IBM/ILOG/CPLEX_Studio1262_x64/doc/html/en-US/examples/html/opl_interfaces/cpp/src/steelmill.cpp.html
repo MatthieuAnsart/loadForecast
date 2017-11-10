@@ -1,0 +1,173 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+002: <b><font color="#007D00">// File: steelmill.cpp</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">/////////////////////////////////////////////////////////////////////////////// </font></b>
+013: 
+014: <b><font color="#007D00">/*</font></b>
+015: <b><font color="#007D00">This problem is based on "prob038: Steel mill slab design problem" from</font></b>
+016: <b><font color="#007D00">CSPLib (www.csplib.org). It is a simplification of an industrial problem</font></b>
+017: <b><font color="#007D00">described in J. R. Kalagnanam, M. W. Dawande, M. Trumbo, H. S. Lee.</font></b>
+018: <b><font color="#007D00">"Inventory Matching Problems in the Steel Industry," IBM Research</font></b>
+019: <b><font color="#007D00">Report RC 21171, 1998.</font></b>
+020: <b><font color="#007D00">*/</font></b>
+021: 
+022: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+023: 
+024: 
+025: #include <b><font color="#8A2BE2">&lt;sstream&gt;</font></b>
+026: 
+027: ILOSTLBEGIN
+028: 
+029: <b><font color="EA7D00">class</font></b> MyData: <b><font color="EA7D00">public</font></b> IloOplDataSourceBaseI {
+030: <b><font color="EA7D00">public</font></b>:
+031:         MyData(IloEnv&amp; env);
+032:     <b><font color="#0000FF">void</font></b> read() <b><font color="EA7D00">const</font></b>;
+033: };
+034: <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">char</font></b>* getModelText();
+035: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+036:         IloEnv env;
+037:     
+038: 
+039:     <b><font color="#0000FF">int</font></b> status = 127;
+040:     <b><font color="EA7D00">try</font></b> {
+041:         IloOplErrorHandler handler(env,cout);
+042:         std::istringstream in( getModelText() );
+043:         IloOplModelSource modelSource(env,in,<b><font color="#8A2BE2">"steelmill"</font></b>);
+044:             IloOplSettings settings(env,handler);
+045:         IloOplModelDefinition def(modelSource,settings);
+046:         IloCP cp(env);
+047:         IloOplModel opl(def,cp);
+048:         MyData data(env);
+049:         IloOplDataSource dataSource(&amp;data);
+050:         opl.addDataSource(dataSource);
+051:         opl.generate();
+052:         <b><font color="EA7D00">if</font></b> ( cp.solve() ) {
+053:             cout &lt;&lt; endl 
+054:                 &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: "</font></b>  &lt;&lt; opl.getCP().getObjValue() 
+055:                 &lt;&lt; endl;
+056:             opl.postProcess();
+057:             opl.printSolution(cout);
+058:             status = 0;
+059:         } <b><font color="EA7D00">else</font></b> {
+060:             cout &lt;&lt; <b><font color="#8A2BE2">"No solution!"</font></b> &lt;&lt; endl;
+061:             status = 1;
+062:         }
+063:     } <b><font color="EA7D00">catch</font></b>( IloOplException &amp; e ) {
+064:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+065:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+066:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+067:         e.print(cout);
+068:         status = 2;
+069:     } <b><font color="EA7D00">catch</font></b> (...) {
+070:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+071:         status = 3;
+072:     }
+073: 
+074:     env.end();
+075: 
+076:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+077:     getchar();
+078: 
+079:     <b><font color="EA7D00">return</font></b> status;
+080: }
+081: <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">char</font></b>* getModelText() {
+082:     <b><font color="EA7D00">return</font></b> (<b><font color="#0000FF">char</font></b>*)<b><font color="#8A2BE2">"\</font></b>
+083: <b><font color="#8A2BE2">using CP;\</font></b>
+084: <b><font color="#8A2BE2">\</font></b>
+085: <b><font color="#8A2BE2">int nbOrders   = ...;\</font></b>
+086: <b><font color="#8A2BE2">int nbSlabs = ...;\</font></b>
+087: <b><font color="#8A2BE2">int nbColors   = ...;\</font></b>
+088: <b><font color="#8A2BE2">int nbCap      = ...;\</font></b>
+089: <b><font color="#8A2BE2">int capacities[1..nbCap] = ...;\</font></b>
+090: <b><font color="#8A2BE2">int weight[1..nbOrders] = ...;\</font></b>
+091: <b><font color="#8A2BE2">int colors[1..nbOrders] = ...;\</font></b>
+092: <b><font color="#8A2BE2">int maxLoad = sum(i in 1..nbOrders) weight[i];\</font></b>
+093: <b><font color="#8A2BE2">int maxCap  = max(i in 1..nbCap) capacities[i];\</font></b>
+094: <b><font color="#8A2BE2">int loss[c in 0..maxCap] = min(i in 1..nbCap : capacities[i] &gt;= c) capacities[i] - c; \</font></b>
+095: <b><font color="#8A2BE2">execute {\</font></b>
+096: <b><font color="#8A2BE2">writeln(</font></b>\"<b><font color="#8A2BE2">loss = </font></b>\"<b><font color="#8A2BE2">, loss);\</font></b>
+097: <b><font color="#8A2BE2">writeln(</font></b>\"<b><font color="#8A2BE2">maxLoad = </font></b>\"<b><font color="#8A2BE2">, maxLoad);\</font></b>
+098: <b><font color="#8A2BE2">writeln(</font></b>\"<b><font color="#8A2BE2">maxCap = </font></b>\"<b><font color="#8A2BE2">, maxCap);\</font></b>
+099: <b><font color="#8A2BE2">};\</font></b>
+100: <b><font color="#8A2BE2">dvar int where[1..nbOrders] in 1..nbSlabs;\</font></b>
+101: <b><font color="#8A2BE2">dvar int load[1..nbSlabs] in 0..maxLoad;\</font></b>
+102: <b><font color="#8A2BE2">execute {\</font></b>
+103: <b><font color="#8A2BE2">  cp.param.LogPeriod = 50;\</font></b>
+104: <b><font color="#8A2BE2">  var f = cp.factory;\</font></b>
+105: <b><font color="#8A2BE2">  cp.setSearchPhases(f.searchPhase(where));\</font></b>
+106: <b><font color="#8A2BE2">}\</font></b>
+107: <b><font color="#8A2BE2">dexpr int totalLoss = sum(s in 1..nbSlabs) loss[load[s]];\</font></b>
+108: <b><font color="#8A2BE2">\</font></b>
+109: <b><font color="#8A2BE2">minimize totalLoss;\</font></b>
+110: <b><font color="#8A2BE2">subject to {  \</font></b>
+111: <b><font color="#8A2BE2">  packCt: pack(load, where, weight);\</font></b>
+112: <b><font color="#8A2BE2">  forall(s in 1..nbSlabs)\</font></b>
+113: <b><font color="#8A2BE2">    colorCt: sum (c in 1..nbColors) (or(o in 1..nbOrders : colors[o] == c) (where[o] == s)) &lt;= 2; \</font></b>
+114: <b><font color="#8A2BE2">}\</font></b>
+115: <b><font color="#8A2BE2">           "</font></b>;
+116: }
+117: 
+118: MyData::MyData(IloEnv&amp; env):IloOplDataSourceBaseI(env) {
+119:  
+120: }
+121: 
+122: <b><font color="#0000FF">void</font></b> MyData::read() <b><font color="EA7D00">const</font></b> {
+123:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">int</font></b> _nbOrders = 12;
+124:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">int</font></b> _nbSlabs = 12;
+125:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">int</font></b> _nbColors = 8;
+126:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">int</font></b> _nbCap = 20;
+127:         
+128:     IloOplDataHandler handler = getDataHandler();
+129: 
+130:     handler.startElement(<b><font color="#8A2BE2">"nbOrders"</font></b>);
+131:     handler.addIntItem(_nbOrders);
+132:     handler.endElement();
+133:     handler.startElement(<b><font color="#8A2BE2">"nbSlabs"</font></b>);
+134:     handler.addIntItem(_nbSlabs);
+135:     handler.endElement();
+136:     handler.startElement(<b><font color="#8A2BE2">"nbColors"</font></b>);
+137:     handler.addIntItem(_nbColors);
+138:     handler.endElement();
+139:     handler.startElement(<b><font color="#8A2BE2">"nbCap"</font></b>);
+140:     handler.addIntItem(_nbCap);
+141:     handler.endElement();
+142: 
+143:         <b><font color="#0000FF">int</font></b> _capacity[_nbCap] = { 0, 11, 13, 16, 17, 19, 20,
+144:                                   23, 24, 25, 26, 27, 28, 29,
+145:                                   30, 33, 34, 40, 43, 45 };
+146:         handler.startElement(<b><font color="#8A2BE2">"capacities"</font></b>);
+147:         handler.startArray();
+148:         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;_nbCap; i++)
+149:                 handler.addIntItem(_capacity[i]);
+150:         handler.endArray();
+151:         handler.endElement();
+152: 
+153:         <b><font color="#0000FF">int</font></b> _weight[_nbOrders] = { 22, 9, 9, 8, 8, 6, 5, 3, 3, 3, 2, 2};
+154:         handler.startElement(<b><font color="#8A2BE2">"weight"</font></b>);
+155:         handler.startArray();
+156:         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;_nbOrders; i++)
+157:                 handler.addIntItem(_weight[i]);
+158:         handler.endArray();
+159:         handler.endElement();
+160: 
+161:         <b><font color="#0000FF">int</font></b> _colors[_nbOrders] = { 5, 3, 4, 5, 7, 3, 6, 0, 2, 3, 1, 5 };
+162:         handler.startElement(<b><font color="#8A2BE2">"colors"</font></b>);
+163:         handler.startArray();
+164:         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;_nbOrders; i++)
+165:                 handler.addIntItem(_colors[i]);
+166:         handler.endArray();
+167:         handler.endElement();
+168: }
+</tt></pre>

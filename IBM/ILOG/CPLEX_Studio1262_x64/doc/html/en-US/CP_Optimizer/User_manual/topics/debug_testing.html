@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Testing with a known solution" />
+<meta name="abstract" content="Using an instance of the problem with a known solution is a useful method for debugging." />
+<meta name="Description" content="Using an instance of the problem with a known solution is a useful method for debugging." />
+<meta name="DC.subject" content="solution, incorrect" />
+<meta name="keywords" content="solution, incorrect" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/debug.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerdebug.1009710" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/debug.html" />
+<title>Testing with a known solution</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerdebug.1009710">
+<h1 class="title topictitle1">Testing with a known solution</h1>
+<div class="body"><p class="shortdesc">Using an instance of the problem with a known solution
+is a useful method for debugging.</p>
+<p class="p"><a class="xref" href="design.html" title="While developing models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing models</a> explains how to
+design good models for various problems. However, if errors slip in
+when you implement the constraints of the problem, it can be very
+difficult to understand why the application finds wrong answers, even
+though the model is very good.</p>
+<p class="p">There is a simple way to address such cases: use an instance of
+the problem with a known solution to test the constraints. For testing
+a solution, you assign the values corresponding to a solution before
+adding the constraints to the model. Then no failure should happen
+within this function. If a failure occurs with the known solution,
+you know there is a problem among the constraints. </p>
+<p class="p">To see how to test with a known solution, consider a map-coloring
+problem in which there are four available colors (blue, white, red,
+green) and six contiguous countries (Belgium, Denmark, France, Germany,
+Luxembourg, Netherlands). One known solution is to color Belgium and
+Germany blue; Denmark, France and the Netherlands white; and Luxembourg
+red.</p>
+<p class="p">This C++ sample tests a known solution of the map-coloring problem.
+ </p>
+<pre class="pre codeblock"><code>#include &lt;ilcp/cp.h&gt;
+const char* Names[] = {"blue", "white", "red", "green"};
+int main(){
+  IloEnv env;
+  try {
+    IloModel model(env);
+    IloIntVar Belgium(env, 0, 3), Denmark(env, 0, 3),
+      France(env, 0, 3), Germany(env, 0, 3), 
+      Netherlands(env, 0, 3), Luxembourg(env, 0, 3);
+    // Test a known solution
+    model.add(Belgium == 0);
+    model.add(Denmark == 1);
+    model.add(France == 1);
+    model.add(Germany ==  0);
+    model.add(Netherlands == 1);
+    model.add(Luxembourg == 2);
+    // Constraints
+    model.add(Belgium != France); 
+    model.add(Denmark != Germany ); 
+    model.add(France != Germany); 
+    model.add(Belgium != Netherlands); 
+    model.add(Germany != Netherlands); 
+    model.add(France != Luxembourg);  
+    model.add(Luxembourg != Germany);
+    model.add(Luxembourg != Belgium);
+    IloCP cp(model);
+    // Search for a solution
+    if (cp.solve()) {    
+      cp.out() &lt;&lt; cp.getStatus() &lt;&lt; " Solution" &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Belgium:" &lt;&lt; Names[(IloInt)cp.getValue(Belgium)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Denmark:" &lt;&lt; Names[(IloInt)cp.getValue(Denmark)] &lt;&lt; std::endl;
+      cp.out()  &lt;&lt;  "France:" &lt;&lt; Names[(IloInt)cp.getValue(France)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Germany:" &lt;&lt; Names[(IloInt)cp.getValue(Germany)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Netherlands:" &lt;&lt; Names[(IloInt)cp.getValue(Netherlands)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Luxembourg:" &lt;&lt; Names[(IloInt)cp.getValue(Luxembourg)]  &lt;&lt; std::endl;
+                   }
+  }
+  catch (IloException&amp; ex) { 
+    env.error() &lt;&lt; "Error: " &lt;&lt; ex &lt;&lt; std::endl;
+  }
+  env.end();
+  return 0;
+}
+</code></pre>
+<p class="p">If the solution turns out not to be feasible for the constraints
+of the model, you can use the conflict refiner to identify which constraints
+are violated in the solution as described in <a class="xref" href="debug_refiner.html" title="The conflict refiner is used to find an explanation for the infeasibility of a model.">Using the conflict refiner</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/debug.html" title="CP Optimizer offers debugging features including exception handling, logging and tracing.">Debugging applications</a></div>
+</div>
+</div></body>
+</html>

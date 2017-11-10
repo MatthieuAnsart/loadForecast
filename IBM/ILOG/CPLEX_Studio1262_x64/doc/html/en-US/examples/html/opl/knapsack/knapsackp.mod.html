@@ -1,0 +1,55 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">int</font></b> NbRows = ...;
+13: <b><font color="#0000FF">int</font></b> NbColumns = ...;
+14: 
+15: <b><font color="#0000FF">range</font></b> Rows = 1..NbRows;
+16: <b><font color="#0000FF">range</font></b> Columns = 1..NbColumns;
+17: 
+18: <b><font color="#0000FF">int</font></b> b[Rows] = ...;
+19: <b><font color="#0000FF">int</font></b> c[Columns] = ...; 
+20: <b><font color="#0000FF">int</font></b> Coef[Rows][Columns] = ...;
+21: <b><font color="#0000FF">int</font></b> MaxValue = <b><font color="#7D007D">max</font></b>(i <b><font color="#0000FF">in</font></b> Rows)  b[i];
+22: <b><font color="#0000FF">int</font></b> MaxCoef[j <b><font color="#0000FF">in</font></b> Columns] = <b><font color="#7D007D">max</font></b>(i <b><font color="#0000FF">in</font></b> Rows) Coef[i][j];
+23: 
+24: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> x[Columns] <b><font color="#0000FF">in</font></b> 0..MaxValue;   
+25: <b><font color="#0000FF">execute</font></b> setting_mipsearch {
+26:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> Columns) {
+27:      <b><font color="#0000FF">cplex</font></b>.setPriority(x[j],c[j]/MaxCoef[j]);
+28:      <b><font color="#0000FF">cplex</font></b>.setDirection(x[j],<b><font color="#8A2BE2">"BranchDown"</font></b>);
+29:   }
+30:   <b><font color="#007D00">/* ALTERNATIVE use properties</font></b>
+31: <b><font color="#007D00">  for(var j in Columns) {</font></b>
+32: <b><font color="#007D00">     x[j].priority = c[j]/MaxCoef[j];</font></b>
+33: <b><font color="#007D00">     x[j].direction = "BranchDown";</font></b>
+34: <b><font color="#007D00">  }</font></b>
+35: <b><font color="#007D00">  */</font></b>
+36: }
+37: 
+38: 
+39: maximize
+40:   sum( j in Columns ) 
+41:     c[j] * x[j];
+42: 
+43: subject to {
+44:   forall( i <b><font color="EA7D00">in</font></b> Rows )
+45:     ct:
+46:       sum( j <b><font color="EA7D00">in</font></b> Columns ) 
+47:         Coef[i][j] * x[j] &lt;= b[i];
+48: }
+49: 
+50: 
+</tt></pre>

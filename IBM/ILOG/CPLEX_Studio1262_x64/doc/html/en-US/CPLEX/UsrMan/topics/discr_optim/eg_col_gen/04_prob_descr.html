@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Describing the problem" />
+<meta name="abstract" content="Describes a problem to illustrate column generation." />
+<meta name="Description" content="Describes a problem to illustrate column generation." />
+<meta name="DC.subject" content="knapsack problem with reduced cost in objective, reduced cost, choosing variables in column generation, column generation, reduced cost and (example)" />
+<meta name="keywords" content="knapsack problem with reduced cost in objective, reduced cost, choosing variables in column generation, column generation, reduced cost and (example)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/01_col_gen_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingColumnGen.1001631" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/01_col_gen_title_synopsis.html" />
+<title>Describing the problem</title>
+</head>
+<body role="main" id="User_manual.uss_usingColumnGen.1001631">
+<h1 class="title topictitle1">Describing the problem</h1>
+<div class="body"><p class="shortdesc">Describes a problem to illustrate column generation.</p>
+<p class="p">The cutting stock problem in this chapter is sometimes
+known in math programming terms as a knapsack problem with reduced
+cost in the objective function.</p>
+<p class="p">Generally, a cutting stock problem begins with a supply
+of rolls of material of fixed length (the stock). Strips are cut from
+these rolls. All the strips cut from one roll are known together as
+a pattern. The point of this example is to use as few rolls of stock
+as possible to satisfy some specified demand of strips. By convention,
+it is assumed that only one pattern is laid out across the stock;
+consequently, only one dimension—the width—of each roll
+of stock is important. </p>
+<div class="fig fignone" id="User_manual.uss_usingColumnGen.1001631__User_manual.uss_usingColumnGen.1003300"><span class="figcap">Figure 1. Two different patterns from a roll of stock</span><div class="image"><img class="image" src="../../../images/usingColumnGenu.gif" alt="usingColumnGenu.gif" /></div></div>
+<p class="p">Even with that simplifying assumption, the fact that
+there can be so many different patterns makes a naive model of this
+problem (where a user declares one variable for every possible pattern)
+impractical. Such a model introduces too many symmetries. Fortunately,
+for any given customer order, a limited number of patterns will suffice,
+so many of the possible patterns can be disregarded, and the application
+can focus on finding the relevant ones.</p>
+<p class="p">Here is a conventional statement of a cutting stock problem
+in terms of the unknown X<sub class="ph sub">j</sub>, the
+number of times that pattern j will be used, and A<sub class="ph sub">ij</sub>, the number of items i of each pattern j needed
+to satisfy demand d<sub class="ph sub">i</sub>: </p>
+<p class="p">Minimize:   </p>
+<p class="p"><img class="image" src="../../../images/usingColumnGen2.gif" alt="usingColumnGen2.gif" /> </p>
+<p class="p">subject to: </p>
+<p class="p"><img class="image" src="../../../images/usingColumnGen3.gif" alt="usingColumnGen3.gif" /></p>
+<p class="p"> greater than or equal to d<sub class="ph sub">i</sub> with: </p>
+<p class="p"><img class="image" src="../../../images/usingColumnGen4.gif" alt="usingColumnGen4.gif" /> </p>
+<p class="p">Solving this model with all columns present from the
+beginning is practically impossible. In fact, even with only 10 types
+of items with a size roughly 1/10 of the width of the roll, there
+would exist roughly 10^10 kinds of patterns, and hence that many decision
+variables. Such a formulation might not even fit in memory on a reasonably
+large computer. Moreover, most of those patterns would obviously not
+be interesting in a solution. These considerations make column generation
+an interesting approach for this problem.</p>
+<p class="p">To solve a cutting stock problem by column generation,
+start with a subproblem. Choose one pattern, lay it out on the stock,
+and cut as many items as possible, subject to the constraints of demand
+for that item and the width of the stock. This procedure will surely
+work in that it produces some answer (a feasible solution) to the
+problem, but it will not necessarily produce a satisfactory answer
+in this way since it probably uses too many rolls. </p>
+<p class="p">To move closer to a satisfactory solution, the application
+can then generate other columns. That is, other decision variables
+(other X<sub class="ph sub">j</sub>) will be chosen to
+add to the model. Those decision variables are chosen on the basis
+of their favorable reduced cost with the help of a subproblem. This
+subproblem is defined to identify the coefficients of a new column
+of the master problem with minimal reduced cost. With π as the
+vector of the dual variables of the current solution of the master
+problem, the subproblem is defined like this:</p>
+<p class="p">Minimize: </p>
+<p class="p"><img class="image" src="../../../images/usingColumnGen5.gif" alt="usingColumnGen5.gif" /> </p>
+<p class="p">subject to: </p>
+<p class="p"><img class="image" src="../../../images/usingColumnGen6.gif" alt="usingColumnGen6.gif" /> </p>
+<p class="p">That is, the subproblem data consists of W as the width
+of a roll of stock, W<sub class="ph sub">i</sub> as the
+width of strip i that can be used in a pattern cut from the roll.
+The entries A<sub class="ph sub">i</sub> are the modeling
+variables of the subproblem. They specify the number of times the
+i-th strip is used in the pattern. Their solution values will be the
+coefficients of the new column to be added to the master model if
+a solution with a negative objective function is found for the subproblem.
+Consequently, the variables A<sub class="ph sub">i</sub> must be nonnegative integers.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/01_col_gen_title_synopsis.html" title="Uses an example of cutting stock to demonstrate the technique of column generation in Concert Technology.">Using column generation: a cutting stock example</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Reading and writing LP files" />
+<meta name="abstract" content="Describes reading and writing pools of user cuts or lazy constraints from LP files." />
+<meta name="Description" content="Describes reading and writing pools of user cuts or lazy constraints from LP files." />
+<meta name="DC.subject" content="lazy constraint, LP file format and, LP file format, lazy constraints, user cuts, file format, lazy constraints in LP format" />
+<meta name="keywords" content="lazy constraint, LP file format and, LP file format, lazy constraints, user cuts, file format, lazy constraints in LP format" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/06_add_uc_lc_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cbAndLcPools.1016413" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/06_add_uc_lc_title_synopsis.html" />
+<title>Reading and writing LP files</title>
+</head>
+<body role="main" id="User_manual.uss_cbAndLcPools.1016413">
+<h1 class="title topictitle1">Reading and writing LP files</h1>
+<div class="body"><p class="shortdesc">Describes reading and writing pools of user cuts or lazy
+constraints from LP files.</p>
+<p class="p">User cuts and lazy constraints may also be specified in LP-format
+files, and so may be read:</p>
+<ul class="ul"><li class="li"><p class="p">With the <strong class="ph b">Interactive Optimizer</strong> <samp class="ph codeph">read</samp> 
+command</p>
+ </li>
+<li class="li"><p class="p">Through the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/readcopyprob.html" title="The routine CPXXreadcopyprob/CPXreadcopyprob reads an MPS, LP, or SAV file into an existing CPLEX problem object.">CPXreadcopyprob</a></samp> of
+the <strong class="ph b">Callable Library</strong></p>
+</li>
+<li class="li"><p class="p">Through the methods of <strong class="ph b">Concert Technology</strong>:</p>
+ <ul class="ul"><li class="li"><p class="p">  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#importModel" title="(Opens in a new tab or window)">importModel</a> of the C++
+API</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloCplex.importModel</samp>  of the Java API</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">Cplex.ImportModel</samp>  of the .NET API</p>
+</li>
+</ul>
+ </li>
+</ul>
+<p class="p">When CPLEX writes LP-format files, user cuts and lazy constraints
+added through their respective <samp class="ph codeph">add</samp>  routines or read
+from LP format files are included in the output files along with their
+names (if any). </p>
+<div class="section" id="User_manual.uss_cbAndLcPools.1016413__User_manual.uss_cbAndLcPools.1016613"><h2 class="title sectiontitle">General
+syntax</h2><p class="p">The general syntax rules for LP format documented
+in the <em class="ph i">CPLEX File Formats Reference Manual</em> apply to user cuts
+and lazy constraints. </p>
+<ul class="ul"><li class="li"><p class="p">The user cuts section or sections must be preceded by the keywords <samp class="ph codeph">USER CUTS</samp>. </p>
+ </li>
+<li class="li"><p class="p">The lazy constraints section or sections must be preceded by
+the keywords <samp class="ph codeph">LAZY CONSTRAINTS</samp>. </p>
+ </li>
+</ul>
+<p class="p">These sections, and the ordinary constraints section preceded
+by the keywords <samp class="ph codeph">SUBJECT TO</samp>, can appear in any order
+and can be present multiple times, as long as they are placed after
+the objective function section and before any of the keywords <samp class="ph codeph">BOUNDS</samp>, <samp class="ph codeph">GENERALS</samp>, <samp class="ph codeph">BINARIES</samp>, <samp class="ph codeph">SEMI-CONTINUOUS</samp>or <samp class="ph codeph">END</samp>.</p>
+</div>
+<div class="section" id="User_manual.uss_cbAndLcPools.1016413__User_manual.uss_cbAndLcPools.1016428"><h2 class="title sectiontitle">Example</h2><p class="p">Here
+is an example of an LP file containing ordinary constraints and lazy
+constraints. </p>
+<pre class="pre codeblock"><code>Maximize
+ obj: 12 x1 + 5 x2 + 15 x3 + 10 x4
+Subject To
+ c1: 5 x1 + x2 + 9 x3 + 12 x4 &lt;= 15
+Lazy Constraints
+ l1: 2 x1 + 3 x2 + 4 x3 + x4 &lt;= 10
+ l2: 3 x1 + 2 x2 + 4 x3 + 10 x4 &lt;= 8
+Bounds
+ 0 &lt;= x1 &lt;= 5
+ 0 &lt;= x2 &lt;= 5
+ 0 &lt;= x3 &lt;= 5
+ 0 &lt;= x4 &lt;= 5
+Generals
+ x1  x2  x3  x4
+End  </code></pre>
+<p class="p">CPLEX stores user cuts and lazy constraints in memory
+separately from ordinary constraints. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/06_add_uc_lc_title_synopsis.html" title="You can add user cuts or lazy constraints through routines or methods in the Component Libraries or via LP, SAV, or MPS files, as explained in the following sections.">Adding user cuts and lazy constraints</a></div>
+</div>
+</div></body>
+</html>

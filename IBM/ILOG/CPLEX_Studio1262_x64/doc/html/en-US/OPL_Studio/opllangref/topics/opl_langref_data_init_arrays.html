@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Initializing arrays" />
+<meta name="abstract" content="Describes the various ways in which you can initialize arrays." />
+<meta name="Description" content="Describes the various ways in which you can initialize arrays." />
+<meta name="DC.subject" content="initializing, arrays, initialization" />
+<meta name="keywords" content="initializing, arrays, initialization" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_data_init.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datasources.1064637" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_data_init.html" />
+<title>Initializing arrays</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datasources.1064637">
+<h1 class="title topictitle1">Initializing arrays</h1>
+<div class="body"><p class="shortdesc">Describes the various ways in which you can initialize
+arrays.</p>
+<p class="p"><strong class="ph b">You can initialize arrays:</strong></p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1064637__section1326819709977">Externally</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1064637__section1326819723227">Internally</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1064637__section1326898877228">In preprocessing instructions</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1064637__section1326898885994">As generic arrays</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1064637__section1326898893369">As generic indexed arrays</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1064637__section1326898906885">From a database</a></p>
+ </li>
+</ul>
+<div class="section" id="usropllangref.uss_langref_datasources.1064637__section1326819709977"><h2 class="title sectiontitle">Externally</h2><p class="p">Arrays can be initialized by external data, in which case
+the declaration has the form:</p>
+<pre class="pre codeblock"><code>int a[1..2] [1..3] = ...; </code></pre>
+<p class="p">and the actual initialization is given in
+a data source, which is a separate <samp class="ph codeph">.dat</samp> file
+in IBM ILOG OPL.</p>
+<ul class="ul"><li class="li"><p class="p"><strong class="ph b">By listing values</strong></p>
+<p class="p">This is how arrays are initialized in most of the examples
+presented so far. Multidimensional arrays in OPL are, in fact, arrays
+of arrays and must be initialized accordingly. For example, the declaration:</p>
+<pre class="pre codeblock"><code>/* .mod file */
+int a[1..2][1..3] = ...;
+/* .dat file */
+a = [
+[10, 20, 30],
+[40, 50, 60]
+];</code></pre>
+<p class="p">initializes a two-dimensional array by giving
+initializations for the one-dimensional arrays of its first dimension.
+It is easy to see how to generalize this initialization to any number
+of dimensions.</p>
+</li>
+</ul>
+<ul class="ul"><li class="li"><p class="p"><strong class="ph b">By specifying pairs</strong></p>
+<p class="p">An array can also be initialized by specifying pairs (index,
+value), as in the declaration:</p>
+<pre class="pre codeblock"><code>/* .mod file */
+int a[Days] = ...;
+/* .dat file */
+a = #[
+“Monday”: 1,
+”Tuesday”: 2,
+”Wednesday”: 3,
+”Thursday”: 4,
+”Friday”: 5,
+”Saturday”: 6,
+”Sunday”: 7
+]#;</code></pre>
+<div class="note note"><span class="notetitle">Note:</span>  <ol class="ol"><li class="li"><p class="p">When the initialization is specified by (index,
+value) pairs, the delimiters <samp class="ph codeph">#[</samp> and <samp class="ph codeph">]#</samp> must be used instead of <samp class="ph codeph">[</samp> and <samp class="ph codeph">]</samp>.</p>
+ </li>
+<li class="li"><p class="p">The ordering of the pairs can be arbitrary.</p>
+ </li>
+</ol>
+ </div>
+<p class="p">These two forms of initialization can be
+combined arbitrarily, as in:</p>
+<pre class="pre codeblock"><code>/* .mod file */
+int a[1..2][1..3] = ...;
+/* .dat file */
+a = #[
+2: [40, 50, 60],
+1: [10, 20, 30]
+]#; </code></pre>
+</li>
+</ul>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1064637__section1326819723227"><h2 class="title sectiontitle">Internally</h2><p class="p">You can initialize arrays internally (that is, in the <samp class="ph codeph">.mod</samp> file) using the same syntax as in <samp class="ph codeph">.dat</samp> files. Here, the array items may be expressions
+that are evaluated during initialization. The syntax for pairs <samp class="ph codeph">#[</samp>, <samp class="ph codeph">]#</samp> is not available
+for internal initialization.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1064637__section1326898877228"><h2 class="title sectiontitle">In preprocessing
+instructions</h2><p class="p">Arrays can also be initialized in
+the preprocessing instructions, as in:</p>
+<pre class="pre codeblock"><code>range R = 1..8;
+int a[R];
+execute {
+  for(var i in R) {
+    a[i] = i + 1;
+  }}</code></pre>
+<p class="p">which initializes the array in such a way
+that <samp class="ph codeph">a[1] = 2, a[2] = 3</samp>, and so on. See <a class="xref" href="opl_langref_datasources_preprocessing.html" title="Provides an overview of preprocessing operations in OPL.">Preprocessing of data</a>.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1064637__section1326898885994"><h2 class="title sectiontitle">As generic
+arrays</h2><p class="p">OPL also supports generic arrays, that is,
+arrays whose items are initialized by an expression. These generic
+arrays may significantly simplify the modeling of an application.
+The declaration:</p>
+<pre class="pre codeblock"><code>int a[i in 1..10] = i+1; </code></pre>
+<p class="p">declares an array of 10 elements such that
+the value of <samp class="ph codeph">a[i]</samp> is <samp class="ph codeph">i+1</samp>.
+Generic arrays can of course be multidimensional, as in:</p>
+<pre class="pre codeblock"><code>int m[i in 0..10][j in 0..10] = 10*i + j; </code></pre>
+<p class="p">which initializes element <samp class="ph codeph">m[i][j]</samp> to <samp class="ph codeph">10*i + j</samp>. Generic arrays are useful in performing
+some simple transformations. For instance, generic arrays can be used
+to transpose matrices in a simple way, as in:</p>
+<pre class="pre codeblock"><code>int m[Dim1][Dim2] = ...; 
+int t[j in Dim2][i in Dim1] = m[i][j]; </code></pre>
+<p class="p">More generally speaking, generic arrays can
+be used to permute the indices of arrays in simple ways.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1064637__section1326898893369"><h2 class="title sectiontitle">As generic
+indexed arrays</h2><p class="p">To have more flexibility when initializing
+arrays in a generic way, OPL enables you to control the <strong class="ph b">index</strong> value
+in addition to the <strong class="ph b">item</strong> value, as described earlier
+in <em class="ph i">As generic arrays</em>. To illustrate the syntax, the
+same examples can be expressed as follows:</p>
+<pre class="pre codeblock"><code>int a[1..10] = [ i-1 : i | i in 2..11 ]; 
+int m[0..10][0..10] = [ i : [ j : 10*i+j ] | i,j in 0..10 ]; </code></pre>
+<p class="p">This syntax is close to the syntax used for
+initializing arrays in <samp class="ph codeph">.dat</samp> files by means
+of indices, delimited by <samp class="ph codeph">#[</samp> and <samp class="ph codeph">]</samp> #, as explained above in <em class="ph i">Specifying
+pairs</em>. Using this syntax is an efficient means of initializing
+arrays used to index data.</p>
+<p class="p">The <samp class="ph codeph">oilDB.mod</samp> example
+contains an <samp class="ph codeph">execute</samp> block that performs
+initialization. Instead of:</p>
+<pre class="pre codeblock"><code>GasType gas[Gasolines];
+execute {
+  for(var g in gasData) {
+    gas[g.name] = g
+  }
+}</code></pre>
+<p class="p">the same can be expressed with the syntax
+for generic indexed arrays as:</p>
+<pre class="pre codeblock"><code>GasType gas[Gasolines] = [ g.name : g | g in gasData ];</code></pre>
+<p class="p">Likewise, this syntax, from <samp class="ph codeph">transp4.mod</samp></p>
+<pre class="pre codeblock"><code>float Cost[Routes];
+execute INITIALIZE {
+  for( var t in TableRoutes ) {
+      Cost[Routes.get(t.p,Connections.get(t.o,t.d))] = t.cost;
+   }
+}</code></pre>
+<p class="p">is
+equivalent to</p>
+<pre class="pre codeblock"><code>float Cost[Routes] = [ &lt;t.p,&lt;t.o,t.d&gt;&gt;:t.cost | t in TableRoutes ];</code></pre>
+<div class="note note"><span class="notetitle">Note:</span>  <ol class="ol"><li class="li"><p class="p">It is recommended to use generic arrays or
+generic indexed arrays whenever possible, since they make the model
+more explicit and readable.</p>
+</li>
+<li class="li"><p class="p">If an index is met more than once, no warning
+is issued and the latest value set for this index is the one kept.</p>
+ <p class="p exampletitle">For example:</p>
+<pre class="pre codeblock"><code>int n=5;
+
+{int} s= {1,3,4,2,5};
+sorted {int} s2=asSet(1..n);;
+reversed {int} s3=asSet(1..n);;
+
+int x[1..n]=[maxl(n-i,i): i | i in s];
+int x2[1..n]=[maxl(n-i,i): i | i in s2];
+int x3[1..n]=[maxl(n-i,i): i | i in s3];
+
+execute
+{
+ writeln(x);
+ writeln(x2);
+ writeln(x3);
+} </code></pre>
+<p class="p">gives out</p>
+<pre class="pre codeblock"><code>[0 0 2 4 5]
+[0 0 3 4 5]
+[0 0 2 1 5] </code></pre>
+ </li>
+</ol>
+ </div>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1064637__section1326898906885"><h2 class="title sectiontitle">From a
+database</h2><p class="p">The example below is more efficient because
+no data is duplicated.</p>
+<p class="p exampletitle" id="usropllangref.uss_langref_datasources.1064637__usropllangref.uss_langref_datasources.1063063">Reading database columns to a
+tuple array (<samp class="ph codeph">oilDB2.dat</samp>)</p>
+<pre class="pre codeblock"><code>Gasolines,Gas from DBRead(db,"SELECT name,name,demand,price,octane,lead FROM GasData");
+Oils,Oil from DBRead(db,"SELECT name,name,capacity,price,octane,lead FROM OilData");</code></pre>
+<p class="p">You can also write:</p>
+<pre class="pre codeblock"><code>Gasolines from DBRead(db,"SELECT name FROM GasData");
+Gas from DBRead(db,"SELECT name,demand,price,octane,lead FROM GasData");
+Oils from DBRead(db,"SELECT name from OilData");
+Oil from DBRead(db,"SELECT name,capacity,price,octane,lead FROM OilData");</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_data_init.html" title="Defines internal versus external initialization, describes how to initialize arrays, tuples, and sets, and discusses memory allocation aspects of data initialization.">Data initialization</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Reading from a spreadsheet" />
+<meta name="abstract" content="Explains how to read from a spreadsheet from within OPL." />
+<meta name="Description" content="Explains how to read from a spreadsheet from within OPL." />
+<meta name="DC.subject" content="spreadsheets, reading from, reading, from a spreadsheet, keywords, SheetRead, SheetRead, OPL keyword, data, reading from an Excel spreadsheet, Excel spreadsheet, what data can be read, R1C1 style not supported in Excel, Excel, R1C1 style not supported" />
+<meta name="keywords" content="spreadsheets, reading from, reading, from a spreadsheet, keywords, SheetRead, SheetRead, OPL keyword, data, reading from an Excel spreadsheet, Excel spreadsheet, what data can be read, R1C1 style not supported in Excel, Excel, R1C1 style not supported" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_spreadsheet.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datasources.1056122" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_spreadsheet.html" />
+<title>Reading from a spreadsheet</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datasources.1056122">
+<h1 class="title topictitle1">Reading from a spreadsheet</h1>
+<div class="body"><p class="shortdesc">Explains how to read from a spreadsheet from within OPL.</p>
+<p class="p">In OPL, spreadsheet ranges can be read into one- or two-dimensional
+arrays or sets. For instance, the instructions:</p>
+<pre class="pre codeblock"><code>/* .mod file */
+{string} Gasolines = ...;
+
+tuple GasType {
+   float demand;
+   float price;
+   float octane;
+   float lead;
+}
+
+GasType gas[Gasolines] = ...;
+
+/* .dat file */
+SheetConnection sheet("oilSheet.xls");
+
+Gasolines from SheetRead(sheet,"'gas data'!A2:A4");
+Gas from SheetRead(sheet,"'gas data'!B2:E4");</code></pre>
+<div class="section" id="usropllangref.uss_langref_datasources.1056122__section1327067635507"><h2 class="title sectiontitle">What data can be read from
+an Excel spreadsheet?</h2><p class="p">OPL opens a spreadsheet in read-only
+mode to read data from it.</p>
+<p class="p">The
+types of data elements supported are:</p>
+<ul class="ul"><li class="li"><p class="p">sets with integers, floats, strings, or tuples;</p>
+</li>
+<li class="li"><p class="p">scalar integers, floats, or strings;</p>
+ </li>
+<li class="li"><p class="p">arrays with integers, floats, one- or two-dimensional strings,
+or one-dimensional tuples;</p>
+ </li>
+<li class="li"><p class="p">one- or two-dimensional arrays of simple types: for such arrays,
+the data must be formatted, that is, it must have the same width/length
+as the array to be filled. OPL automatically determines whether the
+data must be read line by line or column by column. When facing a
+square zone (a two-dimensional array with <samp class="ph codeph">[x][x]</samp> as
+dimensions), the engine reads the data line by line.</p>
+ </li>
+</ul>
+<div class="note note"><span class="notetitle">Note:</span> <ul class="ul"><li class="li"><p class="p">Only tuples with integer, float, and string components are
+supported.</p>
+</li>
+<li class="li"><p class="p">If the sheet name contains a space, the name should be surrounded
+by single quotes in the <samp class="ph codeph">SheetRead</samp> instruction. For
+example:</p>
+<p class="p"><samp class="ph codeph">Oil from SheetRead(sheet,"'oil data'!B2:E4");</samp></p>
+ </li>
+<li class="li"><p class="p">OPL does not support the R1C1 reference style to specify the
+range when reading data from an Excel spreadsheet.</p>
+</li>
+</ul>
+ </div>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1056122__section1238607125434"><h2 class="title sectiontitle">Accessing named ranges in
+Excel</h2><p class="p">IBM ILOG OPL supports the convention
+of <em class="ph i">names</em>, which are a word or string of characters used to
+represent a cell, range of cells, formula, or constant value, and
+that can be used in other formulas.</p>
+<p class="p">Thus you can use easy-to-understand
+names, such as <samp class="ph codeph">Nutrients</samp>, to refer to hard-to-understand
+ranges, such as <samp class="ph codeph">B4:J15</samp> or <samp class="ph codeph">IncreasedProtein</samp> to
+refer to a constraint. You can then substitute these names in formulas
+for the range of cells or constraint.</p>
+<p class="p">Excel <em class="ph i">names</em>, or
+named ranges, can be accessed using the <samp class="ph codeph">SheetRead</samp> command,
+using the following syntax:</p>
+<pre class="pre codeblock"><code>SheetConnection sheetData("C:\\ILOG_Files\\myExcelFile.xls");
+prods from SheetRead(sheetData,"Product"); </code></pre>
+<p class="p">Note the
+double separator \\ in the <samp class="ph codeph">SheetConnection</samp> command.</p>
+<p class="p">The <samp class="ph codeph">SheetRead</samp> command
+is normal, and in this example the Excel name <samp class="ph codeph">Product</samp> replaces
+the normal syntax of, say, <samp class="ph codeph">C13:O72</samp>. </p>
+<p class="p listtitle">To create named ranges in Excel 2007:</p>
+<ol class="ol"><li class="li"><p class="p">Highlight the range of cells you want to name, then click the <span class="ph uicontrol">Name</span> box
+at the left end of the Formula Bar.</p>
+</li>
+<li class="li"><p class="p">Type the name you want to assign to this range and press <span class="ph uicontrol">Enter</span>.</p>
+ </li>
+<li class="li"><p class="p">Save the spreadsheet file.</p>
+ </li>
+</ol>
+<div class="note note"><span class="notetitle">Note:</span> For
+a list of supported versions of Microsoft Excel, please see the detailed
+system requirements <a class="xref" href="http://www-01.ibm.com/support/docview.wss?uid=swg27019100" target="_blank" title="(Opens in a new tab or window)">http://www-01.ibm.com/support/docview.wss?uid=swg27019100</a>.</div>
+<p class="p listtitle">Additional information on named ranges</p>
+<ul class="ul"><li class="li"><p class="p">Excel automatically updates (expands) a named range when a
+row is added somewhere within the range. However, one must careful
+adding rows at the end of a range as the range does not get automatically
+updated in that case. It would have to be updated manually.</p>
+</li>
+<li class="li"><p class="p">OPL allows blank rows in a named range. If you are reading
+a set of strings, it will consider the blank cells as having the value <samp class="ph codeph">0</samp>.
+ If you are reading a set of strings, then it inserts an empty string <samp class="ph codeph">""</samp> into
+the set. For example:</p>
+<p class="p"><samp class="ph codeph">s2 =  {"Monday" "" "Wednesday"
+"Thursday" "Friday"}</samp></p>
+ <p class="p">This behavior is the same when
+you don't use named range but instead use explicit ranges like <samp class="ph codeph">C1:C5</samp>,
+where <samp class="ph codeph">C2</samp> is empty.</p>
+ </li>
+<li class="li"><p class="p">With the Excel VBA one can name the first (top left) cell of
+a named range and access the whole range. OPL does not support this.</p>
+</li>
+<li class="li"><p class="p">When using <samp class="ph codeph">sheetWrite</samp> to write to named ranges,
+the size of the range does not have to match the size of the data
+you are writing to Excel. If the set is smaller, then only the top
+most cells will be filled. </p>
+<p class="p">If you try to write more data than
+the range can accommodate, you receive the error message: "<samp class="ph codeph">Exception
+from IBM ILOG Concert: excel: range is not wide enough to write the
+set</samp>". </p>
+ <p class="p">In this sense, named ranges behave in exactly
+the same way as "regular" ranges.</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1056122__usropllangref.uss_langref_datasources.1058636"><h2 class="title sectiontitle">Format
+of the Excel data</h2><p class="p">Here
+we must differentiate between simple types and tuples:</p>
+<ul class="ul"><li class="li"><p class="p">Sets of simple types: The engine reads data from left to right
+and top to bottom. Data can therefore be read either horizontally,
+vertically, or from a rectangular zone.</p>
+ </li>
+<li class="li"><p class="p">Sets of tuples: The data has to be formatted because the tuple
+schema has an arity. As in databases and manual tables, the data format
+is “fixed width, variable length”. Therefore, tuple sets
+are read only line by line in Excel: this is the same representation
+as in pure data files.</p>
+ </li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_spreadsheet.html" title="Describes how to connect an MS Excel spreadsheet, read from it, and write the results to the connected spreadsheet.">Spreadsheet Input/Output</a></div>
+</div>
+</div></body>
+</html>

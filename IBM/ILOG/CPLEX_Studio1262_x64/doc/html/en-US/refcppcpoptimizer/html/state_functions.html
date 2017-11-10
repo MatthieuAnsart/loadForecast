@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>State functions in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="state_functions.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="72"><div
+                class="section-title1">State functions in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                    href="cumul_functions.html">PREVIOUS</a> <a
+                href="isomorphism.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%"><tr><td><a
+                            href="state_functions.html#73">Semantics</a></td></tr><tr><td><a
+                            href="state_functions.html#74">State functions and transition distance</a></td></tr><tr><td><a
+                href="state_functions.html#75">Constraints on state functions</a></td></tr></table><div
+                    class="section-body"><div class="section"><a
+                            name="73"><div
+                        class="section-title2">Semantics</div>
+</a><div
+                            class="section-body"><p>Some scheduling problems involve reasoning with resources whose state may change over time.
+The state of the resource can change because of the scheduled activities or because of exogenous
+events, and some activities in the schedule may need a particular condition on the resource
+state to be true in order to execute. For instance, the temperature of an oven may change due
+to the execution of an activity that sets the oven temperature to a value <em>v</em> and some cooking
+activity may require the oven temperature to be maintained at a temperature level <em>v'</em> during
+its execution. In some applications, the transition between two states is not instantaneous
+and a transition time is needed for the resource to switch from a state <em>v</em> to a state <em>v'</em>.</p><p>CP Optimizer introduces the notion of state function which is a function describing the
+evolution of a given feature of the environment. The possible evolution of this feature is
+constrained by the interval variables of the problem. The main difference between state functions
+and cumul functions (see section Cumul Functions) 
+is that interval variables have an incremental effect on cumul
+functions (increasing or decreasing the function value) whereas they have an absolute effect
+on state functions (requiring the function value to be equal to a particular state or in a set of
+possible states).</p><p>Informally speaking, a state function is a set of non-overlapping intervals over which the
+function maintains a particular non-negative integer state. In between those intervals, the
+state of the function is not defined, typically because of an ongoing transition between two
+states (see State Functions and Transition Distance). For instance for an oven with 3 possible temperature levels identified by
+indexes 0, 1, and 2 we could have:</p><pre
+                            class="sample">[start=0, end=100): state=0,
+[start=150, end=250): state=1,
+[start=250, end=300): state=1,
+[start=320, end=420): state=2,
+[start=460, end=560): state=0, ...</pre><p>A set of constraints is available to restrict the evolution of a state function (see Constraints on State Functions).
+These constraints make it possible to specify:</p><ul>
+<li>that the state of the function must be defined and should remain equal to a given state
+        everywhere over a given fixed or variable interval (<em>alwaysEqual</em>),</li><li>that the state of the function must be defined and should remain constant (no matter
+        its value) everywhere over a given fixed or variable interval (<em>alwaysConstant</em>),</li><li>that intervals requiring the state of the function to be defined cannot overlap a given
+        fixed or variable interval (<em>alwaysNoState</em>), and</li><li>that everywhere over a given fixed or variable interval, the state of the function, if
+        defined, must remain within a given range of states [<em>Vmin</em>, <em>Vmax</em>] 
+        (<em>alwaysIn</em>).</li>
+</ul><p>Additionally, the <em>alwaysEqual</em> and <em>alwaysConstant</em> constraints can be 
+complemented to specify that the given fixed
+or variable interval should have its start and/or end point synchronized with the start and/or
+end point of the interval of the state function that maintains the required state. This is the
+notion of start and end alignment which is particularly useful for modelling parallel batches.
+For instance in the oven example above, all interval variables that would require an oven
+temperature of level 1 and specify a start and end alignment, if executed over the interval
+[150, 250) would have to start exactly at 150 and end at 250. This is depicted on figure 6
+where <em>a1</em> and <em>a2</em> are two start and end aligned interval variables, <em>a3</em>
+is start aligned only and <em>a4</em> is not aligned at all.</p><img
+                            src="images/state.png"
+                                alt="image" /><p>The constraints involving interval variables and a state function cannot be used in logical constraints of CP 
+Optimizer (see <a
+                                href="functions/operator_dif.html">operator!</a>, <a
+                    href="functions/operator_or_or.html">operator||</a>). The reason is that any 
+logical constraint involving interval variables
+must be represented via the presence Boolean value on the interval handled by the <em>presenceOf</em> constraint.
+The constraints having this limitation are <em>alwaysIn</em>, <em>alwaysNoState</em>, <em>alwaysConstant</em> and 
+<em>alwaysEqual</em>.</p></div></div><div
+                        class="section"><a name="74"><div
+                        class="section-title2">State functions and transition distance</div>
+</a><div
+                            class="section-body"><p>A state function <em>f</em> is a decision variable whose value is a set of non-overlapping intervals,
+each interval [<em>si, ei</em>) being associated a non-negative integer value <em>vi</em> that represents the state
+of the function over the interval.</p><img
+                            src="images/state_func1.png"
+                                alt="image" /><p>For instance, in the example of the oven introduced above, we would have
+<img
+                                src="images/f_underscore.png"
+                                alt="image" />(200) = 1, 
+<em>s</em>(<img
+                                src="images/f_underscore.png"
+                            alt="image" />, 200) = 150 and <em>e</em>(<em>f</em>, 200) = 250.</p><p>A state function can be associated with a <strong>transition distance</strong>. The transition distance defines
+the minimal distance that must separate two consecutive states in the state function.</p><p>More formally, if <em>M</em>[<em>v, v0</em>] represents a transition distance matrix between state <em>v</em> and state
+<em>v'</em>, the transition distance means that:</p><img
+                            src="images/state_func2.png"
+                            alt="image" /><p>The transition distance matrix <em>M</em> must satisfy the triangular inequality.</p><p>For instance, in the example of the oven, the state function depicted on Figure 6 is consistent
+with the following transition distance:</p><img
+                            src="images/state_func3.png"
+                    alt="image" /><p>Notice that a transition distance between the same states can be non-zero, as it is
+for state 3 in this example.</p></div></div><div
+                        class="section"><a name="75"><div
+                        class="section-title2">Constraints on state functions</div>
+</a><div
+                                class="section-body"><p>If <em>f</em> is a state function, <em>a</em> an interval variable, <em>v</em>, <em>vmin</em>, <em>vmax</em> non-negative 
+integers and <img
+                                src="images/align_se.png"
+                                    alt="image" /> two Boolean values:</p><ul>
+<li>The constraint <em>alwaysEqual(f, a, v,</em><img
+                                    src="images/align_se.png"
+                            alt="image" />) specifies that whenever <em>a</em> is present,
+       state function <em>f</em> must be defined everywhere between the start and the end of interval <em>a</em>
+       and be constant and equal to <em>v</em> over this interval. If <em>algn_s</em> is true, it means that interval
+       <em>a</em> is start-aligned with <em>f</em>: interval <em>a</em> must start at the beginning of the interval where <em>f</em>
+       is maintained in state <em>s</em>. If <em>algn_e</em> is true, it means that interval <em>a</em> is end-aligned with <em>f</em>:
+       interval <em>a</em> must end at the end of the interval where <em>f</em> is maintained in state <em>s</em>. More
+       formally:</li>
+</ul><img
+                            src="images/state_func4.png"
+                                    alt="image" /><ul>
+<li>The constraint <em>alwaysConstant(f, a,</em><img
+                                    src="images/align_se.png"
+                                    alt="image" />) specifies that whenever <em>a</em> is present,
+       state function <em>f</em> must be defined everywhere between the start and the end of interval <em>a</em>
+       and be constant over this interval. More formally: <img
+                                    src="images/exist.png"
+                                    alt="image" /><em>v</em><img
+                                    src="images/isin.png"
+                                    alt="image" /><em>Z+</em>, 
+       <em>alwaysEqual(f, a, v,</em><img
+                                    src="images/align_se.png"
+                                    alt="image" />)</li><li>The constraint <em>alwaysNoState(f, a)</em> specifies that whenever <em>a</em> is present,
+       state function <em>f</em> cannot provide any valid state between the start and the end of interval <em>a</em>. As a
+       consequence, any interval constrained with <em>alwaysEqual</em> or <em>alwaysConstant</em> on this
+       function and thus requiring the function to be defined cannot overlap interval <em>a</em>. More
+       formally, the constraint means that 
+       [<em>s</em>(<img
+                                    src="images/a_underscore.png"
+                                    alt="image" />), <em>e</em>(<img
+                                    src="images/a_underscore.png"
+                                    alt="image" />)) &cap; 
+       <em>D</em>(<img
+                                    src="images/f_underscore.png"
+                                    alt="image" />) = <img
+                                    src="images/empty.png"
+                                    alt="image" />.</li><li>The constraint <em>alwaysIn(f, a, vmin, vmax)</em> specifies that whenever <em>a</em> is present, everywhere
+       between the start and the end of interval <em>a</em> the state of function <em>f</em>, if defined, must
+       belong to the range [<em>vmin, vmax</em>]. Formally: 
+       <img
+                                    src="images/forall.png"
+                                    alt="image" /><em>t</em><img
+                                    src="images/isin.png"
+                                    alt="image" /> [<em>s</em>(<img
+                                    src="images/a_underscore.png"
+                                    alt="image" />), 
+       <em>e</em>(<img
+                                    src="images/a_underscore.png"
+                                    alt="image" />)) &cap; <em>D</em>(<img
+                                    src="images/f_underscore.png"
+                                    alt="image" />), 
+       <img
+                                    src="images/f_underscore.png"
+                                    alt="image" />(<em>t</em>) <img
+                                    src="images/isin.png"
+                alt="image" /> [<em>vmin, vmax</em>].</li>
+</ul><p>In Figure 6, there are two adjacent intervals of state 1: the first one is [150,250) and the second one [250,300}.  There 
+are two reasons for that: 250 is end of end-aligned interval <em>a1</em> and also start of start-aligned interval <em>a2</em>.
+Therefore due to condition (b) or (c) the interval [150,300) must be split in two (even though the state function does not
+change its value).  Note also that thanks to condition (a) the interval <em>a4</em> cannot overlap 250, despite the fact that 
+<em>a4</em> is neither start nor end aligned.  To allow <em>a4</em> to overlap 250,  it would be necessary
+to use an <em>alwaysIn</em> constraint instead of <em>alwaysEqual</em> -- the difference is that <em>alwaysIn</em> does not
+enforce condition (a) even if the allowed state range is singleton (however, <em>alwaysIn</em> also allows the interval to
+overlap with state transitions).</p></div></div></div><div
+                    align="right"><a
+                    href="cumul_functions.html">PREVIOUS</a> <a href="isomorphism.html">NEXT</a></div></div></body>
+</html>

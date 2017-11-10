@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Conversion notes for users of the C++ API" />
+<meta name="abstract" content="Explains changes introduced in the C++ API by CPLEX V12.6.1." />
+<meta name="Description" content="Explains changes introduced in the C++ API by CPLEX V12.6.1." />
+<meta name="DC.subject" content="release notes CPLEX V12.6.1, conversion notes (C++ API)" />
+<meta name="keywords" content="release notes CPLEX V12.6.1, conversion notes (C++ API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/convertIntro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ConvertCPPapi1261" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/convertIntro.html" />
+<title>Conversion notes for users of the C++ API</title>
+</head>
+<body role="main" id="ConvertCPPapi1261">
+<h1 class="title topictitle1">Conversion notes for users of the C++ API</h1>
+<div class="body"><p class="shortdesc">Explains changes introduced in the C++ API 
+by CPLEX V12.6.1.</p>
+<p class="p">These notes explain changes introduced in CPLEX V12.6.1 for users of the
+C++ API.</p>
+<div class="section"><h2 class="title sectiontitle">Node ID query</h2> 
+ 
+<p class="p">Previously, the method <span class="keyword apiname">getNodeID</span> was defined only for the class 
+<span class="keyword apiname">BranchCallback</span>. That is, unfortunately, the method was not 
+available in a user cut callback nor in a lazy constraint callback, rendering it 
+difficult to write such instructions to CPLEX as "Create no more than N cuts 
+at the current node."</p>
+ 
+<p class="p">Now, however, in CPLEX V12.6.1, the method <span class="keyword apiname">getNodeID</span> 
+is defined in the class <span class="keyword apiname">IloCplex::ControlCallback</span>, thus 
+making the method available in all derived subclasses for greater ease of use.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Does a solution exist?</h2>
+<p class="p">When CPLEX solves a model, it formerly returned true to the question 
+of whether a solution exists only when that solution was provably optimal 
+or when the model was bounded and the solution was feasible. That convention has changed because CPLEX can 
+now detect feasible solutions even in unbounded models. Consequently, 
+CPLEX now returns true to the question of whether a solution exists 
+when the solution is provably optimal or when the solution is feasible, 
+even if that feasible solution occurs in an unbounded model.</p>
+
+<p class="p">This change implies possible differences in the return value of the 
+following methods in your existing C++ applications:</p>
+
+<ul class="ul"><li class="li"><span class="keyword apiname">IloCplex::solve</span></li>
+<li class="li"><span class="keyword apiname">IloCplex::solveFixed</span></li>
+<li class="li"><span class="keyword apiname">IloCplex::populate</span></li>
+</ul>
+
+<p class="p">The following asynchronous methods (likely to occur in 
+applications of the remote object) also changed:</p>
+
+<ul class="ul"><li class="li"><span class="keyword apiname">IloCplex::SolveHandle::joinSolve</span></li>
+<li class="li"><span class="keyword apiname">IloCplex::SolveFixedHandle::joinSolveFixed</span></li>
+<li class="li"><span class="keyword apiname">IloCplex::PopulateHandle::joinPopulate</span></li>
+</ul>
+
+<p class="p">When CPLEX returns true, your application can query the solution 
+to determine whether it is optimal, feasible, and so forth 
+by means of these methods:</p>
+
+<ul class="ul"><li class="li"><span class="keyword apiname">IloCplex::isPrimalFeasible</span></li>
+<li class="li"><span class="keyword apiname">IloCplex::isDualFeasible</span></li>
+</ul>
+
+<p class="p">In future applications, when CPLEX returns true specifying that 
+a solution exists, your application may need to check whether that 
+solution is optimal, feasible, or from an unbounded model.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/convertIntro.html" title="Explains changes introduced by CPLEX V12.6.1.">Conversion notes</a></div>
+</div>
+</div></body>
+</html>

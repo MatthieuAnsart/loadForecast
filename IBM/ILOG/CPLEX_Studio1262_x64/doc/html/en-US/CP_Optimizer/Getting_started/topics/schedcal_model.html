@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the house building with resource calendars problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the house building with resource calendars problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/schedcal.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerschedcal.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/schedcal.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerschedcal.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the house building with resource calendars
+problem has been described using natural language, you then use Concert
+Technology classes to model the constraint programming problem.</p>
+<p class="p">After you have written a description of your problem,
+you can use IBM® ILOG® Concert Technology
+classes to model it.</p>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156193"><h2 class="title sectiontitle">Step 2: Open the example file</h2><p class="p">Open the
+example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/sched_calendar_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You will enter the missing code in each step
+in this lesson. At the end, you will have completed the program code,
+and you can compile and run the program.</p>
+<p class="p">In
+this lesson, you include the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>.
+To catch exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code for creating the environment and model and for printing out
+the solution found by the CP Optimizer engine is provided.</p>
+<p class="p">In addition, the data related to the tasks, such as the tasks
+(<samp class="ph codeph">Tasks</samp>), the number of tasks (<samp class="ph codeph">NbTasks</samp>),
+the names of the tasks (<samp class="ph codeph">TaskNames</samp>) and sizes
+of the tasks (<samp class="ph codeph">TaskDurations</samp>), are provided.</p>
+<p class="p">After you create an environment and a model, you need to
+define the decision variables and add the constraints and objective
+to the model. Since the requirements for each of the five houses are
+similar, you use a function, <samp class="ph codeph">MakeHouse</samp>,
+to create the decision variables, constraints and costs associated
+with a house. Information about individual houses that must be shared
+with the main function includes the expressions needed to create the
+objective function and the set of tasks associated with each worker.
+This set of tasks is needed in order to post the no overlap constraints
+on a worker’s tasks. In order to display the results of the optimization,
+it is also useful to maintain an array of all the interval variables. </p>
+<p class="p">To access this information, you create objects to be updated
+in the <samp class="ph codeph">MakeHouse</samp> function. An array of task
+interval variables, <samp class="ph codeph">allTasks</samp>, stores all
+the interval variables that are created. The cost expression involves
+the date at which moving is completed for each house; the integer
+expression array <samp class="ph codeph">ends</samp> is used to store this
+information. You create an array of interval variables, <samp class="ph codeph">joeTasks</samp>,
+to be filled by the <samp class="ph codeph">MakeHouse</samp> function.
+A similar array is created for Jim. These two arrays are passed to
+the <samp class="ph codeph">MakeHouse</samp> function which adds elements
+to these arrays as the variables are created. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156182"><h2 class="title sectiontitle">Step 3: Declare the objects needed for MakeHouse</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare
+the objects needed for MakeHouse</samp>  </p>
+<pre class="pre codeblock"><code>    IloInt nbHouses = 5;
+    IloModel model(env);
+    IloIntExprArray ends(env);
+    IloIntervalVarArray allTasks(env);
+    IloIntervalVarArray joeTasks(env);
+    IloIntervalVarArray jimTasks(env);
+</code></pre>
+<p class="p">You pass the model, the house identifier (a
+number in <samp class="ph codeph">0..nbHouses-1</samp>), the array of expressions
+representing the completion dates of the houses, the array of all
+tasks and the arrays <samp class="ph codeph">joeTasks</samp> and <samp class="ph codeph">jimTasks</samp> as arguments to the <samp class="ph codeph">MakeHouse</samp> function. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156169"><h2 class="title sectiontitle">Step 4: Create the MakeHouse function</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the
+MakeHouse function</samp> </p>
+<pre class="pre codeblock"><code>void MakeHouse(IloModel model,
+       IloInt id,
+       IloIntExprArray ends,
+       IloIntervalVarArray allTasks,
+       IloIntervalVarArray joeTasks,
+       IloIntervalVarArray jimTasks) {
+</code></pre>
+<p class="p">Each house has a list of <samp class="ph codeph">NbTasks</samp> that
+must be scheduled. Task <samp class="ph codeph">i</samp>, where <samp class="ph codeph">i</samp> is in <samp class="ph codeph">0..NbTasks-1</samp>,
+has a size of <samp class="ph codeph">TaskDurations[i]</samp> and the name <samp class="ph codeph">TaskNames[i]</samp>.   Using these, you build an array <samp class="ph codeph">tasks</samp> of interval variables. As you create each
+interval variable, you also add it to the array <samp class="ph codeph">allTasks</samp> that
+will be used to display the solution once the schedule has been determined.
+  </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156158"><h2 class="title sectiontitle">Step 5: Create the interval variables</h2><p class="p"> Add
+the following code after the comment <samp class="ph codeph">//Create the
+interval variables</samp> </p>
+<pre class="pre codeblock"><code>  char name[128];
+  IloIntervalVarArray tasks(env, NbTasks);
+  for (IloInt i=0; i&lt;NbTasks; ++i) {
+    sprintf(name, "H%ld-%s", id, TaskNames[i]);
+    tasks[i] = IloIntervalVar(env, TaskDurations[i], name);
+    allTasks.add(tasks[i]);
+  }
+</code></pre>
+<p class="p">The tasks of the house building project have
+precedence constraints that are added to the model.   </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156147"><h2 class="title sectiontitle">Step 6: Add the precedence constraints</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the precendence
+constraints</samp> </p>
+<pre class="pre codeblock"><code>  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[carpentry]));
+  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[plumbing]));
+  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[ceiling]));
+  model.add(IloEndBeforeStart(env, tasks[carpentry], tasks[roofing]));
+  model.add(IloEndBeforeStart(env, tasks[ceiling],   tasks[painting]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[windows]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing],  tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing],  tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[windows],   tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[facade],    tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[garden],    tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[painting],  tasks[moving]));
+</code></pre>
+<p class="p">Each of the tasks requires a particular worker.
+For expressing constraints related to workers, such as no overlap
+and calendar constraints, it is necessary to know the set of tasks
+a particular worker must perform. To maintain this information, you
+add the appropriate tasks to the arrays <samp class="ph codeph">joeTasks</samp> and <samp class="ph codeph">jimTasks</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156136"><h2 class="title sectiontitle">Step 7: Add the tasks to workers</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the tasks to workers</samp> </p>
+<pre class="pre codeblock"><code>  joeTasks.add(tasks[masonry]);
+  joeTasks.add(tasks[carpentry]);
+  jimTasks.add(tasks[plumbing]);
+  jimTasks.add(tasks[ceiling]);
+  joeTasks.add(tasks[roofing]);
+  jimTasks.add(tasks[painting]);
+  jimTasks.add(tasks[windows]);
+  joeTasks.add(tasks[facade]);
+  joeTasks.add(tasks[garden]);
+  jimTasks.add(tasks[moving]);
+</code></pre>
+<p class="p">To model the cost of building the houses,
+you will need to determine the maximum completion date among the individual
+house projects. To access the expression representing the completion
+date of the house currently in consideration, you use the function <samp class="ph codeph">IloEndOf</samp> on the last task in building a house (here,
+it is the moving task) and store this expression in the array <samp class="ph codeph">ends</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156123"><h2 class="title sectiontitle">Step 8: Add the cost expression</h2><p class="p">Add the
+following code after the comment <samp class="ph codeph">//Add the cost expression</samp> </p>
+<pre class="pre codeblock"><code>  ends.add(IloEndOf(tasks[moving]));
+</code></pre>
+<p class="p">This completes the <samp class="ph codeph">MakeHouse</samp> function.
+In the main function, you now call the <samp class="ph codeph">MakeHouse</samp> function,
+once for each house. At each call, additional elements are appended
+to the arrays <samp class="ph codeph">ends</samp>, <samp class="ph codeph">allTasks</samp>, <samp class="ph codeph">joeTasks</samp> and  <samp class="ph codeph">jimTasks</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156112"><h2 class="title sectiontitle">Step 9: Create the houses</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the houses</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt h=0; h&lt;nbHouses; ++h) {
+      MakeHouse(model, h, ends, allTasks, joeTasks, jimTasks);
+    }
+</code></pre>
+<p class="p">To add the constraint that a worker can perform
+only one task at a time, you constrain that the interval variables
+associated with that worker do not overlap in the solution. To do
+this, you can use the specialized constraint <samp class="ph codeph">IloNoOverlap</samp>,
+but with a slightly different constructor than was used in <a class="xref" href="schedseq.html" title="In this lesson, you will learn how to find a solution to a house building with workers problem using CP Optimizer and the three-stage method.">Using no overlap constraints on interval variables: house building with workers</a>.</p>
+<p class="p">This
+constructor is a shortcut that avoids the need to explicitly define
+the interval sequence variable when no additional constraints are
+required on the sequence variable. The first argument passed to this
+constructor of the class <samp class="ph codeph">IloNoOverlap</samp> is
+the environment. The second argument is the array of interval variables
+that should not overlap. The third argument is an optional transition
+parameter. The final argument is an optional name used for debug and
+trace purposes. Here is a constructor:       </p>
+<pre class="pre codeblock"><code>  IloNoOverlap(const IloEnv env,
+               const IloIntervalVarArray a,
+               const IloTransitionDistance ttime =0,
+               const char* name=0);
+</code></pre>
+<p class="p">You add to the model one no overlap constraint
+on the array of interval variables for each worker.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156099"><h2 class="title sectiontitle">Step 10: Add the no overlap constraints</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the no overlap constraints</samp> </p>
+<pre class="pre codeblock"><code>    model.add(IloNoOverlap(env, joeTasks));
+    model.add(IloNoOverlap(env, jimTasks));
+</code></pre>
+<p class="p">To model the availability of a worker in regard
+to his days off, you first create a function that represents his intensity
+over time. You specify that this function has a range of [0..100],
+where the value 0 represents that the worker is not available and
+the value 100 represents that the worker is available in regard to
+his calendar.</p>
+<p class="p">Concert Technology provides the class <samp class="ph codeph">IloNumToNumStepFunction</samp> to represent a step function
+that is defined everywhere on a given interval and can be used to
+model the intensity of a worker.     </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Step function</strong> </p>
+ <p class="p">Step functions are represented
+by the class <samp class="ph codeph">IloNumToNumStepFunction</samp> in IBM ILOG Concert Technology.</p>
+ <p class="p">Each
+interval <em class="ph i">[x1, x2)</em> on which the function has the same
+value is called a <em class="ph i">step</em>.</p>
+ <p class="p">When two consecutive
+steps of the function have the same value, these steps are merged
+so that the function is always represented with the minimal number
+of steps. </p>
+ </div>
+<p class="p">The first argument passed to the
+constructor of the class <samp class="ph codeph">IloNumToNumStepFunction</samp> is
+the environment. The second and third arguments define the interval
+on which the function is defined. The fourth argument is the default
+value of the function on the defined interval. The fifth argument
+is an optional name used for debug and trace purposes. Here is a constructor: </p>
+<pre class="pre codeblock"><code>  IloNumToNumStepFunction(const IloEnv env,
+                          IloNum xmin = -IloInfinity,
+                          IloNum xmax =  IloInfinity,
+                          IloNum dval =  0.0,
+                          const char* name = 0);
+</code></pre>
+<p class="p">This constructor creates a step defined everywhere
+on the interval <samp class="ph codeph">[xmin,xmax)</samp> whose single
+step takes the value <samp class="ph codeph">dval</samp>. </p>
+<p class="p">In
+this case, a worker’s calendar is simplest to describe in terms of
+noting exceptions to being available to work, so you set the default
+value for his intensity to 100. Later you modify the subintervals
+associated with his days off to take the value 0. Based on knowledge
+of the problem, you can assume that it should take less than two years
+to build all five houses and thus define the function’s interval as
+[0..2*365).</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156088"><h2 class="title sectiontitle">Step 11: Add the intensity step functions</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Add the intensity step functions</samp> </p>
+<pre class="pre codeblock"><code>    IloNumToNumStepFunction joeCalendar(env, 0, 2*365, 100);
+    IloNumToNumStepFunction jimCalendar(env, 0, 2*365, 100);
+</code></pre>
+<p class="p">To modify the step function to reflect a worker’s
+days off, you set the step value of the subintervals associated with
+those days to the value 0. Since both workers have the weekends off,
+you iterate through the weeks and set the step value for day 5 and
+6 of each week to 0 (For this problem, day 0 is the start of a week.).
+For the holidays, you also set the values of the associated intervals
+to zero.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156073"><h2 class="title sectiontitle">Step 12: Add the weekends and holidays</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the weekends and holidays</samp> </p>
+<pre class="pre codeblock"><code>    // Week-ends
+    for (IloInt w=0; w&lt;2*52; ++w) {
+      joeCalendar.setValue(5+(7*w), 7+(7*w), 0);
+      jimCalendar.setValue(5+(7*w), 7+(7*w), 0);
+    }  
+
+    // Holidays
+    joeCalendar.setValue(  5,  12, 0);
+    joeCalendar.setValue(124, 131, 0);
+    joeCalendar.setValue(215, 236, 0);
+    joeCalendar.setValue(369, 376, 0);
+    joeCalendar.setValue(495, 502, 0);
+    joeCalendar.setValue(579, 600, 0);
+    jimCalendar.setValue( 26,  40, 0);
+    jimCalendar.setValue(201, 225, 0);
+    jimCalendar.setValue(306, 313, 0);
+    jimCalendar.setValue(397, 411, 0);
+    jimCalendar.setValue(565, 579, 0);
+</code></pre>
+<p class="p">To apply a worker’s intensity function to
+all of his tasks, you use the function <samp class="ph codeph">IloIntervalVar::setIntensity</samp>.
+         </p>
+<pre class="pre codeblock"><code>   void IloIntervalVar::setIntensity(IloNumToNumStepFunction intensity, 
+                                     IloInt granularity =100);
+</code></pre>
+<p class="p">This method sets the step function  <samp class="ph codeph">intensity</samp> as the intensity function of the invoking
+interval variable. Full intensity is represented by a value <samp class="ph codeph">granularity</samp>. The argument <samp class="ph codeph">intensity</samp> should
+be an integral <samp class="ph codeph">IloNumToNumStepFunction</samp> with
+values in the range <samp class="ph codeph">[0..granularity]</samp>. In
+this example, the intensity values are only 0 and 100, and the granularity
+is 100.</p>
+<p class="p">When an intensity function is set on an interval
+variable, the interval will automatically be prolonged if it overlaps
+any weekends or holidays or both. The size of the interval variable
+is the time spent at the house to process the task, not including
+the worker’s days off. The length is the difference between the start
+and the end of the interval.</p>
+<p class="p">A task could still be
+scheduled to start or end on a day off. In this problem, a worker’s
+tasks cannot start or end during the worker’s days off. Concert Technology
+provides the constraints <samp class="ph codeph">IloForbidStart</samp> and <samp class="ph codeph">IloForbidEnd</samp> to model these types of restrictions.
+      </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Forbidden interval
+placement constraint</strong> </p>
+ <p class="p"> With the specialized constraint <samp class="ph codeph">IloForbidStart</samp>, you can create a constraint that
+specifies that an interval variable must not be scheduled to start
+at certain times.  </p>
+ <p class="p">The constraint takes an interval
+variable and a step function. If the interval variable is present
+in the solution, then it is constrained to not start at a time when
+the value of the step function is zero.</p>
+ <p class="p">Concert Technology
+also provides <samp class="ph codeph">IloForbidEnd</samp> and <samp class="ph codeph">IloForbidExtent</samp>, which respectively constrain an
+interval variable to not end and not overlap where the associated
+step function is valued zero. </p>
+ </div>
+<p class="p"> The first argument
+passed to the function <samp class="ph codeph">IloForbidStart</samp> is
+the environment. The second argument is the interval variable on which
+you want to place the constraint. The third argument is the step function
+that defines a set of forbidden values for the start of the interval
+variable: the interval variable cannot start at a point where the
+step function is 0.</p>
+<p class="p">Here is a function signature: 
+   </p>
+<pre class="pre codeblock"><code>  IloConstraint IloForbidStart (const IloEnv env, 
+                                const IloIntervalVar a 
+                                const IloNumToNumStepFunction func);
+</code></pre>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156052"><h2 class="title sectiontitle">Step 13: Add the forbidden start and end constraints</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the forbidden start and end constraints</samp> </p>
+<pre class="pre codeblock"><code>    IloInt i;
+    for (i=0; i&lt;joeTasks.getSize(); ++i) {
+      joeTasks[i].setIntensity(joeCalendar);
+      model.add(IloForbidStart(env, joeTasks[i], joeCalendar));
+      model.add(IloForbidEnd(env, joeTasks[i], joeCalendar));
+    }
+    for (i=0; i&lt;jimTasks.getSize(); ++i) {
+      jimTasks[i].setIntensity(jimCalendar);
+      model.add(IloForbidStart(env, jimTasks[i], jimCalendar));
+      model.add(IloForbidEnd(env, jimTasks[i], jimCalendar));
+    }
+</code></pre>
+<p class="p">The objective of this problem is to minimize
+the overall completion date (the completion date of the house that
+is completed last). To do this, you minimize the maximal expression
+in the array <samp class="ph codeph">ends</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedcal.114936__migration.uss_gscpoptimizerschedcal.156033"><h2 class="title sectiontitle">Step 14: Add the objective</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the objective</samp> </p>
+<pre class="pre codeblock"><code>    model.add(IloMinimize(env, IloMax(ends)));
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/schedcal.html" title="In this lesson, you will learn how to find a solution to a house building with resource calendars problem using CP Optimizer and the three-stage method.">Using interval variables with intensities: house building with resource calendars</a></div>
+</div>
+</div></body>
+</html>

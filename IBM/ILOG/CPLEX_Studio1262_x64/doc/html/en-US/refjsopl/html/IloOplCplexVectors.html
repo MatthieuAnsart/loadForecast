@@ -1,0 +1,774 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="generator" content="JsDoc Toolkit" />
+		
+		 <!-- C. Chardiny - Set the page titles as in old javascript doclet  -->
+		
+		    <title>IBM ILOG OPL JavaScript Reference: Class IloOplCplexVectors</title>
+		
+		
+		<!-- C. Chardiny JSF1 - link to the template CSS -->
+		<link rel="stylesheet" type="text/css" href="ibm.css" title="Style" />
+	</head>
+
+	<body>
+    <div class="ibm-access"><a href="#ibm-content">
+    <img class="ibm-access" src="whitepixel.png" alt="Skip to main content"/>
+    </a></div>
+    
+<!-- ============================== header ================================= -->	
+	<!-- C. Chardiny - JSF1 - Add a navigation bar in each class  -->
+    <div class='navBar'><a href="index-all.html">Index</a>  <a href="intro.html">Overview</a></div><div class='frameNavBar'><a href="IloOplCplexBasis.html">PREV CLASS</a>  <a href="IloOplCPSolution.html">NEXT CLASS</a>  <a href="index.html" target="_top">FRAMES</a>  <a href="IloOplCplexVectors.html" target="_top">NO FRAMES</a></div>
+<hr/>
+<!-- ============================== class title ============================ -->
+<a name="ibm-content">&nbsp;</a>
+			<h2 class="classTitle">
+				
+				
+				Class IloOplCplexVectors
+				
+			</h2>
+
+<!-- C. Chardiny from old english tempate -->		
+
+   <!-- ============ CLASS INHERITANCE BEGIN ========== -->
+
+   <!-- C. Chardiny JSN2 - INHERITANCE graph  -->
+   <pre><a href="IloObject.html">IloObject</a>
+   |
+   +--IloOplCplexVectors</pre>
+  
+   <!-- ============ CLASS INHERITANCE END ========== -->
+	
+		<hr/>
+	   
+
+		
+<!-- ============================== class summary ========================== -->
+				<!-- C. Chardiny JST12 - proofread tag  -->
+				
+		
+		<!--	<p class="description"> -->
+				
+				<!-- C. Chardiny JS01 - module tag  -->
+				
+				<!-- C. Chardiny JST6 - ilog.undocumented.jsFile tag  -->
+								
+				
+					
+				
+				
+					<dl class="detailList">
+						<dt class="heading">Description:</dt>
+							<dd>This is an OPL service class provided to support the CPLEX warm start functionalityfor mixed integer programming models.<p>See the <a href ="intro.html">Overview</a> for a general presentation of the ILOG Script extensions for OPL.</p><p>See the CPLEX documentation for the methods <code>IloCplex::getStart</code> and <code>IloCplex::setStart</code> or for<code>CPXgetmipstart</code>, <code>CPXcopymipstart</code> for details.</p><p></dd>
+					</dl>
+				
+				<!-- @note generated notes out of the description -->	
+				
+				<!-- @example generated Examples out of the description -->
+				
+					<dl class="detailList">
+					<dt class="heading">Example:</dt>
+									
+						<dd>For the following basic model:</dd>
+						<dd><pre class="code">int maxOfx = ...;dvar int x;maximize x;subject to {  x<=maxOfx;   }</pre></dd>
+									
+						<dd>and the following data:</dd>
+						<dd><pre class="code">maxOfx=10;</pre></dd>
+									
+						<dd>Flow control script:</dd>
+						<dd><pre class="code">main {     var vectors= new IloOplCplexVectors();  var source = new IloOplModelSource("basicmodel2.mod");  var cplex = new IloCplex();  var def = new IloOplModelDefinition(source);  var opl = new IloOplModel(def,cplex);  var data = new IloOplDataSource("basicmodel.dat");  opl.addDataSource(data);  opl.generate();  if (cplex.solve()) {     writeln("OBJ = " + cplex.getObjValue());  } else {     writeln("No solution");  }  if ( !vectors.getStart(cplex) ) {     writeln("warm start preparation failed: ",vectors.status);  } else {     writeln("warm start preparation successful ");  }  var opl2 = new IloOplModel(def,cplex);  var data2= new IloOplDataElements();  data2.maxOfx=11;  opl2.addDataSource(data2);  opl2.generate();  if ( !vectors.setStart(cplex) ) {     writeln("warm start ",vectors.Nrows,"x",vectors.Ncols," failed: ",vectors.status);  } else {     writeln("warm start ",vectors.Nrows,"x",vectors.Ncols," succeeded ");  }  if (cplex.solve()) {     writeln("OBJ = " + cplex.getObjValue());  } else {     writeln("No solution");  }  opl.end();  opl2.end();  data.end();   def.end();   cplex.end();   vectors.end();  source.end(); }</pre></dd>
+									
+						<dd>After execution the Scripting  log shows:</dd>
+						<dd><pre class="code"> OBJ = 10 warm start preparation succeeded warm start 1x2 succeeded OBJ = 11</pre></dd>
+					
+					</dl>
+				
+				<!--  -->
+				
+					
+					
+					
+					<!-- C. Chardiny JSN5 - iterating-properties tag  -->
+					<dl class='detailList'><dt class='heading'>Iterating properties:</dt><dd>Default behavior.</dd></dl>
+					<!-- C. Chardiny JSN5 - index-resolution tag  -->
+					<dl class='detailList'><dt class='heading'>Index resolution:</dt><dd>Default behavior.</dd></dl>
+					<!-- C. Chardiny JST2 - available tag  -->
+					<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+					<!-- C. Chardiny JST3 - opl-type tag  -->				
+					
+					
+					<!-- Add support to global functions links -->
+						
+	<!--		</p> -->
+			<hr />
+<!-- ============================== constructor summary ==================== -->			
+		  
+		  <!-- C. Chardiny JST4 - ilog.undocumented.constructor tag  -->
+		   
+			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class IloOplCplexVectors.">
+				<caption>Constructor Summary</caption>
+				<thead>
+					<tr>
+						<th scope="col">Constructor Attributes</th>
+						<th scope="col">Constructor Name and Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="attributes">&nbsp;</td>
+						<td class="nameDescription" >
+							<div class="fixedFont">
+								<b><a href="IloOplCplexVectors.html#constructor">IloOplCplexVectors</a></b>()
+							</div>
+							<div class="description"></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		
+			
+<!-- ============================== properties summary ===================== -->
+			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class IloOplCplexVectors.">
+					<caption>Property Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Field Attributes</th>
+							<th scope="col">Field Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								
+								<a href="IloOplCplexVectors.html#Ncols">Ncols</a>
+								
+								<!-- <b><a href="IloOplCplexVectors.html#Ncols">Ncols</a></b> -->
+								</div>
+								<div class="description">Accesses the number of columns in the CPLEX matrixfrom which the warm start information has been taken.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								
+								<a href="IloOplCplexVectors.html#Nrows">Nrows</a>
+								
+								<!-- <b><a href="IloOplCplexVectors.html#Nrows">Nrows</a></b> -->
+								</div>
+								<div class="description">Accesses the number of rows in the CPLEX matrix from which the vectors have been taken.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								
+								<a href="IloOplCplexVectors.html#status">status</a>
+								
+								<!-- <b><a href="IloOplCplexVectors.html#status">status</a></b> -->
+								</div>
+								<div class="description">The CPLEX status of the last call.</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
+				<!-- C. Chardiny - add a summary table and enhance style -->
+				
+				
+			
+
+<!-- ============================== methods summary ======================== -->
+			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class IloOplCplexVectors.">
+					 <!-- C. Chardiny - Customize global functions page  -->
+					<caption>Method Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Method Attributes</th>
+							<th scope="col">Method Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b>
+								<a href="IloOplCplexVectors.html#attach">attach</a></b>(dvars, values)
+								</div>
+								<div class="description">Attaches a variable array to a value array.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b>
+								<a href="IloOplCplexVectors.html#getStart">getStart</a></b>(cplex)
+								</div>
+								<div class="description">Saves the MIP start information for the given CPLEX instance.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b>
+								<a href="IloOplCplexVectors.html#getVectors">getVectors</a></b>(cplex)
+								</div>
+								<div class="description">Saves the MIP start information for the given CPLEX instance.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b>
+								<a href="IloOplCplexVectors.html#setStart">setStart</a></b>(cplex)
+								</div>
+								<div class="description">Restores the MIP start information available for the given CPLEX instance.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<!-- C. Chardiny JST2 - available tag  -->
+							<td class="attributes">flow control</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b>
+								<a href="IloOplCplexVectors.html#setVectors">setVectors</a></b>(cplex)
+								</div>
+								<div class="description">Restores the MIP start information available for the given CPLEX instance.</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
+				
+				<!-- C. Chardiny - add a summary table and enhance style -->
+				<table class='inheritedTable' cellspacing='0' summary='A summary of the borrowed fields.'><caption>Methods inherited from class <a href="IloObject.html">IloObject</a></caption><tr><td class='inheritedItem'><a href="IloObject.html#end">end</a></tr></td></table>
+				
+			
+<!-- ============================== events summary ======================== -->
+			
+<!-- ============================== constructor details ==================== -->		
+			
+			 <!-- C. Chardiny JST4 - ilog.undocumented.constructor tag  -->
+			 
+			<div class="details"><a name="constructor"> </a>
+				<div class="sectionTitle">
+					Constructor Detail
+				</div>
+				<div class="method">
+						IloOplCplexVectors
+				</div>
+				<div class="fixedFont">
+						<b>IloOplCplexVectors</b>()
+				</div>
+				
+				<div class="detailedDescription"></div>
+				
+					
+					
+
+			</div>
+			
+			
+<!-- ============================== Properties details ========================== -->		
+			
+				<div class="sectionTitle">
+					Property Detail
+				</div>
+				
+					<a name="Ncols"> </a>
+					<div class="method">
+						Ncols
+					</div>
+					<div class="fixedFont">
+					
+					<span class="light">{int}</span>
+					<b>Ncols</b>
+					
+					</div>
+					<div class="detailedDescription">
+						Accesses the number of columns in the CPLEX matrixfrom which the warm start information has been taken. OPL uses this information when restoring the warm start information.
+						
+						
+						<!--  -->
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+				
+						
+						
+						
+						
+						
+						<!-- C. Chardiny JST2 - available tag  -->							
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+
+					<hr />
+				
+					<a name="Nrows"> </a>
+					<div class="method">
+						Nrows
+					</div>
+					<div class="fixedFont">
+					
+					<span class="light">{int}</span>
+					<b>Nrows</b>
+					
+					</div>
+					<div class="detailedDescription">
+						Accesses the number of rows in the CPLEX matrix from which the vectors have been taken. OPL uses this information when restoring the warm start information.
+						
+						
+						<!--  -->
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+				
+						
+						
+						
+						
+						
+						<!-- C. Chardiny JST2 - available tag  -->							
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+
+					<hr />
+				
+					<a name="status"> </a>
+					<div class="method">
+						status
+					</div>
+					<div class="fixedFont">
+					
+					<span class="light">{int}</span>
+					<b>status</b>
+					
+					</div>
+					<div class="detailedDescription">
+						The CPLEX status of the last call.
+						
+						
+						<!--  -->
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+				
+						
+						
+						
+						
+						
+						<!-- C. Chardiny JST2 - available tag  -->							
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+
+					
+				
+			
+<!-- ============================== method details ========================= -->		
+			
+				 <!-- C. Chardiny - Customize global functions page  -->
+					<div class='sectionTitle'>Method Detail</div>
+				
+					<a name="attach"> </a>
+					
+					<div class="method">
+						attach
+					</div>
+					
+					<div class="fixedFont">
+					
+					
+					<b>attach</b>(dvars, values)
+					
+					</div>
+					<div class="detailedDescription">
+						Attaches a variable array to a value array.Once attachments exist, only the elements with attachmentsare taken into account to get/set the basis.
+						<!--  -->
+						<!--  --> 
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							<!-- C. Chardiny - JSO1 - format parameters output -->
+							
+							<dd>
+								 
+								<span class="parameters">dvars</span>
+								
+								 
+								 - The array of variables to consider.
+								
+							</dd>
+							
+							<dd>
+								 
+								<span class="parameters">values</span>
+								
+								 
+								 - The array of values to get/set.
+								
+							</dd>
+							
+							</dl>
+											
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+									
+						
+						
+						
+						
+						
+						
+						<!-- C. Chardiny - JST5 - undocumented javascript file -->
+						<!--  -->
+						
+						
+
+						<!-- C. Chardiny JST2 - available tag  -->
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+						
+					<hr />
+				
+					<a name="getStart"> </a>
+					
+					<div class="method">
+						getStart
+					</div>
+					
+					<div class="fixedFont">
+					
+					<span class="light">{boolean}</span>
+					<b>getStart</b>(cplex)
+					
+					</div>
+					<div class="detailedDescription">
+						Saves the MIP start information for the given CPLEX instance.
+						<!--  -->
+						<!--  --> 
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							<!-- C. Chardiny - JSO1 - format parameters output -->
+							
+							<dd>
+								 
+								<span class="parameters">cplex</span>
+								
+								 
+								 - Saves the MIP start information for this instance of CPLEX.
+								
+							</dd>
+							
+							</dl>
+											
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+									
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><code>true</code> if successful. The CPLEX return status is available as the property <code>status</code>.</dd>
+							
+							</dl>
+						
+						
+						
+						<!-- C. Chardiny - JST5 - undocumented javascript file -->
+						<!--  -->
+						
+						
+
+						<!-- C. Chardiny JST2 - available tag  -->
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+						
+					<hr />
+				
+					<a name="getVectors"> </a>
+					
+					<div class="method">
+						getVectors
+					</div>
+					
+					<div class="fixedFont">
+					
+					<span class="light">{boolean}</span>
+					<b>getVectors</b>(cplex)
+					
+					</div>
+					<div class="detailedDescription">
+						Saves the MIP start information for the given CPLEX instance.
+						<!--  -->
+						<!--  --> 
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							<!-- C. Chardiny - JSO1 - format parameters output -->
+							
+							<dd>
+								 
+								<span class="parameters">cplex</span>
+								
+								 
+								 - Saves the MIP start information for this instance of CPLEX.
+								
+							</dd>
+							
+							</dl>
+											
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+									
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><code>true</code> if successful. The CPLEX return status is available as the property <code>status</code>.</dd>
+							
+							</dl>
+						
+						
+						
+						<!-- C. Chardiny - JST5 - undocumented javascript file -->
+						<!--  -->
+						
+						
+
+						<!-- C. Chardiny JST2 - available tag  -->
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+						
+					<hr />
+				
+					<a name="setStart"> </a>
+					
+					<div class="method">
+						setStart
+					</div>
+					
+					<div class="fixedFont">
+					
+					
+					<b>setStart</b>(cplex)
+					
+					</div>
+					<div class="detailedDescription">
+						Restores the MIP start information available for the given CPLEX instance.This utility can restore MIP start only if the problem of the given CPLEX instance has exactly the same number of rows and columns as the problem it was taken from.
+						<!--  -->
+						<!--  --> 
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							<!-- C. Chardiny - JSO1 - format parameters output -->
+							
+							<dd>
+								 
+								<span class="parameters">cplex</span>
+								
+								 
+								 - Restores the MIP start information available for this instance of CPLEX.
+								
+							</dd>
+							
+							</dl>
+											
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+									
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><code>true</code> if successful. The CPLEX return status is available as the property <code>status</code>.</dd>
+							
+							</dl>
+						
+						
+						
+						<!-- C. Chardiny - JST5 - undocumented javascript file -->
+						<!--  -->
+						
+						
+
+						<!-- C. Chardiny JST2 - available tag  -->
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+						
+					<hr />
+				
+					<a name="setVectors"> </a>
+					
+					<div class="method">
+						setVectors
+					</div>
+					
+					<div class="fixedFont">
+					
+					
+					<b>setVectors</b>(cplex)
+					
+					</div>
+					<div class="detailedDescription">
+						Restores the MIP start information available for the given CPLEX instance.This utility can restore MIP start only if the problem of the given CPLEX instance has exactly the same number of rows and columns as the problem it was taken from.
+						<!--  -->
+						<!--  --> 
+					</div>
+					
+					<!-- C. Chardiny JST12 - proofread tag  -->
+					
+					
+					
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							<!-- C. Chardiny - JSO1 - format parameters output -->
+							
+							<dd>
+								 
+								<span class="parameters">cplex</span>
+								
+								 
+								 - Restores the MIP start information available for this instance of CPLEX.
+								
+							</dd>
+							
+							</dl>
+											
+					
+					<!-- @note generates notes out of the description -->	
+					
+					
+					<!-- @example generated Examples out of description	the description -->	
+					
+									
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><code>true</code> if successful. The CPLEX return status is available as the property <code>status</code>.</dd>
+							
+							</dl>
+						
+						
+						
+						<!-- C. Chardiny - JST5 - undocumented javascript file -->
+						<!--  -->
+						
+						
+
+						<!-- C. Chardiny JST2 - available tag  -->
+						<dl class='detailList'><dt class='heading'>Available for:</dt><dd>flow control</dd></dl>
+						
+					
+				
+			
+			
+<!-- ============================== event details ========================= -->		
+			
+			
+		
+		<!-- ============================== footer ================================= -->	
+		<hr />	
+		<div class="fineprint" style="clear:both">
+			&copy;Copyright IBM Corp. 1987-2011.
+		</div>
+	</body>
+</html>

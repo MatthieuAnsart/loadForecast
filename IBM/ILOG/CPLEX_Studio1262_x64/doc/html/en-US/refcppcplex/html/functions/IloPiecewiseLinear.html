@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en"
+            xml:lang="en"><head><title>IloPiecewiseLinear</title>
+<link
+            type="text/css" rel="stylesheet"
+            href="../cppdoc.css" />
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../functions/IloPiecewiseLinear.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+                name="ibm-content"></a><h3><a
+            name="method_IloPiecewiseLinear">IloPiecewiseLinear</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+                class="function-name">IloPiecewiseLinear</span>(const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+                class="parameter-name">node</span>, const <a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">point</span>, const <a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">slope</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">fa</span>)</div><div
+                class="prototype">public <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+                class="function-name">IloPiecewiseLinear</span>(const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+                class="parameter-name">node</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">firstSlope</span>, const <a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">point</span>, const <a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">value</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">lastSlope</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilconcert/iloexpression.h</span></div>
+Represents a continuous or discontinuous piecewise linear function.
+      <div
+                class="description"><p>The function <code>IloPiecewiseLinear</code> creates an expression node
+ to represent a continuous or discontinuous piecewise linear function
+ <em>f</em> of the variable <em>x</em>.
+ The signatures of this overloaded function support two different ways
+ to specify piecewise linear functions. One approach specifies the
+ breakpoints and slopes of the segments of the PWL function. The other
+ approach specifies the breakpoints and function values of the segments.
+ Both approaches can specify either continuous or discontinuous piecewise
+ linear functions.
+ </p><p>However, the user must take care with the approach that
+ uses breakpoints and slopes to specify a discontinuous piecewise linear
+ function <strong>uniquely</strong>. For further explanation about
+ unique specification of discontinuous piecewise linear functions, see
+ the topic <em>Discontinuous piecewise linear functions</em> in the
+ <em>CPLEX User's Manual</em>.
+ </p><p>In the approach using breakpoints and slopes to specify a PWL
+ function, the array <code>point</code> contains
+ the <em>n</em> breakpoints of the function such that
+ <em>point[i-1] &lt;= point[i] for i = 1, . . . , n-1</em>. The array
+ <code>slope</code> contains the <em>n+1</em> slopes of the <em>n+1</em>
+ segments of the function. The values <code>a</code> and <code>fa</code> must
+ be coordinates of a point such that <code>fa = f(a)</code>.</p><p>The argument <code>a</code> cannot be the coordinate of a step. In
+ other words, <code>a</code> must <strong>not</strong> be the
+ <code>point[i]</code> if <code>point[i] == point[i-1]</code> or
+ if <code>point[i] == point[i+1]</code>.
+ </p><strong>Example</strong><pre class="sample">
+   IloPiecewiseLinear(x, IloNumArray(env, 2, 10., 20.),
+                      IloNumArray(env, 3, 0.3, 1., 2.),
+                      0, 0);
+ </pre><p>That expression
+ defines a piecewise linear function <em>f</em> having two breakpoints at
+ <em>x = 10</em> and <em>x = 20</em>, and three segments; their slopes are
+ <em>0.3, 1,</em> and <em>2</em>. The first segment has infinite length and
+ ends at the point <em>(x = 10,  f(x) = 3)</em> since <em>f(0) = 0</em>.
+ The second segment starts at the point <em>(x = 10, f(x) = 3)</em> and ends
+ at the point <em>(x = 20, f(x) = 13)</em>, where the third segment starts.
+ </p><p>
+ For the approach that defines a piecewise linear function by breakpoints
+ and values, the array <code>point</code> also contains the <em>n</em>
+ breakpoints of the PWL function. The array <code>value</code>
+ contains the corresponding <em>n</em> values of the function. The
+ argument <code>firstSlope</code> specifies the slope of the segment
+ to the left of the first breakpoint; the argument <code>lastSlope</code>
+ specifies the slope of the segment to the right of the final breakpoint.
+ </p><p>For an example and further explanation of this approach of specification
+ by breakpoint and value, see the topic
+ <em>Discontinuous piecewise linear functions</em> in the
+ <em>CPLEX User's Manual</em>.
+ </p></div><hr /></body>
+</html>

@@ -1,0 +1,50 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: <b><font color="#0000FF">int</font></b> nbJobs = ...;
+15: <b><font color="#0000FF">int</font></b> nbMchs = ...;
+16: 
+17: <b><font color="#0000FF">range</font></b> Jobs = 0..nbJobs-1;
+18: <b><font color="#0000FF">range</font></b> Mchs = 0..nbMchs-1; 
+19: 
+20: <b><font color="#0000FF">int</font></b> OpDurations[j <b><font color="#0000FF">in</font></b> Jobs][m <b><font color="#0000FF">in</font></b> Mchs] = ...;
+21: 
+22: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> itvs[j <b><font color="#0000FF">in</font></b> Jobs][m <b><font color="#0000FF">in</font></b> Mchs]  <b><font color="#0000FF">size</font></b> OpDurations[j][m];
+23: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">sequence</font></b> mchs[m <b><font color="#0000FF">in</font></b> Mchs] <b><font color="#0000FF">in</font></b> <b><font color="#7D007D">all</font></b>(j <b><font color="#0000FF">in</font></b> Jobs) itvs[j][m];
+24: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">sequence</font></b> jobs[j <b><font color="#0000FF">in</font></b> Jobs] <b><font color="#0000FF">in</font></b> <b><font color="#7D007D">all</font></b>(m <b><font color="#0000FF">in</font></b> Mchs) itvs[j][m];
+25: 
+26: <b><font color="#0000FF">execute</font></b> {
+27:                 cp.param.FailLimit = 10000;
+28: }
+29: 
+30: minimize max(j in Jobs, m in Mchs) endOf(itvs[j][m]);
+31: subject to {
+32:   forall (j <b><font color="EA7D00">in</font></b> Jobs)
+33:     noOverlap(jobs[j]);
+34:   forall (m <b><font color="EA7D00">in</font></b> Mchs)
+35:     noOverlap(mchs[m]);
+36: }
+37: 
+38: execute {
+39:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> j = 0; j &lt;= nbJobs-1; j++) {
+40:     <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> m = 0; m &lt;= nbMchs-1; m++) {
+41:       write(itvs[j][m].start + <b><font color="#8A2BE2">" "</font></b>);
+42:     }
+43:     writeln(<b><font color="#8A2BE2">""</font></b>);
+44:   }
+45: }
+</tt></pre>

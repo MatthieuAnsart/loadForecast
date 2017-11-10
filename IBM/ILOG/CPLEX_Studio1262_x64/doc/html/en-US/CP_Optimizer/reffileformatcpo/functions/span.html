@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="span" />
+<meta name="abstract" content="Creates a span constraint between interval variables." />
+<meta name="Description" content="Creates a span constraint between interval variables." />
+<meta name="DC.subject" content="span" />
+<meta name="keywords" content="span" />
+<meta name="DC.Relation" scheme="URI" content="../../../refcppcpoptimizer/html/constraints_groups.html" />
+<meta name="DC.Relation" scheme="URI" content="intervalVar.html" />
+<meta name="DC.Relation" scheme="URI" content="alternative.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="span" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<title>span</title>
+</head>
+<body role="main" id="span">
+<h1 class="title topictitle1">span</h1>
+<div class="body refbody"><p class="shortdesc">Creates a span constraint between interval variables.</p>
+<div class="section" id="span__Syntax"><h2 class="title sectiontitle">Syntax</h2>
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/070_Types.html#Type_constraint">constraint</a> <strong class="ph b">span</strong>(<a class="xref" href="../syntax/070_Types.html#Variable_types__intervalVar">intervalVar</a> itv, <a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intervalVarArray">intervalVarArray</a> array)</code></pre>
+</div>
+<div class="section" id="span__Parameters"><h2 class="title sectiontitle">Parameters</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">itv</samp>: spanning interval variable.
+  </li>
+<li class="li">    <samp class="ph codeph">array</samp>: array of spanned interval variables.
+  </li>
+</ul>
+
+</div>
+<div class="section" id="span__Description"><h2 class="title sectiontitle">Description</h2>
+<p class="p">This function creates a span constraint between an interval variable <samp class="ph codeph">itv</samp> and a set of interval variables in <samp class="ph codeph">array</samp>. This constraint states that interval <samp class="ph codeph">itv</samp> when it is present spans over all present intervals from the <samp class="ph codeph">array</samp>. That is: interval <samp class="ph codeph">itv</samp> starts together with the first present interval from <samp class="ph codeph">array</samp> and ends together with the last one. Interval <samp class="ph codeph">itv</samp> is absent if and only if all intervals in <samp class="ph codeph">array</samp> are absent.</p>
+
+</div>
+<div class="section" id="span__Example"><h2 class="title sectiontitle">Example</h2>
+<pre class="pre codeblock"><code>act1 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=3);
+act2 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=2);
+act3 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=7);
+act4 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=6);
+spanning = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>();
+<span class="ph commentemph">// Activities act1,...,act4 are executed in sequence on a machine capable of</span>
+<span class="ph commentemph">// executing only one action at a time.</span>
+<a class="xref" href="noOverlap.html" title="Constrains a set of interval variables not to overlap each others.">noOverlap</a>([act1,act2,act3,act4]);
+<span class="ph commentemph">// Interval variable spanning represents the immobilization time of the machine</span>
+<strong class="ph b">span</strong>(spanning, [act1,act2,act3,act4]);</code></pre>
+</div>
+<div class="section" id="span__Example2"><h2 class="title sectiontitle">Example</h2>
+<p class="p">In the above example, the activities could be optional. In this case we would define an optional spanning interval variable. This spanning interval will be present if and only if the machine is used by at least one activity in the schedule.</p>
+
+
+<pre class="pre codeblock"><code>act1 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(optional, size=3);
+act2 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(optional, size=2);
+act3 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(optional, size=7);
+act4 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(optional, size=6);
+spanning = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(optional);
+machineUsed = <a class="xref" href="presenceOf.html" title="Returns the presence status of specified interval variable.">presenceOf</a>(spanning);
+<span class="ph commentemph">// Activities act1,...,act4 are executed in sequence on a machine capable of</span>
+<span class="ph commentemph">// executing only one action at a time.</span>
+<a class="xref" href="noOverlap.html" title="Constrains a set of interval variables not to overlap each others.">noOverlap</a>([act1,act2,act3,act4]);
+<span class="ph commentemph">// Interval variable spanning represents the immobilization time of the machine</span>
+<strong class="ph b">span</strong>(spanning, [act1,act2,act3,act4]);</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a></div>
+<div><a class="link" href="alternative.html" title="Creates an alternative constraint between interval variables.">alternative</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../../../refcppcpoptimizer/html/constraints_groups.html">Constraints on groups of interval variables in CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

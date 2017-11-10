@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Announcements" />
+<meta name="abstract" content="Highlights news from the team." />
+<meta name="Description" content="Highlights news from the team." />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_1.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Release_notes.uss_relnotescplex.1009061" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_1.html" />
+<title>Announcements</title>
+</head>
+<body role="main" id="Release_notes.uss_relnotescplex.1009061">
+<h1 class="title topictitle1">Announcements</h1>
+<div class="body"><p class="shortdesc">Highlights news from the team.</p>
+<p class="p">What is new?</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="releasenotescplex123_2.html#Release_notes.uss_relnotescplex.1009061__section1299678943018">Nonconvex or indefinite QPs</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_2.html#Release_notes.uss_relnotescplex.1009061__section1299679455283">More nonzeros in large models</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_26.html" title="Describes new features in CPLEX V12.3 for users of the CPLEX connector for Excel">New features for users of Excel</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_25.html" title="Describes new features available to users of the CPLEX connector for The MathWorks MATLAB.">New features for users of MATLAB</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_2.html#Release_notes.uss_relnotescplex.1009061__section1299681048310">MIP incumbent writer</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_2.html#Release_notes.uss_relnotescplex.1009061__section1299681055028">Globalization: new parameters for encoding</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="releasenotescplex123_5.html" title="Describes improvements in user’s control of threads, parallel search, and callbacks.">Simplified threading and parallel search</a></p>
+ </li>
+</ul>
+<p class="p">For a complete list of machine types and library formats (including
+version numbers of compilers and JDKs) see <a class="xref" href="http://www-01.ibm.com/support/docview.wss?uid=swg27019100" target="_blank" title="(Opens in a new tab or window)">the Detailed System Requirements (DSR)</a> for
+IBM ILOG CPLEX Optimization Studio V12.3.0.0.</p>
+<div class="section" id="Release_notes.uss_relnotescplex.1009061__section1299678943018"><h2 class="title sectiontitle">Nonconvex or indefinite
+QPs</h2><p class="p">CPLEX V12.3 solves a greater variety of <strong class="ph b">nonconvex</strong> quadratic
+programming models; that is, QP models with a quadratic term in the
+objective function. These models are also known as <strong class="ph b">indefinite</strong> QPs
+(in contrast to positive or negative semi-definite QPs). In fact,
+CPLEX V12.3 can find solutions that satisfy Karush-Kuhn-Tucker (KKT)
+conditions for certain indefinite QPs.</p>
+<p class="p">A new parameter, <a class="xref" href="../../../Parameters/topics/OptimalityTarget.html" title="Specifies type of optimality that CPLEX targets (optimal convex or first-order satisfaction) as it searches for a solution">optimality target</a> 
+(<samp class="ph codeph">CPX_PARAM_SOLUTIONTARGET</samp>, <samp class="ph codeph">SolutionTarget</samp>), 
+lets you specify to CPLEX whether you will accept a solution that
+satisfies <strong class="ph b">first-order optimality</strong> conditions (rather than accepting
+only globally optimal solutions), and CPLEX computes and searches
+accordingly. The new parameter is documented in the <em class="ph i">CPLEX Parameters
+Reference Manual</em>.</p>
+<p class="p">CPLEX V12.3 returns a <strong class="ph b">new solution
+status</strong> when optimization of an indefinite QP results in a solution
+that satisfies first-order optimality conditions.  This new solution
+status applies to solutions from the barrier optimizer for indefinite
+QPs when the solution target type parameter is set to the value 2.
+The new status is available in all APIs of CPLEX V12.3. See documentation
+of the new status <span class="keyword apiname">CPX_STAT_FIRSTORDER</span> in the reference
+manual of the Callable Library (C API) as code number 24.</p>
+
+<p class="p paragrouptitle">Reproducing previous behavior with respect
+to non PSD QPs</p>
+<p class="p">You do not need to make any changes in your application
+to reproduce previous behavior with respect to this new parameter.
+In other words, if the new parameter, <a class="xref" href="../../../Parameters/topics/OptimalityTarget.html" title="Specifies type of optimality that CPLEX targets (optimal convex or first-order satisfaction) as it searches for a solution">optimality target</a> 
+(<samp class="ph codeph">CPX_PARAM_SOLUTIONTARGET</samp>, <samp class="ph codeph">SolutionTarget</samp>), 
+ remains at its default value (to accept only globally optimal solutions),
+then the QP optimizer will still terminate optimization and return
+an error if you invoke it for a model with is not positive semi-definite
+(PSD).</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1009061__section1299679455283"><h2 class="title sectiontitle">More nonzeros in large models</h2><p class="p">CPLEX
+V12.3 changed to support models with up to 2<sup class="ph sup">63</sup> nonzero
+coefficients in the constraint matrix. Specifically, CPLEX V12.3 offers
+64-bit counters for the number of nonzero coefficients in very large
+problems. In other words, the number of nonzero coefficients in a
+model can be greater than the largest, signed, 4-byte integer available
+in previous versions of CPLEX. For more information about this new
+feature and its implications for existing applications, see the topic <a class="xref" href="releasenotescplex123_23.html" title="Describes the new feature supporting much larger models and recommends migration paths for those users who plan to apply the new feature.">New features in the Callable Library: 64-bit integer counters</a> in these release notes.</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1009061__section1299681048310"><h2 class="title sectiontitle">MIP incumbent writer</h2><p class="p">CPLEX V12.3 can write
+the integer-feasible solutions of a mixed integer programming (MIP)
+optimization to a file as these incumbents are found. A new parameter,
+the <a class="xref" href="../../../Parameters/topics/IntSolFilePrefix.html" title="MIP integer solution file switch and filename prefix.">MIP integer solution-file switch and prefix</a>, lets
+you specify a prefix to name such a file of solutions. The new parameter
+also turns on or off this recording of incumbent MIP solutions (off
+by default).</p>
+</div>
+<div class="section" id="Release_notes.uss_relnotescplex.1009061__section1299681055028"><h2 class="title sectiontitle">Globalization: new parameters
+for encoding </h2><p class="p">CPLEX
+V12.3 offers support for adaptation of input and output to the language
+and writing system of multiple cultural or ethnic groups. More technically,
+new parameters let you control the encoding of strings to and from
+the application programming interface (API strings), as well as the
+reading and writing of files, along with input and output to the terminal.
+The new parameters let you specify an encoding (also known as a code
+page), such as UTF-8 or another code page.</p>
+<p class="p">For more information
+about these new parameters, see their documentation in the <em class="ph i">CPLEX
+Parameters Reference Manual</em>.</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="../../../Parameters/topics/APIEncoding.html" title="API string encoding switch">API string encoding switch</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="../../../Parameters/topics/FileEncoding.html" title="file encoding switch">file encoding switch</a></p>
+ </li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_1.html" title="These release notes highlight improvements and new features of CPLEX, the optimization engine for mathematical programming in IBM ILOG CPLEX Optimization Studio V12.3. Please review these notes before using CPLEX V12.3.">Release notes for CPLEX V12.3</a></div>
+</div>
+</div></body>
+</html>

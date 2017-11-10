@@ -1,0 +1,82 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">/*</font></b>
+02: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+04: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+05: <b><font color="#007D00">*</font></b>
+06: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+07: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+08: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+09: <b><font color="#007D00">*/</font></b> 
+10: 
+11: package externaldataread;
+12: 
+13: import ilog.concert.IloSymbolSet;
+14: import ilog.opl.IloOplElement;
+15: import ilog.opl.IloOplModel;
+16: 
+17: import java.io.BufferedReader;
+18: import java.io.FileReader;
+19: import java.io.IOException;
+20: import java.util.ArrayList;
+21: import java.util.StringTokenizer;
+22: 
+23: 
+24: <b><font color="#007D00">// This is a very simple text reader used to demonstrate how</font></b>
+25: <b><font color="#007D00">// OPL can run Java functions from a .dat file during data initialization.</font></b>
+26: <b><font color="#007D00">// See documentation on externaldataread project</font></b>
+27: 
+28: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> SimpleTextReader
+29: {
+30:     <b><font color="EA7D00">private</font></b> BufferedReader br;
+31:     <b><font color="EA7D00">private</font></b> String token = <b><font color="#8A2BE2">" "</font></b>;
+32: 
+33:     <b><font color="EA7D00">public</font></b> SimpleTextReader(IloOplModel opl, String fileName, String token) <b><font color="EA7D00">throws</font></b> IOException
+34:     {
+35:         opl.getSettings().getConsoleOutput().println(<b><font color="#8A2BE2">"SimpleTextReader : "</font></b> + fileName);
+36:         <b><font color="EA7D00">this</font></b>.br = <b><font color="EA7D00">new</font></b> BufferedReader(<b><font color="EA7D00">new</font></b> FileReader(fileName));
+37:         <b><font color="EA7D00">this</font></b>.token = token;
+38:     }
+39: 
+40:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> fillOplElement(IloOplModel opl, IloOplElement element) <b><font color="EA7D00">throws</font></b> IOException
+41:     {
+42:         opl.getSettings().getConsoleOutput().println(<b><font color="#8A2BE2">"Filling element : "</font></b> + element.getName());
+43:         IloSymbolSet set = element.asSymbolSet();
+44:         String[] values = readNext();
+45:         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;values.length; i++)
+46:             set.add(values[i]);
+47:     }
+48:     <b><font color="EA7D00">public</font></b> String[] readNext() <b><font color="EA7D00">throws</font></b> IOException
+49:     {
+50:         <b><font color="EA7D00">return</font></b> parseLine(br.readLine());
+51:     }
+52: 
+53:     <b><font color="EA7D00">private</font></b> String[] parseLine(String nextLine) <b><font color="EA7D00">throws</font></b> IOException
+54:     {
+55: 
+56:         <b><font color="EA7D00">if</font></b> (nextLine == <b><font color="EA7D00">null</font></b>)
+57:         {
+58:             <b><font color="EA7D00">return</font></b> <b><font color="EA7D00">null</font></b>;
+59:         }
+60: 
+61:         ArrayList&lt;String&gt; tokensOnThisLine = <b><font color="EA7D00">new</font></b> ArrayList&lt;String&gt;();
+62:         StringTokenizer tokens=<b><font color="EA7D00">new</font></b> StringTokenizer(nextLine, token);
+63:         <b><font color="EA7D00">while</font></b>(tokens.hasMoreTokens())
+64:         {
+65:             tokensOnThisLine.add((tokens.nextToken()));
+66:         }
+67: 
+68:         <b><font color="EA7D00">return</font></b> tokensOnThisLine.toArray(<b><font color="EA7D00">new</font></b> String[0]);
+69: 
+70:     }
+71: 
+72:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> close() <b><font color="EA7D00">throws</font></b> IOException
+73:     {
+74:         br.close();
+75:     }
+76: 
+77: }
+</tt></pre>

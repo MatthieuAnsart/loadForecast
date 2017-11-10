@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Set covering" />
+<meta name="abstract" content="Describes the problem and presents the model and data files." />
+<meta name="Description" content="Describes the problem and presents the model and data files." />
+<meta name="DC.subject" content="integer programming, set covering, models, set covering problem, code samples, covering.mod, constraints, in set covering problem, covering.dat" />
+<meta name="keywords" content="integer programming, set covering, models, set covering problem, code samples, covering.mod, constraints, in set covering problem, covering.dat" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1019813" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" />
+<title>Set covering</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1019813">
+<h1 class="title topictitle1">Set covering</h1>
+<div class="body"><p class="shortdesc">Describes the problem and presents the model and data files.</p>
+<p class="p">Consider selecting workers to build a house. The construction of
+a house can be divided into a number of tasks, each requiring a number
+of skills (e.g., plumbing or masonry). A worker may or may not perform
+a task, depending on skills. In addition, each worker can be hired
+for a cost that also depends on his qualifications. The problem consists
+of selecting a set of workers to perform all the tasks, while minimizing
+the cost. This is known as a set-covering problem. The key idea in
+modeling a set-covering problem as an integer program is to associate
+a 0/1 variable with each worker to represent whether the worker is
+hired. To make sure that all the tasks are performed, it is sufficient
+to choose at least one worker by task. This constraint can be expressed
+by a simple linear inequality.</p>
+<p class="p">The example <samp class="ph codeph">covering.mod</samp> describes a set-covering
+model for this problem and <a class="xref" href="opl_languser_app_areas_IP_set.html#usropllangtut.uss_langtut_linearInteger.1019813__usropllangtut.uss_langtut_linearInteger.1049851">Instance data for the set-covering model (covering.dat)</a> below
+shows some instance data.</p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1019813__usropllangtut.uss_langtut_linearInteger.1022516"><h2 class="title sectiontitle">A
+set-covering model (<samp class="ph codeph">covering.mod</samp>)</h2><pre class="pre codeblock"><code>int NbWorkers = ...;
+range Workers = 1..NbWorkers;
+{string} Tasks = ...;
+{int} Qualified[Tasks] = ...;
+assert 
+  forall( t in Tasks , i in Qualified[t] ) i in asSet(Workers);
+//alternate formulation:
+assert 
+  forall( t in Tasks ) 
+    card(Qualified[t] inter asSet(Workers))==card(Qualified[t]);
+int Cost[Workers] = ...;
+dvar boolean Hire[Workers];
+
+minimize 
+  sum(c in Workers) Cost[c] * Hire[c];
+subject to {
+  forall(j in Tasks)
+    ct:
+      sum( c in Qualified[j] ) 
+        Hire[c] &gt;= 1;
+}
+{int} Crew = { c | c in Workers : Hire[c] == 1 };
+execute DISPLAY {
+  writeln("Crew=",Crew);
+}</code></pre>
+</div>
+<p class="p">The first instruction in the model declares a number of workers
+as an integer, a range for the workers, and a <samp class="ph codeph">string</samp> type
+for the tasks. The instruction </p>
+<pre class="pre codeblock"><code>{int} Qualified[Tasks] = ...;</code></pre>
+<p class="p">declares the workers qualified to perform a given task, Therefore, <samp class="ph codeph">Qualified[Tasks]</samp> is
+the set of workers able to perform task <samp class="ph codeph">t</samp>. </p>
+<p class="p">The problem variables </p>
+<pre class="pre codeblock"><code>dvar boolean Hire[Workers];</code></pre>
+<p class="p">indicate whether a worker is hired for the project. </p>
+<p class="p">The constraints </p>
+<pre class="pre codeblock"><code>  forall(j in Tasks)
+    ct:
+      sum( c in Qualified[j] ) 
+        Hire[c] &gt;= 1;</code></pre>
+<p class="p">make sure that each task is covered by at least one worker. </p>
+<p class="p">Note also the declaration </p>
+<pre class="pre codeblock"><code>{int} Crew = { c | c in Workers : Hire[c] == 1 };</code></pre>
+<p class="p">which collects all the hired workers in the set <samp class="ph codeph">Crew</samp> to
+produce a more pleasing representation of the results.</p>
+<p class="p">The example <samp class="ph codeph">covering.dat</samp> shows data for an instance
+of this model.</p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1019813__usropllangtut.uss_langtut_linearInteger.1049851"><h2 class="title sectiontitle">Instance
+data for the set-covering model (<samp class="ph codeph">covering.dat</samp>)</h2><pre class="pre codeblock"><code>NbWorkers = 32;
+Tasks = { masonry, carpentry, plumbing, ceiling,
+     electricity, heating, insulation, roofing, 
+     painting, windows, facade, garden, 
+     garage, driveway, moving };
+Qualified = [
+   { 1  9 19  22  25  28  31 }
+   { 2 12 15 19 21 23 27 29 30 31 32 }
+   { 3 10 19 24 26 30 32 }
+   { 4 21 25 28 32 }
+   { 5 11 16 22 23 27 31 }
+   { 6 20 24 26 30 32 }
+   { 7 12 17 25 30 31 } 
+   {  8 17 20 22 23  }
+   {  9 13 14  26 29 30 31 }
+   {  10 21 25 31 32 }
+   {  14 15 18 23 24 27 30 32 }
+   {  18 19 22 24 26 29 31 }
+   {  11 20 25 28 30 32 }
+   {  16 19 23 31 }
+   {  9 18 26 28 31 32 }
+];
+Cost = [ 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 3 3 3 3 4 4 4 4 5 5 5 6 6 6 7 8 9 ];</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_linearInteger.1019813__usropllangtut.uss_langtut_linearInteger.1047238"><h2 class="title sectiontitle">A
+solution to covering.mod</h2><p class="p">For
+the instance data given in <samp class="ph codeph">covering.dat</samp>, OPL returns
+the solution </p>
+<pre class="pre codeblock"><code>// solution (optimal) with objective 14
+Crew= {23 25 26}</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" title="Defines integer programming and describes a set covering problem, a warehouse location problem, a fixed-charge problem, and integer relaxation.">Integer programming</a></div>
+</div>
+</div></body>
+</html>

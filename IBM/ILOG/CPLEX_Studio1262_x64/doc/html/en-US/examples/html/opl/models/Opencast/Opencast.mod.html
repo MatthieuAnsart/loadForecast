@@ -1,0 +1,96 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/* Opencast Mining.  </font></b>
+13: <b><font color="#007D00">   From H.P. Williams, Model Building in Mathematical Programming</font></b>
+14: <b><font color="#007D00">   Problem 12.14.</font></b>
+15: <b><font color="#007D00">   </font></b>
+16: <b><font color="#007D00">   This model is described in the documentation. </font></b>
+17: <b><font color="#007D00">See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+18: <b><font color="#007D00"> */</font></b>
+19: <b><font color="#0000FF">int</font></b> NbLevels = ...;
+20: <b><font color="#0000FF">range</font></b> Level = 1..NbLevels;
+21: 
+22: <b><font color="#0000FF">tuple</font></b> blockType {
+23:    <b><font color="#0000FF">float</font></b> purity;
+24:    <b><font color="#0000FF">int</font></b>   level;
+25:    <b><font color="#0000FF">int</font></b>   x;
+26:    <b><font color="#0000FF">int</font></b>   y;
+27: };
+28: 
+29: <b><font color="#0000FF">float</font></b> Cost[Level] = ...;
+30: <b><font color="#0000FF">float</font></b> PureValue = ...;
+31: {blockType} Blocks = ...;
+32: {blockType} Ontop[j <b><font color="#0000FF">in</font></b> Blocks] = 
+33:     {i | i <b><font color="#0000FF">in</font></b> Blocks: j.level == i.level - 1 &amp;&amp;
+34:                        ((j.x + 1 == i.x &amp;&amp; j.y + 1 == i.y) ||
+35:                         (j.x - 1 == i.x &amp;&amp; j.y + 1 == i.y) ||
+36:                         (j.x + 1 == i.x &amp;&amp; j.y - 1 == i.y) ||
+37:                         (j.x - 1 == i.x &amp;&amp; j.y - 1 == i.y)   )};
+38: <b><font color="#0000FF">int</font></b> Minx = <b><font color="#7D007D">min</font></b>(i <b><font color="#0000FF">in</font></b> Blocks) i.x;
+39: <b><font color="#0000FF">int</font></b> Miny = <b><font color="#7D007D">min</font></b>(i <b><font color="#0000FF">in</font></b> Blocks) i.y;
+40: <b><font color="#0000FF">int</font></b> Maxx = <b><font color="#7D007D">max</font></b>(i <b><font color="#0000FF">in</font></b> Blocks) i.x;
+41: <b><font color="#0000FF">int</font></b> Maxy = <b><font color="#7D007D">max</font></b>(i <b><font color="#0000FF">in</font></b> Blocks) i.y;
+42: <b><font color="#0000FF">range</font></b> XRange = Minx..Maxx;
+43: <b><font color="#0000FF">range</font></b> YRange = Miny..Maxy;
+44: 
+45: <b><font color="#0000FF">tuple</font></b> trips {
+46:   <b><font color="#0000FF">int</font></b> x; 
+47:   <b><font color="#0000FF">int</font></b> y; 
+48:   <b><font color="#0000FF">int</font></b> z;
+49: };
+50: 
+51: {trips} There = {&lt;x,y,z&gt; | &lt;p,z,x,y&gt; <b><font color="#0000FF">in</font></b> Blocks};
+52: {trips} Allposs = {&lt;x,y,z&gt; | x <b><font color="#0000FF">in</font></b> XRange, y <b><font color="#0000FF">in</font></b> YRange, z <b><font color="#0000FF">in</font></b> Level};
+53: {trips} Notthere = Allposs <b><font color="#0000FF">diff</font></b> There;
+54:                      
+55: 
+56: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Extract[Blocks];
+57: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> XYZ[Level][XRange][YRange];
+58: 
+59: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> Objective =
+60:   <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Blocks) Extract[i] * (i.purity * PureValue / 100.0 - Cost[i.level]);
+61:   
+62: <b><font color="#0000FF">maximize</font></b> Objective;
+63: 
+64: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+65:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Blocks: i.level &lt; NbLevels)
+66:     <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> Ontop[i])
+67:       Extract[i] &gt;= Extract[j];
+68:  
+69:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Blocks) {
+70:     ctBlocks: XYZ[i.level][i.x][i.y] == Extract[i];
+71:   }
+72:    
+73:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Notthere) {
+74:     ctNotThere: XYZ[i.z][i.x][i.y] == 0;
+75:   }
+76: }
+77: 
+78: 
+79: <b><font color="#0000FF">tuple</font></b> ExtractSolutionT{ 
+80:         blockType Blocks;       
+81:         <b><font color="#0000FF">int</font></b> value; 
+82: };
+83: {ExtractSolutionT} ExtractSolution = {&lt;i0,Extract[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Blocks};
+84: <b><font color="#0000FF">tuple</font></b> XYZSolutionT{ 
+85:         <b><font color="#0000FF">int</font></b> Level; 
+86:         <b><font color="#0000FF">int</font></b> XRange; 
+87:         <b><font color="#0000FF">int</font></b> YRange; 
+88:         <b><font color="#0000FF">int</font></b> value; 
+89: };
+90: {XYZSolutionT} XYZSolution = {&lt;i0,i1,i2,XYZ[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> Level,i1 <b><font color="#0000FF">in</font></b> XRange,i2 <b><font color="#0000FF">in</font></b> YRange};
+91: 
+</tt></pre>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Simplest propagator: writing a checker" />
+<meta name="abstract" content="A checker checks that the values assigned to the decision variables values are consistent." />
+<meta name="Description" content="A checker checks that the values assigned to the decision variables values are consistent." />
+<meta name="DC.subject" content="IloCustomConstraint class, execute method, IloPropagatorI class, addVar method, propagator, defining" />
+<meta name="keywords" content="IloCustomConstraint class, execute method, IloPropagatorI class, addVar method, propagator, defining" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerprop.1027257" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<title>Simplest propagator: writing a checker</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerprop.1027257">
+<h1 class="title topictitle1">Simplest propagator: writing a checker</h1>
+<div class="body"><p class="shortdesc">A checker checks that the values assigned to the
+decision variables values are consistent.</p>
+<p class="p">When a constraint is added to a model in CP Optimizer,
+its purpose is to limit the possible combinations of values that can
+be assigned to the decision variables. A constraint propagator is
+intended to have the same effect. The simplest form of a propagator
+is a checker. Once all of the decision variables have been assigned
+values, the checker checks that the assigned values are consistent.</p>
+<p class="p">For example, a checker written to enforce the relation <em class="ph i">x &lt;= y</em> must ensure that the value assigned to the
+decision variable x is not greater than the value assigned to the
+decision variable y. </p>
+<p class="p">To define a new class of constraint propagator in CP Optimizer,
+you implement a subclass of a predefined class. In the C++ API, this
+is done by defining a subclass of the <samp class="ph codeph">IloPropagatorI</samp> class
+and a virtual member function, <samp class="ph codeph">execute</samp>.
+In the Java™ API, this is done
+by defining a subclass of the <samp class="ph codeph">IloCustomConstraint</samp> class
+and a member function, <samp class="ph codeph">execute</samp>. In both
+cases the function <samp class="ph codeph">execute</samp> performs the
+checking, ensuring that the values assigned to the decision variables
+are consistent in regards to the constraint. In addition, you must
+explicitly indicate which decision variables are involved in the propagator.
+Whenever the domain of one of the indicated variables changes, the <samp class="ph codeph">execute</samp> method of the propagator is called. The
+data members of the propagator subclass include the decision variables
+involved in the propagator. </p>
+<p class="p">Consequently, the definition of a new class of constraint
+propagator in the C++ API follows the form: </p>
+<pre class="pre codeblock"><code>  class MyConstraintI : public IloPropagatorI {
+  private:
+    // data members for the constraint
+  public:
+    MyConstraintI(... args ...);  // constuctor
+    void execute();
+    IloPropagatorI * makeClone(IloEnv env) const;
+  };</code></pre>
+<p class="p">A new class of constraint propagator in the Java API follows the form: </p>
+<pre class="pre codeblock"><code>  class MyConstraint extends IloCustomConstraint {
+     // data members for the constraint
+    public MyConstraint(IloCP cp, ... args ... ) throws IloException { ... }
+    public void execute() { ... }
+  }</code></pre>
+<p class="p">To illustrate how to define a checker by writing a new
+class of constraint propagator, consider the relation <em class="ph i">x &lt;=
+y</em>. The arguments of the propagator are obviously the decision
+variables <samp class="ph codeph">x</samp> and <samp class="ph codeph">y</samp> themselves.
+In the C++ API, the class declaration is: </p>
+<pre class="pre codeblock"><code>class LEConstraintI : public IloPropagatorI {
+ private:
+   IloIntVar _x;
+   IloIntVar _y;
+ public:
+   LEConstraintI(IloIntVar x, IloIntVar y);
+   void execute();
+   IloPropagatorI * makeClone(IloEnv env) const;
+};
+</code></pre>
+<p class="p">In the Java API,
+the class declaration is: </p>
+<pre class="pre codeblock"><code>class LEConstraintI extends IloCustomConstraint {
+  private IloIntVar _x;
+  private IloIntVar _y;
+  // ...
+</code></pre>
+<p class="p">The role of the constructor is to initialize the data
+members and inform the constraint propagation engine upon which variables
+this propagator must work. To inform the engine that a decision variable
+is incident on the constraint, you call the method <samp class="ph codeph">IloPropagatorI::addVar</samp> in
+the C++ API and <samp class="ph codeph">IloCustomConstraint::addVar</samp> in
+the Java API with the variable
+as the argument. The constructor for the <samp class="ph codeph">LEConstraintI</samp> in
+the C++ API is: </p>
+<pre class="pre codeblock"><code>LEConstraintI::LEConstraintI(IloIntVar x, IloIntVar y)
+   : IloPropagatorI(x.getEnv()), _x(x), _y(y) {
+   addVar(x);
+   addVar(y);
+}
+</code></pre>
+<p class="p">and in the Java API
+is: </p>
+<pre class="pre codeblock"><code>public LEConstraintI(IloCP cp, IloIntVar x, IloIntVar y) throws IloException {
+  super(cp);
+  _x = x;
+  _y = y;
+  addVar(x);
+  addVar(y);
+}
+</code></pre>
+<p class="p">In the method <samp class="ph codeph">execute</samp> for the
+checker, you specify to the inference engine the logic for determining
+whether or not the assigned values satisfy the constraint.</p>
+<p class="p">For the constraint <em class="ph i">x &lt;= y</em>, this logic
+is easy to determine:</p>
+<ul class="ul"><li class="li"><p class="p">if <em class="ph i">x</em> and <em class="ph i">y</em> are
+fixed to values, the value assigned to x must not exceed the value
+assigned to y. If the values are inconsistent, then the propagation
+must be forced to fail.</p>
+ </li>
+</ul>
+<p class="p">In the case that the values are inconsistent, you can
+force the propagation to produce a failure by setting the value of
+a decision variable to a value other than that to which it is fixed.</p>
+<p class="p">The virtual member function <samp class="ph codeph">execute</samp> implements
+the value checker; in the C++ API, the method is:  </p>
+<pre class="pre codeblock"><code>void LEConstraintI::execute () {
+  if (isFixed(_x) &amp;&amp; isFixed(_y)) 
+    if (getValue(_x) &gt; getValue(_y))
+      setValue(_x, getValue(_x)+1);
+}
+</code></pre>
+<p class="p">and in the Java API,
+the method is  </p>
+<pre class="pre codeblock"><code>public void execute() {
+  if (isFixed(_x) &amp;&amp; isFixed(_y)) 
+    if (getValue(_x) &gt; getValue(_y))
+      setValue(_x,getValue(_x)+1);
+}
+</code></pre>
+<p class="p">In the C++ API, when subclassing the <samp class="ph codeph">IloPropagatorI</samp> class
+to create a propagator, you also need to define the method that will
+clone the propagator for use in the CP Optimizer engine during parallel
+search. </p>
+<pre class="pre codeblock"><code>IloPropagatorI* LEConstraintI::makeClone(IloEnv env) const {
+  return new (env) LEConstraintI(_x, _y);
+}
+</code></pre>
+<p class="p">To be able to use the propagator as a constraint in a
+C++ API model, you create a function using <samp class="ph codeph">IloCustomConstraint</samp> that
+returns an <samp class="ph codeph">IloConstraint</samp>.     </p>
+<pre class="pre codeblock"><code>IloConstraint LEConstraint(IloIntVar x, IloIntVar y){
+  return IloCustomConstraint(x.getEnv(), 
+         new (x.getEnv()) LEConstraintI(x, y));
+}
+</code></pre>
+<p class="p">While writing a checker is an interesting introductory
+exercise, it is generally not an efficient manner in which to create
+a new constraint. When writing a constraint propagator, it is important
+to eliminate inconsistent values as soon as possible. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" title="A constraint propagator is a simple way to define a custom constraint, that is, one where you define the domain reduction rules.">Using constraint propagators</a></div>
+</div>
+</div></body>
+</html>

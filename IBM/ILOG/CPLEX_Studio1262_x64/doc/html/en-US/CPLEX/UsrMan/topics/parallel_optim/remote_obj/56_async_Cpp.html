@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Asynchronous execution in the C++ API" />
+<meta name="abstract" content="Introduces the idea of asynchronous execution for the remote object in the Concert C++ API." />
+<meta name="Description" content="Introduces the idea of asynchronous execution for the remote object in the Concert C++ API." />
+<meta name="DC.subject" content="remote object, asynchronous execution (C++ API), asynchronous execution, remote object and (C++ API), joining and (C++ API), joining (C++ API), C++ API, joining" />
+<meta name="keywords" content="remote object, asynchronous execution (C++ API), asynchronous execution, remote object and (C++ API), joining and (C++ API), joining (C++ API), C++ API, joining" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/50_async_intro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="asyncCpp" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/50_async_intro.html" />
+<title>Asynchronous execution in the C++ API</title>
+</head>
+<body role="main" id="asyncCpp">
+<h1 class="title topictitle1">Asynchronous execution in the C++ API</h1>
+<div class="body"><p class="shortdesc">Introduces the idea of asynchronous execution for the remote object 
+in the Concert C++ API.</p>
+<p class="p">In the class <span class="keyword apiname">IloCplex</span>, several methods support asynchronous 
+execution with the remote object. These methods typically solve a model.  For example,
+consider the methods <span class="keyword apiname">IloCplex::solve</span>,
+<span class="keyword apiname">IloCplex::feasOpt</span>, <span class="keyword apiname">IloCplex::refineConflict</span> 
+and others.
+For each of those methods, CPLEX provides another overloaded method that accepts
+an additional argument (<samp class="ph codeph">async</samp>) of type <samp class="ph codeph">bool</samp>.
+Furthermore, each of those overloaded methods returns an instance of 
+<span class="keyword apiname">IloCplex::AsyncHandle</span> or, more precisely, one of its derived subclasses.</p>
+<p class="p">For example, the class <span class="keyword apiname">IloCplex::SolveHandle</span> 
+ is a subclass of the generic handle class 
+ <span class="keyword apiname">IloCplex::AsyncHandle</span>. Consequently, 
+for the method <span class="keyword apiname">IloCplex::solve</span>, 
+the additional overloaded method to support asynchronous execution 
+with the remote object offers this signature:</p>
+<pre class="pre codeblock"><code>IloCplex::SolveHandle IloCplex::solve(bool async);</code></pre>
+<p class="p">When your application invokes that method with the value <samp class="ph codeph">true</samp>
+for the argument <samp class="ph codeph">async</samp>, that method starts asynchronous 
+execution of the method <span class="keyword apiname">solve</span> 
+on the remote object worker associated with the invoking instance of 
+<span class="keyword apiname">IloCplex</span>. Furthermore, the instance of 
+<span class="keyword apiname">IloCplex::SolveHandle</span> returned by this method represents 
+the asynchronous <span class="keyword apiname">solve</span> just started.  </p>
+<p class="p">The class <span class="keyword apiname">IloCplex::AsyncHandle</span> offers two important
+methods:  <span class="keyword apiname">test</span> and <span class="keyword apiname">kill</span>.
+<span class="keyword apiname">IloCplex::AsyncHandle::test</span> returns a Boolean value 
+specifying whether the asynchronous <span class="keyword apiname">solve</span> is still running.
+<span class="keyword apiname">IloCplex::AsyncHandle::kill</span> kills the asynchronous <span class="keyword apiname">solve</span>.</p>
+<p class="p">Also CPLEX offers a 
+static method (<span class="keyword apiname">join</span>) with several overloaded variations.
+Use these methods in your application to join the asynchronous <span class="keyword apiname">solve</span>.
+In this context, to join an asynchronous <span class="keyword apiname">solve</span> means 
+for your application to wait for its completion and to query the result.
+Specifically, <span class="keyword apiname">AsyncHandle::join</span> discards the Boolean return value, 
+which specifies the presence of a feasible solution, and 
+<span class="keyword apiname">SolveHandle::join</span> returns the Boolean value specifying the 
+presence of a feasible solution.</p>
+<div class="p">As an example of this class in use, first consider a conventional 
+<em class="ph i">synchronous</em> <span class="keyword apiname">solve</span>, like this:
+<pre class="pre codeblock"><code>bool feasible = cplex.solve();
+if ( feasible ) { ... }
+else            { ... }</code></pre>
+
+To execute the same pseudo-code <em class="ph i">asynchronously</em> with a CPLEX remote object,
+your application includes lines like these:
+<pre class="pre codeblock"><code>    IloCplex::SolveHandle handle = cplex.solve(true);
+    while ( handle.test() ) {
+     // sleep or do something else,
+     // maybe check for user abort and invoke handle-&gt;kill() if solve
+     // should be aborted.
+    }
+    bool feasible = handle.joinSolve();
+    if ( feasible ) { ... }
+    else            { ... }</code></pre>
+</div>
+<p class="p">The main advantage of an asynchronous execution of <span class="keyword apiname">solve</span> 
+is that the asynchronous <span class="keyword apiname">solve</span> runs in the background of 
+your application, so that your application can interrupt it or wait for it as 
+you prefer. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> If you fail to <span class="keyword apiname">join</span> an asynchronous handle, 
+then your application will leak resources.</div>
+<p class="p">If you invoke the method (such as <span class="keyword apiname">solve</span>, <span class="keyword apiname">feasOpt</span>, 
+<span class="keyword apiname">refineConflict</span> or other method) with the value 
+<samp class="ph codeph">false</samp> for the argument <samp class="ph codeph">async</samp>, 
+then the method is executed synchronously. That is, the method returns only after
+the activity has finished. The method still returns an instance of 
+<span class="keyword apiname">IloCplex::AsyncHandle</span>.  The method 
+<span class="keyword apiname">IloCplex::AsyncHandle::test</span> for this handle always 
+returns <samp class="ph codeph">false</samp>; that is, the activity has already finished. 
+Likewise, the method <span class="keyword apiname">IloCplex::AsyncHandle::kill</span> for this handle 
+does nothing because there is no activity to interrupt. However, you still need to 
+invoke the method <span class="keyword apiname">join</span> in your application in order to obtain a
+result and to free resources.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> Calling the special asynchronous overloaded methods on an 
+instance of the class <span class="keyword apiname">IloCplex</span> that is not connected to a 
+CPLEX remote object is an error.  That is, calling the 
+special asynchronous overloaded methods on an instance not created by one of the two  
+constructors cited at the beginning of this topic throws an exception.</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/50_async_intro.html" title="Introduces the idea of asynchronous execution for the remote object.">Asynchronous execution</a></div>
+</div>
+</div></body>
+</html>

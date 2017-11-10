@@ -1,0 +1,175 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: 
+013: <b><font color="#0000FF">int</font></b> checkResults=1; <b><font color="#007D00">// In order to check objectives</font></b>
+014: 
+015: <b><font color="#0000FF">execute</font></b> {
+016:   <b><font color="EA7D00">function</font></b> ParseDat(dataFiles) {
+017:     <b><font color="EA7D00">if</font></b> (dataFiles == <b><font color="#8A2BE2">""</font></b>) 
+018:       <b><font color="EA7D00">return</font></b> <b><font color="EA7D00">null</font></b>;
+019:     <b><font color="EA7D00">else</font></b> {
+020:       <b><font color="EA7D00">var</font></b> pos = 0;
+021:       <b><font color="EA7D00">var</font></b> datFileNames = <b><font color="EA7D00">new</font></b> Array();
+022:       <b><font color="EA7D00">while</font></b> (dataFiles.indexOf(<b><font color="#8A2BE2">","</font></b>, pos) != -1) {
+023:         <b><font color="EA7D00">var</font></b> pos2 = dataFiles.indexOf(<b><font color="#8A2BE2">","</font></b>, pos);
+024:         datFileNames[datFileNames.length] = dataFiles.substring(pos, pos2);
+025:         pos = pos2+1;
+026:       }
+027:       datFileNames[datFileNames.length] = dataFiles.substring(pos);
+028:       <b><font color="EA7D00">return</font></b> datFileNames;
+029:     }
+030:   }
+031:   <b><font color="EA7D00">function</font></b> ModelInfo(dirName, modName, datParam, expRes) {
+032:     <b><font color="EA7D00">this</font></b>.dir = dirName;
+033:     <b><font color="EA7D00">this</font></b>.name = modName;
+034:     <b><font color="EA7D00">this</font></b>.data = ParseDat(datParam);
+035:     <b><font color="EA7D00">this</font></b>.result = expRes;
+036:   }
+037:   <b><font color="EA7D00">function</font></b> AddModel(models, dir, name, dat, res) {
+038:     models[models.length] = <b><font color="EA7D00">new</font></b> ModelInfo(dir, name, dat, res);
+039:   }
+040:   <b><font color="EA7D00">function</font></b> isNearEqual(result, expectedResult) {
+041:     <b><font color="EA7D00">var</font></b> tolerance = 0.000001;
+042:    <b><font color="EA7D00">return</font></b> Math.abs(expectedResult-result)&lt;tolerance;
+043:   }
+044: }
+045: 
+046: main {
+047:   <b><font color="#007D00">// activate end() method in the IDE</font></b>
+048:   <b><font color="#0000FF">thisOplModel</font></b>.settings.mainEndEnabled = <b><font color="EA7D00">true</font></b>;
+049:   
+050:   writeln(<b><font color="#8A2BE2">"Executing some of the distributed examples..."</font></b>);
+051:   writeln();
+052:   writeln();
+053:   
+054:   <b><font color="EA7D00">var</font></b> path = <b><font color="#8A2BE2">""</font></b>;
+055:   <b><font color="EA7D00">var</font></b> OK = <b><font color="EA7D00">true</font></b>;
+056: 
+057:   <b><font color="EA7D00">var</font></b> models = <b><font color="EA7D00">new</font></b> Array();
+058:   <b><font color="EA7D00">var</font></b> modelCurr = 0;
+059: 
+060: 
+061:   AddModel(models, <b><font color="#8A2BE2">"../blending"</font></b>, <b><font color="#8A2BE2">"blending.mod"</font></b>, <b><font color="#8A2BE2">"blending.dat"</font></b>, 653.61);
+062:   AddModel(models, <b><font color="#8A2BE2">"../cutstock"</font></b>, <b><font color="#8A2BE2">"cutstock_main.mod"</font></b>, <b><font color="#8A2BE2">"cutstock.dat"</font></b>, 0);
+063:   AddModel(models, <b><font color="#8A2BE2">"../timetabling"</font></b>, <b><font color="#8A2BE2">"timetabling.mod"</font></b>, <b><font color="#8A2BE2">"timetabling-base.dat,timetabling-small.dat"</font></b>, 20);
+064:   AddModel(models, <b><font color="#8A2BE2">"../sched_bridge"</font></b>, <b><font color="#8A2BE2">"sched_bridge.mod"</font></b>, <b><font color="#8A2BE2">"sched_bridge.dat"</font></b>,<b><font color="EA7D00">null</font></b>); 
+065:    
+066: 
+067:   <b><font color="EA7D00">while</font></b> (modelCurr &lt; models.length ) {
+068:     <b><font color="EA7D00">var</font></b> withData = <b><font color="EA7D00">true</font></b>; 
+069:     <b><font color="EA7D00">var</font></b> dirName = models[modelCurr].dir;
+070:     <b><font color="EA7D00">var</font></b> modelName = models[modelCurr].name;
+071:     <b><font color="EA7D00">var</font></b> dataName = models[modelCurr].data;
+072:     <b><font color="EA7D00">var</font></b> expectedResult = models[modelCurr].result;
+073: 
+074:     <b><font color="EA7D00">if</font></b> (dataName.length &lt;= 0)
+075:       withData = <b><font color="EA7D00">false</font></b>;
+076:   
+077:     modelName = path + dirName + <b><font color="#8A2BE2">"/"</font></b> + modelName;
+078:     
+079:     <b><font color="EA7D00">var</font></b> allName;
+080:     <b><font color="EA7D00">if</font></b> (withData) {
+081:       allName = modelName + <b><font color="#8A2BE2">" - "</font></b> ;
+082:       <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i=0; i&lt;dataName.length; i++) {
+083:         dataName[i] = path + dirName + <b><font color="#8A2BE2">"/"</font></b> + dataName[i];
+084:         allName = allName + dataName[i] + <b><font color="#8A2BE2">" "</font></b>;
+085:       }
+086:     } <b><font color="EA7D00">else</font></b> {
+087:       allName = modelName + <b><font color="#8A2BE2">" - without data file"</font></b>;
+088:     }
+089:     writeln(<b><font color="#8A2BE2">"---------------"</font></b>);
+090:     writeln(<b><font color="#8A2BE2">"solving: "</font></b>, allName);
+091:     <b><font color="EA7D00">var</font></b> source = <b><font color="EA7D00">new</font></b> IloOplModelSource(modelName);
+092:     
+093:     <b><font color="EA7D00">var</font></b> algo;      
+094:     <b><font color="EA7D00">var</font></b> def = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(source);
+095:     
+096:     <b><font color="EA7D00">if</font></b> (def.isUsingCplex())
+097:     {
+098:       algo = <b><font color="EA7D00">new</font></b> IloCplex(); 
+099:     }  
+100:     <b><font color="EA7D00">if</font></b> (def.isUsingCP())
+101:     {
+102:       algo = <b><font color="EA7D00">new</font></b> IloCP();       
+103:     }
+104:     <b><font color="EA7D00">var</font></b> theModel;
+105:     
+106:     theModel= <b><font color="EA7D00">new</font></b> IloOplModel(def,algo);
+107:      
+108:     
+109:     <b><font color="EA7D00">if</font></b> (withData) {
+110:       <b><font color="EA7D00">var</font></b> data = <b><font color="EA7D00">new</font></b> Array();
+111:       <b><font color="EA7D00">for</font></b> (i=0; i&lt;dataName.length; i++) {
+112:         data[i] = <b><font color="EA7D00">new</font></b> IloOplDataSource(dataName[i]);
+113:         theModel.addDataSource(data[i]);
+114:       }
+115:     }
+116:     
+117:     <b><font color="EA7D00">var</font></b> result;
+118:     <b><font color="EA7D00">if</font></b> (def.hasMain()) {
+119:       result = theModel.main();
+120:       <b><font color="EA7D00">if</font></b> ((expectedResult != <b><font color="EA7D00">null</font></b> &amp;&amp; result != expectedResult) || (expectedResult==<b><font color="EA7D00">null</font></b> &amp;&amp; result!=0)) {
+121:         OK = <b><font color="EA7D00">false</font></b>;
+122:         writeln(allName, <b><font color="#8A2BE2">" is NOT OK"</font></b>);
+123:         <b><font color="EA7D00">break</font></b>;
+124:       } <b><font color="EA7D00">else</font></b> {
+125:         writeln(allName, <b><font color="#8A2BE2">" is OK"</font></b>);
+126:       } 
+127:     } <b><font color="EA7D00">else</font></b> {
+128:       theModel.generate();
+129:       <b><font color="EA7D00">if</font></b> ( algo.solve() ) {
+130:         result = algo.getObjValue();
+131:         <b><font color="EA7D00">if</font></b> (expectedResult != <b><font color="EA7D00">null</font></b>) {
+132:            <b><font color="EA7D00">if</font></b> (<b><font color="#0000FF">thisOplModel</font></b>.checkResults==1) 
+133:            <b><font color="EA7D00">if</font></b> (isNearEqual(result,expectedResult)) {
+134:              writeln(allName, <b><font color="#8A2BE2">" is OK"</font></b>);
+135:              theModel.postProcess();
+136:            } <b><font color="EA7D00">else</font></b> {
+137:              writeln(<b><font color="#8A2BE2">"Fail to solve: "</font></b>, allName);
+138:              writeln(<b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">Expected result: "</font></b>, expectedResult, <b><font color="#8A2BE2">" found result: "</font></b>, result);
+139:              OK = <b><font color="EA7D00">false</font></b>;
+140:              <b><font color="EA7D00">break</font></b>;
+141:            }
+142:         }
+143:       } <b><font color="EA7D00">else</font></b> {
+144:         writeln(<b><font color="#8A2BE2">"Fail to solve: "</font></b>, allName);
+145:         writeln(<b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">No solution found!"</font></b>);
+146:         OK = <b><font color="EA7D00">false</font></b>;
+147:         <b><font color="EA7D00">break</font></b>;
+148:       }
+149:     }  
+150:     theModel.end();
+151:     algo.end();
+152:     def.end();
+153:     <b><font color="EA7D00">if</font></b> (withData) {
+154:       <b><font color="EA7D00">for</font></b> (i=0; i&lt;data.length; i++)
+155:         data[i].end();
+156:     }
+157:     source.end();
+158:     modelCurr = modelCurr + 1;
+159:   }
+160:   writeln(<b><font color="#8A2BE2">"---------------"</font></b>);
+161:   writeln();
+162:   <b><font color="EA7D00">if</font></b> (OK) {
+163:     writeln(<b><font color="#8A2BE2">"All models have been solved."</font></b>);
+164:   } <b><font color="EA7D00">else</font></b> {
+165:     writeln(<b><font color="#8A2BE2">"Not all models have been solved as expected."</font></b>);
+166:   }
+167:   writeln();
+168: 
+169:   (OK)?0:1;
+170: }
+</tt></pre>

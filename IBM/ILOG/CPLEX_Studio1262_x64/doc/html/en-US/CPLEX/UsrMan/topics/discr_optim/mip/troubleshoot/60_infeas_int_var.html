@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Slightly infeasible integer variables" />
+<meta name="abstract" content="Describes remedies for slightly infeasible integer variables." />
+<meta name="Description" content="Describes remedies for slightly infeasible integer variables." />
+<meta name="DC.subject" content="integrality tolerance, parameter, MIP, simplex, feasibility tolerance in MIP" />
+<meta name="keywords" content="integrality tolerance, parameter, MIP, simplex, feasibility tolerance in MIP" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.683623" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<title>Slightly infeasible integer variables</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.683623">
+<h1 class="title topictitle1">Slightly infeasible integer variables</h1>
+<div class="body"><p class="shortdesc">Describes remedies for slightly infeasible integer variables.</p>
+<p class="p">On some models, the integer solution returned by CPLEX
+at default settings may contain solution values for the discrete variables
+that violate integrality by a small amount. The <a class="xref" href="../../../../../Parameters/topics/EpInt.html" title="Specifies the amount by which an integer variable can be different from an integer and still be considered feasible.">integrality tolerance</a> parameter
+(<samp class="ph codeph">EpInt</samp>, <samp class="ph codeph">CPX_PARAM_EPINT</samp>)
+has a default value of 1e-5, which means that any discrete variable
+that violates integrality by no more than this amount will not be
+branched upon for resolution. For most model formulations, this situation
+is satisfactory and avoids branching that may be essentially meaningless,
+only consuming additional computing time. </p>
+<p class="p">However, some formulations combine discrete and continuous
+variables, for example, involving constraint coefficients over a million
+in magnitude, where even a small integrality violation can be magnified
+elsewhere in the model. In such situations, you may attempt to address
+this variation by tightening the simplex <a class="xref" href="../../../../../Parameters/topics/EpRHS.html" title="Specifies the feasibility tolerance, that is, the degree to which the basic variables of a model may violate their bounds.">feasibility tolerance</a> (<samp class="ph codeph">EpRHS</samp>, <samp class="ph codeph">CPX_PARAM_EPRHS</samp>)
+from its default value to its minimum; also tighten <samp class="ph codeph">EpInt</samp> to
+a similar value, and re-run the MIP optimization from the beginning. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">If you restart CPLEX from a previously optimal or infeasible
+solution and use reduced tolerance without making any other change
+to the problem, the previous solution status remains valid. Consequently,
+no iterations will occur because parameter settings (such as this
+reduced tolerance) are part of the environment in which CPLEX operates,
+rather than part of a solution to one of possibly multiple models
+in that environment. In other words, changing parameters does not
+alter the solution status, but changing the model does. You can make
+CPLEX restart the optimization using new tolerances by making a superfluous
+change in the model, for example, by resetting the bound on a variable
+to its existing value.</p>
+</div>
+<p class="p">If this adjustment is insufficient to give satisfactory
+results, you can also try setting <samp class="ph codeph">EpInt</samp> all
+the way to zero, preferably in conjunction with a tightened <samp class="ph codeph">EpRHS</samp> 
+setting. This very tight integrality tolerance directs CPLEX to attempt
+to branch on any integer infeasibility, no matter how small. Numeric
+round-off due to floating-point arithmetic on any computer may make
+it impossible to achieve this tolerance, but in practice, the setting
+achieves its aim in many models and reduces the integrality violations
+in many others. In cases where the integrality violation even after
+branching remains above <samp class="ph codeph">EpInt</samp>  or is above
+1e-10 when <samp class="ph codeph">EpInt</samp>  has been set to a value
+smaller than that, a solution status returned will be <samp class="ph codeph">CPX_STAT_OPTIMAL_INFEAS</samp> instead
+of the usual <samp class="ph codeph">CPX_STAT_OPTIMAL</samp>. In most
+cases a solution with status <samp class="ph codeph">CPX_STAT_OPTIMAL_INFEAS</samp> will
+be satisfactory, and reflects only round-off error after presolve
+uncrush, but extra care in using the solution may be advisable in
+numerically sensitive formulations.</p>
+<p class="p">If these suggestions are not appropriate for your problem,
+another alternative to consider is reformulation of your model with
+indicator constraints. <a class="xref" href="../../indicator_constr/01_indicators_title_synopsis.html" title="Introduces indicator constraints and emphasizes their advantages over Big M formulations.">Indicator constraints in optimization</a> offers more information about that alternative.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" title="Describes symptoms of performance problems in MIP optimization and recommends remedies.">Troubleshooting MIP performance problems</a></div>
+</div>
+</div></body>
+</html>

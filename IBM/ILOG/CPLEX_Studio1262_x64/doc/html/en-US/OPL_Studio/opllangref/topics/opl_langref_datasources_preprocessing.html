@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Preprocessing of data" />
+<meta name="abstract" content="Provides an overview of preprocessing operations in OPL." />
+<meta name="Description" content="Provides an overview of preprocessing operations in OPL." />
+<meta name="DC.subject" content="execute, IBM ILOG Script block, for preprocessing, data, preprocessing" />
+<meta name="keywords" content="execute, IBM ILOG Script block, for preprocessing, data, preprocessing" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_datasources.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datasources.1055550" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_datasources.html" />
+<title>Preprocessing of data</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datasources.1055550">
+<h1 class="title topictitle1">Preprocessing of data</h1>
+<div class="body"><p class="shortdesc">Provides an overview of preprocessing operations in OPL.</p>
+<p class="p">You can preprocess data before the optimization model is created
+by using IBM ILOG Script/JavaScript syntax encapsulated in <samp class="ph codeph">execute</samp> blocks.</p>
+<p class="p">OPL provides script integration with the modeling language. All
+declared model elements are available for scripting via their name.</p>
+<p class="p">The functionality available for an element depends on its type.
+All elements can be read, but modifications are possible only for
+primitive types (<samp class="ph codeph">int</samp>, <samp class="ph codeph">float</samp>, <samp class="ph codeph">string</samp>)
+and primitive items of arrays and tuples. See the  <a class="xref hardcodedApiLink" href="../../../refjsopl/html/intro.html" title="(Opens in a new tab or window)">intro</a> to the <em class="ph i">Reference Manual of IBM ILOG Script
+Extensions for OPL</em> about these limitations.</p>
+<p class="p">You can change the domain boundaries for decision variables, as
+well as their priority, in the preprocessing phase.</p>
+<p class="p">You can also use preprocessing to change CPLEX or CP Optimizer
+parameter settings (see <a class="xref" href="../../opllanguser/topics/opl_languser_script_intro_prechange.html" title="You can use execute blocks to change CPLEX parameters, CP parameters, and OPL settings within an OPL model.">Changing option values</a> in
+the <em class="ph i">Language User’s Manual</em>).</p>
+<p class="p">Elements of a range or constraint type are immutable. </p>
+<p class="p">Example: </p>
+<pre class="pre codeblock"><code>int n = ...;
+range R = 1..n;
+int A[R] = ...
+
+execute {
+  for(r in R) {
+     if ( A[r]&lt;0 ) {
+       A[r] = 0;
+     }
+  }
+}</code></pre>
+<div class="section" id="usropllangref.uss_langref_datasources.1055550__usropllangref.uss_langref_datasources.1059143"><h2 class="title sectiontitle">Initialization
+and processing order</h2><p class="p">Preprocessing items
+are processed according to their category, not in absolute declaration
+order.</p>
+<p class="p">Within
+categories, the order is:</p>
+<ol class="ol"><li class="li"><p class="p">External data, in the order in which the data sources are added
+to the OPL model</p>
+ </li>
+<li class="li"><p class="p">All <samp class="ph codeph">execute</samp> blocks and <samp class="ph codeph">assert</samp> statements,
+in declaration order</p>
+ </li>
+</ol>
+<p class="p">Internal data is initialized as encountered during external
+data initialization, in execute blocks and in assert statements. The
+following examples use internal data.</p>
+<p class="p">If you write:</p>
+<pre class="pre codeblock"><code>{int} s1={1,2}; 
+{int} s2={ i | i in s1}; 
+execute 
+{ 
+writeln(s2); 
+s1.add(3); 
+writeln(s1,s2); 
+} </code></pre>
+<p class="p">the result is:</p>
+<pre class="pre codeblock"><code>{1 2}
+{1 2 3} {1 2}</code></pre>
+<p class="p">whereas if you write:</p>
+<pre class="pre codeblock"><code>{int} s1={1,2}; 
+{int} s2={ i | i in s1}; 
+execute 
+{ 
+//writeln(s2); 
+s1.add(3); 
+writeln(s1,s2); 
+} </code></pre>
+<p class="p">the result is:</p>
+<pre class="pre codeblock"><code>{1 2 3} {1 2 3}</code></pre>
+<p class="p">The order in which you use the internal data is important.
+The order in which you use external data is not important because
+it is all created, or initiated, at the beginning of the run.</p>
+<p class="p">See
+also <a class="xref" href="opl_langref_datasources_pitfall.html" title="In OPL, external data is always initialized before internal data.">Pitfall of lazy initialization of data</a>.</p>
+<p class="p">Use
+the profiler feature to inspect the instantiation sequence of your
+model. See <a class="xref" href="../../usroplide/topics/opl_ide_profil.html" title="Explains how the IDE Profiler table can help you improve your model to make it run faster while consuming less memory.">Profiling the execution of a model</a> in <em class="ph i">IDE
+Tutorials</em>.</p>
+<p class="p">See <a class="xref" href="opl_langref_script.html" title="Describes the structure and built-in values and functions of the scripting language.">IBM ILOG Script for OPL</a> for details on the scripting
+language and its extensions for OPL.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1055550__l16s5skY"><h2 class="title sectiontitle">Lazy initialization</h2><p class="p">It is
+important to be aware from OPL 5.2 onwards that during processing,
+declared data elements are initialized on demand when referenced for
+the first time. See <em class="ph i">Data preprocessing</em> in <a class="xref" href="../../oplmigration/topics/opl_mig_prev_3x4x_3xCP.html" title="Provides a quick-reference list of the changes you need to make to an existing OPL 3.x model that uses Constraint Programming (CP) for it to be compatible with OPL 6.x.">Migration from OPL 3.x (CP projects)</a> for
+migration aspects.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_datasources.html" title="Describes data and database initialization, spreadsheet input/output, data consistency, and preprocessing.">Data sources</a></div>
+</div>
+</div></body>
+</html>

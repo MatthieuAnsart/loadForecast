@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Sets of tuples" />
+<meta name="abstract" content="Sets of tuples can be used to model data that is related." />
+<meta name="Description" content="Sets of tuples can be used to model data that is related." />
+<meta name="DC.subject" content="arity, IloIntTupleSet class, tuple, tuple, definition, tupleset" />
+<meta name="keywords" content="arity, IloIntTupleSet class, tuple, tuple, definition, tupleset" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/model_data.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizermodel.1021430" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/model_data.html" />
+<title>Sets of tuples</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizermodel.1021430">
+<h1 class="title topictitle1">Sets of tuples</h1>
+<div class="body"><p class="shortdesc">Sets of tuples can be used to model data that
+is related.</p>
+<p class="p">In many constraint applications, it is necessary to process
+a huge quantity of data. For instance, the features of some products
+can be described as a relation in a database or in text files.   In
+this case, a useful data modeling object is a <em class="ph i">tupleset</em>,
+or a set of tuples.</p>
+<p class="p">A <em class="ph i">tuple</em> is an ordered set of values represented
+by an array. Tuples are useful for representing allowed combinations
+of data in a model. A <em class="ph i">set of integer tuples</em> in a model
+is represented by an instance of a tupleset. </p>
+<p class="p">The elements of a tupleset are tuples of integer values,
+represented by arrays. The number of values in a tuple is known as
+the <em class="ph i">arity</em> of the tuple, and the arity of the tuples
+in a set is called the arity of the set. (In contrast, the number
+of tuples in the set is known as the cardinality of the set.)  </p>
+<p class="p">In the <strong class="ph b">C++ API</strong> of CP Optimizer, the class <samp class="ph codeph">IloTupleSet</samp> represents tuplesets.</p>
+<p class="p">In the <strong class="ph b">Java™ API</strong> of
+CP Optimizer, the interface <samp class="ph codeph">IloTupleset</samp> represents
+tuplesets.</p>
+<p class="p">In the <strong class="ph b">C# API</strong> of CP Optimizer, the interface <samp class="ph codeph">ITupleSet</samp> represents tuplesets. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Set of tuples </strong> </p>
+ <p class="p">An <em class="ph i">integer tuple</em> is an ordered set of values
+represented by an array. A set of integer tuples in a model is represented
+by a tupleset.</p>
+ <p class="p">The number of values in a tuple is
+known as the arity of the tuple. </p>
+ </div>
+<p class="p">Consider as an example a bicycle factory that can produce
+thousands of different models. For each model of bicycle, a relation
+associates the features of that bicycle such as size, weight, color
+and price. This information can be used in a constraint programming
+application that allows a customer to find the bicycle that most closely
+fits a specification. </p>
+<p class="p">Then the tupleset <samp class="ph codeph">bicycleSet</samp> defines
+the set of possible combinations of features. In the C++ API, the
+tupleset is created and built as follows: </p>
+<pre class="pre codeblock"><code>    IloIntTupleSet bicycleSet(env, 5);
+    bicycleSet.add(IloIntArray(env, 5, 1, 57, 12, 3, 1490));
+    bicycleSet.add(IloIntArray(env, 5, 2, 57, 13, 5, 1340));
+    bicycleSet.add(IloIntArray(env, 5, 3, 60, 14, 3, 1790));
+    bicycleSet.add(IloIntArray(env, 5, 4, 65, 14, 7, 1550));
+    bicycleSet.add(IloIntArray(env, 5, 5, 67, 15, 2, 2070));
+    bicycleSet.add(IloIntArray(env, 5, 6, 70, 15, 2, 1990));
+</code></pre>
+<p class="p">In the Java API,
+the tupleset is created using the method <samp class="ph codeph">IloCP.intTable</samp> and
+built as follows: </p>
+<pre class="pre codeblock"><code>      IloIntTupleSet bicycleSet = cp.intTable(5);
+      int[][] tuples = {{1, 57, 12, 3, 1490},
+                        {2, 57, 13, 5, 1340},
+                        {3, 60, 14, 3, 1790},
+                        {4, 65, 14, 7, 1550},
+                        {5, 67, 15, 2, 2070},
+                        {6, 70, 15, 2, 1990}};
+      cp.addTuple(bicycleSet, tuples[0]);
+      cp.addTuple(bicycleSet, tuples[1]);
+      cp.addTuple(bicycleSet, tuples[2]);
+      cp.addTuple(bicycleSet, tuples[3]);
+      cp.addTuple(bicycleSet, tuples[4]);
+      cp.addTuple(bicycleSet, tuples[5]);
+</code></pre>
+<p class="p">In the C# API, the tupleset is created using the method <samp class="ph codeph">CP.IntTable</samp> and built as follows:    </p>
+<pre class="pre codeblock"><code>      IIntTupleSet bicycleSet = cp.IntTable(5);
+      int[][] tuples = { new int [] {1, 57, 12, 3, 1490},
+                         new int [] {2, 57, 13, 5, 1340},
+                         new int [] {3, 60, 14, 3, 1790},
+                         new int [] {4, 65, 14, 7, 1550},
+                         new int [] {5, 67, 15, 2, 2070},
+                         new int [] {6, 70, 15, 2, 1990}};
+      cp.AddTuple(bicycleSet, tuples[0]);
+      cp.AddTuple(bicycleSet, tuples[1]);
+      cp.AddTuple(bicycleSet, tuples[2]);
+      cp.AddTuple(bicycleSet, tuples[3]);
+      cp.AddTuple(bicycleSet, tuples[4]);
+      cp.AddTuple(bicycleSet, tuples[5]);
+</code></pre>
+<p class="p">A tupleset can be used as an argument to a compatibility
+constraint in order to enforce the possible combinations allowed for
+a solution.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/model_data.html" title="Concert Technology provides classes that simplify the management of data.">Managing data</a></div>
+</div>
+</div></body>
+</html>

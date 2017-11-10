@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Sparsity in the transportation problem" />
+<meta name="abstract" content="Describes the problem, and presents transp1.mod." />
+<meta name="Description" content="Describes the problem, and presents transp1.mod." />
+<meta name="DC.subject" content="files, transportation example, transportation problem, models, transportation, code samples, transp1.mod" />
+<meta name="keywords" content="files, transportation example, transportation problem, models, transportation, code samples, transp1.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips_sparsity.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_modelingtips.1014267" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips_sparsity.html" />
+<title>Sparsity in the transportation problem</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_modelingtips.1014267">
+<h1 class="title topictitle1">Sparsity in the transportation problem</h1>
+<div class="body"><p class="shortdesc">Describes the problem, and presents <samp class="ph codeph">transp1.mod</samp>.</p>
+<p class="p">Consider the transportation problem in which the shipments of products
+between each pair of cities may not exceed a given limit. <a class="xref" href="opl_languser_modelingtips_sparsity_transport.html#usropllangtut.uss_langtut_modelingtips.1014267__usropllangtut.uss_langtut_modelingtips.1009347">A simple transportation model (transp1.mod)</a> shows
+a simple model for this problem, which implicitly assumes that all
+cities are connected and that all products may be shipped between
+two cities. It is thus not appropriate for large-scale problems where
+only a fraction of the cities are connected. </p>
+<p class="p">A small data set can easily illustrate the issue. Consider the
+set of cities</p>
+<pre class="pre codeblock"><code>{"Amsterdam","Antwerpen","Bergen","Bonn","Brussels","Cassis","London","Madrid",
+"Milan","Paris"}</code></pre>
+<p class="p">and the set of products <samp class="ph codeph">{"Godiva","Leonidas","Neuhaus"}</samp>.
+There are three hundred ways of shipping a product from one city to
+another. However, only a small fraction of these may be explored in
+the application and <a class="xref" href="opl_languser_modelingtips_sparsity_transport.html#usropllangtut.uss_langtut_modelingtips.1014267__usropllangtut.uss_langtut_modelingtips.1011436" title="A three column table that presents a subset of city pairs and products being shipped between them.">Table 1</a> displays
+a possible subset. </p>
+<p class="p">The statement in the model below, <samp class="ph codeph">transp1.mod</samp>,
+would induce a substantial loss in (memory and time) efficiency. The
+following sections explore how to exploit this sparsity. </p>
+<div class="example" id="usropllangtut.uss_langtut_modelingtips.1014267__usropllangtut.uss_langtut_modelingtips.1009347"><h2 class="title sectiontitle">A
+simple transportation model (<samp class="ph codeph">transp1.mod</samp>)</h2><pre class="pre codeblock"><code>{string} Cities =...;
+{string} Products = ...;
+float Capacity = ...;
+
+float Supply[Products][Cities] = ...;
+float Demand[Products][Cities] = ...;
+assert
+  forall(p in Products)
+    sum(o in Cities) Supply[p][o] == sum(d in Cities) Demand[p][d];
+float Cost[Products][Cities][Cities] = ...;
+
+dvar float+ Trans[Products][Cities][Cities];
+
+
+minimize
+  sum( p in Products , o , d in Cities ) 
+    Cost[p][o][d] * Trans[p][o][d];
+   
+subject to {
+  forall( p in Products , o in Cities )
+    ctSupply:  
+      sum( d in Cities ) 
+        Trans[p][o][d] == Supply[p][o];
+  forall( p in Products , d in Cities ) 
+    ctDemand:
+      sum( o in Cities ) 
+        Trans[p][o][d] == Demand[p][d];
+   forall( o , d in Cities )
+     ctCapacity:
+       sum( p in Products ) 
+         Trans[p][o][d] &lt;= Capacity;
+}  
+
+execute DISPLAY {
+  writeln("trans = ",Trans);
+}</code></pre>
+</div>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three column table that presents a subset of city pairs and products being shipped between them." id="usropllangtut.uss_langtut_modelingtips.1014267__usropllangtut.uss_langtut_modelingtips.1011436" class="table NoBorder" rules="none" frame="void" border="0"><caption><span class="tablecap">Table 1. A sparse data
+set for a transportation problem</span></caption><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%">&lt;"Godiva","Brussels","Paris"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Godiva","Brussels","Bonn"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Godiva","Amsterdam","London"&gt;</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%">&lt;"Godiva","Amsterdam","Milan"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Godiva","Antwerpen","Madrid"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Godiva","Antwerpen","Bergen"&gt;</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%">&lt;"Neuhaus","Brussels","Milan"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Neuhaus","Brussels","Bergen"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Neuhaus","Amsterdam","Madrid"&gt;</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%">&lt;"Neuhaus","Amsterdam","Cassis"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Neuhaus","Antwerpen","Paris"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Neuhaus","Antwerpen","Bonn"&gt;</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%">&lt;"Leonidas","Brussels","Bonn"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Leonidas","Brussels","Milan"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Leonidas","Amsterdam","Paris"&gt;</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%">&lt;"Leonidas","Amsterdam","Cassis"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Leonidas","Antwerpen","London"&gt;</td>
+<td class="entry" valign="top" width="33.33333333333333%">&lt;"Leonidas","Antwerpen","Bergen"&gt;</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">The rest of this section explores how to exploit this sparsity.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips_sparsity.html" title="Discusses sparsity, tuples of parameters, and filtering in the context of model efficiency.">Sparsity</a></div>
+</div>
+</div></body>
+</html>

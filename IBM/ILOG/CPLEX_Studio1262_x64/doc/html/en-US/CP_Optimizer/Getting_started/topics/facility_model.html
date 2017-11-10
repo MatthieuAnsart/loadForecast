@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the warehouse location problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the warehouse location problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/facility.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerfacility.135280" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/facility.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerfacility.135280">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the warehouse location problem has been described
+using natural language, you then use Concert Technology classes to
+model the constraint programming problem. </p>
+<p class="p">After you have written a description of your problem,
+you can use IBM® ILOG® Concert Technology classes to model it.
+After you create a model of your problem, you can use CP Optimizer
+classes and functions to search for a solution.</p>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.147837"><h2 class="title sectiontitle">Step 2: Open the example file</h2><p class="p">Open the example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/facility_partial.cpp</samp> in
+your development environment.</p>
+<p class="p">In this lesson, you include
+the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>. To catch
+exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code to declare an environment and a model is provided for you
+as is the code to declare the standard programming variables <samp class="ph codeph">i</samp> and <samp class="ph codeph">j</samp> for use in loops:
+ </p>
+<pre class="pre codeblock"><code>int main(int argc, const char* argv[]){
+  IloEnv env;
+  try{
+    IloModel model(env);
+    IloInt i, j;
+</code></pre>
+<p class="p">In this lesson, you will input data from the
+file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/data/facility.dat</samp>.
+The code for opening the data file is provided for you:  </p>
+<pre class="pre codeblock"><code>    const char* filename = "../../../examples/data/facility.dat";
+    if (argc &gt; 1)
+      filename = argv[1];
+    std::ifstream file(filename);
+    if (!file){
+      env.out() &lt;&lt; "usage: " &lt;&lt; argv[0] &lt;&lt; " &lt;file&gt;" &lt;&lt; std::endl;
+      throw FileError();
+    }
+</code></pre>
+<p class="p">The data from the file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/data/facility.dat</samp> is: </p>
+<pre class="pre codeblock"><code>[ 3, 1, 2, 4, 1]
+[ 480, 200, 320, 340, 300]
+[[ 24, 74, 31, 51, 84], 
+ [ 57, 54, 86, 61, 68],
+ [ 57, 67, 29, 91, 71],
+ [ 54, 54, 65, 82, 94],
+ [ 98, 81, 16, 61, 27],
+ [ 13, 92, 34, 94, 87],
+ [ 54, 72, 41, 12, 78],
+ [ 54, 64, 65, 89, 89]]
+</code></pre>
+<p class="p">The first line of data is the capacity of
+each potential supplier warehouse: Bonn 3, Bordeaux 1, London 2, Paris
+4 and Rome 1. The second line of data is the fixed cost associated
+with opening each warehouse. The last part of the data is a matrix
+representing the relative cost of supplying each existing store from
+each of the potential warehouse sites. Other than the capacity data,
+this is the information presented in the table <a class="xref" href="facility_describe.html#migration.uss_gscpoptimizerfacility.130750__migration.uss_gscpoptimizerfacility.131292" title="A six column table listing supply costs for each of the seven stores from each of the five warehouses.">Table 1</a>. </p>
+<p class="p">You create standard programming
+variables to represent the number of stores, <samp class="ph codeph">nbStores</samp>,
+and the number of supplier warehouses, <samp class="ph codeph">nbLocations</samp>.
+You model the capacities and fixed costs of the potential warehouses
+as arrays of integer values.  </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Array of integer values </strong> </p>
+ <p class="p"> Arrays of
+integer values are represented by the class <samp class="ph codeph">IloIntArray</samp> in
+the C++ API of Concert Technology. These arrays are extensible. </p>
+ <p class="p"> When you use an array, you can access a value in that array
+by its index, and the <samp class="ph codeph">operator[]</samp> is overloaded
+for this purpose. </p>
+ <p class="p">In the C# and Java™ APIs, the native arrays are used. </p>
+ </div>
+<p class="p">The constructor of the class <samp class="ph codeph">IloIntArray</samp> takes
+an environment as its first argument. The second argument is the number
+of integer values in the array, which is extensible. The elements
+of the new array take the values that are passed as the remaining
+arguments. Here is one constructor: </p>
+<pre class="pre codeblock"><code>  IloIntArray(const IloEnv env, IloInt n, const IloInt v0, ...);
+</code></pre>
+<p class="p">In this lesson however, you create empty arrays
+which will be filled directly from the data file. To do this, you
+pass solely the first argument, the environment, to the constructor. </p>
+<p class="p">You model the matrix of relative supply costs as an array
+of arrays. To create this cost matrix, you use the Concert Technology
+template <samp class="ph codeph">IloArray</samp>.  </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Extensible array</strong> </p>
+ <p class="p">In the
+C++ API, Concert Technology provides the template class <samp class="ph codeph">IloArray</samp> which
+makes it easy for you to create classes of arrays for elements of
+any given class. In other words, you can use this template to create
+arrays of Concert Technology objects; you can also use this template
+to create arrays of arrays (that is, multidimensional arrays). </p>
+ <p class="p"> When you use an array, you can access a value in that array
+by its index, and the <samp class="ph codeph">operator[]</samp> is overloaded
+for this purpose. </p>
+ <p class="p">The classes you create in this
+way consist of extensible arrays. That is, you can add elements to
+the array as needed.  </p>
+ </div>
+<p class="p">To model the supply
+costs, you create an <samp class="ph codeph">IloArray</samp> in which each
+of the elements is an <samp class="ph codeph">IloIntArray</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.137684"><h2 class="title sectiontitle">Step 3: Model the data</h2><p class="p">Add the following
+code after the comment<samp class="ph codeph"> //Model the data</samp>  </p>
+<pre class="pre codeblock"><code>    IloIntArray capacity(env), fixedCost(env);
+    IloArray&lt;IloIntArray&gt; cost(env);
+    IloInt nbLocations;
+    IloInt nbStores;
+</code></pre>
+<p class="p">Now, you input the data from the data file.
+The overloaded C++ <samp class="ph codeph">operator&gt;&gt;</samp> directs
+input from an input stream.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.137724"><h2 class="title sectiontitle">Step 4: Input the data</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Input the data</samp>  </p>
+<pre class="pre codeblock"><code>    file &gt;&gt; capacity &gt;&gt; fixedCost &gt;&gt; cost;
+</code></pre>
+<p class="p">The number of stores can be deduced from the
+size of the <samp class="ph codeph">cost</samp> matrix. The number of supplier
+warehouses can be deduced from the size of the <samp class="ph codeph">capacity</samp> array.
+Calculating these values from the data read from the file allows you
+to easily extend the example by using another data file. The code
+for determining the values of <samp class="ph codeph">nbLocations</samp> and <samp class="ph codeph">nbStores</samp> is provided for you:  </p>
+<pre class="pre codeblock"><code>    nbLocations = capacity.getSize();
+    nbStores = cost.getSize();
+</code></pre>
+<p class="p">Next, you represent the first set of unknowns
+in this problem, the warehouse that will serve each store. IBM ILOG Concert
+Technology gives you the means to represent these unknowns as an array
+of constrained integer variables. You associate one decision variable
+in the array with each store.  </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Array of decision variables</strong> </p>
+ <p class="p"> In the
+C++ API, arrays of constrained integer variables are represented by
+the class <samp class="ph codeph">IloIntVarArray</samp> in Concert Technology. </p>
+ <p class="p"> When you use an array, you can access a decision variable
+in that array by its index, and the <samp class="ph codeph">operator[]</samp> is
+overloaded for this purpose.</p>
+ </div>
+<p class="p">The constructor
+of the class <samp class="ph codeph">IloIntVarArray</samp> takes an environment
+as its first argument. The second argument is the number of decision
+variables in the array. Arrays are extensible, so you can later increase
+or reduce the number of variables in the array. The third and fourth
+arguments are the lower and upper bounds of the domain of possible
+values for each variable in the array. When you use an array, you
+can access a variable in that array by its index, and the operator<samp class="ph codeph">[]</samp> is overloaded for this purpose. Here is a constructor: </p>
+<pre class="pre codeblock"><code>  IloIntVarArray (const IloEnv env,
+                  IloInt n,
+                  IloInt lb,
+                  IloInt ub);
+</code></pre>
+<p class="p">The first array of decision variables, called <samp class="ph codeph">supplier</samp>, represents which supplier warehouse should
+supply each store. This array has <samp class="ph codeph">nbStores</samp> elements
+or, in this example, 10. The domain of possible values for each of
+these variables represent the supplier warehouses. In this example,
+a value of 0 represents Bonn, a value of 1 represents Bordeaux, a
+value of 2 represents London, a value of 3 represents Paris, and a
+value of 4 represents Rome. </p>
+<p class="p">For each store, the associated
+decision variable in the array <samp class="ph codeph">supplier</samp> can
+be assigned one value in a solution, so each solution will satisfy
+the constraint that a store must be served by exactly one warehouse.
+The array of decision variables <samp class="ph codeph">supplier</samp> will
+represent the solution to the problem, after it has been solved.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.147882"><h2 class="title sectiontitle">Step 5: Declare the supplier decision variables</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare
+the supplier decision variables</samp> </p>
+<pre class="pre codeblock"><code>    IloIntVarArray supplier(env, nbStores, 0, nbLocations - 1);
+</code></pre>
+<p class="p">To represent whether a potential supplier
+warehouse site should be open or not, you declare another array of
+decision variables, <samp class="ph codeph">open</samp>. It has <samp class="ph codeph">nbLocations</samp> elements or, in this example, 5. There
+are two possible values for each variable, 0 and 1. The value of 1
+indicates that the warehouse is open and 0 indicates that the warehouse
+is not open.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.147893"><h2 class="title sectiontitle">Step 6: Declare the warehouse open decision variables</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare
+the warehouse open decision variables</samp> </p>
+<pre class="pre codeblock"><code>    IloIntVarArray open(env, nbLocations, 0, 1);
+</code></pre>
+<p class="p">Now you add the constraints. The first constraint
+states that the supplier warehouse used by a given store must be open.
+In other words, the warehouse must be open if a store is to be supplied
+by it. For example, if store 0 is supplied by the Rome warehouse,
+the constraint states that the variable of the <samp class="ph codeph">open</samp> array
+that is associated with the Rome warehouse must be assigned the value
+1. The Rome warehouse must be open.</p>
+<p class="p">This interdependence
+of the decision variable arrays <samp class="ph codeph">supplier</samp> and <samp class="ph codeph">open</samp> is modeled through the use of an <em class="ph i">element
+expression</em>.     </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Element
+expression</strong> </p>
+ <p class="p">The construction <samp class="ph codeph">T[i]
+= v</samp> (where <samp class="ph codeph">T</samp> is an instance of <samp class="ph codeph">IloIntVarArray</samp>, <samp class="ph codeph">i</samp> is an
+instance of <samp class="ph codeph">IloIntVar</samp> and <samp class="ph codeph">v</samp> is
+an integer value) constrains the <samp class="ph codeph">i</samp>-th element
+of <samp class="ph codeph">T</samp> to be equal to <samp class="ph codeph">v</samp>. </p>
+ <p class="p"> In the C# and Java APIs,
+the respective methods <samp class="ph codeph">CP.Element</samp> and <samp class="ph codeph">IloCP.element</samp> are used to create an element expression. </p>
+ </div>
+<p class="p">For each store <samp class="ph codeph">i</samp>, the warehouse
+that supplies that store is represented by <samp class="ph codeph">supplier[i]</samp>.
+To indicate that <samp class="ph codeph">supplier[i]</samp> must be open,
+you constrain <samp class="ph codeph">open[supplier[i]]</samp> to be assigned
+the value 1.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.147904"><h2 class="title sectiontitle">Step 7: Add the constraints on open warehouses</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the constraint on open warehouses</samp> </p>
+<pre class="pre codeblock"><code>    for (i = 0; i &lt; nbStores; i++)
+      model.add(open[supplier[i]] == 1);
+</code></pre>
+<p class="p">Next, you need to compute the number of stores
+being supplied by a particular warehouse and ensure that this value
+does not exceed the capacity of the warehouse. You can use the IBM ILOG Concert
+Technology function <samp class="ph codeph">IloCount</samp> to represent
+the number of times a warehouse is assigned to be a supplier.     </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Counting expression</strong> </p>
+ <p class="p"> Using the function <samp class="ph codeph">IloCount</samp>, you
+can create an <em class="ph i">expression</em> that represents the number
+of times a particular value is assigned to the decision variables
+in an array of constrained integer variables. </p>
+ <p class="p"> Expressions
+are discussed in further detail in the following step. </p>
+ </div>
+<p class="p">The function <samp class="ph codeph">IloCount</samp> takes two
+arguments, an array of decision variables and an integer value, and
+returns an instance of <samp class="ph codeph">IloIntExprArg </samp>that
+represents the number of times the value appears in the array. The
+class <samp class="ph codeph">IloIntExprArg</samp> is used internally by IBM ILOG Concert
+Technology to build expressions; you should not use <samp class="ph codeph">IloIntExprArg</samp> directly.
+Here is the version of <samp class="ph codeph">IloCount</samp> that you
+will use: </p>
+<pre class="pre codeblock"><code>  IloIntExprArg IloCount(const IloIntVarArray vars, IloInt value);
+</code></pre>
+<p class="p">For each warehouse, you count the number of
+times it appears in the array <samp class="ph codeph">supplier</samp> using
+the function <samp class="ph codeph">IloCount</samp>. You constrain this
+expression to be no greater than the warehouse capacity using <samp class="ph codeph">operator&lt;=</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.147919"><h2 class="title sectiontitle">Step 8: Add the constraints on warehouse capacity</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the capacity constraints</samp> </p>
+<pre class="pre codeblock"><code>    for (j = 0; j &lt; nbLocations; j++)
+      model.add(IloCount(supplier, j)  &lt;= capacity[j]);
+</code></pre>
+<p class="p">Finally, you consider the objective. The objective
+in a constraint programming model is an <em class="ph i">expression</em> that
+can be maximized or minimized. Expressions in IBM ILOG Concert
+Technology are generally represented by the classes <samp class="ph codeph">IloExpr</samp> and
+its subclasses <samp class="ph codeph">IloIntExpr</samp> and <samp class="ph codeph">IloNumExpr</samp>.
+    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Expression </strong> </p>
+ <p class="p"> Values may be combined with decision variables and other
+expressions to form expressions. To combine values, variables and
+other expressions to form an expression, you can use, among other
+functions, the operators:  </p>
+ <ul class="ul"><li class="li"><p class="p">addition (<samp class="ph codeph">+</samp>),</p>
+ </li>
+<li class="li"><p class="p">subtraction (<samp class="ph codeph">-</samp>),</p>
+ </li>
+<li class="li"><p class="p">multiplication (<samp class="ph codeph">*</samp>),</p>
+ </li>
+<li class="li"><p class="p">division (<samp class="ph codeph">/</samp>),</p>
+ </li>
+<li class="li"><p class="p">self-assigned addition (<samp class="ph codeph">+=</samp>)
+and</p>
+</li>
+<li class="li"><p class="p">self-assigned subtraction (<samp class="ph codeph">-=</samp>).</p>
+ </li>
+</ul>
+ </div>
+<p class="p">Many Concert Technology functions, such as <samp class="ph codeph">IloCount</samp>, return expressions. During search, expressions
+have domains of possible values like decision variables. Unlike variables,
+these domains are not stored but instead calculated based on the basic
+elements of the expression.</p>
+<p class="p">To build the objective
+expression, you need to represent the sum of the fixed costs of all
+the warehouses that are to be opened. This cost can be modeled as
+the scalar product of the <samp class="ph codeph">fixedCost</samp> array
+and the <samp class="ph codeph">open</samp> array. To express the fixed
+cost expression, you use the Concert Technology function <samp class="ph codeph">IloScalProd</samp>.    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b"> Scalar product expression </strong> </p>
+ <p class="p">Using the
+function <samp class="ph codeph">IloScalProd</samp>, you can create an
+expression that represents the scalar product of two arrays. </p>
+ <p class="p">The scalar product is also called the inner product or the
+weighted sum. </p>
+ </div>
+<p class="p">The function <samp class="ph codeph">IloScalProd</samp> takes
+two arguments, both arrays, and returns an instance of <samp class="ph codeph">IloIntExprArg</samp> that
+represents the scalar product of the two arrays. Although you should
+not use an <samp class="ph codeph">IloIntExprArg</samp> directly, it can
+be cast to an <samp class="ph codeph">IloIntExpr</samp>, which you should
+use instead. Here is the signature of the function <samp class="ph codeph">IloScalProd</samp> that
+you will use: </p>
+<pre class="pre codeblock"><code>  IloIntExprArg IloScalProd(const IloIntVarArray vars, 
+                            const IloIntArray values);
+</code></pre>
+<p class="p">You declare the integer expression <samp class="ph codeph">obj</samp> to be the expression returned by the <samp class="ph codeph">IloScalProd</samp> function called with the arguments <samp class="ph codeph">open</samp> and <samp class="ph codeph">fixedCost</samp>.  
+To complete the objective expression, you must also add the supply
+costs to it. To express the cost of supplying each store from the
+warehouse selected to supply it, you use an element expression. For
+each store <samp class="ph codeph">i</samp>, the cost of supplying the
+store from the assigned warehouse is <samp class="ph codeph">cost[i][supplier[i]]</samp>.
+You can incrementally add these costs to the expression <samp class="ph codeph">obj</samp> by
+using the self-assigned addition operator.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.147930"><h2 class="title sectiontitle">Step 9: Create the objective expression</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Build
+the objective expression </samp> </p>
+<pre class="pre codeblock"><code>    IloIntExpr obj = IloScalProd(open, fixedCost);
+    for (i = 0; i &lt; nbStores; i++)
+      obj += cost[i][supplier[i]];
+</code></pre>
+<p class="p">To add the objective to the model, you first
+use the function <samp class="ph codeph">IloMinimize</samp>, which creates
+an instance of the class <samp class="ph codeph">IloObjective</samp>. The
+function <samp class="ph codeph">IloMinimize</samp> takes the environment
+as its first argument and an expression as its second argument. The
+last argument is an optional name used for debug and trace purposes.
+Here is signature of the <samp class="ph codeph">IloMinimize</samp> function
+that you will use: </p>
+<pre class="pre codeblock"><code>  IloObjective IloMinimize(const IloEnv env,
+                           const IloExpr expr, 
+                           const char* name=0);
+</code></pre>
+<p class="p">You then use the member function <samp class="ph codeph">IloModel::add</samp> to add the objective to the model.
+You must explicitly add an objective to the model or the CP Optimizer
+engine will not use it in the search for a solution. If an objective
+has been added to the model, the optimizer will search for an optimal
+solution which minimizes the value of the objective.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerfacility.135280__migration.uss_gscpoptimizerfacility.147941"><h2 class="title sectiontitle">Step 10: Add the objective to the model</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the objective
+to the model </samp> </p>
+<pre class="pre codeblock"><code>    model.add(IloMinimize(env, obj));
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/facility.html" title="In this lesson, you will learn how to use CP Optimizer and a three-stage method to find a solution to a warehouse location problem.">Using arrays and objectives: warehouse location</a></div>
+</div>
+</div></body>
+</html>

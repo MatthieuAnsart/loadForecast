@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Reading from a database" />
+<meta name="abstract" content="Explains the process of reading data from a database in OPL." />
+<meta name="Description" content="Explains the process of reading data from a database in OPL." />
+<meta name="DC.subject" content="reading, from a database, databases, reading from, keywords, DBRead, DBRead, OPL keyword, encryption of SQL statements, SQL encryption, SQL requests, encryption" />
+<meta name="keywords" content="reading, from a database, databases, reading from, keywords, DBRead, DBRead, OPL keyword, encryption of SQL statements, SQL encryption, SQL requests, encryption" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_db_init.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datasources.1056022" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_db_init.html" />
+<title>Reading from a database</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datasources.1056022">
+<h1 class="title topictitle1">Reading from a database</h1>
+<div class="body"><p class="shortdesc">Explains the process of reading data from a database
+in OPL.</p>
+<p class="p">In OPL, database relations can be read into sets or arrays.
+For instance, these instructions from the model file:</p>
+<div class="example" id="usropllangref.uss_langref_datasources.1056022__usropllangref.uss_langref_datasources.1059345"><pre class="pre codeblock"><code>tuple gasType {
+   string name;
+   float demand;
+   float price;
+   float octane;
+   float lead;
+}
+
+tuple oilType {
+   string name;
+   float capacity;
+   float price;
+   float octane;
+   float lead;
+}</code></pre>
+</div>
+<p class="p">And these instructions from the data file: </p>
+<div class="example" id="usropllangref.uss_langref_datasources.1056022__usropllangref.uss_langref_datasources.1056032"><pre class="pre codeblock"><code>GasData from DBRead(db,"SELECT * FROM GasData");
+OilData from DBRead(db,"SELECT * FROM OilData");</code></pre>
+</div>
+<p class="p">Together illustrate how to initialize a set of tuples
+from the relation <samp class="ph codeph">OilData</samp> in the database <samp class="ph codeph">db</samp>. In this example, the <samp class="ph codeph">DBRead</samp> instruction
+inserts an element into the set for each tuple of the relations. </p>
+<p class="p">Important conventions adopted by OPL:</p>
+<ol class="ol"><li class="li"><p class="p">If read into a set, the resulting set must
+be a set of integers, floats, or strings, or a set of tuples whose
+elements are integers, floats, or strings. </p>
+ </li>
+<li class="li"><p class="p">If read into an array, the resulting array
+must be an array of integers, floats, or strings, or an array of tuples
+whose elements are integers, floats, or strings.</p>
+ </li>
+<li class="li"><p class="p">In the case of tuples, the columns of the
+SQL query result are mapped by position to the field of the OPL tuples.
+For instance, in the above query, the column name has been mapped
+to the field <samp class="ph codeph">name</samp> and so on. </p>
+ </li>
+<li class="li"><p class="p">When initializing an array with a <em class="ph i">DBRead</em> statement,
+the indexing set and array cells are initialized at the same time.</p>
+ </li>
+</ol>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">OPL does not parse the query; it simply
+sends the string to the database system that has full responsibility
+for handling it. As a consequence, the syntax and the semantics of
+these queries are outside the scope of this book and users should
+consult the appropriate database manual for more information. </p>
+ </div>
+<p class="p">It is also possible to implement parameterized queries
+in OPL, for example:</p>
+<pre class="pre codeblock"><code>Oils from DBRead(db,"SELECT name FROM OilData WHERE quality&gt;?")(oilQuality);</code></pre>
+<p class="p">where <samp class="ph codeph">oilQuality</samp> is any scalar
+OPL data element already initialized and whose type is expected in
+the SQL query. In this case, <samp class="ph codeph">oilQuality</samp> should
+be a numeric type, for example an integer.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">Despite standardization, Oracle does not
+support the question mark as a variable identifier. Use ':'&lt;parameter
+number&gt; instead. Examples are ':1', ':arg', etc. </p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_db_init.html" title="Describes how to connect to one or several relational databases, how to read from such databases using traditional SQL queries, and to write the results back to the connected database.">Database initialization</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="usropllangref.uss_langref_datasources.1060040"><h2 class="title topictitle2">SQL encryption</h2>
+<div class="body"><div class="section" id="usropllangref.uss_langref_datasources.1060040__usropllangref.uss_langref_datasources.1060041"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">Because all database instructions
+were in the model file, the SQL statements were encrypted as well
+when the model was compiled.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1060040__usropllangref.uss_langref_datasources.1060043"><h3 class="title sectiontitle">In OPL 4 and later</h3><p class="p">To do the same in OPL
+4.x (where you write database instructions in data files), you can
+define literal strings inside the model file (which will be compiled)
+and use them in the data file, like this:</p>
+<p class="p">In the <span class="ph filepath">.mod</span> file:</p>
+<pre class="pre codeblock"><code>string connectionString = "scott/tiger@TEST";
+string myQuery = "select id from table";
+{int} setOfInt = ...;
+
+dvar int X in 1..5;
+
+minimize X;
+subject to {
+   forall (i in setOfInt) 
+      X &gt;= i;
+};</code></pre>
+<p class="p">In
+the <span class="ph filepath">.dat</span> file:</p>
+<pre class="pre codeblock"><code>DBconnection db("oracle9", connectionString);
+setOfInt from DBread (db, myQuery);</code></pre>
+</div>
+</div>
+</div>
+</body>
+</html>

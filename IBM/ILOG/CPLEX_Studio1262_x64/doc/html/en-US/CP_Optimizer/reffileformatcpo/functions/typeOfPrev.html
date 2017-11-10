@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="typeOfPrev" />
+<meta name="abstract" content="Returns an integer expression that represents the type of the interval variable that is previous." />
+<meta name="Description" content="Returns an integer expression that represents the type of the interval variable that is previous." />
+<meta name="DC.subject" content="typeOfPrev" />
+<meta name="keywords" content="typeOfPrev" />
+<meta name="DC.Relation" scheme="URI" content="../../../refcppcpoptimizer/html/interval_sequence.html" />
+<meta name="DC.Relation" scheme="URI" content="sequenceVar.html" />
+<meta name="DC.Relation" scheme="URI" content="intervalVar.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="typeOfPrev" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<title>typeOfPrev</title>
+</head>
+<body role="main" id="typeOfPrev">
+<h1 class="title topictitle1">typeOfPrev</h1>
+<div class="body refbody"><p class="shortdesc">Returns an integer expression that represents the type of the interval variable that is previous.</p>
+<div class="section" id="typeOfPrev__Syntax"><h2 class="title sectiontitle">Syntax</h2>
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/070_Types.html#Expression_types__intExpr">intExpr</a> <strong class="ph b">typeOfPrev</strong>(<a class="xref" href="../syntax/070_Types.html#Variable_types__sequenceVar">sequenceVar</a> seq, <a class="xref" href="../syntax/070_Types.html#Variable_types__intervalVar">intervalVar</a> itv, <a class="xref" href="../syntax/070_Types.html#Numerical_types__int">int</a> firstValue = 0, <a class="xref" href="../syntax/070_Types.html#Numerical_types__int">int</a> absentValue = 0)</code></pre>
+</div>
+<div class="section" id="typeOfPrev__Parameters"><h2 class="title sectiontitle">Parameters</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">seq</samp>: sequence variable.
+  </li>
+<li class="li">    <samp class="ph codeph">itv</samp>: interval variable.
+  </li>
+<li class="li">    <samp class="ph codeph">firstValue</samp>: value to return if interval variable <samp class="ph codeph">itv</samp> is the first one in sequence <samp class="ph codeph">seq</samp>.
+  </li>
+<li class="li">    <samp class="ph codeph">absentValue</samp>: value to return if interval variable <samp class="ph codeph">itv</samp> becomes absent.
+  </li>
+</ul>
+
+</div>
+<div class="section" id="typeOfPrev__Description"><h2 class="title sectiontitle">Description</h2>
+<p class="p">This function returns an integer expression that represents the type of the interval variable 
+that is previous to interval <samp class="ph codeph">itv</samp> in sequence variable <samp class="ph codeph">seq</samp>. When interval <samp class="ph codeph">itv</samp> is present and is 
+the first interval of sequence <samp class="ph codeph">seq</samp>, it returns the constant integer value <samp class="ph codeph">firstValue</samp> (zero by default). 
+When interval <samp class="ph codeph">itv</samp> is absent, it returns the constant integer value <samp class="ph codeph">absentValue</samp> (zero by default).</p>
+
+</div>
+<div class="section" id="typeOfPrev__Example"><h2 class="title sectiontitle">Example</h2>
+<pre class="pre codeblock"><code>a  = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=5);
+bx = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=6);
+by = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=6);
+c  = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(optional, size=7);
+<span class="ph commentemph">// A sequence variable defined on {a,bx,by,c} with types {0,1,1,2}</span>
+seq = <a class="xref" href="sequenceVar.html" title="Creates new sequence variable.">sequenceVar</a>([a,bx,by,c],[0,1,1,2]);
+<span class="ph commentemph">// The interval variables of the sequence cannot overlap</span>
+<a class="xref" href="noOverlap.html" title="Constrains a set of interval variables not to overlap each others.">noOverlap</a>(seq);
+<span class="ph commentemph">// If interval variable a is not the first one, the type of the interval previous to a should not be 1</span>
+<span class="ph commentemph">// Note that a cannot be first (1==1)</span>
+<strong class="ph b">typeOfPrev</strong>(seq,a,1)!=1;
+<span class="ph commentemph">// If interval variable c is not the first one, the type value of the interval previous </span>
+<span class="ph commentemph">// to c should be 1. Note that interval variable c must be present (0!=1) and can be first (1==1).</span>
+<strong class="ph b">typeOfPrev</strong>(seq,c,1,0)==1;</code></pre>
+
+<p class="p">A possible value for the sequence variable in this problem is (<samp class="ph codeph">bx</samp> -&gt; <samp class="ph codeph">c</samp> -&gt; <samp class="ph codeph">a</samp> -&gt; <samp class="ph codeph">by</samp>). </p>
+
+</div>
+<div class="section" id="typeOfPrev__Requirements"><h2 class="title sectiontitle">Requirements</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">itv</samp> should be an interval variable of sequence variable <samp class="ph codeph">seq</samp>.
+  </li>
+</ul>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="sequenceVar.html" title="Creates new sequence variable.">sequenceVar</a></div>
+<div><a class="link" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../../../refcppcpoptimizer/html/interval_sequence.html">Interval variable sequencing in CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

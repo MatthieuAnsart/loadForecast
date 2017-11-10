@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solve" />
+<meta name="abstract" content="Once the house building with workers problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="Description" content="Once the house building with workers problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/schedseq.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerschedseq.146030" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/schedseq.html" />
+<title>Solve</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerschedseq.146030">
+<h1 class="title topictitle1">Solve</h1>
+<div class="body"><p class="shortdesc">Once the house building with workers problem has been
+described and modeled, you use CP Optimizer classes and functions
+to solve the constraint programming problem. </p>
+<p class="p">You use an instance of the class <samp class="ph codeph">IloCP</samp> to
+solve a problem expressed in a model. The constructor for <samp class="ph codeph">IloCP</samp> takes
+an <samp class="ph codeph">IloModel</samp> as its argument. </p>
+<div class="section" id="migration.uss_gscpoptimizerschedseq.146030__migration.uss_gscpoptimizerschedseq.154805"><h2 class="title sectiontitle">Step 16: Create an instance of IloCP</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create
+an instance of IloCP</samp> </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+</code></pre>
+<p class="p">You now use the member function <samp class="ph codeph">IloCP::solve</samp>,
+which solves the problem contained in the model by using constructive
+search and constraint propagation. The search for an optimal solution
+in this problem could potentiality take a long time, so you place
+a fail limit on the solve process. The search will stop when the fail
+limit is reached, even if optimality of the current best solution
+is not guaranteed.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedseq.146030__migration.uss_gscpoptimizerschedseq.154794"><h2 class="title sectiontitle">Step 17: Search for a solution</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Search
+for a solution</samp>  </p>
+<pre class="pre codeblock"><code>    cp.setParameter(IloCP::FailLimit, 30000);
+    if (cp.solve()) {
+</code></pre>
+<p class="p">The member function <samp class="ph codeph">IloCP::solve</samp> returns
+a Boolean value of type <samp class="ph codeph">IloBool</samp>. If a solution
+is found, the value <samp class="ph codeph">IloTrue</samp> is returned.</p>
+<p class="p">After a solution has been found, you can use the member
+functions <samp class="ph codeph">IloCP::getObjValue</samp> and <samp class="ph codeph">IloCP::domain</samp> to
+examine the solution. The stream <samp class="ph codeph">IloAlgorithm::out</samp> is
+the communication stream for general output. The code for displaying
+the solution has been provided for you:    </p>
+<pre class="pre codeblock"><code>      cp.out() &lt;&lt; "Solution with objective " &lt;&lt; cp.getObjValue() &lt;&lt; ":" &lt;&lt; std::endl;
+      for (i=0; i&lt;allTasks.getSize(); ++i) {
+        cp.out() &lt;&lt; cp.domain(allTasks[i]) &lt;&lt; std::endl;
+      }
+</code></pre>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedseq.146030__migration.uss_gscpoptimizerschedseq.117615"><h2 class="title sectiontitle">Step 18: Compile and run the program</h2><p class="p">Compile and run the program. You should get the following
+results:    </p>
+<pre class="pre codeblock"><code>Solution with objective 13852:
+H0-masonry  [1: 1 -- 35 --&gt; 36]
+H0-carpentry[1: 36 -- 15 --&gt; 51]
+H0-plumbing [1: 36 -- 40 --&gt; 76]
+H0-ceiling  [1: 76 -- 15 --&gt; 91]
+H0-roofing  [1: 51 -- 5 --&gt; 56]
+H0-painting [1: 91 -- 10 --&gt; 101]
+H0-windows  [1: 101 -- 5 --&gt; 106]
+H0-facade   [1: 97 -- 10 --&gt; 107]
+H0-garden   [1: 107 -- 5 --&gt; 112]
+H0-moving   [1: 112 -- 5 --&gt; 117]
+H1-masonry  [1: 138 -- 35 --&gt; 173]
+H1-carpentry[1: 192 -- 15 --&gt; 207]
+H1-plumbing [1: 197 -- 40 --&gt; 237]
+H1-ceiling  [1: 237 -- 15 --&gt; 252]
+H1-roofing  [1: 207 -- 5 --&gt; 212]
+H1-painting [1: 252 -- 10 --&gt; 262]
+H1-windows  [1: 262 -- 5 --&gt; 267]
+H1-facade   [1: 252 -- 10 --&gt; 262]
+H1-garden   [1: 262 -- 5 --&gt; 267]
+H1-moving   [1: 267 -- 5 --&gt; 272]
+H2-masonry  [1: 216 -- 35 --&gt; 251]
+H2-carpentry[1: 268 -- 15 --&gt; 283]
+H2-plumbing [1: 273 -- 40 --&gt; 313]
+H2-ceiling  [1: 313 -- 15 --&gt; 328]
+H2-roofing  [1: 283 -- 5 --&gt; 288]
+H2-painting [1: 328 -- 10 --&gt; 338]
+H2-windows  [1: 338 -- 5 --&gt; 343]
+H2-facade   [1: 333 -- 10 --&gt; 343]
+H2-garden   [1: 328 -- 5 --&gt; 333]
+H2-moving   [1: 343 -- 5 --&gt; 348]
+H3-masonry  [1: 59 -- 35 --&gt; 94]
+H3-carpentry[1: 115 -- 15 --&gt; 130]
+H3-plumbing [1: 120 -- 40 --&gt; 160]
+H3-ceiling  [1: 160 -- 15 --&gt; 175]
+H3-roofing  [1: 130 -- 5 --&gt; 135]
+H3-painting [1: 175 -- 10 --&gt; 185]
+H3-windows  [1: 185 -- 5 --&gt; 190]
+H3-facade   [1: 180 -- 10 --&gt; 190]
+H3-garden   [1: 175 -- 5 --&gt; 180]
+H3-moving   [1: 190 -- 5 --&gt; 195]
+H4-masonry  [1: 291 -- 35 --&gt; 326]
+H4-carpentry[1: 345 -- 15 --&gt; 360]
+H4-plumbing [1: 350 -- 40 --&gt; 390]
+H4-ceiling  [1: 390 -- 15 --&gt; 405]
+H4-roofing  [1: 360 -- 5 --&gt; 365]
+H4-painting [1: 405 -- 10 --&gt; 415]
+H4-windows  [1: 415 -- 5 --&gt; 420]
+H4-facade   [1: 390 -- 10 --&gt; 400]
+H4-garden   [1: 400 -- 5 --&gt; 405]
+H4-moving   [1: 420 -- 5 --&gt; 425]
+</code></pre>
+<p class="p">The complete program can be viewed in the <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/sched_sequence.cpp</samp> file. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/schedseq.html" title="In this lesson, you will learn how to find a solution to a house building with workers problem using CP Optimizer and the three-stage method.">Using no overlap constraints on interval variables: house building with workers</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,201 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+002: <b><font color="#007D00">// File: customdatasource.cpp</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">/////////////////////////////////////////////////////////////////////////////// </font></b>
+013: 
+014: 
+015: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+016: 
+017: #ifndef DATADIR
+018: #ifdef ILO_WINDOWS
+019: #define DIRSEP <b><font color="#8A2BE2">"</font></b>\\<b><font color="#8A2BE2">"</font></b>
+020: #else
+021: #define DIRSEP <b><font color="#8A2BE2">"/"</font></b>
+022: #endif
+023: #define DATADIR <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b>  DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">"opl"</font></b> DIRSEP
+024: #endif
+025: 
+026: ILOSTLBEGIN
+027: 
+028: 
+029: <b><font color="EA7D00">class</font></b> MyCustomDataSource : <b><font color="EA7D00">public</font></b> IloOplDataSourceBaseI {
+030: <b><font color="EA7D00">public</font></b>:
+031:   MyCustomDataSource(IloEnv&amp; env) : IloOplDataSourceBaseI(env) {};
+032:   <b><font color="#0000FF">void</font></b> read() <b><font color="EA7D00">const</font></b>;
+033: };
+034: 
+035: 
+036: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+037:   <b><font color="#0000FF">int</font></b> status = 127;
+038:   IloEnv env;
+039: 
+040:   <b><font color="EA7D00">try</font></b> {
+041:     IloOplErrorHandler handler(env,cout);
+042:     IloOplModelSource modelSource(env, DATADIR <b><font color="#8A2BE2">"customDataSource"</font></b> DIRSEP <b><font color="#8A2BE2">"customDataSource.mod"</font></b>);
+043:     IloOplSettings settings(env,handler);
+044:     IloOplModelDefinition def(modelSource,settings);
+045:     IloCplex cplex(env);
+046:     IloOplModel opl(def,cplex);
+047:     MyCustomDataSource ds(env);
+048:     IloOplDataSource dataSource(&amp;ds);
+049:     opl.addDataSource(dataSource);
+050:     opl.generate();
+051:     status = 0;
+052: 
+053:   } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+054:     cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+055:   } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+056:     cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+057:     e.print(cout);
+058:     status = 2;
+059:   } <b><font color="EA7D00">catch</font></b> (...) {
+060:     cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+061:     status = 3;
+062:   }
+063:   env.end();
+064: 
+065:   cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+066:   getchar();
+067:   
+068:   <b><font color="EA7D00">return</font></b> status;
+069: }
+070: 
+071: <b><font color="#0000FF">void</font></b> MyCustomDataSource::read() <b><font color="EA7D00">const</font></b> {
+072:   IloOplDataHandler handler = getDataHandler();
+073: 
+074:   <b><font color="#007D00">// initialize the int 'simpleInt'</font></b>
+075:   handler.startElement(<b><font color="#8A2BE2">"anInt"</font></b>);
+076:   handler.addIntItem(3);
+077:   handler.endElement();
+078: 
+079:   <b><font color="#007D00">// initialize the int array 'simpleIntArray'</font></b>
+080:   handler.startElement(<b><font color="#8A2BE2">"anIntArray"</font></b>);
+081:   handler.startArray();
+082:   handler.addIntItem(1);
+083:   handler.addIntItem(2);
+084:   handler.addIntItem(3);
+085:   handler.endArray();
+086:   handler.endElement();
+087: 
+088:   <b><font color="#007D00">// initialize int array indexed by float 'anArrayIndexedByFloat'</font></b>
+089:   handler.startElement(<b><font color="#8A2BE2">"anArrayIndexedByFloat"</font></b>);
+090:   handler.startIndexedArray();
+091:   handler.setItemNumIndex(2.0);
+092:   handler.addIntItem(1);
+093:   handler.setItemNumIndex(2.5);
+094:   handler.addIntItem(2);
+095:   handler.setItemNumIndex(1.0);
+096:   handler.addIntItem(3);
+097:   handler.setItemNumIndex(1.5);
+098:   handler.addIntItem(4);
+099:   handler.endIndexedArray();
+100:   handler.endElement();
+101:   
+102:   <b><font color="#007D00">// initialize int array indexed by string 'anArrayIndexedByString'</font></b>
+103:   handler.startElement(<b><font color="#8A2BE2">"anArrayIndexedByString"</font></b>);
+104:   handler.startIndexedArray();
+105:   handler.setItemStringIndex(<b><font color="#8A2BE2">"idx1"</font></b>);
+106:   handler.addIntItem(1);
+107:   handler.setItemStringIndex(<b><font color="#8A2BE2">"idx2"</font></b>);
+108:   handler.addIntItem(2);
+109:   handler.endIndexedArray();
+110:   handler.endElement();
+111:   
+112:   <b><font color="#007D00">// initialize a tuple in the order the components are declared</font></b>
+113:   handler.startElement(<b><font color="#8A2BE2">"aTuple"</font></b>);
+114:   handler.startTuple();
+115:   handler.addIntItem(1);
+116:   handler.addNumItem(2.3);
+117:   handler.addStringItem(<b><font color="#8A2BE2">"not named tuple"</font></b>);
+118:   handler.endTuple();
+119:   handler.endElement();
+120:   
+121:   <b><font color="#007D00">// initialize a tuple using tuple component names.</font></b>
+122:   handler.startElement(<b><font color="#8A2BE2">"aNamedTuple"</font></b>);
+123:   handler.startNamedTuple();
+124:   handler.setItemName(<b><font color="#8A2BE2">"f"</font></b>);
+125:   handler.addNumItem(3.45);
+126:   handler.setItemName(<b><font color="#8A2BE2">"s"</font></b>);
+127:   handler.addStringItem(<b><font color="#8A2BE2">"named tuple"</font></b>);
+128:   handler.setItemName(<b><font color="#8A2BE2">"i"</font></b>);
+129:   handler.addIntItem(99);
+130:   handler.endNamedTuple();
+131:   handler.endElement();
+132: 
+133:   <b><font color="#007D00">// initialize the tuple set 'simpleTupleSet'</font></b>
+134:   handler.startElement(<b><font color="#8A2BE2">"aTupleSet"</font></b>);
+135:   handler.startSet();
+136:   <b><font color="#007D00">// first tuple</font></b>
+137:   handler.startTuple();
+138:   handler.addIntItem(1);
+139:   handler.addNumItem(2.5);
+140:   handler.addStringItem(<b><font color="#8A2BE2">"a"</font></b>);
+141:   handler.endTuple();
+142:   <b><font color="#007D00">// second element</font></b>
+143:   handler.startTuple();
+144:   handler.addIntItem(3);
+145:   handler.addNumItem(4.1);
+146:   handler.addStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+147:   handler.endTuple();
+148:   handler.endSet();
+149:   handler.endElement();
+150: 
+151:   <b><font color="#007D00">// initialize element 3 and 2 of the tuple array 'simpleTupleArray' in that particular order</font></b>
+152:   handler.startElement(<b><font color="#8A2BE2">"aTupleArray"</font></b>);
+153:   handler.startIndexedArray();
+154:   <b><font color="#007D00">// initialize 3rd cell</font></b>
+155:   handler.setItemIntIndex(3);
+156:   handler.startTuple();
+157:   handler.addIntItem(1);
+158:   handler.addNumItem(2.5);
+159:   handler.addStringItem(<b><font color="#8A2BE2">"a"</font></b>);
+160:   handler.endTuple();
+161:   <b><font color="#007D00">// initialize second cell</font></b>
+162:   handler.setItemIntIndex(2);
+163:   handler.startTuple();
+164:   handler.addIntItem(3);
+165:   handler.addNumItem(4.1);
+166:   handler.addStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+167:   handler.endTuple();
+168:   handler.endIndexedArray();
+169:   handler.endElement();
+170: 
+171:   <b><font color="#007D00">// initialize int array indexed by tuple set 'anArrayIndexedByTuple'</font></b>
+172:   handler.startElement(<b><font color="#8A2BE2">"anArrayIndexedByTuple"</font></b>);
+173:   handler.startIndexedArray();
+174:   handler.startItemTupleIndex();
+175:   handler.addIntItem(3);
+176:   handler.addNumItem(4.1);
+177:   handler.addStringItem(<b><font color="#8A2BE2">"b"</font></b>);
+178:   handler.endItemTupleIndex();
+179:   handler.addIntItem(1);
+180:   handler.endIndexedArray();
+181:   handler.endElement();
+182: 
+183:   <b><font color="#007D00">//initialize a 2-dimension int array 'a2DIntArray'</font></b>
+184:   handler.startElement(<b><font color="#8A2BE2">"a2DIntArray"</font></b>);
+185:   handler.startArray();
+186:   <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=1;i&lt;=2;i++) {
+187:     handler.startArray();
+188:     <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j=1;j&lt;=3;j++)
+189:       handler.addIntItem(i*10+j);
+190:     handler.endArray();
+191:   }  
+192:   handler.endArray();
+193:   handler.endElement();
+194: }
+195: 
+196: 
+</tt></pre>

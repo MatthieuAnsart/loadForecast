@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Overview" />
+<meta name="abstract" content="CP Optimizer provides tailored constraint propagation algorithms from specialized constraints and expressions." />
+<meta name="Description" content="CP Optimizer provides tailored constraint propagation algorithms from specialized constraints and expressions." />
+<meta name="DC.subject" content="constraint, specialized, domain reduction, specialized constraint, IloCP class, AllDiffInferenceLevel parameter, inference level" />
+<meta name="keywords" content="constraint, specialized, domain reduction, specialized constraint, IloCP class, AllDiffInferenceLevel parameter, inference level" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="OdWtGkZU" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<title>Overview</title>
+</head>
+<body role="main" id="OdWtGkZU">
+<h1 class="title topictitle1">Overview</h1>
+<div class="body"><p class="shortdesc">CP Optimizer provides tailored constraint propagation
+algorithms from specialized constraints and expressions.</p>
+<p class="p">A fundamental and powerful feature of CP Optimizer are
+the predefined specialized constraints. In theory, basic constraints
+like arithmetic and logical ones can model any kind of constraint.
+A specialized constraint is equivalent to a set of arithmetic or logical
+constraints. In most of the cases, the specialized constraint achieves
+more domain reduction than the equivalent set of basic constraints
+and performs domain reduction more efficiently.</p>
+<p class="p">Specialized constraints prove useful in the practical
+real-world problems of allocation and scheduling. These constraints
+make it possible to express complicated relations between decision
+variables, for example, relations that would require a huge number
+of arithmetic constraints. Specialized constraints enter into such
+considerations as counting values, maintaining load weights and other
+such critical activities.</p>
+<p class="p">A typical example of the gain specialized constraints
+can provide is illustrated with the following model implemented using
+the C++ API:  </p>
+<pre class="pre codeblock"><code>  IloIntVar x(env, 1, 2);
+  IloIntVar y(env, 1, 2);
+  IloIntVar z(env, 1, 2);
+  IloModel model(env);
+  model.add(x != y);
+  model.add(x != z);
+  model.add(y != z);
+</code></pre>
+<p class="p">Each decision variable has the values 1 and 2 in its
+domain, and the constraints state that the variables must be all assigned
+different values. This model clearly has no solution. However, no
+constraint can perform domain reduction. Examining the constraint <em class="ph i">x != y</em>, both <em class="ph i">x = 1</em>, <em class="ph i">y
+= 2</em> and <em class="ph i">x = 2</em>, <em class="ph i">y = 1</em> are solutions. Therefore, no
+value can be removed from domains of <em class="ph i">x</em> or <em class="ph i">y</em> if the constraints are considered
+independently. </p>
+<p class="p">To achieve more domain reduction by having a more global
+view on this model, the three constraints need to be replaced by the
+all different constraint: </p>
+<pre class="pre codeblock"><code>    model.add(IloAllDiff(env, IloIntVarArray(env, 3, x, y, z)));
+</code></pre>
+<p class="p">In order to achieve full domain reduction, the inference
+level of this constraint, that is the strength of its domain reduction,
+must be set to the extended level by changing the parameter <samp class="ph codeph">IloCP::AllDiffInfe</samp><samp class="ph codeph">renceLevel</samp>: </p>
+<pre class="pre codeblock"><code>    cp.setParameter(IloCP::AllDiffInferenceLevel, IloCP::Extended);
+</code></pre>
+<p class="p">Invoking propagation by running the code: </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::AllDiffInferenceLevel, IloCP::Extended);
+    if (cp.propagate()){
+      cp.out() &lt;&lt; " Domains reduced: " &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of x is " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of y is " &lt;&lt; cp.domain(y) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of z is " &lt;&lt; cp.domain(z) &lt;&lt; std::endl;
+    }else{
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+    }
+</code></pre>
+<p class="p">produces the output: </p>
+<pre class="pre codeblock"><code> Model has no solution.
+</code></pre>
+<p class="p">because the domain reduction has now created an empty
+domain for one the variables <em class="ph i">x</em>, <em class="ph i">y</em>, or <em class="ph i">z</em>. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" title="CP Optimizer provides tailored constraint propagation algorithms for specialized constraints and expressions.">Propagation of specialized constraints and expressions</a></div>
+</div>
+</div></body>
+</html>

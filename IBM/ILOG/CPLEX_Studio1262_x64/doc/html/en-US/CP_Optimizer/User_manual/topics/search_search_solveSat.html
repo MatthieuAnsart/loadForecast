@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving a satisfiability problem" />
+<meta name="abstract" content="The basic search strategy in CP Optimizer can be used to solve satisfiability problems." />
+<meta name="Description" content="The basic search strategy in CP Optimizer can be used to solve satisfiability problems." />
+<meta name="DC.subject" content="satisfiability problem, search, solution" />
+<meta name="keywords" content="satisfiability problem, search, solution" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/search_search.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizersearch.1016672" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/search_search.html" />
+<title>Solving a satisfiability problem</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizersearch.1016672">
+<h1 class="title topictitle1">Solving a satisfiability problem</h1>
+<div class="body"><p class="shortdesc">The basic search strategy in CP Optimizer can
+be used to solve satisfiability problems.</p>
+<p class="p">The process for finding solutions to constraint satisfaction
+problems is similar to the process for finding solutions to optimization
+problems. </p>
+<p class="p">Consider this satisfiability problem, written in the C++
+API: </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 7, "x");
+    IloIntVar y(env, 0, 7, "y");
+    IloIntVar z(env, 0, 7, "z");
+    IloIntVarArray all(env, 3, x, y, z);
+    model.add(IloAllDiff(env, all));
+    model.add(y == IloElement(IloIntArray(env, 7, 3, 7, 8, 8, 0, 1, 4), x));
+</code></pre>
+<p class="p">A typical code for finding a solution to this model would
+look like: </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::LogVerbosity, IloCP::Quiet);
+    if (cp.solve()){
+      cp.out() &lt;&lt; " A solution has been found" 
+               &lt;&lt; ", x = " &lt;&lt; cp.getValue(x)
+               &lt;&lt; ", y = " &lt;&lt; cp.getValue(y)
+               &lt;&lt; ", z = " &lt;&lt; cp.getValue(z) &lt;&lt; std::endl;
+    } else {
+      cp.out() &lt;&lt; " The problem has no solution " &lt;&lt; std::endl;
+    }
+</code></pre>
+<p class="p">Running this code produces the output: </p>
+<pre class="pre codeblock"><code>A solution has been found, x = 4, y = 0, z = 1
+</code></pre>
+<p class="p">For constraint satisfaction problems, the search stops
+at the first solution encountered, thus there are no intermediate
+solutions found. However, it is possible to produce all solutions
+to a constraint satisfaction problem. For the model at the start of
+this section, running the code: </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::LogVerbosity, IloCP::Quiet);
+    cp.startNewSearch();
+    while(cp.next()){
+      cp.out() &lt;&lt; "x = " &lt;&lt; cp.getValue(x)
+               &lt;&lt; ", y = " &lt;&lt; cp.getValue(y)
+               &lt;&lt; ", z = " &lt;&lt; cp.getValue(z) &lt;&lt; std::endl;
+    }
+    cp.end();
+</code></pre>
+<p class="p">produces the 30 distinct solutions of the model: </p>
+<pre class="pre codeblock"><code>x = 4, y = 0, z = 1
+x = 4, y = 0, z = 2
+x = 4, y = 0, z = 3
+x = 4, y = 0, z = 5
+x = 4, y = 0, z = 6
+x = 4, y = 0, z = 7
+x = 0, y = 3, z = 1
+x = 0, y = 3, z = 2
+x = 0, y = 3, z = 4
+x = 0, y = 3, z = 5
+x = 0, y = 3, z = 6
+x = 0, y = 3, z = 7
+x = 5, y = 1, z = 0
+x = 5, y = 1, z = 2
+x = 5, y = 1, z = 3
+x = 5, y = 1, z = 4
+x = 5, y = 1, z = 6
+x = 5, y = 1, z = 7
+x = 1, y = 7, z = 0
+x = 1, y = 7, z = 2
+x = 1, y = 7, z = 3
+x = 1, y = 7, z = 4
+x = 1, y = 7, z = 5
+x = 1, y = 7, z = 6
+x = 6, y = 4, z = 0
+x = 6, y = 4, z = 1
+x = 6, y = 4, z = 2
+x = 6, y = 4, z = 3
+x = 6, y = 4, z = 5
+x = 6, y = 4, z = 7
+</code></pre>
+<p class="p">In the <strong class="ph b">C++ API</strong> of CP Optimizer, you use
+the class <samp class="ph codeph">IloCP</samp> and the methods <samp class="ph codeph">IloCP::getValue</samp>, <samp class="ph codeph">IloCP::getObjValue</samp>, <samp class="ph codeph">IloCP::startNewSearch</samp>, <samp class="ph codeph">IloCP::next</samp> and <samp class="ph codeph">IloCP::end</samp>.</p>
+<p class="p">In the <strong class="ph b">Java™ API</strong> of
+CP Optimizer, you use the class <samp class="ph codeph">IloCP</samp> and
+the methods <samp class="ph codeph">IloCP.solve</samp>, <samp class="ph codeph">IloCP.getValue</samp>, <samp class="ph codeph">IloCP.getObjValue</samp>, <samp class="ph codeph">IloCP.startNewSearch</samp>, <samp class="ph codeph">IloCP.next</samp> and <samp class="ph codeph">IloCP.end</samp>.</p>
+<p class="p">In the <strong class="ph b">C# API</strong> of CP Optimizer, you use
+the class <samp class="ph codeph">CP</samp> and the methods <samp class="ph codeph">CP.Solve</samp>, <samp class="ph codeph">CP.GetValue</samp>, <samp class="ph codeph">CP.GetObjValue</samp>, <samp class="ph codeph">CP.StartNewSearch</samp>, <samp class="ph codeph">CP.Next</samp> and <samp class="ph codeph">CP.End</samp>. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/search_search.html" title="CP Optimizer uses constructive search strategies to find a solution to a constraint programming problem.">Searching for solutions</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The compatibility and incompatibility constraints" />
+<meta name="abstract" content="Compatibility and incompatibility constraints can be used to model difficult constraints and to improve solving efficiency." />
+<meta name="Description" content="Compatibility and incompatibility constraints can be used to model difficult constraints and to improve solving efficiency." />
+<meta name="DC.subject" content="constraint, allowed assignment, compatibility, table, IloAllowedAssignmens function" />
+<meta name="keywords" content="constraint, allowed assignment, compatibility, table, IloAllowedAssignmens function" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerpropagate.1018955" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<title>The compatibility and incompatibility constraints</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerpropagate.1018955">
+<h1 class="title topictitle1">The compatibility and incompatibility constraints</h1>
+<div class="body"><p class="shortdesc">Compatibility and incompatibility constraints can be used
+to model difficult constraints and to improve solving efficiency.</p>
+<p class="p">The compatibility constraint is a specialized constraint that is
+defined by explicitly specifying the set of assignments that are solutions
+to the constraint. </p>
+<p class="p">Compatibility constraints are used frequently in constraint programming
+applications. There are two broad categories of use: </p>
+<ol class="ol"><li class="li"><p class="p">when external data defines a constraint, and such a constraint
+is difficult to state with arithmetic or logical constraints, and </p>
+</li>
+<li class="li"><p class="p">when you want to improve the efficiency of the solving process
+by modeling a subproblem by assignments.</p>
+ </li>
+</ol>
+<div class="section" id="migration.uss_usrcpoptimizerpropagate.1018955__migration.uss_usrcpoptimizerpropagate.1018967"><h2 class="title sectiontitle">External
+data as constraints</h2><p class="p">In many constraint applications, it
+is necessary to process a huge quantity of data. For instance, the
+features of some products can be described as a relation in a database
+or in text files. </p>
+<p class="p">Consider as an example a bicycle factory
+that can produce thousands of different models. For each model of
+bicycle, a relation associates the features of that bicycle such as
+size, weight, color, price. This information can be used in a constraint
+programming application that allows a customer to find the bicycle
+that most closely fits a specification. </p>
+<p class="p">In the bicycle example,
+illustrated here using the <strong class="ph b">C++ API</strong>, an array of decision variables <samp class="ph codeph">x</samp> is
+defined, where <samp class="ph codeph">x[0]</samp> represents the identifier of
+the bicycle, <samp class="ph codeph">x[1]</samp> its size, x[2] its weight, <samp class="ph codeph">x[3]</samp> its
+color and <samp class="ph codeph">x[4]</samp> its price:  </p>
+<pre class="pre codeblock"><code>    IloIntVarArray x(env, 5);
+</code></pre>
+<p class="p">A compatibility constraint on <samp class="ph codeph">x</samp> forces
+the values of <samp class="ph codeph">x</samp> to be one of the combinations defined
+in the tupleset: </p>
+<pre class="pre codeblock"><code>    model.add(IloAllowedAssignments(env, x, bicycleSet));
+</code></pre>
+<p class="p">where <samp class="ph codeph">bicycleSet</samp> defines the set of
+solutions to the constraint as an <samp class="ph codeph">IloIntTupleSet</samp>:
+ </p>
+<pre class="pre codeblock"><code>    IloIntTupleSet bicycleSet(env, 5);
+    bicycleSet.add(IloIntArray(env, 5, 1, 57, 12, 3, 1490));
+    bicycleSet.add(IloIntArray(env, 5, 2, 57, 13, 5, 1340));
+    bicycleSet.add(IloIntArray(env, 5, 3, 60, 14, 3, 1790));
+    bicycleSet.add(IloIntArray(env, 5, 4, 65, 14, 7, 1550));
+    bicycleSet.add(IloIntArray(env, 5, 5, 67, 15, 2, 2070));
+    bicycleSet.add(IloIntArray(env, 5, 6, 70, 15, 2, 1990));
+</code></pre>
+<p class="p">Another bicycle variable can be created by construction
+another array of variables: </p>
+<pre class="pre codeblock"><code>    IloIntVarArray y(env, 5);
+</code></pre>
+<p class="p">The same compatibility constraint can be placed on <samp class="ph codeph">y</samp>: </p>
+<pre class="pre codeblock"><code>    model.add(IloAllowedAssignments(env, y, bicycleSet));
+</code></pre>
+<p class="p">It is important to note that tuplesets can be large,
+and thus they are shared over compatibility constraints that use the
+same tupleset. </p>
+<p class="p">Here is a full example for illustrating domain
+reduction achieved by this constraint: </p>
+<pre class="pre codeblock"><code>    IloIntVarArray x(env, 5);
+    x[0] = IloIntVar(env, 0, 10);
+    x[1] = IloIntVar(env, 40, 60);
+    x[2] = IloIntVar(env, 10, 20);
+    x[3] = IloIntVar(env, 5, 6);
+    x[4] = IloIntVar(env, 1000, 5000);
+
+    IloIntTupleSet bicycleSet(env, 5);
+    bicycleSet.add(IloIntArray(env, 5, 1, 57, 12, 5, 1490)); // tuple 0
+    bicycleSet.add(IloIntArray(env, 5, 2, 57, 13, 1, 1340)); // tuple 1
+    bicycleSet.add(IloIntArray(env, 5, 3, 60, 14, 5, 1790)); // tuple 2
+    bicycleSet.add(IloIntArray(env, 5, 4, 65, 14, 4, 1550)); // tuple 3
+    bicycleSet.add(IloIntArray(env, 5, 5, 67, 15, 2, 2070)); // tuple 4
+    bicycleSet.add(IloIntArray(env, 5, 6, 70, 15, 5, 1990)); // tuple 5
+
+    IloModel model(env);
+    model.add(IloAllowedAssignments(env, x, bicycleSet));
+
+    IloCP cp(model);
+    if (cp.propagate())
+      cp.out() &lt;&lt; " Domains of vars = " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+    else
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+</code></pre>
+<p class="p">Running this code produces the output:  </p>
+<pre class="pre codeblock"><code> Domains of vars = [[1 3] [57 60] [12 14] [5] [1490 1790]]
+</code></pre>
+<p class="p">There are only two possible solutions to the constraint
+due to the domains of the variables in the array <samp class="ph codeph">x</samp>.
+With the domain of <samp class="ph codeph">x[3]</samp>, only tuples 0, 2 and 5 are
+possible. The domain of <samp class="ph codeph">x[1]</samp> eliminates the tuple
+5. Thus the final domains are the union of the possible values in
+the two remaining solutions. </p>
+<p class="p">The forbidden assignments constraint
+plays a symmetrical role: the tupleset represents the set of non-solutions
+of the constraint. This is useful when there are fewer non-solutions
+than solutions. </p>
+<p class="p">Both constraints achieve full domain reduction
+and do not support inference levels. </p>
+</div>
+<div class="section" id="migration.uss_usrcpoptimizerpropagate.1018955__migration.uss_usrcpoptimizerpropagate.1019055"><h2 class="title sectiontitle">Improving
+efficiency: a compatibility constraint for a subproblem</h2><p class="p">A
+modeling trick that may dramatically reduce the computation time needed
+to solve a problem consists in identifying a difficult subproblem,
+computing all the solutions of the subproblem and storing them in
+a tuple set and then creating a compatibility constraint.</p>
+<p class="p">This
+approach is not restricted to constraint programming but is a general
+approach: facing a difficult problem, it can be easier to solve it
+by: </p>
+<ul class="ul"><li class="li"><p class="p">decomposing the problem into subproblems, </p>
+ </li>
+<li class="li"><p class="p">solving the different subproblems and </p>
+ </li>
+<li class="li"><p class="p">connecting the solutions of the subproblems to produce a solution
+to the whole problem. </p>
+ </li>
+</ul>
+<p class="p">An allowed assignments constraint forces the values of the
+variables of the problem to be one of the solutions of the subproblem.
+Thus the connection of the solution of the subproblem with the remainder
+of the problem is automatically handled. The advantage of this approach
+is that when searching for a solution of the whole problem, instead
+of always retrieving the solutions of the subproblem in the search,
+the allowed assignments constraint forces values to one of these solutions.
+In other terms, the work of solving the subproblem is factored and
+done only once, before the search, and not several times during the
+search (which is potentially a huge number of times). </p>
+<p class="p">This
+approach also has a drawback: the solutions of the subproblem must
+be found first so this must be practical (the solutions should not
+be too numerous). Allowed assignment constraints with several hundreds
+of thousands of tuples can be handled, but subproblems with billions
+of solutions cannot be handled in this way. Nevertheless, it is possible
+to set a bound on the number of solutions of the subproblem to precompute
+and store in the tupleset. In this case, the problem solved is a restriction
+of the initial problem, but this may be useful in practice. </p>
+<p class="p">An
+example of such an approach is available in the file <samp class="ph codeph">teambuilding.cpp</samp> in
+the <samp class="ph codeph">examples/src/cpp</samp> directory. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" title="CP Optimizer provides tailored constraint propagation algorithms for specialized constraints and expressions.">Propagation of specialized constraints and expressions</a></div>
+</div>
+</div></body>
+</html>

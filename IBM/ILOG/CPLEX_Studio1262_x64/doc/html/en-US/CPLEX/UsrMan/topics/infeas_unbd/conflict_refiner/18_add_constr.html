@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Adding a constraint" />
+<meta name="abstract" content="Explains the effect of adding a constraint to an infeasible model." />
+<meta name="Description" content="Explains the effect of adding a constraint to an infeasible model." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_refineConflict.1044423" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" />
+<title>Adding a constraint</title>
+</head>
+<body role="main" id="User_manual.uss_refineConflict.1044423">
+<h1 class="title topictitle1">Adding a constraint</h1>
+<div class="body"><p class="shortdesc">Explains the effect of adding a constraint to an infeasible
+model.</p>
+<p class="p">A natural question is why so many employees are needed.
+Look for an answer by adding a constraint limiting employees to five
+or fewer, like this:  </p>
+<pre class="pre codeblock"><code>add
+x1+x2+x3+x4+x5+x6+x7+x8+x9+x10 &lt;= 5
+end
+optimize</code></pre>
+<p class="p">As you might expect, the output from the optimizer indicates
+the current solution is incompatible with this new constraint, and
+indeed no solution to this what-if scenario exists at all:  </p>
+<pre class="pre codeblock"><code>Warning:  MIP start values are infeasible.
+Retaining MIP start values for possible repair.
+Row 'c11' infeasible, all entries at implied bounds.
+Presolve time =    0.00 sec.  
+MIP - Integer infeasible.
+Current MIP best bound is infinite.
+Solution time =    0.00 sec.  Iterations = 0  Nodes = 0</code></pre>
+<p class="p">Constraint c11, flagged by presolve, is the newly added
+constraint, not revealing very much. To learn more about why c11 causes
+trouble, run <samp class="ph codeph">conflict</samp>  again, and view
+the minimal conflict with the following command again:</p>
+<p class="p"> <samp class="ph codeph">display conflict all</samp>  </p>
+<p class="p">You will see the following conflict: </p>
+<pre class="pre codeblock"><code>Minimize
+ obj:
+Subject To
+ c2:  x1 + x2 + 0.8 x3 + 0.6 x4 + 0.4 x5 &gt;= 2.1
+ c3:  x6 + 0.9 x7 + 0.5 x8 &gt;= 1.2
+ c4:  x9 + 0.9 x10 &gt;= 0.8
+ c11: x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 &lt;= 5
+  (omitting the listing of binary variables' bounds)</code></pre>
+<p class="p">The constraints in conflict with this new limitation
+are all of the skill requirements. When viewed in this light, the
+inconsistency is easy to spot: one employee is obviously needed for
+constraint c4, two are needed for c3, and a simple calculation reveals
+that three are needed for c2. Since there is no overlap in the skill
+sets, five employees are too few. </p>
+<p class="p">Unless management or the formulator of the model is willing
+to compromise about the skills, (for example, to relax the righthand
+side of any of these constraints), constraint c11 needs to be taken
+out again, since it is unrealistic to get by with only five employees: </p>
+<p class="p"> <samp class="ph codeph">change delete constraint c11</samp> </p>
+<p class="p">This change results in a model with an optimal cost of
+335, using six employees. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" title="Interprets the conflict detected by the conflict refiner in the Interactive Optimizer.">Interpreting conflict</a></div>
+</div>
+</div></body>
+</html>

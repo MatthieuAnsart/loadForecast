@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="New routines to access objective offset in CPLEX V12.6.2" />
+<meta name="abstract" content="Announces new routines to access objective offset in CPLEX V12.6.2." />
+<meta name="Description" content="Announces new routines to access objective offset in CPLEX V12.6.2." />
+<meta name="DC.subject" content="release notes CPLEX V12.6.2, new methods for objective offset, objective offset" />
+<meta name="keywords" content="release notes CPLEX V12.6.2, new methods for objective offset, objective offset" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes1262/newIntro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="NewObjOffset1262" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1262/newIntro.html" />
+<title>New routines to access objective offset in CPLEX V12.6.2</title>
+</head>
+<body role="main" id="NewObjOffset1262">
+<h1 class="title topictitle1">New routines to access objective offset in CPLEX V12.6.2</h1>
+<div class="body"><p class="shortdesc">Announces new routines to access objective offset in CPLEX V12.6.2.</p>
+<p class="p">CPLEX V12.6.2 introduces new routines to access an 
+objective offset in a model. Furthermore, file formats, 
+such as LP, MPS, SAV, have been 
+extended to support an objective offset in a model.</p>
+<div class="section"><h2 class="title sectiontitle">Interactive Optimizer</h2>
+<p class="p">To change an objective offset in a model in the Interactive Optimizer, 
+use the command:</p>
+
+<pre class="pre codeblock"><code>change coef 0 0 <em class="ph i">offset</em></code></pre>
+
+<p class="p">where 0 0 represents the row and column of the objective offset, 
+and <em class="ph i">offset</em> is the value that you want to introduce as an offset 
+in the objective of your model.</p>
+
+<p class="p">To query the current objective offset of your model 
+in the Interactive Optimizer, use the following command:</p>
+
+<pre class="pre codeblock"><code>change coeff 0 0</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">APIs</h2>
+<ul class="ul"><li class="li"><p class="p">In the <strong class="ph b">Callable Library (C API)</strong>, use the routine 
+<a class="xref" href="../../../../refcallablelibrary/cpxapi/getobjoffset.html" title="The routine CPXXgetobjoffset/CPXgetobjoffset returns the objective offset between the original problem and the presolved problem.">CPXXgetobjoffset and CPXgetobjoffset</a>
+to access the current objective offset.</p>
+
+<p class="p">Use the routine 
+<a class="xref" href="../../../../refcallablelibrary/cpxapi/chgobjoffset.html" title="The routine CPXXchgobjoffset/CPXchgobjoffset changes the constant offset of the objective function for a problem.">CPXXchgobjoffset and CPXchgobjoffset</a>
+to change or modify the current objective offset.</p>
+
+<div class="p">In applications that use the remote object, change an objective offset 
+by means of the corresponding routines 
+for asynchronization, joins, and multicasts:
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="../../../../refcallablelibrary/cpxremoteapi/chgobjoffset_async.html" title="This routine is the asynchronous version of CPXXchgobjoffset/CPXchgobjoffset.">CPXXchgobjoffset_async and CPXchgobjoffset_async</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../../refcallablelibrary/cpxremoteapi/chgobjoffset_join.html" title="This routine is the asynchronous version of CPXXchgobjoffset/CPXchgobjoffset.">CPXXchgobjoffset_join and CPXchgobjoffset_join</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../../refcallablelibrary/cpxremoteapi/chgobjoffset_multicast.html" title="Multicast version of CPXXchgobjoffset/CPXchgobjoffset.">CPXXchgobjoffset_multicast and CPXchgobjoffset_multicast</a></p>
+</li>
+</ul>
+</div>
+</li>
+<li class="li"><div class="p">In the Python API, use these methods:
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph"><span class="keyword apiname">Cplex.objective.get_offset()</span></samp> to access 
+an objective offset.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph"><span class="keyword apiname">Cplex.objective.set_offset(offset)</span></samp> to 
+set an objective offset.</p>
+</li>
+</ul>
+</div>
+</li>
+<li class="li"><p class="p">In the MATLAB connector, a new optional field 
+<samp class="ph codeph">cplex.Model.objoffset</samp> in the 
+class <span class="keyword apiname">CPLEX</span> allows you to access an 
+objective offset in your model. 
+When you supply a value in this field, CPLEX uses the value to define 
+an objective offset. If you do not specify a value of this field, 
+CPLEX assumes by default that the objective offset is 0 (zero).</p>
+</li>
+</ul>
+ </div>
+<div class="section"><h2 class="title sectiontitle">File formats</h2>
+<p class="p">CPLEX V12.6.2 extends these file formats to support an 
+optional objective offset in a model.</p>
+
+<ul class="ul"><li class="li"><div class="p"><strong class="ph b">LP</strong> file format can optionally include an 
+objective offset as a final constant term in the objective function.
+For example, the following line declares an objective offset of 3.1415. 
+<pre class="pre codeblock"><code>obj:  x1 + 2 x2 + 3.1415</code></pre>
+
+ </div>
+
+ <div class="p">Likewise, the objective offset follows any quadratic expression in LP 
+ file format of a quadratic program (QP), like the following line:
+ <pre class="pre codeblock"><code> obj: x + 2 y + [ x ^2 - 3 x * y ] / 2 + 3.1415
+ </code></pre>
+
+ </div>
+
+ </li>
+<li class="li"><div class="p"><strong class="ph b">MPS</strong> file format stores an optional objective offset as a 
+<strong class="ph b">negative RHS</strong> (that is, a negative right hand side value) 
+of the objective constraint in the RHS section of the MPS file.
+For example, the following line declares an objective offset of -25:
+<pre class="pre codeblock"><code> rhs       obj     25</code></pre>
+</div>
+</li>
+<li class="li"><p class="p"><strong class="ph b">SAV</strong> file format is a binary format for numerical 
+accuracy. SAV format has been extended to contain an optional objective 
+offset. The CPLEX routines and methods for writing or reading such a 
+file have been adapted to support an optional objective offset. (That is,
+the user need not consider formatting details as for LP or MPS file formats.)
+Existing SAV files without an objective offset continue to work correctly.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1262/newIntro.html" title="Announces new features of CPLEX V12.6.2.">New features in CPLEX V12.6.2</a></div>
+</div>
+</div></body>
+</html>

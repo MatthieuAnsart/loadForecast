@@ -1,0 +1,262 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloConversion</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert.cplex/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloConversion.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloConversion</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/iloexpression.h</span></div><div><img
+                src="IloConversion.png" border="0"
+                usemap="#svg_map_IloConversion"
+                    alt="Map of IloConversion"><map
+                        name="svg_map_IloConversion"><area
+                        href="../classes/IloConversion.html"
+                        shape="rect" alt="IloConversion"
+                        coords="10.0,37.6357421875,83.0,55.271484375" /><area
+                        href="../classes/IloConversion.html"
+                        shape="rect" alt="IloConversion"
+                        coords="10.0,37.6357421875,83.0,55.271484375" /><area
+                        href="../classes/IloExtractable.html"
+                        shape="rect" alt="IloExtractable"
+            coords="56.5,10.0,129.5,27.6357421875" /></map></img></div>
+For IBM ILOG CPLEX: a means to change the type of a numeric variable.
+    <div
+                        class="description"><p>An instance of this class offers you a means to change the type of a
+ numeric variable. For example, in a model (an instance of <code><a
+                        href="../classes/IloModel.html">IloModel</a></code>) extracted for an algorithm (such as an instance of
+ the class <code>IloCplex</code>), you may want to convert the type of a
+ given numeric variable (an instance of <code>IloNumVar</code>) from
+ <code>ILOFLOAT</code> to <code>ILOINT</code> or to <code>ILOBOOL</code> (or
+ from <code>IloNumVar::Float</code> to <code>IloNumVar::Int</code> or to
+ <code>IloNumVar::Bool</code>). Such a change is known as a conversion.</p><p>After you create a conversion, you must explicitly add it to the model in
+ order for it to be taken into account. To do so, use the member function
+ <code><a
+                        href="../classes/IloModel.html#method_add">IloModel::add</a></code> or the template <code><a
+                        href="../functions/IloAdd.html">IloAdd</a></code>. Then extract the model for an algorithm (such as an
+ instance of <code>IloCplex</code>) with the member function <code><a
+                            href="../classes/IloAlgorithm.html#method_extract">IloAlgorithm::extract</a></code>.</p><p><strong>Multiple Type Conversions of the Same Variable</strong></p><p>You can convert the type of a numeric variable in a model. To do so,
+ create an instance of <code>IloConversion</code> and add it to the
+ model. You can also convert the type of a numeric variable after the model
+ has been extracted for an algorithm (such as an instance of
+ <code>IloCplex</code>, documented in the IBM ILOG CPLEX Reference Manual). </p><p>An instance of <code>IloCplex</code> will not accept more than one type
+ conversion of the same variable. That is, you can change the type once, but
+ not twice, in a single instance of <code>IloCplex</code>. Attempts to
+ convert the type of the same variable more than once will throw the
+ exception <code>IloCplex::MultipleConversionException</code>, documented in
+ the IBM ILOG CPLEX Reference Manual.</p><p>In situations where you want to change the type of a numeric variable
+ more than once (for example, from Boolean to integer to floating-point),
+ there are these possibilities:</p><ul>
+<li>You can remove a prior conversion of a given variable in a given
+ model. To do so, use its member function <code><a
+                href="../classes/IloExtractable.html#method_end">IloExtractable::end</a></code> to delete it and optionally add a new
+ conversion.</li><li>You can apply different conversions to a given variable
+ in more than one model, like this:</li>
+</ul><pre
+                    class="sample">
+ IloNumVar x(env, 0, 10, ILOBOOL);
+ IloRange rng = (x &lt;= 10);
+ IloModel mdl1(env);
+ mdl1.add(rng);
+ mdl1.add(IloConversion(env, x, ILOINT));
+ IloCplex cplex1(mdl1);
+ IloModel mdl2(env);
+ mdl2.add(rng);
+ mdl2.add(IloConversion(env, x, ILOFLOAT));
+ IloCplex cplex2(mdl2);
+ </pre><p>Most member functions in this class contain <code>assert</code>
+ statements. For an explanation of the macro <code>NDEBUG</code> (a way to
+ turn on or turn off these <code>assert</code> statements), see the concept
+ <a
+            href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p><p><strong>See Also</strong> the class <code>IloCplex</code> in the
+ <em>IBM ILOG CPLEX Reference Manual</em>.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+            href="../classes/IloModel.html">IloModel</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloConversionI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloConversion.html#method_getImpl">getImpl</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloConversion.html#method_IloConversion">IloConversion</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloConversion.html#method_IloConversion">IloConversion</a>(IloConversionI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloConversion.html#method_IloConversion">IloConversion</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> t, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloConversion.html#method_IloConversion">IloConversion</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, const <a
+                            href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars, <a
+                    href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> t, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloConversion.html#method_IloConversion">IloConversion</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, const <a
+                            href="../classes/IloIntVarArray.html">IloIntVarArray</a> vars, <a
+            href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> t, const char * name=0)</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloExtractable.html">IloExtractable</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloExtractable.html#method_asConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_asConstraint">asConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_asIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asIntExpr">asIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asModel"></a><a
+                            href="../classes/IloExtractable.html#method_asModel">asModel</a>, <a
+                            href="../classes/IloExtractable.html#method_asNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asNumExpr">asNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asObjective"></a><a
+                            href="../classes/IloExtractable.html#method_asObjective">asObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_asVariable"></a><a
+                            href="../classes/IloExtractable.html#method_asVariable">asVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_end"></a><a
+                            href="../classes/IloExtractable.html#method_end">end</a>, <a
+                            href="../classes/IloExtractable.html#method_getEnv"></a><a
+                            href="../classes/IloExtractable.html#method_getEnv">getEnv</a>, <a
+                            href="../classes/IloExtractable.html#method_getId"></a><a
+                            href="../classes/IloExtractable.html#method_getId">getId</a>, <a
+                            href="../classes/IloExtractable.html#method_getImpl"></a><a
+                            href="../classes/IloExtractable.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloExtractable.html#method_getName"></a><a
+                            href="../classes/IloExtractable.html#method_getName">getName</a>, <a
+                            href="../classes/IloExtractable.html#method_getObject"></a><a
+                            href="../classes/IloExtractable.html#method_getObject">getObject</a>, <a
+                            href="../classes/IloExtractable.html#method_IloExtractable"></a><a
+                            href="../classes/IloExtractable.html#method_IloExtractable">IloExtractable</a>, <a
+                            href="../classes/IloExtractable.html#method_isConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_isConstraint">isConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_isIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isIntExpr">isIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isModel"></a><a
+                            href="../classes/IloExtractable.html#method_isModel">isModel</a>, <a
+                            href="../classes/IloExtractable.html#method_isNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isNumExpr">isNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isObjective"></a><a
+                            href="../classes/IloExtractable.html#method_isObjective">isObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_isVariable"></a><a
+                            href="../classes/IloExtractable.html#method_isVariable">isVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_removeFromAll"></a><a
+                            href="../classes/IloExtractable.html#method_removeFromAll">removeFromAll</a>, <a
+                            href="../classes/IloExtractable.html#method_setLocation"></a><a
+                            href="../classes/IloExtractable.html#method_setLocation">setLocation</a>, <a
+                            href="../classes/IloExtractable.html#method_setName"></a><a
+                            href="../classes/IloExtractable.html#method_setName">setName</a>, <a
+                            href="../classes/IloExtractable.html#method_setObject"></a><a
+            href="../classes/IloExtractable.html#method_setObject">setObject</a></code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloConversion">IloConversion</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloConversion</span>()</div><div
+                class="description">
+ This constructor creates an empty handle. You must initialize it before you use it. 
+        </div><hr /><h3><a
+            name="method_IloConversion">IloConversion</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloConversion</span>(IloConversionI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description">
+ This constructor creates a handle object from a pointer to an implementation object.  
+        </div><hr /><h3><a
+            name="method_IloConversion">IloConversion</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloConversion</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> <span
+                class="parameter-name">t</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor accepts a numeric variable and a type; it creates a
+ handle to a type conversion to change the type of the variable
+ <code>var</code> to the type specified by <code>t</code>. You may use the
+ argument <code>name</code> to name the type conversion so that you can
+ refer to it by a string identifier.</p></div><hr /><h3><a
+            name="method_IloConversion">IloConversion</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloConversion</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+                class="parameter-name">vars</span>, <a
+                href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> <span
+                class="parameter-name">t</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor accepts an array of numeric variables and a type; it
+ creates a handle to a type conversion to change the
+ type of each variable in
+ the array <code>vars</code> to the type
+ specified by <code>t</code>. You may
+ use the argument <code>name</code> to name
+ the type conversion so that you
+ can refer to it by a string identifier.</p></div><hr /><h3><a
+            name="method_IloConversion">IloConversion</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloConversion</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, const <a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+                class="parameter-name">vars</span>, <a
+                href="../enumerations/IloNumVar_Type.html">IloNumVar::Type</a> <span
+                class="parameter-name">t</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor accepts an array of integer variables and a type; it
+ creates a handle to a type conversion to change the type
+ of each variable in
+ the array <code>vars</code> to the type
+ specified by <code>t</code>. You may
+ use the argument <code>name</code> to name
+ the type conversion so that you
+ can refer to it by a string identifier.</p></div><hr /><h3><a
+            name="method_getImpl">getImpl</a></h3><div
+                class="prototype">public IloConversionI * <span
+            class="function-name">getImpl</span>() const</div><div class="description">
+ This member function returns a pointer to the implementation object of the invoking handle.  
+        </div><hr /></body>
+</html>

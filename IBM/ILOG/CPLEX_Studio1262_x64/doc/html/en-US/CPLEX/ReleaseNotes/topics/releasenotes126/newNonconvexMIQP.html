@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Global solution of nonconvex MIQP" />
+<meta name="abstract" content="Documents a new feature of CPLEX V12.6.0: global solution of nonconvex QP and MIQP" />
+<meta name="Description" content="Documents a new feature of CPLEX V12.6.0: global solution of nonconvex QP and MIQP" />
+<meta name="DC.subject" content="release notes CPLEX V12.6.0, nonconvex MIQP, nonconvex QP, indefinite MIQP, indefinite QP, mixed integer quadratic programming (MIQP), quadratic programming (QP)" />
+<meta name="keywords" content="release notes CPLEX V12.6.0, nonconvex MIQP, nonconvex QP, indefinite MIQP, indefinite QP, mixed integer quadratic programming (MIQP), quadratic programming (QP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newIntro.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newSolnStatus.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="NewNonconvexMIQP126" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newIntro.html" />
+<title>Global solution of nonconvex MIQP</title>
+</head>
+<body role="main" id="NewNonconvexMIQP126">
+<h1 class="title topictitle1">Global solution of nonconvex MIQP</h1>
+<div class="body"><p class="shortdesc">Documents a new feature of CPLEX V12.6.0: global solution of nonconvex QP and MIQP</p>
+<p class="p">CPLEX V12.6.0 is capable of solving a quadratic program (that is, a problem with linear constraints and 
+one or more quadratic terms in the objective function) for which the space of optimal 
+solutions is not convex to global optimality. Such problems are known as nonconvex QPs.
+In addition to the linear constraints and quadratic objective terms, the problem can also include 
+integer constraints, and CPLEX V12.6.0 can solve the MIQP to global optimality.</p>
+<p class="p">Previous versions of CPLEX solved a convex QP (that is, a QP in which the set 
+of optimal solutions is convex) or a convex MIQP (that is, a convex QP with 
+additional integer constraints) to optimality. Also, previous versions of CPLEX 
+solved nonconvex QPs to a locally optimal point satisfying 
+Karush-Kuhn-Tucker (KKT) conditions.  These features are still available. 
+In CPLEX V12.6.0, this new feature solves all classes of QP problems to global 
+optimality. This new feature solves MIQP problems as well. That is, CPLEX now can find globally optimal solutions 
+whether the model includes only continuous variables (QP) or a mix of integer 
+and continuous variables (MIQP) and regardless of the properties of the objective function.</p>
+<p class="p">To enable this new feature solving QP or MIQP models to global optimality, 
+the user sets an existing parameter 
+<a class="xref" href="../../../Parameters/topics/OptimalityTarget.html" title="Specifies type of optimality that CPLEX targets (optimal convex or first-order satisfaction) as it searches for a solution">optimality target</a>
+to a new possible value, <span class="keyword apiname">CPX_SOLUTIONTARGET_OPTIMALGLOBAL</span> or 3.
+Then the user tells CPLEX to solve the problem as usual. For example, in the 
+Interactive Optimizer, the user invokes <samp class="ph codeph">optimize</samp> as usual, or in
+an application of the Callable Library (C API), the user invokes 
+<span class="keyword apiname">CPXXqpopt</span> for QP problems or 
+<span class="keyword apiname">CPXXmipopt</span> for MIQP problems
+as usual. Likewise, in other APIs, the user invokes 
+the appropriate method to optimize. In other words, there is 
+very little change in a user's application making use of this new feature to solve 
+a larger class of problems to global optimality. At the time of optimization, if 
+the parameter specifies <span class="keyword apiname">CPX_SOLUTIONTARGET_OPTIMALGLOBAL</span>, then 
+CPLEX V12.6.0 automatically changes the problem type of a QP to MIQP and invokes a 
+warning to let you know about the change. </p>
+<div class="section"><h2 class="title sectiontitle">New examples</h2>
+
+<p class="p">To help you exercise this new feature, CPLEX V12.6.0 includes nonconvex models, 
+<samp class="ph codeph">nonconvexexqp.lp</samp> and 
+<samp class="ph codeph">nonconvexexmiqp.lp</samp>, in LP file format for you to use in new 
+examples. The new examples are adapted to the application programming 
+interfaces (APIs) of CPLEX V12.6.0. On most platforms, CPLEX V12.6.0 also includes 
+makefiles appropriate for these new examples and models; on Windows, CPLEX V12.6.0 offers 
+project files to support the new examples and models in Visual Studio.</p>
+
+<ul class="ul"><li class="li"><samp class="ph codeph">xglobalqpex1.c</samp>  solves a nonconvex QP model to global optimality in the 
+Callable Library (C API) using <samp class="ph codeph">cplexx.h</samp>.</li>
+<li class="li"><samp class="ph codeph">xglobalmiqpex1.c</samp>  solves a nonconvex MIQP model to global optimality in the 
+Callable Library (C API) using <samp class="ph codeph">cplexx.h</samp>.</li>
+<li class="li"><samp class="ph codeph">globalqpex1.c</samp>  solves a nonconvex QP model to global optimality in the 
+Callable Library (C API) using <samp class="ph codeph">cplex.h</samp>.</li>
+<li class="li"><samp class="ph codeph">globalmiqpex1.c</samp>  solves a nonconvex MIQP model to global optimality in the 
+Callable Library (C API) using <samp class="ph codeph">cplex.h</samp>.</li>
+<li class="li"><samp class="ph codeph">iloglobalqpex1.cpp</samp>  solves a nonconvex QP or MIQP model to global optimality in the 
+in the C++ API of CPLEX.</li>
+<li class="li"><samp class="ph codeph">GlobalQPex1.java</samp>  solves a nonconvex QP or MIQP model to global optimality in the 
+in the Java API of CPLEX.</li>
+<li class="li"><samp class="ph codeph">GlobalQPex1.cs</samp>  solves a nonconvex QP or MIQP model to global optimality in the 
+in the C#.NET API of CPLEX.</li>
+<li class="li"><samp class="ph codeph">GlobalQPex1.vb</samp>  solves a nonconvex QP or MIQP model to global optimality in the 
+in the Visual Basic (VB.NET) API of CPLEX.</li>
+<li class="li"><samp class="ph codeph">globalqpex1.py</samp>  solves a nonconvex QP or MIQP model to global optimality in the 
+Python API of CPLEX.</li>
+<li class="li"><samp class="ph codeph">globalqpex1.m</samp>  solves a nonconvex QP or MIQP model to global optimality in the 
+CPLEX connector for MATLAB.</li>
+</ul>
+</div>
+<div class="section"><h2 class="title sectiontitle">Further information</h2>
+
+<p class="p">See also the revised topic  
+<a class="xref" href="../../../UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" title="Describes solving quadratic programming problems (QPs) with CPLEX.">Solving problems with a quadratic objective (QP)</a> 
+and the new topic 
+
+<a class="xref" href="../../../UsrMan/topics/discr_optim/mip_quadratic/01_quadratic_mip_title_synopsis.html" title="Documents the solution of mixed integer programs that include quadratic terms in the objective (MIQP) or among the constraints (MIQCP). with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values and in which there can be quadratic terms in the objective function and possibly among the coefficients of the constraints.">Solving mixed integer programming problems with quadratic terms</a> 
+
+(both in the <em class="ph i">CPLEX User's Manual</em>) for further information about globally optimal solutions in 
+models with quadratic terms in the objective function.</p>
+</div>
+</div>
+<div class="related-links">
+<ul class="ullinks">
+<li class="link ulchildlink"><span class="ulchildlinktext"><a href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newSolnStatus.html">New solution status</a></span><br />
+Documents a new solution status in CPLEX V12.6.0 when CPLEX solves for a global solution of nonconvex QP and MIQP</li>
+</ul>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newIntro.html" title="Documents new features of CPLEX V12.6.0">New features for all users</a></div>
+</div>
+</div></body>
+</html>

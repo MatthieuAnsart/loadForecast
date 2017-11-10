@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Creating a model: IloModel" />
+<meta name="abstract" content="CPLEX C++ offers modeling objects for an application." />
+<meta name="Description" content="CPLEX C++ offers modeling objects for an application." />
+<meta name="DC.subject" content="model, creating IloModel (C++ API), creating, model (IloModel) (C++ API), creating (C++ API), optimization model (C++ API), optimization model, extracting (C++ API), IloExtractable class (C++ API), IloModel class (C++ API), extractable, handle class, empty handle (C++ API), defining extractable objects (C++ API), add method, variable, continuous (C++ API), continuous variable, representing (C++ API), integer (C++ API), integer variable, representing in model (C++ API), Boolean (C++ API), Boolean variable, IloMinimize function (C++ API), adding, objective function to model (C++ API), objective function, adding to model (C++ API), IloRange class (C++ API), example, IloExpr class (C++ API)" />
+<meta name="keywords" content="model, creating IloModel (C++ API), creating, model (IloModel) (C++ API), creating (C++ API), optimization model (C++ API), optimization model, extracting (C++ API), IloExtractable class (C++ API), IloModel class (C++ API), extractable, handle class, empty handle (C++ API), defining extractable objects (C++ API), add method, variable, continuous (C++ API), continuous variable, representing (C++ API), integer (C++ API), integer variable, representing in model (C++ API), Boolean (C++ API), Boolean variable, IloMinimize function (C++ API), adding, objective function to model (C++ API), objective function, adding to model (C++ API), IloRange class (C++ API), example, IloExpr class (C++ API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/Cplusplus/appliAnatomy_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_cplusStart.999694" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Cplusplus/appliAnatomy_synopsis.html" />
+<title>Creating a model: IloModel</title>
+</head>
+<body role="main" id="Getting_started.uss_cplusStart.999694">
+<h1 class="title topictitle1">Creating a model: IloModel</h1>
+<div class="body"><p class="shortdesc">CPLEX C++ offers modeling objects for an application.</p>
+<p class="p">After creating the environment, a Concert application
+is ready to create one or more optimization models. Doing so consists
+of creating a set of modeling objects to define each optimization
+model.</p>
+<p class="p">Modeling objects, like  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloEnv.html" title="(Opens in a new tab or window)">IloEnv</a>  objects, are handles to implementation objects.
+Though you will be dealing only with the handle objects, it is the
+implementation objects that contain the data that specifies the optimization
+model. If you need to remove an implementation object from memory,
+you need to call the <samp class="ph codeph">end</samp> method for one
+of its handle objects.</p>
+<p class="p">Modeling objects are also known as <em class="ph i">extractables</em> because it is the individual
+modeling objects that are extracted one by one when you extract an
+optimization model to  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a> . So, extractables are characterized by the possibility
+of being extracted to algorithms such as <samp class="ph codeph">IloCplex</samp> .
+In fact, they all are inherited from the class <samp class="ph codeph">IloExtractable</samp> .
+In other words, <samp class="ph codeph">IloExtractable</samp> is the base
+class of all classes of extractables or modeling objects.</p>
+<p class="p">The most fundamental extractable class is <samp class="ph codeph">IloModel</samp> .
+Objects of this class are used to define a complete optimization model
+that can later be extracted to an 
+<a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a>  object. 
+You create a model by constructing an object of type 
+<a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloModel.html" title="(Opens in a new tab or window)">IloModel</a>. 
+For example, to construct a modeling object named <samp class="ph codeph">model</samp>,
+within an existing environment named <samp class="ph codeph">env</samp>,
+you write the following line:</p>
+<pre class="pre codeblock"><code>IloModel model(env);</code></pre>
+<p class="p">At this point, it is important to note that the environment
+is passed as an argument to the constructor. There is also a constructor
+that does not use the environment argument, but this constructor creates
+an empty handle, the handle corresponding to a <samp class="ph codeph">NULL</samp> pointer.
+Empty handles cannot be used for anything but for assigning other
+handles to them. Unfortunately, it is a common mistake to try to use
+empty handles for other things.</p>
+<p class="p">After an <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloModel.html" title="(Opens in a new tab or window)">IloModel</a>  
+object has been constructed, it is populated with
+the extractables that define the optimization model. The most important
+classes here are: </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table listing modeling classes with a brief description." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloNumVar.html" title="(Opens in a new tab or window)">IloNumVar</a>  </td>
+<td class="entry" valign="top"> representing modeling variables; </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloRange.html" title="(Opens in a new tab or window)">IloRange</a>  </td>
+<td class="entry" valign="top"> defining constraints of the form l &lt;=
+expr &lt;= u, where expr is a linear expression; and </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloObjective.html" title="(Opens in a new tab or window)">IloObjective</a>  </td>
+<td class="entry" valign="top"> representing an objective function. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">You create objects of these classes for each variable,
+constraint, and objective function of your optimization problem. Then
+you add the objects to the model by calling</p>
+<pre class="pre codeblock"><code>model.add(object);</code></pre>
+<p class="p">for each extractable <samp class="ph codeph">object</samp> .
+There is no need to explicitly add the variable objects to a model,
+as they are implicitly added when they are used in the range constraints
+(instances of <samp class="ph codeph">IloRange</samp> ) or the objective.
+At most one objective can be used in a model with  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a> .</p>
+<p class="p">Modeling variables are constructed as objects of class <samp class="ph codeph">IloNumVar</samp> ,
+by defining variables of type <samp class="ph codeph">IloNumVar</samp> .
+Concert Technology provides several constructors for doing this; the
+most flexible form is:</p>
+<pre class="pre codeblock"><code>IloNumVar x1(env, 0.0, 40.0, ILOFLOAT);</code></pre>
+<p class="p">This definition creates the modeling variable <samp class="ph codeph">x1</samp> with
+lower bound 0.0, upper bound 40.0 and type <samp class="ph codeph">ILOFLOAT</samp> ,
+which indicates the variable is continuous. Other possible variable
+types include <samp class="ph codeph">ILOINT</samp> for integer variables
+and <samp class="ph codeph">ILOBOOL</samp> for Boolean variables.</p>
+<p class="p">For each variable in the optimization model a corresponding
+object of class <samp class="ph codeph">IloNumVar</samp> must be created.
+Concert Technology provides a wealth of ways to help you construct
+all the <samp class="ph codeph">IloNumVar</samp> objects.</p>
+<p class="p">After all the modeling variables have been constructed,
+they can be used to build expressions, which in turn are used to define
+objects of class <samp class="ph codeph">IloObjective</samp> and <samp class="ph codeph">IloRange</samp> .
+ For example,</p>
+<pre class="pre codeblock"><code>IloObjective obj = IloMinimize(env, x1 + 2*x2 + 3*x3);</code></pre>
+<p class="p">This creates the extractable <samp class="ph codeph">obj</samp> of
+type <samp class="ph codeph">IloObjective</samp> which represents the
+objective function of the example presented in <a class="xref" href="../../preface/preface_synopsis.html" title="This preface introduces CPLEX.">Introducing CPLEX</a>.</p>
+<p class="p">Consider in more detail what this line does. The function <samp class="ph codeph">IloMinimize</samp> takes
+the environment and an expression as arguments, and constructs a new <samp class="ph codeph">IloObjective</samp> object
+from it that defines the objective function to minimize the expression.
+This new object is returned and assigned to the new handle <samp class="ph codeph">obj</samp> .</p>
+<p class="p">After an objective extractable is created, it must be
+added to the model. As noted above this is done with the <samp class="ph codeph">add</samp> method
+of <samp class="ph codeph">IloModel</samp> . If this is all that the variable <samp class="ph codeph">obj</samp> is
+needed for, it can be written more compactly, like this:</p>
+<pre class="pre codeblock"><code>model.add(IloMinimize(env, x1 + 2*x2 + 3*x3));</code></pre>
+<p class="p">This way there is no need for the program variable <samp class="ph codeph">obj</samp> and
+the program is shorter. If in contrast, the objective function is
+needed later, for example, to change it and re-optimize the model
+when doing scenario analysis, the variable <samp class="ph codeph">obj</samp> must
+be created in order to refer to the objective function. (From the
+standpoint of algorithmic efficiency, the two approaches are comparable.)</p>
+<p class="p">Creating constraints and adding them to the model can
+be done just as easily with the following statement:</p>
+<pre class="pre codeblock"><code>model.add(-x1 + x2 + x3 &lt;= 20);</code></pre>
+<p class="p">The part <samp class="ph codeph">-x1 + x2 + x3 &lt;= 20</samp> creates
+an object of class <samp class="ph codeph">IloRange</samp> that is immediately
+added to the model by passing it to the method <samp class="ph codeph">IloModel::add</samp> .
+Again, if a reference to the <samp class="ph codeph">IloRange</samp> object
+is needed later, an <samp class="ph codeph">IloRange</samp> handle object
+must be stored for it. Concert Technology provides flexible array
+classes for storing data, such as these <samp class="ph codeph">IloRange</samp> objects.
+As with variables, Concert Technology provides a variety of constructors
+that help create range constraints.</p>
+<p class="p">While those examples use expressions with modeling variables
+directly for modeling, it should be pointed out that such expressions
+are themselves represented by yet another Concert Technology class, <samp class="ph codeph">IloExpr</samp> .
+Like most Concert Technology objects, <samp class="ph codeph">IloExpr</samp> objects
+are handles. Consequently, the method <samp class="ph codeph">end</samp> must
+be called when the object is no longer needed. The only exceptions
+are implicit expressions, where the user does not create an <samp class="ph codeph">IloExpr</samp> object,
+such as when writing (for example) <samp class="ph codeph">x1 + 2*x2</samp> .
+For such implicit expressions, the method <samp class="ph codeph">end</samp> should
+not be called. The importance of the class <samp class="ph codeph">IloExpr</samp> becomes
+clear when expressions can no longer be fully spelled out in the source
+code but need instead to be built up in a loop. Operators like <samp class="ph codeph">+=</samp> provide
+an efficient way to do this.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Cplusplus/appliAnatomy_synopsis.html" title="Concert Technology is a C++ class library, and therefore Concert Technology applications consist of interacting C++ objects. This topic gives a short introduction to the most important classes that are usually found in a complete Concert Technology CPLEX C++ application.">The anatomy of a Concert Technology C++ application</a></div>
+</div>
+</div></body>
+</html>

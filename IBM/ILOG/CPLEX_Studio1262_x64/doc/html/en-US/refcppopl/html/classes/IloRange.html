@@ -1,0 +1,518 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloRange</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloRange.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloRange</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/ilolinear.h</span></div><div><img
+                src="IloRange.png" border="0" usemap="#svg_map_IloRange"
+                    alt="Map of IloRange"><map
+                        name="svg_map_IloRange"><area
+                        href="../classes/IloRange.html" shape="rect"
+                        alt="IloRange"
+                        coords="10.0,120.54296875,88.0,138.1787109375" /><area
+                        href="../classes/IloRange.html" shape="rect"
+                        alt="IloRange"
+                        coords="10.0,120.54296875,88.0,138.1787109375" /><area
+                        href="../classes/IloConstraint.html"
+                        shape="rect" alt="IloConstraint"
+                        coords="59.0,92.9072265625,137.0,110.54296875" /><area
+                        href="../classes/IloIntExprArg.html"
+                        shape="rect" alt="IloIntExprArg"
+                        coords="108.0,65.271484375,186.0,82.9072265625" /><area
+                        href="../classes/IloNumExprArg.html"
+                        shape="rect" alt="IloNumExprArg"
+                        coords="157.0,37.6357421875,235.0,55.271484375" /><area
+                        href="../classes/IloExtractable.html"
+                        shape="rect" alt="IloExtractable"
+            coords="206.0,10.0,284.0,27.6357421875" /></map></img></div>
+An instance of this class is a range in a model.
+    <div
+                class="description"><p>This class models a constraint of the form:</p><pre
+                        class="sample">
+ lowerBound &lt;= expression &lt;= upperBound
+ </pre><p>You can create a range from the constructors in this class or from the
+ arithmetic operators on numeric variables (instances of
+ <code><a
+                        href="../classes/IloNumVar.html">IloNumVar</a></code> and its subclasses) or on expressions
+ (instances of <code><a
+                        href="../classes/IloExpr.html">IloExpr</a></code> and its subclasses):</p><ul>
+<li><code>operator &lt;=</code></li><li><code>
+ operator &gt;=</code></li><li><code>
+ operator ==</code></li>
+</ul><p>After you create a constraint, such as an instance of <code>IloRange</code>,
+ you must explicitly add it to the model in order for it to be taken into account.
+ To do so, use the member function <code><a
+                        href="../classes/IloModel.html#method_add">IloModel::add</a></code>
+ to add the range to a model and the member function
+ <code><a
+                    href="../classes/IloAlgorithm.html#method_extract">IloAlgorithm::extract</a></code> to extract the model for an
+ algorithm.</p><p>Most member functions in this class contain <code>assert</code> statements.
+ For an explanation of the macro <code>NDEBUG</code> (a way to turn on or turn
+ off these <code>assert</code> statements),  see the concept
+ <a
+                        href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p><p><strong>What Is Extracted</strong></p><p>All the variables (that is, instances of <code><a
+                        href="../classes/IloNumVar.html">IloNumVar</a></code>
+ or one of its subclasses) in the range (an instance of <code>IloRange</code>) will be
+ extracted when an algorithm such as <code>IloCplex</code>, documented in the <em>CPLEX
+ C++ API Reference Manual</em>, extracts the range.  </p><p><strong>Normalizing Linear Expressions: Reducing the Terms</strong></p><p><em>Normalizing</em> is sometimes known as <em>reducing the terms</em> of a linear
+ expression. </p><p>Linear expressions consist of terms made up of constants and variables related by
+ arithmetic operations; for example, x + 3y. In some linear expressions, a given
+ variable may appear in more than one term, for example, x + 3y +2x. Concert Technology
+ has more than one way of dealing with linear expressions in this respect, and you
+ control which way Concert Technology treats linear expressions from your application.
+ </p><p>In one mode (the default mode), Concert Technology analyzes linear expressions that
+ your application passes it, and attempts to reduce them so that a given variable
+ appears in only one term in the expression. You set this mode with the member function
+ <code><a
+                        href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a>(IloTrue)</code> .</p><p>Certain constructors and member functions in this class check this setting in the
+ model and behave accordingly: they attempt to reduce expressions. This mode may
+ require more time during preliminary computation, but it avoids the possibility of an
+ assertion in some of the member functions of this class failing in the case of
+ duplicates.</p><p>In the other mode, Concert Technology assumes that no variable appears in more than
+ one term in any of the linear expressions that your application passes to Concert
+ Technology. We call this mode assume normalized linear expressions. You set this mode
+ with the member function <code><a
+            href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a>(IloFalse)</code>.
+ </p><p>Certain constructors and member functions in this class check this setting in the
+ model and behave accordingly: they assume that no variable appears in more than one
+ term in an expression. This mode may save time during computation, but it entails the
+ risk that an expression may contain one or more variables, each of which appears in
+ one or more terms.  This situation will cause certain <code>assert</code> statements
+ in Concert Technology to fail if you do not compile with the flag
+ <code>-DNDEBUG</code>.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloConstraint.html">IloConstraint</a>, <a
+            href="../classes/IloRangeArray.html">IloRangeArray</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_getExpr">getExpr</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloRangeI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_getImpl">getImpl</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_getLB">getLB</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloExpr_LinearIterator.html">IloExpr::LinearIterator</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_getLinearIterator">getLinearIterator</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloExpr_QuadIterator.html">IloExpr::QuadIterator</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_getQuadIterator">getQuadIterator</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_getUB">getUB</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_IloRange">IloRange</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloRange.html#method_IloRange">IloRange</a>(IloRangeI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_IloRange">IloRange</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                            href="../typedefs/IloNum.html">IloNum</a> lb, <a
+                    href="../typedefs/IloNum.html">IloNum</a> ub, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_IloRange">IloRange</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                            href="../typedefs/IloNum.html">IloNum</a> lhs, const <a
+                            href="../classes/IloNumExprArg.html">IloNumExprArg</a> expr, <a
+                    href="../typedefs/IloNum.html">IloNum</a> rhs=IloInfinity, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_IloRange">IloRange</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, const <a
+                            href="../classes/IloNumExprArg.html">IloNumExprArg</a> expr, <a
+                    href="../typedefs/IloNum.html">IloNum</a> rhs=IloInfinity, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloAddValueToRange</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_operator()">operator()</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_setBounds">setBounds</a>(<a
+                            href="../typedefs/IloNum.html">IloNum</a> lb, <a
+                    href="../typedefs/IloNum.html">IloNum</a> ub)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_setExpr">setExpr</a>(const <a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a> expr)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_setLB">setLB</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> lb)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_setLinearCoef">setLinearCoef</a>(const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../typedefs/IloNum.html">IloNum</a> value)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_setLinearCoefs">setLinearCoefs</a>(const <a
+                            href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars, const <a
+                    href="../classes/IloNumArray.html">IloNumArray</a> values)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloRange.html#method_setUB">setUB</a>(<a
+            href="../typedefs/IloNum.html">IloNum</a> ub)</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloConstraint.html">IloConstraint</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloConstraint.html#method_getImpl"></a><a
+                            href="../classes/IloConstraint.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloConstraint.html#method_IloConstraint"></a><a
+                            href="../classes/IloConstraint.html#method_IloConstraint">IloConstraint</a>, <a
+                            href="../classes/IloConstraint.html#method_IloConstraint"></a><a
+            href="../classes/IloConstraint.html#method_IloConstraint">IloConstraint</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloIntExprArg.html">IloIntExprArg</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloIntExprArg.html#method_getImpl"></a><a
+                            href="../classes/IloIntExprArg.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloIntExprArg.html#method_IloIntExprArg"></a><a
+                            href="../classes/IloIntExprArg.html#method_IloIntExprArg">IloIntExprArg</a>, <a
+                            href="../classes/IloIntExprArg.html#method_IloIntExprArg"></a><a
+            href="../classes/IloIntExprArg.html#method_IloIntExprArg">IloIntExprArg</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloNumExprArg.html#method_getImpl"></a><a
+                            href="../classes/IloNumExprArg.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg"></a><a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg">IloNumExprArg</a>, <a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg"></a><a
+            href="../classes/IloNumExprArg.html#method_IloNumExprArg">IloNumExprArg</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloExtractable.html">IloExtractable</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloExtractable.html#method_asConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_asConstraint">asConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_asIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asIntExpr">asIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asModel"></a><a
+                            href="../classes/IloExtractable.html#method_asModel">asModel</a>, <a
+                            href="../classes/IloExtractable.html#method_asNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asNumExpr">asNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asObjective"></a><a
+                            href="../classes/IloExtractable.html#method_asObjective">asObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_asVariable"></a><a
+                            href="../classes/IloExtractable.html#method_asVariable">asVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_end"></a><a
+                            href="../classes/IloExtractable.html#method_end">end</a>, <a
+                            href="../classes/IloExtractable.html#method_getEnv"></a><a
+                            href="../classes/IloExtractable.html#method_getEnv">getEnv</a>, <a
+                            href="../classes/IloExtractable.html#method_getId"></a><a
+                            href="../classes/IloExtractable.html#method_getId">getId</a>, <a
+                            href="../classes/IloExtractable.html#method_getImpl"></a><a
+                            href="../classes/IloExtractable.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloExtractable.html#method_getName"></a><a
+                            href="../classes/IloExtractable.html#method_getName">getName</a>, <a
+                            href="../classes/IloExtractable.html#method_getObject"></a><a
+                            href="../classes/IloExtractable.html#method_getObject">getObject</a>, <a
+                            href="../classes/IloExtractable.html#method_IloExtractable"></a><a
+                            href="../classes/IloExtractable.html#method_IloExtractable">IloExtractable</a>, <a
+                            href="../classes/IloExtractable.html#method_isConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_isConstraint">isConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_isIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isIntExpr">isIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isModel"></a><a
+                            href="../classes/IloExtractable.html#method_isModel">isModel</a>, <a
+                            href="../classes/IloExtractable.html#method_isNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isNumExpr">isNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isObjective"></a><a
+                            href="../classes/IloExtractable.html#method_isObjective">isObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_isVariable"></a><a
+                            href="../classes/IloExtractable.html#method_isVariable">isVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_removeFromAll"></a><a
+                            href="../classes/IloExtractable.html#method_removeFromAll">removeFromAll</a>, <a
+                            href="../classes/IloExtractable.html#method_setLocation"></a><a
+                            href="../classes/IloExtractable.html#method_setLocation">setLocation</a>, <a
+                            href="../classes/IloExtractable.html#method_setName"></a><a
+                            href="../classes/IloExtractable.html#method_setName">setName</a>, <a
+                            href="../classes/IloExtractable.html#method_setObject"></a><a
+            href="../classes/IloExtractable.html#method_setObject">setObject</a></code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloRange">IloRange</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloRange</span>()</div><div
+                class="description">
+ This constructor creates an empty handle. You must initialize it before you use it. 
+        </div><hr /><h3><a
+            name="method_IloRange">IloRange</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloRange</span>(IloRangeI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description">
+ This constructor creates a handle object from a pointer to an implementation object.  
+        </div><hr /><h3><a
+            name="method_IloRange">IloRange</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloRange</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">lb</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">ub</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                        class="description"><p>This constructor creates an empty range constraint. Before you use this constraint,
+ you must fill the range. The optional argument <code>name</code> is set to <code>0</code>
+ by default.</p><p>After you create a range constraint, you must explicitly add it to a model in order
+ for it to be taken into account. To do so, use the member function
+ <code><a
+                href="../classes/IloModel.html#method_add">IloModel::add</a></code>.</p></div><hr /><h3><a
+            name="method_IloRange">IloRange</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloRange</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">lhs</span>, const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+                class="parameter-name">expr</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">rhs</span>=<span
+                class="parameter-name">IloInfinity</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                        class="description"><p>This constructor creates a range constraint from an expression (an
+ instance of the class <code><a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a></code>) and
+ its upper bound (<code>rhs</code>). The default bound for <code>rhs</code>
+ is the symbolic constant <code>IloInfinity</code>. The optional argument
+ <code>name</code> is set to <code>0</code> by default.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                            class="noteText">When it accepts an expression as an argument, this constructor checks
+ the setting of <code><a
+                href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a></code> to
+ determine whether to assume the expression has already been reduced or to
+ reduce the expression before using it.</div></div></div><hr /><h3><a
+            name="method_IloRange">IloRange</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloRange</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+                class="parameter-name">expr</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">rhs</span>=<span
+                class="parameter-name">IloInfinity</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                        class="description"><p>This constructor creates a range constraint from an expression (an
+ instance of the class <code><a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a></code>) and
+ its upper bound (<code>rhs</code>). Its lower bound (<code>lhs</code>)
+ will be <code>-IloInfinity</code>. The default bound for <code>rhs</code>
+ is <code>IloInfinity</code>. The optional argument <code>name</code> is
+ set to <code>0</code> by default.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                            class="noteText">When it accepts an expression as an argument, this constructor checks
+ the setting of <code><a
+                href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a></code> to
+ determine whether to assume the expression has already been reduced or to
+ reduce the expression before using it.</div></div></div><hr /><h3><a
+            name="method_getExpr">getExpr</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+            class="function-name">getExpr</span>() const</div><div
+                class="description"><p>This member function returns the expression of the invoking
+ <code>IloRange</code> object.</p></div><hr /><h3><a
+            name="method_getImpl">getImpl</a></h3><div
+                class="prototype">public IloRangeI * <span
+            class="function-name">getImpl</span>() const</div><div
+                class="description">
+ This member function returns a pointer to the implementation object of the invoking handle.  
+        </div><hr /><h3><a
+            name="method_getLB">getLB</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getLB</span>() const</div><div
+                class="description"><p>This member function returns the lower bound of the invoking range.</p></div><hr /><h3><a
+            name="method_getLinearIterator">getLinearIterator</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloExpr_LinearIterator.html">IloExpr::LinearIterator</a> <span
+            class="function-name">getLinearIterator</span>() const</div><div
+                class="description"><p>This member function creates and returns an interator
+ to traverse linear expressions in the invoking range.</p></div><hr /><h3><a
+            name="method_getQuadIterator">getQuadIterator</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloExpr_QuadIterator.html">IloExpr::QuadIterator</a> <span
+            class="function-name">getQuadIterator</span>() const</div><div
+                class="description"><p>This member function creates and returns an interator
+ to traverse quadratic expressions in the invoking range.</p></div><hr /><h3><a
+            name="method_getUB">getUB</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getUB</span>() const</div><div
+                class="description"><p>This member function returns the upper bound of the invoking range.</p></div><hr /><h3><a
+            name="method_operator()">operator()</a></h3><div
+                class="prototype">public IloAddValueToRange <span
+                class="function-name">operator()</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>) const</div><div
+                    class="description"><p>This operator creates the objects needed internally to represent a range in
+ column-wise modeling. See the concept <a
+                href="../column-wisemodeling.html">Column-Wise Modeling in CPLEX</a>
+ for an explanation of how to use this operator in column-wise modeling.</p></div><hr /><h3><a
+            name="method_setBounds">setBounds</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setBounds</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">lb</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">ub</span>)</div><div
+                class="description"><p>This member function sets <code>lb</code> as the lower bound and <code>ub</code> as
+ the upper bound of the invoking range, and it creates the appropriate instance of the
+ undocumented class <code>IloChange</code> to notify algorithms about this change of an
+ extractable object in the model.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setBounds</code> notifies Concert Technology algorithms about
+ this change of this invoking object.</div></div></div><hr /><h3><a
+            name="method_setExpr">setExpr</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setExpr</span>(const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+            class="parameter-name">expr</span>)</div><div
+                class="description"><p>This member function sets <code>expr</code> as the invoking range, and it creates
+ the appropriate instance of the undocumented class <code>IloChange</code> to notify
+ algorithms about this change of an extractable object in the model.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setExpr</code> notifies
+ Concert Technology algorithms about
+ this change of this invoking object.</div></div></div><hr /><h3><a
+            name="method_setLB">setLB</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLB</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">lb</span>)</div><div
+                class="description"><p>This member function sets <code>lb</code> as the lower bound of the invoking range,
+ and it creates the appropriate instance of the undocumented class
+ <code>IloChange</code> to notify algorithms about 
+ this change of an extractable object in the model. </p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setLB</code> 
+ notifies Concert Technology algorithms about
+ this change of this invoking object.
+ </div></div></div><hr /><h3><a
+            name="method_setLinearCoef">setLinearCoef</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLinearCoef</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>)</div><div
+                class="description"><p>This member function sets <code>value</code> as the linear coefficient of the
+ variable <code>var</code> in the invoking range, and it creates the appropriate
+ instance of the undocumented class <code>IloChange</code> to notify algorithms about
+ this change of an extractable object in the model.  </p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setLinearCoef</code> notifies Concert Technology algorithms
+ about this change of this invoking object.
+ </div></div><p>If you attempt to use <code>setLinearCoef</code> on a non linear expression, it
+ will throw an exception on platforms that support C++ exceptions when exceptions are
+ enabled.</p></div><hr /><h3><a
+            name="method_setLinearCoefs">setLinearCoefs</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLinearCoefs</span>(const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+                class="parameter-name">vars</span>, const <a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+            class="parameter-name">values</span>)</div><div
+                class="description"><p>For each of the variables in <code>vars</code>, this member function sets the
+ corresponding value of <code>values</code> (whether integer or floating-point) as its
+ linear coefficient in the invoking range, and it creates the appropriate instance of
+ the undocumented class <code>IloChange</code> to notify algorithms about this change
+ of an extractable object in the model.  </p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                class="noteText">
+ The member function <code>setLinearCoefs</code> notifies Concert Technology algorithms
+ about this change of this invoking object.
+ </div></div><p>If you attempt to use <code>setLinearCoef</code> on a non linear expression, it will
+ throw an exception on platforms that support C++ exceptions when exceptions are enabled.
+ </p></div><hr /><h3><a
+            name="method_setUB">setUB</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setUB</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">ub</span>)</div><div
+                class="description"><p>This member function sets <code>ub</code> as the upper bound of the invoking range,
+ and it creates the appropriate instance of the undocumented class
+ <code>IloChange</code> to notify algorithms about this change of an extractable object
+ in the model. </p><div
+                    class="note"><div class="noteTitle">Note</div><div class="noteText">
+ The member function <code>setUB</code> notifies Concert Technology algorithms about
+ this change of this invoking object.
+ </div></div></div><hr /></body>
+</html>

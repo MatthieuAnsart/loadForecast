@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Deletion of Extractable Objects in CPLEX</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a
+                href="deletion-of-extractables.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="20"><div
+                class="section-title1">Deletion of Extractable Objects in CPLEX</div>
+</a><div
+                    align="right"><a
+                    href="inferencer.html">PREVIOUS</a> <a
+                href="domain.html">NEXT</a></div><table class="summary"
+                border="1" cellpadding="3" cellspacing="0"
+                width="100%" /><div
+                            class="section-body"><p>As a modeling layer, Concert allows the creation and 
+  destruction of extractables through the methods 
+  <code><a
+                            href="classes/IloExtractable.html#method_end">IloExtractable::end</a></code> and 
+  <code><a
+                            href="classes/IloExtractableArray.html#method_endElements">IloExtractableArray::endElements</a></code>. 
+  The purpose of these methods is to reclaim memory associated 
+  with the deleted objects while 
+  maintaining the safest possible Concert environment. 
+  In this context, a safe Concert 
+  environment is defined by the property that no object points to a 
+  deleted object; a pointer to a deleted object  
+  is referred to as a dangling pointer in C++.</p><p>There exist two paradigms to make sure of the safety 
+  of the delete operation. The first, 
+  linear mode, comes from math programming; in a Concert application,
+  linear mode is possible only on extractable and other objects 
+  used in linear programming. The second, safe generic mode, is 
+  stricter and is valid on all Concert extractable objects.</p><p>You can access both paradigms by calling 
+  <code><a
+                                href="classes/IloEnv.html#method_setDeleter">IloEnv::setDeleter</a>(IloDeleterMode mode)</code>, where mode may be 
+  <code>IloLinearDeleterMode</code> or <code>IloSafeDeleterMode</code>.</p><p><strong>Linear Mode</strong></p><p>To use linear mode, you must either</p><ul>
+<li>call <code><a
+                                href="classes/IloEnv.html#method_setDeleter">IloEnv::setDeleter</a>(IloLinearDeleterMode)</code>, or</li><li>refrain from calling <code><a
+                    href="classes/IloEnv.html#method_setDeleter">IloEnv::setDeleter</a></code>, as linear is the default mode.</li>
+</ul><p>In linear mode, the following behavior is implemented:</p><ul>
+<li>If a range constraint is deleted, it is removed from the models 
+      that contain it.</li><li>If a variable is deleted, its coefficient is set to 0 (zero) 
+      in the ranges, expressions, and objectives where it appears. 
+      The variable is removed from the special ordered sets of type 1 and 2
+      (that is, SOS1 and SOS2),
+      as well as from instances of <code>IloConversion</code> where it appears.</li>
+</ul><p><strong>Example</strong></p><p>This example tests the linear mode deletion of a variable <code>x</code>.</p><pre
+                    class="sample">
+  void TestLinearDeleter() {
+    IloEnv env;
+    env.out() &lt;&lt; &quot;TestLinearDeleter&quot; &lt;&lt; endl;
+    try {
+      IloModel model(env);
+      IloNumVar x(env, 0, 10, &quot;x&quot;);
+      IloNumVar y(env, 0, 10, &quot;y&quot;);
+      IloConstraint con = (x + y &lt;= 0);
+      IloConstraint con2 = y &gt;= 6;
+      IloNumVarArray ar(env, 2, x, y);
+      IloSOS1 sos(env, ar, &quot;sos&quot;);
+      model.add(con);
+      model.add(con2);
+      model.add(sos);
+      env.out() &lt;&lt; &quot;Before Delete&quot; &lt;&lt; endl;
+      env.out() &lt;&lt; model &lt;&lt; endl;
+      x.end();
+      con2.end();
+      env.out() &lt;&lt; &quot;After Delete&quot; &lt;&lt; endl;
+      env.out() &lt;&lt; model &lt;&lt; endl;    
+    } catch (IloException&amp; e) {
+      cout &lt;&lt; &quot;Error : &quot; &lt;&lt; e &lt;&lt; endl;
+    }
+    env.end();
+  }
+  </pre><p>The example produces the following output:</p><pre
+                                class="sample">
+  TestLinearDeleter
+  Before Delete
+  IloModel model0 = {
+  IloRange rng3(    1 * x + 1 * y ) &lt;= 0
+  
+  IloRange rng46 &lt;=(    1 * y )
+  
+  IloSOS1I (sos)
+    _varArray [x(F)[0..10], y(F)[0..10]]
+    _valArray []
+      
+  }
+  
+  After Delete  
+  IloModel model0 = {
+  IloRange rng3(    1 * y ) &lt;= 0
+  
+  IloSOS1I (sos)
+    _varArray [y(F)[0..10]]
+    _valArray []
+  }</pre><p><strong>Safe Generic Mode</strong></p><p>To use safe generic mode, you must:</p><ul>
+<li>call <code><a
+                                href="classes/IloEnv.html#method_setDeleter">IloEnv::setDeleter</a>(IloSafeDeleterMode)</code>, and</li><li>add <code>#include &lt;ilconcert/ilodeleter.h&gt;</code> to your 
+  application.</li>
+</ul><p>In this mode, the environment builds a dependency graph 
+  between all extractable objects. 
+  This graph contains all extractable objects created</p><ul>
+<li>after a call to <code><a
+                                href="classes/IloEnv.html#method_setDeleter">IloEnv::setDeleter</a>(IloSafeDeleterMode)</code> and </li><li>before a call to <code><a
+                            href="classes/IloEnv.html#method_unsetDeleter">IloEnv::unsetDeleter</a></code>.</li>
+</ul><p>Objects not managed by this dependency graph are referred to here as 
+  &quot;nondeletable&quot;. An attempt to delete a nondeletable object will throw an 
+  exception.</p><p>It is recommended that you create this graph just after the 
+  creation of the environment
+  and that you refrain from using <code>IloEnv::unsetDeleter</code>  
+  because building an incomplete dependency graph is very error prone and 
+  should only be attempted by advanced users. A clear example of this 
+  incomplete graph is the separation of a model between a nondeletable 
+  base model and deletable extensions of this base model.</p><p>Calling <code><a
+                            href="classes/IloExtractable.html#method_end">IloExtractable::end</a></code> 
+  on extractable <code>xi</code> will succeed 
+  only if no other extractable object uses extractable <code>xi</code>. 
+  If this is not the case, 
+  a call to <code><a
+                    href="classes/IloExtractable.html#method_end">IloExtractable::end</a></code> 
+  will throw an exception 
+  <code>IloDeleter::RequiresAnotherDeletionException</code> 
+  indicating which extractable object 
+  uses the extractable object that you want to delete.</p><p><strong>Example</strong></p><p>This example shows an attempt to delete one extractable object 
+  that is used by another.</p><pre
+                    class="sample">  
+  void TestSafeDeleter() {
+    IloEnv env;
+    env.out() &lt;&lt; &quot;TestSafeDeleter&quot; &lt;&lt; endl;
+    env.setDeleter(IloSafeDeleterMode);
+    try {
+      IloModel model(env);
+      IloNumVar x(env, 0, 10);
+      IloNumVar y(env, 0, 10);
+      IloConstraint con = (x + y &lt;= 0);
+      try {
+        x.end();
+      } catch (IloDeleter::RequiresAnotherDeletionException &amp;e) {
+        cout &lt;&lt; &quot;Caught &quot; &lt;&lt; e &lt;&lt; endl;
+        e.getUsers()[0].end();
+        e.end();
+      }
+      x.end();
+    } catch (IloException&amp; e) {
+      cout &lt;&lt; &quot;Error : &quot; &lt;&lt; e &lt;&lt; endl;
+    }
+    env.unsetDeleter();
+    env.end();
+  }
+  </pre><p>The example produces the following output:</p><pre
+                            class="sample">
+  TestSafeDeleter
+  Caught You cannot end x1(F)[0..10] before IloRange rng3(  1 * x1 + 1 * x2  ) &lt;= 0
+  </pre><p>To address this situation, you should use the method <code><a
+                    href="classes/IloExtractableArray.html#method_endElements">IloExtractableArray::endElements</a></code>. 
+  With this method,
+  all extractable objects in the array are deleted one after another. 
+  Thus, if an extractable object is used by another extractable object 
+  and this other extractable object is deleted before the 
+  first one, the system will not complain and will not throw an exception.</p><p><strong>Example</strong></p><p>This example illustrates the use of the <code>endElements</code> method</p><pre
+                    class="sample">  
+  void TestSafeDeleterWithArray() {
+    IloEnv env;
+    env.out() &lt;&lt; &quot;TestSafeDeleterWithArray&quot; &lt;&lt; endl;
+    env.setDeleter(IloSafeDeleterMode);
+    try {
+      IloModel model(env);
+      IloNumVar x(env, 0, 10);
+      IloNumVar y(env, 0, 10);
+      IloConstraint con = (x + y &lt;= 0);
+      IloExtractableArray ar(env, 2, con, x);
+      ar.endElements();
+    } catch (IloException&amp; e) {
+      cout &lt;&lt; &quot;Error : &quot; &lt;&lt; e &lt;&lt; endl;
+    }
+    env.unsetDeleter();
+    env.end();
+  }
+  </pre><p>That example will not throw an exception.</p><div
+                        class="note"><div
+                        class="noteTitle">Note</div><div
+                class="noteText">In this last example, the constraint <code>con</code> must appear 
+  before the variable <code>x</code> as it will be deleted before the variable 
+  <code>x</code>.</div></div></div><div
+                    align="right"><a
+                    href="inferencer.html">PREVIOUS</a> <a href="domain.html">NEXT</a></div></div></body>
+</html>

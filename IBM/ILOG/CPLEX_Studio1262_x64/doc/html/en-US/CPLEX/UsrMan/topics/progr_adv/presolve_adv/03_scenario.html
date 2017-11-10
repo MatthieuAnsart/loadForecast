@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="A proposed example" />
+<meta name="abstract" content="Describes special considerations about presolve." />
+<meta name="Description" content="Describes special considerations about presolve." />
+<meta name="DC.subject" content="basis, starting from advanced, presolved model, adding constraints to" />
+<meta name="keywords" content="basis, starting from advanced, presolved model, adding constraints to" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advancedPresolve.999642" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<title>A proposed example</title>
+</head>
+<body role="main" id="User_manual.uss_advancedPresolve.999642">
+<h1 class="title topictitle1">A proposed example</h1>
+<div class="body"><p class="shortdesc">Describes special considerations about presolve.</p>
+<p class="p">Now consider an application where the user wants to
+solve a linear program using the simplex method, then modify the problem
+slightly and solve the modified problem. As an example, let's say
+a user wants to add a few new constraints to a problem based on the
+results of the first solution. The second solution should ideally
+start from the basis of the first, since starting from an advanced
+basis is usually significantly faster if the problem is only modified
+slightly.</p>
+<p class="p">Unfortunately, this scenario presents several difficulties.
+First, presolve must translate the new constraints on the original
+problem into constraints on the presolved model. Presolve in releases
+prior to 7.0 could not do this. In addition, the new constraints may
+invalidate earlier presolve reductions, thus rendering the presolved
+model useless for the re-optimization. (There is an example in <a class="xref" href="04_reductions_title_synopsis.html" title="Describes conditions under which a user might restrict presolve.">Restricting presolve reductions</a>.) Presolve in releases prior to 7.0 had no way of disabling such
+reductions. In the prior releases, a user could either restart the
+optimization on the original, unpresolved model or perform a new presolve
+on the modified problem. In the former case, the re-optimization does
+not benefit from the reduction of the problem size by presolve. In
+the latter, the second optimization does not have the benefit of an
+advanced starting solution.</p>
+<p class="p">The advanced presolve interface can potentially make
+this and many other sequences of operations more efficient. It provides
+facilities to restrict the set of presolve reductions performed so
+that subsequent problem modifications can be accommodated. It also
+provides routines to translate constraints on the original problem
+to constraints on the presolved model, so new constraints can be added
+to the presolved model. In short, it provides a variety of capabilities.</p>
+<p class="p">When processing mixed integer programs, the advanced
+presolve interface plays a very different role. The branch &amp; cut
+process needs to be restarted from scratch when the problem is even
+slightly modified, so preserving advanced start information isn't
+useful. The main benefit of the advanced presolve interface for MIPs
+is that it allows a user to translate decisions made during the branch
+&amp; cut process (and based on the presolved model) back to the corresponding
+constraints and variables in the original problem. This makes it easier
+for a user to control the branch &amp; cut process. Details on the
+advanced MIP callback interface are provided in <em class="ph i">Advanced MIP Control Interface</em>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" title="Documents the advanced presolve routines, available only in the Callable Library (C API).">Advanced presolve routines</a></div>
+</div>
+</div></body>
+</html>

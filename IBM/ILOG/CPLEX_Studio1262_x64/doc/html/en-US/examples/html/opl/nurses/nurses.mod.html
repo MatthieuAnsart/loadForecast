@@ -1,0 +1,202 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: {<b><font color="#0000FF">string</font></b>} Weekdays = ...;  
+013: <b><font color="#0000FF">tuple</font></b> nurse {
+014:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> name;
+015:   <b><font color="#0000FF">int</font></b> seniority;
+016:   <b><font color="#0000FF">int</font></b> qualification;
+017:   <b><font color="#0000FF">int</font></b> payRate;
+018: }
+019: 
+020: <b><font color="#0000FF">tuple</font></b> shift {
+021:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> departmentName;
+022:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> day;
+023:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> startTime;
+024:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> endTime;
+025:    <b><font color="#0000FF">int</font></b> minRequirement;
+026:    <b><font color="#0000FF">int</font></b> maxRequirement;   
+027: }
+028: 
+029: <b><font color="#0000FF">tuple</font></b> nurseCouple {
+030:   nurse Nurse1;
+031:   nurse Nurse2;
+032: }
+033: 
+034: <b><font color="#0000FF">tuple</font></b> departmentIncompat {
+035:   nurse Nurse;
+036:   <b><font color="#0000FF">string</font></b> department;
+037: }
+038: 
+039: <b><font color="#007D00">//tuple workTimeByNurse {</font></b>
+040: <b><font color="#007D00">//   string Nurse;</font></b>
+041: <b><font color="#007D00">//   int minTime;</font></b>
+042: <b><font color="#007D00">//   int maxTime;</font></b>
+043: <b><font color="#007D00">//}</font></b>
+044: 
+045: <b><font color="#0000FF">tuple</font></b> skillRequirement {
+046:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> department;
+047:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> skill;
+048:   <b><font color="#0000FF">int</font></b> number;
+049: }
+050: 
+051: <b><font color="#0000FF">int</font></b> MaxWorkTime = ...;
+052: {nurse} Nurses = ...;
+053: {shift} Shifts = ...;
+054: {<b><font color="#0000FF">string</font></b>} Departments = ...;
+055: 
+056: {skillRequirement} SkillRequirements = ...;
+057: 
+058: {nurseCouple} NurseAssoc 
+059:   <b><font color="#0000FF">with</font></b> Nurse1 <b><font color="#0000FF">in</font></b> Nurses,Nurse2 <b><font color="#0000FF">in</font></b> Nurses = ...;
+060: {nurseCouple} NurseIncompat 
+061:   <b><font color="#0000FF">with</font></b> Nurse1 <b><font color="#0000FF">in</font></b> Nurses, Nurse2 <b><font color="#0000FF">in</font></b> Nurses = ...;
+062: {departmentIncompat} DepartmentIncompat
+063:   <b><font color="#0000FF">with</font></b> Nurse <b><font color="#0000FF">in</font></b> Nurses, department <b><font color="#0000FF">in</font></b> Departments  = ...;
+064:   
+065: <b><font color="#0000FF">int</font></b> Vacations[Nurses][Weekdays] = ...;
+066: <b><font color="#007D00">//{WorkTimeByNurse} WorkTimeByNurses = ...;</font></b>
+067: 
+068: {<b><font color="#0000FF">string</font></b>} Skills = ...;
+069: <b><font color="#0000FF">int</font></b> NurseSkill[Nurses][Skills] = ...;
+070: 
+071: <b><font color="#0000FF">int</font></b> RequiredAssignments[Nurses][Shifts] = ...;
+072: 
+073: <b><font color="#0000FF">int</font></b> AbsStartTime[s <b><font color="#0000FF">in</font></b> Shifts]= s.startTime + <b><font color="#7D007D">ord</font></b>(Weekdays,s.day)*24;
+074: <b><font color="#0000FF">int</font></b> AbsEndTime[s <b><font color="#0000FF">in</font></b> Shifts] = 
+075:   s.endTime + <b><font color="#7D007D">ord</font></b>(Weekdays,s.day)*24
+076:   +(( s.startTime &gt; s.endTime )?24:0);
+077:   
+078: <b><font color="#0000FF">int</font></b> Duration[s <b><font color="#0000FF">in</font></b> Shifts] = AbsEndTime[s] - AbsStartTime[s];
+079: 
+080: <b><font color="#0000FF">int</font></b> incompatShifts[Shifts][Shifts] = [ s1 : [ s2 : 1 ] | s1,s2 <b><font color="#0000FF">in</font></b> Shifts: AbsStartTime[s2]&gt;=AbsStartTime[s1] &amp;&amp; AbsStartTime[s2]&lt;AbsEndTime[s1] ];
+081: 
+082: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> NurseAssignments[Nurses][Shifts] <b><font color="#0000FF">in</font></b> 0..1;
+083: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ NurseWorkTime[Nurses];
+084: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ NurseAvgHours;
+085: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ NurseMoreThanAvgHours[Nurses];
+086: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ NurseLessThanAvgHours[Nurses];
+087: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Fairness;
+088: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> CostByDepartments[Departments];
+089: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> AllocationByDepartments[Departments];
+090: 
+091: 
+092: <b><font color="#0000FF">minimize</font></b> 
+093:   <b><font color="#7D007D">sum</font></b>(d <b><font color="#0000FF">in</font></b> Departments) 
+094:     CostByDepartments[d];
+095: 
+096: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+097:    <b><font color="#007D00">// cost by department</font></b>
+098:    <b><font color="#7D007D">forall</font></b>( d <b><font color="#0000FF">in</font></b> Departments )
+099:      CostByDepartments[d] == 
+100:      <b><font color="#7D007D">sum</font></b>( s <b><font color="#0000FF">in</font></b> Shifts , n <b><font color="#0000FF">in</font></b> Nurses : s.departmentName == d ) 
+101:        NurseAssignments[n][s] * Duration[s] * n.payRate;
+102:    
+103:    <b><font color="#007D00">// allocation by department</font></b>
+104:    <b><font color="#7D007D">forall</font></b>(d <b><font color="#0000FF">in</font></b> Departments)
+105:       AllocationByDepartments[d] == <b><font color="#7D007D">sum</font></b>(s <b><font color="#0000FF">in</font></b> Shifts, n <b><font color="#0000FF">in</font></b> Nurses : s.departmentName == d) NurseAssignments[n][s];
+106:    
+107:    <b><font color="#007D00">// a shift require between min and max Nurses </font></b>
+108:    <b><font color="#7D007D">forall</font></b>(s <b><font color="#0000FF">in</font></b> Shifts) 
+109:      s.minRequirement &lt;= <b><font color="#7D007D">sum</font></b>(n <b><font color="#0000FF">in</font></b> Nurses) NurseAssignments[n][s] &lt;= s.maxRequirement;
+110:    
+111:    <b><font color="#7D007D">forall</font></b>(n <b><font color="#0000FF">in</font></b> Nurses) {      
+112:        <b><font color="#007D00">// time worked by a Nurse</font></b>
+113:       NurseWorkTime[n] == <b><font color="#7D007D">sum</font></b>( s <b><font color="#0000FF">in</font></b> Shifts ) 
+114:         NurseAssignments[n][s]*Duration[s];
+115: 
+116:       <b><font color="#007D00">// two shifts in the same time are incompatile</font></b>
+117:       <b><font color="#7D007D">forall</font></b>( s <b><font color="#0000FF">in</font></b> Shifts )
+118:          <b><font color="#7D007D">sum</font></b>( s2 <b><font color="#0000FF">in</font></b> Shifts : incompatShifts[s,s2]==1 )
+119:            NurseAssignments[n][s2] &lt;=1;         
+120:    }
+121:    <b><font color="#007D00">// respect required assignments</font></b>
+122:      <b><font color="#7D007D">forall</font></b>( n <b><font color="#0000FF">in</font></b> Nurses, s <b><font color="#0000FF">in</font></b> Shifts : RequiredAssignments[n][s] == 1 )
+123:        ctRequiredAssignmentConstraints:
+124:          NurseAssignments[n][s] == 1;
+125:    <b><font color="#007D00">//global max worked time</font></b>
+126:      <b><font color="#7D007D">forall</font></b>(n <b><font color="#0000FF">in</font></b> Nurses)
+127:        ctNurseMaxTimeConstraints: 
+128:          NurseWorkTime[n] &lt;= MaxWorkTime;
+129: 
+130:    <b><font color="#007D00">// Nurse-Nurse incompatibility</font></b>
+131:      <b><font color="#7D007D">forall</font></b>( &lt; n1 , n2 &gt; <b><font color="#0000FF">in</font></b> NurseIncompat , s <b><font color="#0000FF">in</font></b> Shifts )
+132:        ctNurseIncompatConstraints:
+133:          NurseAssignments[n1][s] + NurseAssignments[n2][s] &lt;= 1; 
+134: 
+135:    <b><font color="#007D00">// Nurse association</font></b>
+136:      <b><font color="#7D007D">forall</font></b>( &lt; n1 , n2 &gt; <b><font color="#0000FF">in</font></b> NurseAssoc, s <b><font color="#0000FF">in</font></b> Shifts)
+137:        ctNurseAssocConstraints:
+138:          NurseAssignments[n1][s] == NurseAssignments[n2][s]; 
+139:   
+140:    <b><font color="#007D00">// Nurse-shift incompatibility</font></b>
+141:    <b><font color="#7D007D">forall</font></b>(s <b><font color="#0000FF">in</font></b> Shifts, &lt;n, s.departmentName &gt; <b><font color="#0000FF">in</font></b> DepartmentIncompat)
+142:       NurseAssignments[n][s] == 0;
+143:    
+144:    <b><font color="#007D00">// max worked time</font></b>
+145:    <b><font color="#007D00">// forall( t in workTimeByNurses , n in Nurses : n.name == t.Nurse )</font></b>
+146:    <b><font color="#007D00">//   WorkTimeByNurseConstraints[n]=t.minTime &lt;= NurseWorkTime[n] &lt;= t.maxTime;</font></b>
+147: 
+148:    <b><font color="#007D00">// Nurse vacations</font></b>
+149:    <b><font color="#7D007D">forall</font></b>( n <b><font color="#0000FF">in</font></b> Nurses , d <b><font color="#0000FF">in</font></b> Weekdays : Vacations[n][d] == 1 )
+150:      ctNurseVacationConstraints:
+151:        <b><font color="#7D007D">sum</font></b>(s <b><font color="#0000FF">in</font></b> Shifts : s.day == d) NurseAssignments[n][s] == 0;
+152: 
+153:    <b><font color="#007D00">// skills</font></b>
+154:    <b><font color="#7D007D">forall</font></b>(r <b><font color="#0000FF">in</font></b> SkillRequirements, s <b><font color="#0000FF">in</font></b> Shifts : r.department == s.departmentName)
+155:      ctSkillRequirementConstraints:
+156:        <b><font color="#7D007D">sum</font></b>(n <b><font color="#0000FF">in</font></b> Nurses : NurseSkill[n][r.skill] == 1) NurseAssignments[n][s] &gt;= r.number;   
+157:   
+158:    <b><font color="#7D007D">forall</font></b>( n <b><font color="#0000FF">in</font></b> Nurses )
+159:       NurseWorkTime[n] == NurseAvgHours + NurseMoreThanAvgHours[n] - NurseLessThanAvgHours[n];
+160: 
+161:    Fairness == <b><font color="#7D007D">sum</font></b>(n <b><font color="#0000FF">in</font></b> Nurses) (NurseMoreThanAvgHours[n] + NurseLessThanAvgHours[n]);
+162:       NurseAvgHours == ((<b><font color="#7D007D">card</font></b>(Nurses) == 0) ? 0  : <b><font color="#7D007D">sum</font></b>(n <b><font color="#0000FF">in</font></b> Nurses) NurseWorkTime[n] / <b><font color="#7D007D">card</font></b>(Nurses));
+163: }
+164: 
+165: 
+166: <b><font color="#0000FF">tuple</font></b> CostByDepartmentsSolutionT{ 
+167:         <b><font color="#0000FF">string</font></b> Departments; 
+168:         <b><font color="#0000FF">int</font></b> value; 
+169: };
+170: {CostByDepartmentsSolutionT} CostByDepartmentsSolution = {&lt;i0,CostByDepartments[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Departments};
+171: <b><font color="#0000FF">tuple</font></b> NurseAssignmentsSolutionT{ 
+172:         nurse Nurses; 
+173:         shift Shifts;   
+174:         <b><font color="#0000FF">int</font></b> value; 
+175: };
+176: {NurseAssignmentsSolutionT} NurseAssignmentsSolution = {&lt;i0,i1,NurseAssignments[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Nurses,i1 <b><font color="#0000FF">in</font></b> Shifts};
+177: <b><font color="#0000FF">tuple</font></b> AllocationByDepartmentsSolutionT{ 
+178:         <b><font color="#0000FF">string</font></b> Departments; 
+179:         <b><font color="#0000FF">int</font></b> value; 
+180: };
+181: {AllocationByDepartmentsSolutionT} AllocationByDepartmentsSolution = {&lt;i0,AllocationByDepartments[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Departments};
+182: <b><font color="#0000FF">tuple</font></b> NurseWorkTimeSolutionT{ 
+183:         nurse Nurses;   
+184:         <b><font color="#0000FF">float</font></b> value; 
+185: };
+186: {NurseWorkTimeSolutionT} NurseWorkTimeSolution = {&lt;i0,NurseWorkTime[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Nurses};
+187: <b><font color="#0000FF">tuple</font></b> NurseMoreThanAvgHoursSolutionT{ 
+188:         nurse Nurses;   
+189:         <b><font color="#0000FF">float</font></b> value; 
+190: };
+191: {NurseMoreThanAvgHoursSolutionT} NurseMoreThanAvgHoursSolution = {&lt;i0,NurseMoreThanAvgHours[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Nurses};
+192: <b><font color="#0000FF">tuple</font></b> NurseLessThanAvgHoursSolutionT{ 
+193:         nurse Nurses;   
+194:         <b><font color="#0000FF">float</font></b> value; 
+195: };
+196: {NurseLessThanAvgHoursSolutionT} NurseLessThanAvgHoursSolution = {&lt;i0,NurseLessThanAvgHours[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Nurses};
+197: 
+</tt></pre>

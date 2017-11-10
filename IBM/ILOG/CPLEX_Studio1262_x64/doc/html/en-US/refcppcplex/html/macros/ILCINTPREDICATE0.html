@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>ILCINTPREDICATE0</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../macros/ILCINTPREDICATE0.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Macro ILCINTPREDICATE0</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+            class="prototype">ILCINTPREDICATE0(name)</div><div
+            class="prototype">ILCINTPREDICATE1(name, type1, nameArg1)</div><div
+            class="prototype">ILCINTPREDICATE2(name, type1, nameArg1, type2, nameArg2)</div><div
+            class="prototype">ILCINTPREDICATE3(name, type1, nameArg1, type2, nameArg2, type3, nameArg3)</div><div
+            class="prototype">ILCINTPREDICATE4(name, type1, nameArg1, type2, nameArg2, type3, nameArg3, type4, nameArg4)</div><div
+            class="prototype">ILCINTPREDICATE5(name, type1, nameArg1, type2, nameArg2, type3, nameArg3, type4, nameArg4, type5, nameArg5)</div><div
+            class="prototype">ILCINTPREDICATE6(name, type1, nameArg1, type2, nameArg2, type3, nameArg3, type4, nameArg4, type5, nameArg5, type6, nameArg6)</div>
+Macro to define an integer predicate class.
+      <div
+                        class="description"><p>This macro defines an integer predicate class named <code>nameI</code>
+ with <em>n</em> data members. When <em>n</em> is greater than 0 (zero), the
+ types and names of the data members must be supplied as arguments to the
+ macro. Each data member is defined by its type <code>T</code><em>i</em> and
+ a name <code>data</code><em>i</em>. The call to the macro must be followed
+ immediately by the body of the <code>isTrue</code> member function of the
+ integer predicate class being defined. Besides the definition of the class
+ <code>nameI</code>, this macro also defines a function named
+ <code>name</code> that creates an instance of the class <code>nameI</code>
+ and that returns an instance of the class <code><a
+                        href="../classes/IlcIntPredicate.html">IlcIntPredicate</a></code> that points to it.</p><p>CP Optimizer does not check the arity of the predicate that you defined. It
+ assumes that the size of the array (an instance of <code><a
+                        href="../classes/IlcIntArray.html">IlcIntArray</a></code>) passed as an argument to the member function
+ <code><a
+                href="../classes/IlcIntPredicate.html#method_isTrue">IlcIntPredicate::isTrue</a></code> will always be the
+ same. It also assumes that the name of the array passed as an argument is
+ <code>val</code>. That is, you <em>must</em> use that name to define a
+ predicate.</p><p>You are not obliged to use this macro to define integer predicates. When
+ the macro seems too restrictive for your purposes, we recommend that you
+ define an integer predicate class directly.</p><p>Since the argument <code>name</code> is used to name the integer
+ predicate class, it is not possible to use the same name for several integer
+ predicate definitions.</p><p><strong>Example</strong></p><p>Here's how to define an integer predicate with one data member:</p><pre
+                        class="sample">
+ ILCINTPREDICATE1(AllLessThanX, IlcInt, x){
+     return (val[0] &lt; x &amp;&amp; val[1] &lt; x &amp;&amp; val[2] &lt;
+ x);
+ }</pre><p>That predicate is a ternary predicate, so it assumes that the array
+ passed an argument to the member function <code><a
+                href="../classes/IlcIntPredicate.html#method_isTrue">IlcIntPredicate::isTrue</a></code> is of size three. The predicate is
+ true if all the values are less than the integer x.</p><p>That macro generates code similar to the following lines:</p><pre
+                class="sample">
+ class AllLessThanXI : public IlcIntPredicateI {
+     IlcInt x;
+ public:
+     AllLessThanXI(IlcInt xx):x(xx){}
+     ~AllLessThanXI(){}
+     IlcBool isTrue(IlcIntArray val);
+ };
+ IlcIntPredicate AllLessThanX(IloCP cp, IlcInt xx){
+     return new (cp.getHeap()) AllLessThanXI(xx);
+ }
+ IlcBool AllLessThanXI::isTrue(IlcIntArray val){
+     return (val[0] &lt; x &amp;&amp; val[1] &lt; x &amp;&amp; val[2] &lt;
+ x);
+ }    </pre><p>The following statement creates an instance of the class
+ <code>AllLessThanXI</code> and returns a handle that points to it.</p><pre
+            class="sample">
+ AllLessThanX(s, 4);</pre></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IlcIntArray.html">IlcIntArray</a>, <a
+                href="../classes/IlcIntPredicate.html">IlcIntPredicate</a>, <a
+                href="../classes/IlcIntPredicateI.html">IlcIntPredicateI</a>, <a href="../functions/IlcTableConstraint.html">IlcTableConstraint</a></p></body>
+</html>

@@ -1,0 +1,68 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: {<b><font color="#0000FF">string</font></b>} Cities =...;
+13: {<b><font color="#0000FF">string</font></b>} Products = ...;
+14: <b><font color="#0000FF">float</font></b> Capacity = ...;
+15: <b><font color="#0000FF">tuple</font></b> connection { <b><font color="#0000FF">string</font></b> o; <b><font color="#0000FF">string</font></b> d; }
+16: <b><font color="#0000FF">tuple</font></b> route { 
+17:   <b><font color="#0000FF">string</font></b> p; 
+18:   connection e; 
+19: }
+20: {route} Routes = ...;
+21: {connection} Connections = { c | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+22: <b><font color="#0000FF">tuple</font></b> supply { 
+23:   <b><font color="#0000FF">string</font></b> p; 
+24:   <b><font color="#0000FF">string</font></b> o; 
+25: }
+26: {supply} Supplies = { &lt;p,c.o&gt; | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+27: <b><font color="#0000FF">float</font></b> Supply[Supplies] = ...;
+28: <b><font color="#0000FF">tuple</font></b> customer { 
+29:   <b><font color="#0000FF">string</font></b> p; 
+30:   <b><font color="#0000FF">string</font></b> d; 
+31: }
+32: {customer} Customers = { &lt;p,c.d&gt; | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+33: <b><font color="#0000FF">float</font></b> Demand[Customers] = ...;
+34: <b><font color="#0000FF">float</font></b> Cost[Routes] = ...;
+35: {<b><font color="#0000FF">string</font></b>} Orig[p <b><font color="#0000FF">in</font></b> Products] = { c.o | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+36: {<b><font color="#0000FF">string</font></b>} Dest[p <b><font color="#0000FF">in</font></b> Products] = { c.d | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+37: 
+38: {connection} CPs[p <b><font color="#0000FF">in</font></b> Products] = { c | &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes };
+39: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> Products) 
+40:    <b><font color="#7D007D">sum</font></b>(o <b><font color="#0000FF">in</font></b> Orig[p]) Supply[&lt;p,o&gt;] == <b><font color="#7D007D">sum</font></b>(d <b><font color="#0000FF">in</font></b> Dest[p]) Demand[&lt;p,d&gt;];
+41: 
+42: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Trans[Routes];   
+43: 
+44: <b><font color="#0000FF">constraint</font></b> ctSupply[Products][Cities];
+45: <b><font color="#0000FF">constraint</font></b> ctDemand[Products][Cities];
+46: 
+47: <b><font color="#0000FF">minimize</font></b>
+48:   <b><font color="#7D007D">sum</font></b>(l <b><font color="#0000FF">in</font></b> Routes) 
+49:     Cost[l] * Trans[l];
+50: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+51:   <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products , o <b><font color="#0000FF">in</font></b> Orig[p] ) 
+52:     ctSupply[p][o]: 
+53:       <b><font color="#7D007D">sum</font></b>( &lt;o,d&gt; <b><font color="#0000FF">in</font></b> CPs[p] ) 
+54:         Trans[&lt; p,&lt;o,d&gt; &gt;] == Supply[&lt;p,o&gt;];
+55:   <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products , d <b><font color="#0000FF">in</font></b> Dest[p] ) 
+56:     ctDemand[p][d]:  
+57:       <b><font color="#7D007D">sum</font></b>( &lt;o,d&gt; <b><font color="#0000FF">in</font></b> CPs[p] ) 
+58:         Trans[&lt; p,&lt;o,d&gt; &gt;] == Demand[&lt;p,d&gt;];
+59:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> Connections)
+60:     ctCapacity:             
+61:       <b><font color="#7D007D">sum</font></b>( &lt;p,c&gt; <b><font color="#0000FF">in</font></b> Routes ) 
+62:         Trans[&lt;p,c&gt;] &lt;= Capacity;
+63: } 
+</tt></pre>

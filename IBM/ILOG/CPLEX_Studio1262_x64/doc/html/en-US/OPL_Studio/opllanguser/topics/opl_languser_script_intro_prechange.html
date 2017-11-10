@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Changing option values" />
+<meta name="abstract" content="You can use execute blocks to change CPLEX parameters, CP parameters, and OPL settings within an OPL model." />
+<meta name="Description" content="You can use execute blocks to change CPLEX parameters, CP parameters, and OPL settings within an OPL model." />
+<meta name="DC.subject" content="order, between IDE/scripting values of parameters, parameters, precedence between IDE value and script value, scripting, changing settings within a model, models, changing settings via scripting, execute, IBM ILOG Script block, changing CPLEX parameters, CPLEX parameters, setting with script statements, classes, IloCplex, IloCplex class, setting with script statements, production code sample, code samples, production, preprocessing, setting parameters, time limit, transp4.mod, solution status values, status, getCplexStatus, changing CP parameters, constraint programming, changing parameters with script statements, CP Optimizer, setting parameters with script statements, IloCp, IloCp class, changing OPL parameters, OPL settings, setting in script, IloOplSettings, IloOplSettings class" />
+<meta name="keywords" content="order, between IDE/scripting values of parameters, parameters, precedence between IDE value and script value, scripting, changing settings within a model, models, changing settings via scripting, execute, IBM ILOG Script block, changing CPLEX parameters, CPLEX parameters, setting with script statements, classes, IloCplex, IloCplex class, setting with script statements, production code sample, code samples, production, preprocessing, setting parameters, time limit, transp4.mod, solution status values, status, getCplexStatus, changing CP parameters, constraint programming, changing parameters with script statements, CP Optimizer, setting parameters with script statements, IloCp, IloCp class, changing OPL parameters, OPL settings, setting in script, IloOplSettings, IloOplSettings class" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_script_intro.1013900" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Changing option values</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_script_intro.1013900">
+<h1 class="title topictitle1">Changing option values</h1>
+<div class="body"><p class="shortdesc">You can use <samp class="ph codeph">execute</samp> blocks to change CPLEX
+parameters, CP parameters, and OPL settings within an OPL model.</p>
+<p class="p">The code examples are available at the following location:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl</span> </p>
+<p class="p">where <samp class="ph codeph">&lt;Install_dir&gt;</samp> is your installation
+directory.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_script_intro.1013882"><h2 class="title topictitle2">Changing CPLEX parameters</h2>
+<div class="body"><p class="p">Any CPLEX parameter can be set from a script statement in an <samp class="ph codeph">execute</samp> block.
+In case of conflict, if a different value has been set from the IDE
+for the same parameter, the value set in the script statement takes
+precedence. </p>
+<p class="p"> The following code extract shows how to switch off CPLEX presolve and enable simplex logging in
+the model.</p>
+<p class="p exampletitle">Changing CPLEX parameters via scripting
+(<samp class="ph systemoutput">product.mod</samp>)</p>
+<pre class="pre codeblock"><code>execute CPX_PARAM {
+  cplex.preind = 0;   
+  cplex.simdisplay = 2;   
+}</code></pre>
+<p class="p">In the code extract below, the script named <samp class="ph codeph">PARAMS</samp> sets a time limit on each
+call to the optimizer.</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_script_intro.1013882__usropllangtut.uss_langtut_script_intro.1015349">Preprocessing script statement setting
+a parameter  (<samp class="ph codeph">transp4.mod</samp>)</p>
+<pre class="pre codeblock"><code>execute PARAMS {
+  cplex.tilim = 100;
+}</code></pre>
+<p class="p">You can find the <span class="ph filepath">product.mod</span> and <span class="ph filepath">transp4.mod</span> models
+at the following location respectively:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl\production</span></p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl\transp</span></p>
+<p class="p">where <samp class="ph codeph">&lt;Install_dir&gt;</samp> is your installation directory.</p>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1013882__CFqiDpF7"><h3 class="title sectiontitle">CPLEX solution status</h3><p class="p">This
+table lists the status values for solutions to LP, QP, or MIP problems.
+The status value is returned by <span class="keyword apiname">IloCplex.status</span> or <span class="keyword apiname">IloCplex.getCplexStatus</span>.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two column table that lists the code numbers and statuses for CPLEX solutions." class="table ShadedHead" rules="all" frame="border" border="1"><span class="desc tabledesc"></span><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" width="50%" id="d777090e154">Code number</th>
+<th class="entry" align="left" valign="top" width="50%" id="d777090e156">Solution status</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">1 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Optimal solution is available.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">2 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Problem has an unbounded ray.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">3 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Problem has been proven infeasible. </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">4 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Problem has been proven either infeasible or unbounded.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">5 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Optimal solution is available, but with infeasibilities after
+unscaling.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">6 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Solution is available, but not proved optimal, due to numeric
+difficulties during optimization.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">10 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped due to limit on number of iterations.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">11 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped due to a time limit.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">12 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped due to an objective limit.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">13 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped due to a request from the user.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">14 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">0</span> on a continuous problem. A relaxation was
+successfully found and a feasible solution for the problem. (if relaxed
+according to that relaxation) was installed. The relaxation is minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">15 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">1</span> on a continuous problem. A relaxation was
+successfully found and a feasible solution for the problem. (if relaxed
+according to that relaxation) was installed. The relaxation is optimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">16 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">2</span> on a continuous problem. A relaxation was
+successfully found and a feasible solution for the problem. (if relaxed
+according to that relaxation) was installed. The relaxation is minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">17 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">3</span> on a continuous problem. A relaxation was
+successfully found and a feasible solution for the problem. (if relaxed
+according to that relaxation) was installed. The relaxation is optimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">18 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">4</span> on a continuous problem. A relaxation was
+successfully found and a feasible solution for the problem. (if relaxed
+according to that relaxation) was installed. The relaxation is minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">19 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">5</span> on a continuous problem. A relaxation was
+successfully found and a feasible solution for the problem. (if relaxed
+according to that relaxation) was installed. The relaxation is optimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">20 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Model has an unbounded optimal face.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">21 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped due to a limit on the primal objective.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">22 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped due to a limit on the dual objective.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">23 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The problem under consideration was found to be feasible after
+phase 1 of FeasOpt. A feasible solution is available. </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">24</td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Solution satisfies first-order optimality conditions for a solution returned by the barrier
+optimizer. </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">25</td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped due to a deterministic time limit.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">30 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The problem appears to be feasible; no conflict is available.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">31 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner found a minimal conflict.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">32 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner concluded contradictory feasibility for
+the same set of constraints due to numeric problems. A conflict is
+available, but it is not minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">33 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner terminated because of a time limit. A
+conflict is available, but it is not minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">34 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner terminated because of an iteration limit.
+A conflict is available, but it is not minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">35 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner terminated because of a node limit. A
+conflict is available, but it is not minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">36 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner terminated because of an objective limit.
+A conflict is available, but it is not minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">37 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner terminated because of a memory limit.
+A conflict is available, but it is not minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">38 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner terminated because a user terminated the
+application. A conflict is available, but it is not minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">39</td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The conflict refiner terminated because of a deterministic time limit. A conflict is
+available, but it is not minimal. </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">101 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Optimal integer solution has been found.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">102 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Optimal solution with the tolerance defined by <span class="keyword apiname">epgap</span> or <span class="keyword apiname">epagap</span> has
+been found.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">103 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Solution is integer infeasible </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">104 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The limit on mixed integer solutions has been reached.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">105 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Node limit has been exceeded but integer solution exists.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">106 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Node limit has been reached; no integer solution.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">107 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Time limit exceeded, but integer solution exists.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">108 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Time limit exceeded; no integer solution.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">109 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Terminated because of an error, but integer solution exists.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">110 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Terminated because of an error; no integer solution.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">111 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Limit on tree memory has been reached, but an integer solution
+exists.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">112 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Limit on tree memory has been reached; no integer solution.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">113 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped, but an integer solution exists.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">114 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Stopped; no integer solution.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">115 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Problem is optimal with unscaled infeasibilities.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">116 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Out of memory, no tree available, integer solution exists.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">117 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Out of memory, no tree available, no integer solution.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">118 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Problem has an unbounded ray.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">119 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Problem has been proved either infeasible or unbounded.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">120 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">0</span> on a mixed integer problem. A relaxation was
+successfully found and a feasible solution for the problem (if relaxed
+according to that relaxation) was installed. The relaxation is minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">121 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">1</span> on a mixed integer problem. A relaxation was
+successfully found and a feasible solution for the problem (if relaxed
+according to that relaxation) was installed. The relaxation is optimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">122 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">2</span> on a mixed integer problem. A relaxation was
+successfully found and a feasible solution for the problem (if relaxed
+according to that relaxation) was installed. The relaxation is minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">123 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">3</span> on a mixed integer problem. A relaxation was
+successfully found and a feasible solution for the problem (if relaxed
+according to that relaxation) was installed. The relaxation is optimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">124 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">4</span> on a mixed integer problem. A relaxation was
+successfully found and a feasible solution for the problem (if relaxed
+according to that relaxation) was installed. The relaxation is minimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">125 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only with the parameter <span class="keyword apiname">feasoptmode</span> set
+to <span class="keyword apiname">5</span> on a mixed integer problem. A relaxation was
+successfully found and a feasible solution for the problem (if relaxed
+according to that relaxation) was installed. The relaxation is optimal.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">126 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 "><p class="p">This status occurs only after a call to <span class="keyword apiname">feasOpt</span>,
+when the algorithm terminates prematurely, for example after reaching
+a limit.</p>
+<p class="p">This status means that a relaxed solution is available
+and can be queried. </p>
+</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">127 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">The problem under consideration was found to be feasible after
+phase 1 of <span class="keyword apiname">FeasOpt</span>. A feasible solution is available.
+This status is also used in the status field of solution and mipstart
+files for solutions from the solution pool.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">128 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only after a call to the method <span class="keyword apiname">populate</span> on
+a MIP problem. The limit on mixed integer solutions generated by populate,
+as specified by the parameter <span class="keyword apiname">populatelim</span>, has
+been reached.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">129 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only after a call to the method <span class="keyword apiname">populate</span> on
+a MIP problem. Populate has completed the enumeration of all solutions
+it could enumerate.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">130 </td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">This status occurs only after a call to the method <span class="keyword apiname">populate</span> on
+a MIP problem. Populate has completed the enumeration of all solutions
+it could enumerate whose objective value fit the tolerance specified
+by the parameters <span class="keyword apiname">solnpoolagap</span> and <span class="keyword apiname">solnpoolgap</span>.</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">131</td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Deterministic time limit exceeded, but integer solution exists. </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">132</td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Deterministic time limit exceeded; no integer solution. </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" width="50%" headers="d777090e154 ">133</td>
+<td class="entry" align="left" valign="top" width="50%" headers="d777090e156 ">Could not bound convex relaxation of nonconvex (MI)QP. </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1013882__usropllangtut.uss_langtut_script_intro.1015840"><h3 class="title sectiontitle">For
+more information</h3>
+<ul class="ul"><li class="li">Details of the CPLEX solution statuses can be found in <a class="xref" href="../../../refcallablelibrary/macros/homepagesolutionstatus.html#homepagesolutionstatus">Solution Status Symbols in the CPLEX Callable Library (C API)</a>.</li>
+<li class="li">See the description of class <span class="keyword apiname">IloCplex</span> in the <em class="ph i">IBM ILOG Script Reference
+Manual</em>.</li>
+<li class="li">You can also find the complete reference documentation of CPLEX parameters in the CPLEX
+documentation, <a class="xref" href="../../../CPLEX/homepages/refparameterscplex.html#C856lrgW">Parameters of CPLEX</a>.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_script_intro.1013498"><h2 class="title topictitle2">Changing CP parameters</h2>
+<div class="body"><p class="p">You can set any constraint programming parameter from a script statement in an
+<samp class="ph codeph">execute</samp> block. In case of conflict, if a different value has been set from the IDE
+for the same parameter, the value set in the script statement takes precedence.</p>
+<p class="p">The following code extract extends the <samp class="ph codeph">logPeriod</samp> parameter to
+<samp class="ph codeph">10000</samp>, sets the search type to <samp class="ph codeph">DepthFirst</samp> and the time limit to
+<samp class="ph codeph">600</samp>.</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_script_intro.1013498__usropllangtut.uss_langtut_script_intro.1014487">Changing CP parameters via scripting (<samp class="ph codeph">timetabling.mod</samp>)</p>
+<pre class="pre codeblock"><code>   var p = cp.param;
+   p.logPeriod = 10000;
+   p.searchType = "DepthFirst";
+   p.timeLimit = 600;</code></pre>
+<p class="p">The <span class="ph filepath">timetabling</span> example is available at the following location:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl\timetabling</span></p>
+<p class="p">where <samp class="ph codeph">&lt;Install_dir&gt;</samp> is your installation directory.</p>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1013498__usropllangtut.uss_langtut_script_intro.1014421"><h3 class="title sectiontitle">For
+more information</h3><p class="p">See the description of class <span class="keyword apiname">IloCP</span> in the <em class="ph i">IBM ILOG Script Reference
+Manual</em>. You can also find the complete reference documentation of CP parameters in the CP
+Optimizer documentation.</p>
+<p class="p">In the steel mill example,
+the solution is found very quickly. However, if you want to illustrate
+the engine log, you can decrease the periodicity (that is, the number
+of branches between which a line of log is printed). To do so, write:</p>
+<pre class="pre codeblock"><code>execute {
+        cp.param.Workers = 1;
+        cp.param.LogPeriod = 50;
+}</code></pre>
+<p class="p">The
+general syntax to change engine parameters is:</p>
+<pre class="pre codeblock"><code> execute {cp.param.param_name = param_value
+} </code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_script_intro.1014310"><h2 class="title topictitle2">Changing OPL settings</h2>
+<div class="body"><p class="p">You can set certain OPL settings from a script statement in an <samp class="ph codeph">execute</samp> block.
+Not all OPL parameters can be set by scripting; you can change only the parameters that are listed
+as properties of <span class="keyword apiname">IloOplSettings</span> in the <em class="ph i">IBM ILOG Script Reference Manual</em>.
+In case of conflict, if a different value has been set from the IDE for the same parameter, the
+value set in the script statement takes precedence. For an example, see <em class="ph i">Executing preprocessing
+scripts</em> in <a class="xref" href="../../usroplide/topics/opl_ide_script.html" title="Scripting features are available in the IDE, including script debugging facilities.">Using IBM ILOG Script for OPL</a>. </p>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1014310__usropllangtut.uss_langtut_script_intro.1014606"><h3 class="title sectiontitle">For
+more information</h3><p class="p">See the description of class <span class="keyword apiname">IloOplSettings</span> in the <em class="ph i">IBM ILOG Script
+Reference Manual</em>.</p>
+</div>
+</div>
+</div>
+</body>
+</html>

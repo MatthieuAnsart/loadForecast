@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Postprocessing solutions" />
+<meta name="abstract" content="Shows how to initiate the call to postprocessing in your model." />
+<meta name="Description" content="Shows how to initiate the call to postprocessing in your model." />
+<meta name="DC.subject" content="postprocessing, via APIs" />
+<meta name="keywords" content="postprocessing, via APIs" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllib.uss_lib_opl.1001252" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" />
+<title>Postprocessing solutions</title>
+</head>
+<body role="main" id="usropllib.uss_lib_opl.1001252">
+<h1 class="title topictitle1">Postprocessing solutions</h1>
+<div class="body"><p class="shortdesc">Shows how to initiate the call to postprocessing in your
+model.</p>
+<p class="p">As modeling and solving are two separate phases, the
+OPL model does not know when a solution is available. Therefore, it
+does not know when to postprocess that solution, and you have to initiate
+the call to postprocessing.</p>
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">To avoid unexpected behavior, you are recommended to
+call the <span class="keyword apiname">postprocess</span> method even
+if your model does not contain a postprocessing block.</p>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1001252__usropllib.uss_lib_opl.1003635"><h2 class="title sectiontitle">C++</h2><p class="p exampletitle" id="usropllib.uss_lib_opl.1001252__usropllib.uss_lib_opl.1007961">C++: Calling the postprocessing phase</p>
+<pre class="pre codeblock"><code>        if ( cplex.solve() ) {
+            cout &lt;&lt; endl
+                &lt;&lt; "OBJECTIVE: " &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; opl.getCplex().getObjValue()
+                &lt;&lt; endl;
+            opl.postProcess();
+            opl.printSolution(cout);
+            status = 0;
+        } else {
+            cout &lt;&lt; "No solution!" &lt;&lt; endl;
+            status = 1;
+        }
+    } catch (IloOplException &amp; e) {
+        cout &lt;&lt; "### OPL exception: " &lt;&lt; e.getMessage() &lt;&lt; endl;
+    } catch( IloException &amp; e ) {
+        cout &lt;&lt; "### CONCERT exception: ";
+        e.print(cout);
+        status = 2;
+    } catch (...) {
+        cout &lt;&lt; "### UNEXPECTED ERROR ..." &lt;&lt; endl;
+        status = 3;
+    }
+
+    env.end();
+
+    cout &lt;&lt; endl &lt;&lt; "--Press &lt;Enter&gt; to exit--" &lt;&lt; endl;
+    getchar();
+    
+    return status;
+}</code></pre>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1001252__usropllib.uss_lib_opl.1003639"><h2 class="title sectiontitle">Java</h2><p class="p exampletitle" id="usropllib.uss_lib_opl.1001252__usropllib.uss_lib_opl.1003643">Java: Calling the postprocessing phase</p>
+<pre class="pre codeblock"><code>        if ( cplex.solve() )
+        {
+            System.out.println("OBJECTIVE: " + opl.getCplex().getObjValue());
+            opl.postProcess();
+            opl.printSolution(System.out);
+            status = 0;
+        } else {
+            System.out.println("No solution!");
+            status = 1;
+        }
+
+        oplF.end();</code></pre>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1001252__usropllib.uss_lib_opl.1020885"><h2 class="title sectiontitle">.NET (C#)</h2><p class="p exampletitle" id="usropllib.uss_lib_opl.1001252__usropllib.uss_lib_opl.1020886">Visualizing intermediate data</p>
+<pre class="pre codeblock"><code>                if (cplex.Solve())
+                {
+                    Console.Out.WriteLine("OBJECTIVE: " + opl.Cplex.ObjValue);
+                    opl.PostProcess();
+                    opl.PrintSolution(Console.Out);
+                    status = 0;
+                }
+                else
+                {
+                    Console.Out.WriteLine("No solution!");
+                    status = 1;
+                }
+
+                oplF.End();</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" title="Explains in more general terms how to work with the OPL C++, Java and .NET Interfaces. This section is also illustrated by code samples for each language.">Working with OPL interfaces</a></div>
+</div>
+</div></body>
+</html>

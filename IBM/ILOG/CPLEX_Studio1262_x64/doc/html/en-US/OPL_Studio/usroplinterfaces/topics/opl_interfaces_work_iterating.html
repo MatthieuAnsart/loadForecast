@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Iterating through OPL elements" />
+<meta name="abstract" content="Shows how to iterate through the elements of your model." />
+<meta name="Description" content="Shows how to iterate through the elements of your model." />
+<meta name="DC.subject" content="data elements, iterators, code samples, iterator example" />
+<meta name="keywords" content="data elements, iterators, code samples, iterator example" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work_accessing.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllib.uss_lib_opl.1009565" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work_accessing.html" />
+<title>Iterating through OPL elements</title>
+</head>
+<body role="main" id="usropllib.uss_lib_opl.1009565">
+<h1 class="title topictitle1">Iterating through OPL elements</h1>
+<div class="body"><p class="shortdesc">Shows how to iterate through the elements of your model.</p>
+<p class="p">The OPL Interface libraries enable your applications to iterate
+through OPL elements such as arrays (maps) and sets. This feature
+is illustrated by the <samp class="ph codeph">iterators</samp> example, which contains
+two samples. The <samp class="ph codeph">iterators</samp> example is available in
+C++, Java, and .NET Visual Basic and C# at the following locations:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl_interfaces\cpp\src\iterators.cpp</span></p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl_interfaces\java\iterators\src\iterators\Iterators.java</span></p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\dotnet\x86_windows_vs2010\VisualBasic\Iterators\Iterators.vb</span></p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\dotnet\x86_windows_vs2010\CSharp\Iterators\Iterators.cs</span></p>
+<p class="p">where <span class="ph filepath">&lt;Install_dir&gt;</span> is your installation
+directory.</p>
+<div class="section" id="usropllib.uss_lib_opl.1009565__usropllib.uss_lib_opl.1009571"><h2 class="title sectiontitle">Sample1</h2><p class="p">The
+purpose of <samp class="ph codeph">Sample1</samp> is to check the result of filtering
+by iterating on the generated data element. The data element is an
+array of strings that is indexed by a set of strings. It is filled
+as the result of an iteration on a set of tuples by filtering out
+the duplicates. It is based on the <samp class="ph codeph">transp2.mod</samp> model.</p>
+<p class="p">The
+simplified model is:</p>
+<pre class="pre codeblock"><code>{string} Products = ...;
+tuple Route { string p; string o; string d; }
+{Route} Routes = ...;
+{string} orig[p in Products] = { o | &lt;p,o,d&gt; in Routes };</code></pre>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1009565__usropllib.uss_lib_opl.1009588"><h2 class="title sectiontitle">Sample2</h2><p class="p">The
+purpose of <samp class="ph codeph">Sample2</samp> is to output a multidimensional
+array <samp class="ph codeph">x[i][j]</samp> to illustrate how arrays and sub-arrays
+are managed, as shown in the following code extract.</p>
+<p class="p exampletitle" id="usropllib.uss_lib_opl.1009565__usropllib.uss_lib_opl.1010289">Output
+of a multidimensional array</p>
+<pre class="pre codeblock"><code>        IloIntMap x = opl.getElement("x").asIntMap();
+        IloSymbolSet s1 = opl.getElement("s1").asSymbolSet();
+        IloSymbolSet s2 = opl.getElement("s2").asSymbolSet();
+
+        // Iterate on the first indexer.
+        for (IloSymbolSetIterator it1(s1); it1.ok(); ++it1){
+            // Get the second dimension array from the first dimension.
+            IloIntMap sub = x.getSub(*it1);
+            // Iterate on the second indexer of x (that is the indexer of the subarray).
+            for (IloSymbolSetIterator it2(s2); it2.ok(); ++it2){
+                // This is the last dimension of the array, so you can directly use the get method.
+                cout &lt;&lt; *it1 &lt;&lt; " " &lt;&lt; *it2 &lt;&lt; " " &lt;&lt; sub.get(*it2) &lt;&lt; "\n";
+            }
+        }</code></pre>
+<p class="p">To
+access the elements of an array, you must first access the sub-arrays
+until the last dimension, then you can get the values. Here, as there
+are two dimensions, you have to get one sub-array from which you can
+directly get the values. The array of integers is indexed by two sets
+of strings.</p>
+<p class="p">The simplified model is:</p>
+<pre class="pre codeblock"><code>{string} s1 = ...;
+{string} s2 = ...;
+{int} x[s1][s2] = ...;</code></pre>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1009565__BqN58Q8T"><h2 class="title sectiontitle">Sample 3</h2><p class="p">The purpose of <span class="ph filepath">sample3</span> is
+to output an array of tuples <span class="keyword apiname">arrayT[i]</span>, to illustrate
+how tuple elements can be accessed.</p>
+<p class="p">The simplified model is:</p>
+<pre class="pre codeblock"><code>tuple t
+{
+int a;
+int b;
+}
+{string} ids={"id1","id2","id3"};
+t arrayT[ids]=[&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work_accessing.html" title="Describes what APIs to use to access model elements such as decision variables and their values, and to iterate through model elements.">Accessing elements</a></div>
+</div>
+</div></body>
+</html>

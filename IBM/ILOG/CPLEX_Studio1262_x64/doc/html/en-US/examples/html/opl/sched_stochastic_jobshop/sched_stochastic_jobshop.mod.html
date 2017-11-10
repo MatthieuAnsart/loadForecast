@@ -1,0 +1,58 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: <b><font color="#0000FF">int</font></b> nbJobs = ...;
+15: <b><font color="#0000FF">int</font></b> nbMchs = ...;
+16: <b><font color="#0000FF">int</font></b> nbScns = ...;
+17: 
+18: <b><font color="#0000FF">range</font></b> Jobs = 0..nbJobs-1;
+19: <b><font color="#0000FF">range</font></b> Mchs = 0..nbMchs-1; 
+20: <b><font color="#0000FF">range</font></b> Scns = 0..nbScns-1;
+21: 
+22: <b><font color="#007D00">// Mchs is used both to index machines and operation position in job</font></b>
+23: 
+24: <b><font color="#0000FF">int</font></b> Machines[j <b><font color="#0000FF">in</font></b> Jobs][m <b><font color="#0000FF">in</font></b> Mchs] = ...;
+25: <b><font color="#0000FF">int</font></b> Durations[k <b><font color="#0000FF">in</font></b> Scns][j <b><font color="#0000FF">in</font></b> Jobs][m <b><font color="#0000FF">in</font></b> Mchs] = ...;
+26: 
+27: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> itvs[k <b><font color="#0000FF">in</font></b> Scns][j <b><font color="#0000FF">in</font></b> Jobs][o <b><font color="#0000FF">in</font></b> Mchs] <b><font color="#0000FF">size</font></b> Durations[k][j][o];
+28: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">sequence</font></b> mchs[k <b><font color="#0000FF">in</font></b> Scns][m <b><font color="#0000FF">in</font></b> Mchs] <b><font color="#0000FF">in</font></b> <b><font color="#7D007D">all</font></b>(j <b><font color="#0000FF">in</font></b> Jobs, o <b><font color="#0000FF">in</font></b> Mchs : Machines[j][o] == m) itvs[k][j][o];
+29: 
+30: <b><font color="#0000FF">execute</font></b> {
+31:   cp.param.FailLimit = 250000;
+32:   cp.param.LogPeriod = 1000000;
+33: }
+34: 
+35: minimize sum(k in Scns) (max(j in Jobs) endOf(itvs[k][j][nbMchs-1])) / nbScns;
+36: subject to {
+37:   forall(k <b><font color="EA7D00">in</font></b> Scns) {
+38:         forall (m <b><font color="EA7D00">in</font></b> Mchs) {
+39:           noOverlap(mchs[k][m]);
+40:           <b><font color="EA7D00">if</font></b> (0&lt;k) {
+41:             sameSequence(mchs[0][m], mchs[k][m]);
+42:      }      
+43:    }      
+44:   forall (j <b><font color="EA7D00">in</font></b> Jobs, o <b><font color="EA7D00">in</font></b> 0..nbMchs-2)
+45:     endBeforeStart(itvs[k][j][o], itvs[k][j][o+1]);
+46:   }         
+47: }
+48: 
+49: execute {
+50:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> m <b><font color="EA7D00">in</font></b> Machines) {
+51:     writeln(mchs[0][m]);
+52:   }  
+53: }
+</tt></pre>

@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solution polishing" />
+<meta name="abstract" content="Describes solution polishing as a heuristic of the MIP optimizer." />
+<meta name="Description" content="Describes solution polishing as a heuristic of the MIP optimizer." />
+<meta name="DC.subject" content="PolishTime parameter, solution polishing, CPX_PARAM_POLISHTIME, TiLim parameter, solution polishing and, CPX_PARAM_TILIM, AdvInd parameter, CPX_PARAM_ADVIND, SubMIPNodeLim parameter, CPX_PARAM_SUBMIPNODELIM" />
+<meta name="keywords" content="PolishTime parameter, solution polishing, CPX_PARAM_POLISHTIME, TiLim parameter, solution polishing and, CPX_PARAM_TILIM, AdvInd parameter, CPX_PARAM_ADVIND, SubMIPNodeLim parameter, CPX_PARAM_SUBMIPNODELIM" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/heuristics/42_heur_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.686490" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/heuristics/42_heur_title_synopsis.html" />
+<title>Solution polishing</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.686490">
+<h1 class="title topictitle1">Solution polishing</h1>
+<div class="body"><p class="shortdesc">Describes solution polishing as a heuristic of the MIP
+optimizer.</p>
+<p class="p"><strong class="ph b">Solution polishing</strong> can
+yield better solutions in situations where good solutions are otherwise
+hard to find. More time-intensive than other heuristics, solution
+polishing is actually a variety of branch and cut that works after
+an initial solution is available. In fact, it requires a solution
+to be available for polishing, either a solution produced by branch
+and cut, or a MIP start supplied by a user. </p>
+<p class="p">Because of the high cost entailed by solution polishing,
+it is not called throughout branch and cut like other heuristics.
+Instead, solution polishing works in a second phase after a first
+phase of conventional branch and cut. As an additional step after
+branch and cut, solution polishing can improve the best known solution. </p>
+<p class="p">As a kind of branch-and-cut algorithm itself, solution
+polishing focuses solely on finding better solutions. Consequently,
+it may not prove optimality, even if the optimal solution has indeed
+been found.</p>
+<p class="p paragrouptitle">Stopping criteria for solution polishing</p>
+<p class="p">Solution polishing obeys the same stopping criteria as
+branch and cut.</p>
+<ul class="ul"><li class="li"><p class="p">The absolute gap tolerance is a stopping
+criterion for polishing. For more general information about it, see <a class="xref" href="../../../../../Parameters/topics/EpAGap.html" title="Sets an absolute tolerance on the gap between the best integer objective and the objective of the best node remaining.">absolute MIP gap tolerance</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">EpAGap</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_EPAGAP</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip tolerances absmipgap</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The relative gap tolerance is a stopping
+criterion for polishing. For more general information about it, see <a class="xref" href="../../../../../Parameters/topics/EpGap.html" title="Sets a relative tolerance on the gap between the best integer objective and the objective of the best node remaining.">relative MIP gap tolerance</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">EpGap</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_EPGAP</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip tolerances mipgap</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The optimizer time limit is a stopping
+criterion for polishing. For more general information about it, see <a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">TiLim</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_TILIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">timelimit</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The node limit is a stopping criterion
+for polishing. For more general information about it, see <a class="xref" href="../../../../../Parameters/topics/NodeLim.html" title="Sets the maximum number of nodes solved before the algorithm terminates without reaching optimality.">MIP node limit</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">NodeLim</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_NODELIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip limits nodes</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The integer solution limit is a stopping
+criterion for polishing. For more general information about it, see <a class="xref" href="../../../../../Parameters/topics/IntSolFilePrefix.html" title="MIP integer solution file switch and filename prefix.">MIP integer solution-file switch and prefix</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">IntSolLim</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_INTSOLLIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip limits solutions</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+</ul>
+<p class="p">Those criteria apply to the overall optimization, that
+is, branch and cut plus solution polishing. For example, if you set
+the <a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> (<samp class="ph codeph">TiLim</samp>, <samp class="ph codeph">CPX_PARAM_TILIM</samp>)
+to 100 seconds, then CPLEX spends at most 100 seconds in total for
+branch and cut plus solution polishing.</p>
+<p class="p paragrouptitle">Starting conditions for solution polishing</p>
+<p class="p">You control when CPLEX switches from branch and cut to
+solution polishing with these parameters:</p>
+<ul class="ul"><li class="li"><p class="p">The <a class="xref" href="../../../../../Parameters/topics/PolishAfterEpAGap.html" title="Sets an absolute MIP gap after which CPLEX starts to polish a feasible solution">absolute MIP gap before starting to polish a feasible solution</a> </p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterEpAGap</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTEREPAGAP</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter absmipgap</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The <a class="xref" href="../../../../../Parameters/topics/PolishAfterEpGap.html" title="Sets a relative MIP gap after which CPLEX starts to polish a feasible solution">relative MIP gap before starting to polish a feasible solution</a></p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterEpGap</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTEREPGAP</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter mipgap</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The number of <a class="xref" href="../../../../../Parameters/topics/PolishAfterIntSol.html" title="Sets the number of integer solutions to find after which CPLEX starts to polish a feasible solution">MIP integer solutions to find before starting to polish a feasible solution</a></p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterIntSol</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTERINTSOL</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter solutions</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The number of <a class="xref" href="../../../../../Parameters/topics/PolishAfterNode.html" title="Sets the number of nodes to process after which CPLEX starts to polish a feasible solution">nodes to process before starting to polish a feasible solution</a></p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterNode</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTERNODE</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter nodes</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">The amount (in seconds) of <a class="xref" href="../../../../../Parameters/topics/PolishAfterTime.html" title="Sets the amount of time in seconds to spend during a normal mixed integer optimization after which CPLEX starts to polish a feasible solution">time before starting to polish a feasible solution</a></p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterTime</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTERTIME</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter time</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+</ul>
+<p class="p">With each of those parameters, a user tells CPLEX when
+to switch from branch and cut to solution polishing. CPLEX is able
+to switch after it has found a feasible solution <strong class="ph b">and</strong> put
+into place the MIP structures needed for solution polishing. </p>
+<p class="p">When these two conditions are met (feasible solution
+and structures in place), CPLEX stops branch and cut then switches
+to solution polishing whenever the <strong class="ph b">first</strong> of
+these starting conditions is met:</p>
+<ul class="ul"><li class="li"><p class="p">when CPLEX achieves a specified absolute
+MIP gap;</p>
+</li>
+<li class="li"><p class="p">when CPLEX achieves a specified relative
+MIP gap;</p>
+</li>
+<li class="li"><p class="p">when CPLEX finds a specified number
+of integer feasible solutions;</p>
+</li>
+<li class="li"><p class="p">when CPLEX processes a specified number
+of nodes;</p>
+</li>
+<li class="li"><p class="p">when CPLEX has spent a specified amount
+of time in optimization.</p>
+</li>
+</ul>
+<p class="p paragrouptitle">Other parameters governing solution polishing</p>
+<p class="p">Like the RINS heuristic, solution polishing explores
+neighborhoods of previously found solutions by solving subMIPs. Consequently,
+the subMIP node limit also controls aspects of the work that solution
+polishing performs. See the <a class="xref" href="../../../../../Parameters/topics/SubMIPNodeLim.html" title="Restricts the number of nodes explored when CPLEX is solving a subMIP.">limit on nodes explored when a subMIP is being solved</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">SubMIPNodeLim</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_SUBMIPNODELIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip limits submipnodelim</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">Solution polishing operates in a second phase, <strong class="ph b">after</strong> a
+first phase of the usual branch and cut, but it operates within the
+same branch-and-cut framework. Consequently, the same parameters that
+govern branch and cut also govern solution polishing.</p>
+<p class="p">For example, if multiple threads are available in your
+application, solution polishing can exploit them to work in parallel.
+See <a class="xref" href="../../../../../Parameters/topics/Threads.html" title="Sets the default number of parallel threads that will be invoked by any CPLEX parallel optimizer.">global thread count</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">Threads</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_THREADS</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">threads</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">Similarly, your choice of opportunistic or deterministic
+parallel mode for MIP optimization also governs solution polishing.
+For more detail about choosing opportunistic or deterministic parallel
+mode, see <a class="xref" href="../../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">ParallelMode</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">parallel</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p paragrouptitle">Callbacks and solution polishing</p>
+<p class="p">Callbacks are valid and work during solution polishing.
+However, nodes are processed much more slowly during solution polishing
+because of the more expensive work carried out at each node. Consequently,
+callbacks may be called less often during solution polishing.</p>
+<p class="p paragrouptitle" id="User_manual.uss_solveMIP.686490__paragroup1206965929831">Finding a first solution to improve by polishing</p>
+<p class="p">A typical use of solution polishing is first, to find
+a preliminary solution with branch and cut, then to improve it with
+solution polishing.</p>
+<p class="p">To create conditions where you can find a first solution
+and then improve it by means of polishing, follow these steps:</p>
+<ol class="ol"><li class="li"><p class="p">Set to 1 (one) the number of <a class="xref" href="../../../../../Parameters/topics/PolishAfterIntSol.html" title="Sets the number of integer solutions to find after which CPLEX starts to polish a feasible solution">MIP integer solutions to find before starting to polish a feasible solution</a>.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterIntSol</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTERINTSOL</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter solutions</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Set the <a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> to
+a positive value, such as 200 seconds, to specify the total time for
+CPLEX to spend in branch and cut plus polishing.</p>
+</li>
+<li class="li"><p class="p">Call the optimizer.</p>
+</li>
+</ol>
+<p class="p paragrouptitle" id="User_manual.uss_solveMIP.686490__paragroup1206965877954">Improving a MIP start with polishing</p>
+<p class="p">Similarly, polishing can improve a MIP start.</p>
+<p class="p">To create conditions to improve a MIP start with polishing,
+follow these steps:</p>
+<ol class="ol"><li class="li"><p class="p">Set to 0 (zero) the <a class="xref" href="../../../../../Parameters/topics/PolishAfterTime.html" title="Sets the amount of time in seconds to spend during a normal mixed integer optimization after which CPLEX starts to polish a feasible solution">time before starting to polish a feasible solution</a>.</p>
+</li>
+<li class="li"><p class="p">Set the <a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> to
+a positive number of seconds.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">TiLim</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_TILIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">timelimit</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Verify that the <a class="xref" href="../../../../../Parameters/topics/AdvInd.html" title="If set to 1 or 2, this parameter specifies that CPLEX should use advanced starting information when it initiates optimization.">advanced start switch</a> remains
+at its default value of 1 (one) so that polishing will proceed from
+the MIP start.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">AdvInd</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_ADVIND</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">advance</samp> 
+in the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Specify the MIP start, for example,
+by reading it from a file or adding it to the model, as explained
+in <a class="xref" href="../para/49_mipStarts.html#User_manual.uss_solveMIP.638620__section1220902034761">Establishing starting values in a MIP start</a>.</p>
+</li>
+<li class="li"><p class="p">Call the optimizer.</p>
+</li>
+</ol>
+<p class="p">With those settings, CPLEX switches to polishing as soon
+as all MIP structures needed for polishing are in place. It does <strong class="ph b">not</strong> completely
+solve the root node with those settings. In particular, it does <strong class="ph b">not</strong> generate
+cuts under these conditions. </p>
+<p class="p">If CPLEX is unable to process the MIP start into a solution,
+then solution polishing does not begin until after branch and cut
+finds a solution.</p>
+<p class="p">In contrast, if you want to <strong class="ph b">solve the
+root node</strong>, and if the MIP start has been processed
+into a solution, you must change that step 1 before applying the other
+steps:</p>
+<ol class="ol"><li class="li"><p class="p">Set the starting condition for polishing
+by means of this parameter, the number of <a class="xref" href="../../../../../Parameters/topics/PolishAfterNode.html" title="Sets the number of nodes to process after which CPLEX starts to polish a feasible solution">nodes to process before starting to polish a feasible solution</a>,
+set to 1 (one).</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterNode</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTERNODE</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter nodes</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Set the <a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> to
+a positive number of seconds.</p>
+</li>
+<li class="li"><p class="p">Verify that the <a class="xref" href="../../../../../Parameters/topics/AdvInd.html" title="If set to 1 or 2, this parameter specifies that CPLEX should use advanced starting information when it initiates optimization.">advanced start switch</a> remains
+at its default value of 1 (one).</p>
+</li>
+<li class="li"><p class="p">Specify the MIP start, for example,
+by reading it from a file or adding it to the model, as explained
+in <a class="xref" href="../para/49_mipStarts.html#User_manual.uss_solveMIP.638620__section1220902034761">Establishing starting values in a MIP start</a>.</p>
+</li>
+<li class="li"><p class="p">Call the optimizer.</p>
+</li>
+</ol>
+<p class="p"></p>
+<p class="p">If your model and application are such that processing
+the root node takes too much time, try the recommendations in these
+other topics:</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="../troubleshoot/57_unhelpful_cuts.html" title="Describes remedies for too much time spent to generate cuts.">Large number of unhelpful cuts</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../troubleshoot/55_time_node_zero.html" title="Describes remedies for excessive time spent to solve root relaxation.">Too much time at node 0</a></p>
+</li>
+</ul>
+<p class="p">In the rare event that solution polishing is unable to
+improve a MIP start that you provide, polishing may be more successful
+if you disable some combination of dual reductions, nonlinear reductions,
+or symmetry reductions during preprocessing. </p>
+<p class="p">For details about the parameters to disable those features,
+see the <em class="ph i">CPLEX Parameter Reference
+Manual</em>, especially these topics:</p>
+<ul class="ul"><li class="li"><p class="p">the <a class="xref" href="../../../../../Parameters/topics/PreInd.html" title="Decides whether CPLEX applies presolve during preprocessing.">presolve switch</a>: <samp class="ph codeph">PreInd</samp>, <samp class="ph codeph">CPX_PARAM_PREIND</samp> </p>
+</li>
+<li class="li"><p class="p">the <a class="xref" href="../../../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a>: <samp class="ph codeph">PreLinear</samp>, <samp class="ph codeph">CPX_PARAM_PRELINEAR</samp> </p>
+</li>
+<li class="li"><p class="p">the <a class="xref" href="../../../../../Parameters/topics/Symmetry.html" title="Decides whether symmetry breaking reductions will be automatically executed, during the preprocessing phase, in a MIP model.">symmetry breaking</a> parameter: <samp class="ph codeph">Symmetry</samp>, <samp class="ph codeph">CPX_PARAM_SYMMETRY</samp> </p>
+</li>
+</ul>
+<p class="p paragrouptitle">Controlling solution polishing with time as a criterion</p>
+<p class="p">As an example to illustrate how to manage time spent
+polishing a feasible solution, suppose the user wants to solve a problem
+by spending 100 seconds in branch and cut plus 200 seconds in polishing.</p>
+<ol class="ol"><li class="li"><p class="p">Set the <a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> to
+300.0 seconds. This parameter controls the total time spent in branch
+and cut plus solution polishing.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">TiLim</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_TILIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">timelimit</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Set to 100 seconds the amount of <a class="xref" href="../../../../../Parameters/topics/PolishAfterTime.html" title="Sets the amount of time in seconds to spend during a normal mixed integer optimization after which CPLEX starts to polish a feasible solution">time before starting to polish a feasible solution</a> as
+the starting condition for polishing. This parameter controls the
+amount of time CPLEX spends in branch and cut before CPLEX switches
+to solution polishing.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">PolishAfterTime</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_POLISHAFTERTIME</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip polishafter time</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Call the optimizer.</p>
+</li>
+</ol>
+<p class="p">Under those conditions, if CPLEX finds a feasible solution
+within the first 100 seconds of branch and cut, then it switches to
+solution polishing after exactly 100 seconds. However, if CPLEX does
+not find a feasible solution within the first 100 seconds, then it
+continues branch and cut until it finds a first feasible solution
+and switches to solution polishing afterward. </p>
+<p class="p">Those settings guarantee that CPLEX spends at most 300
+seconds on the model and that CPLEX applies polishing only if it finds
+a feasible solution within that time.</p>
+<p class="p paragrouptitle">Controlling solution polishing with a gap as a criterion</p>
+<p class="p">CPLEX also allows you to control when polishing starts
+and when polishing ends with a gap as a criterion. The gap may be
+relative or absolute. For example, suppose you want to apply branch
+and cut until achieving a 10% relative gap and then you want to switch
+to solution polishing until achieving a 2% relative gap.</p>
+<p class="p">To apply branch and cut until achieving a 10% gap and
+then to switch to solution polishing until achieving a 2% gap, follow
+these steps:</p>
+<ol class="ol"><li class="li"><p class="p">Set the <a class="xref" href="../../../../../Parameters/topics/EpGap.html" title="Sets a relative tolerance on the gap between the best integer objective and the objective of the best node remaining.">relative MIP gap tolerance</a> to
+2%. This parameter determines when overall optimization stops.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">EpGap</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_EPGAP</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">mip tolerances mipgap</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Set to 10% the <a class="xref" href="../../../../../Parameters/topics/PolishAfterEpGap.html" title="Sets a relative MIP gap after which CPLEX starts to polish a feasible solution">relative MIP gap before starting to polish a feasible solution</a>.
+This parameter sets the starting condition for polishing. It controls
+when CPLEX switches from branch and cut to solution polishing.</p>
+</li>
+<li class="li"><p class="p">Set the <a class="xref" href="../../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> to
+a positive value (for example, 200 seconds) to specify the total time
+spent in branch and cut plus polishing. For difficult problems, this
+step is a precaution to guarantee that CPLEX terminates even if the
+targeted gap cannot be achieved.</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">TiLim</samp> in
+Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">CPX_PARAM_TILIM</samp> in
+the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">timelimit 200.0</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Call the optimizer.</p>
+</li>
+</ol>
+<p class="p paragrouptitle">For more about solution polishing</p>
+<p class="p">For technical detail about how solution polishing works,
+see the article by Edward Rothberg, <em class="ph i">An
+evolutionary algorithm for polishing mixed integer programming solutions</em>,
+published in <strong class="ph b">INFORMS Journal on Computing</strong>,
+volume 19, issue 4, pages 534–541 (2007).</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/heuristics/42_heur_title_synopsis.html" title="Introduces heuristics in performance features.">Heuristics</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,119 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">Problem Description</font></b>
+015: <b><font color="#007D00">-------------------</font></b>
+016: 
+017: <b><font color="#007D00">The problem is to schedule a set of tasks on two alternative</font></b>
+018: <b><font color="#007D00">machines with different setup times.</font></b>
+019: 
+020: <b><font color="#007D00">The objective is to minimize the number of "long" setup times on</font></b>
+021: <b><font color="#007D00">machines. A setup time is considered to be long if it is larger than</font></b>
+022: <b><font color="#007D00">30.</font></b>
+023: 
+024: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+025: 
+026: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+027: 
+028: <b><font color="#0000FF">int</font></b> nbTypes = 10;
+029: <b><font color="#0000FF">range</font></b> Types = 0..nbTypes-1;
+030: 
+031: <b><font color="#0000FF">int</font></b> nbMachines = 2;
+032: <b><font color="#0000FF">range</font></b> Machines = 0..nbMachines-1;
+033: 
+034: <b><font color="#0000FF">int</font></b> setup[Machines][Types][Types] = [
+035:  <b><font color="#007D00">// Setups on machine 0</font></b>
+036:  [ [22, 24,  7, 10, 9,  41, 14, 30, 24,  6],
+037:    [63, 21, 42,  1, 24, 17, 35, 25,  0, 68],
+038:    [60, 70, 37, 70, 39, 84, 44, 60, 67, 36],
+039:    [77, 57, 65, 33, 81, 74, 72, 82, 57, 83],
+040:    [51, 31, 18, 32, 48, 45, 51, 21, 28, 45],
+041:    [46, 42, 29, 11, 11, 21, 59,  8,  4, 51],
+042:    [35, 59, 42, 45, 44, 76, 37, 65, 59, 41],
+043:    [38, 62, 45, 14, 33, 24, 52, 32,  7, 44],
+044:    [63, 57, 44,  7, 26, 17, 55, 25, 21, 68],
+045:    [24, 34,  1, 34,  3, 48,  8, 24, 31, 30]
+046:    ],
+047:  <b><font color="#007D00">// Setups on machine 1</font></b>
+048:  [ [27, 48, 44, 52, 21, 61, 33,  5, 37, 64],
+049:    [42, 44, 42, 40, 17, 40, 49, 41, 66, 29],
+050:    [36, 53, 31, 56, 50, 56,  7, 41, 49, 60],
+051:    [6,  43, 46, 38, 16, 44, 39, 11, 43, 12],
+052:    [25, 27, 45, 67, 37, 67, 52, 30, 62, 56],
+053:    [6,  43,  2,  0, 16, 35,  9, 11, 43, 12],
+054:    [29, 70, 25, 62, 43, 62, 26, 34, 42, 61],
+055:    [22, 43, 53, 47, 16, 56, 28, 10, 32, 59],
+056:    [56, 93, 73, 76, 66, 82, 48, 61, 51, 50],
+057:    [18, 55, 34, 26, 28, 32, 40, 12, 44, 25]
+058:    ]
+059:  ];
+060: 
+061: <b><font color="#0000FF">int</font></b> nbTasks = 50;
+062: <b><font color="#0000FF">range</font></b> Tasks = 0..nbTasks-1;
+063: 
+064: <b><font color="#0000FF">int</font></b> taskDur[Tasks] = [
+065:   19, 18, 16, 11, 16, 15, 19, 18, 17, 17, 
+066:   20, 16, 16, 14, 19, 11, 10, 16, 12, 20, 
+067:   14, 14, 20, 12, 18, 16, 10, 15, 11, 13,
+068:   15, 11, 11, 13, 19, 17, 11, 20, 19, 17,
+069:   15, 19, 13, 16, 20, 13, 13, 13, 13, 15
+070: ];
+071: 
+072: <b><font color="#0000FF">int</font></b> taskType[Tasks]= [
+073:   8,  1,  6,  3,  4,  8,  8,  4,  3,  5, 
+074:   9,  4,  1,  5,  8,  8,  4,  1,  9,  2,
+075:   6,  0,  8,  9,  1,  0,  1,  7,  5,  9,
+076:   3,  1,  9,  3,  0,  7,  0,  7,  1,  4, 
+077:   5,  7,  4,  0,  9,  1,  5,  4,  5,  1
+078: ];
+079: 
+080: <b><font color="#0000FF">range</font></b> NextTypes = 0..nbTypes; <b><font color="#007D00">// Includes nbTypes as escape value</font></b>
+081: 
+082: <b><font color="#0000FF">int</font></b> isLongSetup[m <b><font color="#0000FF">in</font></b> Machines][t1 <b><font color="#0000FF">in</font></b> Types][t2 <b><font color="#0000FF">in</font></b> NextTypes] = 
+083:   ((t2&lt;nbTypes) &amp;&amp; (30&lt;=setup[m][t1][t2]))?1:0;
+084: 
+085: <b><font color="#0000FF">tuple</font></b> triplet { <b><font color="#0000FF">int</font></b> t1; <b><font color="#0000FF">int</font></b> t2; <b><font color="#0000FF">int</font></b> v; }
+086: {triplet} tt[m <b><font color="#0000FF">in</font></b> Machines] = { &lt;t1,t2,setup[m][t1][t2]&gt; | t1,t2 <b><font color="#0000FF">in</font></b> Types };
+087: 
+088: <b><font color="#0000FF">execute</font></b> {
+089:                 cp.param.FailLimit = 100000;
+090:         cp.param.LogPeriod = 10000;     
+091: }
+092: 
+093: dvar interval a[i in Tasks] size taskDur[i];
+094: dvar interval alt[Tasks][Machines] optional;
+095: dvar sequence s[m in Machines] 
+096:   in    all(i in Tasks) alt[i][m] 
+097:   types all(i in Tasks) taskType[i];
+098: 
+099: dexpr int nbLongs = sum(m in Machines, i in Tasks)
+100:    isLongSetup[m][taskType[i]][typeOfNext(s[m],alt[i][m],nbTypes,nbTypes)];
+101: 
+102: minimize nbLongs;
+103: subject to {
+104:   forall (i <b><font color="EA7D00">in</font></b> Tasks)
+105:     alternative(a[i], all(m <b><font color="EA7D00">in</font></b> Machines) alt[i][m]);
+106:   forall (m <b><font color="EA7D00">in</font></b> Machines)
+107:     noOverlap(s[m],tt[m],1);
+108: }
+109: 
+110: execute {
+111:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> m <b><font color="EA7D00">in</font></b> Machines)
+112:     writeln(s[m]);
+113:   writeln(<b><font color="#8A2BE2">"Number of long transition times: "</font></b>, nbLongs);
+114: };
+</tt></pre>

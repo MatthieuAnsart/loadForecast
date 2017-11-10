@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the team building problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the team building problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/dinner.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerdinner.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/dinner.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerdinner.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the team building problem has been described
+using natural language, you then use Concert Technology classes to
+model the constraint programming problem. </p>
+<p class="p">After you have written a description of your problem,
+you can use IBM® ILOG® Concert Technology
+classes to model it. </p>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152552"><h2 class="title sectiontitle">Step 2: Open the example file</h2><p class="p">Open the example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/teambuilding_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You enter the missing code in each step in this
+lesson. At the end, you will have completed the program code and you
+can compile and run the program.</p>
+<p class="p">In
+this lesson, you include the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>.
+To catch exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code for declaring an environment and a model, for calculating
+the coaching pairs and for printing out the solution found by the
+CP Optimizer engine is provided for you.</p>
+<p class="p">First, you
+represent the data of the program. The number of people, <samp class="ph codeph">nbPersons</samp>, is set to 60 in this example, but can
+be easily modified. The number of teams, <samp class="ph codeph">nbTeams</samp>,
+is 10 in this example. The size of a team, <samp class="ph codeph">teamSize</samp>,
+is 6 in this example. </p>
+<pre class="pre codeblock"><code>const IloInt nbPersons = 60;
+const IloInt nbTeams = 10;
+const IloInt teamSize = 6;
+const IloInt nbServices = 6;
+</code></pre>
+<p class="p">As the teams and the slots in each team are
+interchangeable, there is a lot of symmetry in this problem. To remove
+the symmetry, you will use a two-step process to solve this problem
+along with adding extra constraints. The first step is to determine
+a set of integer tuples, such that each tuple represents a possible
+set of new hires and existing employees to be assigned to a single
+team with six slots. The second step is to select a feasible set of
+ten of these tuples, one for each team, as the solution. </p>
+<p class="p">The
+first step requires solving a subproblem using CP Optimizer. Since
+this subproblem is a constraint programming problem itself, you follow
+the three step process to solve the subproblem.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152539"><h2 class="title sectiontitle">Step 3: Describe the subproblem</h2><p class="p">In this
+subproblem, you will search for all possible combinations for a single
+team. There are 60 employees from six service units who can to be
+assigned to a team of six people. The team must have three existing
+employees and three new hires assigned to it. At most four people
+from the same service unit can be on the team. If one person from
+a coach/new hire pair is on the team, the other must be as well.</p>
+<p class="p">The sixty people are labeled with unique identifiers in the
+range 0 to 59. The existing employees are those with odd numbered
+identifiers, and the new hires are those with even numbered identifiers.
+The service unit memberships are the same as outlined in the description.</p>
+<p class="p">Employees from Services A and B cannot be on a team together,
+and employees from Services E and F cannot be on a team together.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.135596"><h2 class="title sectiontitle">Discussion</h2><p class="p">What is the known information
+in this subproblem? </p>
+<ul class="ul"><li class="li"><p class="p">There are thirty existing employees and thirty
+new hires. Each employee belongs to one of six service units, and
+there are twenty coach/new hire pairs.</p>
+ </li>
+<li class="li"><p class="p">There is one team with slots for six people.</p>
+</li>
+</ul>
+<p class="p">What are the decision variables or unknowns in this
+problem? </p>
+<ul class="ul"><li class="li"><p class="p">The unknown is all of the possible combinations
+of employees that can be assigned to one team. In other words, there
+are six decision variables, one for each slot. The domain of each
+of these variables is the set of employees, or [0..59].</p>
+ </li>
+</ul>
+<p class="p">What are the constraints on these variables?</p>
+<ul class="ul"><li class="li"><p class="p">The team must have three existing employees
+and three new hires.</p>
+</li>
+<li class="li"><p class="p">The team cannot have just one person from
+a coach/new hire pair.</p>
+</li>
+<li class="li"><p class="p">The team cannot have more than four people
+from a given service unit.</p>
+</li>
+<li class="li"><p class="p">The team cannot have people from both Services
+A and B nor from both Services E and F. </p>
+ </li>
+</ul>
+<p class="p">This subproblem is modeled and solved in the function <samp class="ph codeph">MakeTeamTuples</samp>, which returns an instance of <samp class="ph codeph">IloIntTupleSet</samp>. The tupleset is the set of all feasible
+solutions to the subproblem. In this function, the code for creating
+the environment and model for the subproblem and for filling the data
+arrays <samp class="ph codeph">newEmployee</samp> and <samp class="ph codeph">service</samp>,
+both indexed on the person identifiers, is provided for you. Each
+element of the array <samp class="ph codeph">service</samp> states to which
+service unit the associated person belongs, where the value 0 indicates
+the person is an employee of Service A, the value 1 indicates the
+person is in Service B, etc. The array <samp class="ph codeph">newEmployee</samp> is
+a Boolean array; an element of <samp class="ph codeph">newEmployee</samp> has
+the value 1 if and only if that person is a new hire.</p>
+<p class="p">Each
+tuple in the set to be returned has <samp class="ph codeph">teamSize</samp>,
+or 6, elements. You create the <samp class="ph codeph">IloIntTupleSet</samp> using
+the global environment that is the input argument to the function <samp class="ph codeph">MakeTeamTuples</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152528"><h2 class="title sectiontitle">Step 4: Create the set of tuples</h2><p class="p">Add the
+following code after the comment <samp class="ph codeph">//Add the tupleset</samp>  </p>
+<pre class="pre codeblock"><code>  IloIntTupleSet ts(globalEnv, teamSize);
+</code></pre>
+<p class="p">Each solution to the subproblem is an integer
+tuple of size <samp class="ph codeph">teamSize</samp>. To represent the
+subproblem unknowns, you declare an array of decision variables, <samp class="ph codeph">teamMembers</samp>, of length <samp class="ph codeph">teamSize</samp>.
+The possible values for these variables are the person identifiers,
+or <samp class="ph codeph">[0..nbPersons-1]</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152517"><h2 class="title sectiontitle">Step 5: Create the team members variable array</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the team members variable array</samp>  </p>
+<pre class="pre codeblock"><code>  IloIntVarArray teamMembers(env, teamSize, 0, nbPersons-1);
+</code></pre>
+<p class="p">Next, you begin to add the subproblem constraints.
+To model the constraint that there must be an equal number of new
+and existing employees on a team, you use an expression <samp class="ph codeph">nbNewEmployees</samp> to
+count the number of new employees assigned to the array <samp class="ph codeph">teamMembers</samp>.
+You use element expressions to determine if the person assigned to
+each element of <samp class="ph codeph">teamMembers</samp> is a new employee
+and use the self-assigned addition operator on the expression to find
+the total number of new employees assigned to <samp class="ph codeph">teamMembers</samp>.
+You constrain this expression to be equal to half the number of people
+on the team.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152506"><h2 class="title sectiontitle">Step 6: Add the constraint on number of new employees</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the constraint on the
+number of new employees</samp>  </p>
+<pre class="pre codeblock"><code>  IloIntExpr nbNewEmployees(env); 
+  for (i = 0; i &lt; teamSize; i++)
+    nbNewEmployees += newEmployee[teamMembers[i]]; 
+  model.add(nbNewEmployees == teamSize / 2);
+</code></pre>
+<p class="p">To model the constraint that pairs must be
+together, you constrain that each member of the pair be assigned to <samp class="ph codeph">teamMembers</samp> an equal number of times (in a later
+step you will add a constraint that ensures each person is assigned
+to <samp class="ph codeph">teamMembers</samp> at most once in any given
+solution). You count how many times that person has been assigned
+to elements of <samp class="ph codeph">teamMembers</samp> by using the IBM ILOG Concert Technology function <samp class="ph codeph">IloCount</samp>. To make sure that either both or neither
+person in a pair is assigned to variables in <samp class="ph codeph">teamMembers</samp>,
+you constrain that the number of times each person in the pair is
+assigned to the array <samp class="ph codeph">teamMembers</samp> is equal.
+Here you use the array <samp class="ph codeph">coaching</samp> which is
+initialized in the main program such that the <samp class="ph codeph">i</samp>-th
+element has the value of -1 if the <samp class="ph codeph">i</samp>-th
+person does not have a coach or the identifier of the coach if the <samp class="ph codeph">i</samp>-th person has a coach.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152495"><h2 class="title sectiontitle">Step 7: Add the constraint on coaching pairs</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the constraint
+on coaching pairs</samp> </p>
+<pre class="pre codeblock"><code>  for (i = 0; i &lt; 60; i += 2) {
+    if (coaching[i] &gt;= 0)
+      model.add(IloCount(teamMembers, i) == IloCount(teamMembers, coaching[i])); 
+  }
+</code></pre>
+<p class="p">To add the constraints on incompatible service
+units and the maximum number of people from a service unit that may
+be on the same team, you need to be able to represent the service
+unit of each employee. To do this, you create an array of auxiliary
+constrained integer variables <samp class="ph codeph">serviceVar</samp>,
+which is indexed similarly to <samp class="ph codeph">teamMembers</samp>.
+(For example, the third element of <samp class="ph codeph">serviceVar</samp> represents
+to which service unit the person assigned to the third element of <samp class="ph codeph">teamMembers</samp> belongs. These variables are linked
+using an element expression and the <samp class="ph codeph">service</samp> data
+array.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152484"><h2 class="title sectiontitle">Step 8: Add the service variables array</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the service unit variables</samp> </p>
+<pre class="pre codeblock"><code>  IloIntVarArray serviceVar(env, teamSize, 0, nbServices - 1); 
+  for (i = 0; i &lt; teamSize; i++)
+    model.add(serviceVar[i] == service[teamMembers[i]]); 
+</code></pre>
+<p class="p">You add the constraints that at most four
+people from a single service unit can be assigned to the same team
+using the IBM ILOG Concert Technology
+function <samp class="ph codeph">IloCount</samp> and the array <samp class="ph codeph">serviceVar</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152473"><h2 class="title sectiontitle">Step 9: Add the constraint on cardinality of service unit
+on team</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the constraint on cardinality of service unit on team</samp> </p>
+<pre class="pre codeblock"><code>  for (i = 0; i &lt; nbServices; i++)
+    model.add(IloCount(serviceVar, i) &lt;= 4); 
+</code></pre>
+<p class="p">Employees of Services A and B may not be on
+the same team; likewise, employees of Services E and F may not be
+on the same team. To model this, you again use the IBM ILOG Concert Technology function <samp class="ph codeph">IloCount</samp>,
+but instead of constraining the expression returned, you use it to
+form the subconstraints of logical constraints. These logical constraints
+state that the count of employees from either Service A or Service
+B who are assigned to the team must be zero, and likewise for Services
+E and F.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152462"><h2 class="title sectiontitle">Step 10: Add the constraint on disjoint service units</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the constraint on disjoint service units</samp> </p>
+<pre class="pre codeblock"><code>  model.add(IloCount(serviceVar, 0) == 0 || IloCount(serviceVar, 1) == 0); 
+  model.add(IloCount(serviceVar, 4) == 0 || IloCount(serviceVar, 5) == 0); 
+</code></pre>
+<p class="p">As the elements, or slots, of the array <samp class="ph codeph">teamMembers</samp> are not ordered, the search will likely
+encounter symmetry. In order to reduce symmetry, you introduce order
+among the variables in the array as discussed in <a class="xref" href="sports.html" title="In this lesson, you will learn how to use CP Optimizer to find a solution to a sports scheduling problem.">Using specialized constraints and tuples: scheduling teams</a>. By introducing this order, you
+also ensure that no employee will be assigned to <samp class="ph codeph">teamMembers</samp> more
+than once in any solution.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152450"><h2 class="title sectiontitle">Step 11: Add the symmetry reducing constraint</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the symmetry reducing constraint</samp> </p>
+<pre class="pre codeblock"><code>  for (i = 0; i &lt; teamSize-1; i++)
+    model.add(teamMembers[i] &lt; teamMembers[i+1]);
+</code></pre>
+<p class="p">You now search for all possible solutions
+to the submodel. Each solution is a valid assignment for one team.
+As each solution is found, the assigned values are stored in an integer
+tuple which is then added to the set of tuples that will be returned
+to the main program. You create an integer tuple, or array, to temporarily
+store each newly found valid team. You use an instance of <samp class="ph codeph">IloCP</samp> to find the solutions to the problem in the
+model. Since you will need to find all solutions for this subproblem
+instead of one solution, you will not use <samp class="ph codeph">IloCP::solve</samp>,
+which terminates after a single solution has been found, in the case
+that there is a solution.</p>
+<p class="p">When solving a problem that
+does not have an objective, the member functions <samp class="ph codeph">IloCP::startNewSearch</samp> and <samp class="ph codeph">IloCP::next</samp> can be used in a while loop to find
+all feasible solutions to a problem. The function <samp class="ph codeph">IloCP::startNewSearch</samp> initializes
+the optimizer, the function <samp class="ph codeph">IloCP::next</samp> searches
+for a new solution in the search space. The function <samp class="ph codeph">IloCP::end</samp> cleans
+up the internal memory and data structures used by the optimizer. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152426"><h2 class="title sectiontitle">Step 12: Begin the search for a solution to the subproblem</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Start
+the search</samp> </p>
+<pre class="pre codeblock"><code>  IloIntArray tuple(globalEnv, teamSize);
+  IloCP cp(model);
+  cp.setParameter(IloCP::LogVerbosity, IloCP::Quiet);
+  cp.setParameter(IloCP::SearchType, IloCP::DepthFirst);
+  cp.startNewSearch();
+  while (cp.next()) {
+</code></pre>
+<p class="p">As each solution is found, you copy the values
+assigned to the decision variables in the array <samp class="ph codeph">teamMembers</samp> and
+store these values in a tuple. You add this new tuple to the tupleset
+and search for another solution. This loop is repeated until all solutions
+have been found.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152415"><h2 class="title sectiontitle">Step 13: Search for all solutions to the subproblem</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Search
+for all solutions</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; teamSize; i++)
+      tuple[i] = cp.getValue(teamMembers[i]);
+    ts.add(tuple);
+  }
+</code></pre>
+<p class="p">The search terminates after all possible team
+tuples have been found. In order to clean up and reclaim the memory,
+you end the search and end the environment for the subproblem. You
+return the created tupleset of team configurations to the main program.
+Since the tupleset was created on the environment of the main program
+and not for the subproblem, it will not be destroyed in the clean
+up of the subproblem.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152404"><h2 class="title sectiontitle">Step 14: Clean up the subproblem</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//End the env for the subproblem</samp> </p>
+<pre class="pre codeblock"><code>  cp.end();
+  env.end();
+  return ts;
+</code></pre>
+<p class="p">Now that you have completed searching for
+all possible assignments for one team, you need to select ten of these
+tuples such that the employees are all assigned to teams and such
+that the additional preference constraints are satisfied.</p>
+<p class="p">You
+represent the people assigned to the teams with a matrix of constrained
+integer variables <samp class="ph codeph">group</samp>, which is indexed
+on the team and slot. The array of constrained variables <samp class="ph codeph">group[i]</samp> is the group of people assigned to the <samp class="ph codeph">i</samp>-th team. Each element of <samp class="ph codeph">group</samp> can
+be assigned a value in the interval [<samp class="ph codeph">0..nbPersons-1</samp>].</p>
+<p class="p">For each <samp class="ph codeph">group[i]</samp>, or set of people
+on a team, the only possible values are those in the tupleset retuned
+by the function <samp class="ph codeph">MakeTeamTuple</samp>. To model
+this, you use the IBM ILOG Concert Technology
+function <samp class="ph codeph">IloAllowedAssignments</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.138005"><h2 class="title sectiontitle">Step 15: Add the group variables and allowed assignments</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the group variables
+and allowed assignments</samp> </p>
+<pre class="pre codeblock"><code>    IloArray&lt;IloIntVarArray&gt; groups(env, nbTeams); 
+    for (i = 0; i &lt; nbTeams; i++) {
+      groups[i] = IloIntVarArray(env, teamSize, 0, nbPersons-1);
+      model.add(IloAllowedAssignments(env,groups[i], tupleSet));
+    }
+</code></pre>
+<p class="p">Since each person can be assigned to only
+one team, you must ensure that in any solution every variable in the
+array <samp class="ph codeph">group</samp> takes a unique value. First
+you flatten the matrix <samp class="ph codeph">groups</samp> into an array
+of decision variables. These are not new decision variables, but merely
+an alternate representation of the variables created previously. Then
+by using this new array as the argument to the constraint <samp class="ph codeph">IloAllDiff</samp>, you can assure that no person will be
+assigned to two team slots and also that every person will be assigned
+to a slot.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152382"><h2 class="title sectiontitle">Step 16: Add the all diff constraint</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the all
+diff constraint</samp>  </p>
+<pre class="pre codeblock"><code>    IloIntVarArray allVars(env, nbPersons);
+    IloInt s = 0, w, p;
+    for (w = 0; w &lt; nbTeams; ++w) {
+      for (p = 0; p &lt; teamSize; ++p) {
+        allVars[s] = groups[w][p];
+        ++s;
+      }
+    }
+    model.add(IloAllDiff(env, allVars));
+</code></pre>
+<p class="p">To add the four preference constraints, you
+need to represent the team to which each employee is assigned. You
+declare an array of decision variables <samp class="ph codeph">team</samp> of
+length <samp class="ph codeph">nbPersons</samp>. The domain of each of
+the variables in <samp class="ph codeph">team</samp> is <samp class="ph codeph">[0..nbTeams-1]</samp> and
+the value assigned to <samp class="ph codeph">team[i]</samp> represents
+the team to which person <samp class="ph codeph">i</samp> is assigned.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152371"><h2 class="title sectiontitle">Step 17: Add the team variables</h2><p class="p">Add the
+following code after the comment <samp class="ph codeph">//Add the team variables</samp>  </p>
+<pre class="pre codeblock"><code>    IloIntVarArray team(env, nbPersons, 0, nbTeams);
+    for (w = 0; w &lt; nbTeams; ++w) {
+      for (p = 0; p &lt; teamSize; ++p) {
+        model.add(team[groups[w][p]]==w);
+      }
+    }
+</code></pre>
+<p class="p">Using these variables, you add logical constraints
+to model the four preference constraints.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152360"><h2 class="title sectiontitle">Step 18: Add the preference constraints</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the preference constraints</samp>  </p>
+<pre class="pre codeblock"><code>    model.add(team[5]== team[41] || team[5]==team[51]);
+    model.add(team[15]== team[40] || team[15]==team[51]);
+    model.add(team[25]== team[40] || team[25]==team[50]);
+    model.add(team[20]== team[24] || team[22]==team[50]);
+</code></pre>
+<p class="p">Since the teams are all equivalent, each unique
+solution could be represented in 10! “different” solutions to this
+model. To reduce the symmetry in the search, you add constraints to
+introduce order to the groups. The person assigned to the initial
+slot in each element array of <samp class="ph codeph">group</samp> should
+have a larger identifier than the person assigned to the initial slot
+of the previous element array of <samp class="ph codeph">group</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.114936__migration.uss_gscpoptimizerdinner.152344"><h2 class="title sectiontitle">Step 19: Add the symmetry constraint</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the symmetry
+constraint</samp>  </p>
+<pre class="pre codeblock"><code>    for (i=0; i&lt;nbTeams-1; i++)
+      model.add(groups[i][0] &lt; groups[i+1][0]); 
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/dinner.html" title="In this lesson, you will learn how to find a solution to a team building problem using CP Optimizer and the three-stage method.">Using search parameters: team building</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,80 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+02: <b><font color="#007D00">// File: mulprod.cpp</font></b>
+03: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+04: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+05: <b><font color="#007D00">// </font></b>
+06: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+07: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+08: <b><font color="#007D00">//</font></b>
+09: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+10: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+11: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+12: <b><font color="#007D00">/////////////////////////////////////////////////////////////////////////////// </font></b>
+13: 
+14: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+15: 
+16: #include <b><font color="#8A2BE2">&lt;sstream&gt;</font></b>
+17: 
+18: #ifdef ILO_WINDOWS
+19: #define DIRSEP <b><font color="#8A2BE2">"</font></b>\\<b><font color="#8A2BE2">"</font></b>
+20: #else
+21: #define DIRSEP <b><font color="#8A2BE2">"/"</font></b>
+22: #endif
+23: #ifndef DATADIR
+24: #define DATADIR <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b>  DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">"opl"</font></b> DIRSEP
+25: #endif
+26: 
+27: ILOSTLBEGIN
+28: 
+29: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+30:     IloEnv env;
+31: 
+32:     <b><font color="#0000FF">int</font></b> status = 127;
+33:     <b><font color="EA7D00">try</font></b> {
+34:         IloOplErrorHandler handler(env,cout);
+35:         IloOplModelSource modelSource(env, DATADIR <b><font color="#8A2BE2">"distMIP"</font></b> DIRSEP <b><font color="#8A2BE2">"lifegameip.mod"</font></b>);
+36:         IloOplSettings settings(env,handler);
+37:         IloOplModelDefinition def(modelSource,settings);
+38:         IloCplex cplex(env);
+39:                 cplex.readVMConfig(DATADIR <b><font color="#8A2BE2">"distMIP"</font></b> DIRSEP <b><font color="#8A2BE2">"process.vmc"</font></b>);
+40:         IloOplModel opl(def,cplex);
+41:         opl.generate();
+42:                 cplex.solve();
+43:         cout &lt;&lt; endl
+44:                 &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; opl.getCplex().getObjValue()
+45:         &lt;&lt; endl;
+46:         opl.postProcess();
+47:         opl.printSolution(cout);
+48:         <b><font color="EA7D00">if</font></b> (cplex.hasVMConfig())
+49:                         cout &lt;&lt; <b><font color="#8A2BE2">"cplex has a VM file"</font></b> &lt;&lt; endl;
+50:                 <b><font color="EA7D00">else</font></b>
+51:                         <b><font color="EA7D00">throw</font></b> IloWrongUsage(<b><font color="#8A2BE2">"cplex does not have a VM file"</font></b>);
+52:                 cplex.delVMConfig();
+53:                 <b><font color="EA7D00">if</font></b> (cplex.hasVMConfig())
+54:                         <b><font color="EA7D00">throw</font></b> IloWrongUsage(<b><font color="#8A2BE2">"cplex has a VM file"</font></b>);
+55:                 <b><font color="EA7D00">else</font></b>
+56:                         cout &lt;&lt;  <b><font color="#8A2BE2">"cplex does not have a VM file anymore"</font></b> &lt;&lt; endl;
+57:                 status = 0;
+58:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+59:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+60:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+61:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+62:         e.print(cout);
+63:         status = 2;
+64:     } <b><font color="EA7D00">catch</font></b> (...) {
+65:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+66:         status = 3;
+67:     }
+68: 
+69:     env.end();
+70: 
+71:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+72:     getchar();
+73: 
+74:     <b><font color="EA7D00">return</font></b> status;
+75: }
+</tt></pre>

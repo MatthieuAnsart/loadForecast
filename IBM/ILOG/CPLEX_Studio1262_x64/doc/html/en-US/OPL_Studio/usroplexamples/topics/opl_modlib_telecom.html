@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Telecommunications" />
+<meta name="abstract" content="Provides an example of a model that is used to construct a network route." />
+<meta name="Description" content="Provides an example of a model that is used to construct a network route." />
+<meta name="DC.subject" content="models, telecommunications, telecommunications problem, sample model" />
+<meta name="keywords" content="models, telecommunications, telecommunications problem, sample model" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplexamples/topics/opl_modlib.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1231235917044" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplexamples/topics/opl_modlib.html" />
+<title>Telecommunications</title>
+</head>
+<body role="main" id="descriptiveTopic1231235917044">
+<h1 class="title topictitle1">Telecommunications</h1>
+<div class="body"><p class="shortdesc">Provides an example of a model that is used to construct
+a network route.</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="opl_modlib_telecom.html#descriptiveTopic1231235917044__usroplsamples.uss_opl_modlib.1030872">Call route</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="opl_modlib_telecom.html#descriptiveTopic1231235917044__section1236608719003">Call Traffic Optimization</a></p>
+</li>
+</ul>
+<div class="section" id="descriptiveTopic1231235917044__usroplsamples.uss_opl_modlib.1030872"><h2 class="title sectiontitle">Call route</h2><p class="p">This model is used to construct
+a route from a set of end-to-end paths so that the collection of paths
+satisfies the blocking criterion, and at a minimum cost. This extends
+the two-arc path optimization algorithm in chapter 4 of <em class="ph i">Dynamic
+Routing in Telecommunications Networks</em> by Gerald R. Ash (McGraw
+Hill).</p>
+<p class="p">This is a dynamic programming model with two specialized
+constraints:</p>
+<ul class="ul"><li class="li"><p class="p">All paths are different</p>
+ </li>
+<li class="li"><p class="p">Blocking criterion</p>
+ </li>
+</ul>
+<p class="p">The <samp class="ph codeph">alldifferent</samp>  constraint is implemented
+explicitly to allow duplicates of a dummy value at the end of the
+sequence. (Alternatively, a <samp class="ph codeph">distribute</samp>  constraint
+can be used, but the propagation will be worse.) Pseudo random cost
+and blocking data are generated within the model.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two column table that describes the telecommunications model route.mod and provides a link to the code of the model." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> Industry </td>
+<td class="entry" valign="top"> Telecommunications </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Feature </td>
+<td class="entry" valign="top"> OPL Project </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Technique </td>
+<td class="entry" valign="top"> Constraint Programming </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Complexity </td>
+<td class="entry" valign="top"> Intermediate </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Keywords </td>
+<td class="entry" valign="top"> Call routes </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Project Location </td>
+<td class="entry" valign="top"> <span class="ph filepath">examples/opl/models/CallRoute</span> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Model Name </td>
+<td class="entry" valign="top">  <a class="xref" href="../../../examples/html/opl/models/CallRoute/route.mod.html">route.mod</a> </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="descriptiveTopic1231235917044__section1236608719003"><h2 class="title sectiontitle">Call Traffic Optimization</h2><p class="p">We
+consider a telecommunications network with a given volume of origin-to-destination
+traffic. We want to balance the call volume throughout the network.
+Additionally, we want to limit the number of "hops", the number of
+links a packet must travel to reach its destination. Because the more
+hops a call takes, the worse is its quality.  </p>
+<p class="p">We use a multicommodity
+network flow model. Each commodity represents the traffic between
+an origin and destination. We use a "surplus" variable to represent
+the amount that the flow may be increased without violating the arc
+capacities. A single surplus value is used for all commodities. We
+balance the traffic by maximizing the surplus capacity over each origin-destination
+pair.  </p>
+<p class="p">The file <span class="ph filepath">calls.mod</span>executes two
+separate models. First, it runs a simple multicommodity flow model.
+In this model, there is no limit to the number of hops each packet
+may take. Once this model is finished, the script loads a second multicommodity
+flow model where the network has been expanded by the number of hops.
+The number of possible hops is increased until the surplus capacity
+is the same as the model with unlimited hops. Finally, the surplus
+capacity is removed from the simple model and it is reoptimized so
+that the solution may be displayed.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two column table that describes the telecommunications model calls.mod and provides a link to the code of the model." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> Industry </td>
+<td class="entry" valign="top"> Telecommunications </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Feature </td>
+<td class="entry" valign="top"> OPL Project, OPL Flow Control Script </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Technique </td>
+<td class="entry" valign="top"> Decomposition </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Complexity </td>
+<td class="entry" valign="top"> Advanced </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Keywords </td>
+<td class="entry" valign="top"> Call traffic </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Project Location </td>
+<td class="entry" valign="top"> <span class="ph filepath">examples/opl/models/CallTrafficOptimization</span> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> Model Name </td>
+<td class="entry" valign="top">  <a class="xref" href="../../../examples/html/opl/models/CallTrafficOptimization/calls.mod.html">calls.mod</a> </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplexamples/topics/opl_modlib.html" title="The OPL model library is a collection of OPL models that describe known problems in the academic and industrial fields.">OPL model library</a></div>
+</div>
+</div></body>
+</html>

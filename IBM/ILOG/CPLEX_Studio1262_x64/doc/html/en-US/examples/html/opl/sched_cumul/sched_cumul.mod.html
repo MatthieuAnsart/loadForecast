@@ -1,0 +1,88 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+13: 
+14: <b><font color="#007D00">Problem Description</font></b>
+15: <b><font color="#007D00">-------------------</font></b>
+16: 
+17: <b><font color="#007D00">This is a problem of building five houses in different locations. The</font></b>
+18: <b><font color="#007D00">masonry, roofing, painting, etc. must be scheduled. Some tasks must</font></b>
+19: <b><font color="#007D00">necessarily take place before others and these requirements are</font></b>
+20: <b><font color="#007D00">expressed through precedence constraints.</font></b>
+21: 
+22: <b><font color="#007D00">There are three workers, and each task requires a worker.  There is</font></b>
+23: <b><font color="#007D00">also a cash budget which starts with a given balance.  Each task costs</font></b>
+24: <b><font color="#007D00">a given amount of cash per day which must be available at the start of</font></b>
+25: <b><font color="#007D00">the task.  A cash payment is received periodically.  The objective is</font></b>
+26: <b><font color="#007D00">to minimize the overall completion date.</font></b>
+27: 
+28: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+29: 
+30: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+31: 
+32: <b><font color="#0000FF">int</font></b> NbWorkers = ...;
+33: <b><font color="#0000FF">int</font></b> NbHouses  = ...; 
+34: <b><font color="#0000FF">range</font></b> Houses  = 1..NbHouses;
+35: 
+36: {<b><font color="#0000FF">string</font></b>} TaskNames   = ...;
+37: 
+38: <b><font color="#0000FF">int</font></b> Duration [t <b><font color="#0000FF">in</font></b> TaskNames] = ...;
+39: 
+40: <b><font color="#0000FF">tuple</font></b> Precedence {
+41:    <b><font color="#0000FF">string</font></b> pre;
+42:    <b><font color="#0000FF">string</font></b> post;
+43: };
+44: 
+45: {Precedence} Precedences = ...;
+46: 
+47: <b><font color="#0000FF">int</font></b> ReleaseDate[Houses] = ...; 
+48: 
+49: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> itvs[h <b><font color="#0000FF">in</font></b> Houses][t <b><font color="#0000FF">in</font></b> TaskNames] <b><font color="#0000FF">in</font></b> ReleaseDate[h]..(maxint <b><font color="#0000FF">div</font></b> 2)-1 <b><font color="#0000FF">size</font></b> Duration[t];
+50: 
+51: <b><font color="#0000FF">cumulFunction</font></b> workersUsage = 
+52:    <b><font color="#7D007D">sum</font></b>(h <b><font color="#0000FF">in</font></b> Houses, t <b><font color="#0000FF">in</font></b> TaskNames) <b><font color="#7D007D">pulse</font></b>(itvs[h][t],1);
+53: 
+54: <b><font color="#0000FF">cumulFunction</font></b> cash = 
+55:   <b><font color="#7D007D">sum </font></b>(p <b><font color="#0000FF">in</font></b> 0..5) <b><font color="#7D007D">step</font></b>(60*p, 30000)
+56:   - <b><font color="#7D007D">sum</font></b>(h <b><font color="#0000FF">in</font></b> Houses, t <b><font color="#0000FF">in</font></b> TaskNames) <b><font color="#7D007D">stepAtStart</font></b>(itvs[h][t], 200*Duration[t]);
+57: 
+58: <b><font color="#0000FF">execute</font></b> {
+59:         cp.param.FailLimit = 10000;
+60: }
+61: 
+62: minimize max(h in Houses) endOf(itvs[h]["moving"]);
+63: 
+64: subject to {
+65:   forall(h <b><font color="EA7D00">in</font></b> Houses)
+66:     forall(p <b><font color="EA7D00">in</font></b> Precedences)
+67:       endBeforeStart(itvs[h][p.pre], itvs[h][p.post]);
+68: 
+69:   workersUsage &lt;= NbWorkers;
+70: 
+71:   cash &gt;= 0;
+72: }
+73: 
+74: execute display_workersUsage
+75: {
+76:  writeln(<b><font color="#8A2BE2">"number of Segments of workersUsage = "</font></b>,workersUsage.getNumberOfSegments());
+77:  <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> i=0;i&lt;workersUsage.getNumberOfSegments();i++)
+78:  {
+79:    write(workersUsage.getSegmentStart(i),<b><font color="#8A2BE2">" -&gt; "</font></b>,workersUsage.getSegmentEnd(i));
+80:    writeln(<b><font color="#8A2BE2">" : "</font></b>,workersUsage.getSegmentValue(i)); 
+81:  }   
+82: }  
+83: 
+</tt></pre>

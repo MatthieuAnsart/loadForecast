@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Changing bounds on cost" />
+<meta name="abstract" content="Explains the effect of changing bounds on cost in the model." />
+<meta name="Description" content="Explains the effect of changing bounds on cost in the model." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_refineConflict.1044428" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" />
+<title>Changing bounds on cost</title>
+</head>
+<body role="main" id="User_manual.uss_refineConflict.1044428">
+<h1 class="title topictitle1">Changing bounds on cost</h1>
+<div class="body"><p class="shortdesc">Explains the effect of changing bounds on cost in the
+model.</p>
+<p class="p">No better cost is possible in this formulation. Still,
+you may wonder, "Why not?" To try yet another scenario, instead of
+limiting the number of employees, try focusing on the cost by changing
+the upper bound of the cost to 330, like this:  </p>
+<pre class="pre codeblock"><code>change bound cost upper 330
+optimize
+conflict
+display conflict all</code></pre>
+<p class="p">This series of commands again renders the model infeasible
+and shows a minimal conflict:  </p>
+<pre class="pre codeblock"><code>Subject To
+ c1:         - cost + 80 x1 + 60 x2 + 55 x3 + 30 x4 + 25 x5 + 80 x6 + 60 x7
+             + 35 x8 + 80 x9 + 55 x10  = 0
+ c2:         x1 + x2 + 0.8 x3 + 0.6 x4 + 0.4 x5 &gt;= 2.1
+ c3:         x6 + 0.9 x7 + 0.5 x8 &gt;= 1.2
+ c5:         0.2 x2 + x3 + 0.5 x4 + 0.5 x5 + 0.2 x7 + 0.5 x8 + x10 - service
+              = 0
+ c9:         x4 + x5 + x8 &lt;= 1
+Bounds
+ -Inf &lt;= cost &lt;= 330
+      service &gt;= 2.9</code></pre>
+<p class="p">The upper bound on <samp class="ph codeph">cost</samp>  is,
+of course, expected to be in the conflict, so relaxing it would merely
+put the scenario back the way it was. The constraint c1 defines <samp class="ph codeph">cost</samp>,
+so unless there is some unexpected latitude in setting salaries, no
+relief will be found there. Constraints c2 and c3 represent two skill
+requirements, previously judged beyond negotiation, and constraint
+c5 represents service quality, already compromised a bit. That rough
+analysis leaves c9, the requirement not to use three particular employees
+together.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/12_interp_title_synopsis.html" title="Interprets the conflict detected by the conflict refiner in the Interactive Optimizer.">Interpreting conflict</a></div>
+</div>
+</div></body>
+</html>

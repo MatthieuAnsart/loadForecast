@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Writing the core constraints" />
+<meta name="abstract" content="How to write constraints that model the interactions between the various components of the problem." />
+<meta name="Description" content="How to write constraints that model the interactions between the various components of the problem." />
+<meta name="DC.subject" content="constraints, time tabling example" />
+<meta name="keywords" content="constraints, time tabling example" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_cp.1069583" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<title>Writing the core constraints</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_cp.1069583">
+<h1 class="title topictitle1">Writing the core constraints</h1>
+<div class="body taskbody"><p class="shortdesc">How to write constraints that model the interactions
+between the various components of the problem.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div> <p class="p">To produce a valid time table using
+constraint programming, you must write constraints that model the
+interactions between the various components of the model: course time
+intervals, teachers, classes and rooms.</p>
+ </div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To write the core constraints:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Define the time interval corresponding
+to each course.</span> <pre class="pre codeblock"><code>  forall(r in InstanceSet)
+    End[r] == r.Duration + Start[r];</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Ensure that each resource is not used
+more that once at any moment: they are unary resources.</span> <p class="p">One way to do so consists in defining an
+array of variables that model the demand at any moment, like this:</p>
+<pre class="pre codeblock"><code>dvar demand[t in Time] in 0..1;
+...
+demand[t in Time] = sum(i in Instance) (t &gt;= start[i] &amp;&amp; t &lt; end[i]);</code></pre>
+<p class="p">However, it makes sense to create fewer variables:
+what we need is the points in time when the courses start and, therefore,
+need the resources; or, in other words, the demand on resources when
+each activity (course) starts. This is why, in the distributed time-tabling
+example, the choice was made not to model each possible point of time
+with a variable. Each course start time is considered as a point in
+time at which the resource usage uniqueness must be preserved.</p>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Ensure that a teacher works with one
+class only at a time. </span> <p class="p">When he is teaching, there is no other
+teaching demand for him at the same time.</p>
+<pre class="pre codeblock"><code>  forall(r in InstanceSet, x in Teacher) {
+    if(r.discipline in PossibleTeacherDiscipline[x])
+      (sum(o in InstanceSet
+                                : r.discipline in PossibleTeacherDiscipline[x])
+        (Start[o] &gt;= Start[r])
+        *(Start[o] &lt; End[r])
+        *(teacher[o] == ord(Teacher,x))) &lt; 2;
+  }</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Ensure that a room is occupied by one
+class only, with similar constraints.</span> <pre class="pre codeblock"><code>  forall(r in InstanceSet, x in Room) {
+    if(PossibleRoom[r.discipline,x] == 1)
+      (sum(o in InstanceSet : 1 == PossibleRoom[o.discipline,x])
+        (Start[o] &gt;= Start[r])
+        *(Start[o] &lt; End[r])
+        *(room[o] == ord(Room,x))) &lt; 2;            
+  } </code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Possibly, constrain the classes on the
+same pattern, so that they do not follow two courses simultaneously.</span> <pre class="pre codeblock"><code>  forall(r in InstanceSet, x in Class) {
+    if(r.Class == x)
+      (sum(o in InstanceSet : o.Class == x) 
+       (1 == (Start[o] &gt;= Start[r])*(Start[o] &lt; End[r]))) &lt; 2;
+  }</code></pre>
+</li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" title="Shows how to build a school timetable, given a set of room specifications, teacher skills, and educational requirements.">The time tabling example</a></div>
+</div>
+</div></body>
+</html>

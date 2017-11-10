@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Create the model" />
+<meta name="abstract" content="Java methods create a model in a Java application of CPLEX." />
+<meta name="Description" content="Java methods create a model in a Java application of CPLEX." />
+<meta name="DC.subject" content="creating, model (Java API), variable, modeling (Java API), modeling, variables (Java API), IloLinearNumExpr class (Java API), IloNumExpr class (Java API), add(obj) method (Java API), IloCplex class (Java API), add modeling object, addMinimize method (Java API), adding, objective (shortcut) (Java API), constraints, adding to a model (Java API), equality constraints, adding to a model (Java API), greater than equal to constraints, adding to a model (Java API), range constraint" />
+<meta name="keywords" content="creating, model (Java API), variable, modeling (Java API), modeling, variables (Java API), IloLinearNumExpr class (Java API), IloNumExpr class (Java API), add(obj) method (Java API), IloCplex class (Java API), add modeling object, addMinimize method (Java API), adding, objective (shortcut) (Java API), constraints, adding to a model (Java API), equality constraints, adding to a model (Java API), greater than equal to constraints, adding to a model (Java API), range constraint" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/Java/anatomy_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_javaStart.1006052" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Java/anatomy_synopsis.html" />
+<title>Create the model</title>
+</head>
+<body role="main" id="Getting_started.uss_javaStart.1006052">
+<h1 class="title topictitle1">Create the model</h1>
+<div class="body"><p class="shortdesc">Java methods create a model in a Java application
+of CPLEX.</p>
+<p class="p">The  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a> object
+provides the functionality to create an optimization model that can
+be solved with  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a>.
+The class <samp class="ph codeph">IloCplex</samp> implements the Concert
+Technology interface  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloModeler.html" title="(Opens in a new tab or window)">IloModeler</a> and
+its extensions  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloMPModeler.html" title="(Opens in a new tab or window)">IloMPModeler</a> and  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplexModeler.html" title="(Opens in a new tab or window)">IloCplexModeler</a>.
+These interfaces define the constructors for modeling objects of the
+following types, which can be used with <samp class="ph codeph">IloCplex</samp> : </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table listing modeling classes and a brief description." class="table NoBorder" rules="none" frame="void" border="0"><span class="desc tabledesc"></span><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloNumVar.html" title="(Opens in a new tab or window)">IloNumVar</a>  </td>
+<td class="entry" valign="top"> modeling variables </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloRange.html" title="(Opens in a new tab or window)">IloRange</a>  </td>
+<td class="entry" valign="top"> ranged constraints of the type lb &lt;= expr &lt;=
+ub </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloObjective.html" title="(Opens in a new tab or window)">IloObjective</a>  </td>
+<td class="entry" valign="top"> optimization objective </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloNumExpr.html" title="(Opens in a new tab or window)">IloNumExpr</a>  </td>
+<td class="entry" valign="top"> expression using variables </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Modeling variables are represented by objects implementing
+the  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloNumVar.html" title="(Opens in a new tab or window)">IloNumVar</a> interface
+defined by Concert Technology. Here is how to create three continuous
+variables, all with bounds <samp class="ph codeph">0</samp> and <samp class="ph codeph">100</samp> :</p>
+<pre class="pre codeblock"><code>IloNumVar[] x = cplex.numVarArray(3, 0.0, 100.0);</code></pre>
+<p class="p">There is a wealth of other methods for creating arrays
+or individual modeling variables. The documentation for  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloModeler.html" title="(Opens in a new tab or window)">IloModeler</a>,  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplexModeler.html" title="(Opens in a new tab or window)">IloCplexModeler</a>,
+and  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloMPModeler.html" title="(Opens in a new tab or window)">IloMPModeler</a> gives
+you the complete list.</p>
+<p class="p">Modeling variables build expressions, of type  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloNumExpr.html" title="(Opens in a new tab or window)">IloNumExpr</a>,
+for use in constraints or the objective function of an optimization
+model. For example, the expression: </p>
+<pre class="pre codeblock"><code>x[0] + 2*x[1] + 3*x[2]</code></pre>
+<p class="p">can be created like this:</p>
+<pre class="pre codeblock"><code>IloNumExpr expr = cplex.sum(x[0], 
+                            cplex.prod(2.0, x[1]),
+                            cplex.prod(3.0, x[2]));</code></pre>
+<p class="p">Another way of creating an object representing the same
+expression is to use an expression of  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloLinearNumExpr.html" title="(Opens in a new tab or window)">IloLinearNumExpr</a>.
+Here is how:</p>
+<pre class="pre codeblock"><code>  IloLinearNumExpr expr = cplex.linearNumExpr();
+  expr.addTerm(1.0, x[0]);
+  expr.addTerm(2.0, x[1]);
+  expr.addTerm(3.0, x[2]);
+</code></pre>
+<p class="p">The advantage of using  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloLinearNumExpr.html" title="(Opens in a new tab or window)">IloLinearNumExpr</a> over
+the first way is that you can more easily build up your linear expression
+in a loop, which is what is typically needed in more complex applications.
+The interface  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloLinearNumExpr.html" title="(Opens in a new tab or window)">IloLinearNumExpr</a> is
+an extension of  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloNumExpr.html" title="(Opens in a new tab or window)">IloNumExpr</a> and
+thus can be used anywhere an expression can be used.</p>
+<p class="p">As mentioned before, expressions can be used to create
+constraints or an objective function for a model. Here is how to create
+a minimization objective for that expression:</p>
+<p class="p">In addition to your creating an objective, you must also
+instruct  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a> to
+use that objective in the model it solves. To do so, <em class="ph i">add</em> the
+objective to <samp class="ph codeph">IloCplex</samp> like this:</p>
+<pre class="pre codeblock"><code>cplex.add(obj);</code></pre>
+<p class="p">Every modeling object that is to be used in a model must
+be added to the  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a> object.
+The variables need not be explicitly added as they are treated implicitly
+when used in the expression of the objective. More generally, every
+modeling object that is referenced by another modeling object which
+itself has been added to  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a>,
+is implicitly added to <samp class="ph codeph">IloCplex</samp> as well.</p>
+<p class="p">There is a shortcut notation for creating and adding the
+objective: <samp class="ph codeph">cplex.addMinimize(expr);</samp>This shortcut
+uses the method <a class="xref logicalApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplexModeler.html#addMinimize()" title="(Opens in a new tab or window)">addMinimize</a></p>
+<p class="p">Since the objective is not otherwise accessed, it does
+not need to be stored in the variable <samp class="ph codeph">obj</samp> .</p>
+<p class="p">Adding constraints to the model is just as easy. For example,
+the constraint </p>
+<p class="p"><samp class="ph codeph">-x[0] + x[1] + x[2] &lt;= 20.0</samp></p>
+<p class="p">can be added by calling:</p>
+<pre class="pre codeblock"><code>cplex.addLe(cplex.sum(cplex.negative(x[0]), x[1], x[2]), 20);</code></pre>
+<p class="p">Again, many methods are provided for adding other constraint
+types, including equality constraints, greater than or equal to constraints,
+and ranged constraints. Internally, they are all represented as  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloRange.html" title="(Opens in a new tab or window)">IloRange</a> objects
+with appropriate choices of bounds, which is why all these methods
+return  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloRange.html" title="(Opens in a new tab or window)">IloRange</a> objects.
+Also, note that the expressions above could have been created in many
+different ways, including the use of  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloLinearNumExpr.html" title="(Opens in a new tab or window)">IloLinearNumExpr</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Java/anatomy_synopsis.html" title="A Java application of CPLEX includes these parts.">The anatomy of a Concert Technology Java application</a></div>
+</div>
+</div></body>
+</html>

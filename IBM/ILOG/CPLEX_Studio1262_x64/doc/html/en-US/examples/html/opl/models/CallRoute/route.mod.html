@@ -1,0 +1,138 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/******************************************************************************</font></b>
+013: <b><font color="#007D00"> * </font></b>
+014: <b><font color="#007D00"> * OPL Model for Telecommunication Route Generation</font></b>
+015: <b><font color="#007D00"> * </font></b>
+016: <b><font color="#007D00"> * Construct a "route" from a set of end-to-end paths so that the collection</font></b>
+017: <b><font color="#007D00"> * of paths satisfies the blocking criterion at a minimum cost.  This extends</font></b>
+018: <b><font color="#007D00"> * the two-arc path optimization algorithm in chapter 4 of "Dynamic Routing in </font></b>
+019: <b><font color="#007D00"> * Telecommunications Networks" by Gerald R. Ash (McGraw Hill).</font></b>
+020: <b><font color="#007D00"> * </font></b>
+021: <b><font color="#007D00"> * This is a dynamic programming model with two global constraints:</font></b>
+022: <b><font color="#007D00"> *      1. All paths are different</font></b>
+023: <b><font color="#007D00"> *      2. Blocking criterion</font></b>
+024: <b><font color="#007D00"> * The "allDifferent" constraint is implemented explicitly to allow duplicates</font></b>
+025: <b><font color="#007D00"> * of a dummy value at the end of the sequence.</font></b>
+026: <b><font color="#007D00"> * </font></b>
+027: <b><font color="#007D00"> * Pseudorandom cost and blocking data are generated within the model.</font></b>
+028: <b><font color="#007D00"> * </font></b>
+029: <b><font color="#007D00">******************************************************************************/</font></b>
+030: 
+031: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+032: 
+033: <b><font color="#0000FF">execute</font></b>
+034: {
+035: <b><font color="#007D00">// This makes sure we'll get the exact minimum</font></b>
+036:                 cp.param.optimalityTolerance = 1.0;
+037:         cp.param.relativeOptimalityTolerance = 0.0; 
+038: }    
+039: 
+040: /******************************************************************************
+041:  * DATA DECLARATIONS
+042:  ******************************************************************************/
+043: 
+044: int nNodes          = 500;          // Number of nodes
+045: int SCALE           = 1000;         // Integer scaling factor
+046: int blkTol          = -6;           // Blocking criterion
+047: 
+048: range Nodes         = 1..nNodes;
+049: range Paths         = 0..nNodes;    // Only consider 2-arc paths
+050: 
+051: // Blocking percentages
+052: int blk[p in Paths] = (p==0)?0:(1+rand(10));   
+053: // Logs of blocking percentages
+054: int lbk[p in Paths] = ftoi(round(log(0.01*((p==0)?(1+rand(10)):blk[p]))*SCALE));
+055: // Costs 
+056: int cst[p in Paths] = (p==0)?0:(10+rand(90));                
+057: 
+058: /*
+059:  * Initialize blocking percentages and path costs
+060:  * with pseudorandom data.
+061:  */
+062: 
+063: 
+064: // Summary data
+065: int minRoute    = ftoi(ceil(1.0*SCALE*blkTol/(min (i in Paths) lbk[i])));
+066: int maxCost     = max (i in Nodes) cst[i];
+067: int rteSize     = 2+minRoute;
+068: range Route     = 1..rteSize;
+069: 
+070: 
+071: /******************************************************************************
+072:  * DECISION VARIABLES
+073:  ******************************************************************************/
+074: range R = 1..rteSize+1;
+075: dvar int     rte[Route] in Paths;
+076: dvar int     cost[R]  in 0..SCALE*maxCost;
+077: 
+078: 
+079: /******************************************************************************
+080:  * MODEL
+081:  ******************************************************************************/
+082: 
+083: minimize cost[1];
+084: subject to {
+085:     
+086:     <b><font color="#007D00">// Recursive objective function</font></b>
+087:     cost[rteSize+1] == 0;
+088:     forall (i <b><font color="EA7D00">in</font></b> Route)
+089:       cost[i] == ( SCALE*(100-blk[rte[i]])*cst[rte[i]]
+090:                    + blk[rte[i]]*cost[i+1] ) div 100;
+091:               
+092:     <b><font color="#007D00">// Path constraints: All paths are different except</font></b>
+093:     <b><font color="#007D00">// dummy paths at the end.  This comes from simplifying</font></b>
+094:     <b><font color="#007D00">// the two constraints:</font></b>
+095:    
+096:     forall (ordered i,j <b><font color="EA7D00">in</font></b> Route)
+097:         (rte[i] != 0 &amp;&amp; rte[i] != rte[j]) || (rte[j] == 0);
+098:     
+099:     <b><font color="#007D00">// Blocking criterion: Joint probability that all paths are</font></b>
+100:     <b><font color="#007D00">// blocked is at most 10^blkTol.  Take the log of both sides</font></b>
+101:     <b><font color="#007D00">// to avoid underflow.</font></b>
+102:     sum (i <b><font color="EA7D00">in</font></b> Route) lbk[rte[i]] &lt;= SCALE*blkTol;
+103:               
+104:     <b><font color="#007D00">// Redundant constraint: </font></b>
+105:     <b><font color="#007D00">// Eliminate dummy paths from the start of the route</font></b>
+106:     forall (i <b><font color="EA7D00">in</font></b> 1..minRoute) rte[i] != 0;
+107: 
+108:     <b><font color="#007D00">// Redundant constraint:</font></b>
+109:     <b><font color="#007D00">// The expected cost is at least the minimum cost of a</font></b>
+110:     <b><font color="#007D00">// single path</font></b>
+111:     cost[1] &gt;= SCALE * (min (i <b><font color="EA7D00">in</font></b> Nodes) cst[i]);
+112: };
+113: 
+114: 
+115: tuple costSolutionT{ 
+116:         <b><font color="#0000FF">int</font></b> R; 
+117:         <b><font color="#0000FF">int</font></b> value; 
+118: };
+119: {costSolutionT} costSolution = {&lt;i0,cost[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> R};
+120: tuple rteSolutionT{ 
+121:         <b><font color="#0000FF">int</font></b> Route; 
+122:         <b><font color="#0000FF">int</font></b> value; 
+123: };
+124: {rteSolutionT} rteSolution = {&lt;i0,rte[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Route};
+125: 
+126: execute{ 
+127:         writeln(costSolution);
+128:         writeln(rteSolution);
+129: }
+130: 
+131: 
+132: 
+133: 
+</tt></pre>

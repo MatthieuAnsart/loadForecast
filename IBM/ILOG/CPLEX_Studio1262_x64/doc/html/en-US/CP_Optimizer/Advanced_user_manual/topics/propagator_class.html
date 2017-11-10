@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Defining a new class of constraint propagator" />
+<meta name="abstract" content="Defining a new class of constraint propagator involves writing methods to implement the logic regarding the reduction of the domains." />
+<meta name="Description" content="Defining a new class of constraint propagator involves writing methods to implement the logic regarding the reduction of the domains." />
+<meta name="DC.subject" content="propagator, defining" />
+<meta name="keywords" content="propagator, defining" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerprop.1022661" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<title>Defining a new class of constraint propagator</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerprop.1022661">
+<h1 class="title topictitle1">Defining a new class of constraint propagator</h1>
+<div class="body"><p class="shortdesc">Defining a new class of constraint propagator
+involves writing methods to implement the logic regarding the reduction
+of the domains.</p>
+<p class="p">When defining a new class of constraint propagator, the
+function <samp class="ph codeph">execute</samp> performs the required domain
+reductions, updating the domains to make the domains consistent in regards to
+the constraint. For the constraint <em class="ph i">x &lt;= y</em>, this
+logic is easy to determine:</p>
+<ul class="ul"><li class="li"><p class="p">the values in the domain of <em class="ph i">x</em> must
+be less than or equal to the maximum of the values in the domain of <em class="ph i">y</em>;</p>
+ </li>
+<li class="li"><p class="p">the values in the domain of <em class="ph i">y</em> must
+be greater than or equal to the minimum of the values in the domain
+of <em class="ph i">x</em>. </p>
+</li>
+</ul>
+<p class="p">The invariant of the constraint <em class="ph i">x &lt;= y</em> can
+be enforced using elementary modifiers. The virtual member function <samp class="ph codeph">execute</samp> implements the logic regarding the reduction
+of the domains. For example, the function would look like this in
+the C++ API:  </p>
+<pre class="pre codeblock"><code>void LEConstraintI::execute () {
+  setMax(_x, getMax(_y)); 
+  setMin(_y, getMin(_x));  
+}
+</code></pre>
+<p class="p">and like this in the Java™ API:  </p>
+<pre class="pre codeblock"><code>public void execute() {
+  setMax(_x,(int)getMax(_y));
+  setMin(_y,(int)getMin(_x));
+}
+</code></pre>
+<p class="p">Putting all the pieces together, the propagator in the
+C++ API looks like:  </p>
+<pre class="pre codeblock"><code>class LEConstraintI : public IloPropagatorI {
+ private:
+   IloIntVar _x;
+   IloIntVar _y;
+ public:
+   LEConstraintI(IloIntVar x, IloIntVar y);
+   void execute();
+   IloPropagatorI * makeClone(IloEnv env) const;
+};
+
+LEConstraintI::LEConstraintI(IloIntVar x, IloIntVar y)
+   : IloPropagatorI(x.getEnv()), _x(x), _y(y) {
+   addVar(x);
+   addVar(y);
+}
+
+void LEConstraintI::execute () {
+  setMax(_x, getMax(_y)); 
+  setMin(_y, getMin(_x));  
+}
+IloPropagatorI* LEConstraintI::makeClone(IloEnv env) const {
+  return new (env) LEConstraintI(_x, _y);
+}
+IloConstraint LEConstraint(IloIntVar x, IloIntVar y){
+  return IloCustomConstraint(x.getEnv(), 
+         new (x.getEnv()) LEConstraintI(x, y));
+}
+</code></pre>
+<p class="p">In the Java API,
+the full propagator is:  </p>
+<pre class="pre codeblock"><code>class LEConstraintI extends IloCustomConstraint {
+  private IloIntVar _x;
+  private IloIntVar _y;
+  // ...
+public LEConstraintI(IloCP cp, IloIntVar x, IloIntVar y) throws IloException {
+  super(cp);
+  _x = x;
+  _y = y;
+  addVar(x);
+  addVar(y);
+}
+public void execute() {
+  setMax(_x,(int)getMax(_y));
+  setMin(_y,(int)getMin(_x));
+}
+}
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" title="A constraint propagator is a simple way to define a custom constraint, that is, one where you define the domain reduction rules.">Using constraint propagators</a></div>
+</div>
+</div></body>
+</html>

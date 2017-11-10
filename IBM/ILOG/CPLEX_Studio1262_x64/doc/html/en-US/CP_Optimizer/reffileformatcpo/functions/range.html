@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="range" />
+<meta name="abstract" content="Restriction of the bounds of and integer or floating-point expression." />
+<meta name="Description" content="Restriction of the bounds of and integer or floating-point expression." />
+<meta name="DC.subject" content="range" />
+<meta name="keywords" content="range" />
+<meta name="DC.Relation" scheme="URI" content="../syntax/100_Expressions.html#Operator_expressions" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="range" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<title>range</title>
+</head>
+<body role="main" id="range">
+<h1 class="title topictitle1">range</h1>
+<div class="body refbody"><p class="shortdesc">Restriction of the bounds of and integer or floating-point expression.</p>
+<div class="section" id="range__Syntax"><h2 class="title sectiontitle">Syntax</h2>
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/070_Types.html#Expression_types__boolExpr">boolExpr</a> <strong class="ph b">range</strong>(<a class="xref" href="../syntax/070_Types.html#Expression_types__floatExpr">floatExpr</a> x, <a class="xref" href="../syntax/070_Types.html#Numerical_types__float">float</a> lb, <a class="xref" href="../syntax/070_Types.html#Numerical_types__float">float</a> ub)
+<a class="xref" href="../syntax/070_Types.html#Expression_types__boolExpr">boolExpr</a> <strong class="ph b">range</strong>(<a class="xref" href="../syntax/070_Types.html#Expression_types__intExpr">intExpr</a> x, <a class="xref" href="../syntax/070_Types.html#Numerical_types__float">float</a> lb, <a class="xref" href="../syntax/070_Types.html#Numerical_types__float">float</a> ub)</code></pre>
+</div>
+<div class="section" id="range__Parameters"><h2 class="title sectiontitle">Parameters</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">x</samp>: The integer or floating-point expression.
+  </li>
+<li class="li">    <samp class="ph codeph">lb</samp>: The lower bound.
+  </li>
+<li class="li">    <samp class="ph codeph">ub</samp>: The upper bound.
+  </li>
+</ul>
+
+</div>
+<div class="section" id="range__Description"><h2 class="title sectiontitle">Description</h2>
+<p class="p">This Boolean expression (which is interpreted as a constraint outside of
+an expression) determines whether the value of expression <samp class="ph codeph">x</samp> is
+inside the range <samp class="ph codeph">[lb, ub]</samp>.  The returned expression will be true if and
+only if <samp class="ph codeph">x</samp> is no less than <samp class="ph codeph">lb</samp> and no greater than <samp class="ph codeph">ub</samp>.
+<samp class="ph codeph"><strong class="ph b">range</strong>(y, a, b)</samp> is also a more efficient form of
+writing <samp class="ph codeph">a &lt;= y &amp;&amp; y &lt;= b</samp>.</p>
+
+</div>
+<div class="section" id="range__Example"><h2 class="title sectiontitle">Example</h2>
+<p class="p">In this example there are 4 mathematics lessons per week, and 6 hours per
+day (a 30 hour week). We want to avoid scheduling two or more mathematics
+lessons in one day.
+m1 = intVar(0..29);</p>
+
+
+<pre class="pre codeblock"><code>m2 = <a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>(0..29);
+m3 = <a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>(0..29);
+m4 = <a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>();
+<strong class="ph b">range</strong>(m4,  0, 29);
+<strong class="ph b">range</strong>(m1,  0,  5) + <strong class="ph b">range</strong>(m2,  0,  5) + <strong class="ph b">range</strong>(m3,  0,  5) + <strong class="ph b">range</strong>(m4,  0,  5) &lt;= 1;
+<strong class="ph b">range</strong>(m1,  6, 11) + <strong class="ph b">range</strong>(m2,  6, 11) + <strong class="ph b">range</strong>(m3,  6, 11) + <strong class="ph b">range</strong>(m4,  6, 11) &lt;= 1;
+<strong class="ph b">range</strong>(m1, 12, 17) + <strong class="ph b">range</strong>(m2, 12, 17) + <strong class="ph b">range</strong>(m3, 12, 17) + <strong class="ph b">range</strong>(m4, 12, 17) &lt;= 1;
+<strong class="ph b">range</strong>(m1, 18, 23) + <strong class="ph b">range</strong>(m2, 18, 23) + <strong class="ph b">range</strong>(m3, 18, 23) + <strong class="ph b">range</strong>(m4, 18, 23) &lt;= 1;
+<strong class="ph b">range</strong>(m1, 24, 29) + <strong class="ph b">range</strong>(m2, 24, 29) + <strong class="ph b">range</strong>(m3, 24, 29) + <strong class="ph b">range</strong>(m4, 24, 29) &lt;= 1;</code></pre>
+
+<p class="p">The variables <samp class="ph codeph">m1</samp> to <samp class="ph codeph">m4</samp> represent the hours of the four mathematics lessons.
+Since there is a 30 hour week, then domains are from 0 to 29.  For
+illustrative purposes, the example shows how to limit the bounds of variable
+<samp class="ph codeph">m4</samp> using <samp class="ph codeph"><a class="xref" href="range.html" title="Restriction of the bounds of and integer or floating-point expression.">range</a></samp> as a constraint.  Thereafter, five constraints (one per
+day) make use of <samp class="ph codeph"><a class="xref" href="range.html" title="Restriction of the bounds of and integer or floating-point expression.">range</a></samp> as a Boolean expression which is automatically
+interpreted as a 0-1 integer expression.  These expressions ensure that only
+one lesson can be in the period of the corresponding day.</p>
+
+</div>
+<div class="section" id="range__Notes"><h2 class="title sectiontitle">Notes</h2>
+<p class="p">If <samp class="ph codeph">lb</samp> is strictly greater than <samp class="ph codeph">ub</samp> then the expression will always be
+false, and if used as a constraint, will cause the model to be insoluble.</p>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a></div>
+</div>
+<div class="relinfo relconcepts"><strong>Related concepts</strong>:<br />
+<div><a class="link" href="../syntax/100_Expressions.html#Operator_expressions">operators</a></div>
+</div>
+</div></body>
+</html>

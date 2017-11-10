@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Branch selection callback" />
+<meta name="abstract" content="Describes special considerations about the branch selection callback." />
+<meta name="Description" content="Describes special considerations about the branch selection callback." />
+<meta name="DC.subject" content="callback, branch variable selection, branch variable selection callback, CPXsetbranchcallbackfunc, CPXgetcallbacknodeintfeas, CPXgetcallbackpseudocosts, CPXgetcallbackorder, CPX_PARAM_MIPCBREDLP, branch callbacks and, CPX_INTEGER_INFEASIBLE, CPXcopyprotected" />
+<meta name="keywords" content="callback, branch variable selection, branch variable selection callback, CPXsetbranchcallbackfunc, CPXgetcallbacknodeintfeas, CPXgetcallbackpseudocosts, CPXgetcallbackorder, CPX_PARAM_MIPCBREDLP, branch callbacks and, CPX_INTEGER_INFEASIBLE, CPXcopyprotected" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advMIPcontrolInterface.998536" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" />
+<title>Branch selection callback</title>
+</head>
+<body role="main" id="User_manual.uss_advMIPcontrolInterface.998536">
+<h1 class="title topictitle1">Branch selection callback</h1>
+<div class="body"><p class="shortdesc">Describes special considerations about the branch selection
+callback.</p>
+<p class="p">The next callback to consider is the branch variable selection
+callback. </p>
+<p class="p">After <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/setbranchcallbackfunc.html" title="The routine CPXXsetbranchcallbackfunc/CPXsetbranchcallbackfunc sets and modifies the user-written callback routine to be called after a branch has been selected but before the branch is carried out during MIP optimization.">CPXsetbranchcallbackfunc</a></samp> is
+called with a pointer to a user callback routine, the user routine
+is called whenever CPLEX makes a branching decision. CPLEX indicates
+which variable has been chosen for branching and allows the user to
+modify that decision. The user may specify the number of children
+for the current node (between 0 and 2), and the set of bounds or constraints
+that are modified for each child through one of the routines  <samp class="ph codeph">CPXbranchcallbackbranchbds</samp> , <samp class="ph codeph">CPXbranchcallbackbranchconstraints</samp> ,
+or <samp class="ph codeph">CPXbranchcallbackbranchgeneral</samp>. The children
+are explored in the order that they are returned. The branch callback
+routine is called for all viable nodes. In particular, it will be
+called for nodes that have zero integer infeasibilities; in this case,
+CPLEX will not have chosen a branch variable, and the default action
+will be to discard the node. The user can choose to branch from this
+node and in this way impose additional restrictions on integer solutions.</p>
+<p class="p">For example, a user branch routine may call <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacknodeintfeas.html" title="The routine CPXXgetcallbacknodeintfeas/CPXgetcallbacknodeintfeas retrieves information for each variable about whether or not the variable is integer feasible in the subproblem at the current node.">CPXgetcallbacknodeintfeas</a></samp> to
+identify branching candidates, call <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbackpseudocosts.html" title="The routine CPXXgetcallbackpseudocosts/CPXgetcallbackpseudocosts retrieves the pseudo-cost values during MIP optimization from within a user-written callback.">CPXgetcallbackpseudocosts</a></samp> to
+obtain pseudo-cost information on these variables, call <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbackorder.html" title="The routine CPXXgetcallbackorder/CPXgetcallbackorder retrieves MIP priority order information during MIP optimization from within a user-written callback.">CPXgetcallbackorder</a></samp> to
+get priority order information, make a decision based on this and
+perhaps other information, and then respond that the current node
+will have two children, where one has a new lower bound on the branch
+variable and the other has a new upper bound on that variable.</p>
+<p class="p">Alternatively, the branch callback routine can be used to sculpt
+the search tree by pruning nodes or adjusting variable bounds. Choosing
+zero children for a node prunes that node, while choosing one node
+with a set of new variable bounds adjusts bounds on those variables
+for the entire subtree rooted at this node. Note that the user must
+be careful when using this routine for anything other than choosing
+a different variable to branch on. Pruning a valid node or placing
+an invalid bound on a variable can prune the optimal solution.</p>
+<p class="p">We should point out one important detail associated with the use
+of the <a class="xref" href="../../../../Parameters/topics/MIPCBREDLP.html" title="Controls whether your callback accesses node information of the original model (off) or node information of the reduced, presolved model (on, default).">MIP callback switch between original model and reduced, presolved model</a>,<samp class="ph codeph">CPX_PARAM_MIPCBREDLP</samp>,
+in a branch callback. If this parameter is set to <samp class="ph codeph">CPX_OFF</samp> 
+(0), the user can choose branch variables (and add bounds) for the
+original problem. However, not every fractional variable is actually
+available for branching. Recall that some variables are replaced by
+linear combinations of other variables in the presolved problem. Since
+branching involves adding new bounds to specific variables in the
+presolved problem, a variable must be present in the presolved problem
+for it to be branched on. The user should use the <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacknodeintfeas.html" title="The routine CPXXgetcallbacknodeintfeas/CPXgetcallbacknodeintfeas retrieves information for each variable about whether or not the variable is integer feasible in the subproblem at the current node.">CPXgetcallbacknodeintfeas</a></samp> routine
+from the Advanced Presolve Interface to find branching candidates
+(those for which <samp class="ph codeph">CPXgetcallbacknodeintfeas</samp>  returns <samp class="ph codeph">CPX_INTEGER_INFEASIBLE</samp> ).
+The <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/copyprotected.html" title="The routine CPXXcopyprotected/CPXcopyprotected specifies a set of variables that should not be substituted out of the problem.">CPXcopyprotected</a></samp> routine
+can be used to prevent presolve from removing specific variables from
+the presolved problem. (In Concert Technology, this issue is handled
+for you automatically.) While restricting branching may appear to
+limit your ability to solve a problem, in fact a problem can always
+be solved to optimality by branching only on the variables of the
+presolved problem.</p>
+<p class="p">By design, the CPLEX branch callback calculates and provides the 
+branching decisions 
+that CPLEX would make in case the user does not create any branches in 
+the callback. Depending on variable selection and other details 
+of your model, the computation of these candidate branches can be 
+time-consuming. Consequently, if you know that you will <strong class="ph b">never</strong> 
+use the branching candidates suggested by CPLEX, then you can save time 
+by disabling such features as strong branching.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" title="Documents the advanced MIP control interface.">Advanced MIP control interface</a></div>
+</div>
+</div></body>
+</html>

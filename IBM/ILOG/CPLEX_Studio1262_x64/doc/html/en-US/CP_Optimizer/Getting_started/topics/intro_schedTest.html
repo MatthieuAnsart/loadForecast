@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Testing your installation with a scheduling problem" />
+<meta name="abstract" content="Before proceeding with the other tutorials in the Getting Started with CP Optimizer manual, you should test your environment by compiling and running a simple application. The log produced by the application provides useful information about the model and the solution search." />
+<meta name="Description" content="Before proceeding with the other tutorials in the Getting Started with CP Optimizer manual, you should test your environment by compiling and running a simple application. The log produced by the application provides useful information about the model and the solution search." />
+<meta name="DC.subject" content="search log" />
+<meta name="keywords" content="search log" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/intro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerintro.143104" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/intro.html" />
+<title>Testing your installation with a scheduling problem</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerintro.143104">
+<h1 class="title topictitle1">Testing your installation with a scheduling problem</h1>
+<div class="body"><p class="shortdesc">Before proceeding with the other tutorials in the <em class="ph i">Getting
+Started with CP Optimizer</em> manual, you should test your environment
+by compiling and running a simple application. The log produced by
+the application provides useful information about the model and the
+solution search.</p>
+<p class="p">In this lesson, you are provided with a completed example code
+so that you can test your installation of CP Optimizer. In <a class="xref" href="schedtime.html" title="In this lesson, you will learn how to find a solution to a house building with earliness and tardiness costs problem using CP Optimizer and the three-stage method.">Using expressions on interval variables: house building with earliness and tardiness costs</a>, you will learn about
+the classes and member functions used in this program. </p>
+<p class="p">The problem is a house building problem in which there are ten
+tasks of fixed size, each of which needs to be assigned a starting
+time.   Using the <strong class="ph b">C++ API</strong>, the code for creating the environment,
+model and interval variables that represent the tasks is:    </p>
+<pre class="pre codeblock"><code>#include &lt;ilcp/cp.h&gt;
+
+int main(int argc, const char * argv[]) {
+  IloEnv env;
+  try {
+    IloModel model(env);
+    
+    /* CREATE THE TIME-INTERVALS. */
+    IloIntervalVar masonry  (env, 35, "masonry   ");
+    IloIntervalVar carpentry(env, 15, "carpentry ");
+    IloIntervalVar plumbing (env, 40, "plumbing  ");
+    IloIntervalVar ceiling  (env, 15, "ceiling   ");
+    IloIntervalVar roofing  (env, 5,  "roofing   ");
+    IloIntervalVar painting (env, 10, "painting  ");
+    IloIntervalVar windows  (env, 5,  "windows   ");
+    IloIntervalVar facade   (env, 10, "facade    ");
+    IloIntervalVar garden   (env, 5,  "garden    ");
+    IloIntervalVar moving   (env, 5,  "moving    ");
+</code></pre>
+<p class="p">The constraints in this problem are precedence constraints; some
+tasks cannot start until other tasks have ended. For example, the
+ceilings must be completed before painting can begin. The set of precedence
+constraints for this problem can be added to the model with the code:
+      </p>
+<pre class="pre codeblock"><code>    model.add(IloEndBeforeStart(env, masonry,   carpentry));
+    model.add(IloEndBeforeStart(env, masonry,   plumbing));
+    model.add(IloEndBeforeStart(env, masonry,   ceiling));
+    model.add(IloEndBeforeStart(env, carpentry, roofing));
+    model.add(IloEndBeforeStart(env, ceiling,   painting));
+    model.add(IloEndBeforeStart(env, roofing,   windows));
+    model.add(IloEndBeforeStart(env, roofing,   facade));
+    model.add(IloEndBeforeStart(env, plumbing,  facade));
+    model.add(IloEndBeforeStart(env, roofing,   garden));
+    model.add(IloEndBeforeStart(env, plumbing,  garden));
+    model.add(IloEndBeforeStart(env, windows,   moving));
+    model.add(IloEndBeforeStart(env, facade,    moving));
+    model.add(IloEndBeforeStart(env, garden,    moving));
+    model.add(IloEndBeforeStart(env, painting,  moving));
+</code></pre>
+<p class="p">Here there is a special constraint, <samp class="ph codeph">IloEndBeforeStart</samp>,
+which ensures that one interval variable ends before the other starts.
+This constraint is handled specially by the engine. One reason is
+to correctly treat the presence of intervals so that if one of the
+interval variables is not present, the constraint is automatically
+satisfied, and another reason is for stronger inference in constraint
+propagation.</p>
+<p class="p">The interval variables and precedence constraints completely describe
+this simple problem. An optimizer object (an instance of the class <samp class="ph codeph">IloCP</samp>)
+is used to find a solution to the model, assigning values to the start
+and end of each of the interval variables in the model. The last part
+of the code for this example is:        </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    if (cp.solve()) {
+      cp.out() &lt;&lt; cp.domain(masonry)   &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(carpentry) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(plumbing)  &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(ceiling)   &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(roofing)   &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(painting)  &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(windows)   &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(facade)    &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(garden)    &lt;&lt; std::endl;
+      cp.out() &lt;&lt; cp.domain(moving)    &lt;&lt; std::endl;
+    } else {
+      cp.out() &lt;&lt; "No solution found. " &lt;&lt; std::endl;
+    }
+    cp.printInformation();
+  } catch (IloException&amp; ex) {
+    env.out() &lt;&lt; "Error: " &lt;&lt; ex &lt;&lt; std::endl;
+  }
+  env.end();
+  return 0;
+}
+</code></pre>
+<p class="p">Open the example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/sched_intro.cpp</samp> in
+your development environment. To test your installation of CP Optimizer,
+build and run the program. When you run the program, you should get
+results similar to this search log output:    </p>
+<pre class="pre codeblock"><code>  ! ----------------------------------------------------------------------------
+ ! Satisfiability problem - 10 variables, 14 constraints
+ ! Initial process time : 0.00s (0.00s extraction + 0.00s propagation)
+ !  . Log search space  : 33.2 (before), 33.2 (after)
+ !  . Memory usage      : 323.5 kB (before), 323.5 kB (after)
+ ! Using parallel search with 2 workers.
+ ! ----------------------------------------------------------------------------
+ !               Branches  Non-fixed    W       Branch decision
+ *                      1 0.00s         1            -
+ ! ----------------------------------------------------------------------------
+ ! Search terminated normally, 1 solution found.
+ ! Number of branches     : 204
+ ! Number of fails        : 44
+ ! Total memory usage     : 1.1 MB (1.1 MB CP Optimizer + 0.0 MB Concert)
+ ! Time spent in solve    : 0.00s (0.00s engine + 0.00s extraction)
+ ! Search speed (br. / s) : 20400.0
+ ! ----------------------------------------------------------------------------
+masonry   [1: 0 -- 35 --&gt; 35]
+carpentry [1: 35 -- 15 --&gt; 50]
+plumbing  [1: 35 -- 40 --&gt; 75]
+ceiling   [1: 35 -- 15 --&gt; 50]
+roofing   [1: 50 -- 5 --&gt; 55]
+painting  [1: 50 -- 10 --&gt; 60]
+windows   [1: 55 -- 5 --&gt; 60]
+facade    [1: 75 -- 10 --&gt; 85]
+garden    [1: 75 -- 5 --&gt; 80]
+moving    [1: 85 -- 5 --&gt; 90]
+Number of branches      : 204
+Number of fails         : 44
+Number of choice points : 132
+Number of variables     : 10
+Number of constraints   : 2
+Total memory usage      : 1.1 MB (1.1 MB CP + 0.0 MB Concert)
+Time in last solve      : 0.01s (0.01s engine + 0.00s extraction)
+Total time spent in CP  : 0.01s</code></pre>
+<p class="p">To understand the solution found by CP Optimizer to this satisfiability
+scheduling problem, consider the line:      </p>
+<pre class="pre codeblock"><code>masonry [1: 0 -- 35 --&gt; 35]
+</code></pre>
+<p class="p">The interval variable representing the masonry task, which has
+size 35, has been assigned the interval [0,35). Masonry starts at
+time 0 and ends at the time point 35. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Displaying interval variables </strong> </p>
+ <p class="p">After a time
+interval has been assigned a start value (say <samp class="ph codeph">s</samp>)
+and an end value (say <samp class="ph codeph">e</samp>), the interval is written
+as <samp class="ph codeph">[s,e)</samp>. The time interval does not include the
+endpoint <samp class="ph codeph">e</samp>. If another interval variable is constrained
+to be placed after this interval, it can start at the time <samp class="ph codeph">e</samp>.
+ </p>
+ </div>
+<p class="p">In subsequent lessons in this manual, the log output is not included
+in the sections which report the results. You can view the log information
+when you build and run the completed programs. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/intro.html" title="Solving constraint programming problems with CP Optimizer can be broken into three steps: describing the problem, modeling the problem and finding solutions to the model of the problem. A basic constraint programming problem model consists of decision variables and constraints on those variables. Finding a solution to a model involves constraint propagation and search.">Constraint programming with CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

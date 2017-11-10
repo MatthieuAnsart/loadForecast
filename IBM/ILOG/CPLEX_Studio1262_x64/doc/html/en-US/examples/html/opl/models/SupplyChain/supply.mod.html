@@ -1,0 +1,448 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/************************************************************</font></b>
+013: <b><font color="#007D00">* Supply Chain Optimization</font></b>
+014: <b><font color="#007D00">* </font></b>
+015: <b><font color="#007D00">* This model is described in the documentation. </font></b>
+016: <b><font color="#007D00">* See "IDE and OPL &gt; Language and Interfaces Examples &gt; OPL model library" </font></b>
+017: <b><font color="#007D00">*</font></b>
+018: <b><font color="#007D00">* This model is greater than the size allowed in trial mode. </font></b>
+019: <b><font color="#007D00">* You therefore need a commercial edition of CPLEX Studio to run this example. </font></b>
+020: <b><font color="#007D00">* If you are a student or teacher, you can also get a full version through</font></b>
+021: <b><font color="#007D00">* the IBM Academic Initiative.</font></b>
+022: <b><font color="#007D00">*************************************************************/</font></b>
+023: 
+024: <b><font color="#0000FF">execute</font></b> {
+025:    <b><font color="#0000FF">cplex</font></b>.epgap = 0.001;
+026: }
+027: 
+028: //********************* Data *********************************
+029: int NumMonths = ...;
+030: range Months = 1..NumMonths;
+031: 
+032: {string} Products = ...;
+033: 
+034: {string} Aplants = ...;    
+035: {string} Bplants = ...;
+036: {string} BExternal = ...;
+037: {string} Cplants = ...;
+038: 
+039: {string} Acustomers = ...;
+040: {string} Bcustomers = ...;
+041: {string} Ccustomers = ...;
+042: 
+043: 
+044: tuple custSource {        <b><font color="#007D00">//Customers' information</font></b>
+045:   string cust;
+046:   string Source;
+047:   <b><font color="#0000FF">float</font></b>  pricePerTon;
+048:   <b><font color="#0000FF">float</font></b>  distCostPerTon;
+049:   <b><font color="#0000FF">float</font></b>  markSalesCost;
+050: }
+051: 
+052: tuple custMonthlyDemand { 
+053:   string cust;
+054:   <b><font color="#0000FF">float</font></b>  monthlyDemand[Months];
+055: }   
+056: 
+057: // Customer Information 
+058: {custSource} CustSourceSetA = ...;
+059: {custMonthlyDemand} CustMonDemandA = ...;
+060: 
+061: {custSource} CustSourceSetB = ...;
+062: {custMonthlyDemand} CustMonDemandB = ...;
+063: 
+064: {custSource} CustSourceSetC = ...;
+065: {custMonthlyDemand} CustMonDemandC = ...;
+066: 
+067: 
+068: // Production Information
+069: tuple BandCProductionData {
+070:   string manPlanName;
+071:   <b><font color="#0000FF">float</font></b>  feedStockToDownProdRatio;
+072:   <b><font color="#0000FF">float</font></b>  conversionCost;     <b><font color="#007D00">// $ per ton</font></b>
+073:   <b><font color="#0000FF">float</font></b>  productionCap;      <b><font color="#007D00">// tons per hour</font></b>
+074:   <b><font color="#0000FF">float</font></b>  manuReliability;    <b><font color="#007D00">// manufacturing reliability (%)</font></b>
+075:   <b><font color="#0000FF">float</font></b>  finProdStorCap;     <b><font color="#007D00">// finished product storage capacity - inventory max</font></b>
+076:   <b><font color="#0000FF">float</font></b>  feedStockStorCap;   <b><font color="#007D00">// feedstock storage capacity (tons)</font></b>
+077: }
+078: 
+079: tuple BandCfeedstockData {
+080:   string manPlanName;
+081:   string feedstockSource;  
+082:   <b><font color="#0000FF">float</font></b>  feedstockLogisticsCost;
+083:   <b><font color="#0000FF">float</font></b>  feedstockReplLotSize; <b><font color="#007D00">//feedstock replenishment lot size</font></b>
+084: }
+085: 
+086: {BandCProductionData} BProductionData  = ...;
+087: {BandCfeedstockData} BfeedstockData  = ...;
+088: {BandCProductionData} CProductionData  = ...;
+089: {BandCfeedstockData} CfeedstockData  = ...;
+090: {BandCfeedstockData} CExfeedstockData = ...;
+091: 
+092: //Inventory at start 
+093: float BegInvA[Aplants] = ...; 
+094: float BegInvB[Bplants] = ...; 
+095: float BegInvC[Cplants] = ...;
+096: 
+097: // Route Connections
+098: tuple route {
+099:   string o;   <b><font color="#007D00">// Origin</font></b>
+100:   string d;   <b><font color="#007D00">// Destination</font></b>
+101: }
+102: 
+103: // All routes from A to A's customers         
+104: {route} ARoutesCust = { &lt;o,d&gt; | 
+105:    &lt;d, o, pricePerTon, distCostPerTon, markSalesCost&gt; <b><font color="EA7D00">in</font></b> CustSourceSetA };
+106: 
+107: // All routes from B to B's customers         
+108: {route} BRoutesCust = { &lt;o,d&gt; | 
+109:    &lt;d, o, pricePerTon, distCostPerTon, markSalesCost&gt; <b><font color="EA7D00">in</font></b> CustSourceSetB };   
+110: 
+111: // All routes from C to C's customers         
+112: {route} CRoutesCust = { &lt;o,d&gt; | 
+113:    &lt;d, o, pricePerTon, distCostPerTon, markSalesCost&gt; <b><font color="EA7D00">in</font></b> CustSourceSetC };         
+114: 
+115: // All routes from A's plants to B
+116: {route} ARoutesPlant = { &lt;o,d&gt; | &lt;d, o, feedstockLogisticsCost, feedstockReplLotSize 
+117:          &gt; <b><font color="EA7D00">in</font></b> BfeedstockData };
+118: // All routes from B's plants to C 
+119: {route} BRoutesPlant = { &lt;o,d&gt; | &lt;d, o, feedstockLogisticsCost, feedstockReplLotSize
+120:          &gt; <b><font color="EA7D00">in</font></b> CfeedstockData };
+121: // All routes from outsources to C
+122: {route} BExternalRoutesPlant = { &lt;o,d&gt; | &lt;d, o, feedstockLogisticsCost, feedstockRepLotSize
+123:          &gt; <b><font color="EA7D00">in</font></b> CExfeedstockData };
+124:      
+125: // Production Quantities for each month at each plant
+126: dvar float+ ProductionA[Months][Aplants];  
+127: dvar float+ ProductionB[Months][Bplants];
+128: dvar float+ ProductionC[Months][Cplants];
+129: 
+130: // Shipment on each route each month
+131: dvar float+ ShipmentACust[Months][ARoutesCust];
+132: dvar float+ ShipmentBCust[Months][BRoutesCust];
+133: dvar float+ ShipmentCCust[Months][CRoutesCust];
+134: 
+135: dvar float+ ShipmentAPlants[Months][ARoutesPlant]; 
+136: dvar float+ ShipmentBPlants[Months][BRoutesPlant];
+137: dvar float+ ShipmentBExPlants[Months][BExternalRoutesPlant];
+138: dvar int+ NumLotsShipAPlants[Months][ARoutesPlant] in 0..50;
+139: dvar int+ NumLotsShipBPlants[Months][BRoutesPlant] in 0..50;
+140: dvar int+ NumLotsShipBExPlants[Months][BExternalRoutesPlant] in 0..10;
+141: 
+142: // Inventories at each plant
+143: range R0 = 0..NumMonths;
+144: dvar float+ InventoryA[R0][Aplants];
+145: dvar float+ InventoryB[R0][Bplants];
+146: dvar float+ InventoryC[R0][Cplants];
+147: 
+148: // Spot Price
+149: float SpotPrice[Acustomers] = ...;
+150: 
+151: // Costs
+152: dvar float+ CostBFL[Months][Bplants];
+153: dvar float+ CostBConversion[Months][Bplants];
+154: dvar float+ CostCFL[Months][Cplants];
+155: dvar float+ CostCFLEx[Months][Cplants];
+156: dvar float+ CostCConversion[Months][Cplants];
+157: dvar float+ CostCConversionEx[Months][Cplants];
+158: 
+159: dexpr float TotalCost =
+160:  sum(mon in Months, b in Bplants) CostBFL[mon][b] + 
+161:            sum(mon in Months, b in Bplants) CostBConversion[mon][b] + 
+162:            sum(mon in Months, c in Cplants) CostCFL[mon][c] + 
+163:            sum(mon in Months, c in Cplants) CostCConversion[mon][c] + 
+164:            sum(mon in Months, c in Cplants) CostCFLEx[mon][c] + 
+165:            sum(mon in Months, c in Cplants) CostCConversionEx[mon][c];
+166:            
+167: dexpr float ProfitSpotMarket =
+168:   sum(c in Acustomers, i in Months, ar in ARoutesCust: ar.d == c) SpotPrice[c]*ShipmentACust[i][ar];      
+169:            
+170: minimize TotalCost - ProfitSpotMarket;
+171: 
+172: subject to {   
+173:                            
+174:   <b><font color="#007D00">// conversion cost + feedstock logistics cost</font></b>
+175:   forall(mon <b><font color="EA7D00">in</font></b> Months) {
+176:     
+177:     <b><font color="#007D00">// From A Plants</font></b>
+178:     forall(bprod <b><font color="EA7D00">in</font></b> BProductionData) {
+179:       CostBFL[mon][bprod.manPlanName] == sum(bfeed <b><font color="EA7D00">in</font></b> BfeedstockData: bprod.manPlanName == bfeed.manPlanName) 
+180:             (ShipmentAPlants[mon][&lt;bfeed.feedstockSource,bfeed.manPlanName&gt;] * bfeed.feedstockLogisticsCost);  
+181:       CostBConversion[mon][bprod.manPlanName] == bprod.conversionCost * 
+182:             (sum(bfeed <b><font color="EA7D00">in</font></b> BfeedstockData: bprod.manPlanName == bfeed.manPlanName) 
+183:                (ShipmentAPlants[mon][&lt;bfeed.feedstockSource,bfeed.manPlanName&gt;]));
+184:     }
+185:       
+186:     <b><font color="#007D00">// From B Plants</font></b>
+187:     forall(cprod <b><font color="EA7D00">in</font></b> CProductionData) {
+188:       CostCFL[mon][cprod.manPlanName] == sum(cfeed <b><font color="EA7D00">in</font></b> CfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+189:             (ShipmentBPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;] * cfeed.feedstockLogisticsCost);    
+190:       CostCConversion[mon][cprod.manPlanName] == cprod.conversionCost * 
+191:             (sum(cfeed <b><font color="EA7D00">in</font></b> CfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+192:                (ShipmentBPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;]));
+193:     }
+194:            
+195:     <b><font color="#007D00">// From B External Plants</font></b>
+196:     forall(cprod <b><font color="EA7D00">in</font></b> CProductionData) {
+197:       CostCFLEx[mon][cprod.manPlanName] == sum(cfeed <b><font color="EA7D00">in</font></b> CExfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+198:             (ShipmentBExPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;] * cfeed.feedstockLogisticsCost);  
+199:       CostCConversionEx[mon][cprod.manPlanName] == cprod.conversionCost * 
+200:             (sum(cfeed <b><font color="EA7D00">in</font></b> CExfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+201:                (ShipmentBExPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;]));
+202:     }    
+203:   }
+204:     
+205:   <b><font color="#007D00">// Inventory constraints</font></b>
+206:   <b><font color="#007D00">// Set initial inventory</font></b>
+207:   forall(aplant <b><font color="EA7D00">in</font></b> Aplants) InventoryA[0][aplant] == BegInvA[aplant];
+208:   forall(bplant <b><font color="EA7D00">in</font></b> Bplants) InventoryB[0][bplant] == BegInvB[bplant];
+209:   forall(cplant <b><font color="EA7D00">in</font></b> Cplants) InventoryC[0][cplant] == BegInvC[cplant];
+210:    
+211:   <b><font color="#007D00">// Set Inventory Maximums</font></b>
+212:   <b><font color="#007D00">// constraint constBInvStorCap[BProductionData][0..numMonths]; </font></b>
+213:   forall(b <b><font color="EA7D00">in</font></b> BProductionData, mon <b><font color="EA7D00">in</font></b> 0..NumMonths)
+214:     ctBInvStorCap:  
+215:       InventoryB[mon][b.manPlanName] &lt;= b.finProdStorCap;  
+216:       
+217:   forall(c <b><font color="EA7D00">in</font></b> CProductionData, mon <b><font color="EA7D00">in</font></b> 0..NumMonths)
+218:     ctCInvStorCap:
+219:       InventoryC[mon][c.manPlanName] &lt;= c.finProdStorCap;
+220:          
+221:   <b><font color="#007D00">// Production constraints</font></b>
+222:   forall(mon <b><font color="EA7D00">in</font></b> Months, aplant <b><font color="EA7D00">in</font></b> Aplants) 
+223:     ProductionA[mon][aplant] + InventoryA[mon-1][aplant] ==
+224:       sum(ar <b><font color="EA7D00">in</font></b> ARoutesCust: ar.o == aplant) ShipmentACust[mon][ar] + 
+225:       sum(ar <b><font color="EA7D00">in</font></b> ARoutesPlant: ar.o == aplant) ShipmentAPlants[mon][ar] + 
+226:       InventoryA[mon][aplant];                 
+227:    
+228:   forall(mon <b><font color="EA7D00">in</font></b> Months, bplant <b><font color="EA7D00">in</font></b> Bplants)
+229:     ProductionB[mon][bplant] + InventoryB[mon-1][bplant] ==
+230:       sum(br <b><font color="EA7D00">in</font></b> BRoutesCust: br.o == bplant) ShipmentBCust[mon][br] + 
+231:       sum(br <b><font color="EA7D00">in</font></b> BRoutesPlant: br.o == bplant) ShipmentBPlants[mon][br] + 
+232:       InventoryB[mon][bplant];
+233: 
+234:   forall(mon <b><font color="EA7D00">in</font></b> Months, cplant <b><font color="EA7D00">in</font></b> Cplants)
+235:     ProductionC[mon][cplant] + InventoryC[mon-1][cplant] ==
+236:     sum(cr <b><font color="EA7D00">in</font></b> CRoutesCust: cr.o == cplant) ShipmentCCust [mon][cr] + 
+237:     InventoryC[mon][cplant];
+238:    
+239:   <b><font color="#007D00">// Lot size constraints</font></b>
+240:   forall(mon <b><font color="EA7D00">in</font></b> Months) {
+241:     forall(bfeed <b><font color="EA7D00">in</font></b> BfeedstockData: bfeed.feedstockReplLotSize &gt; 0) 
+242:        ShipmentAPlants[mon][&lt;bfeed.feedstockSource,bfeed.manPlanName&gt;] == 
+243:           bfeed.feedstockReplLotSize * NumLotsShipAPlants[mon][&lt;bfeed.feedstockSource,bfeed.manPlanName&gt;];
+244: 
+245:     forall(cfeed <b><font color="EA7D00">in</font></b> CfeedstockData: cfeed.feedstockReplLotSize &gt; 0) 
+246:        ShipmentBPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;] == 
+247:           cfeed.feedstockReplLotSize * NumLotsShipBPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;];
+248: 
+249:     forall(cfeed <b><font color="EA7D00">in</font></b> CExfeedstockData: cfeed.feedstockReplLotSize &gt; 0)
+250:        ShipmentBExPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;] == 
+251:           cfeed.feedstockReplLotSize * NumLotsShipBExPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;];
+252:   }          
+253: 
+254: 
+255:   <b><font color="#007D00">// Maximum shipment from External B plants</font></b>
+256:   forall(mon <b><font color="EA7D00">in</font></b> Months, bplant <b><font color="EA7D00">in</font></b> BExternal)
+257:     CtExtB:
+258:        sum(be <b><font color="EA7D00">in</font></b> BExternalRoutesPlant: be.o == bplant)  
+259:           <b><font color="#007D00">// *External Suppliers can supply a maximum of 25000 tons/month</font></b>
+260:           ShipmentBExPlants[mon][be] &lt;= 25000;
+261:  
+262:   <b><font color="#007D00">// Production at a "C" plant = feedStockToDownProdRatio * amount from B feedstock sources</font></b>
+263:   forall(mon <b><font color="EA7D00">in</font></b> Months) {   
+264:     forall(cprod <b><font color="EA7D00">in</font></b> CProductionData) {
+265:       ProductionC[mon][cprod.manPlanName] == 
+266:           cprod.manuReliability * cprod.feedStockToDownProdRatio * 
+267:            (<b><font color="#007D00">/*internal*/</font></b> sum(cfeed <b><font color="EA7D00">in</font></b> CfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+268:                          ShipmentBPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;] + 
+269:             <b><font color="#007D00">/*external*/</font></b> sum(cfeed <b><font color="EA7D00">in</font></b> CExfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+270:                          ShipmentBExPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;]
+271:            ); 
+272:     }                       
+273:   }
+274:    
+275:   <b><font color="#007D00">// Production at a "B" plant = feedStockToDownProdRatio * amount from A feedstock sources</font></b>
+276:   forall(mon <b><font color="EA7D00">in</font></b> Months) {   
+277:     forall(bprod <b><font color="EA7D00">in</font></b> BProductionData) {
+278:       ProductionB[mon][bprod.manPlanName] == 
+279:          bprod.manuReliability * bprod.feedStockToDownProdRatio * 
+280:            (<b><font color="#007D00">/*internal*/</font></b> sum(bfeed <b><font color="EA7D00">in</font></b> BfeedstockData: bprod.manPlanName == bfeed.manPlanName) 
+281:                          ShipmentAPlants[mon][&lt;bfeed.feedstockSource,bfeed.manPlanName&gt;]
+282:            );                      
+283:     }                       
+284:   }
+285:    
+286: 
+287:   <b><font color="#007D00">// Feedstock Storage Capacity constraints - C plants</font></b>
+288:   forall(mon <b><font color="EA7D00">in</font></b> Months, cprod <b><font color="EA7D00">in</font></b> CProductionData)
+289:     CtfeedStorCapC:
+290:       10*cprod.feedStockStorCap &gt;=  
+291:             <b><font color="#007D00">//internal</font></b>
+292:             sum(cfeed <b><font color="EA7D00">in</font></b> CfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+293:                ShipmentBPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;] +  
+294:             sum(cfeed <b><font color="EA7D00">in</font></b> CExfeedstockData: cprod.manPlanName == cfeed.manPlanName) 
+295:                ShipmentBExPlants[mon][&lt;cfeed.feedstockSource,cfeed.manPlanName&gt;];
+296: 
+297:   <b><font color="#007D00">// Feedstock Storage Capacity constraints - B plants</font></b>
+298:   forall(mon <b><font color="EA7D00">in</font></b> Months, bprod <b><font color="EA7D00">in</font></b> BProductionData)
+299:     CtfeedStorCapB:
+300:       10*bprod.feedStockStorCap &gt;= 
+301:          <b><font color="#007D00">//internal </font></b>
+302:          sum(bfeed <b><font color="EA7D00">in</font></b> BfeedstockData: bprod.manPlanName == bfeed.manPlanName) 
+303:             ShipmentAPlants[mon][&lt;bfeed.feedstockSource,bfeed.manPlanName&gt;];
+304:    
+305:   <b><font color="#007D00">// Demand constraints</font></b>
+306:   forall(cm <b><font color="EA7D00">in</font></b> CustMonDemandA, mon <b><font color="EA7D00">in</font></b> Months)
+307:     cm.monthlyDemand[mon] &gt;=  
+308:       sum(cs <b><font color="EA7D00">in</font></b> CustSourceSetA: cm.cust == cs.cust) ShipmentACust[mon][&lt;cs.Source,cs.cust&gt;];  
+309:                     
+310:   forall(cm <b><font color="EA7D00">in</font></b> CustMonDemandC, mon <b><font color="EA7D00">in</font></b> Months)
+311:     cm.monthlyDemand[mon] ==
+312:       sum(cs <b><font color="EA7D00">in</font></b> CustSourceSetC: cm.cust == cs.cust) ShipmentCCust[mon][&lt;cs.Source,cs.cust&gt;];
+313:   
+314:   forall(cm <b><font color="EA7D00">in</font></b> CustMonDemandB, mon <b><font color="EA7D00">in</font></b> Months)
+315:     cm.monthlyDemand[mon] ==  
+316:       sum(cs <b><font color="EA7D00">in</font></b> CustSourceSetB: cm.cust == cs.cust) ShipmentBCust[mon][&lt;cs.Source,cs.cust&gt;];
+317:       
+318: }
+319: 
+320: 
+321: 
+322: tuple CostBFLSolutionT{ 
+323:         <b><font color="#0000FF">int</font></b> Months; 
+324:         string Bplants; 
+325:         <b><font color="#0000FF">float</font></b> value; 
+326: };
+327: {CostBFLSolutionT} CostBFLSolution = {&lt;i0,i1,CostBFL[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Bplants};
+328: tuple CostBConversionSolutionT{ 
+329:         <b><font color="#0000FF">int</font></b> Months; 
+330:         string Bplants; 
+331:         <b><font color="#0000FF">float</font></b> value; 
+332: };
+333: {CostBConversionSolutionT} CostBConversionSolution = {&lt;i0,i1,CostBConversion[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Bplants};
+334: tuple CostCFLSolutionT{ 
+335:         <b><font color="#0000FF">int</font></b> Months; 
+336:         string Cplants; 
+337:         <b><font color="#0000FF">float</font></b> value; 
+338: };
+339: {CostCFLSolutionT} CostCFLSolution = {&lt;i0,i1,CostCFL[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Cplants};
+340: tuple CostCConversionSolutionT{ 
+341:         <b><font color="#0000FF">int</font></b> Months; 
+342:         string Cplants; 
+343:         <b><font color="#0000FF">float</font></b> value; 
+344: };
+345: {CostCConversionSolutionT} CostCConversionSolution = {&lt;i0,i1,CostCConversion[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Cplants};
+346: tuple CostCFLExSolutionT{ 
+347:         <b><font color="#0000FF">int</font></b> Months; 
+348:         string Cplants; 
+349:         <b><font color="#0000FF">float</font></b> value; 
+350: };
+351: {CostCFLExSolutionT} CostCFLExSolution = {&lt;i0,i1,CostCFLEx[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Cplants};
+352: tuple CostCConversionExSolutionT{ 
+353:         <b><font color="#0000FF">int</font></b> Months; 
+354:         string Cplants; 
+355:         <b><font color="#0000FF">float</font></b> value; 
+356: };
+357: {CostCConversionExSolutionT} CostCConversionExSolution = {&lt;i0,i1,CostCConversionEx[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Cplants};
+358: tuple ShipmentACustSolutionT{ 
+359:         <b><font color="#0000FF">int</font></b> Months; 
+360: route ARoutesCust;      <b><font color="#0000FF">float</font></b> value; 
+361: };
+362: {ShipmentACustSolutionT} ShipmentACustSolution = {&lt;i0,i1,ShipmentACust[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> ARoutesCust};
+363: tuple ShipmentAPlantsSolutionT{ 
+364:         <b><font color="#0000FF">int</font></b> Months; 
+365: route ARoutesPlant;     <b><font color="#0000FF">float</font></b> value; 
+366: };
+367: {ShipmentAPlantsSolutionT} ShipmentAPlantsSolution = {&lt;i0,i1,ShipmentAPlants[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> ARoutesPlant};
+368: tuple ShipmentBPlantsSolutionT{ 
+369:         <b><font color="#0000FF">int</font></b> Months; 
+370: route BRoutesPlant;     <b><font color="#0000FF">float</font></b> value; 
+371: };
+372: {ShipmentBPlantsSolutionT} ShipmentBPlantsSolution = {&lt;i0,i1,ShipmentBPlants[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> BRoutesPlant};
+373: tuple ShipmentBExPlantsSolutionT{ 
+374:         <b><font color="#0000FF">int</font></b> Months; 
+375: route BExternalRoutesPlant;     <b><font color="#0000FF">float</font></b> value; 
+376: };
+377: {ShipmentBExPlantsSolutionT} ShipmentBExPlantsSolution = {&lt;i0,i1,ShipmentBExPlants[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> BExternalRoutesPlant};
+378: tuple InventoryASolutionT{ 
+379:         <b><font color="#0000FF">int</font></b> R; 
+380:         string Aplants; 
+381:         <b><font color="#0000FF">float</font></b> value; 
+382: };
+383: {InventoryASolutionT} InventoryASolution = {&lt;i0,i1,InventoryA[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> R0,i1 <b><font color="EA7D00">in</font></b> Aplants};
+384: tuple InventoryBSolutionT{ 
+385:         <b><font color="#0000FF">int</font></b> R; 
+386:         string Bplants; 
+387:         <b><font color="#0000FF">float</font></b> value; 
+388: };
+389: {InventoryBSolutionT} InventoryBSolution = {&lt;i0,i1,InventoryB[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> R0,i1 <b><font color="EA7D00">in</font></b> Bplants};
+390: tuple InventoryCSolutionT{ 
+391:         <b><font color="#0000FF">int</font></b> R; 
+392:         string Cplants; 
+393:         <b><font color="#0000FF">float</font></b> value; 
+394: };
+395: {InventoryCSolutionT} InventoryCSolution = {&lt;i0,i1,InventoryC[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> R0,i1 <b><font color="EA7D00">in</font></b> Cplants};
+396: tuple ProductionASolutionT{ 
+397:         <b><font color="#0000FF">int</font></b> Months; 
+398:         string Aplants; 
+399:         <b><font color="#0000FF">float</font></b> value; 
+400: };
+401: {ProductionASolutionT} ProductionASolution = {&lt;i0,i1,ProductionA[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Aplants};
+402: tuple ProductionBSolutionT{ 
+403:         <b><font color="#0000FF">int</font></b> Months; 
+404:         string Bplants; 
+405:         <b><font color="#0000FF">float</font></b> value; 
+406: };
+407: {ProductionBSolutionT} ProductionBSolution = {&lt;i0,i1,ProductionB[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Bplants};
+408: tuple ShipmentBCustSolutionT{ 
+409:         <b><font color="#0000FF">int</font></b> Months; 
+410:         route BRoutesCust;      
+411:         <b><font color="#0000FF">float</font></b> value; 
+412: };
+413: {ShipmentBCustSolutionT} ShipmentBCustSolution = {&lt;i0,i1,ShipmentBCust[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> BRoutesCust};
+414: tuple ProductionCSolutionT{ 
+415:         <b><font color="#0000FF">int</font></b> Months; 
+416:         string Cplants; 
+417:         <b><font color="#0000FF">float</font></b> value; 
+418: };
+419: {ProductionCSolutionT} ProductionCSolution = {&lt;i0,i1,ProductionC[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> Cplants};
+420: tuple ShipmentCCustSolutionT{ 
+421:         <b><font color="#0000FF">int</font></b> Months; 
+422:         route CRoutesCust;      
+423:         <b><font color="#0000FF">float</font></b> value; 
+424: };
+425: {ShipmentCCustSolutionT} ShipmentCCustSolution = {&lt;i0,i1,ShipmentCCust[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> CRoutesCust};
+426: tuple NumLotsShipAPlantsSolutionT{ 
+427:         <b><font color="#0000FF">int</font></b> Months; 
+428:         route ARoutesPlant;     
+429:         <b><font color="#0000FF">int</font></b> value; 
+430: };
+431: {NumLotsShipAPlantsSolutionT} NumLotsShipAPlantsSolution = {&lt;i0,i1,NumLotsShipAPlants[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> ARoutesPlant};
+432: tuple NumLotsShipBPlantsSolutionT{ 
+433:         <b><font color="#0000FF">int</font></b> Months; 
+434:         route BRoutesPlant;     
+435:         <b><font color="#0000FF">int</font></b> value; 
+436: };
+437: {NumLotsShipBPlantsSolutionT} NumLotsShipBPlantsSolution = {&lt;i0,i1,NumLotsShipBPlants[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> BRoutesPlant};
+438: tuple NumLotsShipBExPlantsSolutionT{ 
+439:         <b><font color="#0000FF">int</font></b> Months; 
+440:         route BExternalRoutesPlant;     
+441:         <b><font color="#0000FF">int</font></b> value; 
+442: };
+443: {NumLotsShipBExPlantsSolutionT} NumLotsShipBExPlantsSolution = {&lt;i0,i1,NumLotsShipBExPlants[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Months,i1 <b><font color="EA7D00">in</font></b> BExternalRoutesPlant};
+</tt></pre>

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using state functions: house building with state incompatibilities" />
+<meta name="abstract" content="Describes how to use state functions to take into account incompatible states as tasks finish." />
+<meta name="Description" content="Describes how to use state functions to take into account incompatible states as tasks finish." />
+<meta name="DC.subject" content="state functions, limit, fail, fail limit, state function, viewing results in the IDE" />
+<meta name="keywords" content="state functions, limit, fail, fail limit, state function, viewing results in the IDE" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="tvI4ZzEn" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Using state functions: house building with state incompatibilities</title>
+</head>
+<body role="main" id="tvI4ZzEn">
+<h1 class="title topictitle1">Using state functions: house building with state incompatibilities</h1>
+<div class="body"><p class="shortdesc">Describes how to use state functions to take into account incompatible states as tasks finish.</p>
+<p class="p">In this section, you will learn how to:</p>
+<ul class="ul"><li class="li"><p class="p">use the keyword <span class="keyword apiname">stateFunction</span>.</p>
+</li>
+<li class="li"><p class="p">use the constraint <span class="keyword apiname">alwaysEqual</span>;</p>
+</li>
+</ul>
+<p class="p">You will learn how to model and solve a house building problem, a problem of scheduling the tasks involved in building multiple houses. Some tasks must necessarily take place before other tasks, and each task has a predefined size. Moreover, there are two workers, and each task requires either one of the two workers. A subset of the tasks require that the house be clean, whereas other tasks make the house dirty. A transition time is needed to change the state of the house from dirty to clean. To find a solution to this problem using IBM ILOG OPL, you will use the three-stage method: describe, model, and solve.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="k2WbOlVt"><h2 class="title topictitle2">Describe</h2>
+<div class="body"><p class="p">The problem consists of assigning start dates to a set of tasks in such a way that the schedule satisfies temporal constraints and minimizes an expression. The objective for this problem is to minimize the overall completion date.</p>
+<p class="p">For each task type in the house building project, the following table shows the duration of the task in days along with state of the house during the task. A worker can only work on one task at a time; each task, once started, may not be interrupted.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four column table that lists the ten tasks in the house building problem, the duration of each task, in days, the state of the house during the task, and the tasks that must precede." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. House construction tasks</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d870671e50">Task</th>
+<th class="entry" align="left" valign="top" id="d870671e52">Duration</th>
+<th class="entry" align="left" valign="top" id="d870671e54">State</th>
+<th class="entry" align="left" valign="top" id="d870671e56">Preceding tasks</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">35</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 ">dirty</td>
+<td class="entry" align="left" valign="top" headers="d870671e56 "> </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">15</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 ">dirty</td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">plumbing</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">40</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 ">clean</td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">15</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 ">clean</td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">roofing</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">5</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 ">dirty</td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">carpentry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">painting</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">10</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 ">clean</td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">ceiling</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">windows</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">5</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 ">dirty</td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">roofing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">facade</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">10</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 "> </td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">garden</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">5</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 "> </td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d870671e50 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d870671e52 ">5</td>
+<td class="entry" align="left" valign="top" headers="d870671e54 "> </td>
+<td class="entry" align="left" valign="top" headers="d870671e56 ">windows, facade, garden, painting </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Solving the problem consists of determining starting dates for the tasks such that the overall completion date is minimized. </p>
+<div class="section" id="k2WbOlVt__EbMn6HJ5"><h3 class="title sectiontitle">Step 1: Describe the problem</h3><p class="p">The first step in modeling and solving the problem is to write a natural language description of the problem, identifying the decision variables and the constraints on these variables.</p>
+<p class="p">Write a natural language description of this problem. Answer these questions:</p>
+<ul class="ul"><li class="li"><p class="p">What is the known information in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the decision variables or unknowns in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the constraints on these variables?</p>
+ </li>
+<li class="li"><p class="p">What is the objective?</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="k2WbOlVt__AGNiIi8H"><h3 class="title sectiontitle">Discussion</h3><p class="p">What is the known information in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">There are five houses to be built by two workers. For each house, there are ten house building tasks, each with a given size. For each task, there is a list of tasks that must be completed before the task can start. There are two workers. There is a transition time associated with changing the state of a house from dirty to clean.</p>
+</li>
+</ul>
+<p class="p">What are the decision variables or unknowns in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">The unknowns are the date that each task will start. The cost is determined by the assigned start dates. </p>
+ </li>
+</ul>
+<p class="p">What are the constraints on these variables?</p>
+<ul class="ul"><li class="li"><p class="p">There are constraints that specify that a particular task may not begin until one or more given tasks have been completed. Each task requires either one of the two workers. Some tasks have a specified house cleanliness state.</p>
+ </li>
+</ul>
+<p class="p">What is the objective?</p>
+<ul class="ul"><li class="li"><p class="p">The objective is to minimize the overall completion date.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="O1soAXXp"><h2 class="title topictitle2">Model</h2>
+<div class="body"><p class="p">After you have written a description of your problem, you can use IBM ILOG OPL to model and solve it.</p>
+<div class="section" id="O1soAXXp__qmRg3y3t"><h3 class="title sectiontitle">Step 2: Open the example file</h3><ul class="ul"><li class="li"><p class="p">Still working with the <span class="ph uicontrol">scheduling_tutorial</span> project, open the <span class="ph uicontrol">sched_state.mod</span> file in the CPLEX Studio IDE.</p>
+ </li>
+</ul>
+<p class="p">This file is an OPL model that is only partially completed. You will add the missing code in each step of this lesson. At the end, you will have completed the OPL model.</p>
+<p class="p">The code for reading the data into the data structures from the data file is provided.</p>
+<p class="p">In the related data file, the data provided includes the number of houses (<samp class="ph codeph">NbHouses</samp>), the number of workers (<samp class="ph codeph">NbWorkers</samp>), the names of the tasks (<samp class="ph codeph">TaskNames</samp>), the sizes of the tasks (<samp class="ph codeph">Duration</samp>), the precedence relations (<samp class="ph codeph">Precedences</samp>), and the cleanliness state of each task (<samp class="ph codeph">AllStates</samp>).</p>
+<p class="p">Each house has a list of tasks that must be scheduled. The duration, or size, of each task <samp class="ph codeph">t</samp> is <samp class="ph codeph">Duration[t]</samp>. Using this information, you build a matrix <samp class="ph codeph">task</samp> of interval variables.</p>
+</div>
+<div class="section" id="O1soAXXp__N8qFJkmC"><h3 class="title sectiontitle">Step 3: Create the interval variables</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the interval variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar interval task[h in Houses][t in TaskNames] size Duration[t];</code></pre>
+<p class="p">As in the example <a class="xref" href="opl_gs_sched_use_cumul.html" title="Introduces cumulative functions to the house building problem.">Using cumulative functions in the house building problem</a>, each task requires one worker from the start to the end of the task interval. To represent the fact that a worker is required for the task, you create a cumulative function expression, workers. This function is constrained to not exceed the number of workers at any point in time. The keyword <span class="keyword apiname">pulse</span> adjusts the expression by a given amount on the interval. Summing these pulse atoms over all the interval variables results in an expression that represents worker usage over the entire time frame for building the houses.</p>
+</div>
+<div class="section" id="O1soAXXp__K96GGjrn"><h3 class="title sectiontitle">Step 4: Declare the worker usage functions</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare the worker usage functions</samp>:</p>
+<pre class="pre codeblock"><code>cumulFunction workers = sum (h in Houses, t in TaskNames)
+  pulse(task[h][t], 1);</code></pre>
+<p class="p">The transition time from a dirty state to a clean state is the same for all houses. As in the example <a class="xref" href="opl_gs_sched_add_workers.html" title="Introduces workers and transition times to the house building problem described in the previous section.">Adding workers and transition times to the house building problem</a>, you create a tupleset to represent the transition time <samp class="ph codeph">ttime</samp> between cleanliness states.</p>
+</div>
+<div class="section" id="O1soAXXp__W5j3O6N7"><h3 class="title sectiontitle">Step 5: Create the transition times</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the transition times</samp>:</p>
+<pre class="pre codeblock"><code>tuple triplet { int loc1; int loc2; int value; }; 
+{triplet} ttime = { 
+  &lt;Index["dirty"], Index["clean"], 1&gt;,
+  &lt;Index["clean"], Index["dirty"], 0&gt;
+};</code></pre>
+<p class="p">Certain tasks require the house to be clean, and other tasks cause the house to be dirty. To model the possible states of the house, you use the <span class="keyword apiname">stateFunction</span> keyword to represent the disjoint states through time.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">stateFunction</strong></p>
+ <p class="p">A state function is a function describing the evolution of a given feature of the environment. The possible evolution of this feature is constrained by interval variables of the problem. For example, a scheduling problem may contain a resource whose state changes over time. The resource state can change because of scheduled activities or because of exogenous events; some activities in the schedule may need a particular resource state in order to execute.</p>
+ <p class="p">Interval variables have an absolute effect on a state function, requiring the function value to be equal to a particular state or in a set of possible states. </p>
+ </div>
+</div>
+<div class="section" id="O1soAXXp__PTOgyS2q"><h3 class="title sectiontitle">Step 6: Declare the state function</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare the state function</samp>:</p>
+<pre class="pre codeblock"><code>stateFunction state[h in Houses] with ttime;</code></pre>
+<p class="p">To model the state required or imposed by a task, you create a constraint that specifies the state of the house throughout the interval variable representing that task.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">alwaysEqual</strong></p>
+ <p class="p">The constraint <span class="keyword apiname">alwaysEqual</span>, specifies the value of a state function over the interval variable.</p>
+ <p class="p">The constraint takes a state function, an interval variable, and a state value. Whenever the interval variable is present, the state function is defined everywhere between the start and the end of the interval variable and remains equal to the specified state value over this interval.</p>
+ </div>
+<p class="p">You constrain the state function to take the appropriate values during the tasks that require the house to be in a specific state.</p>
+<p class="p">To add the constraint that there can be only two workers working at a given time, you constrain the cumulative function expression representing worker usage to be no greater than the value <span class="keyword apiname">NbWorkers</span>.</p>
+</div>
+<div class="section" id="O1soAXXp__fmaqva6M"><h3 class="title sectiontitle">Step 7: Add the constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the constraints</samp>:</p>
+<pre class="pre codeblock"><code>subject to {
+  forall(h in Houses) {
+    forall(p in Precedences) {
+      endBeforeStart(task[h][p.pre], task[h][p.post]);
+    }
+    forall(s in States) {
+      alwaysEqual(state[h], task[h][s.task], Index[s.state]);
+    }
+  }
+  workers &lt;= NbWorkers;
+}</code></pre>
+<p class="p">The objective of this problem is to minimize the overall completion date (the completion date of the house that is completed last). </p>
+</div>
+<div class="section" id="O1soAXXp__MImO7dSG"><h3 class="title sectiontitle">Step 8: Add the objective</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the objective</samp>:</p>
+<pre class="pre codeblock"><code>minimize max(h in Houses) endOf(task[h]["moving"]);</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="eiXsOaYM"><h2 class="title topictitle2">Solve</h2>
+<div class="body"><p class="p">The search for an optimal solution in this problem could potentiality take a long time, so a fail limit has been placed on the solve process. The search will stop when the fail limit is reached, even if optimality of the current best solution is not guaranteed. The code for limiting the solve process has been provided for you: </p>
+<pre class="pre codeblock"><code>execute {
+  cp.param.FailLimit = 10000;
+}</code></pre>
+<div class="section" id="eiXsOaYM__PFRvjstF"><h3 class="title sectiontitle">Step 9: Execute the model</h3><p class="p">There are two ways of solving the model:</p>
+<ul class="ul"><li class="li"><p class="p">Execute the model in the CPLEX Studio IDE. You can view the results in a table or a Gantt chart; see <a class="xref" href="opl_gs_sched_state_incompatibilities.html#section1268063248943">Viewing the results of state functions in a Gantt chart</a>.</p>
+</li>
+<li class="li"><p class="p">Execute the model using <samp class="ph codeph">oplrun</samp>. You will need to pass as arguments not only the model file but also the data file, <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/tutorial/sched_state.dat</span>.</p>
+</li>
+</ul>
+<p class="p">You can view the complete model online in the file <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_state/sched_state.mod</span>.</p>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="section1268063248943"><h2 class="title topictitle2">Viewing the results of state functions in a Gantt chart</h2>
+<div class="body"><p class="p">After a problem is solved in the CPLEX Studio IDE, the Problem browser shows both data and decision variable values. If a scheduling model includes the <samp class="ph codeph">stateFunction</samp> keyword or a <samp class="ph codeph">stateFunction</samp> array, their values can be displayed in a dedicated view.</p>
+<p class="p">The sample model:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_state/sched_state.mod</span></p>
+<p class="p">includes a <samp class="ph codeph">stateFunction</samp> array and, after the model is solved, the values of the state functions are displayed in the Problem browser.</p>
+<p class="p">Detailed information can be viewed by clicking the button <img class="image" src="../../gsoplide/images/dataview_button.jpg" alt="Show data view button" /><span class="ph uicontrol">Show data view</span>, which appears when the mouse hovers over a variable name in the Problem browser. In the screen capture below, the button is next to the variable name <samp class="ph codeph">state</samp>. The array is displayed in a tabular view in the central window. Each line of the table is a string representation (that can be copied and pasted) of the value of the state function, as a stepwise function.</p>
+<div class="image"><img class="image" src="../images/state_function.jpg" alt="Screen capture of Gantt for state function" /></div><p class="p">When lines are selected, a Gantt chart below the tabular view shows the selected functions. Each line in the Gantt corresponds to one state function, as a series of intervals. Each interval is labeled with the state value for this interval. Undefined intervals are omitted. The zoom buttons are on the top right of the Gantt chart.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Increasing inference on alternative constraints in the engine" />
+<meta name="abstract" content="Adding redundant cumul functions can increase the inference of the optimizer on alternative constraints." />
+<meta name="Description" content="Adding redundant cumul functions can increase the inference of the optimizer on alternative constraints." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="k51tbJv8" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Increasing inference on alternative constraints in the engine</title>
+</head>
+<body role="main" id="k51tbJv8">
+<h1 class="title topictitle1">Increasing inference on alternative constraints in the engine</h1>
+<div class="body"><p class="shortdesc">Adding redundant cumul functions can increase the inference
+of the optimizer on alternative constraints. </p>
+<p class="p">There may be situations where stronger inference on alternative
+constraints will help the optimizer to find a solution or to converge
+quicker. Given a pool of <samp class="ph codeph">m</samp> alternative
+resources, some activities <samp class="ph codeph">act[i]</samp>, <samp class="ph codeph">i</samp> in <samp class="ph codeph">0..n–1</samp> in
+the schedule need to select one resource from this pool. As described
+in the section <a class="xref" href="designsched_alt.html" title="The alternative constraint between interval variables should be used when an interval variable represents a set of alternative possibilities.">Different uses of the alternative constraint</a>, this can be modeled by a set of <samp class="ph codeph">m</samp> optional
+interval variables <samp class="ph codeph">actOnRes[i][k]</samp> for each
+possible resource <samp class="ph codeph">k</samp> in <samp class="ph codeph">0..m—1</samp> and
+an alternative constraint between <samp class="ph codeph">act[i]</samp> and
+these <samp class="ph codeph">actOnRes[i][k]</samp>. The resource pool
+can also be seen, globally, as a renewable resource of capacity <samp class="ph codeph">m</samp>,
+each activity <samp class="ph codeph">act[i]</samp> requiring one unit
+of this resource. This additional redundant constraint will provide
+the engine a more global view on the number of resources simultaneously
+used at each time point, independently from the actual resource that
+is being allocated to each activity. This redundant constraint can
+be modeled as a cumul function with maximal level as illustrated on
+the sample below.  </p>
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">Sometimes, although the description of the problem in
+natural language mentions the allocation of individual resources to
+an activity, it is not necessary to use a fine grained model and the
+decomposition of the activities as an alternative of optional interval
+variable on each resource will not be necessary. A cumul function
+with maximal level will be sufficient for these cases where resources
+from a resource pool do not have individual characteristics. When
+possible, this will result in a much lighter and efficient model.
+ </p>
+</div>
+<pre class="pre codeblock"><code>IloIntervalVarArray act(env,n);
+IloIntervalVarArray2 actOnRes(env,n);
+for (IloInt i=0; i&lt;n; i++ ) {
+  act[i] = IloIntervalVar(env,pt[i]);
+  actOnRes[i] = IloIntervalVarArray(env,m);
+  for (IloInt j=0; j&lt;m; j++) {
+    actOnRes[i][j] = IloIntervalVar(env);
+    actOnRes.setOptional();
+  }
+  m.add(IloAlternative(env,act[i], actOnRes[i]));     
+}
+
+IloIntervalVarArray2 ResHasAct(env,m);
+for (IloInt j=0; j&lt;m; j++) {
+  resHasAct[j] = IloIntervalVarArray(env,n);
+  for (IloInt i=0; i&lt;n; i++ )
+    resHasAct[j][i] = actOnRes[i][j];
+  m.add(IloNoOverlap(env,resHasAct[j]);
+}
+
+cumulFunction nbUsed(env);
+nbused += IloPulse(act[i], 1);    
+
+// Redundant constraint     
+m.add(nbUsed &lt;= m);</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

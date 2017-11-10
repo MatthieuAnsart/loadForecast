@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: goals in branch &amp; cut" />
+<meta name="abstract" content="Illustrates goals in a C++ application." />
+<meta name="Description" content="Illustrates goals in a C++ application." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_goals.1042812" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<title>Example: goals in branch &amp; cut</title>
+</head>
+<body role="main" id="User_manual.uss_goals.1042812">
+<h1 class="title topictitle1">Example: goals in branch &amp; cut</h1>
+<div class="body"><p class="shortdesc">Illustrates goals in a C++ application.</p>
+<p class="p">Consider the following example to clarify the discussions
+of goals. This example is available as <samp class="ph codeph">ilogoalex1.cpp</samp> in
+the <samp class="ph codeph">examples/src</samp> subdirectory of your CPLEX
+distribution. The equivalent Java implementation can be found as <samp class="ph codeph">GoalEx1.java</samp> in
+the same location. The C#.NET version is in <samp class="ph codeph">Goalex1.cs</samp> and
+the VB.NET version is in <samp class="ph codeph">Goalex1.vb</samp>.</p>
+<p class="p">This example shows how to implement and use a goal for
+controlling the branch strategy used by CPLEX. As discussed, goals
+are implemented as subclasses of the class <samp class="ph codeph">IloCplex::GoalI</samp> 
+(<samp class="ph codeph">IloCplex.Goal</samp> or <samp class="ph codeph">Cplex.Goal</samp>).
+The C++ implementation of that example uses the macro</p>
+<pre class="pre codeblock"><code>ILOCPLEXGOAL1(MyBranchGoal, IloNumVarArray, vars)</code></pre>
+<p class="p">instead. This macro defines two things, class <samp class="ph codeph">MyBranchGoalI</samp> 
+and the function </p>
+<pre class="pre codeblock"><code>IloCplex::Goal MyBranchGoal(IloEnv env, IloNumVarArray vars);</code></pre>
+<p class="p">The class <samp class="ph codeph">MyBranchGoalI</samp> is
+defined as a subclass of class <samp class="ph codeph">IloCplex::GoalI</samp> 
+(<samp class="ph codeph">IloCplex.Goal</samp> or<samp class="ph codeph">Cplex.Goal</samp> )
+and has a private member <samp class="ph codeph">IloNumVarArray</samp>  <samp class="ph codeph">vars</samp>.
+The function <samp class="ph codeph">MyBranchGoal</samp> creates an instance
+of class <samp class="ph codeph">MyBranchGoalI</samp>, initializes the
+member <samp class="ph codeph">vars</samp>  to the argument <samp class="ph codeph">vars</samp> 
+passed to the function, and returns a handle to the new goal object.
+The curly brackets "{ ... }" following the macro enclose the implementation
+of the method <samp class="ph codeph">MyBranchGoalI::execute</samp> containing
+the actual code of the goal.</p>
+<p class="p">The use of the macro is very convenient as the amount
+of user code is equivalent to the amount for defining a function,
+but with a slightly unusual syntax. <samp class="ph codeph">IloCplex</samp> provides
+seven such macros that can be used for defining goals with 0 to 6
+private members. If more than 6 members are needed, <samp class="ph codeph">IloCplex::GoalI</samp> 
+(<samp class="ph codeph">IloCplex.Goal</samp>  or <samp class="ph codeph">Cplex.Goal</samp>)
+must be subclassed <em class="ph i">by hand</em>.</p>
+<p class="p">Since the <strong class="ph b">Java</strong> programming
+language does not provide macros, a subclass of <samp class="ph codeph">IloCplex.Goal</samp> must
+always be implemented by hand. In this example, this class is called <samp class="ph codeph">MyBranchGoal</samp> and
+there is no helper function for creating an instance of that class
+(as the macro does in the case of C++). </p>
+<p class="p">The goal is then used for solving the extracted node
+by calling:</p>
+<pre class="pre codeblock"><code>cplex.solve(MyBranchGoal(env, var));</code></pre>
+<p class="p">for <strong class="ph b">C++</strong>, or for <strong class="ph b">Java</strong>:</p>
+<pre class="pre codeblock"><code>cplex.solve(new MyBranchGoal(var));</code></pre>
+<p class="p">instead of the usual <samp class="ph codeph">cplex.solve</samp>.
+The rest of the <samp class="ph codeph">main</samp> function contains
+nothing new and will not be discussed any further.</p>
+<p class="p">In the implementation of the goal, or more precisely
+its method <samp class="ph codeph">execute</samp>, starts by declaring
+and initializing some arrays. These arrays are then used by methods
+of class <samp class="ph codeph">IloCplex::GoalI</samp>  (<samp class="ph codeph">IloCplex.Goal</samp> or <samp class="ph codeph">Cplex.Goal</samp>)
+to query information about the node subproblem and the solution of
+its relaxation. The method <samp class="ph codeph">getValues</samp> is
+used to query the solution values for the variables in <samp class="ph codeph">vars</samp>,
+the method <samp class="ph codeph">getObjCoefs</samp> is used to query
+the linear objective function coefficients for these variables, and
+method <samp class="ph codeph">getFeasibilities</samp> is used to query
+feasibility statuses for them. The feasibility status of a variable
+indicates whether <samp class="ph codeph">IloCplex</samp> considers the
+current solution value of the variable to be integer feasible or not. <samp class="ph codeph">IloCplex::GoalI</samp> 
+(<samp class="ph codeph">IloCplex.Goal</samp> or <samp class="ph codeph">Cplex.Goal</samp>)
+provides a wealth of other query methods. For details, see the <em class="ph i">CPLEX Reference Manuals</em>.</p>
+<p class="p">After you have gathered information about the variables,
+their objective coefficients, and their current feasibility statuses,
+compute the index of an integer infeasible variable in <samp class="ph codeph">vars</samp> that
+has the largest objective coefficients among the variables with largest
+integer infeasibility. That index is recorded in variable <samp class="ph codeph">bestj</samp>.</p>
+<p class="p">Then create a new goal handle object <samp class="ph codeph">res</samp>.
+By default, this is initialized to an empty goal. However, if an integer
+infeasible variable was found among those in <samp class="ph codeph">vars</samp>,
+then variable <samp class="ph codeph">bestj</samp> will be ≥<samp class="ph codeph">0</samp> and
+a nonempty goal will be assigned to <samp class="ph codeph">res</samp>: </p>
+<pre class="pre codeblock"><code>res = AndGoal(OrGoal(vars[bestj] &gt;= IloFloor(x[bestj])+1,
+                     vars[bestj] &lt;= IloFloor(x[bestj])),
+                     this);</code></pre>
+<p class="p">This goal creates two branches, one for </p>
+<p class="p"><img class="image" src="../../../images/goals5.gif" alt="goals5.gif" /> <samp class="ph codeph"> </samp> </p>
+<p class="p">and one for </p>
+<p class="p"><img class="image" src="../../../images/goals6.gif" alt="goals6.gif" /> </p>
+<p class="p">and continues branching in both subtrees with the same
+goal <samp class="ph codeph">this</samp>. Finally, call method <samp class="ph codeph">end</samp> for
+all temporary arrays and return goal <samp class="ph codeph">res</samp>.</p>
+<p class="p">Since Java objects are garbage collected, there is no
+need for the variable <samp class="ph codeph">res</samp>. Instead, depending
+on the availability of an integer infeasible variable, the <samp class="ph codeph">null</samp> goal
+is returned or the returned goal is created in the return statement
+itself: </p>
+<pre class="pre codeblock"><code>return cplex.and(cplex.or(cplex.geGoal(_vars[bestj],
+                          Math.floor(x[bestj]))+1,
+                          cplex.leGoal(_vars[bestj],
+                          Math.floor(x[bestj]))),
+                 this);</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" title="Documents goals and their role in a branch &amp; cut search.">Using goals</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,105 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+013: 
+014: include <b><font color="#8A2BE2">"common.mod"</font></b>;
+015: 
+016: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> pattern[1..nbRounds] <b><font color="#0000FF">in</font></b> Where;
+017: 
+018: <b><font color="#0000FF">tuple</font></b> p
+019: {
+020:    <b><font color="#0000FF">int</font></b> v[1..nbRounds];
+021: }
+022: 
+023: {p} patterns=...;
+024: 
+025: 
+026: <b><font color="#0000FF">execute</font></b>{
+027:         cp.param.Workers = 1;
+028: }
+029: 
+030: 
+031: int nbPatterns = card(patterns);
+032: range rngPatterns= 0..nbPatterns-1;
+033: 
+034: 
+035: int score[i in rngPatterns] = sum(j in 1..nbRounds-3)((item(patterns,i).v[j]!=away)*
+036:           (item(patterns,i).v[j+1]!=away)*(item(patterns,i).v[j+2]!=away)*(item(patterns,i).v[j+3]!=away));
+037: 
+038: int lesspref[i in rngPatterns] = 
+039:      prod(j in 1..2) (item(patterns,i).v[j]==away);
+040: 
+041: 
+042: dvar int patind[rngPatterns] in 0..1;
+043: 
+044: dvar int patset[0..nbTeams] in rngPatterns;
+045: 
+046: 
+047: 
+048: 
+049: subject to
+050:  {
+051:    sum (i <b><font color="EA7D00">in</font></b> rngPatterns) patind[i] == nbTeams;
+052:    forall (j <b><font color="EA7D00">in</font></b> 1..nbRounds) {
+053:       sum (i <b><font color="EA7D00">in</font></b> rngPatterns:item(patterns,i).v[j] == home )1*patind[i] == 4;
+054:      sum (i <b><font color="EA7D00">in</font></b> rngPatterns) (item(patterns,i).v[j]== away)*patind[i] == 4;
+055:      sum (i <b><font color="EA7D00">in</font></b> rngPatterns )(item(patterns,i).v[j]==  bbye )*patind[i] == 1;
+056:   };
+057:    forall (i <b><font color="EA7D00">in</font></b> rngPatterns) {
+058:        patind[i] == 1  =&gt; patset[(sum(j <b><font color="EA7D00">in</font></b> 0..i) patind[j])] == i;
+059:    };
+060:    patset[0] == 1; 
+061:    sum (i <b><font color="EA7D00">in</font></b> rngPatterns) (lesspref[i]*patind[i]) &lt;= 1;
+062:    forall (i <b><font color="EA7D00">in</font></b> rngPatterns, j <b><font color="EA7D00">in</font></b> rngPatterns: i != j) {
+063:       (patind[i]*patind[j] == 1 ) =&gt;
+064:           (sum (r <b><font color="EA7D00">in</font></b> rngRounds) ((item(patterns,i).v[r]==home)*(item(patterns,j).v[r]==away))) &gt;= 1;
+065:    };
+066: <b><font color="#007D00">/*</font></b>
+067: <b><font color="#007D00">  Use following constraints with Henz's patterns to select just one specific</font></b>
+068: <b><font color="#007D00">  pattern from NT's solution corresponding to UNC </font></b>
+069: 
+070: <b><font color="#007D00">   sum (i in rngPatterns) ((item(patterns,i).v[1]==away) &amp;&amp; (item(patterns,i).v[2]==away))  * patind[i] &lt;= 1;</font></b>
+071: <b><font color="#007D00">   sum (i in rngPatterns) ((item(patterns,i).v[17]==away) &amp;&amp; (item(patterns,i).v[18]==away))  * patind[i] &lt;= 1;</font></b>
+072: <b><font color="#007D00">   sum (i in rngPatterns) (score[i]*patind[i]) &lt;= 1;</font></b>
+073: <b><font color="#007D00">    forall (i in rngPatterns) ((item(patterns,i).v[1]==away)*(item(patterns,i).v[2]==away)*patind[i]) == 1 =&gt;</font></b>
+074: <b><font color="#007D00">            ( (item(patterns,i).v[6]==bbye)*patind[i])==1;</font></b>
+075: <b><font color="#007D00">*/</font></b>
+076: 
+077: };
+078: 
+079: main
+080: {
+081:    <b><font color="EA7D00">var</font></b>  n=0;
+082:    <b><font color="#0000FF">thisOplModel</font></b>.generate();
+083:    cp.startNewSearch();
+084:    <b><font color="EA7D00">while</font></b> (cp.next()) { 
+085:      n++;
+086:       
+087:      <b><font color="#0000FF">thisOplModel</font></b>.postProcess();
+088:      writeln(<b><font color="#0000FF">thisOplModel</font></b>.patset); 
+089:    }
+090:    
+091:    writeln(n,<b><font color="#8A2BE2">" solutions "</font></b>); 
+092:    
+093:  
+094: 
+095: }
+096: 
+097: 
+098: 
+099: 
+100:    
+</tt></pre>

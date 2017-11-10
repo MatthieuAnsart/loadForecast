@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Difficulties in the quality of solution" />
+<meta name="abstract" content="Suggests strategies with the barrier optimizer to overcome poor quality solutions." />
+<meta name="Description" content="Suggests strategies with the barrier optimizer to overcome poor quality solutions." />
+<meta name="DC.subject" content="solution, quality" />
+<meta name="keywords" content="solution, quality" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/26_numeric_difficulty_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveBarrier.654164" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/26_numeric_difficulty_title_synopsis.html" />
+<title>Difficulties in the quality of solution</title>
+</head>
+<body role="main" id="User_manual.uss_solveBarrier.654164">
+<h1 class="title topictitle1">Difficulties in the quality of solution</h1>
+<div class="body"><p class="shortdesc">Suggests strategies with the barrier optimizer to overcome
+poor quality solutions.</p>
+<p class="p"> <a class="xref" href="18_soln_quality.html" title="Documents the information available about the quality of a solution found by the barrier optimizer.">Understanding solution quality from the barrier LP optimizer</a> lists
+the items that CPLEX displays about the quality of a barrier solution.
+If the CPLEX barrier optimizer terminates its work with a solution
+that does not meet your quality requirements, you can adjust parameters
+that influence the quality of a solution. Those adjustments affect
+the choice of barrier algorithm, the limit on barrier corrections,
+and the choice of starting-point heuristic—topics introduced
+in <a class="xref" href="19_tuning_title_synopsis.html" title="Describes facilities for tuning performance of the barrier optimizer.">Tuning barrier optimizer performance</a> and
+recapitulated here in the following subsections.</p>
+<div class="section" id="User_manual.uss_solveBarrier.654164__User_manual.uss_solveBarrier.654190"><h2 class="title sectiontitle">Change the barrier algorithm</h2><p class="p">The CPLEX barrier optimizer implements the algorithms
+listed in <a class="xref" href="29_soln_quality_difficulty.html#User_manual.uss_solveBarrier.654164__User_manual.uss_solveBarrier.659274" title="A two-column table showing possible values and their meaning.">Table 1</a>.
+The selection of barrier algorithm is controlled by the <samp class="ph codeph">BarAlg</samp> parameter.
+The default option invokes option <samp class="ph codeph">3</samp> for
+LPs and QPs, option <samp class="ph codeph">1</samp> for QCPs, and option <samp class="ph codeph">1</samp> for
+MIPs where the CPLEX barrier optimizer is used on the subproblems.
+Naturally, the default is the fastest for most problems, but it may
+not work well on LP or QP problems that are primal infeasible or dual
+infeasible. Options <samp class="ph codeph">1</samp> and <samp class="ph codeph">2</samp> in
+the CPLEX barrier optimizer implement a barrier algorithm that also
+detects infeasibility. (They differ from each other in how they compute
+a starting point.) Though they are slower than the default option,
+in a problem demonstrating numeric difficulties, they may eliminate
+the numeric difficulties and thus improve the quality of the solution.
+ </p>
+
+ <div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible values and their meaning." id="User_manual.uss_solveBarrier.654164__User_manual.uss_solveBarrier.659274" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. BarAlg parameter settings for barrier optimizer</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d373793e80"> BarAlg Setting </th>
+<th class="entry" align="left" valign="top" id="d373793e82"> Meaning </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d373793e80 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" headers="d373793e82 "> default </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d373793e80 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" headers="d373793e82 "> algorithm starts with infeasibility estimate  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d373793e80 ">  <samp class="ph codeph">2</samp>  </td>
+<td class="entry" valign="top" headers="d373793e82 "> algorithm starts with infeasibility constant </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d373793e80 ">  <samp class="ph codeph">3</samp>  </td>
+<td class="entry" valign="top" headers="d373793e82 "> standard barrier algorithm </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="User_manual.uss_solveBarrier.654164__User_manual.uss_solveBarrier.654244"><h2 class="title sectiontitle">Change the limit on barrier corrections</h2><p class="p">The default barrier algorithm in the CPLEX barrier optimizer
+computes an estimate of the maximum number of centering corrections
+that CPLEX should make on each iteration. You can see this computed
+value by setting barrier display level two, as explained in <a class="xref" href="09_log_file_title_synopsis.html" title="Describes the log file generated by the barrier optimizer.">Interpreting the barrier log file</a>,
+and checking the value of the parameter to limit corrections. (Its
+default value is <samp class="ph codeph">-1</samp>.) If you see that the
+current value is <samp class="ph codeph">0</samp> (zero), then you should
+experiment with greater settings. Setting the parameter <samp class="ph codeph">BarMaxCor</samp> to
+a value greater than <samp class="ph codeph">0</samp> (zero) may improve
+numeric performance, but there may also be an increase in computation
+time.</p>
+</div>
+<div class="section" id="User_manual.uss_solveBarrier.654164__User_manual.uss_solveBarrier.654270"><h2 class="title sectiontitle">Choose a different starting-point heuristic</h2><p class="p">As explained in <a class="xref" href="25_start_pt_heuristic.html" title="Describes impact of starting-point heuristics on performance of the barrier algorithm.">Using a starting-point heuristic</a>,
+the default starting-point heuristic works well for most problems
+suitable to barrier optimization. But for a model that is exhibiting
+numeric difficulty it is possible that setting the <samp class="ph codeph">BarStartAlg</samp> to
+select a different starting point will make a difference. However,
+if you are preprocessing your problem as dual (for example, in the
+Interactive Optimizer you issued the command <samp class="ph codeph">set preprocessing dual</samp>),
+then a different starting-point heuristic may perform better than
+the default. To change the starting-point heuristic, see <a class="xref" href="25_start_pt_heuristic.html#User_manual.uss_solveBarrier.654096__User_manual.uss_solveBarrier.654112" title="A two-column table showing possible values and the heuristic that the value invokes.">Table 1</a>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/26_numeric_difficulty_title_synopsis.html" title="Documents ways to cope with numeric difficulties in the barrier optimizer.">Overcoming numeric difficulties</a></div>
+</div>
+</div></body>
+</html>

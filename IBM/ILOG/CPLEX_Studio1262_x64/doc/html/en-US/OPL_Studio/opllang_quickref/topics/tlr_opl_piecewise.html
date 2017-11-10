@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="piecewise" />
+<meta name="abstract" content="OPL keyword to express piecewise linear functions." />
+<meta name="Description" content="OPL keyword to express piecewise linear functions." />
+<meta name="DC.subject" content="steps in pwl, discontinuous piecewise linear functions, breakpoints, in piecewise-linear functions, slopes in piecewise-linear functions, piecewise, OPL keyword" />
+<meta name="keywords" content="steps in pwl, discontinuous piecewise linear functions, breakpoints, in piecewise-linear functions, slopes in piecewise-linear functions, piecewise, OPL keyword" />
+<meta name="DC.Relation" scheme="URI" content="../../opllangref/topics/opl_langref_expressions_piecewise.html" />
+<meta name="DC.Relation" scheme="URI" content="../../opllangref/topics/opl_langref_expressions_piecewise_discont.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_stepwise.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_opl_pwlFunc.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="xQcrllRf" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<title>piecewise</title>
+</head>
+<body role="main" id="xQcrllRf">
+<h1 class="title topictitle1">piecewise</h1>
+<div class="body refbody"><p class="shortdesc">OPL keyword to express piecewise linear functions.</p>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>PiecewiseExpression: 
+      . "piecewise" '{' Pieces Expression '}' Offset_opt Expression
+    | . "piecewise" '(' Qualifiers ')' '{' Piece Expression '}' Offset_opt 
+Expression
+</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">OPL supports piecewise linear
+functions, which are important in many applications. In most cases,
+you specify piecewise linear functions by giving a set of slopes,
+a set of breakpoints at which the slopes change, and the value of
+the functions at a given point. The parameters are <samp class="ph msgph">n</samp> breakpoints
+and <samp class="ph msgph">n+1</samp> slopes, and <samp class="ph msgph">s -&gt; b</samp> means
+that the slope <samp class="ph msgph">s</samp> goes up to breakpoint <samp class="ph msgph">b</samp>.</p>
+<p class="p">The
+keyword <samp class="ph codeph">piecewise</samp> can also represent discontinuous
+piecewise linear functions; if two successive breakpoints are identical,
+then the value associated with the second one is considered to be
+a “step” instead of a “slope”. By convention, a breakpoint belongs
+to the segment that starts at that breakpoint and to the segment that
+ends at the breakpoint. See <a class="xref" href="../../opllangref/topics/opl_langref_expressions_piecewise.html" title="Describes the use of piecewise-linear functions in OPL.">Piecewise-linear functions</a> in
+the <em class="ph i">Language Reference Manual</em> for an example. </p>
+<div class="note important"><span class="importanttitle">Important:</span>  <p class="p"> Breakpoints and slopes in piecewise linear functions
+must always be ground and the breakpoints must be strictly increasing. </p>
+ </div>
+<p class="p">Note
+that the related keyword <a class="xref" href="tlr_oplsch_stepwise.html" title="OPL keyword for stepwise linear functions">stepwise</a> is a special case of piecewise,
+where all slopes are equal to zero.</p>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">To illustrate piecewise linear functions,
+let's consider a small example with a piecewise linear objective. </p>
+<pre class="pre codeblock"><code>int n=2;
+float objectiveforxequals0=300;
+float breakpoint[1..n]=[100,200];
+float slope[1..n+1]=[1,2,-3];
+dvar int x;
+
+maximize piecewise(i in 1..n) 
+{slope[i] -&gt; breakpoint[i]; slope[n+1]}(0,objectiveforxequals0) x; 
+
+subject to
+{
+ true;  
+}</code></pre>
+<p class="p">The piecewise linear expression: </p>
+<pre class="pre codeblock"><code>maximize piecewise(i in 1..n) 
+{slope[i] -&gt; breakpoint[i]; slope[n+1]}(0,objectiveforxequals0) x; </code></pre>
+<p class="p">describes the piecewise linear function of <samp class="ph codeph">x</samp>.
+The function has slopes 1, 2, and -3, breakpoints 100 and 200, and
+evaluates to 300 at point 0. In other words, the piecewise linear
+expression is equivalent to: </p>
+<pre class="pre codeblock"><code>300 + x </code></pre>
+<p class="p">when </p>
+<pre class="pre codeblock"><code>x &lt;= 100 </code></pre>
+<p class="p">to </p>
+<pre class="pre codeblock"><code>300 + 100 + 2 * (x-100) </code></pre>
+<p class="p">when </p>
+<pre class="pre codeblock"><code>100 &lt;= x &lt;= 200 </code></pre>
+<p class="p">and to </p>
+<pre class="pre codeblock"><code>300 + 100 + 2 * (200-100) - 3 * (x-200) </code></pre>
+<p class="p">otherwise. </p>
+<p class="p">The above piecewise linear function
+is written with generic pieces but could have also been written with
+a fixed number of pieces.</p>
+<pre class="pre codeblock"><code>piecewise{1 -&gt; 100; 2-&gt;200;-3}(0,300) x; </code></pre>
+<p class="p">By default, OPL assumes that a piecewise linear function
+evaluates to zero at the origin, so the following two expressions
+are equivalent.</p>
+<pre class="pre codeblock"><code>piecewise{1 -&gt; 100; 2-&gt;200;-3}(0,0) x;</code></pre>
+<pre class="pre codeblock"><code>piecewise{1 -&gt; 100; 2-&gt;200;-3}x;  </code></pre>
+<p class="p">Note that there may be several generic pieces in piecewise
+linear functions.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" title="Description, syntax, and example for each individual OPL keyword..">OPL keywords</a></div>
+</div>
+<div class="relinfo relconcepts"><strong>Related concepts</strong>:<br />
+<div><a class="link" href="../../opllangref/topics/opl_langref_expressions_piecewise.html" title="Describes the use of piecewise-linear functions in OPL.">Piecewise-linear functions</a></div>
+<div><a class="link" href="../../opllangref/topics/opl_langref_expressions_piecewise_discont.html" title="Describes the use of discontinuous piecewise-linear functions in OPL.">Discontinuous piecewise-linear functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_oplsch_stepwise.html" title="OPL keyword for stepwise linear functions">stepwise</a></div>
+<div><a class="link" href="tlr_opl_pwlFunc.html" title="OPL keyword to create a piecewise linear function">pwlFunction</a></div>
+</div>
+</div></body>
+</html>

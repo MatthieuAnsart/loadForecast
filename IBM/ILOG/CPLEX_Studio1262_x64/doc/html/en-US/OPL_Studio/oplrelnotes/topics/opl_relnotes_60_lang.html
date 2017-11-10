@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Language" />
+<meta name="abstract" content="New language elements were introduced in OPL 6.0." />
+<meta name="Description" content="New language elements were introduced in OPL 6.0." />
+<meta name="DC.subject" content="language, changes from 5.5 to 6.0" />
+<meta name="keywords" content="language, changes from 5.5 to 6.0" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplrelnotes/topics/opl_relnotes_60.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1204223576999" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplrelnotes/topics/opl_relnotes_60.html" />
+<title>Language</title>
+</head>
+<body role="main" id="descriptiveTopic1204223576999">
+<h1 class="title topictitle1">Language</h1>
+<div class="body"><p class="shortdesc">New language elements were introduced in OPL 6.0.</p>
+<div class="section" id="descriptiveTopic1204223576999__oplrelnotes.uss_reln_from52to55.1049074"><h2 class="title sectiontitle">New keywords</h2><p class="p">These new keywords are no longer accepted as identifiers.</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">pwlFunction, pwlfunction</samp>  </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">stepFunction, stepfunction</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">stepwise</samp></p>
+</li>
+</ul>
+<p class="p">These new CP keywords are still accepted as CPLEX identifiers.</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">interval   </samp>  </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">sequence</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">size</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">intensity</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">optional</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">stateFunction, statefunction</samp></p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">cumulFunction, cumulfunction</samp></p>
+</li>
+</ul>
+</div>
+<div class="section" id="descriptiveTopic1204223576999__C281Shu7"><h2 class="title sectiontitle">Identifiers</h2><p class="p">Certain names are no longer allowed to be used as identifiers</p>
+<ul class="ul"><li class="li"><p class="p">Function names are no longer allowed
+to be identifiers.</p>
+</li>
+<li class="li"><p class="p">The algorithm names CP, CPLEX, <samp class="ph codeph">IloCplex</samp>, <samp class="ph codeph">IloCP</samp> are
+now keywords and are therefore refused as element identifiers.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="descriptiveTopic1204223576999__M8nNM3Q3"><h2 class="title sectiontitle">Multi-criteria search phases</h2><p class="p">In OPL 5.2 and 5.5, search phases were limited. The engine
+would branch on variables and then on values. Now, in OPL 6.0, this
+limit no longer exists and the two phases are merged into one.</p>
+<p class="p">For example, the search phase we have in the <samp class="ph codeph">carseq</samp> project:</p>
+<pre class="pre codeblock"><code>var phase1 = f.searchPhase(slot,
+                        f.selectSmallest(f.varIndex(slot)),
+                        f.selectLargest(f.explicitValueEval(values, valueEval, 0)));</code></pre>
+<p class="p">could be changed into</p>
+<pre class="pre codeblock"><code>var multiPhaseVar = new Array( f.selectSmallest( f.domainSize() ), f.selectRandomVar() );
+               var multiPhaseValue = new Array( f.selectSmallest( f.value() ), f.selectRandomValue() );
+var phase1 = f.searchPhase( multiPhaseVar, multiPhaseValue );</code></pre>
+<p class="p">Note that this is just an example and would not make
+the <samp class="ph codeph">carseq</samp> example more efficient.</p>
+</div>
+<div class="section" id="descriptiveTopic1204223576999__gC8JIiug"><h2 class="title sectiontitle">Sets that are iterated on cannot be modified</h2><p class="p">If you write in a script <samp class="ph codeph">for(a in s)</samp>,
+you cannot modify <samp class="ph codeph">s</samp> .</p>
+<p class="p">The following code is not accepted any more:</p>
+<pre class="pre codeblock"><code>tuple t
+{
+  int x;
+  int y;
+}
+ 
+{t} s={&lt;1,2&gt;,&lt;2,2&gt;};
+
+ execute
+{
+  for(var i in s) i.y=i.x;
+}</code></pre>
+<p class="p">and should be rewritten as:</p>
+<pre class="pre codeblock"><code>tuple t
+{
+  int x;
+  int y;
+}
+ 
+{t} s={&lt;1,2&gt;,&lt;2,2&gt;};
+
+execute
+{
+  for(var k=0;i&lt;=s.size;k++)
+  {
+    var i=Opl.item(s,k); 
+    i.y=i.x;
+  }
+}</code></pre>
+</div>
+<div class="section" id="descriptiveTopic1204223576999__EsOJVIz8"><h2 class="title sectiontitle">Tuple sets with multiple indirections (with keyword)</h2><p class="p">Slicing is not allowed on <samp class="ph codeph">tupleSet</samp> with
+an indirection of <samp class="ph codeph">subTuple</samp> on another set
+with indirection.</p>
+<p class="p">The following example illustrates the restriction.</p>
+<pre class="pre codeblock"><code>tuple T{ 
+  int a;
+  int b;
+}
+
+tuple TT{ 
+   T a;
+   int b;
+}
+
+tuple TTT{
+  TT a;
+   int b;
+}   
+
+{T} S0 = {&lt;1,2&gt;, &lt;2,2&gt;};
+{TT} S1 with a in S0 = {&lt;&lt;1,2&gt;,1&gt;, &lt;&lt;2,2&gt;,2&gt;};
+{TTT} S2 with a in S1 = {&lt;&lt;&lt;1,2&gt;,1&gt;,1&gt;, &lt;&lt;&lt;2,2&gt;,2&gt;,2&gt;};
+
+{TTT} S3 = {t | t in S2 : t.a == &lt;&lt;1,2&gt;,1&gt;}; //slicing of S2 using sub-tuple 'a' is not allowed.
+
+execute {
+   writeln(S3);
+}</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplrelnotes/topics/opl_relnotes_60.html" title="These release notes highlight improvements and new features in OPL 6.0.">New and changed in OPL 6.0</a></div>
+</div>
+</div></body>
+</html>

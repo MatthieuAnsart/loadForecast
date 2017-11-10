@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Simplex parameters" />
+<meta name="abstract" content="Documents parameters settings that may improve performance of LP optimizers." />
+<meta name="Description" content="Documents parameters settings that may improve performance of LP optimizers." />
+<meta name="DC.subject" content="performance, LP, parameters for" />
+<meta name="keywords" content="performance, LP, parameters for" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveLP.637848" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" />
+<title>Simplex parameters</title>
+</head>
+<body role="main" id="User_manual.uss_solveLP.637848">
+<h1 class="title topictitle1">Simplex parameters</h1>
+<div class="body"><p class="shortdesc">Documents parameters settings that may improve
+performance of LP optimizers.</p>
+<p class="p">After you have chosen the right optimizer and, if appropriate,
+you have started from an advanced basis, you may want to experiment
+with different parameter settings to improve performance. This section
+documents parameters that are most likely to affect performance of
+the simplex linear optimizers. (The barrier optimizer is different
+enough from the simplex optimizers that it is discussed elsewhere,
+in <a class="xref" href="../barrier/01_barrier_title_synopsis.html" title="Documents solving linear programming problems by means of the CPLEX barrier optimizer.">Solving LPs: barrier optimizer</a>).
+The simplex tuning suggestions appear in the following topics:</p>
+<ul class="ul"><li class="li"><p class="p"> <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.638163">Pricing algorithm and gradient parameters</a> </p>
+ </li>
+<li class="li"><p class="p"> <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.638148">Scaling</a> </p>
+ </li>
+<li class="li"><p class="p"> <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665500">Crash</a> </p>
+ </li>
+<li class="li"><p class="p"> <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.664962">Memory management and problem growth</a> </p>
+ </li>
+</ul>
+<div class="section" id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.638163"><h2 class="title sectiontitle">Pricing
+algorithm and gradient parameters</h2><p class="p">The
+parameters in <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665152" title="A four-column table showing each possible value, a description of the parameter, its name in Concert Technology (C++, Java, .NET APIs), and its name in the Callable Library (C API).">Table 1</a> set the pricing algorithms that CPLEX uses. Consequently,
+these are the algorithmic parameters most likely to affect simplex
+linear programming performance. The default setting of these gradient
+parameters chooses the pricing algorithms that are best for most problems.
+When you are selecting alternate pricing algorithms, look at these
+values as guides:</p>
+<ul class="ul"><li class="li"><p class="p">overall solution time;</p>
+ </li>
+<li class="li"><p class="p">number of Phase I iterations (that is, iterations
+before CPLEX arrives at an initial feasible solution);</p>
+ </li>
+<li class="li"><p class="p">total number of iterations.</p>
+ </li>
+</ul>
+<p class="p">CPLEX records those values in the log file as it
+works. (By default, CPLEX creates the log file in the directory where
+it is executing, and it names the log file <samp class="ph codeph">cplex.log</samp>. <a class="xref" href="../../progr_consid/input_output/manageIO_log_files_synopsis.html" title="Describes facilities for working with log files.">Managing log files</a> tells you how to rename and relocate this log file.)</p>
+<p class="p">If the number of iterations required to solve your problem
+is approximately the same as the number of rows, then you are doing
+well. If the number of iterations is three times greater than the
+number of rows (or more), then it may very well be possible to improve
+performance by changing the parameter that sets the pricing algorithm, <samp class="ph codeph">DPriInd</samp> for the dual simplex optimizer or <samp class="ph codeph">PPriInd</samp> for the primal simplex optimizer.</p>
+<p class="p">The symbolic names for the acceptable values for these parameters
+appear in <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665152" title="A four-column table showing each possible value, a description of the parameter, its name in Concert Technology (C++, Java, .NET APIs), and its name in the Callable Library (C API).">Table 1</a> and <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.668695" title="A four-column table showing each possible value, a description of the parameter, its name in Concert Technology (C++, Java, .NET APIs), and its name in the Callable Library (C API).">Table 2</a>. The default value in both cases is <samp class="ph codeph">0</samp> (zero). </p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four-column table showing each possible value, a description of the parameter, its name in Concert Technology (C++, Java, .NET APIs), and its name in the Callable Library (C API)." id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665152" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. DPriInd parameter settings for dual simplex pricing algorithm</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="14.285714285714285%" id="d393772e154"> </th>
+<th class="entry" align="left" valign="top" width="28.57142857142857%" id="d393772e155"> Description </th>
+<th class="entry" align="left" valign="top" width="28.57142857142857%" id="d393772e157"> Concert </th>
+<th class="entry" align="left" valign="top" width="28.57142857142857%" id="d393772e159"> Callable Library </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e154 ">  <samp class="ph codeph"> 0</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e155 "> set automatically </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e157 ">  <samp class="ph codeph">DPriIndAuto</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e159 ">  <samp class="ph codeph">CPX_DPRIIND_AUTO </samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e154 ">  <samp class="ph codeph"> 1</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e155 "> standard dual pricing </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e157 ">  <samp class="ph codeph">DPriIndFull</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e159 ">  <samp class="ph codeph">CPX_DPRIIND_FULL</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e154 ">  <samp class="ph codeph"> 2</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e155 "> steepest-edge pricing </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e157 ">  <samp class="ph codeph">DPriIndSteep</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e159 ">  <samp class="ph codeph">CPX_DPRIIND_STEEP</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e154 ">  <samp class="ph codeph"> 3</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e155 "> steepest-edge in slack space </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e157 ">  <samp class="ph codeph">DPriIndFullSteep</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e159 ">  <samp class="ph codeph">CPX_DPRIIND_FULLSTEEP</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e154 ">  <samp class="ph codeph"> 4</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e155 "> steepest-edge, unit initial norms </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e157 ">  <samp class="ph codeph">DPriIndSteepQStart</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e159 ">  <samp class="ph codeph">CPX_DPRIIND_STEEPQSTART</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e154 ">  <samp class="ph codeph"> 5</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e155 "> devex pricing  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e157 ">  <samp class="ph codeph">DPriIndDevex</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e159 ">  <samp class="ph codeph">CPX_DPRIIND_DEVEX</samp>  </td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four-column table showing each possible value, a description of the parameter, its name in Concert Technology (C++, Java, .NET APIs), and its name in the Callable Library (C API)." id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.668695" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. PPriInd parameter settings for primal simplex pricing algorithm</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="14.285714285714285%" id="d393772e284"> </th>
+<th class="entry" align="left" valign="top" width="28.57142857142857%" id="d393772e285"> Description </th>
+<th class="entry" align="left" valign="top" width="28.57142857142857%" id="d393772e287"> Concert </th>
+<th class="entry" align="left" valign="top" width="28.57142857142857%" id="d393772e289"> Callable Library </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e284 "> -1 </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e285 "> reduced-cost pricing </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e287 ">  <samp class="ph codeph">PPriIndPartial</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e289 ">  <samp class="ph codeph">CPX_PPRIIND_PARTIAL</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e284 ">  0 </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e285 "> hybrid reduced-cost and devex </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e287 ">  <samp class="ph codeph">PPriIndAuto</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e289 ">  <samp class="ph codeph">CPX_PPRIIND_AUTO </samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e284 ">  1 </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e285 "> devex pricing </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e287 ">  <samp class="ph codeph">PPriIndDevex</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e289 ">  <samp class="ph codeph">CPX_PPRIIND_DEVEX</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e284 ">  2 </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e285 "> steepest-edge pricing </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e287 ">  <samp class="ph codeph">PPriIndSteep</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e289 ">  <samp class="ph codeph">CPX_PPRIIND_STEEP</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e284 ">  3 </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e285 "> steepest-edge, slack initial norms </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e287 ">  <samp class="ph codeph">PPriIndSteepQStart</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e289 ">  <samp class="ph codeph">CPX_PPRIIND_STEEPQSTART</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="14.285714285714285%" headers="d393772e284 ">  4 </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e285 "> full pricing </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e287 ">  <samp class="ph codeph">PriIndFull</samp>  </td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d393772e289 ">  <samp class="ph codeph">CPX_PPRIIND_FULL</samp>  </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">For the dual simplex pricing parameter, the default
+value selects steepest-edge pricing. That is, the default (0 or <samp class="ph codeph">CPX_DPRIIND_AUTO</samp>) automatically selects 2 or <samp class="ph codeph">CPX_DPRIIND_STEEP</samp>.</p>
+<p class="p">For the primal
+simplex pricing parameter, reduced-cost pricing (<samp class="ph codeph">-1</samp> )
+is less computationally expensive, so you may prefer it for small
+or relatively easy problems. Try reduced-cost pricing, and watch for
+faster solution times. Also if your problem is dense (say, 20-30 nonzeros
+per column), reduced-cost pricing may be advantageous.</p>
+<p class="p">In
+contrast, if you have a more difficult problem taking many iterations
+to complete Phase I and arrive at an initial solution, then you should
+consider devex pricing (1<samp class="ph codeph">)</samp>. Devex pricing
+benefits more from CPLEX linear algebra enhancements than does partial
+pricing, so it may be an attractive alternative to partial pricing
+in some problems. However, if your problem has many columns and relatively
+few rows, devex pricing is not likely to help much. In such a case,
+the number of calculations required per iteration will usually be
+disadvantageous.</p>
+<p class="p">If you observe that devex pricing
+helps, then you might also consider steepest-edge pricing (2). Steepest-edge
+pricing is computationally more expensive than reduced-cost pricing,
+but it may produce the best results on difficult problems. One way
+of reducing the computational intensity of steepest-edge pricing is
+to choose steepest-edge pricing with initial slack norms (3).</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.638148"><h2 class="title sectiontitle">Scaling</h2><p class="p">Poorly conditioned problems (that is, problems in which even
+minor changes in data result in major changes in solutions) may benefit
+from an alternative scaling method. Scaling attempts to rectify poorly
+conditioned problems by multiplying rows or columns by constants without
+changing the fundamental sense of the problem. If you observe that
+your problem has difficulty staying feasible during its solution,
+then you should consider an alternative scaling method. </p>
+<p class="p">Use
+the scaling parameter (<a class="xref" href="../../../../Parameters/topics/ScaInd.html" title="Decides how to scale the problem matrix.">scale parameter</a>: <samp class="ph codeph">ScaInd</samp>, <samp class="ph codeph">CPX_PARAM_SCAIND</samp>)
+to set scaling appropriate for your model. <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.675720" title="A two-column table showing possible values and their effect.">Table 3</a> summarizes available values for this parameter. </p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible values and their effect." id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.675720" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 3. ScaInd parameter settings for scaling methods</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d393772e450"> ScaInd Value </th>
+<th class="entry" align="left" valign="top" id="d393772e452"> Meaning </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e450 ">  <samp class="ph codeph">-1</samp>  </td>
+<td class="entry" valign="top" headers="d393772e452 "> no scaling </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e450 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" headers="d393772e452 "> equilibration scaling (default) </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e450 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" headers="d393772e452 "> aggressive scaling </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665376"><h2 class="title sectiontitle">Refactoring
+frequency</h2><p class="p">CPLEX dynamically decides
+the frequency at which the basis of a problem is refactored in order
+to maximize the speed of iterations. On very large problems, CPLEX
+refactors the basis matrix infrequently. Very rarely should you consider
+increasing the number of iterations between refactoring. The refactoring
+interval is controlled by the <samp class="ph codeph">ReInv</samp> parameter.
+The default value of <samp class="ph codeph">0</samp> (zero) means CPLEX
+will decide dynamically; any positive integer specifies the user's
+chosen factoring frequency.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665500"><h2 class="title sectiontitle">Crash</h2><p class="p">It is possible to control the
+way CPLEX builds an initial (crash) basis through the <samp class="ph codeph">CraInd</samp> parameter.</p>
+<p class="p">In the dual simplex optimizer, the <samp class="ph codeph">CraInd</samp> parameter
+sets whether CPLEX aggressively uses primal variables instead of slack
+variables while it still tries to preserve as much dual feasibility
+as possible. If its value is <samp class="ph codeph">1</samp> (one), it
+specifies the default starting basis; if its value is <samp class="ph codeph">0</samp> (zero)
+or <samp class="ph codeph">-1</samp>, it specifies an aggressive starting
+basis. These settings are summarized in <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.638420" title="A two-column table showing possible values and their effect.">Table 4</a>. </p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible values and their effect." id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.638420" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 4. CraInd parameter settings for the dual simplex optimizer</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d393772e556"> CraInd Setting </th>
+<th class="entry" align="left" valign="top" id="d393772e558"> Meaning for Dual Simplex Optimizer </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e556 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" headers="d393772e558 "> Use default starting basis guided by coefficients </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e556 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" headers="d393772e558 "> Use an aggressive starting basis ignoring coefficients </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e556 ">  <samp class="ph codeph">-1</samp>  </td>
+<td class="entry" valign="top" headers="d393772e558 "> Use an aggressive starting basis contrary to coefficients </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">In the primal simplex optimizer, the <samp class="ph codeph">CraInd</samp> setting sets how CPLEX uses the coefficients
+of the objective function to select the starting basis. If its value
+is <samp class="ph codeph">1</samp> (one), CPLEX uses the coefficients
+to guide its selection; if its value is <samp class="ph codeph">0</samp> (zero),
+CPLEX ignores the coefficients; if its value is <samp class="ph codeph">-1</samp>,
+CPLEX does the opposite of what the coefficients normally suggest.
+These settings are summarized in <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665569" title="A two-column table showing possible values and their meaning.">Table 5</a>. </p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible values and their meaning." id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.665569" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 5. CraInd parameter settings for the primal simplex optimizer</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d393772e618"> CraInd Setting </th>
+<th class="entry" align="left" valign="top" id="d393772e620"> Meaning for Primal Simplex Optimizer </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e618 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" headers="d393772e620 "> Use coefficients of objective function to select
+basis </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e618 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" headers="d393772e620 "> Ignore coefficients of objective function </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393772e618 ">  <samp class="ph codeph">-1</samp>  </td>
+<td class="entry" valign="top" headers="d393772e620 "> Select basis contrary to one indicated by coefficients
+of objective function </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="User_manual.uss_solveLP.637848__User_manual.uss_solveLP.664962"><h2 class="title sectiontitle">Memory
+management and problem growth</h2><p class="p">CPLEX automatically
+handles memory allocations to accommodate the changing size of a problem
+object as you modify it. And it manages (using a cache) most changes
+to prevent inefficiency when the changes will require memory re-allocations. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" title="Documents tactics for tuning performance on LP models.">Tuning LP performance</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Selecting an encoding" />
+<meta name="abstract" content="Explains special considerations about encoding, also known as code pages." />
+<meta name="Description" content="Explains special considerations about encoding, also known as code pages." />
+<meta name="DC.subject" content="encoding, selecting, multi-byte, NULL byte in, multi-byte encoding, NULL byte encoding" />
+<meta name="keywords" content="encoding, selecting, multi-byte, NULL byte in, multi-byte encoding, NULL byte encoding" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1304688815312" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_synopsis.html" />
+<title>Selecting an encoding</title>
+</head>
+<body role="main" id="descriptiveTopic1304688815312">
+<h1 class="title topictitle1">Selecting an encoding</h1>
+<div class="body"><p class="shortdesc">Explains special considerations about encoding, also known
+as code pages.</p>
+<p class="p">CPLEX offers parameters that specify the encoding (also known as
+the code page) for CPLEX to use in the representation of data, whether
+as input or output. For details about these encoding parameters, see
+also the documentation of the  <a class="xref" href="../../../../Parameters/topics/APIEncoding.html" title="API string encoding switch">API string encoding switch</a>  and
+the <a class="xref" href="../../../../Parameters/topics/FileEncoding.html" title="file encoding switch">file encoding switch</a>  in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">These encoding parameters have no effect on IBM CPLEX Optimizer
+for z/OS, where only EBCDIC IBM-1047 encoding is available.</p>
+
+<div class="p">However, the user must append the option 
+<samp class="ph codeph">swaplfnl</samp> to the encoding name, like this:
+<pre class="pre codeblock"><code>"IBM1047,swaplfnl"</code></pre>
+
+in order to avoid anomalies due to a difference in the way that the 
+IBM Java Virtual Machine and Runtime Environment interprets newline characters, 
+and the way International Components for Unicode (ICU) interprets 
+newline characters.</div>
+</div>
+<p class="p paragrouptitle"><strong class="ph b">Default encoding</strong></p>
+<p class="p">By default, CPLEX uses the encoding ISO-8859-1 (also known as Latin-1).
+The familiar encoding known as ASCII is a subset of ISO-8859-1. In
+fact, ISO-8859-1 supports a wide variety of character sets, so this
+default is a reasonable choice for many users.</p>
+<p class="p paragrouptitle"><strong class="ph b">Multi-byte encoding</strong></p>
+<p class="p">However, the encoding ISO-8859-1 cannot represent multi-byte character
+sets, such as Chinese, Japanese, Korean, Indian, or Vietnamese characters,
+for example.  If you want to represent a character set that requires
+multiple bytes per character, then a better choice than the default
+is the encoding UTF-8.  UTF-8 is a multi-byte character encoding that
+can represent every character in the Unicode character set; that is,
+it is sufficiently comprehensive for many purposes. It is compatible
+with ASCII. It does not require byte-order marks (also known as BOM)
+nor specification of big-end or little-end byte-order. It does not
+include multi-byte characters that contain a <samp class="ph codeph">NULL</samp> byte
+in their multi-byte encoding. In short, it is a serviceable if bulky
+encoding for many users whose needs reach beyond ASCII or Latin-1.</p>
+<p class="p">If you choose another multi-byte encoding,  such as UTF-32 or UTF-16,
+for example, rather than UTF-8, be sure to specify the encoding fully
+by including the byte order, like this:  UTF-32LE or UTF-32BE.</p>
+<p class="p">Also take care if you choose another multi-byte encoding, such
+as UTF-16 or UTF-32, instead of UTF-8: CPLEX routines such as <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/msg.html" title="The routine CPXXmsg/CPXmsg writes a message to a specified channel.">CPXmsg</a></samp> do
+not work well with those encodings because those encodings include
+characters that contain a <samp class="ph codeph">NULL</samp> byte in their multi-byte
+representation. The presence of these <samp class="ph codeph">NULL</samp> bytes
+can lead to unfortunate coincidences in representation and thus unintended
+renderings of characters.</p>
+<p class="p paragrouptitle"> <strong class="ph b">Example: hazardous encodings</strong></p>
+<p class="p">To get an idea of the hazards of such encodings, imagine a situation
+in which a user creates a model as a file in a favorite editor with
+the encoding <samp class="ph codeph">cp424</samp>, an extension of ASCII to support
+Hebrew characters. The unsuspecting user names the model gimel (a
+single Hebrew character, not reproduced here). In this model, the
+user names each variable with a distinct, single Hebrew character.
+The user, aware that the encoding used in the editor is not the default
+file encoding in CPLEX, carefully sets the CPLEX file encoding parameter
+to the value <samp class="ph codeph">cp424</samp> before reading the file into CPLEX.
+Unfortunately, our unlucky user then relies on the default value ISO-8859-1
+of the API encoding  parameter of CPLEX to write the problem to disk.
+Since the Hebrew character gimel (the name of the model) cannot be
+represented in the Latin-1 code page, a silent substitution of the
+ISO08859-1 substitute character (hex value 0x1a) occurs. Equally calamitous,
+all the variables in the model appear to have the same name, {0x1a,
+0x00}, because some representations in the encoding <samp class="ph codeph">cp424</samp> unfortunately
+coincide with other character representations in the default API encoding
+ISO-8859-1,  though this coincidence does not appear to the software
+to be an error.</p>
+<p class="p paragrouptitle"><strong class="ph b">Advice</strong></p>
+<p class="p">To avoid hazardous situations such as that example, the documentation
+of relevant features of CPLEX call your attention to the current value
+of the parameters  <a class="xref" href="../../../../Parameters/topics/APIEncoding.html" title="API string encoding switch">API string encoding switch</a>  and <a class="xref" href="../../../../Parameters/topics/FileEncoding.html" title="file encoding switch">file encoding switch</a>.
+ The documentation also urges caution about your choice of an encoding
+that allows a <samp class="ph codeph">NULL</samp> byte in the representation of
+characters. The documentation also notes that your choice of encoding
+must be a superset of ASCII. The documentation of the encoding parameters
+also point out that when you change either of them from its default
+setting, you must verify that your change is consistent with the value
+of the other encoding parameter.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_synopsis.html" title="Describes input to and output from CPLEX.">Managing input and output</a></div>
+</div>
+</div></body>
+</html>

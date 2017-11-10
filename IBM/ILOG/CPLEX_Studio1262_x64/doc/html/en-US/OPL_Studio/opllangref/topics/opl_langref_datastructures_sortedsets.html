@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Sorted and ordered sets" />
+<meta name="abstract" content="Shows the effect of the sorted property on simple sets, tuple sets, and sets used in piecewise linear functions." />
+<meta name="Description" content="Shows the effect of the sorted property on simple sets, tuple sets, and sets used in piecewise linear functions." />
+<meta name="DC.subject" content="tuple sets, sorted, sets, ordered versus sorted, sorted sets" />
+<meta name="keywords" content="tuple sets, sorted, sets, ordered versus sorted, sorted sets" />
+<meta name="DC.Relation" scheme="URI" content="opl_langref_datasources.html" />
+<meta name="DC.Relation" scheme="URI" content="../../opllanguser/topics/opl_languser_script_intro.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_datastructures.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datatypes.1062286" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_datastructures.html" />
+<title>Sorted and ordered sets</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datatypes.1062286">
+<h1 class="title topictitle1">Sorted and ordered sets</h1>
+<div class="body"><p class="shortdesc">Shows the effect of the sorted property on simple sets, tuple sets, and sets used in piecewise linear functions.</p>
+<div class="section"><h2 class="title sectiontitle">Definitions</h2><ul class="ul"><li class="li"><p class="p">An ordered set is a set whose elements are arranged in the order in which they were added to the set. Note that this is how sets are created by default. For example:</p>
+ <pre class="pre codeblock"><code>{int} S1 = {3,2,5}; </code></pre>
+ <p class="p">and </p>
+ <pre class="pre codeblock"><code>ordered {int} S1 = {3,2,5};</code></pre>
+ <p class="p">are equivalent.</p>
+ </li>
+<li class="li"><p class="p">A sorted set is a set in which elements are arranged in their natural, ascending (or descending) order. For strings, the natural order is the lexicographic order. The natural order also depends on the system locale. For example:</p>
+ <pre class="pre codeblock"><code>sorted {int} sortedS = {3,2,5};</code></pre>
+ <p class="p">and </p>
+ <pre class="pre codeblock"><code>ordered {int} orderedS = {2,3,5};</code></pre>
+ <p class="p">are equivalent, and iterating over <samp class="ph codeph">sortedS</samp> or <samp class="ph codeph">orderedS</samp> will have the same behavior.</p>
+ <p class="p">To specify the descending order, you add the keyword <samp class="ph codeph">reversed</samp>.</p>
+ </li>
+</ul>
+</div>
+<div class="section"><h2 class="title sectiontitle">Simple sets</h2><p class="p">The following code sample enables you to see the difference between the union of ordered sets and the union of sorted sets.</p>
+<pre class="pre codeblock"><code>{int} s1 = {3,5,1};
+{int} s2 = {4,2};
+{int} orderedS = s1 union s2;
+sorted {int} sortedS = s1 union s2;
+execute{
+    writeln("ordered union = ", orderedS);
+    writeln("sorted union = ", sortedS);
+}</code></pre>
+<p class="p">The statement</p>
+<pre class="pre codeblock"><code>{int} orderedS = s1 union s2;</code></pre>
+<p class="p">returns</p>
+<pre class="pre codeblock"><code>ordered union =  {3 5 1 4 2}</code></pre>
+<p class="p">while the statement</p>
+<pre class="pre codeblock"><code>sorted {int} sortedS = s1 union s2;</code></pre>
+<p class="p">returns</p>
+<pre class="pre codeblock"><code>sorted union =  {1 2 3 4 5}</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Sorted tuple sets</h2></div>
+<p class="p">When a tuple set does not use keys, the entire tuple, except set and array fields, is taken into account for sorting. For tuple sets with keys, sorting takes place on all keys in their order of declaration. In other words, it is not possible to sort a tuple set on one (or more) given column(s) only.</p>
+<p class="p">The code extract below declares a team of people who are defined by their first name, last name, and nickname, then prints the list of team members first in the creation order, then in alphabetical order.</p>
+<pre class="pre codeblock"><code>tuple person {
+     string firstname;
+     string lastname;
+     string nickname;
+}
+tuple personKeys {
+     key string firstname;
+     key string lastname;
+     string nickname;
+}
+{person} devTeam = {
+&lt;"David", "Atkinson", "Dave"&gt;,
+&lt;"David", "Doe", "Skinner"&gt;,
+&lt;"Gregory", "Simons", "Greg"&gt;, 
+&lt;"David", "Smith", "Lewis"&gt;,
+&lt;"Kevin", "Morgan", "Kev"&gt;,
+&lt;"Gregory", "McNamara ", "Mac"&gt;
+};
+sorted {personKeys} sortedDevTeam = {&lt;i,j,k&gt; | &lt;i,j,k&gt; in devTeam};
+execute{
+        writeln(devTeam);
+        writeln(sortedDevTeam);
+}</code></pre>
+<p class="p">The <samp class="ph codeph">person</samp> tuple uses no keys.</p>
+<pre class="pre codeblock"><code>tuple person {
+     string firstname;
+     string lastname;
+     string nickname;
+}</code></pre>
+<p class="p">The <samp class="ph codeph">personKeys</samp> tuple uses keys for the first and last names, not for the nickname.</p>
+<pre class="pre codeblock"><code>tuple personKeys {
+     key string firstname;
+     key string lastname;
+     string nickname;
+}</code></pre>
+<p class="p">The data shows that the team includes three people whose first name is David, two people whose first name is Gregory, and one person whose first name is Kevin. </p>
+<p class="p">As a consequence, the statement</p>
+<pre class="pre codeblock"><code>sorted {personKeys} sortedDevTeam = {&lt;i,j,k&gt; | &lt;i,j,k&gt; in devTeam};</code></pre>
+<p class="p">lists the <samp class="ph codeph">David</samp> tuples before the <samp class="ph codeph">Gregory</samp> tuples, which themselves appear before the <samp class="ph codeph">Kevin</samp> tuple. Within the <samp class="ph codeph">David</samp> tuples, <samp class="ph codeph">"David" "Doe" "Skinner"</samp> comes before <samp class="ph codeph">"David" "Smith" "Lewis"</samp> because a second sorting also takes place on the second field with the key <samp class="ph codeph">lastname</samp>. In contrast, since there is no person with the same first name and last name, no sort is ever done on the last field <samp class="ph codeph">nickname</samp>.</p>
+<p class="p">The output of <samp class="ph codeph">sortedDevTeam</samp> is displayed in the CPLEX Studio IDE as:</p>
+<pre class="pre msgblock"><code>   {&lt;"David" "Atkinson" "Dave"&gt; &lt;"David" "Doe" "Skinner"&gt;
+    &lt;"David" "Smith" "Lewis"&gt; &lt;"Gregory" "McNamara " "Mac"&gt;
+    &lt;"Gregory" "Simons" "Greg"&gt; &lt;"Kevin" "Morgan" "Kev"&gt;}</code></pre>
+<div class="section"><h2 class="title sectiontitle">Sorted sets in piecewise linear functions</h2><p class="p">In piecewise linear functions, breakpoints must be strictly increasing. However, in most cases, the data supplied by a database or a <samp class="ph codeph">.dat</samp> file is not sorted in an increasing numeric or lexicographic order. As a consequence, you have to add complex and verbose scripting statements to sort the data.</p>
+<p class="p">To avoid these extra code lines, the <samp class="ph codeph">sorted</samp> property of sets enables you to sort data by specifying a single keyword, as shown in the code extract below. Writing piecewise linear functions becomes easier, as one code line is sufficient instead of several dozens.</p>
+<pre class="pre codeblock"><code>tuple Cost{ 
+    key int BreakPoint; 
+    float Slope; 
+} 
+sorted {Cost} sS = { &lt;1, 1.5&gt;, &lt;0, 2.5&gt;, &lt;3, 4.5&gt;, &lt;2, 4.5&gt;}; 
+
+float lastSlope = 3.5; 
+
+
+dvar float+ x; 
+minimize piecewise(t in sS) 
+    {t.Slope -&gt; t.BreakPoint; lastSlope} x; </code></pre>
+<p class="p">See also <a class="xref" href="opl_langref_expressions_piecewise.html" title="Describes the use of piecewise-linear functions in OPL.">Piecewise-linear functions</a>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_datastructures.html" title="Describes how the basic data types can be combined using arrays, tuples, and sets to obtain complex data structures.">Data structures</a></div>
+</div>
+
+<div class="linklist linklist">Other related topics:<br />
+
+<div><a class="link" href="opl_langref_datasources.html" title="Describes data and database initialization, spreadsheet input/output, data consistency, and preprocessing.">Data sources</a></div>Describes data initialization.<br />
+</div>
+
+<div class="linklist linklist">
+<div><a class="link" href="../../opllanguser/topics/opl_languser_script_intro.html" title="Defines IBM ILOG Script as a scripting language and describes the situations in which it is used: preprocessing, postprocessing, and flow control. Also provides programming tips and warns you of pitfalls to avoid.">Introduction to scripting</a></div>Describes how to set declarations.<br />
+</div>
+</div></body>
+</html>

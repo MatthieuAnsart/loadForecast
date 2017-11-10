@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Pitfall of lazy initialization of data" />
+<meta name="abstract" content="In OPL, external data is always initialized before internal data." />
+<meta name="Description" content="In OPL, external data is always initialized before internal data." />
+<meta name="DC.subject" content="data initialization, lazy" />
+<meta name="keywords" content="data initialization, lazy" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_datasources.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1304329941957" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_datasources.html" />
+<title>Pitfall of lazy initialization of data</title>
+</head>
+<body role="main" id="descriptiveTopic1304329941957">
+<h1 class="title topictitle1">Pitfall of lazy initialization of data</h1>
+<div class="body"><p class="shortdesc">In OPL, external data is always initialized before internal
+data.</p>
+<p class="p">If you are not aware of the lazy initialization of data
+in OPL, you may be surprised by unexpected results.</p>
+<p class="p">OPL is a declarative language. The order of elements
+as they are written in the source file is less important than with
+imperative languages. We initialize OPL data elements when they are
+first used, which may result in an initialization order different
+from the declaration order in a <samp class="ph codeph">.mod</samp> file.
+External data (with <samp class="ph codeph">=...</samp> syntax) is always
+initialized before internal data. Scripting blocks are executed after
+external data.</p>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">In the following example, the array <samp class="ph codeph">arrayInitExternally</samp> is
+initialized with three elements in the <samp class="ph codeph">.dat</samp> file,
+but, because <samp class="ph codeph">set1</samp> has four elements, the
+result shows that <samp class="ph codeph">arrayInitExternally</samp> has
+one more element (initialized by default with zero).</p>
+<pre class="pre codeblock"><code>string arrayInitByScript[0..3]; 
+
+execute initializeArray {
+  for(var i=0; i&lt;=3; i++) {
+    if(i &gt;= 1) arrayInitByScript[i] = "A";
+    else arrayInitByScript[i] = "B";
+  }
+}  
+// set1 is later used to index an array initialized externally.
+// This external initialization of arrayInitExternally alters the content of set1
+// because external initialization is done prior to script execution.
+// So instead of having set1={1 2 3}, set1 has an additional element "0" 
+// Before the script is executed, arrayInitByScript contains four empty elemens ["" "" "" ""]
+{int} set1 = union(s in 0..3 : arrayInitByScript[s] != "B") {s};
+{int} set2 = union(s in 0..3 : arrayInitByScript[s] != "B") {s};
+
+int arrayInitExternally[set1] = ...; // [0, 0, 0]; //  
+
+execute {
+writeln(arrayInitByScript);
+writeln(set1);
+writeln(set2);
+writeln(arrayInitExternally);
+}</code></pre>
+<p class="p">This produces the output:</p>
+<pre class="pre codeblock"><code>["B" "A" "A" "A"]
+{0 1 2 3}
+{1 2 3}
+[0 0 0 0]</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_datasources.html" title="Describes data and database initialization, spreadsheet input/output, data consistency, and preprocessing.">Data sources</a></div>
+</div>
+</div></body>
+</html>

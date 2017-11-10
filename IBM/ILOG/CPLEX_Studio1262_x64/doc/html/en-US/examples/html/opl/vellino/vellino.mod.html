@@ -1,0 +1,44 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: include <b><font color="#8A2BE2">"vellinocommon.mod"</font></b>;
+13: 
+14: <b><font color="#0000FF">main</font></b> {
+15:    <b><font color="EA7D00">var</font></b> master = <b><font color="#0000FF">thisOplModel</font></b>;
+16:    master.generate();
+17:    <b><font color="EA7D00">var</font></b> data = master.dataElements;
+18:       
+19:    <b><font color="EA7D00">var</font></b> genBin = <b><font color="EA7D00">new</font></b> IloOplRunConfiguration(<b><font color="#8A2BE2">"vellinogenBin.mod"</font></b>);
+20:    genBin.oplModel.addDataSource(data);
+21:    genBin.oplModel.generate();
+22:    genBin.cp.startNewSearch();
+23:    <b><font color="EA7D00">while</font></b> (genBin.cp.next()) {  
+24:      genBin.oplModel.postProcess();
+25:      data.Bins.add(genBin.oplModel.newId, 
+26:                    genBin.oplModel.colorStringValue, 
+27:                    genBin.oplModel.n.solutionValue);
+28:    }
+29:    genBin.cp.endSearch();
+30:    genBin.end();
+31:    <b><font color="EA7D00">var</font></b> chooseBin = <b><font color="EA7D00">new</font></b> IloOplRunConfiguration(<b><font color="#8A2BE2">"vellinochooseBin.mod"</font></b>);
+32:    chooseBin.<b><font color="#0000FF">cplex</font></b> = <b><font color="#0000FF">cplex</font></b>;   
+33:    chooseBin.oplModel.addDataSource(data);   
+34:    chooseBin.oplModel.generate();
+35:    <b><font color="EA7D00">if</font></b> (chooseBin.<b><font color="#0000FF">cplex</font></b>.solve()) {
+36:      chooseBin.oplModel.postProcess();
+37:    } 
+38:    chooseBin.end();
+39: }
+</tt></pre>

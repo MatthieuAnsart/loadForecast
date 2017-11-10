@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Lack of memory" />
+<meta name="abstract" content="Documents CPLEX behavior in limited memory for LP models." />
+<meta name="Description" content="Documents CPLEX behavior in limited memory for LP models." />
+<meta name="DC.subject" content="managing, memory (LP), memory management, performance in LP, memory emphasis, continuous (LP), emphasis, MemoryEmphasis parameter, conserving memory and, CPX_PARAM_MEMORYEMPHASIS, conserving memory" />
+<meta name="keywords" content="managing, memory (LP), memory management, performance in LP, memory emphasis, continuous (LP), emphasis, MemoryEmphasis parameter, conserving memory and, CPX_PARAM_MEMORYEMPHASIS, conserving memory" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/18_performance_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveLP.675271" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/18_performance_title_synopsis.html" />
+<title>Lack of memory</title>
+</head>
+<body role="main" id="User_manual.uss_solveLP.675271">
+<h1 class="title topictitle1">Lack of memory</h1>
+<div class="body"><p class="shortdesc">Documents CPLEX behavior in limited memory for LP models.</p>
+<p class="p">To sustain computational speed, CPLEX should use only
+available physical memory, rather than virtual memory or paged memory.
+Even if your problem data fit in memory, CPLEX will need still more
+memory to optimize the problem. When CPLEX recognizes that only limited
+memory is available, it automatically makes algorithmic adjustments
+to compensate. These adjustments almost always reduce optimization
+speed. If you detect when these automatic adjustments occur, then
+you can decide when you need to add additional memory to your computer
+to sustain computational speed for your particular problem. </p>
+<p class="p">An alternative to obtaining more memory is to conserve
+memory that is available. The memory emphasis parameter (<a class="xref" href="../../../../Parameters/topics/MemoryEmphasis.html" title="Directs CPLEX that it should conserve memory where possible.">memory reduction switch</a>)
+can help you in this respect. </p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">C++ Name MemoryEmphasis
+(bool)</samp> in Concert Technology</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">C Name CPX_PARAM_MEMORYEMPHASIS
+(int)</samp> in the Callable Library</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">emphasis memory</samp> in
+the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">If you set the memory emphasis parameter to its optional
+value of 1 (one), then CPLEX adopts memory conservation tactics at
+the beginning of optimization rather than only after the shortage
+becomes apparent. These tactics may still have a noticeable impact
+on solution speed because these tactics change the emphasis from speed
+to memory utilization, but they could give an improvement over the
+default in the case where memory is insufficient. </p>
+<p class="p">The following sections offer further guidance about memory
+conservation if memory emphasis alone does not do enough for your
+problem.</p>
+<div class="section" id="User_manual.uss_solveLP.675271__User_manual.uss_solveLP.638508"><h2 class="title sectiontitle">Warning messages</h2><p class="p">In certain cases, CPLEX issues a warning message when
+it cannot perform an operation, but it continues to work on the problem.
+Other CPLEX messages warn that CPLEX is compressing the problem to
+conserve memory. These warnings mean that CPLEX finds insufficient
+memory available, so it is following an alternate—less desirable—path
+to a solution. If you provide more memory, CPLEX will return to the
+best path toward a solution.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.675271__User_manual.uss_solveLP.638532"><h2 class="title sectiontitle">Paging virtual memory</h2><p class="p">If you observe paging of memory to disk, then your application
+is incurring a performance penalty. If you increase available memory
+in such a case, performance will speed up dramatically.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.675271__User_manual.uss_solveLP.638533"><h2 class="title sectiontitle">Refactoring frequency and memory requirements</h2><p class="p">The CPLEX primal and dual simplex optimizers refactor
+the problem basis at a rate set by the <samp class="ph codeph">ReInv</samp> parameter.</p>
+<p class="p">The longer CPLEX works between refactoring, the greater
+the amount of memory it needs for each iteration. Consequently, one
+way of conserving memory is to decrease the interval between refactoring.
+In fact, if little memory is available to it, CPLEX will automatically
+decrease the refactoring interval in order to use less memory at each
+iteration.</p>
+<p class="p">Since refactoring is an expensive operation, decreasing
+the refactoring interval (that is, factoring more often) will generally
+slow performance. You can tell whether performance is being degraded
+in this way by checking the iteration log file.</p>
+<p class="p">In an extreme case, lack of memory may force CPLEX to
+refactor at every iteration, and the impact on performance will be
+dramatic. If you provide more memory in such a situation, the benefit
+will be tremendous.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.675271__User_manual.uss_solveLP.638559"><h2 class="title sectiontitle">Preprocessing and memory requirements</h2><p class="p">By default, CPLEX automatically preprocesses your problem
+before optimizing, and this preprocessing requires memory. If memory
+is extremely tight, consider turning off preprocessing, by setting
+the <samp class="ph codeph">PreInd</samp> parameter to 0 (zero). But doing
+this foregoes the potential performance benefit of preprocessing,
+and should be considered only as a last resort.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/18_performance_title_synopsis.html" title="While some linear programming models offer opportunities for performance tuning, others, unfortunately, entail outright performance problems that require diagnosis and correction. This section indicates how to diagnose and correct such performance problems as lack of memory or numeric difficulties.">Diagnosing performance problems</a></div>
+</div>
+</div></body>
+</html>

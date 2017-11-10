@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Accessing intermediate solutions" />
+<meta name="abstract" content="As CP Optimizer searched for an optimal solution to an optimization problem, the search will generally encounter a sequence of solutions that improve the objective function." />
+<meta name="Description" content="As CP Optimizer searched for an optimal solution to an optimization problem, the search will generally encounter a sequence of solutions that improve the objective function." />
+<meta name="DC.subject" content="IloCP class, startNewSearch method, optimization, search, optimal solution, solution, optimal" />
+<meta name="keywords" content="IloCP class, startNewSearch method, optimization, search, optimal solution, solution, optimal" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/search_search.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizersearch.1016665" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/search_search.html" />
+<title>Accessing intermediate solutions</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizersearch.1016665">
+<h1 class="title topictitle1">Accessing intermediate solutions</h1>
+<div class="body"><p class="shortdesc">As CP Optimizer searched for an optimal solution
+to an optimization problem, the search will generally encounter a
+sequence of solutions that improve the objective function.</p>
+<p class="p">As the CP Optimizer engine solves an optimization problem,
+a sequence of solutions that improve the objective function are produced
+until an optimal solution is found. In some cases, you may want to
+have access to this sequence of intermediate solutions. CP Optimizer
+provides a simple interface that provides this access via member functions
+of the optimizer object.</p>
+<p class="p">To prepare the optimizer for search, you call the member
+function <samp class="ph codeph">startNewSearch</samp>, a member function
+of the optimizer object. To instruct the optimizer to find a solution,
+you call the method <samp class="ph codeph">next</samp>. This method returns
+true (<samp class="ph codeph">IloTrue</samp> in the C++ API) if the optimizer
+finds a solution (not necessarily an optimal one) and false (<samp class="ph codeph">IloFalse</samp> in the C++ API) if the problem is infeasible.
+To find the next solution, you again call the method <samp class="ph codeph">next</samp>.
+If the method returns true, then the optimizer has found a new solution
+with a strictly better objective value than the previous one. If the
+optimizer does not find another solution, the value returned by this
+method is false. When you have finished searching, you can call the
+method <samp class="ph codeph">end</samp> to free the memory and reset
+the state of the optimizer. A typical code using these methods of
+the optimizer object in the C++ API would be similar to:  </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::LogVerbosity, IloCP::Quiet);
+    cp.startNewSearch();
+    while(cp.next()){
+      cp.out() &lt;&lt; "objective value = " &lt;&lt; cp.getObjValue()
+               &lt;&lt; ", x = " &lt;&lt; cp.getValue(x)
+               &lt;&lt; ", y = " &lt;&lt; cp.getValue(y)
+               &lt;&lt; ", z = " &lt;&lt; cp.getValue(z) &lt;&lt; std::endl;
+    }
+    cp.end();
+</code></pre>
+<p class="p">Running this code produces the output: </p>
+<pre class="pre codeblock"><code>objective value = 5, x = 4, y = 0, z = 1
+objective value = 4, x = 0, y = 3, z = 1
+</code></pre>
+<p class="p">This run finds two solutions, one with an objective value
+of 5 and then one with an objective value of 4, which is the optimum.</p>
+<p class="p">In the <strong class="ph b">C++ API</strong> of CP Optimizer, you use
+the class <samp class="ph codeph">IloCP</samp> and the methods <samp class="ph codeph">IloCP::startNewSearch</samp> and <samp class="ph codeph">IloCP::next</samp>.</p>
+<p class="p">In the <strong class="ph b">Java™ API</strong> of
+CP Optimizer, you use the class <samp class="ph codeph">IloCP</samp> and
+the methods <samp class="ph codeph">IloCP.startNewSearch</samp> and <samp class="ph codeph">IloCP.next</samp>.</p>
+<p class="p">In the <strong class="ph b">C# API</strong> of CP Optimizer, you use
+the class <samp class="ph codeph">CP</samp> and the methods <samp class="ph codeph">CP.StartNewSearch</samp> and <samp class="ph codeph">CP.Next</samp>. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/search_search.html" title="CP Optimizer uses constructive search strategies to find a solution to a constraint programming problem.">Searching for solutions</a></div>
+</div>
+</div></body>
+</html>

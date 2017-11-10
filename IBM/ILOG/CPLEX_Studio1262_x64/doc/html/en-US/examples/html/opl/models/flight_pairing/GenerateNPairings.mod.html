@@ -1,0 +1,124 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2015. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: include <b><font color="#8A2BE2">"FlightPairing_data.mod"</font></b>;
+013: 
+014:  <b><font color="#007D00">/// this is actually a JS program</font></b>
+015:  
+016:  <b><font color="#007D00">// the maximum number of initial pairings to generate.</font></b>
+017:  <b><font color="#0000FF">int</font></b> NumberOfInitialPairings = 3;
+018:  
+019:  
+020: {TPairingLeg}  pairingLegs;
+021: {TPairingCost} pairingCosts;
+022: 
+023:  <b><font color="#0000FF">main</font></b> {
+024:    includeScript(<b><font color="#8A2BE2">"helpers.js"</font></b>);
+025:    <b><font color="EA7D00">var</font></b> status = 0;
+026: 
+027:    <b><font color="EA7D00">var</font></b> MAX_INITIAL_PAIRINGS_PER_FLIGHT         = <b><font color="#0000FF">thisOplModel</font></b>.NumberOfInitialPairings;   <b><font color="#007D00">// Initial pairings to cover each flight</font></b>
+028:    <b><font color="EA7D00">var</font></b> PrintPeriod  = 20;   <b><font color="#007D00">// Print frequency</font></b>
+029:    
+030:    <b><font color="EA7D00">var</font></b> time  = 0;          <b><font color="#007D00">// Procedure time</font></b>
+031:    <b><font color="EA7D00">var</font></b> date0;
+032:    <b><font color="EA7D00">var</font></b> totalTime;            <b><font color="#007D00">// Total computation time </font></b>
+033: 
+034:    <b><font color="#007D00">/******************************************************************************</font></b>
+035: <b><font color="#007D00">    * INITIALIZATION:</font></b>
+036: <b><font color="#007D00">    * Generate initial pairings that cover all flights</font></b>
+037: <b><font color="#007D00">    ******************************************************************************/</font></b>
+038:    
+039:    <b><font color="#007D00">// Load pairing cover model</font></b>
+040:    <b><font color="EA7D00">var</font></b> generateOnePairingConfig =
+041:       <b><font color="EA7D00">new</font></b> IloOplRunConfiguration(<b><font color="#8A2BE2">"GenerateOnePairing.mod"</font></b>, <b><font color="#8A2BE2">"FlightPairing.dat"</font></b>, <b><font color="#8A2BE2">"PairingGeneration.dat"</font></b>, <b><font color="#8A2BE2">"DefaultGenerateOnePairing.dat"</font></b>);
+042:    <b><font color="EA7D00">var</font></b> generatePairingModel = generateOnePairingConfig.oplModel;
+043:    <b><font color="EA7D00">var</font></b> generatePairingData  = generatePairingModel.dataElements;
+044:    <b><font color="#007D00">//generatePairingData.forcedCoveredFlight = -1;</font></b>
+045:    generatePairingModel.generate();
+046:    
+047:    <b><font color="EA7D00">var</font></b> allFlights = generatePairingData.flights;
+048:    <b><font color="EA7D00">var</font></b> nbFlights = generatePairingData.flights.size;
+049:    <b><font color="EA7D00">var</font></b> maxNbLegs = generatePairingData.parameters.maxNbLegs;
+050:    
+051:    writeln(<b><font color="#8A2BE2">"* starting CP search for initial pairings"</font></b>, <b><font color="#8A2BE2">", #flights="</font></b>, nbFlights, <b><font color="#8A2BE2">", max. pairings/flight="</font></b>, MAX_INITIAL_PAIRINGS_PER_FLIGHT);
+052:    date0 = <b><font color="EA7D00">new</font></b> Date();
+053:    <b><font color="#007D00">// Indices for master problem</font></b>
+054:    <b><font color="EA7D00">var</font></b> legs  = <b><font color="#0000FF">thisOplModel</font></b>.pairingLegs;
+055:    <b><font color="EA7D00">var</font></b> costs = <b><font color="#0000FF">thisOplModel</font></b>.pairingCosts;
+056:    <b><font color="EA7D00">var</font></b> totalNumberOfColumns = 0;
+057: 
+058:    <b><font color="#007D00">// Now, generate pairings for every flight</font></b>
+059:    <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> f=1; f &lt;= nbFlights; f++) {
+060:    
+061:      <b><font color="EA7D00">var</font></b> localGeneratePairingConfig =
+062:       <b><font color="EA7D00">new</font></b> IloOplRunConfiguration(<b><font color="#8A2BE2">"GenerateOnePairing.mod"</font></b>);
+063:      <b><font color="EA7D00">var</font></b> localGeneratePairingModel = localGeneratePairingConfig.oplModel;
+064:      generatePairingData.forcedCoveredFlight = f;
+065:      localGeneratePairingModel.addDataSource(generatePairingData);
+066:      localGeneratePairingModel.generate();     
+067:      <b><font color="EA7D00">var</font></b> localNumberOfPairings = 0;
+068:      <b><font color="EA7D00">var</font></b> localCP = localGeneratePairingConfig.cp;
+069: 
+070:      <b><font color="#007D00">/// --- search loop for covering pairings</font></b>
+071:      <b><font color="#007D00">/// seems better with nb agents ==1</font></b>
+072:      <b><font color="#007D00">///</font></b>
+073:          localCP.param.Workers = 1;
+074:      localCP.startNewSearch();
+075:      <b><font color="EA7D00">while</font></b> (localCP.next()) {
+076:        <b><font color="#007D00">// Add the pairing to the list</font></b>
+077:        <b><font color="EA7D00">var</font></b> currentPairingIndex = totalNumberOfColumns;
+078:        <b><font color="#007D00">/// 1. store the cost</font></b>
+079:        costs.add( currentPairingIndex, localGeneratePairingModel.costVar );
+080:        <b><font color="#007D00">/// 2. store the actual legs as triplets &lt;#p, #l, flight&gt;</font></b>
+081:        <b><font color="#007D00">///</font></b>
+082:        <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> l=1; l &lt;= maxNbLegs; ++l) {   
+083:          <b><font color="EA7D00">var</font></b> flightRank  = localGeneratePairingModel.flightVars[l];
+084:          <b><font color="EA7D00">var</font></b> isActualLeg = localGeneratePairingModel.isActualLeg[l];
+085:          <b><font color="#007D00">//writeln("-- flight covered: ", f, ", #leg: ", l, ", f=", flightIndex);</font></b>
+086:          <b><font color="EA7D00">if</font></b> ( isActualLeg &lt; 0.1 ) <b><font color="EA7D00">break</font></b>;  <b><font color="#007D00">/// stop at dummy legs.</font></b>
+087:             
+088:          <b><font color="#007D00">/// BEWARE: variable is 1..F, but Opl.item() has C-convention</font></b>
+089:          legs.add(currentPairingIndex, l , flightRank);
+090:        }<b><font color="#007D00">//for           </font></b>
+091:        ++localNumberOfPairings;
+092:        ++totalNumberOfColumns;
+093:          
+094:        <b><font color="EA7D00">if</font></b> (localNumberOfPairings &gt;= MAX_INITIAL_PAIRINGS_PER_FLIGHT) 
+095:          <b><font color="EA7D00">break</font></b>;
+096:      }<b><font color="#007D00">//while</font></b>
+097:      localCP.endSearch();
+098:      <b><font color="EA7D00">if</font></b> ( 0 == localNumberOfPairings) {
+099:          writeln(<b><font color="#8A2BE2">"** ERROR: cannot find any pairing for flight: "</font></b>, f, <b><font color="#8A2BE2">" final problem will be infeasible"</font></b>);
+100:          status = -2;
+101:      }
+102:      <b><font color="EA7D00">if</font></b> ( localNumberOfPairings &lt; MAX_INITIAL_PAIRINGS_PER_FLIGHT ) {
+103:        <b><font color="#007D00">///  !!!</font></b>
+104:        <b><font color="#007D00">/// This may be a problem: cannot find MAX_PAIRINGS pairings</font></b>
+105:        <b><font color="#007D00">/// only a subset..        </font></b>
+106:        writeln(<b><font color="#8A2BE2">"* warning: cannot find "</font></b>, MAX_INITIAL_PAIRINGS_PER_FLIGHT, <b><font color="#8A2BE2">" pairings, only: "</font></b>, localNumberOfPairings);
+107:      }              
+108:      <b><font color="EA7D00">if</font></b> ( (f% PrintPeriod) == 0) {
+109:        writeln(<b><font color="#8A2BE2">"* initial generation: "</font></b>, Opl.floor( (100 * f)/nbFlights +.5), <b><font color="#8A2BE2">"%, #columns: "</font></b>, totalNumberOfColumns, <b><font color="#8A2BE2">", time="</font></b>, getElapsedTime(date0));
+110:      }
+111:    }
+112:   
+113:    writeln(<b><font color="#8A2BE2">"* end initial pairings phase, time: "</font></b> , time, <b><font color="#8A2BE2">"#columns="</font></b>, totalNumberOfColumns, <b><font color="#8A2BE2">", time="</font></b>, getElapsedTime(date0), <b><font color="#8A2BE2">"s."</font></b>);
+114:    print_initial_pairings(legs, costs, <b><font color="#8A2BE2">"initial_pairings.dat"</font></b>);
+115:    <b><font color="#007D00">// this is the end</font></b>
+116:    
+117:     writeln(<b><font color="#8A2BE2">"*  script returns with code: "</font></b>, status)
+118:    status; 
+119:  }
+</tt></pre>

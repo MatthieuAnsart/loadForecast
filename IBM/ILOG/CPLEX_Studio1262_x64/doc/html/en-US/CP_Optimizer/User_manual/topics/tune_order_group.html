@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Grouping variables" />
+<meta name="abstract" content="Decision variables and their possible values can be ordered so that the optimizer can fix the key decision variables early in the process." />
+<meta name="Description" content="Decision variables and their possible values can be ordered so that the optimizer can fix the key decision variables early in the process." />
+<meta name="DC.subject" content="IloSearchPhase class, search, tuning, search phase, tuning object" />
+<meta name="keywords" content="IloSearchPhase class, search, tuning, search phase, tuning object" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/tune_order.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="UmXtQFOU" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/tune_order.html" />
+<title>Grouping variables</title>
+</head>
+<body role="main" id="UmXtQFOU">
+<h1 class="title topictitle1">Grouping variables</h1>
+<div class="body"><p class="shortdesc">Decision variables and their possible values can be ordered
+so that the optimizer can fix the key decision variables early in
+the process.</p>
+<p class="p">In many applications, there exists a group of key decision
+variables, such that once these variables are fixed, it is easy to
+extend the partial solution to the remaining variables. </p>
+<p class="p">Information about key variables can be given to the search
+by way of tuning objects called search phases. An instance of <samp class="ph codeph">IloSearchPhase</samp> (<samp class="ph codeph">ISearchPhase</samp> in
+the <strong class="ph b">C# API</strong>) is created
+with an array of decision variables and passed to the search as argument
+to the search methods <samp class="ph codeph">solve</samp> and <samp class="ph codeph">startNewSearch</samp>.</p>
+<p class="p">Assume that in a model the decision variables in the
+array <samp class="ph codeph">x</samp> are key variables. In the C++ API,
+you can pass this information to the search the following way: </p>
+<pre class="pre codeblock"><code>    cp.solve(IloSearchPhase(env,x));
+</code></pre>
+<p class="p">This search phase forces the search to fix (instantiate)
+the decision variables from the array <samp class="ph codeph">x</samp> before
+instantiating any other variable in the model.</p>
+<p class="p">Instantiation of groups of decision variables can be
+ordered by using several search phases. The search phases are passed
+to the search using a search phase array. The decision variables in
+the first phase are instantiated before the variables in the second
+one and so on.</p>
+<p class="p">Consider for instance, the two phases: </p>
+<pre class="pre codeblock"><code>    IloSearchPhase xPhase(env, x);
+    IloSearchPhase yPhase(env, y);
+</code></pre>
+<p class="p">If we solve a model by calling:  </p>
+<pre class="pre codeblock"><code>    IloSearchPhaseArray phaseArray(env);
+    phaseArray.add(xPhase);
+    phaseArray.add(yPhase);
+    cp.solve(phaseArray);
+</code></pre>
+<p class="p">Decision variables in <samp class="ph codeph">x</samp> will
+be instantiated before variables in <samp class="ph codeph">y</samp> that
+in turn will be instantiated before any variables that are not in <samp class="ph codeph">x</samp> and <samp class="ph codeph">y</samp>.</p>
+<p class="p">It is important to observe that when using search phases,
+the phases do not need to cover all variables of the model. The CP
+Optimizer search will instantiate all variables, and those that do
+not appear in any search phase will always be instantiated last. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/tune_order.html" title="Decision variables and their possible values can be ordered so that the optimizer can fix the key decision variables early in the process.">Ordering variables and values</a></div>
+</div>
+</div></body>
+</html>

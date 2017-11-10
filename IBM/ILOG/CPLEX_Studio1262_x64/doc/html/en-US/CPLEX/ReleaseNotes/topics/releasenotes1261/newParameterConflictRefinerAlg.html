@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Conflict refiner algorithm" />
+<meta name="abstract" content="Announces a new parameter of CPLEX V12.6.1 to choose the algorithm CPLEX uses in the conflict refiner." />
+<meta name="Description" content="Announces a new parameter of CPLEX V12.6.1 to choose the algorithm CPLEX uses in the conflict refiner." />
+<meta name="DC.subject" content="release notes CPLEX V12.6.1, new parameter: conflict refiner" />
+<meta name="keywords" content="release notes CPLEX V12.6.1, new parameter: conflict refiner" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/newParameters.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="NewParameterConflictRefinerAlg1261" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/newParameters.html" />
+<title>Conflict refiner algorithm</title>
+</head>
+<body role="main" id="NewParameterConflictRefinerAlg1261">
+<h1 class="title topictitle1">Conflict refiner algorithm</h1>
+<div class="body"><p class="shortdesc">Announces a new parameter of CPLEX V12.6.1 to choose 
+the algorithm CPLEX uses in the conflict refiner.</p>
+<p class="p">A new parameter lets you choose the algorithm that CPLEX 
+uses in the conflict refiner to find minimal conflicts in an 
+infeasible model.</p>
+<p class="p">By default, CPLEX automatically chooses the algorithm in the 
+conflict refiner according to 
+the way that CPLEX determined the infeasibility of the original
+problem. </p>
+<p class="p">To see which algorithm that CPLEX chose by default, use the 
+parameter to manage 
+<a class="xref" href="../../../Parameters/topics/ConflictDisplay.html" title="Decides how much information CPLEX reports when the conflict refiner is working.">conflict information display</a>. </p>
+<p class="p">The algorithm selected by default by CPLEX ordinarily yields the fastest 
+possible performance. However, in certain models, a 
+nondefault selection can work better. In particular, settings 
+1 (one), 2, or 3  entail preprocessing or propagation algorithms 
+that are very fast, but those same algorithms can be inefficient 
+at discarding large numbers 
+of constraints quickly. In such a case, explicitly setting this 
+parameter to 5 for a limited solve by the conflict refiner or 
+6 for a full solve can improve performance. </p>
+<p class="p">Setting 4 of this parameter invokes the conflict refiner to 
+detect an irreducibly inconsistent set (IIS) in a linear 
+program (LP). You can apply this setting anyway to models that 
+are not strictly LP; in that case, CPLEX tries to detect a 
+conflict using only the linear constraints of the model.</p>
+<p class="p">This new parameter also introduces new symbols and 
+enumerations to express its values 
+symbolically in the application programming interfaces (APIs):</p>
+<ul class="ul"><li class="li"><p class="p">In the Callable Library (C API)</p>
+
+<pre class="pre codeblock"><code>0  CPX_CONFLICTALG_AUTO
+1  CPX_CONFLICTALG_FAST
+2  CPX_CONFLICTALG_PROPAGATE
+3  CPX_CONFLICTALG_PRESOLVE
+4  CPX_CONFLICTALG_IIS
+5  CPX_CONFLICTALG_LIMITSOLVE
+6  CPX_CONFLICTALG_SOLVE</code></pre>
+</li>
+<li class="li"><p class="p">In the C++ API</p>
+
+<pre class="pre codeblock"><code> enum ConflictAlgorithm {
+                         ConflictAuto        
+                         ConflictFast         
+                         ConflictPropagate    
+                         ConflictPresolve     
+                         ConflictIIS          
+                         ConflictLimitedSolve 
+                         ConflictSolve        
+                         }</code></pre>
+</li>
+<li class="li"><p class="p">In the Java API</p>
+
+<pre class="pre codeblock"><code>static public class ConflictAlgorithm {
+               static public final int Auto        
+               static public final int Fast         
+               static public final int Propagate    
+               static public final int Presolve     
+               static public final int IIS          
+               static public final int LimitedSolve 
+               static public final int Solve        
+                                      }</code></pre>
+</li>
+<li class="li"><p class="p">In the .NET API</p>
+
+<pre class="pre codeblock"><code>ConflictAlgorithm {
+                   Auto        
+                   Fast         
+                   Propagate    
+                   Presolve     
+                   IIS          
+                   LimitedSolve 
+                   Solve        
+                         }</code></pre>
+</li>
+<li class="li"><p class="p">In the Python API</p>
+
+<pre class="pre codeblock"><code>class conflict_algorithm_constants:
+    auto          = _constants.CPX_CONFLICTALG_AUTO
+    fast          = _constants.CPX_CONFLICTALG_FAST
+    propagate     = _constants.CPX_CONFLICTALG_PROPAGATE
+    presolve      = _constants.CPX_CONFLICTALG_PRESOLVE
+    iis           = _constants.CPX_CONFLICTALG_IIS
+    limitedsolve  = _constants.CPX_CONFLICTALG_LIMITSOLVE
+    solve         = _constants.CPX_CONFLICTALG_SOLVE</code></pre>
+</li>
+<li class="li"><p class="p">In the MATLAB Connector</p>
+
+<pre class="pre codeblock"><code></code></pre>
+</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/newParameters.html" title="Announces new parameters of CPLEX V12.6.1.">New CPLEX parameters</a></div>
+</div>
+</div></body>
+</html>

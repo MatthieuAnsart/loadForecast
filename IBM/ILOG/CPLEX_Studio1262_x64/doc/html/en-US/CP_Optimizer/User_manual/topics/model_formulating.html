@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Formulating a problem" />
+<meta name="abstract" content="Modeling objects, such as objectives, variables and constraints, are contained in a model." />
+<meta name="Description" content="Modeling objects, such as objectives, variables and constraints, are contained in a model." />
+<meta name="DC.subject" content="IloModel class, model, definition, model, representation" />
+<meta name="keywords" content="IloModel class, model, definition, model, representation" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/model.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizermodel.1010277" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/model.html" />
+<title>Formulating a problem</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizermodel.1010277">
+<h1 class="title topictitle1">Formulating a problem</h1>
+<div class="body"><p class="shortdesc">Modeling objects, such as objectives, variables
+and constraints, are contained in a model.</p>
+<p class="p">A model is a container of modeling objects, such as objectives,
+variables and constraints. You must explicitly add a constraint to
+the model or the CP Optimizer search engine will not use it in the
+search for a solution.</p>
+<p class="p">In the <strong class="ph b">C++ API</strong> of CP Optimizer, a model
+is an instance of the class <samp class="ph codeph">IloModel</samp>. Decision
+variables, objectives and constraints can be added to the model with
+the method <samp class="ph codeph">IloModel::add</samp>.</p>
+<p class="p">In the <strong class="ph b">Java™ API</strong> of
+CP Optimizer, the methods for adding object to the model are defined
+in the interfaces <samp class="ph codeph">IloModel</samp> and <samp class="ph codeph">IloModeler</samp> and implemented in the class <samp class="ph codeph">IloCP</samp>. In particular, <samp class="ph codeph">IloCP.add</samp> is
+one function for adding objects to the model.</p>
+<p class="p">Likewise, in the <strong class="ph b">C# API</strong> of CP Optimizer,
+the methods for adding object to the model are defined in the interface <samp class="ph codeph">IModeler</samp> and <samp class="ph codeph">IModelImpl</samp> and
+implemented in the class <samp class="ph codeph">CP</samp>. In particular, <samp class="ph codeph">CP.Add</samp> is one function for adding objects to the
+model.</p>
+<p class="p">To create a model using the <strong class="ph b">C++ API</strong>, the
+first step is to create an instance of the class <samp class="ph codeph">IloEnv</samp>: </p>
+<pre class="pre codeblock"><code>  IloEnv env;
+</code></pre>
+<p class="p">(Note that creating an environment is not necessary in
+the C# and the Java APIs.)</p>
+<p class="p">The initialization of the environment creates internal
+data structures to be used in the rest of the code. Once this is done,
+you can create model objects; here illustrated in the <strong class="ph b">C++
+API</strong>: </p>
+<pre class="pre codeblock"><code>  IloIntVar x(env, 0, 10);
+  IloConstraint ct = (x != 0);
+</code></pre>
+<p class="p">In the <strong class="ph b">Java API</strong>,
+you must create the <samp class="ph codeph">IloCP</samp> object before
+creating the modeling objects: </p>
+<pre class="pre codeblock"><code>      IloCP cp = new IloCP();
+      IloIntVar x = cp.intVar(0, 10);
+      IloConstraint ct = cp.neq(x, 0);
+</code></pre>
+<p class="p">Likewise in the <strong class="ph b">C# API</strong>, you must create
+the <samp class="ph codeph">CP</samp> object before creating the modeling
+objects: </p>
+<pre class="pre codeblock"><code>      CP cp = new CP();
+      IIntVar x = cp.IntVar(0, 10);
+      IConstraint ct = cp.Neq(x, 0);
+</code></pre>
+<p class="p">Once this is done, you can create model and fill it with
+modeling objects; here illustrated in the <strong class="ph b">C++ API</strong>:
+ </p>
+<pre class="pre codeblock"><code>  IloModel model(env);
+  model.add(ct);
+</code></pre>
+<p class="p">In the <strong class="ph b">Java API</strong>,
+you have already created the <samp class="ph codeph">IloCP</samp> object
+before creating the modeling objects, so adding the constraint to
+the model is simply: </p>
+<pre class="pre codeblock"><code>      cp.add(ct);
+</code></pre>
+<p class="p">Likewise in the <strong class="ph b">C# API</strong>, you have already
+created the <samp class="ph codeph">CP</samp> object before creating the
+modeling objects, so adding the constraint to the model is simply: </p>
+<pre class="pre codeblock"><code>      cp.Add(ct);
+</code></pre>
+<p class="p">As soon as the model is completed, you are ready to solve
+the problem. The processes for searching for solutions to a model
+are introduced in <a class="xref" href="search.html" title="CP Optimizer uses constructive search strategies to find a solution to a constraint programming problem.">Search in CP Optimizer</a>.</p>
+<p class="p">When your problem solving is finished, you can reclaim
+memory for all modeling objects and clean up internal data structures
+by calling <samp class="ph codeph">IloEnv::end</samp> for every environment
+you have created. This should be always be done before you exit your
+application.</p>
+<p class="p">To free memory used by a model in the <strong class="ph b">Java API</strong>, you use the method <samp class="ph codeph">IloCP.end</samp>. To free memory used by a model in the <strong class="ph b">C# API</strong>, you use the method <samp class="ph codeph">CP.End</samp>.
+   </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Model </strong> </p>
+ <p class="p">A
+model is a container for modeling objects such as decision variables,
+objectives and constraints. </p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/model.html" title="After describing your constraint satisfaction or optimization problem, you use Concert Technology classes to model the problem. A Concert Technology model consists of a set of objects, known as modeling objects. Each decision variable, each constraint and the objective function in a model are all represented by objects of the appropriate class.">Modeling a problem with Concert Technology</a></div>
+</div>
+</div></body>
+</html>

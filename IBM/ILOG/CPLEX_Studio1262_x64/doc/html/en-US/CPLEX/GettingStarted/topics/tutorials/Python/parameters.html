@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using CPLEX parameters in the CPLEX Python API" />
+<meta name="abstract" content="Manage CPLEX parameters in the CPLEX Python API." />
+<meta name="Description" content="Manage CPLEX parameters in the CPLEX Python API." />
+<meta name="DC.subject" content="Python API, paramters in, parameter, in Python API" />
+<meta name="keywords" content="Python API, paramters in, parameter, in Python API" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/Python/Python_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1235742925011" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Python/Python_synopsis.html" />
+<title>Using CPLEX parameters in the CPLEX Python API</title>
+</head>
+<body role="main" id="descriptiveTopic1235742925011">
+<h1 class="title topictitle1">Using CPLEX parameters in the CPLEX Python API</h1>
+<div class="body"><p class="shortdesc">Manage CPLEX parameters in the CPLEX Python API.</p>
+<p class="p">For CPLEX users familiar with the Interactive Optimizer, 
+setting and querying parameters in the CPLEX Python API 
+is similar to parameter handling in the Interactive Optimizer. 
+The class <a class="xref logicalApiLink" href="../../../../../refpythoncplex/html/cplex.Cplex-class.html" title="(Opens in a new tab or window)">Cplex</a> 
+offers a data member named <samp class="ph codeph">parameters</samp> containing
+names of parameters (such as <samp class="ph codeph">lpmethod</samp> and <samp class="ph codeph">threads</samp>)
+and names of groups of related parameters 
+(such as <samp class="ph codeph">barrier</samp> and <samp class="ph codeph">output</samp>).
+These groups can in turn contain individual parameters and groups
+of parameters themselves. The hierarchy is the same as that found
+in the Interactive Optimizer, with the exception of parameters such
+as <samp class="ph codeph">output dialog</samp>; their functionality is
+handled by other parts of the CPLEX Python API.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">If you are already familiar with the names of parameters
+in the Interactive Optimizer, then you quickly recognize names of
+parameters in the Python API. For example, the command 
+“<samp class="ph codeph">set mip limits nodes 1</samp>” in the Interactive Optimizer
+corresponds to 
+“<samp class="ph codeph">c.parameters.mip.limits.nodes.set(1)</samp>” 
+in a Python session.</p>
+</div>
+<p class="p">For users whose first contact with CPLEX is through the CPLEX Python API, 
+the following topics introduce setting parameters, querying their current value,
+and using groups of parameters.</p>
+<div class="section" id="descriptiveTopic1235742925011__dkoScaka"><h2 class="title sectiontitle">Setting and querying parameters in the CPLEX Python API</h2>
+
+
+<p class="p">As objects themselves, parameters offer the following <strong class="ph b">methods</strong>:</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">get()</samp> returns
+the current value of the parameter.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">set(value)</samp> sets 
+the invoking parameter to <samp class="ph codeph">value</samp>. If <samp class="ph codeph">value</samp> is 
+of the wrong type for the invoking parameter, or if <samp class="ph codeph">value</samp> is 
+less than the minimum value or greater than the maximum value for 
+the parameter, CPLEX raises an exception.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">reset()</samp> sets
+the parameter to its default value.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">default()</samp> returns
+the default value of the parameter.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">type()</samp> returns
+the type of the parameter.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">help()</samp> returns
+a brief description of the parameter.</p>
+</li>
+</ul>
+
+<p class="p"><strong class="ph b">Numerical parameters</strong> offer these additional methods:</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">min()</samp> returns
+the minimum value allowed for the parameter.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">max()</samp> returns
+the maximum value allowed for the parameter.</p>
+</li>
+</ul>
+
+<p class="p">Parameters of type <samp class="ph codeph">float</samp> with
+no restrictions on their value return 0.0 (zero) when you invoke the
+method <samp class="ph codeph">min()</samp> or <samp class="ph codeph">max()</samp>.</p>
+
+<p class="p">Certain integer parameters, such as <samp class="ph codeph">lpmethod</samp>,
+have values with a special meaning. Such parameters also have a <strong class="ph b">data
+attribute</strong> named <samp class="ph codeph">values</samp>,
+which has as its attributes the values that the parameter can take.
+For example, if <samp class="ph codeph">cpx</samp> is an instance of the
+class <a class="xref logicalApiLink" href="../../../../../refpythoncplex/html/cplex.Cplex-class.html" title="(Opens in a new tab or window)">Cplex</a> 
+encapsulating an LP problem, then:</p>
+
+<pre class="pre codeblock"><code>&gt;&gt;&gt; cpx.parameters.lpmethod.set(cpx.parameters.lpmethod.values.primal)
+&gt;&gt;&gt; cpx.solve()</code></pre>
+
+<p class="p">results in CPLEX solving
+the problem by the primal simplex optimizer.</p>
+</div>
+<div class="section" id="descriptiveTopic1235742925011__fYczjCFt"><h2 class="title sectiontitle">Parameter groups</h2>
+
+<p class="p">For your convenience, CPLEX parameters
+are organized into groups of parameters that you can manage simultaneously.
+A <strong class="ph b">parameter group</strong> is an instance
+of the class <a class="xref logicalApiLink" href="../../../../../refpythoncplex/html/cplex._internal._parameter_classes.ParameterGroup-class.html" title="(Opens in a new tab or window)">ParameterGroup</a>. </p>
+
+<p class="p">The class  <samp class="ph codeph">ParameterGroup</samp> offers
+these methods:</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">reset</samp> sets
+all parameters within the group to their default value.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">get_changed</samp> returns
+a list of pairs (parameter, current value) for the members of the
+group not currently at their default value.</p>
+</li>
+</ul>
+
+<p class="p">The parameter group that encompasses all parameters is
+an instance of the class <samp class="ph codeph">RootParameterGroup</samp>,
+a subclass of the class <samp class="ph codeph">ParameterGroup</samp>.
+It offers these methods:</p>
+
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">read(filename)</samp> reads
+a set of parameters from the named file.</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">write(filename)</samp> writes
+a set of parameters to the named file.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">tune_problem(fixed_parameters_and_values=[])</samp> tunes
+the parameters to improve performance on an instance of the class <a class="xref logicalApiLink" href="../../../../../refpythoncplex/html/cplex.Cplex-class.html" title="(Opens in a new tab or window)">Cplex</a>. 
+The argument <samp class="ph codeph">fixed_parameters_and_values</samp> is
+a sequence of pairs (parameter, value) as returned by the method <samp class="ph codeph">ParameterGroup.get_changed</samp>.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">tune_problem_set(filenames,
+filetypes=[], fixed_parameters_and_values=[])</samp> tunes
+the parameters to improve performance on a set of problems. Again,
+the argument <samp class="ph codeph">fixed_parameters_and_values</samp> is
+a sequence of pairs (parameter, value) as returned by the method <samp class="ph codeph">ParameterGroup.get_changed</samp>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Python/Python_synopsis.html" title="Use CPLEX interactively in a Python session, or write an application using the Python API for CPLEX.">Python tutorial</a></div>
+</div>
+</div></body>
+</html>

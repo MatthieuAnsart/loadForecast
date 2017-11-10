@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Examining the engine log" />
+<meta name="abstract" content="Describes the Engine Log tab." />
+<meta name="Description" content="Describes the Engine Log tab." />
+<meta name="DC.subject" content="Engine Log (CPLEX node log), CPLEX node log" />
+<meta name="keywords" content="Engine Log (CPLEX node log), CPLEX node log" />
+<meta name="DC.Relation" scheme="URI" content="../../../CPLEX/UsrMan/topics/discr_optim/mip/para/52_node_log.html#User_manual.uss_solveMIP.653334" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_stats_MP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1234539087896" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_stats_MP.html" />
+<title>Examining the engine log</title>
+</head>
+<body role="main" id="descriptiveTopic1234539087896">
+<h1 class="title topictitle1">Examining the engine log</h1>
+<div class="body"><p class="shortdesc">Describes the Engine Log tab.</p>
+<p class="p">The <strong class="ph b">Engine Log tab</strong> in
+the Output window shows the CPLEX node log when an LP model is solved.</p>
+<div class="fig fignone"><span class="figcap">Figure 1. Engine log for the warehouse example (<samp class="ph codeph">scalable
+warehouse.mod</samp>)</span><div class="image"><img class="image" src="../images/cplex_enginelog.jpg" alt="CPLEX log" /></div></div>
+<p class="p">When CPLEX optimizes mixed integer programs, it builds
+a tree with the linear relaxation of the original MIP at the root,
+and subproblems to optimize at the nodes of the tree. CPLEX reports
+its progress in optimizing the original problem in a node log file
+as it traverses this tree. You control how information in the log
+file is recorded and displayed through two CPLEX parameters.</p>
+<ul class="ul"><li class="li"><p class="p">The <samp class="ph codeph">MIPDisplay</samp> parameter
+controls the general nature of the output that goes to the node log.</p>
+</li>
+<li class="li"><p class="p">The MIP node log interval parameter, <samp class="ph codeph">MIPInterval</samp>,
+controls how frequently node log lines  are printed. Its default value
+is 100.</p>
+</li>
+</ul>
+<p class="p">These parameters can be set in the OPL settings file.
+See <a class="xref" href="opl_ide_stats_MP_change.html" title="Explains how to change a mathematical programming option in the IDE.">Changing a CPLEX parameter value</a>. The values for these
+parameters are also given in <a class="xref" href="../../oplparams/topics/opl_params_mpoptions_cplexparams.html" title="Explains how OPL mathematical programming options reflect CPLEX parameters.">CPLEX parameters and OPL parameters</a>. </p>
+<p class="p">CPLEX records a line in the node log for every node with
+an integer solution if the parameter controlling MIP node log display
+information (<samp class="ph codeph">MIPDisplay</samp>) is set to 1 or
+higher. If <samp class="ph codeph">MIPDisplay</samp> is set to 2 or higher,
+then for any node whose number is a multiple of the <samp class="ph codeph">MIPInterval</samp> value,
+a line is recorded in the node log for every node with an integer
+solution.</p>
+<p class="p">CPLEX logs an asterisk (* ) in the left-most column for
+any node where it finds an integer-feasible solution or new incumbent.
+In the next column, it logs the node number. It next logs the number
+of nodes left to explore.</p>
+<p class="p">In the <strong class="ph b">Objective</strong> column,
+CPLEX either records the objective value at the node or a reason to
+fathom the node. (A node is fathomed if the solution of a subproblem
+at the node is infeasible; or if the value of the objective function
+at the node is worse than the cutoff value for branch &amp; cut; or
+if the linear programming relaxation at the node supplies an integer
+solution.) This column is left blank for lines that report that CPLEX
+found a new incumbent by primal heuristics. A plus (+) after the node
+number distinguishes such lines.</p>
+<p class="p">In the column labeled <strong class="ph b">IInf</strong>,
+CPLEX records the number of integer-infeasible variables and special
+ordered sets. If no solution has been found, the column titled <strong class="ph b">Best
+Integer</strong> is blank; otherwise, it records the objective
+value of the best integer solution found so far.</p>
+<p class="p">The column labeled <strong class="ph b">Cuts/Best Node</strong> records
+the best objective function value achievable. If the word Cuts appears
+in this column, it means various cuts were generated; if a particular
+name of a cut appears, then only that kind of cut was generated.</p>
+<p class="p">The column labeled <strong class="ph b">ItCnt</strong> records
+the cumulative iteration count of the algorithm solving the subproblems.</p>
+<p class="p">Until a solution has been found, the column labeled <strong class="ph b">Gap</strong> is
+blank. If a solution has been found, the relative gap value is printed:
+when it is less than 999.99,  the value is printed; otherwise, hyphens
+are printed. The gap is computed as: </p>
+<p class="p"><samp class="ph msgph">(best integer - best node ) * objsen
+/ (abs (best integer) + 1e-10)</samp></p>
+<p class="p">Consequently, the printed gap value may not always move
+smoothly. In particular, there may be sharp improvements whenever
+a new best integer solution is found.  Moreover, if the populate procedure
+of the solution pool is invoked, the printed gap value may become
+negative after the optimal solution has been found and proven optimal.</p>
+<p class="p">CPLEX also logs its addition of cuts to a model. Cuts
+generated at intermediate nodes are not logged  individually unless
+they happen to be generated at a node logged for other reasons. CPLEX
+logs the number of applied cuts of all classes at the end.</p>
+<p class="p">CPLEX also indicates, in the node log file, each instance
+of a successful application of the node heuristic. The + denotes an
+incumbent generated by the heuristic.  Periodically, if the MIP display
+parameter is 2 or greater, CPLEX records the cumulative time spent
+since the beginning of the current MIP optimization and the amount
+of memory used by branch &amp; cut. (For example, if the <samp class="ph codeph">MIPInterval</samp> parameter
+is set to 10, time and memory information appears either every 20
+nodes or ten times the MIP interval parameter, whichever is greater.)</p>
+<p class="p">CPLEX prints an additional summary line in the log if
+optimization stops before it is complete. This summary line shows
+the best MIP bound, that is,  the best objective value among all the
+remaining node subproblems.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_stats_MP.html" title="Shows how the IDE displays a dynamically updated progress chart for a mixed integer programming (MIP) example that takes some time to solve.">Understanding solving statistics and progress (MP models)</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../../../CPLEX/UsrMan/topics/discr_optim/mip/para/52_node_log.html#User_manual.uss_solveMIP.653334" title="Describes the progress reports issued in the node log during MIP optimization.">Progress reports: interpreting the node log</a></div>
+</div>
+</div></body>
+</html>

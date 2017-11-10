@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using IBM ILOG Script in data files" />
+<meta name="abstract" content="Discusses the use of script statements in data files as a way to load data." />
+<meta name="Description" content="Discusses the use of script statements in data files as a way to load data." />
+<meta name="DC.subject" content="keywords, invoke, invoke, OPL keyword, prepare, prepare, OPL keyword, IBM ILOG Script, in data files, data files, declaring script functions in" />
+<meta name="keywords" content="keywords, invoke, invoke, OPL keyword, prepare, prepare, OPL keyword, IBM ILOG Script, in data files, data files, declaring script functions in" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_data.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_externalfunctions.1021456" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_data.html" />
+<title>Using IBM ILOG Script in data files</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_externalfunctions.1021456">
+<h1 class="title topictitle1">Using IBM ILOG Script in data files</h1>
+<div class="body"><p class="shortdesc">Discusses the use of script statements in data
+files as a way to load data.</p>
+<p class="p">Another custom way to load data is to use script statements
+in data files.</p>
+<p class="p">It is possible to declare some script functions in a <span class="ph filepath">.dat</span> file using a <samp class="ph codeph">prepare{}</samp> block.
+If you do so, at each initialization of an element, you can invoke
+one of these functions using the <samp class="ph codeph">invoke</samp> keyword. </p>
+<p class="p">In the function, two properties are being defined:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">name</samp>: the name
+of the element being initialized.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">element</samp>: the element
+being initialized.</p>
+</li>
+</ul>
+<p class="p">You can then use these constructs along with some Java
+external functions to do some custom reading of data. The example
+used in this tutorial reads in a file called <samp class="ph codeph">externaldatasource.txt</samp> that
+uses a format where all the elements of a sets are separated with
+commas (','). For this case, a simple parser has been written (<span class="ph filepath">SimpleTextReader.java</span>). It has mainly two public
+methods:</p>
+<p class="p"><span class="keyword apiname">public SimpleTextReader (String fileName,
+String token)</span> </p>
+<p class="p"><span class="keyword apiname">public void fillOplElement(IloOplElement
+element) throws IOException </span></p>
+<p class="p">The parser is used as follows:</p>
+<pre class="pre codeblock"><code>prepare { 
+   function read(element, name) {
+      var customDataSource = 
+IloOplCallJava("externaldatasource.SimpleTextReader",
+         "&lt;init&gt;", "(Ljava.lang.String;Ljava.lang.String;)V", 
+                     "C:/ILOG/OPL/examples/opl/externaldatasource.txt", ",");
+      customDataSource.fillOplElement(element);
+      return true;
+   }   
+}
+
+strings = {"val1"} invoke read;</code></pre>
+<div class="section" id="usropllangtut.uss_langtut_externalfunctions.1021456__usropllangtut.uss_langtut_externalfunctions.1021493"><h2 class="title sectiontitle">Results</h2><p class="p">Running the example, you can see that:</p>
+<ul class="ul"><li class="li"><p class="p">the OPL element <samp class="ph codeph">a</samp> takes
+the value <samp class="ph codeph">1</samp> </p>
+ </li>
+<li class="li"><p class="p">the string set <samp class="ph codeph">strings</samp> contains
+not only <samp class="ph codeph">val1</samp> as defined in the <span class="ph filepath">.dat</span> file, but also two more values added from
+the text file.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_data.html" title="Shows how to use calls to external functions to define two customer-specific ways of feeding data to an OPL model: by using a subclass of IloCustomOplDataSource and by using a script function from a .dat file.">Using data from other sources</a></div>
+</div>
+</div></body>
+</html>

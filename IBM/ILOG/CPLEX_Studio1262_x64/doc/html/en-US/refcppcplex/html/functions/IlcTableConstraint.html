@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en"
+            xml:lang="en"><head><title>IlcTableConstraint</title>
+<link
+            type="text/css" rel="stylesheet"
+            href="../cppdoc.css" />
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../functions/IlcTableConstraint.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+                name="ibm-content"></a><h3><a
+            name="method_IlcTableConstraint">IlcTableConstraint</a></h3><div
+                class="prototype">public <a
+                href="../classes/IlcConstraint.html">IlcConstraint</a> <span
+                class="function-name">IlcTableConstraint</span>(<a
+                href="../classes/IlcIntVarArray.html">IlcIntVarArray</a> <span
+                class="parameter-name">vars</span>, <a
+                href="../classes/IlcIntPredicate.html">IlcIntPredicate</a> <span
+            class="parameter-name">predicate</span>)</div><div
+                class="prototype">public <a
+                href="../classes/IlcConstraint.html">IlcConstraint</a> <span
+                class="function-name">IlcTableConstraint</span>(<a
+                href="../classes/IlcIntVarArray.html">IlcIntVarArray</a> <span
+                class="parameter-name">vars</span>, <a
+                href="../classes/IlcIntTupleSet.html">IlcIntTupleSet</a> <span
+                class="parameter-name">set</span>, <a
+                href="../typedefs/IlcBool.html">IlcBool</a> <span
+            class="parameter-name">compatible</span>)</div><div
+                class="prototype">public <a
+                href="../classes/IlcConstraint.html">IlcConstraint</a> <span
+                class="function-name">IlcTableConstraint</span>(<a
+                href="../classes/IlcIntVar.html">IlcIntVar</a> <span
+                class="parameter-name">y</span>, <a
+                href="../classes/IlcIntArray.html">IlcIntArray</a> <span
+                class="parameter-name">a</span>, <a
+                href="../classes/IlcIntVar.html">IlcIntVar</a> <span
+            class="parameter-name">x</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+            class="include-file">&lt;ilcp/cpext.h&gt; </span></div>
+Returns a table constraint.
+      <div
+                    class="description"><p>This function can be used to define simple constraints that are not
+ predefined in CP Optimizer.  (For similar
+ functionality to use in an IBM&reg; ILOG&reg; Concert Technology model, see
+ <a
+                    href="../functions/IloAllowedAssignments.html">IloAllowedAssignments</a> and
+ <a
+                href="../functions/IloForbiddenAssignments.html">IloForbiddenAssignments</a>.) This function creates and returns a
+ constraint. That constraint is defined for <em>all</em> the constrained variables in
+ the array <code>vars</code> or for the single constrained variable <code>y</code>.</p><p>This kind of constraint is sometimes known as an <em>element constraint</em>.</p><p>The semantics of that generic constraint can be indicated in either one of several ways: </p><ul>
+<li>by a predicate; in that case, the argument <code>
+ predicate</code>, of course, indicates that predicate;</li><li>by the values that satisfy the constraint; in that case, the argument <code>
+ set</code> indicates the combinations of values that satisfy the constraint, and the argument <code>
+ compatible</code> must be <code>
+ IlcTrue</code>;</li><li>by the values that do <em>
+ not</em> satisfy the constraint; in that case, the argument <code>
+ set</code> indicates the unsatisfactory combinations of values, and the argument <code>
+ compatible</code> must be <code>
+ IlcFalse</code>;</li><li>by making the constrained variable <code>
+ y</code> equal to the element of the array <code>
+ a</code> at the index indicated by <code>
+ x</code>. In other words, <code>
+ y=a[x];</code></li>
+</ul><p>The order of the constrained variables in the array <code>vars</code> is important because
+ the same order is respected in the <code>predicate</code> or the <code>set</code>. That is,
+ <code>IlcTableConstraint</code> passes an array of values to the member function <code>isTrue</code>
+ for a predicate or to the member function <code>isIn</code> for a set, where the first such value is a
+ value of <code>vars[0]</code>, the second is a value of <code>vars[1]</code>, and in general, the
+ <em>ith</em> value is a value of the constrained variable <code>vars[i]</code>.</p><p>This function will throw an exception (an instance of <code>IloException</code>)
+ if any of the following conditions occur:</p><ul>
+<li>the function is called with a <code>
+ predicate</code> as an argument but the size of the array of constrained variables is greater than three;</li><li>the size of <code>
+ vars</code> is different from the size of the <code>
+ set</code>.</li>
+</ul><p>This function reduces domains efficiently, but it may take some time to do so. The time it needs
+ for domain reduction depends on the size of the domains of the constrained variables in <code>vars</code>.</p><p><strong>Examples</strong>:</p><p>The following code defines a constraint of arity four such that only these combinations of
+ values are allowed: <code>(0, 1, 1, 2)</code>, <code>(1, 0, 2, 3)</code>, and <code>(0, 0, 2, 1)</code>.</p><pre
+                        class="sample">
+ IlcIntTupleSet set(cp,4);
+ set.add(IlcIntArray(cp,4,0,1,1,2));
+ set.add(IlcIntArray(cp,4,1,0,2,3));
+ set.add(IlcIntArray(cp,4,0,0,2,1));
+ set.close();
+
+ IlcIntVar x(cp,0,1),y(cp,0,1),z(cp,0,3),t(cp,0,2);
+ IlcIntVarArray vars(cp,4,x,y,z,t);
+ </pre><p>Inside a goal or constraint now, you can post that constraint by adding it to an instance of
+ <code><a
+                href="../classes/IloCP.html">IloCP</a></code>, like this:</p><pre
+                class="sample">
+ cp.add(IlcTableConstraint(vars,set,IlcTrue));</pre><p>The following code defines a constraint of arity three. It uses a predicate that is true if
+ the three variables are pairwise different or the sum of the first two constrained variables
+ is equal to the third variable.</p><pre
+                        class="sample">
+ IlcBool IlcIntPredicateI::isTrue(IlcIntArray val) {
+    return((val[0] != val[1] &amp;&amp; val[1] != val[2] &amp;&amp; val[0] != val[2])
+                || (val[0] + val[1] == val[2]));
+ }
+
+ IlcIntVar x(cp, 0, 3), y(cp, 0, 3), z(cp, 0, 3);
+ IlcIntVarArray vars(cp, 3, x, y, z);
+ </pre><p>Inside a goal or constraint now, you can post this constraint by adding it to an instance
+ of <code><a
+                href="../classes/IloCP.html">IloCP</a></code>, like this:</p><pre
+            class="sample">
+ cp.add(IlcTableConstraint(vars, Predicate(cp));</pre></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IlcConstraint.html">IlcConstraint</a>, <a
+                href="../macros/ILCINTPREDICATE0.html">ILCINTPREDICATE0</a>, <a
+                href="../classes/IlcIntPredicate.html">IlcIntPredicate</a>, <a
+                href="../classes/IlcIntTupleSet.html">IlcIntTupleSet</a>, <a
+                href="../functions/IloAllowedAssignments.html">IloAllowedAssignments</a>, <a href="../functions/IloForbiddenAssignments.html">IloForbiddenAssignments</a></p><hr /></body>
+</html>

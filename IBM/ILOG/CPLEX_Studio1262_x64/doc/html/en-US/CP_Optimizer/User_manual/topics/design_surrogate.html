@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Introduce surrogate constraints" />
+<meta name="abstract" content="One method for removing symmetries is to introduce surrogate constraints." />
+<meta name="Description" content="One method for removing symmetries is to introduce surrogate constraints." />
+<meta name="DC.subject" content="constraint, surrogate" />
+<meta name="keywords" content="constraint, surrogate" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/design.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerdesign.1009738" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/design.html" />
+<title>Introduce surrogate constraints</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerdesign.1009738">
+<h1 class="title topictitle1">Introduce surrogate constraints</h1>
+<div class="body"><p class="shortdesc">One method for removing symmetries is to introduce
+surrogate constraints.</p>
+<p class="p">Since constraint propagation decreases the size of the
+search space by reducing the domains of variables, it is obviously
+important to express all necessary constraints. In some cases, it
+is even a good idea to introduce implicit constraints to reduce the
+size of the search space by supplementary propagation. </p>
+<p class="p">Processing supplementary constraints inevitably slows
+down execution. However, this slowing down may be negligible in certain
+problems when it is compared with the efficiency gained from reducing
+the size of the search space. </p>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1009738__migration.uss_usrcpoptimizerdesign.1010290"><h2 class="title sectiontitle">Principle</h2><p class="p">A surrogate constraint makes
+explicit a property that satisfies a solution implicitly. Such a constraint
+should not change the nature of the solution, but its propagation
+should delimit the general shape of the solution more quickly.</p>
+<p class="p">Of course, there is no need to express grossly obvious redundant
+constraints since the highly optimized algorithms that CP Optimizer
+uses to ensure arc consistency already work well enough. For example,
+given this system of equations: </p>
+<p class="p"><em class="ph i">x = y + z</em></p>
+<p class="p"><em class="ph i">z = a + b</em></p>
+<p class="p">no efficiency whatsoever is gained by adding this constraint:</p>
+<p class="p"><em class="ph i">x = y + a + b</em></p>
+<p class="p">However, in
+any case where an implicit property makes good sense, or derives from
+experience, or satisfies formal computations, its explicit implementation
+as a surrogate constraint can be beneficial.</p>
+</div>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1009738__migration.uss_usrcpoptimizerdesign.1013580"><h2 class="title sectiontitle">Example</h2><p class="p">Consider the problem of the magic
+sequence. Assume that there are <em class="ph i">n+1</em> unknowns, namely, <em class="ph i">x</em><sub class="ph sub">0</sub><em class="ph i">, x</em><sub class="ph sub">1</sub><em class="ph i">, . . . , x</em><sub class="ph sub">n</sub>. These <em class="ph i">x</em><sub class="ph sub">i</sub> must respect the following constraints: </p>
+<p class="p">0
+appears <em class="ph i">x</em><sub class="ph sub">0</sub> times in the solution. </p>
+<p class="p">1 appears <em class="ph i">x</em><sub class="ph sub">1</sub> times. </p>
+<p class="p">In general, <em class="ph i">i</em> appears <em class="ph i">x</em><sub class="ph sub">i</sub> times. </p>
+<p class="p"><em class="ph i">n</em> appears <em class="ph i">x</em><sub class="ph sub">n</sub> times. </p>
+<p class="p">The constraint
+of this problem can easily be written, using the specialized distribute
+constraint. However, the search for a solution can be greatly accelerated
+by introducing the following surrogate constraint that expresses the
+fact that <em class="ph i">n+1</em> numbers are counted. </p>
+<p class="p"><em class="ph i">1*x</em><em class="ph i">1</em><em class="ph i"> + 2*x</em><em class="ph i">2</em><em class="ph i"> + . . . + n*x</em><em class="ph i">n</em><em class="ph i"> = n+1</em>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/design.html" title="While developing models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing models</a></div>
+</div>
+</div></body>
+</html>

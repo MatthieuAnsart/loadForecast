@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="dvar" />
+<meta name="abstract" content="OPL keyword for decision variables." />
+<meta name="Description" content="OPL keyword for decision variables." />
+<meta name="DC.subject" content="decision variables, dvar, OPL keyword" />
+<meta name="keywords" content="decision variables, dvar, OPL keyword" />
+<meta name="DC.Relation" scheme="URI" content="tlr_opl_dexpr.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="N53leujR" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<title>dvar</title>
+</head>
+<body role="main" id="N53leujR">
+<h1 class="title topictitle1">dvar</h1>
+<div class="body refbody"><p class="shortdesc">OPL keyword for decision variables.</p>
+<div class="section"><h2 class="title sectiontitle">Purpose</h2><p class="p">OPL keyword
+to define decision variables</p>
+</div>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>LocalVar: Type VariableDeclarator
+        | "dvar" Type VariableDeclarator DecisionVarRange_opt
+        | Type VariableDeclarator "=" Expression
+        | Type VariableDeclarator "=" "..."
+</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">The
+purpose of an OPL model is to find values for the decision variables
+such that all constraints are satisfied or, in optimization problems,
+to find values for the decision variables that satisfy all constraints
+and optimize a specific objective function. Decision variables in
+OPL are thus essentially mathematical variables and differ fundamentally
+from variables in programming languages such as C and Pascal. A variable
+declaration in OPL specifies the type and set of possible values for
+the decision variable. </p>
+<p class="p">The CP Optimizer engine supports
+integer, sequence, and interval decision variables. You can declare
+floating point expressions with the <a class="xref" href="tlr_opl_dexpr.html" title="OPL keyword to express decision variables.">dexpr</a> keyword. </p>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">For non-CP Optimizer
+problems, the decision variables can be of type integer, float, or
+boolean, and it is possible to define multidimensional arrays of decision
+variables. The declaration:</p>
+<pre class="pre codeblock"><code>{string} Orig= { "Paris" ,"London" };
+{string} Dest = { "Madrid", "Roma" };
+dvar int transp[Orig][Dest] in 0..100; </code></pre>
+<p class="p">declares
+a two-dimensional array of integer variables. The decision variables
+are constrained to take their values in the range <samp class="ph codeph">0..100</samp>;
+i.e., any solution to the model containing this declaration must assign
+values between 0 and 100 to these variables. Note that all integer
+variables need a finite range in OPL. </p>
+<p class="p">Arrays of decision
+variables can be constructed using the same index sets as arrays of
+data. In particular, it is also possible, and desirable for larger
+problems, to index arrays of decision variables by finite sets. The
+following excerpt declares an array of decision variables <samp class="ph codeph">transp</samp> that is indexed by the finite set of tuples <samp class="ph codeph">routes</samp>. For instance, the excerpt:</p>
+<pre class="pre codeblock"><code>tuple Route {
+  string orig; 
+  string dest; 
+};
+
+{Route} routes = { &lt;"Paris","Roma"&gt; , &lt;"Madrid","Berlin"&gt;}; 
+dvar int transp[routes] in 0..100; </code></pre>
+<p class="p">declares
+an array of decision variables <samp class="ph codeph">transp</samp> that
+is indexed by the finite set of tuples <samp class="ph codeph">routes</samp>.</p>
+<p class="p">It is also possible to use genericity for initializing the
+domain of the decision variables. For instance, the excerpt:</p>
+<pre class="pre codeblock"><code>tuple Route {
+  string orig; 
+  string dest; 
+};
+
+{Route} routes = { &lt;"Paris","Roma"&gt; , &lt;"Madrid","Berlin"&gt;}; 
+
+int capacity[routes] = [ 1000,5000]; 
+dvar int transp[r in routes] in 0..capacity[r];</code></pre>
+<p class="p">declares
+an array of decision variables indexed by the finite set <samp class="ph codeph">routes</samp> such that variable <samp class="ph codeph">transp[r]</samp> ranges
+over <samp class="ph codeph">0..capacity[r]</samp>. The array <samp class="ph codeph">capacity</samp> is also indexed by the finite set <samp class="ph codeph">routes</samp>. </p>
+<p class="p">Decision variables can be
+declared to range over a user-defined range. For instance, the excerpt:</p>
+<pre class="pre codeblock"><code>range Capacity = 0..limitCapacity; 
+   dvar int transp[Orig][Dest] in Capacity;</code></pre>
+<p class="p">declares an array of integer variables ranging
+over <samp class="ph codeph">Capacity</samp>. </p>
+<p class="p">Decision
+variables can of course be declared individually, as in:</p>
+<pre class="pre codeblock"><code>dvar int averageDelay in 0..maxDelay; </code></pre>
+<p class="p">As mentioned previously, decision variables
+can be of different types. The excerpt:</p>
+<pre class="pre codeblock"><code>dvar float+ transp[orig][dest];</code></pre>
+<p class="p">declares a two-dimensional array of float
+variables that are constrained to be non-negative (i.e., their range
+is <samp class="ph codeph">0..</samp>∞).</p>
+<p class="p">Float variables
+can be assigned more specific ranges, as in:</p>
+<pre class="pre codeblock"><code>dvar float+ transp[o in Orig][d in Dest] in 0..cap[o] [d]; </code></pre>
+<p class="p">which declares a two-dimensional array of
+float variables, where decision variable <samp class="ph codeph">transp[o][d]</samp> ranges
+over the set<samp class="ph codeph"> 0..cap[o][d]</samp>. This last declaration
+is of course equivalent to the declaration:</p>
+<pre class="pre codeblock"><code>dvar float transp[o in Orig][d in Dest] in 0..cap[o][d]; </code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" title="Description, syntax, and example for each individual OPL keyword..">OPL keywords</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_opl_dexpr.html" title="OPL keyword to express decision variables.">dexpr</a></div>
+</div>
+</div></body>
+</html>

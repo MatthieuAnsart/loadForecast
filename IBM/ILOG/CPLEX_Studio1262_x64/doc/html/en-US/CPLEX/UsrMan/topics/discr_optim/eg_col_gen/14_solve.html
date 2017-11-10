@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving the problem: using more than one algorithm" />
+<meta name="abstract" content="Uses two instances of the algorithm to solve two models (master and column generator)." />
+<meta name="Description" content="Uses two instances of the algorithm to solve two models (master and column generator)." />
+<meta name="DC.subject" content="algorithm, using multiple" />
+<meta name="keywords" content="algorithm, using multiple" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/01_col_gen_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingColumnGen.1001827" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/01_col_gen_title_synopsis.html" />
+<title>Solving the problem: using more than one algorithm</title>
+</head>
+<body role="main" id="User_manual.uss_usingColumnGen.1001827">
+<h1 class="title topictitle1">Solving the problem: using more than one algorithm</h1>
+<div class="body"><p class="shortdesc">Uses two instances of the algorithm to solve two models
+(master and column generator).</p>
+<p class="p">This example does not solve the problem to optimality.
+It only generates a good feasible solution. It does so by first solving
+a continuous relaxation of the column-generation problem. In other
+words, the application drops the requirement for integrality of the
+variables while the columns are generated. After all columns have
+been generated for the continuous relaxation, the application keeps
+the variables generated so far, changes their type to integer, and
+solves the resulting integer problem.</p>
+<p class="p">As you’ve seen, this example manages two models
+of the problem, <samp class="ph codeph">cutOpt</samp> and <samp class="ph codeph">patGen</samp>. Likewise, it uses two algorithms (that is,
+two instances of <samp class="ph codeph">IloCplex</samp>) to solve them.</p>
+<p class="p">Here’s how to create the first algorithm <samp class="ph codeph">cutSolver</samp> and extract the initial model <samp class="ph codeph">cutOpt</samp>:  </p>
+<pre class="pre codeblock"><code>    IloCplex cutSolver(cutOpt);</code></pre>
+<p class="p">And here is how to create the second algorithm and extract
+the model <samp class="ph codeph">patGen</samp>:  </p>
+<pre class="pre codeblock"><code>    IloCplex patSolver(patGen);</code></pre>
+<p class="p">The heart of the example is here, in the column generation
+and optimization over current patterns:  </p>
+<pre class="pre codeblock"><code>    IloNumArray price(env, nWdth);
+    IloNumArray newPatt(env, nWdth);
+
+    for (;;) {
+      /// OPTIMIZE OVER CURRENT PATTERNS ///
+
+      cutSolver.solve();
+      report1 (cutSolver, Cut, Fill);
+
+      /// FIND AND ADD A NEW PATTERN ///
+
+      for (i = 0; i &lt; nWdth; i++)
+        price[i] = -cutSolver.getDual(Fill[i]);
+      ReducedCost.setLinearCoefs(Use, price);
+
+      patSolver.solve();
+      report2 (patSolver, Use, ReducedCost);
+
+      if (patSolver.getValue(ReducedCost) &gt; -RC_EPS) break;
+
+      patSolver.getValues(newPatt, Use);
+      Cut.add( IloNumVar(RollsUsed(1) + Fill(newPatt)) );
+    }
+    cutOpt.add(IloConversion(env, Cut, ILOINT));
+    cutSolver.solve();</code></pre>
+<p class="p">Those lines solve the current subproblem <samp class="ph codeph">cutOpt</samp> by calling <samp class="ph codeph">cutSolver.solve</samp>. Then they copy the values of the negative dual solution into the
+array <samp class="ph codeph">price</samp>. They use that array to set
+objective coefficients in the model <samp class="ph codeph">patGen</samp>. Then they solve the right pattern generation problem. </p>
+<p class="p">If the objective value of the subproblem is nonnegative
+within the tolerance <samp class="ph codeph">RC_EPS</samp>, then the application
+has proved that the current solution of the model <samp class="ph codeph">cutOpt</samp> is optimal within the given optimality tolerance (<samp class="ph codeph">RC_EPS</samp>). Otherwise, the application copies the solution of the current
+pattern generation problem into the array <samp class="ph codeph">newPatt</samp> and uses that new pattern to build the next column to add to the
+model <samp class="ph codeph">cutOpt</samp>. Then it repeats the procedure.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/01_col_gen_title_synopsis.html" title="Uses an example of cutting stock to demonstrate the technique of column generation in Concert Technology.">Using column generation: a cutting stock example</a></div>
+</div>
+</div></body>
+</html>

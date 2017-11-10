@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Adding workers and transition times to the house building problem" />
+<meta name="abstract" content="Introduces workers and transition times to the house building problem described in the previous section." />
+<meta name="Description" content="Introduces workers and transition times to the house building problem described in the previous section." />
+<meta name="DC.subject" content="limit, fail, fail limit" />
+<meta name="keywords" content="limit, fail, fail limit" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="DpeGJiMZ" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Adding workers and transition times to the house building problem</title>
+</head>
+<body role="main" id="DpeGJiMZ">
+<h1 class="title topictitle1">Adding workers and transition times to the house building problem</h1>
+<div class="body"><p class="shortdesc">Introduces workers and transition times to the house building
+problem described in the previous section.</p>
+<p class="p">In this section, you will learn how to:</p>
+<ul class="ul"><li class="li"><p class="p">use the <span class="keyword apiname">dvar</span> interval variable <span class="keyword apiname">sequence</span>;</p>
+ </li>
+<li class="li"><p class="p">use the constraints <span class="keyword apiname">span</span> and <span class="keyword apiname">noOverlap</span>;</p>
+ </li>
+<li class="li"><p class="p">use the expression <span class="keyword apiname">lengthOf</span>.</p>
+ </li>
+</ul>
+<p class="p">You will learn how to model and solve a problem of scheduling the
+tasks involved in building multiple houses in a manner that minimizes
+the costs associated with completing each house after a given due
+date and with the length of time it takes to build each house. Some
+tasks must necessarily take place before other tasks, and each task
+has a predefined duration. Each house has an earliest starting date.
+Moreover, there are two workers, each of whom must perform a given
+subset of the necessary tasks, and there is a transition time associated
+with a worker transferring from one house to another house. A task,
+once started, cannot be interrupted. The objective is to minimize
+the cost, which is composed of tardiness costs for certain tasks as
+well as a cost associated with the length of time it takes to complete
+each house. To find a solution to this problem using IBM ILOG OPL,
+you will use the three-stage method: describe, model, and solve.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="nJNednRZ"><h2 class="title topictitle2">Describe</h2>
+<div class="body"><p class="p">The problem consists of assigning start dates to a set of tasks
+in such a way that the schedule satisfies temporal constraints and
+minimizes a criterion. The criterion for this problem is to minimize
+the tardiness costs associated with completing each house later than
+its specified due date and the cost associated with the length of
+time it takes to complete each house.</p>
+<p class="p">For each task type in the house building project, the following
+table shows the duration of the task in days along with the tasks
+that must be finished before the task can start. In addition, each
+type of task must be performed by a specific worker, Jim or Joe. A
+worker can only work on one task at a time; a task, once started,
+may not be interrupted. The time required to transfer from one house
+to another house is determined by a function based on the location
+of the two houses.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four column table that lists the tasks in the house building problem, the duration of each task, the worker assigned to each task, and the preceding tasks." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. House construction
+tasks</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d865217e62">Task</th>
+<th class="entry" align="left" valign="top" id="d865217e64">Duration</th>
+<th class="entry" align="left" valign="top" id="d865217e66">Worker</th>
+<th class="entry" align="left" valign="top" id="d865217e68">Preceding tasks</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">35</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 "> </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">15</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">plumbing</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">40</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">15</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">roofing</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">5</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">carpentry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">painting</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">10</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">ceiling</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">windows</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">5</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">roofing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">facade</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">10</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">garden</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">5</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e62 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d865217e64 ">5</td>
+<td class="entry" align="left" valign="top" headers="d865217e66 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d865217e68 ">windows, facade, garden, painting </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">For each of the five houses that must be built, there is an earliest
+starting date, a due date and a cost per day of completing the house
+later than the preferred due date.  </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four column table that illustrates tardiness costs in the house building problem. For each house, numbered 0 to 5, the three other columns contain the earliest start date, the preferred latest end date, and the cost per day for ending late." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. House construction
+tardiness costs</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d865217e176">House</th>
+<th class="entry" align="left" valign="top" id="d865217e178">Earliest start date</th>
+<th class="entry" align="left" valign="top" id="d865217e180">Preferred latest end date</th>
+<th class="entry" align="left" valign="top" id="d865217e182">Cost per day for ending late</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d865217e176 ">0</td>
+<td class="entry" align="left" valign="top" headers="d865217e178 ">0</td>
+<td class="entry" align="left" valign="top" headers="d865217e180 ">120</td>
+<td class="entry" align="left" valign="top" headers="d865217e182 ">100.0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e176 ">1</td>
+<td class="entry" align="left" valign="top" headers="d865217e178 ">0</td>
+<td class="entry" align="left" valign="top" headers="d865217e180 ">212</td>
+<td class="entry" align="left" valign="top" headers="d865217e182 ">100.0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e176 ">2</td>
+<td class="entry" align="left" valign="top" headers="d865217e178 ">151</td>
+<td class="entry" align="left" valign="top" headers="d865217e180 ">304</td>
+<td class="entry" align="left" valign="top" headers="d865217e182 ">100.0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e176 ">3</td>
+<td class="entry" align="left" valign="top" headers="d865217e178 ">59</td>
+<td class="entry" align="left" valign="top" headers="d865217e180 ">181</td>
+<td class="entry" align="left" valign="top" headers="d865217e182 ">200.0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d865217e176 ">4</td>
+<td class="entry" align="left" valign="top" headers="d865217e178 ">243</td>
+<td class="entry" align="left" valign="top" headers="d865217e180 ">425</td>
+<td class="entry" align="left" valign="top" headers="d865217e182 ">100.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Solving the problem consists of determining starting dates for
+the tasks such that the cost, where the cost is determined by the
+lateness costs and length costs, is minimized.</p>
+<div class="section" id="nJNednRZ__vyjx1oan"><h3 class="title sectiontitle">Step 1: Describe the problem</h3><p class="p">The
+first step in modeling and solving the problem is to write a natural
+language description of the problem, identifying the decision variables
+and the constraints on these variables.</p>
+<p class="p">Write
+a natural language description of this problem. Answer these questions:</p>
+<ul class="ul"><li class="li"><p class="p">What is the known information in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the decision variables or unknowns in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the constraints on these variables?</p>
+ </li>
+<li class="li"><p class="p">What is the objective?</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="nJNednRZ__j9Ywvh5z"><h3 class="title sectiontitle">Discussion</h3><p class="p">What
+is the known information in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">There are five houses to be built by two workers. For each
+house, there are ten house building tasks, each with a given duration,
+or size. Each house also has a given earliest starting date. For each
+task, there is a list of tasks that must be completed before the task
+can start. Each task must be performed by a given worker, and there
+is a transition time associated with a worker transferring from one
+house to another house. There are costs associated with completing
+each house after its preferred due date and with the length of time
+it takes to complete each house.</p>
+ </li>
+</ul>
+<p class="p">What
+are the decision variables or unknowns in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">The unknowns are the start and end dates of the interval variables
+associated with the tasks. Once fixed, these interval variables also
+determine the cost of the solution. For some of the interval variables,
+there is a fixed minimum start date.</p>
+ </li>
+</ul>
+<p class="p">What
+are the constraints on these variables?</p>
+<ul class="ul"><li class="li"><p class="p">There are constraints that specify a particular task may not
+begin until one or more given tasks have been completed. In addition,
+there are constraints that specify that a worker can be assigned to
+only one task at a time and that it takes time for a worker to travel
+from one house to the other.</p>
+ </li>
+</ul>
+<p class="p">What
+is the objective?</p>
+<ul class="ul"><li class="li"><p class="p">The objective is to minimize the cost incurred through tardiness
+and length costs.</p>
+ </li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="Jq5ygbZK"><h2 class="title topictitle2">Model</h2>
+<div class="body"><p class="p">After you have written a description of your problem, you can use
+IBM ILOG OPL to model and solve it.</p>
+<div class="section" id="Jq5ygbZK__Q9QH2sX4"><h3 class="title sectiontitle">Step 2: Open the example file</h3><ul class="ul"><li class="li"><p class="p">Still working with the <span class="ph uicontrol">scheduling_tutorial</span> project,
+open the <span class="ph uicontrol">sched_sequence.mod</span> file in the CPLEX
+Studio IDE.</p>
+</li>
+</ul>
+<p class="p">This file is an OPL model that is only partially completed.
+You will add the missing code in each step of this lesson. At the
+end, you will have completed the OPL model.</p>
+<p class="p">The code for reading
+the data into the data structures from the data file is provided.</p>
+<p class="p">In
+the related data file, the data provided includes the number of houses
+(<samp class="ph codeph">NbHouses</samp>), the names of the workers (<samp class="ph codeph">WorkerNames</samp>),
+the names of the tasks (<samp class="ph codeph">TaskNames</samp>), the sizes of
+the tasks (<samp class="ph codeph">Duration</samp>), the worker that can perform
+each task (<samp class="ph codeph">Worker</samp>), the release date of each house
+(<samp class="ph codeph">ReleaseDate</samp>), the preferred due date of each house
+(<samp class="ph codeph">DueDate</samp>), the cost per day of ending each house
+late (<samp class="ph codeph">Weight</samp>), and the precedence relations (<samp class="ph codeph">Precedences</samp>).</p>
+<p class="p">One
+part of the objective is based on the length of time it takes to build
+a house. To model this, you use one interval variable for each house
+that you later will constrain to span the tasks associated with the
+given house. As each house has an earliest starting date, you declare
+each house interval variable to have a start date no earlier than
+that release date. The ending date of the task is not constrained,
+so the upper value of the range for the variable is <span class="keyword apiname">maxint</span>. </p>
+</div>
+<div class="section" id="Jq5ygbZK__OdPeBTEp"><h3 class="title sectiontitle">Step 3: Create the house interval variables</h3><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the house interval
+variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar interval houses[h in Houses] in ReleaseDate[h]..(maxint div 2)-1;</code></pre>
+<p class="p">Each
+house has a list of tasks that must be scheduled. The duration, or
+size, of each task <samp class="ph codeph">t</samp> is <samp class="ph codeph">Duration[t]</samp>.
+Using this information, you build a matrix <samp class="ph codeph">itvs</samp> of
+interval variables.</p>
+</div>
+<div class="section" id="Jq5ygbZK__p3AoFt4n"><h3 class="title sectiontitle">Step 4: Create the task interval variables</h3><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the task interval
+variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar interval itvs  [h in Houses][t in TaskNames] size Duration[t];</code></pre>
+<p class="p">The tasks of the house building project have precedence
+constraints that are added to the model.</p>
+</div>
+<div class="section" id="Jq5ygbZK__uUTYJjGe"><h3 class="title sectiontitle">Step 5: Add the precedence constraints</h3><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the precedence
+constraints</samp>:</p>
+<pre class="pre codeblock"><code>  forall(h in Houses)
+    forall(p in Precedences)
+      endBeforeStart(itvs[h][p.pre], itvs[h][p.post]);</code></pre>
+<p class="p">To model the cost associated with the length of time
+it takes to build a single house, you constrain the interval variable
+associated with the house to start at the start of the first task
+of the house and end at the end of the last task. This interval variable
+must <em class="ph i">span</em> the tasks.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">Span constraint</p>
+ <p class="p">With
+the constraint <span class="keyword apiname">span</span>, you can create a constraint
+that specifies that one interval variable must exactly cover a set
+of interval variables.</p>
+ <p class="p">In other words, the spanning interval <samp class="ph codeph">a</samp> is
+present in the solution if and only if at least one of the spanned
+interval variables is present and, in this case, the spanning interval
+variable starts at the start of the interval variable scheduled earliest
+in the set and ends at the end of the interval variable scheduled
+latest in the set</p>
+ </div>
+<p class="p">For house <samp class="ph codeph">h</samp>, you
+constrain the interval variable <samp class="ph codeph">houses[h]</samp> to cover
+the interval variables in <samp class="ph codeph">itvs</samp> that are associated
+with the tasks of the given house.</p>
+</div>
+<div class="section" id="Jq5ygbZK__LCv4MYU9"><h3 class="title sectiontitle">Step 6: Add the span constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the house span constraints</samp>:</p>
+<pre class="pre codeblock"><code>  forall(h in Houses)
+    span(houses[h], all(t in TaskNames) itvs[h][t]);</code></pre>
+<p class="p">You model the times associated with the workers having
+to transfer between houses as a transition time tupleset.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Transition
+times</strong></p>
+ <p class="p">Transition times can be modeled using tuples with
+three elements. The first element is the interval variable type of
+one task, the second is the interval variable type of the other task
+and the third element of the tuple is the transition time from the
+first to the second. An integer interval variable type can be associated
+with each interval variable.</p>
+ <p class="p">Given an interval variable <samp class="ph codeph">a1</samp> that
+precedes (not necessarily directly) an interval variable <samp class="ph codeph">a2</samp> in
+a sequence of non-overlapping interval variables, the transition time
+between <samp class="ph codeph">a1</samp> and <samp class="ph codeph">a2</samp> is an amount of
+time that must elapse between the end of <samp class="ph codeph">a1</samp> and the
+beginning of <samp class="ph codeph">a2</samp>. </p>
+ </div>
+</div>
+<div class="section" id="Jq5ygbZK__M1jNoW1c"><h3 class="title sectiontitle">Step 7: Create the transition times</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Create
+the transition times</samp>:</p>
+<pre class="pre codeblock"><code>tuple triplet { int loc1; int loc2; int value; }; 
+{triplet} transitionTimes = { &lt;i,j, ftoi(abs(i-j))&gt; | i in Houses, j in Houses };</code></pre>
+<p class="p">Each
+of the tasks requires a particular worker. As a worker can perform
+only one task at a time, it is necessary to know all of the tasks
+that a worker must perform and then constrain that these intervals
+not overlap and respect the transition times.</p>
+<p class="p">A sequence variable
+represents the order in which the workers perform the tasks. Note
+that the sequence variable does not force the tasks to not overlap
+or the order of tasks; in a later step you will create a constraint
+that enforces these relations on the sequence of interval variables.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Interval
+sequence variable</strong></p>
+ <p class="p">Using the decision variable type <span class="keyword apiname">sequence</span> in
+IBM ILOG OPL, you can create a variable that represents a sequence
+of interval variables. The sequence can contain a subset of the variables
+or be empty. In a solution, the sequence will represent a total order
+over all the intervals in the set that are present in the solution.</p>
+ <p class="p">The
+assigned order of interval variables in the sequence does not necessarily
+determine their relative positions in time in the schedule.</p>
+ </div>
+<p class="p">The
+sequence variable takes an array of interval variables as well as
+the transition types for each of those variables. You create interval
+sequence variables for Jim and Joe, using the arrays of their tasks
+and the task locations.</p>
+</div>
+<div class="section" id="Jq5ygbZK__O4qxQJWH"><h3 class="title sectiontitle">Step 8: Create the sequence variables</h3><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the sequence
+variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar sequence workers[w in WorkerNames] in
+    all(h in Houses, t in TaskNames: Worker[t]==w) itvs[h][t] types
+    all(h in Houses, t in TaskNames: Worker[t]==w) h;</code></pre>
+<p class="p">Now that you have created the sequence variables, you
+must constrain each sequence such that the interval variables do not
+overlap in the solution, that the transition times are respected,
+and that the sequence represents the relations of the interval variables
+in time. To do this, you use the constraint <span class="keyword apiname">noOverlap</span>.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">No
+overlap constraint</strong></p>
+ <p class="p">Using the constraint <span class="keyword apiname">noOverlap</span>,
+you can constrain that the interval sequence variable passed defines
+a chain of non-overlapping intervals that are present in the solution.
+If a set of transition tuples is specified, it defines the minimal
+time that must elapse between two intervals in the chain.</p>
+ <p class="p">Note
+that intervals which are not present in the solution are automatically
+removed from the sequence.</p>
+ </div>
+<p class="p">You add one no overlap constraint
+for the sequence interval variable for each worker.</p>
+</div>
+<div class="section" id="Jq5ygbZK__BBygZyX9"><h3 class="title sectiontitle">Step 9: Add the no overlap constraint</h3><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the no overlap
+constraints</samp>:</p>
+<pre class="pre codeblock"><code>  forall(w in WorkerNames)
+    noOverlap(workers[w], transitionTimes);</code></pre>
+<p class="p">The cost for building a house is the sum of the tardiness
+cost and the number of days it takes from start to finish building
+the house. To model the cost associated with a task being completed
+later than its preferred latest end date, you use the expression <span class="keyword apiname">endOf</span> to
+determine the end date of the house interval variable. To model the
+cost of the length of time it takes to build the house, you use the
+expression <span class="keyword apiname">lengthOf</span>, which returns an expression
+representing the length of an interval variable. The objective of
+this problem is to minimize the cost as represented by the cost expression.</p>
+</div>
+<div class="section" id="Jq5ygbZK__jSAf3Zxn"><h3 class="title sectiontitle">Step 10: Add the objective</h3><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the objective</samp>:</p>
+<pre class="pre codeblock"><code>minimize sum(h in Houses) 
+  (Weight[h] * maxl(0, endOf(houses[h])-DueDate[h]) + lengthOf(houses[h]));</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="aBixHg7b"><h2 class="title topictitle2">Solve</h2>
+<div class="body"><p class="p">The search for an optimal solution in this problem could potentiality
+take a long time, so a fail limit has been placed on the solve process.
+The search will stop when the fail limit is reached, even if optimality
+of the current best solution is not guaranteed. The code for limiting
+the solve process has been provided for you:</p>
+<pre class="pre codeblock"><code>execute {
+  cp.param.FailLimit = 20000;
+}</code></pre>
+<div class="section" id="aBixHg7b__s6Iyb3Ys"><h3 class="title sectiontitle">Step 11: Execute the model</h3><p class="p">There
+are two ways of solving the model:</p>
+<ul class="ul"><li class="li"><p class="p">Execute the model in the CPLEX Studio IDE. You can view the
+results in a Gantt chart; see <a class="xref" href="opl_gs_sched_add_workers.html#section1269021389278">Viewing the results of sequencing problems in a Gantt chart</a>.</p>
+</li>
+<li class="li"><p class="p">Execute the model using <samp class="ph codeph">oplrun</samp>. You will need
+to pass as arguments not only the model file but also the data file, <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/tutorial/sched_sequence.dat</span>.</p>
+ </li>
+</ul>
+<p class="p">You can view the complete model online in the file:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_sequence/sched_sequence.mod</span></p>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="section1269021389278"><h2 class="title topictitle2">Viewing the results of sequencing problems in a Gantt chart</h2>
+<div class="body"><p class="p">After solving a problem, the Problem Browser view shows both data
+and decision variable values. If the problem includes a scheduling
+variable, the value of the variable is displayed.</p>
+<p class="p">The sample model:</p>
+<p class="p"><samp class="ph codeph">&lt;Install_dir&gt;/opl/examples/opl/sched_sequence/sched_sequence.mod</samp> </p>
+<p class="p">includes a sequence variable array. After the model is solved,
+the sequence value is displayed in the Problem Browser.</p>
+<p class="p">Detailed information can be viewed by clicking the button <img class="image" src="../../gsoplide/images/dataview_button.jpg" alt="Show data view button" /> <span class="ph uicontrol">Show data view</span>.
+The button appears when the mouse hovers over a variable name.</p>
+<p class="p">The following screen shows the button next to the decision variable <samp class="ph codeph">workers</samp>.</p>
+<div class="image"><img class="image" src="../../gsoplide/images/pbbrowser_sequence.jpg" alt="Problem Browser showing View Data button." /></div><p class="p">This button opens a new tab in the central window and shows the
+array in a tabular view. In the case of a sequence array, a <span class="ph uicontrol">Gantt
+Chart</span> tab in the bottom left of the window allows you
+to open a Gantt Chart.</p>
+<div class="image"><img class="image" src="../../gsoplide/images/gantt_sequence.jpg" alt="Gant Chart showing results of sched_sequence.mod" /></div><p class="p">For each sequence of the array, the intervals are displayed on
+the same horizontal line. The <samp class="ph codeph">noOverlap</samp> constraint,
+if posted in the problem model, can be checked visually on this line.</p>
+</div>
+</div>
+</body>
+</html>

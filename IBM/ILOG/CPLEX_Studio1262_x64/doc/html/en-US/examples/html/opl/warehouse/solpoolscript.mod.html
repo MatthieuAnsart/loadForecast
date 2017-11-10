@@ -1,0 +1,38 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">// the main script solves the warehouse location model</font></b>
+13: <b><font color="#007D00">// and displays the solution pools that were populated</font></b>
+14: include <b><font color="#8A2BE2">"scalableWarehouse.mod"</font></b>;
+15: 
+16: <b><font color="#0000FF">main</font></b> {
+17:     <b><font color="#0000FF">thisOplModel</font></b>.generate();
+18:     <b><font color="#0000FF">cplex</font></b>.solve();
+19:     <b><font color="EA7D00">if</font></b> (<b><font color="#0000FF">cplex</font></b>.populate()) {
+20:       <b><font color="EA7D00">var</font></b> nsolns = <b><font color="#0000FF">cplex</font></b>.solnPoolNsolns;
+21:       writeln(<b><font color="#8A2BE2">"Number of solutions found = "</font></b>,nsolns);
+22:       writeln();
+23:       <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> s=0; s&lt;nsolns; s++) {
+24:         <b><font color="#0000FF">thisOplModel</font></b>.setPoolSolution(s);
+25:         writeln(<b><font color="#8A2BE2">"solution #"</font></b>, s, <b><font color="#8A2BE2">": objective = "</font></b>, <b><font color="#0000FF">cplex</font></b>.getObjValue(s));
+26:         write(<b><font color="#8A2BE2">"Open = [ "</font></b>);
+27:         <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.Warehouses)
+28:           write(<b><font color="#0000FF">thisOplModel</font></b>.Open[i], <b><font color="#8A2BE2">" "</font></b>);
+29:         writeln(<b><font color="#8A2BE2">"]"</font></b>);  
+30:         writeln(<b><font color="#8A2BE2">"---------"</font></b>);
+31:       }
+32:     }
+33: }
+</tt></pre>

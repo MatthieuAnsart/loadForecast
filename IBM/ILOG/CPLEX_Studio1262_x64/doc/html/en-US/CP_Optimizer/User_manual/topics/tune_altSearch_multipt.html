@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Multi-point search" />
+<meta name="abstract" content="Multi-point search creates a set of solutions and combines the solutions in the set in order to produce better solutions." />
+<meta name="Description" content="Multi-point search creates a set of solutions and combines the solutions in the set in order to produce better solutions." />
+<meta name="DC.subject" content="multi-point search, search type, multi-point" />
+<meta name="keywords" content="multi-point search, search type, multi-point" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/tune_altSearch.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizertune.1014279" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/tune_altSearch.html" />
+<title>Multi-point search</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizertune.1014279">
+<h1 class="title topictitle1">Multi-point search</h1>
+<div class="body"><p class="shortdesc">Multi-point search creates a set of solutions and combines
+the solutions in the set in order to produce better solutions.</p>
+<p class="p">The third value for the search type parameter is for “multi-point”
+search. This search creates a set of solutions and combines the solutions
+in the set in order to produce better solutions.</p>
+<p class="p"> Multi-point search is more diversified than depth-first or restart
+search, but it does not necessarily prove optimality or the inexistence
+of a solution. The search runs until the optimizer considers that
+the best solution found cannot be improved. Therefore it is recommended
+to set up a limit when using multi-point search. </p>
+<p class="p">For instance, to use multi-point search on the model above, you
+can write: </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::SearchType, IloCP::MultiPoint);
+    cp.setParameter(IloCP::BranchLimit, 10000);
+    if (cp.solve()){
+      cp.out() &lt;&lt; " A solution has been found"
+               &lt;&lt; ", objective value = " &lt;&lt; cp.getObjValue()
+               &lt;&lt; ", x = " &lt;&lt; cp.getValue(x)
+               &lt;&lt; ", y = " &lt;&lt; cp.getValue(y)
+               &lt;&lt; ", z = " &lt;&lt; cp.getValue(z) &lt;&lt; std::endl;
+  }
+</code></pre>
+<p class="p">Running this code produces the output: </p>
+<pre class="pre codeblock"><code> ! ----------------------------------------------------------------------------
+ ! Minimization problem - 3 variables, 2 constraints
+ ! SearchType           = MultiPoint
+ ! BranchLimit          = 10000
+ ! Initial process time : 0.01s (0.00s extraction + 0.01s propagation)
+ !  . Log search space  : 9.0 (before), 7.6 (after)
+ !  . Memory usage      : 331.4 KB (before), 331.4 KB (after)
+ ! Using parallel search with 2 workers.
+ ! ----------------------------------------------------------------------------
+ !          Best Branches  Non-fixed    W       Branch decision
+ *            15       22 0.03s         2            -
+ *             8       23 0.03s         1            -
+ *             5       46 0.03s         1            -
+ *             4      201 0.03s         2            -
+ ! ----------------------------------------------------------------------------
+ ! Search terminated normally, 4 solutions found.
+ ! Best objective         : 4 (optimal - effective tol. is 0)
+ ! Number of branches     : 464
+ ! Number of fails        : 225
+ ! Total memory usage     : 336.4 KB (331.4 KB CP Optimizer + 5.0 KB Concert)
+ ! Time spent in solve    : 0.03s (0.03s engine + 0.00s extraction)
+ ! Search speed (br. / s) : 14848.0
+ ! ----------------------------------------------------------------------------
+ An solution has been found, objective value = 4, x = 0, y = 3, z = 1</code></pre>
+<p class="p">For more information on multi-point search, refer to <a class="xref" href="tune_multiPoint.html" title="Multi-point search is based on a pool of points. This pool can be managed via parameters.">Using multi-point search algorithms</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/tune_altSearch.html" title="The alternative search types include depth-first search, restart search and multi-point search.">Using alternative search types</a></div>
+</div>
+</div></body>
+</html>

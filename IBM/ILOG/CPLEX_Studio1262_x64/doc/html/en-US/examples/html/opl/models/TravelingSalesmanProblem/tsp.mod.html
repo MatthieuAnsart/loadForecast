@@ -1,0 +1,158 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/*****************************************************************************</font></b>
+013: <b><font color="#007D00"> *</font></b>
+014: <b><font color="#007D00"> * OPL model and script for Symmetric Travelling Salesman Problem</font></b>
+015: <b><font color="#007D00"> * </font></b>
+016: <b><font color="#007D00"> *****************************************************************************/</font></b>
+017: 
+018: <b><font color="#007D00">/*****************************************************************************</font></b>
+019: <b><font color="#007D00"> *</font></b>
+020: <b><font color="#007D00"> * DATA</font></b>
+021: <b><font color="#007D00"> * </font></b>
+022: <b><font color="#007D00"> *****************************************************************************/</font></b>
+023: 
+024: <b><font color="#007D00">// Cities</font></b>
+025: <b><font color="#0000FF">int</font></b>     n       = ...;
+026: <b><font color="#0000FF">range</font></b>   Cities  = 1..n;
+027: 
+028: <b><font color="#007D00">// Edges -- sparse set</font></b>
+029: <b><font color="#0000FF">tuple</font></b>       edge        {<b><font color="#0000FF">int</font></b> i; <b><font color="#0000FF">int</font></b> j;}
+030: <b><font color="#7D007D">setof</font></b>(edge) Edges       = {&lt;i,j&gt; | <b><font color="#0000FF">ordered</font></b> i,j <b><font color="#0000FF">in</font></b> Cities};
+031: <b><font color="#0000FF">int</font></b>         dist[Edges] = ...;
+032: 
+033: <b><font color="#007D00">// Decision variables</font></b>
+034: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> x[Edges];
+035: 
+036: <b><font color="#0000FF">tuple</font></b> Subtour { <b><font color="#0000FF">int</font></b> <b><font color="#0000FF">size</font></b>; <b><font color="#0000FF">int</font></b> subtour[Cities]; }
+037: {Subtour} subtours = ...;
+038: 
+039: 
+040: 
+041: <b><font color="#007D00">/*****************************************************************************</font></b>
+042: <b><font color="#007D00"> *</font></b>
+043: <b><font color="#007D00"> * MODEL</font></b>
+044: <b><font color="#007D00"> * </font></b>
+045: <b><font color="#007D00"> *****************************************************************************/</font></b>
+046: 
+047: <b><font color="#007D00">// Objective</font></b>
+048: <b><font color="#0000FF">minimize</font></b> <b><font color="#7D007D">sum </font></b>(&lt;i,j&gt; <b><font color="#0000FF">in</font></b> Edges) dist[&lt;i,j&gt;]*x[&lt;i,j&gt;];
+049: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+050:    
+051:    <b><font color="#007D00">// Each city is linked with two other cities</font></b>
+052:    <b><font color="#7D007D">forall </font></b>(j <b><font color="#0000FF">in</font></b> Cities)
+053:         <b><font color="#7D007D">sum </font></b>(&lt;i,j&gt; <b><font color="#0000FF">in</font></b> Edges) x[&lt;i,j&gt;] + <b><font color="#7D007D">sum </font></b>(&lt;j,k&gt; <b><font color="#0000FF">in</font></b> Edges) x[&lt;j,k&gt;] == 2;
+054:         
+055:    <b><font color="#007D00">// Subtour elimination constraints.</font></b>
+056:    <b><font color="#7D007D">forall </font></b>(s <b><font color="#0000FF">in</font></b> subtours)
+057:        <b><font color="#7D007D">sum </font></b>(i <b><font color="#0000FF">in</font></b> Cities : s.subtour[i] != 0)
+058:           x[&lt;<b><font color="#7D007D">minl</font></b>(i, s.subtour[i]), <b><font color="#7D007D">maxl</font></b>(i, s.subtour[i])&gt;]
+059:            &lt;= s.<b><font color="#0000FF">size</font></b>-1;
+060:           
+061: };
+062: 
+063: <b><font color="#007D00">// POST-PROCESSING to find the subtours</font></b>
+064: 
+065: <b><font color="#007D00">// Solution information</font></b>
+066: <b><font color="#0000FF">int</font></b> thisSubtour[Cities];
+067: <b><font color="#0000FF">int</font></b> newSubtourSize;
+068: <b><font color="#0000FF">int</font></b> newSubtour[Cities];
+069: 
+070: <b><font color="#007D00">// Auxiliar information</font></b>
+071: <b><font color="#0000FF">int</font></b> visited[i <b><font color="#0000FF">in</font></b> Cities] = 0;
+072: <b><font color="#7D007D">setof</font></b>(<b><font color="#0000FF">int</font></b>) adj[j <b><font color="#0000FF">in</font></b> Cities] = {i | &lt;i,j&gt; <b><font color="#0000FF">in</font></b> Edges : x[&lt;i,j&gt;] == 1} <b><font color="#0000FF">union</font></b>
+073:                               {k | &lt;j,k&gt; <b><font color="#0000FF">in</font></b> Edges : x[&lt;j,k&gt;] == 1};
+074: <b><font color="#0000FF">execute</font></b> {
+075: 
+076:   newSubtourSize = n;
+077:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> Cities) { <b><font color="#007D00">// Find an unexplored node</font></b>
+078:     <b><font color="EA7D00">if</font></b> (visited[i]==1) <b><font color="EA7D00">continue</font></b>;
+079:     <b><font color="EA7D00">var</font></b> start = i;
+080:     <b><font color="EA7D00">var</font></b> node = i;
+081:     <b><font color="EA7D00">var</font></b> thisSubtourSize = 0;
+082:     <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> Cities)
+083:       thisSubtour[j] = 0;
+084:     <b><font color="EA7D00">while</font></b> (node!=start || thisSubtourSize==0) {
+085:       visited[node] = 1;
+086:       <b><font color="EA7D00">var</font></b> succ = start; 
+087:       <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> adj[node]) 
+088:         <b><font color="EA7D00">if</font></b> (visited[i] == 0) {
+089:           succ = i;
+090:           <b><font color="EA7D00">break</font></b>;
+091:         }
+092:                         
+093:       thisSubtour[node] = succ;
+094:       node = succ;
+095:       ++thisSubtourSize;
+096:     }
+097: 
+098:     writeln(<b><font color="#8A2BE2">"Found subtour of size : "</font></b>, thisSubtourSize);
+099:     <b><font color="EA7D00">if</font></b> (thisSubtourSize &lt; newSubtourSize) {
+100:       <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> Cities)
+101:         newSubtour[i] = thisSubtour[i];
+102:         newSubtourSize = thisSubtourSize;
+103:     }
+104:   }
+105:   <b><font color="EA7D00">if</font></b> (newSubtourSize != n)
+106:     writeln(<b><font color="#8A2BE2">"Best subtour of size "</font></b>, newSubtourSize);
+107: }
+108: 
+109: 
+110: 
+111: /*****************************************************************************
+112:  *
+113:  * SCRIPT
+114:  * 
+115:  *****************************************************************************/
+116: 
+117: main {
+118:     <b><font color="EA7D00">var</font></b> opl = <b><font color="#0000FF">thisOplModel</font></b>
+119:     <b><font color="EA7D00">var</font></b> mod = opl.modelDefinition;
+120:     <b><font color="EA7D00">var</font></b> dat = opl.dataElements;
+121: 
+122:     <b><font color="EA7D00">var</font></b> status = 0;
+123:     <b><font color="EA7D00">var</font></b> it =0;
+124:     <b><font color="EA7D00">while</font></b> (1) {
+125:         <b><font color="EA7D00">var</font></b> cplex1 = <b><font color="EA7D00">new</font></b> IloCplex();
+126:         opl = <b><font color="EA7D00">new</font></b> IloOplModel(mod,cplex1);
+127:         opl.addDataSource(dat);
+128:         opl.generate();
+129:         it++;
+130:         writeln(<b><font color="#8A2BE2">"Iteration "</font></b>,it, <b><font color="#8A2BE2">" with "</font></b>, opl.subtours.size, <b><font color="#8A2BE2">" subtours."</font></b>);
+131:         <b><font color="EA7D00">if</font></b> (!cplex1.solve()) {
+132:             writeln(<b><font color="#8A2BE2">"ERROR: could not solve"</font></b>);
+133:             status = 1;
+134:             opl.end();
+135:             <b><font color="EA7D00">break</font></b>;
+136:         }
+137:         opl.postProcess();
+138:         writeln(<b><font color="#8A2BE2">"Current solution : "</font></b>, cplex1.getObjValue());
+139: 
+140:         <b><font color="EA7D00">if</font></b> (opl.newSubtourSize == opl.n) {
+141:           opl.end();
+142:           cplex1.end();
+143:           <b><font color="EA7D00">break</font></b>; <b><font color="#007D00">// not found</font></b>
+144:         }
+145:           
+146:         dat.subtours.add(opl.newSubtourSize, opl.newSubtour);
+147:                 opl.end();
+148:                 cplex1.end();
+149:     }
+150: 
+151:     status;
+152: }
+153: 
+</tt></pre>

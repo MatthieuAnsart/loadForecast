@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using the timing interface in callbacks" />
+<meta name="abstract" content="Describes the timing interface for accessing time stamps from callbacks." />
+<meta name="Description" content="Describes the timing interface for accessing time stamps from callbacks." />
+<meta name="DC.subject" content="time stamp, callbacks and, timing interface, callback, time stamps and" />
+<meta name="keywords" content="time stamp, callbacks and, timing interface, callback, time stamps and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/timing/timingInterface_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="UsingTheTimingInterfaceInCallbacks" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/timing/timingInterface_title_synopsis.html" />
+<title>Using the timing interface in callbacks</title>
+</head>
+<body role="main" id="UsingTheTimingInterfaceInCallbacks">
+<h1 class="title topictitle1">Using the timing interface in callbacks</h1>
+<div class="body"><p class="shortdesc">Describes the timing interface for accessing time
+stamps from callbacks.</p>
+<p class="p">In addition to the general purpose methods and routines
+ that provide a time stamp to enable you to measure
+computational time in your applications of IBM ILOG CPLEX, 
+there are methods and routines specifically for
+use in <strong class="ph b">callbacks</strong>. Like the general purpose methods and routines
+for time stamps, these callback methods and  routines are adapted
+for use either with the default opportunistic search or with the deterministic search.  
+An application can invoke one of these methods or routines
+at the beginning and end of an operation, and then compare the two
+time stamps to compute elapsed time (either in seconds or in deterministic
+ticks, respectively). </p>
+<ul class="ul"><li class="li"><p class="p">In Concert Technology</p>
+    
+    <ul class="ul"><li class="li"><p class="p">In the C++ API, 
+    <samp class="ph codeph">CallbackI::getStartTime</samp> 
+    returns a time stamp in seconds at the beginning of optimization.
+    <samp class="ph codeph">CallbackI::getStartDetTime</samp> 
+    returns a time stamp in deterministic ticks at the beginning of optimization.
+   <samp class="ph codeph">CallbackI::getEndTime</samp> 
+   returns a time stamp specifying in seconds when CPLEX will reach a time limit. 
+   <samp class="ph codeph">CallbackI::getEndDetTime</samp> 
+   returns a time stamp specifying in deterministic ticks when CPLEX will reach a time limit.
+    <samp class="ph codeph">CallbackI::getCplexTime</samp> returns the current time stamp in seconds.
+    <samp class="ph codeph">CallbackI::getDetTime</samp> returns the current time stamp in deterministic ticks.
+   </p>
+
+   </li>
+<li class="li"><p class="p">In the Java API, 
+      <samp class="ph codeph">CpxCallback.getStartTime</samp> 
+      returns a time stamp in seconds at the beginning of optimization.
+      <samp class="ph codeph">CpxCallback.getStartDetTime</samp> 
+      returns a time stamp in deterministic ticks at the beginning of optimization.
+      <samp class="ph codeph">CpxCallback.getEndTime</samp> 
+      returns a time stamp specifying in seconds when CPLEX will reach a time limit.
+      <samp class="ph codeph">CpxCallback.getEndDetTime</samp> 
+       returns a time stamp specifying in deterministic ticks when CPLEX will reach a time limit.
+      </p>
+
+   </li>
+<li class="li"><p class="p">In the .NET API, the property 
+   <samp class="ph codeph">Cplex.Callback.StartTime</samp>
+   accesses a time stamp in seconds at the beginning of optimization.
+   <samp class="ph codeph">Cplex.Callback.StartDetTime</samp>
+   accesses  a time stamp in deterministic ticks at the beginning of optimization.
+   <samp class="ph codeph">Cplex.Callback.EndTime</samp> 
+   accesses a time stamp specifying in seconds when CPLEX will reach a time limit.
+   <samp class="ph codeph">Cplex.Callback.EndDetTime</samp> 
+   accesses a time stamp specifying in deterministic ticks when CPLEX will reach a time limit.
+   </p>
+
+   </li>
+</ul>
+ 
+<p class="p">With those values, you can compute the time in seconds since the start 
+of the optimization: <samp class="ph codeph">getCplexTime - getStartTime</samp>.
+Likewise, you can compute the remaining time in seconds until CPLEX reaches the time limit: 
+<samp class="ph codeph">getEndTime - getCplexTime</samp>.
+Analogously, you can compute the time in deterministic ticks since the start 
+of the optimization: <samp class="ph codeph">getDetTime - getStartDetTime</samp>. 
+Similarly, you can compute the remaining time in determinitic ticks until 
+CPLEX reaches the time limit: <samp class="ph codeph">getDetEndTime - getDetTime</samp>.</p>
+</li>
+<li class="li"><p class="p">In the Callable Library, <samp class="ph codeph">CPX_CALLBACK_INFO_STARTTIME</samp> 
+and <samp class="ph codeph">CPX_CALLBACK_INFO_ENDTIME</samp> are symbolic
+values that <samp class="ph codeph">CPXgetcallbackinfo</samp> can supply
+in its  argument <samp class="ph codeph">whichinfo</samp>. Those values
+are time stamps of the point in time when optimization
+started and terminated (if optimization does not finish before that
+point). In other words, those symbols are useful in measuring time
+in seconds through information callbacks.</p>
+ <p class="p">Likewise, <samp class="ph codeph">CPX_CALLBACK_INFO_STARTDETTIME</samp>  and 
+<samp class="ph codeph">CPX_CALLBACK_INFO_ENDDETTIME</samp> are
+also symbolic values that <samp class="ph codeph">CPXgetcallbackinfo</samp> can
+supply in its  argument <samp class="ph codeph">whichinfo</samp>. Those
+values are time stamps of the point in time measured in deterministic
+ticks when optimization started and terminated (if
+optimization does not finish before that point). In other words, those
+symbols are useful in measuring time in deterministic ticks through
+information callbacks.</p>
+ </li>
+<li class="li">In the Python API, these methods are available for measuring time in callbacks.
+    <ul class="ul"><li class="li"><span class="keyword apiname">Callback.get_start_time</span></li>
+<li class="li"><span class="keyword apiname">Callback.get_start_dettime</span></li>
+<li class="li"><span class="keyword apiname">Callback.get_end_time</span></li>
+<li class="li"><span class="keyword apiname">Callback.get_end_dettime</span></li>
+<li class="li"><span class="keyword apiname">Callback.get_dettime</span></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/timing/timingInterface_title_synopsis.html" title="Introduces the timing interface available in CPLEX.">Timing interface</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,97 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/*********************************************************************</font></b>
+13: 
+14: <b><font color="#007D00">CAPITAL BUDGETING EXAMPLE </font></b>
+15: 
+16: <b><font color="#007D00">This model is described in the documentation. </font></b>
+17: <b><font color="#007D00">See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+18: <b><font color="#007D00">   </font></b>
+19: <b><font color="#007D00">***********************************************************************/</font></b>  
+20: 
+21: <b><font color="#0000FF">int</font></b> T=...;
+22: <b><font color="#0000FF">int</font></b> NbMustTakeOne=...;
+23: 
+24: <b><font color="#0000FF">range</font></b> Periods = 1..T;
+25: 
+26: <b><font color="#007D00">// All projects in the model </font></b>
+27: {<b><font color="#0000FF">string</font></b>} AllProjects = ...;                    
+28: 
+29: <b><font color="#007D00">// Subsets of projects; must take one </font></b>
+30: {<b><font color="#0000FF">string</font></b>} MustTakeOne[1..NbMustTakeOne] = ...;  
+31: 
+32: <b><font color="#007D00">//Discount rate (interest rate)</font></b>
+33: <b><font color="#0000FF">float</font></b> Rate = ...;
+34: 
+35: <b><font color="#007D00">// Setup cost of projects </font></b>
+36: <b><font color="#0000FF">float</font></b> SetupCost[AllProjects][Periods] = ...; 
+37: 
+38: <b><font color="#007D00">// Rewards (= Revenue - Cost) of projects in each period </font></b>
+39: <b><font color="#0000FF">float</font></b> Reward[AllProjects][Periods] = ...;    
+40: 
+41: <b><font color="#007D00">// Minimum balance in each period</font></b>
+42: <b><font color="#0000FF">float</font></b> MinBal[Periods]=...;
+43: 
+44: <b><font color="#0000FF">float</font></b> InitBal = ...;
+45: 
+46: <b><font color="#007D00">// Account balance at the end of each period</font></b>
+47: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b> Bal[0..T];
+48: 
+49: <b><font color="#007D00">// Selection activities </font></b>
+50: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> doProj[AllProjects][Periods]; <b><font color="#007D00">// 1 if project is selected to start at time t; 0 otherwise</font></b>
+51: 
+52: 
+53: <b><font color="#007D00">// Indicate if a project has been selected up to period t</font></b>
+54: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> SelectedProj[AllProjects][Periods];
+55: 
+56: 
+57: <b><font color="#007D00">// Maximize the total NPV of selected projects </font></b>
+58: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> Objective = 
+59:   Bal[T] /<b><font color="#7D007D">pow</font></b>(1+Rate,T) - Bal[0];
+60:   
+61: <b><font color="#0000FF">maximize</font></b>
+62:     Objective;
+63:     
+64: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+65:    
+66:    <b><font color="#007D00">// Initial Balanced</font></b>
+67:    Bal[0] == InitBal;   
+68:    
+69:    <b><font color="#007D00">// Cash flows balance constraints</font></b>
+70:    <b><font color="#007D00">// Current money = Money left from previous period - Cost of selected projects </font></b>
+71:    <b><font color="#007D00">//in current period  +  Rewards of the ongoing projects </font></b>
+72:    <b><font color="#7D007D">forall</font></b>(t <b><font color="#0000FF">in</font></b> Periods) 
+73:       ctBal: Bal[t] == (1+Rate)*(Bal[t-1] - <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> AllProjects) SetupCost[i][t]*doProj[i][t] 
+74:       + <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> AllProjects) Reward[i][t]*SelectedProj[i][t]);
+75:    
+76:    <b><font color="#007D00">// Minimum Balance constraint in each period</font></b>
+77:    <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Periods) 
+78:       ctMinBal: Bal[i] &gt;= MinBal[i];
+79:    
+80:    <b><font color="#007D00">// Selected Projects</font></b>
+81:    <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> AllProjects, t <b><font color="#0000FF">in</font></b> Periods) 
+82:       SelectedProj[i][t] == <b><font color="#7D007D">sum</font></b>(s <b><font color="#0000FF">in</font></b> 1..t-1) doProj[i][s];
+83:    
+84:       
+85:    <b><font color="#007D00">// All project are selected at most once</font></b>
+86:    <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> AllProjects) 
+87:       ctMost: SelectedProj[i][T] &lt;= 1;  
+88:    
+89:    <b><font color="#007D00">// Must-take-one group -- select one project from the MustTakeOne set </font></b>
+90:    <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> 1..NbMustTakeOne) 
+91:       ctMust: <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> MustTakeOne[i]) SelectedProj[p][T] == 1;
+92: }
+</tt></pre>

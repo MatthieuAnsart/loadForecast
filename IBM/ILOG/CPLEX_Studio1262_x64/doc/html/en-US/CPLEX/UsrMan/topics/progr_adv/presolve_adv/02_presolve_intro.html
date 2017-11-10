@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Introduction to presolve" />
+<meta name="abstract" content="Describes presolve with an example contrasting continuous and discrete optimization." />
+<meta name="Description" content="Describes presolve with an example contrasting continuous and discrete optimization." />
+<meta name="DC.subject" content="presolve, presolved model, building, process for MIP, RelaxPreInd parameter, advanced presolve, CPX_PARAM_RELAXPREIND" />
+<meta name="keywords" content="presolve, presolved model, building, process for MIP, RelaxPreInd parameter, advanced presolve, CPX_PARAM_RELAXPREIND" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advancedPresolve.1001925" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<title>Introduction to presolve</title>
+</head>
+<body role="main" id="User_manual.uss_advancedPresolve.1001925">
+<h1 class="title topictitle1">Introduction to presolve</h1>
+<div class="body"><p class="shortdesc">Describes presolve with an example contrasting continuous
+and discrete optimization.</p>
+<p class="p">This discussion of the advanced presolve interface begins
+with a quick introduction to presolve. Most of the information in
+this section will be familiar to people who are interested in the
+advanced interface, but everyone is encouraged to read through it
+nonetheless.</p>
+<p class="p">As most users of IBM ILOG CPLEX know, presolve is a process whereby
+the problem input by the user is examined for logical reduction opportunities.
+The goal is to reduce the size of the problem passed to the requested
+optimizer. A reduction in problem size typically translates to a reduction
+in total run time (even including the time spent in presolve itself).</p>
+<p class="p">Consider <samp class="ph codeph">scorpion.mps</samp> from <strong class="ph b">NETLIB</strong> as an example: </p>
+<pre class="pre codeblock"><code>CPLEX&gt; disp pr st
+Problem name: scorpion.mps
+Constraints        :     388  [Less: 48,  Greater: 60,  Equal: 280]
+Variables          :     358
+Constraint nonzeros:    1426
+Objective  nonzeros:     282
+RHS        nonzeros:      76
+CPLEX&gt; optimize
+Tried aggregator 1 time.
+LP Presolve eliminated 138 rows and 82 columns.
+Aggregator did 193 substitutions.
+Reduced LP has 57 rows, 83 columns, and 327 nonzeros.
+Presolve time =    0.00 sec.
+ 
+Iteration log . . .
+Iteration:     1   Dual objective     =           317.965093
+ 
+Dual - Optimal:  Objective =    1.8781248227e+03
+Solution time =    0.01 sec.  Iterations = 54 (0)</code></pre>
+<p class="p">CPLEX is presented with a problem with 388 constraints
+and 358 variables, and after presolve the dual simplex method is presented
+with a problem with 57 constraints and 83 variables. Dual simplex
+solves this problem and passes the solution back to the presolve routine,
+which then unpresolves the solution to produce a solution to the original
+problem. During this process, presolve builds an entirely new ‘presolved’
+problem and stores enough information to translate a solution to this
+problem back to a solution to the original problem. This information
+is hidden within the user's problem (in the CPLEX LP problem object,
+for Callable Library users) and was inaccessible to the user in CPLEX
+releases prior to 7.0.</p>
+<p class="p">The presolve process for a mixed integer program is similar,
+but has a few important differences. First, the actual presolve reductions
+differ. Integrality restrictions allow CPLEX to perform several classes
+of reductions that are invalid for continuous variables. A second
+difference is that the MIP solution process involves a series of linear
+program solutions. In the MIP branch &amp; cut tree, a linear program
+is solved at each node. MIP presolve is performed at the beginning
+of the optimization and applied a second time to the root relaxation,
+unless the <a class="xref" href="../../../../Parameters/topics/RelaxPreInd.html" title="Decides whether LP presolve is applied to the root relaxation in a mixed integer program (MIP).">relaxed LP presolve switch</a> (<samp class="ph codeph">RelaxPreInd</samp> or <samp class="ph codeph">CPX_PARAM_RELAXPREIND</samp>) is set to 0 (zero), in which case the presolve is performed only
+once. All of the node relaxation solutions use the presolved model.
+Again, presolve stores the presolved model and the information required
+to convert a presolved solution to a solution for the original problem
+within the LP problem object. Again, this information was inaccessible
+to the user in CPLEX releases prior to version 7.0.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" title="Documents the advanced presolve routines, available only in the Callable Library (C API).">Advanced presolve routines</a></div>
+</div>
+</div></body>
+</html>

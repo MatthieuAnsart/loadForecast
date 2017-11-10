@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: examining the simplex tableau in the Python API" />
+<meta name="abstract" content="Illustrates how to examine a typical simplex tableau." />
+<meta name="Description" content="Illustrates how to examine a typical simplex tableau." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1268148642268" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" />
+<title>Example: examining the simplex tableau in the Python API</title>
+</head>
+<body role="main" id="descriptiveTopic1268148642268">
+<h1 class="title topictitle1">Example: examining the simplex tableau in the Python
+API</h1>
+<div class="body"><p class="shortdesc">Illustrates how to examine a typical simplex tableau.</p>
+<p class="p">This example reads a problem from a file, <span class="ph filepath">myprob.mps</span>,
+formatted in MPS. (For more information about the math programming
+standard format MPS, see that topic in the reference manual, <a class="xref" href="../../../../homepages/reffileformatscplex.html">File formats supported by CPLEX</a>.)
+After setting a limit on the number of iterations, and selecting primal
+simplex as the optimizer, it then loops through the simplex iterations
+as CPLEX solves the problem, printing rows (constraints).</p>
+<pre class="pre codeblock"><code>&gt;&gt;&gt; c = cplex.Cplex("myprob.mps")
+&gt;&gt;&gt; c.parameters.simplex.limits.iterations.set(1)
+&gt;&gt;&gt; c.parameters.lpmethod.set(c.parameters.lpmethod.values.primal)
+&gt;&gt;&gt; # this while loop will print the tableau after each
+&gt;&gt;&gt; # simplex iteration
+&gt;&gt;&gt; while c.solution.get_status() != c.solution.status.optimal:
+...   c.solve()
+...   print " CURRENT TABLEAU "
+...   for tableau_row in c.solution.advanced.binvarow():
+...     print tableau_row
+...   print
+...</code></pre>
+<p class="p">You can print only selected rows of the tableau by passing
+the names of rows or the indices of rows to the method <samp class="ph codeph">binvarow</samp>.
+Another method, <samp class="ph codeph">binvacol</samp>, returns columns
+of a tableau. The methods <samp class="ph codeph">binvrow</samp> and <samp class="ph codeph">binvcol</samp> return the inverted basis matrix.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" title="Explores the features that CPLEX offers to users of Python to solve mathematical programming problems.">CPLEX for Python users</a></div>
+</div>
+</div></body>
+</html>

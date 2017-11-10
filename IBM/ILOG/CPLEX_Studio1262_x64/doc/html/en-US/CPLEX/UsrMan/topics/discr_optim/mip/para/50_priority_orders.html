@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Issuing priority orders" />
+<meta name="abstract" content="Describes priority order to control MIP optimization." />
+<meta name="Description" content="Describes priority order to control MIP optimization." />
+<meta name="DC.subject" content="priority, order, objective coefficients, priority and, integer variables and, binary variables and, semi-continuous variables and, semi-continuous variable, semi-integer variables and, semi-integer variable, special ordered set (SOS) and, reading from file, parameter to control" />
+<meta name="keywords" content="priority, order, objective coefficients, priority and, integer variables and, binary variables and, semi-continuous variables and, semi-continuous variable, semi-integer variables and, semi-integer variable, special ordered set (SOS) and, reading from file, parameter to control" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.676302" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" />
+<title>Issuing priority orders</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.676302">
+<h1 class="title topictitle1">Issuing priority orders</h1>
+<div class="body"><p class="shortdesc">Describes priority order to control MIP optimization.</p>
+<p class="p">In the search, CPLEX makes decisions about which variable
+to branch on at a node. You can control the order in which CPLEX branches
+on variables by issuing a priority order. A priority order assigns
+a branching priority to some or all of the integer variables in a
+model. CPLEX performs branches on variables with a higher assigned
+priority number before variables with a lower priority; variables
+not assigned an explicit priority value by the user are treated as
+having a priority value of <samp class="ph codeph">0</samp>. Note that
+CPLEX will branch only on variables that take a fractional solution
+value at a given node. Thus a variable with a high priority number
+might still not be branched upon until late in the tree, if at all,
+and indeed if the presolve or the aggregator feature of the CPLEX
+Preprocessor removes a given variable then branching on that variable
+would never occur regardless of a high priority order assigned to
+it by the user.</p>
+<p class="p">Problems that use integer variables to represent different
+types of decisions should assign higher priority to those that must
+be decided first. For example, if some variables in a model activate
+processes, and others use those activated processes, then the first
+group of variables should be assigned higher priority than the second
+group. In that way, you can use priority to achieve better solutions.</p>
+<p class="p">Setting priority based on the magnitude of objective
+coefficients is also sometimes helpful.</p>
+<p class="p">You can specify priority for any variable, though the
+priority is used only if the variable is a general integer variable,
+a binary integer variable, a semi-continuous variable, a semi-integer
+variable, or a member of a special ordered set. To specify priority,
+use one of the following routines or methods:</p>
+<ul class="ul"><li class="li"><p class="p">From the Callable Library, use <samp class="ph codeph">CPXcopyorder</samp> 
+to copy a priority order and apply it, or <samp class="ph codeph">CPXreadcopyorder</samp> 
+to read the copy order from a file in ORD format. That format is documented
+in the <em class="ph i">CPLEX File Formats Reference
+Manual</em>.</p>
+</li>
+<li class="li"><p class="p">From Concert Technology, use the method <samp class="ph codeph">setPriority</samp> 
+to set the priority of a given variable or <samp class="ph codeph">setPriorities</samp> 
+to set priorities for an array of variables. Use the method <samp class="ph codeph">readOrder</samp> to
+read priorities from a file in ORD format and apply them.</p>
+</li>
+</ul>
+<p class="p">CPLEX can generate a priority order automatically, based
+on problem-data characteristics. This facility can be activated by
+setting the <samp class="ph codeph">MIPOrdType</samp> parameter to one
+of the values in <a class="xref" href="50_priority_orders.html#User_manual.uss_solveMIP.676302__User_manual.uss_solveMIP.676322" title="A two-column table showing possible values for branching priority orders and their effect.">Table 1</a>.
+ </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible values for branching priority orders and their effect." id="User_manual.uss_solveMIP.676302__User_manual.uss_solveMIP.676322" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Parameter settings for branching priority order</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="50%" id="d415002e115"> Value </th>
+<th class="entry" align="left" valign="top" width="50%" id="d415002e117"> Branching priority order </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d415002e115 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d415002e117 "> no automatic priority order will be generated
+(default) </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d415002e115 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d415002e117 "> decreasing cost coefficients among the variables </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d415002e115 "> 2 </td>
+<td class="entry" valign="top" width="50%" headers="d415002e117 "> increasing bound range among the variables </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d415002e115 ">  <samp class="ph codeph">3</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d415002e117 "> increasing cost per matrix coefficient count
+among the variables </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">If you explicitly read a file of priority orders, its
+settings will override any generic priority order you may have set
+by this parameter. </p>
+<p class="p">The parameter <samp class="ph codeph">MIPOrdInd</samp>, when
+set to 0 (zero), allows you to direct CPLEX to ignore a priority order
+that was previously read from a file. The default setting for this
+parameter means that CPLEX applies a priority order, if one has been
+read in.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" title="Documents the solution of mixed integer programs (MIPs) with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values.">Solving mixed integer programming problems (MIP)</a></div>
+</div>
+</div></body>
+</html>

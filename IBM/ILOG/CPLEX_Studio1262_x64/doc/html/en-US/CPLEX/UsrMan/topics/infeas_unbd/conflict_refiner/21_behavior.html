@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="More about the conflict refiner" />
+<meta name="abstract" content="Describes the behavior of the conflict refiner in greater detail." />
+<meta name="Description" content="Describes the behavior of the conflict refiner in greater detail." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/01_ref_confl_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_refineConflict.1044439" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/01_ref_confl_title_synopsis.html" />
+<title>More about the conflict refiner</title>
+</head>
+<body role="main" id="User_manual.uss_refineConflict.1044439">
+<h1 class="title topictitle1">More about the conflict refiner</h1>
+<div class="body"><p class="shortdesc">Describes the behavior of the conflict refiner in greater
+detail.</p>
+<p class="p">Presolve proved the infeasibility of that simplified
+example in <a class="xref" href="08_eg_model.html" title="Describes a model to exercise the conflict refiner in the Interactive Optimizer.">A model for the conflict refiner</a>.
+However, a minimal conflict can be refined from an infeasible model
+regardless of how the infeasibility was found. The infeasibility may
+have been proven by presolve, by the continuous optimizers, or by
+the mixed integer optimizer.</p>
+<p class="p">A minimal conflict on a nontrivial model can take longer
+to refine than the associated optimization algorithm would have taken
+either to prove the infeasibility or to solve a similar model instance
+that was feasible. One reason that refining a minimal conflict may
+take longer is that multiple passes (that is, iterations) are performed;
+each iteration solves a submodel to decide its feasibility status.
+Another reason is that even if the full model is quickly detected
+to be infeasible, the infeasibility of the submodels may be less blatant
+and thus require more time to analyze. It can happen that a number
+of refinement iterations proceed quickly, and then suddenly no further
+progress is seen for quite a long time. This deceptive appearance
+of lack of progress may be especially noticeable in the case of mixed
+integer models, where a proof of infeasibility may become a quite
+difficult mathematical problem.</p>
+<p class="p">If the user sets a resource limit, such as a time limit,
+an iteration limit, or node limit, for example, or if a user interrupts
+the process interactively, the conflict that is available at that
+termination will be the best (that is, the most refined) that was
+achievable at that point. Even a nonminimal conflict may be more useful
+than the full model for discovering the cause of infeasibility. The
+status of a bound or constraint in such a nonminimal conflict may
+be <em class="ph i">proved</em>, meaning
+that the conflict refiner had sufficient resources to prove participation
+of bound or constraint in the conflict, or the status may be <em class="ph i">possible</em>, meaning that the conflict
+refiner has not yet proven whether the bound or constraint is necessarily
+part of a minimal conflict.</p>
+<p class="p">If a model contains more than one cause of infeasibility,
+then the conflict that is delivered may not be unique. As you saw
+in the example, you may repair one infeasibility only to find that
+there is another arising. An iterative approach may be necessary.</p>
+<p class="p">When the conflict refiner is allowed to run to completion,
+a conflict will be minimal in the sense that removal of any constraint
+or bound will result in a feasible subproblem. However, even if there
+is a single cause of infeasibility, it is worth realizing that conflicts
+can often be derived in more than one way, and one minimal conflict
+may be smaller (fewer in number of constraints or bounds) than another.
+For example, consider this small set of inconsistent constraints:
+ </p>
+<pre class="pre codeblock"><code>x + y + z &gt;= 1
+x         &lt;= 0
+    y     &lt;= 0
+        z &lt;= 0
+x + y + z &lt;= 0</code></pre>
+<p class="p">There are multiple minimal conflicts in that small set.
+ </p>
+<pre class="pre codeblock"><code>(1)
+x + y + z &gt;= 1
+x         &lt;= 0
+    y     &lt;= 0
+        z &lt;= 0</code></pre>
+<pre class="pre codeblock"><code>(2)
+x + y + z &gt;= 1
+x + y + z &lt;= 0</code></pre>
+<p class="p">Removing any one of the constraints in conflict (1) results
+in feasibility. Likewise, removing either of the constraints in conflict
+(2) also results in feasibility. Either representation may guide you
+toward a correct analysis of the infeasibilities in the model.</p>
+<p class="p">Keep in mind also that a conflict may guide you toward
+multiple ways to repair a model, some more reasonable than others.
+For example, if the conflict in a model using continuous variables
+to represent percentages looked like this:  </p>
+<pre class="pre codeblock"><code>x1 + x2 + x3 &gt;= 400
+Bounds
+0 &lt;= x1 &lt;= 100
+0 &lt;= x2 &lt;= 100
+0 &lt;= x3 &lt;= 100</code></pre>
+<p class="p">the infeasibility could be repaired by one change, namely,
+by increasing the upper bound of <samp class="ph codeph">x3</samp>  to
+be 200. However, with the way the variables are defined, this modification
+makes little sense. It is more likely that the model contains a subtle
+mistake in modeling (if the constraint should include more than three
+variables, for example).</p>
+<p class="p">When the model passed to the conflict refiner is actually
+feasible, the conflict refiner will return this message:  </p>
+<pre class="pre codeblock"><code>Problem is feasible; no conflict available</code></pre>
+<p class="p">An attempt to display or access a conflict when none
+exists, whether because the conflict refiner has not yet been invoked
+or because an error occurred, results in this error message:  </p>
+<pre class="pre codeblock"><code>No conflict exists.</code></pre>
+<p class="p">The cause of those messages will usually be apparent
+to a user. However, numeric instability may cause genuine uncertainty
+for a user. In an unstable model, one of the optimizers may return
+a valid conclusion of infeasibility, based on the numeric precision
+allowed by the model, and yet when a trivial modification is made,
+the model status changes, and a feasible solution now seems attainable.
+Because one of the conventional signs of instability can be this switching
+back and forth from feasibility to infeasibility, the user should
+be alert to this possibility. The conflict refiner halts and returns
+an error code if an infeasible model suddenly appears feasible during
+its analysis, due to this presumption of numeric instability. The
+user should turn attention away from infeasibility analysis at that
+point, and toward the sections in this manual such as <a class="xref" href="../../cont_optim/simplex/20_num_difficulty.html" title="Documents CPLEX behavior with respect to numeric difficulties in LP models.">Numeric difficulties</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/01_ref_confl_title_synopsis.html" title="Describes the conflict refiner, a feature for diagnosing the cause of infeasibility in a model, whether continuous or discrete, whether linear or quadratic.">Diagnosing infeasibility by refining conflicts</a></div>
+</div>
+</div></body>
+</html>

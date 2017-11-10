@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Interpreting solution quality" />
+<meta name="abstract" content="Documents facilities for evaluating solution quality in LP models." />
+<meta name="Description" content="Documents facilities for evaluating solution quality in LP models." />
+<meta name="DC.subject" content="solution quality, LP unboundedness and infeasibility, infeasibility, unboundedness and (LP), unboundedness, infeasibility and (LP), optimal objective and, log file, records infeasibilities, displaying, infeasibilities on screen, displaying on screen, reduced-cost infeasibilities, bound infeasibilities, summary statistics, scaled problem statistics, unscaled problem statistics, maximum bound, maximum reduced-cost, row, residual, dual residual, dual, slack, in summary statistics, interpreting results, dual infeasibility and, infeasibility and, meaning in infeasible primal or dual LP" />
+<meta name="keywords" content="solution quality, LP unboundedness and infeasibility, infeasibility, unboundedness and (LP), unboundedness, infeasibility and (LP), optimal objective and, log file, records infeasibilities, displaying, infeasibilities on screen, displaying on screen, reduced-cost infeasibilities, bound infeasibilities, summary statistics, scaled problem statistics, unscaled problem statistics, maximum bound, maximum reduced-cost, row, residual, dual residual, dual, slack, in summary statistics, interpreting results, dual infeasibility and, infeasibility and, meaning in infeasible primal or dual LP" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/21_infeas_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveLP.640018" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/21_infeas_title_synopsis.html" />
+<title>Interpreting solution quality</title>
+</head>
+<body role="main" id="User_manual.uss_solveLP.640018">
+<h1 class="title topictitle1">Interpreting solution quality</h1>
+<div class="body"><p class="shortdesc">Documents facilities for evaluating solution quality in
+LP models.</p>
+<p class="p">Infeasibility and unboundedness in linear programs are closely
+related.  (For more about that idea, see the topics in  <a class="xref" href="../../infeas_unbd/partInfeasUnbnded_title_synopsis.html" title="Documents tools to help you analyze the source of the infeasibility in a model: the preprocessing reduction parameter for distinguishing infeasibility from unboundedness, the conflict refiner for detecting minimal sets of mutually contradictory bounds and constraints, and FeasOpt for repairing infeasibilities.">Infeasibility and unboundedness</a>.)
+ When the linear program CPLEX solves is <em class="ph i">infeasible</em>, the associated
+dual linear program has an <em class="ph i">unbounded</em> ray. Similarly, when the
+dual linear program is <em class="ph i">infeasible</em>, the primal linear program
+has an <em class="ph i">unbounded</em> ray. This relationship is important for proper
+interpretation of infeasible solution output.</p>
+<p class="p">The treatment of models that are unbounded involves a few subtleties.
+Specifically, a declaration of unboundedness means that CPLEX has
+detected that the model has an unbounded ray. Given any feasible solution
+x with objective z, a multiple of the unbounded ray can be added to
+x to give a feasible solution with objective z-1 (or z+1 for maximization
+models). Thus, if a feasible solution exists, then the optimal objective
+is unbounded. Note that CPLEX has not necessarily concluded that a
+feasible solution exists. To see whether CPLEX has also concluded
+that the model has a feasible solution, use one of these routines
+or methods:</p>
+<ul class="ul"><li class="li"><p class="p">in Concert Technology:</p>
+ <ul class="ul"><li class="li"><p class="p">  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#isPrimalFeasible" title="(Opens in a new tab or window)">isPrimalFeasible</a> or <samp class="ph codeph">isDualFeasible</samp> in
+the C++ API;</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloCplex.isPrimalFeasible</samp> or <samp class="ph codeph">isDualFeasible</samp> in
+the Java API; </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">Cplex.IsPrimalFeasible</samp> or <samp class="ph codeph">IsDualFeasible</samp> in
+the .NET API.</p>
+</li>
+</ul>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph">CPXsolninfo</samp> in the Callable Library.</p>
+</li>
+</ul>
+<p class="p">By default, individual infeasibilities are written to a log file
+but not displayed on the screen. To display the infeasibilities on
+your screen, in Concert Technology, use methods of the environment
+to direct the output stream to a log file; in the Interactive Optimizer,
+use the command <samp class="ph codeph">set output logonly y cplex.log</samp>.</p>
+<p class="p">For C++ applications, see <a class="xref" href="../../APIs/Cpp/soln_info.html" title="Describes available information about solution feasibility, solution variables, basis information, and solution quality.">Accessing solution information</a>, and for Java applications,
+see <a class="xref" href="../../APIs/Java/12_access_soln.html" title="Describes the information available in the Java API about a solution.">Accessing solution information</a>.
+Those sections highlight the application programming details of how
+to retrieve statistics about the quality of a solution.</p>
+<p class="p">Regardless of whether a solution is infeasible or optimal, the
+command <samp class="ph codeph">display solution quality</samp> in the Interactive
+Optimizer displays the bound and reduced-cost infeasibilities for
+both the scaled and unscaled problem. In fact, it displays the following
+summary statistics for both the scaled and unscaled problem:</p>
+<ul class="ul"><li class="li"><p class="p">maximum bound infeasibility, that is, the largest bound violation;</p>
+</li>
+<li class="li"><p class="p">maximum reduced-cost infeasibility;</p>
+ </li>
+<li class="li"><p class="p">maximum row residual;</p>
+ </li>
+<li class="li"><p class="p">maximum dual residual;</p>
+ </li>
+<li class="li"><p class="p">maximum absolute value of a variable, a slack variable, a dual
+variable, and a reduced cost.</p>
+ </li>
+</ul>
+<p class="p">When the simplex optimizer detects infeasibility in the primal
+or dual linear program (LP), parts of the solution it provides are
+relative to the Phase I linear program it solved to conclude infeasibility.
+In other words, the result you see in such a case is not the solution
+values computed relative to the original objective or original righthand
+side vector. Keep this distinction in mind when you interpret solution
+quality; otherwise, you may be surprised by the results. In particular,
+when CPLEX detects that a linear program is infeasible using the primal
+simplex method, the reduced costs and dual variables provided in the
+solution are relative to the objective of the Phase I linear program
+it solved. Similarly, when CPLEX detects that a linear program is
+unbounded because the dual simplex method detected dual infeasibility,
+the primal and slack variables provided in the solution are relative
+to the Phase I linear program created for the dual simplex optimizer. </p>
+<p class="p">The following sections discuss these summary statistics in greater
+detail. </p>
+<div class="section" id="User_manual.uss_solveLP.640018__User_manual.uss_solveLP.639289"><h2 class="title sectiontitle">Maximum bound
+infeasibility: identifying largest bound violation</h2><p class="p">The
+maximum bound infeasibility identifies the largest bound violation.
+This information may help you discover the cause of infeasibility
+in your problem. If the largest bound violation exceeds the feasibility
+tolerance of your problem by only a small amount, then you may be
+able to get a feasible solution to the problem by increasing the <a class="xref" href="../../../../Parameters/topics/EpRHS.html" title="Specifies the feasibility tolerance, that is, the degree to which the basic variables of a model may violate their bounds.">feasibility tolerance</a> parameter
+(<samp class="ph codeph">EpRHS</samp> in Concert Technology, <samp class="ph codeph">CPX_PARAM_EPRHS</samp> in
+the Callable Library). Its range is between <samp class="ph codeph">1e-9</samp> and <samp class="ph codeph">0.1</samp>.
+Its default value is <samp class="ph codeph">1e-6</samp>. </p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.640018__User_manual.uss_solveLP.639306"><h2 class="title sectiontitle">Maximum reduced-cost
+infeasibility</h2><p class="p">The
+maximum reduced-cost infeasibility identifies a value for the optimality
+tolerance that would cause CPLEX to perform additional iterations.
+It refers to the infeasibility in the dual slack associated with reduced
+costs. Whether CPLEX terminated with an optimal or infeasible solution,
+if the maximum reduced-cost infeasibility is only slightly smaller
+in absolute value than the optimality tolerance, then solving the
+problem with a smaller optimality tolerance may result in an improvement
+in the objective function.</p>
+<p class="p">To change the optimality tolerance,
+set the <a class="xref" href="../../../../Parameters/topics/EpOpt.html" title="Influences the reduced-cost tolerance for optimality.">optimality tolerance</a> parameter
+(<samp class="ph codeph">EpOpt</samp> in Concert Technology, <samp class="ph codeph">CPX_PARAM_EPOPT</samp> in
+the Callable Library).  Its range is between <samp class="ph codeph">1e-9</samp> and <samp class="ph codeph">0.1</samp>.
+Its default value is <samp class="ph codeph">1e-6</samp>.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.640018__User_manual.uss_solveLP.639297"><h2 class="title sectiontitle">Maximum row residual</h2>          <p class="p">The
+maximum row residual identifies the maximum constraint violation.
+CPLEX simplex optimizers control these residuals only indirectly by
+applying numerically sound methods to solve the given linear system.
+When CPLEX terminates with an infeasible solution, all infeasibilities
+will appear as bound violations on structural or slack variables,
+not constraint violations. That is, the row residuals compare the
+ righthand side of the constraint with the lefthand side (including
+slacks)  for the computed solution.   The maximum row residual may
+help you decide whether a model of your problem is poorly scaled,
+or whether the final basis (whether it is optimal or infeasible) is
+ill-conditioned.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.640018__User_manual.uss_solveLP.668299"><h2 class="title sectiontitle">Maximum dual residual</h2><p class="p">The maximum dual residual
+indicates the numeric accuracy of the reduced costs in the current
+solution. By construction, in exact arithmetic, the dual residual
+of a basic solution is always 0 (zero). A nonzero value is thus the
+effect of roundoff error due to finite-precision arithmetic in the
+computation of the dual solution vector. Thus, a significant nonzero
+value indicates ill conditioning.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.640018__User_manual.uss_solveLP.639301"><h2 class="title sectiontitle">Maximum absolute
+values: detecting ill-conditioned problems</h2><p class="p">When you are trying to decide whether your problem
+is ill-conditioned, you also need to consider the following maximum
+absolute values, all available in the infeasibility analysis that
+CPLEX provides you:</p>
+<ul class="ul"><li class="li"><p class="p">variables;</p>
+</li>
+<li class="li"><p class="p">slack variables;</p>
+ </li>
+<li class="li"><p class="p">dual variables;</p>
+ </li>
+<li class="li"><p class="p">reduced costs (that is, dual slack variables).</p>
+ </li>
+</ul>
+<p class="p">When using the Component Libraries, use the method  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getQuality" title="(Opens in a new tab or window)">getQuality</a> or the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getdblquality.html" title="The routine CPXXgetdblquality/CPXgetdblquality accesses double-valued information about the quality of the current solution of a problem.">CPXgetdblquality</a></samp> to
+access the information provided by the command <samp class="ph codeph">display solution quality</samp> in
+the Interactive Optimizer.</p>
+<p class="p">If you discover
+from this analysis that your model is indeed ill-conditioned, then
+you need to reformulate it. <a class="xref" href="23_ill_conditioned_or_unscaled_infeas.html" title="Describes the effect of scaling on infeasible LP models.">Coping with an ill-conditioned problem or handling unscaled infeasibilities</a> outlines
+steps to follow in this situation.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/21_infeas_title_synopsis.html" title="Documents ways to diagnose sources of infeasibility in LP models.">Diagnosing LP infeasibility</a></div>
+</div>
+</div></body>
+</html>

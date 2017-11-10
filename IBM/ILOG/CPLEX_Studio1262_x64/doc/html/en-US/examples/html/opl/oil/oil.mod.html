@@ -1,0 +1,71 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: {<b><font color="#0000FF">string</font></b>} Gasolines = ...;
+13: {<b><font color="#0000FF">string</font></b>} Oils = ...;
+14: <b><font color="#0000FF">tuple</font></b> gasType {
+15:   <b><font color="#0000FF">float</font></b> demand;
+16:   <b><font color="#0000FF">float</font></b> price;
+17:   <b><font color="#0000FF">float</font></b> octane;
+18:   <b><font color="#0000FF">float</font></b> lead;
+19: }
+20: 
+21: <b><font color="#0000FF">tuple</font></b> oilType {
+22:   <b><font color="#0000FF">float</font></b> capacity;
+23:   <b><font color="#0000FF">float</font></b> price;
+24:   <b><font color="#0000FF">float</font></b> octane;
+25:   <b><font color="#0000FF">float</font></b> lead;
+26: }
+27: gasType Gas[Gasolines] = ...;
+28: oilType Oil[Oils] = ...;
+29: <b><font color="#0000FF">float</font></b> MaxProduction = ...;
+30: <b><font color="#0000FF">float</font></b> ProdCost = ...;
+31: 
+32: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ a[Gasolines];
+33: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Blend[Oils][Gasolines];
+34: 
+35: 
+36: <b><font color="#0000FF">maximize</font></b>
+37:   <b><font color="#7D007D">sum</font></b>( g <b><font color="#0000FF">in</font></b> Gasolines , o <b><font color="#0000FF">in</font></b> Oils )
+38:     (Gas[g].price - Oil[o].price - ProdCost) * Blend[o][g] 
+39:     - <b><font color="#7D007D">sum</font></b>(g <b><font color="#0000FF">in</font></b> Gasolines) a[g];
+40: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+41:   <b><font color="#7D007D">forall</font></b>( g <b><font color="#0000FF">in</font></b> Gasolines )
+42:     ctDemand: 
+43:       <b><font color="#7D007D">sum</font></b>( o <b><font color="#0000FF">in</font></b> Oils ) 
+44:         Blend[o][g] == Gas[g].demand + 10*a[g];
+45:   <b><font color="#7D007D">forall</font></b>( o <b><font color="#0000FF">in</font></b> Oils )
+46:     ctCapacity:   
+47:       <b><font color="#7D007D">sum</font></b>( g <b><font color="#0000FF">in</font></b> Gasolines ) 
+48:         Blend[o][g] &lt;= Oil[o].capacity;
+49:   ctMaxProd:  
+50:     <b><font color="#7D007D">sum</font></b>( o <b><font color="#0000FF">in</font></b> Oils , g <b><font color="#0000FF">in</font></b> Gasolines ) 
+51:       Blend[o][g] &lt;= MaxProduction;
+52:   <b><font color="#7D007D">forall</font></b>( g <b><font color="#0000FF">in</font></b> Gasolines )
+53:     ctOctane: 
+54:       <b><font color="#7D007D">sum</font></b>( o <b><font color="#0000FF">in</font></b> Oils ) 
+55:         (Oil[o].octane - Gas[g].octane) * Blend[o][g] &gt;= 0;
+56:   <b><font color="#7D007D">forall</font></b>( g <b><font color="#0000FF">in</font></b> Gasolines )
+57:     ctLead:
+58:       <b><font color="#7D007D">sum</font></b>( o <b><font color="#0000FF">in</font></b> Oils ) 
+59:         (Oil[o].lead - Gas[g].lead) * Blend[o][g] &lt;= 0;
+60: }
+61: 
+62: <b><font color="#0000FF">execute</font></b> DISPLAY_REDUCED_COSTS{
+63:   <b><font color="EA7D00">for</font></b>( <b><font color="EA7D00">var</font></b> g <b><font color="EA7D00">in</font></b> Gasolines ) {
+64:     writeln(<b><font color="#8A2BE2">"a["</font></b>,g,<b><font color="#8A2BE2">"].reducedCost = "</font></b>,a[g].reducedCost);
+65:   }
+66: }
+</tt></pre>

@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><title>IlcGenerate</title>
+<link
+            type="text/css" rel="stylesheet"
+            href="../cppdoc.css" />
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../functions/IlcGenerate.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+                name="ibm-content"></a><h3><a
+            name="method_IlcGenerate">IlcGenerate</a></h3><div
+                class="prototype">public <a
+                href="../classes/IlcGoal.html">IlcGoal</a> <span
+                class="function-name">IlcGenerate</span>(const <a
+                href="../classes/IlcIntVarArray.html">IlcIntVarArray</a> <span
+                class="parameter-name">array</span>, <a
+                href="../typedefs/IlcChooseIntIndex.html">IlcChooseIntIndex</a> <span
+                class="parameter-name">chooseVariable</span>=<span
+            class="parameter-name">IlcChooseFirstNonFixedInt</span>)</div><div
+                class="prototype">public <a
+                href="../classes/IlcGoal.html">IlcGoal</a> <span
+                class="function-name">IlcGenerate</span>(const <a
+                href="../classes/IlcIntVarArray.html">IlcIntVarArray</a> <span
+                class="parameter-name">array</span>, <a
+                href="../typedefs/IlcChooseIntIndex.html">IlcChooseIntIndex</a> <span
+                class="parameter-name">chooseVariable</span>, <a
+                href="../classes/IlcIntSelect.html">IlcIntSelect</a> <span
+            class="parameter-name">select</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+            class="include-file">&lt;ilcp/cpext.h&gt; </span></div>
+A goal to assign values to the variables in an array.
+      <div
+                class="description"><p>CP Optimizer provides an enumeration algorithm with parameters that can be set for choosing the
+ order in which variables are tried during the search for a solution.</p><p>This goal binds each constrained variable in its argument <code>array</code>; it does so
+ by calling the function <code>IlcInstantiate</code> for each of them. The order in which the
+ variables are fixed is controlled by the function <code>chooseVariable</code>. The argument
+ <code>select</code> is passed to each call to <code>IlcInstantiate</code>, if that argument
+ is provided.</p><p><strong>Implementation</strong></p><p>Here's how we could define that goal for <code>IlcIntVar</code>.</p><pre
+            class="sample">
+ ILCGOAL3(IlcIntGenerate,
+          IlcIntVarArray, vars,
+          IlcChooseIntIndex,   chooseIndex,
+          IlcIntSelectI*, select){
+   IlcInt index = chooseIndex(vars);
+   if(index == -1) return 0;
+   return IlcAnd(IlcIntVarInstantiate(getCP(),
+                                      vars[index],
+                                      select),
+                 this);
+ }
+
+ IlcGoal IlcGenerate(const IlcIntVarArray array,
+                     IlcChooseIntIndex chooseIndex){
+   return IlcIntGenerate(array.getCP(),
+                         array,
+                         chooseIndex,
+                         0);
+ }
+
+ IlcGoal IlcGenerate(const IlcIntVarArray array,
+                     IlcChooseIntIndex chooseIndex,
+                     IlcIntSelect select){
+   return IlcIntGenerate(array.getCP(),
+                         array,
+                         chooseIndex,
+                         select.getImpl());
+ }
+ </pre></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../functions/IlcBestGenerate.html">IlcBestGenerate</a>, <a
+                href="../functions/IlcBestInstantiate.html">IlcBestInstantiate</a>, <a
+                href="../functions/IlcDichotomize.html">IlcDichotomize</a>, <a
+                href="../classes/IlcGoal.html">IlcGoal</a>, <a
+                href="../functions/IlcInstantiate.html">IlcInstantiate</a>, <a href="../classes/IlcIntVarArray.html">IlcIntVarArray</a></p><hr /></body>
+</html>

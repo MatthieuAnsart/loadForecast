@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Basic formal parameters" />
+<meta name="abstract" content="Formal parameters play a fundamental role in OPL; they are used in aggregate operators, generic sets, and forall statements." />
+<meta name="Description" content="Formal parameters play a fundamental role in OPL; they are used in aggregate operators, generic sets, and forall statements." />
+<meta name="DC.subject" content="formal parameters, basic, filter expressions, filtering, keywords, ordered, ordered, OPL keyword" />
+<meta name="keywords" content="formal parameters, basic, filter expressions, filtering, keywords, ordered, ordered, OPL keyword" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_formalParam.1005511" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" />
+<title>Basic formal parameters</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_formalParam.1005511">
+<h1 class="title topictitle1">Basic formal parameters</h1>
+<div class="body conbody"><div class="abstract"><span class="shortdesc">Formal parameters play a fundamental role in
+OPL; they are used in aggregate operators, generic sets, and <samp class="ph codeph">forall</samp> statements.</span>
+ </div>
+<p class="p">The simplest formal parameter has the form </p>
+<p class="p"><em class="ph i">p in S</em> </p>
+<p class="p">where <em class="ph i">p</em> is the formal parameter and <em class="ph i">S</em> is the set
+from which <em class="ph i">p</em> takes its values.</p>
+<p class="p">The set <em class="ph i">S</em> can be:</p>
+<ul class="ul"><li class="li"><p class="p">an integer range, as in </p>
+ <pre class="pre codeblock"><code>int n=6;
+int s = sum(i in 1..n) i*i; </code></pre>
+ </li>
+<li class="li"><p class="p">a string set, as in </p>
+ <pre class="pre codeblock"><code>{string} Products ={"car","truck"}; 
+float cost[Products] =[12000,10000]; 
+float maxCost = max(p in Products) cost[p]; </code></pre>
+ </li>
+<li class="li"><p class="p">or a tuple set, as in </p>
+ <pre class="pre codeblock"><code>{string} Cities = { "Paris", "London", "Berlin" };
+tuple Connection
+{
+   string orig;
+   string dest;
+}
+{Connection} connections = { &lt;"Paris","Berlin"&gt;,&lt;"Paris","London"&gt;};
+float cost[connections] = [ 1000, 2000 ];
+float maxCost= max(r in connections) cost[r];</code></pre>
+ </li>
+</ul>
+<p class="p">If you need to filter the range of the formal parameters using
+conditions, the formal parameter then takes the form </p>
+<p class="p"><em class="ph i">p in S : filtering condition</em> </p>
+<p class="p">and assigns to <em class="ph i">p</em> all elements of <em class="ph i">S</em> according to the
+filter applied.</p>
+<p class="p">For instance, in the excerpt</p>
+<pre class="pre codeblock"><code>int n=8;
+dvar int a[1..n][1..n];
+subject to
+{
+ forall(i in 1..8) 
+   forall(j in 1..8: i &lt; j) 
+      a[i][j] &gt;= 0;
+}</code></pre>
+<p class="p">the constraint <samp class="ph codeph">a[i][j] &gt;= 0</samp> is modeled for
+all <samp class="ph codeph">i</samp> and <samp class="ph codeph">j</samp> such that <samp class="ph codeph">1</samp> ≤ <samp class="ph codeph">i &lt;
+j</samp> ≤ <samp class="ph codeph">8</samp>. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">OPL does not support aggregates in filter expressions. For
+example:</p>
+ <ul class="ul"><li class="li"><p class="p">For an expression such as:</p>
+ <pre class="pre codeblock"><code>{int} notFirst = {i | i in 1..10 : card({j | &lt;i,j&gt; in pairs}) == 0};</code></pre>
+ <p class="p">the
+type check displays the error: "Aggregate set is currently not supported
+for filter expressions." </p>
+ </li>
+<li class="li"><p class="p">For an expression such as:</p>
+ <pre class="pre codeblock"><code>{int} notFirst = {i | i in 1..10 : sum(&lt;i,j&gt;in pairs) i == 0}; </code></pre>
+ <p class="p">the
+type check displays the error: "Aggregate sum is currently not supported
+for filter expressions." </p>
+ </li>
+</ul>
+ </div>
+<p class="p">Several parameters can often be combined together to produce more
+compact statements. For instance, the declaration </p>
+<pre class="pre codeblock"><code>int s = sum(i,j in 1..n: i &lt; j) i*j; </code></pre>
+<p class="p">is equivalent to </p>
+<pre class="pre codeblock"><code>int s = sum(i in 1..n) sum(j in 1..n: i &lt; j) i*j; </code></pre>
+<p class="p">which is less readable. </p>
+<p class="p">The declaration </p>
+<pre class="pre codeblock"><code>int s = sum(i in 1..n, j in 1..m) i*j; </code></pre>
+<p class="p">is equivalent to </p>
+<pre class="pre codeblock"><code>int s = sum(i in 1..n) sum(j in 1..m) i*j; </code></pre>
+<p class="p">These parameters can, of course, be subject to filtering conditions.
+The excerpt </p>
+<pre class="pre codeblock"><code>forall(i,j in 1..n : i &lt; j) 
+     a[i][j] &gt;= 0;</code></pre>
+<p class="p">is equivalent to </p>
+<pre class="pre codeblock"><code>forall(i in 1..n, j in 1..n : i&lt;j) 
+     a[i][j] &gt;= 0; </code></pre>
+<p class="p">Here is an even more compact form:</p>
+<pre class="pre codeblock"><code>forall(ordered i,j in 1..n) 
+     a[i][j] &gt;= 0;</code></pre>
+<p class="p">Indeed, in many applications one is interested, given a set <em class="ph i">S</em>,
+in stating filters or conditions over all pairs (<em class="ph i">i, j</em>) of elements
+of <em class="ph i">S</em> satisfying <em class="ph i">i &lt; j</em> in the ordering associated
+with <em class="ph i">S</em>. In this excerpt</p>
+<pre class="pre codeblock"><code>{T} S = ...;
+forall(ordered s, t in S)...;
+forall(s in S, t in S: ord(S,s) &lt; ord(S,t)) ... </code></pre>
+<p class="p">the first <samp class="ph codeph">forall</samp> line is equivalent to the second
+one and illustrates the functionality <samp class="ph codeph">ordered</samp>, often
+useful in practical applications. T can be one of the types <samp class="ph codeph">int</samp>, <samp class="ph codeph">float</samp>, <samp class="ph codeph">string</samp>,
+or a tuple type. </p>
+<div class="note important"><span class="importanttitle">Important:</span>  <p class="p">This ordering does not refer to the ordering
+associated with type T but to the order of the items within the set. </p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_formalParams.html" title="Describes basic formal parameters, tuples of parameters, and filtering in tuples of parameters.">Formal parameters</a></div>
+</div>
+</div></body>
+</html>

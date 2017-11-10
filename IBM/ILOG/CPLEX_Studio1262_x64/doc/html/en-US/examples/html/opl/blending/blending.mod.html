@@ -1,0 +1,93 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">int</font></b>   NbMetals = ...;
+13: <b><font color="#0000FF">int</font></b>   NbRaw = ...;
+14: <b><font color="#0000FF">int</font></b>   NbScrap = ...;
+15: <b><font color="#0000FF">int</font></b>   NbIngo = ...;
+16: 
+17: <b><font color="#0000FF">range</font></b> Metals = 1..NbMetals;
+18: <b><font color="#0000FF">range</font></b> Raws = 1..NbRaw;
+19: <b><font color="#0000FF">range</font></b> Scraps = 1..NbScrap;
+20: <b><font color="#0000FF">range</font></b> Ingos = 1..NbIngo;
+21: 
+22: <b><font color="#0000FF">float</font></b> CostMetal[Metals] = ...;
+23: <b><font color="#0000FF">float</font></b> CostRaw[Raws] = ...;
+24: <b><font color="#0000FF">float</font></b> CostScrap[Scraps] = ...;
+25: <b><font color="#0000FF">float</font></b> CostIngo[Ingos] = ...;
+26: <b><font color="#0000FF">float</font></b> Low[Metals] = ...;
+27: <b><font color="#0000FF">float</font></b> Up[Metals] = ...;
+28: <b><font color="#0000FF">float</font></b> PercRaw[Metals][Raws] = ...;
+29: <b><font color="#0000FF">float</font></b> PercScrap[Metals][Scraps] = ...;
+30: <b><font color="#0000FF">float</font></b> PercIngo[Metals][Ingos] = ...;
+31: 
+32: <b><font color="#0000FF">int</font></b> Alloy  = ...;
+33: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+    p[Metals];
+34: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+    r[Raws];
+35: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+    s[Scraps];
+36: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+      i[Ingos];
+37: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>    m[j <b><font color="#0000FF">in</font></b> Metals] <b><font color="#0000FF">in</font></b> Low[j] * Alloy .. Up[j] * Alloy;
+38: 
+39: 
+40: <b><font color="#0000FF">minimize</font></b> 
+41:   <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Metals) CostMetal[j] * p[j] +
+42:   <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Raws)   CostRaw[j]   * r[j] +
+43:   <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Scraps) CostScrap[j] * s[j] +
+44:   <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Ingos)  CostIngo[j]  * i[j];
+45: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+46:   <b><font color="#7D007D">forall</font></b>( j <b><font color="#0000FF">in</font></b> Metals )
+47:     ct1:
+48:       m[j] == 
+49:       p[j] + 
+50:       <b><font color="#7D007D">sum</font></b>( k <b><font color="#0000FF">in</font></b> Raws )   PercRaw[j][k] * r[k] +
+51:       <b><font color="#7D007D">sum</font></b>( k <b><font color="#0000FF">in</font></b> Scraps ) PercScrap[j][k] * s[k] +
+52:       <b><font color="#7D007D">sum</font></b>( k <b><font color="#0000FF">in</font></b> Ingos )  PercIngo[j][k] * i[k];
+53:     ct2:  
+54:       <b><font color="#7D007D">sum</font></b>( j <b><font color="#0000FF">in</font></b> Metals ) m[j] == Alloy;
+55: }
+56: 
+57: <b><font color="#0000FF">tuple</font></b> pSolutionT{ 
+58:         <b><font color="#0000FF">int</font></b> Metals; 
+59:         <b><font color="#0000FF">float</font></b> value; 
+60: };
+61: {pSolutionT} pSolution = {&lt;i0,p[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Metals};
+62: <b><font color="#0000FF">tuple</font></b> rSolutionT{ 
+63:         <b><font color="#0000FF">int</font></b> Raws; 
+64:         <b><font color="#0000FF">float</font></b> value; 
+65: };
+66: {rSolutionT} rSolution = {&lt;i0,r[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Raws};
+67: <b><font color="#0000FF">tuple</font></b> sSolutionT{ 
+68:         <b><font color="#0000FF">int</font></b> Scraps; 
+69:         <b><font color="#0000FF">float</font></b> value; 
+70: };
+71: {sSolutionT} sSolution = {&lt;i0,s[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Scraps};
+72: <b><font color="#0000FF">tuple</font></b> iSolutionT{ 
+73:         <b><font color="#0000FF">int</font></b> Ingos; 
+74:         <b><font color="#0000FF">int</font></b> value; 
+75: };
+76: {iSolutionT} iSolution = {&lt;i0,i[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Ingos};
+77: <b><font color="#0000FF">tuple</font></b> mSolutionT{ 
+78:         <b><font color="#0000FF">int</font></b> Metals; 
+79:         <b><font color="#0000FF">float</font></b> value; 
+80: };
+81: {mSolutionT} mSolution = {&lt;i0,m[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Metals};
+82: 
+83: 
+84: 
+85: 
+86: 
+87: 
+88: 
+</tt></pre>

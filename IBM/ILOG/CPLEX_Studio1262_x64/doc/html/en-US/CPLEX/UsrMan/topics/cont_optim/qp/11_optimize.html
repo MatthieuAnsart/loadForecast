@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Optimizing QPs" />
+<meta name="abstract" content="Describes how to invoke an optimizer for a quadratic program and explains the appropriate choice of optimizer." />
+<meta name="Description" content="Describes how to invoke an optimizer for a quadratic program and explains the appropriate choice of optimizer." />
+<meta name="DC.subject" content="performance, QP, tuning" />
+<meta name="keywords" content="performance, QP, tuning" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveQP.637915" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<title>Optimizing QPs</title>
+</head>
+<body role="main" id="User_manual.uss_solveQP.637915">
+<h1 class="title topictitle1">Optimizing QPs</h1>
+<div class="body"><p class="shortdesc">Describes how to invoke an optimizer for a quadratic program
+and explains the appropriate choice of optimizer.</p>
+<p class="p">CPLEX allows you to solve your QP models through a simple interface,
+by calling the default optimizer.</p>
+<ul class="ul"><li class="li"><p class="p">In the <strong class="ph b">Interactive Optimizer</strong>, use the command <samp class="ph codeph">optimize</samp>. </p>
+ </li>
+<li class="li"><p class="p">From the <strong class="ph b">Callable Library</strong>, use the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/qpapi/qpopt.html" title="The routineCPXXqpopt/CPXqpopt may be used, at any time after a continuous quadratic program has been created, to find a solution to that problem using one of the CPLEX quadratic optimizers.">CPXqpopt</a></samp>.</p>
+</li>
+<li class="li"><p class="p">In <strong class="ph b">Concert Technology</strong> applications, use the method <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#solve" title="(Opens in a new tab or window)">solve</a>.</p>
+ </li>
+</ul>
+<p class="p">With default settings, this will result in CPLEX invoking the barrier
+optimizer to solve a continuous QP.</p>
+<p class="p"><strong class="ph b">Tip</strong>: For nonconvex QP problems, particularly for those that are 
+non PSD, consider changing the default value of 
+<a class="xref" href="../../../../Parameters/topics/OptimalityTarget.html" title="Specifies type of optimality that CPLEX targets (optimal convex or first-order satisfaction) as it searches for a solution">optimality target</a>
+to search for either a locally or globally optimal solution.
+When instructed to look for a globally optimal solution, CPLEX 
+uses a branch-and-bound algorithm. In such cases, the algorithms and options 
+documented in <a class="xref" href="../../discr_optim/mip/01_mip_title_synopsis.html" title="Documents the solution of mixed integer programs (MIPs) with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values.">Solving mixed integer programming problems (MIP)</a> 
+and in <a class="xref" href="../../discr_optim/mip_quadratic/01_quadratic_mip_title_synopsis.html" title="Documents the solution of mixed integer programs that include quadratic terms in the objective (MIQP) or among the constraints (MIQCP). with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values and in which there can be quadratic terms in the objective function and possibly among the coefficients of the constraints.">Solving mixed integer programming problems with quadratic terms</a> 
+apply.</p>
+<p class="p">For users who wish to tune the performance of their applications,
+CPLEX offers two simplex optimizers to try for solving convex QPs:
+dual simplex and primal simplex. (However, dual simplex and primal
+simplex cannot be used to solve nonconvex QPs.) You can also use the
+network optimizer; this approach first solves the model as an LP network
+(temporarily ignoring the quadratic term in the objective function)
+and takes this solution as a starting point for the primal simplex
+QP optimizer. This choice of QP optimizer is controlled by the root
+algorithm parameter (<samp class="ph codeph">QPMETHOD</samp> in the <strong class="ph b">Interactive
+Optimizer</strong> and in the <strong class="ph b">Callable Library</strong>). The table 
+<a class="xref" href="11_optimize.html#User_manual.uss_solveQP.637915__User_manual.uss_solveQP.652739" title="A two-column table showing possible parameter settings and their effect.">Table 1</a> shows you the possible settings.  </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible parameter settings and their effect." id="User_manual.uss_solveQP.637915__User_manual.uss_solveQP.652739" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. RootAlg parameter settings for QPs</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="50%" id="d387332e111">Root algorithm value</th>
+<th class="entry" align="left" valign="top" width="50%" id="d387332e113">Optimizer</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d387332e111 ">0</td>
+<td class="entry" valign="top" width="50%" headers="d387332e113 ">Automatic (default)</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d387332e111 ">1</td>
+<td class="entry" valign="top" width="50%" headers="d387332e113 ">Primal Simplex </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d387332e111 ">2</td>
+<td class="entry" valign="top" width="50%" headers="d387332e113 ">Dual Simplex</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d387332e111 ">3</td>
+<td class="entry" valign="top" width="50%" headers="d387332e113 ">Network Simplex </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d387332e111 ">4</td>
+<td class="entry" valign="top" width="50%" headers="d387332e113 ">Barrier</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d387332e111 ">5</td>
+<td class="entry" valign="top" width="50%" headers="d387332e113 ">Sifting</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d387332e111 ">6</td>
+<td class="entry" valign="top" width="50%" headers="d387332e113 ">Concurrent</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Many of the optimizer tuning decisions for LP apply in the QP case;
+and parameters that control barrier and simplex optimizers in the
+LP case can be set for the QP case, although in some instances to
+differing effect. Most models are solved fastest by default parameter
+settings. In case your model is not solved satisfactorily by default
+settings, consider the advice offered in the topic 
+<a class="xref" href="../barrier/01_barrier_title_synopsis.html" title="Documents solving linear programming problems by means of the CPLEX barrier optimizer.">Solving LPs: barrier optimizer</a>, especially 
+<a class="xref" href="../barrier/19_tuning_title_synopsis.html" title="Describes facilities for tuning performance of the barrier optimizer.">Tuning barrier optimizer performance</a> as well as in the topic 
+<a class="xref" href="../simplex/01_simplex_title_synopsis.html" title="Documents the primal and dual simplex optimizers.">Solving LPs: simplex optimizers</a>, especially 
+<a class="xref" href="../simplex/13_tune_title_synopsis.html" title="Documents tactics for tuning performance on LP models.">Tuning LP performance</a>.</p>
+<p class="p">Just as for the LP case, each of the available QP optimizers automatically
+preprocesses your model, conducting presolution problem analysis and
+reductions appropriate for a QP.</p>
+<p class="p">The barrier optimizer for QP supports crossover for convex QPs,
+but unlike other LP optimizers, its crossover step is off by default
+for QPs. The QP simplex optimizers return basic solutions, and these
+bases can be used for purposes of restarting sequences of optimizations,
+for example. As a result, application writers who wish to allow end
+users control over the choice of QP optimizer need to be aware of
+this fundamental difference and to program carefully. For most purposes,
+the nonbasic barrier solution for convex QPs is entirely satisfactory,
+in that all such solutions fully satisfy the standard optimality and
+feasibility conditions of optimization theory.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" title="Describes solving quadratic programming problems (QPs) with CPLEX.">Solving problems with a quadratic objective (QP)</a></div>
+</div>
+</div></body>
+</html>

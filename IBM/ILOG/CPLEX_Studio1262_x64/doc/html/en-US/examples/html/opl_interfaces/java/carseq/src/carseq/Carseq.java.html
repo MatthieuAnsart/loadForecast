@@ -1,0 +1,165 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*/</font></b>
+010: 
+011: <b><font color="#007D00">//-------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">//Java version of carseq.cpp of OPL distrib</font></b>
+013: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+014: package carseq;
+015: 
+016: import ilog.concert.*;
+017: import ilog.cp.*;
+018: import ilog.opl.*;
+019: 
+020: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> Carseq
+021: {
+022:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">class</font></b> MyData <b><font color="EA7D00">extends</font></b> IloCustomOplDataSource
+023:     {
+024:         MyData(IloOplFactory oplF)
+025:         {
+026:             <b><font color="EA7D00">super</font></b>(oplF);
+027:         }
+028: 
+029:         <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> customRead()
+030:         {
+031:             <b><font color="#0000FF">int</font></b> _nbConfs = 7;
+032:             <b><font color="#0000FF">int</font></b> _nbOptions = 5;
+033: 
+034:             IloOplDataHandler handler = getDataHandler();
+035:             handler.startElement(<b><font color="#8A2BE2">"nbConfs"</font></b>);
+036:             handler.addIntItem(_nbConfs);
+037:             handler.endElement();
+038:             handler.startElement(<b><font color="#8A2BE2">"nbOptions"</font></b>);
+039:             handler.addIntItem(_nbOptions);
+040:             handler.endElement();
+041: 
+042:             <b><font color="#0000FF">int</font></b> _demand[] = {5, 5, 10, 10, 10, 10, 5};
+043:             handler.startElement(<b><font color="#8A2BE2">"demand"</font></b>);
+044:             handler.startArray();
+045:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i= 0; i&lt; _nbConfs; i++)
+046:                 handler.addIntItem(_demand[i]);
+047:             handler.endArray();
+048:             handler.endElement();
+049: 
+050:             <b><font color="#0000FF">int</font></b> _option[][] = {{1, 0, 0, 0, 1, 1, 0},
+051:                                {0, 0, 1, 1, 0, 1, 0},
+052:                                {1, 0, 0, 0, 1, 0, 0},
+053:                                {1, 1, 0, 1, 0, 0, 0},
+054:                                {0, 0, 1, 0, 0, 0, 0}};
+055:             handler.startElement(<b><font color="#8A2BE2">"option"</font></b>);
+056:             handler.startArray();
+057:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0 ; i&lt; _nbOptions ; i++) {
+058:                 handler.startArray();
+059:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j = 0 ; j&lt;_nbConfs ; j++)
+060:                     handler.addIntItem(_option[i][j]);
+061:                 handler.endArray();
+062:             }
+063:             handler.endArray();
+064:             handler.endElement();
+065: 
+066:             <b><font color="#0000FF">int</font></b> _capacity[][] = {{1, 2}, {2, 3}, {1, 3}, {2, 5}, {1, 5}};
+067:             handler.startElement(<b><font color="#8A2BE2">"capacity"</font></b>);
+068:             handler.startArray();
+069:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0; i&lt;_nbOptions;i++) {
+070:                 handler.startTuple();
+071:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j= 0; j&lt;=1;j++)
+072:                     handler.addIntItem(_capacity[i][j]);
+073:                 handler.endTuple();
+074:             }
+075:             handler.endArray();
+076:             handler.endElement();
+077:         }
+078:     };
+079: 
+080:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception
+081:     {
+082:         <b><font color="#0000FF">int</font></b> status = 127;
+083:         <b><font color="EA7D00">try</font></b> {
+084:             IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+085:             IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+086:             IloOplErrorHandler errHandler = oplF.createOplErrorHandler(System.out);
+087:             IloOplModelSource modelSource=oplF.createOplModelSourceFromString(getModelText(),<b><font color="#8A2BE2">"carseq"</font></b>);
+088:             IloOplSettings settings = oplF.createOplSettings(errHandler);
+089:             IloOplModelDefinition def=oplF.createOplModelDefinition(modelSource,settings);
+090:             IloCP cp = oplF.createCP();
+091:             IloOplModel opl=oplF.createOplModel(def,cp);
+092: 
+093:             IloOplDataSource dataSource=<b><font color="EA7D00">new</font></b> MyData(oplF);
+094:             opl.addDataSource(dataSource);
+095:             opl.generate();
+096: 
+097:             <b><font color="EA7D00">if</font></b> ( cp.solve() )
+098:             {
+099:                 System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.getCP().getObjValue());
+100:                 opl.postProcess();
+101:                 opl.printSolution(System.out);
+102:                 status = 0;
+103:             } <b><font color="EA7D00">else</font></b> {
+104:                 System.out.println(<b><font color="#8A2BE2">"No solution!"</font></b>);
+105:                 status = 1;
+106:             }
+107: 
+108:             oplF.end();
+109:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+110:             System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+111:             ex.printStackTrace();
+112:             status = 2;
+113:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+114:             System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+115:             ex.printStackTrace();
+116:             status = 3;
+117:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+118:             System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+119:             ex.printStackTrace();
+120:             status = 4;
+121:         }
+122:     }
+123: 
+124:     <b><font color="EA7D00">static</font></b> String getModelText()
+125:     {
+126:         String model=<b><font color="#8A2BE2">"using CP;"</font></b>;
+127:         model+=<b><font color="#8A2BE2">"int nbConfs   = ...;"</font></b>;
+128:         model+=<b><font color="#8A2BE2">"int nbOptions = ...;"</font></b>;
+129:         model+=<b><font color="#8A2BE2">"range Confs = 1..nbConfs;"</font></b>;
+130:         model+=<b><font color="#8A2BE2">"range Options = 1..nbOptions;"</font></b>;
+131:         model+=<b><font color="#8A2BE2">"int demand[Confs] = ...;"</font></b>;
+132:         model+=<b><font color="#8A2BE2">"tuple CapacitatedWindow {"</font></b>;
+133:         model+=<b><font color="#8A2BE2">"  int l;"</font></b>;
+134:         model+=<b><font color="#8A2BE2">"  int u;"</font></b>;
+135:         model+=<b><font color="#8A2BE2">"};"</font></b>;
+136:         model+=<b><font color="#8A2BE2">"CapacitatedWindow capacity[Options] = ...; "</font></b>;
+137:         model+=<b><font color="#8A2BE2">"range AllConfs = 0..nbConfs;"</font></b>;
+138:         model+=<b><font color="#8A2BE2">"int nbCars = sum (c in Confs) demand[c];"</font></b>;
+139:         model+=<b><font color="#8A2BE2">"int nbSlots = ftoi(floor(nbCars * 1.1 + 5)); "</font></b>;
+140:         model+=<b><font color="#8A2BE2">"int nbBlanks = nbSlots - nbCars;"</font></b>;
+141:         model+=<b><font color="#8A2BE2">"range Slots = 1..nbSlots;"</font></b>;
+142:         model+=<b><font color="#8A2BE2">"int option[Options,Confs] = ...; "</font></b>;
+143:         model+=<b><font color="#8A2BE2">"int allOptions[o in Options, c in AllConfs] = (c == 0) ? 0 : option[o][c];"</font></b>;
+144:         model+=<b><font color="#8A2BE2">"dvar int slot[Slots] in AllConfs;"</font></b>;
+145:         model+=<b><font color="#8A2BE2">"dvar int lastSlot in nbCars..nbSlots;"</font></b>;
+146: 
+147:         model+=<b><font color="#8A2BE2">"minimize lastSlot - nbCars; "</font></b>;
+148:         model+=<b><font color="#8A2BE2">"subject to {"</font></b>;
+149:         model+=<b><font color="#8A2BE2">"  count(slot, 0) == nbBlanks;"</font></b>;
+150:         model+=<b><font color="#8A2BE2">"  forall (c in Confs)"</font></b>;
+151:         model+=<b><font color="#8A2BE2">"    count(slot, c) == demand[c];"</font></b>;
+152:         model+=<b><font color="#8A2BE2">"  forall(o in Options, s in Slots : s + capacity[o].u - 1 &lt;= nbSlots)"</font></b>;
+153:         model+=<b><font color="#8A2BE2">"    sum(j in s .. s + capacity[o].u - 1) allOptions[o][slot[j]] &lt;= capacity[o].l;"</font></b>;
+154:         model+=<b><font color="#8A2BE2">"  forall (s in nbCars + 1 .. nbSlots)"</font></b>;
+155:         model+=<b><font color="#8A2BE2">"    (s &gt; lastSlot) =&gt; slot[s] == 0;"</font></b>;
+156:         model+=<b><font color="#8A2BE2">"}"</font></b>;
+157:         <b><font color="EA7D00">return</font></b> model;
+158:     }
+159: }
+160: 
+</tt></pre>

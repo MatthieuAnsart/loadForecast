@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Conflict Refiner in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="conflictrefiner.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="17"><div
+                class="section-title1">Conflict Refiner in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                    href="conflict.html">PREVIOUS</a> <a
+                href="lazy-copy.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%" /><div
+                    class="section-body"><p>
+Given an infeasible model, the conflict refiner can identify conflicting constraints
+and variable domains within the model to help you identify the causes of the
+infeasibility. In this context, a conflict is a subset of the constraints and/or
+variable domains of the model which are mutually contradictory. The conflict
+refiner first examines the full infeasible model to identify portions of the conflict
+that it can remove. By this process of refinement, the conflict refiner arrives at
+a minimal conflict. A minimal conflict is usually smaller than the full infeasible
+model and thus makes infeasibility analysis easier. Since the conflict is minimal,
+removal of any one of these constraints will remove that particular cause for
+infeasibility. There may be other conflicts in the model; consequently, repair of
+a given conflict does not guarantee feasibility of the remaining model. If a model
+happens to include multiple independent causes of infeasibility, then it may be
+necessary for the user to repair one such cause and then repeat the diagnosis
+with further conflict analysis.
+</p><p>Consider for instance the following model:</p><pre
+                    class="sample">
+x, y, z in { 1, 2, 3 }
+constraint C1: AllDiff(x,y,z)
+constraint C2: z == x + 2y
+constraint C3: y &lt; x
+constraint C4: z == 2x
+</pre><p>
+This model is clearly infeasible. Given the domain of variable, subset <code>{C1,C2}</code> is a 
+minimal conflict:</p><ul>
+<li>it is infeasible because <code>C2</code> implies <code>y=1</code> and <code>x=1</code> 
+which violates <code>C1</code></li><li>it is minimal because both subsets <code>{C1}</code> and <code>{C2}</code> are feasible with possible
+respective solutions <code>(x=1,y-2,z=3)</code> and <code>(x=1,y=1,z=3)</code>.</li>
+</ul><p>Note that in this example, <code>{C1,C2}</code> is not the only minimal conflict. For instance 
+<code>{C2,C4}</code> is also a minimal one.</p><p>To invoke the conflict refiner, call one of the <code>IloCP::refineconflict</code> methods. 
+For instance:</p><pre
+                class="sample">
+IloModel model = ...;
+IloCP cp(model);
+if (cp.refineConflict()) {
+  // Model is infeasible
+  cp.writeConflict(cp.out());
+}
+</pre><p>
+A user may organize constraints into one or more groups for a conflict. When
+a user specifies a group, the conflict refiner will make sure that either the group
+as a whole will be present in a conflict (that is, all its members will participate
+in the conflict, and removal of one will result in a feasible subproblem) or
+that the group will not participate in the conflict at all. See the member function
+<code>refineConflict(IloConstraintArray csts)</code>.
+</p><p>
+A user may also assign a numeric preference to constraints or groups of
+constraints. In the case of an infeasible model having more than one possible conflict,
+preferences guide the conflict refiner towards identifying constraints in a conflict
+as the user prefers. See the member function
+<code>refineConflict(IloConstraintArray csts, IloNumArray prefs)</code>.
+</p><p>
+By default, the conflict refiner works only on the constraints of the model. 
+If parameter <code>IloCP::ConflictRefinerOnVariables</code> is set to <code>IloCP::On</code>, the
+conflict refiner will consider variable domains as additional (unary) constraints to be 
+refined. in this case, it will first identify a minimal conflicting set of
+constraints. Then it will refine this conflict further by identifying a minimal subset
+of variables whose initial domain is responsible for the infeasibility from amongst 
+the decision variables involved in the constraints of the conflict. 
+For instance, on the above example for the minimal conflict <code>{C2,C4}</code>,
+the conflict refiner would 
+additionally identify initial domain of variable <code>z</code> to be sufficient to explain the
+infeasibility when used in conjunction with <code>{C2,C4}</code>.
+</p><p>some parameters are available to limit the effort of the conflict refiner:</p><ul>
+<li><code>IloCP::ConflictRefinerIterationLimit</code>,</li><li><code>IloCP::ConflictRefinerBranchLimit</code>,</li><li><code>IloCP::ConflictRefinerFailLimit,</code> and </li><li><code>IloCP::ConflictRefinerOnVariables</code>.</li>
+</ul><p>Once computed, the conflict can be queried with the methods <code>getConflict</code>
+and displayed with method <code>writeConflict</code>.</p></div><div
+                    align="right"><a
+                    href="conflict.html">PREVIOUS</a> <a href="lazy-copy.html">NEXT</a></div></div></body>
+</html>

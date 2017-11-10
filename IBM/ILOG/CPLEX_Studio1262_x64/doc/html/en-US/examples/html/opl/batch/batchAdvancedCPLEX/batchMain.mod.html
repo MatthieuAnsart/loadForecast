@@ -1,0 +1,241 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011:  
+012: <b><font color="#0000FF">string</font></b> dataPath = ...;
+013: 
+014: <b><font color="#0000FF">tuple</font></b> BatchModelType {
+015:         <b><font color="#0000FF">string</font></b> name;
+016:         <b><font color="#0000FF">int</font></b> needToSolve;
+017: };
+018: 
+019: <b><font color="#007D00">// Set of OPL model of type T defined above </font></b>
+020: {BatchModelType} models = ...;  
+021: 
+022: <b><font color="#007D00">/** </font></b>
+023: <b><font color="#007D00"> * Limitations:</font></b>
+024: <b><font color="#007D00"> * solve only with a mod and a dat file (or a set of dat file), not possible with only a mod.</font></b>
+025: <b><font color="#007D00"> * not compatible with opl config</font></b>
+026: <b><font color="#007D00"> * not compatible ops file</font></b>
+027: <b><font color="#007D00"> */</font></b>
+028: <b><font color="#0000FF">main</font></b> {
+029:   writeln(<b><font color="#8A2BE2">"* Note: This OPL model is not compliant with cloud execution"</font></b>);
+030:         
+031:         includeScript(<b><font color="#8A2BE2">"../kpiFile.js"</font></b>);
+032:         includeScript(<b><font color="#8A2BE2">"../htmlReport.js"</font></b>);
+033:         
+034:         <b><font color="#007D00">/**</font></b>
+035: <b><font color="#007D00">         * Modify this method to save the KPIs for a given modelName, optional </font></b>
+036: <b><font color="#007D00">         * modelParam  and dataSet </font></b>
+037: <b><font color="#007D00">         * using the solution from the engine.</font></b>
+038: <b><font color="#007D00">         * You can write your own method to define your custom KPIs.</font></b>
+039: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> modelName Name of the model with the full path of the file</font></b>
+040: <b><font color="#007D00">     * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> modelParam Optional parameter changed by code on the model</font></b>
+041: <b><font color="#007D00">     * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> dataSetName Name of the data set with the full path</font></b>
+042: <b><font color="#007D00">     * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> engine Optimization engine</font></b>
+043: <b><font color="#007D00">     * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> previousTime Time before the solve</font></b>
+044: <b><font color="#007D00">     */</font></b> 
+045:     <b><font color="EA7D00">function</font></b> overload_output_saveAllKpi(modelName, modelParam, dataSetName, engine, previousTime) {             
+046:                 <b><font color="EA7D00">if</font></b> (<b><font color="EA7D00">typeof</font></b>(engine)==<b><font color="#8A2BE2">"IloOplMain.IloCplex"</font></b>) {
+047:                     <b><font color="#007D00">// CPLEX</font></b>
+048:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"best obj"</font></b>, engine.getBestObjValue(), MAX);
+049:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"status"</font></b>, engine.getCplexStatus(), MIN);
+050:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n cols"</font></b>, engine.getNcols(), MIN);
+051:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n rows"</font></b>, engine.getNrows(), MIN);
+052:                     <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n nodes"</font></b>, engine.getNnodes(), MIN);
+053:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n iterations"</font></b>, engine.getNiterations(), MIN);
+054:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"obj"</font></b>, engine.getObjValue(), MAX);
+055:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"time"</font></b>, engine.getCplexTime() - previousTime, MIN);           
+056:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"gap"</font></b>, engine.getMIPRelativeGap(), MIN);
+057:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n ints"</font></b>, <b><font color="#0000FF">cplex</font></b>.getNintVars(), MIN);
+058:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n nzs"</font></b>, <b><font color="#0000FF">cplex</font></b>.getNNZs(), MIN);
+059:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n bins"</font></b>, <b><font color="#0000FF">cplex</font></b>.getNbinVars(), MIN);
+060:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n qcs"</font></b>, <b><font color="#0000FF">cplex</font></b>.getNQCs(), MIN);
+061:                         <b><font color="EA7D00">this</font></b>.saveKpi( modelName, modelParam, dataSetName, engine, <b><font color="#8A2BE2">"n sos"</font></b>, <b><font color="#0000FF">cplex</font></b>.getNSOSs(), MIN);
+062:                         
+063:                 } <b><font color="EA7D00">else</font></b> {
+064:                         <b><font color="#007D00">// CP</font></b>
+065:                 
+066:                 }       
+067:         }       
+068:         
+069:         
+070:     <b><font color="#007D00">/**</font></b>
+071: <b><font color="#007D00">         * Returns the name of the KPI file.</font></b>
+072: <b><font color="#007D00">         */</font></b>     
+073:         <b><font color="EA7D00">function</font></b> getKpiFileName(modelFile) {
+074:                 <b><font color="EA7D00">return</font></b> modelFile.absolutePath.split(<b><font color="#8A2BE2">"."</font></b>)[0] + <b><font color="#8A2BE2">".kpi"</font></b>;
+075:         }
+076:     <b><font color="#007D00">/**</font></b>
+077: <b><font color="#007D00">         * Solves the oplModelName with the dataSetPath, </font></b>
+078: <b><font color="#007D00">         * and then save the resulting KPIs the file kpiFile.</font></b>
+079: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> oplModelDefinition The Definition</font></b>
+080: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> oplModelName The MOD file</font></b>
+081: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> dataSetPath The DAT file name or directory of DAT files</font></b>
+082: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> kpiFile The KPI file</font></b>
+083: <b><font color="#007D00">         */</font></b>
+084:          <b><font color="EA7D00">function</font></b> solveModel( oplModelDefinition, oplModelName, dataSetPath, kpiFile ) {
+085:                 <b><font color="EA7D00">var</font></b> engine = <b><font color="#8A2BE2">""</font></b>;
+086:                 <b><font color="EA7D00">var</font></b> foundADatFile = <b><font color="EA7D00">false</font></b>;
+087:                 
+088:                 <b><font color="EA7D00">if</font></b>( oplModelDefinition.isUsingCP() ) {
+089:                         engine = <b><font color="EA7D00">new</font></b> IloCP();  
+090:                 } <b><font color="EA7D00">else</font></b> {
+091:                         engine = <b><font color="EA7D00">new</font></b> IloCplex();                        
+092:                 }
+093:                 <b><font color="EA7D00">var</font></b> model = <b><font color="EA7D00">new</font></b> IloOplModel( oplModelDefinition, engine );
+094: 
+095:                 <b><font color="EA7D00">var</font></b> dataSet = <b><font color="EA7D00">new</font></b> IloOplFile( dataSetPath );
+096:                 <b><font color="EA7D00">if</font></b>( !dataSet.exists ) {
+097:                           writeln( <b><font color="#8A2BE2">"ERROR : cannot find the specified file: "</font></b>, dataSet.name);      
+098:                 } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (!dataSet.isHidden) {
+099:                     <b><font color="EA7D00">if</font></b>( !dataSet.isDirectory ) {
+100:                             <b><font color="#007D00">// a file</font></b>
+101:                             <b><font color="EA7D00">if</font></b> ( dataSet.name.lastIndexOf(<b><font color="#8A2BE2">".dat"</font></b>)!=-1 ) {
+102:                               <b><font color="#007D00">// A dat file</font></b>
+103:                                   <b><font color="EA7D00">var</font></b> dataSource = <b><font color="EA7D00">new</font></b> IloOplDataSource(dataSet.name);
+104:                                   model.addDataSource(dataSource);
+105:                                   foundADatFile = <b><font color="EA7D00">true</font></b>;
+106:                                 } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (dataSet.name.lastIndexOf(<b><font color="#8A2BE2">".kpi"</font></b>)==-1 &amp;&amp;
+107:                                                    dataSet.name.lastIndexOf(<b><font color="#8A2BE2">".html"</font></b>)==-1) {     
+108:                                   writeln( <b><font color="#8A2BE2">"ERROR : "</font></b>, dataSet.name, 
+109:                                            <b><font color="#8A2BE2">" is not a *.dat file"</font></b>);      
+110:                                 }
+111:                         } <b><font color="EA7D00">else</font></b> {
+112:                           <b><font color="EA7D00">var</font></b> f = dataSet.getFirstFileName();
+113:                           <b><font color="EA7D00">while</font></b>( f != <b><font color="EA7D00">null</font></b> ) {
+114:                             <b><font color="EA7D00">if</font></b> ( f.lastIndexOf(<b><font color="#8A2BE2">".dat"</font></b>)!=-1 ) {
+115:                               <b><font color="#007D00">// A dat file     </font></b>
+116:                                   <b><font color="EA7D00">var</font></b> ds1 = <b><font color="EA7D00">new</font></b> IloOplDataSource(f);
+117:                                   model.addDataSource(ds1);
+118:                                   foundADatFile = <b><font color="EA7D00">false</font></b>;
+119:                             } <b><font color="EA7D00">else</font></b> {
+120:                                   writeln( <b><font color="#8A2BE2">"ERROR : Directory "</font></b>, dataSet.name,
+121:                                            <b><font color="#8A2BE2">" contains a file that is not a *.dat :"</font></b>, f);
+122:                                 }
+123:                                 f = dataSet.getNextFileName();
+124:                   }
+125:                 } 
+126:                 }
+127:         <b><font color="EA7D00">if</font></b> (foundADatFile) {            
+128:           addDatFileName(dataSet.absolutePath);
+129:           <b><font color="#007D00">// Only solve if a dat file has been found    </font></b>
+130:           writeln(<b><font color="#8A2BE2">"* DAT FILE"</font></b>, dataSetPath);
+131:           <b><font color="EA7D00">var</font></b> previousTime = engine.getCplexTime();
+132:           model.generate();
+133:                   engine.solve();
+134:                   kpiFile.saveAllKpi(oplModelName, <b><font color="EA7D00">null</font></b>, dataSet.absolutePath, engine, previousTime);
+135:                   
+136:                   model.end();
+137:                   engine.end();
+138:                 }
+139:         }
+140:                   
+141:         <b><font color="#007D00">/**</font></b>
+142: <b><font color="#007D00">         * Solves one by one all the models for each DAT file</font></b>
+143: <b><font color="#007D00">         * of sub directory of DAT files.</font></b>
+144: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> dataDir Either a DAT file or a set of sub directory containing the DAT files.</font></b>
+145: <b><font color="#007D00">         * </font></b><b><font color="#0000FF">@param</font></b><b><font color="#007D00"> models Set of BatchModelType</font></b>
+146: <b><font color="#007D00">         */</font></b>
+147:          <b><font color="EA7D00">function</font></b> solveModels(dataDir, models) {                
+148:                 <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> model <b><font color="EA7D00">in</font></b> models ) {
+149:                         <b><font color="EA7D00">var</font></b> oplModelName = model.name;
+150:                         <b><font color="EA7D00">if</font></b> (model.needToSolve) {
+151:                                 <b><font color="#007D00">// Check the validity of the mod file</font></b>
+152:                                 <b><font color="EA7D00">var</font></b> oplModelFile = <b><font color="EA7D00">new</font></b> IloOplFile(oplModelName);
+153:                                 <b><font color="EA7D00">if</font></b>( !oplModelFile.exists ) {
+154:                                         writeln( <b><font color="#8A2BE2">"ERROR : Cannot find specified file: "</font></b>, oplModelName);
+155:                                         <b><font color="EA7D00">return</font></b> <b><font color="EA7D00">false</font></b>;
+156:                                 } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (oplModelFile.isDirectory != <b><font color="EA7D00">false</font></b>) {
+157:                                         writeln( <b><font color="#8A2BE2">"ERROR : Not a file: "</font></b>, oplModelName);
+158:                                         <b><font color="EA7D00">return</font></b> <b><font color="EA7D00">false</font></b>;
+159:                                 } <b><font color="EA7D00">else</font></b> {
+160:                                         writeln( <b><font color="#8A2BE2">"--------------------"</font></b>);
+161:                                         writeln( <b><font color="#8A2BE2">"MODEL : "</font></b>, oplModelName);
+162:                                         writeln( <b><font color="#8A2BE2">"--------------------"</font></b>);
+163:                                         <b><font color="EA7D00">var</font></b> kpiFileName = getKpiFileName(oplModelFile);
+164:                                         <b><font color="EA7D00">var</font></b> kpiFile = <b><font color="EA7D00">new</font></b> KpiOutputFile(kpiFileName);
+165:                                         <b><font color="#007D00">// Redefine the save kpi method</font></b>
+166:                             kpiFile.saveAllKpi = overload_output_saveAllKpi;
+167:                 
+168:                                         <b><font color="EA7D00">var</font></b> source = <b><font color="EA7D00">new</font></b> IloOplModelSource(oplModelName);       
+169:                                         <b><font color="EA7D00">var</font></b> def = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(source);
+170:                 
+171:                                         <b><font color="#007D00">// Solve</font></b>
+172:                                         <b><font color="EA7D00">var</font></b> f = dataDir.getFirstFileName();
+173:                                         <b><font color="EA7D00">while</font></b>( f != <b><font color="EA7D00">null</font></b> ) {    
+174:                                                 <b><font color="EA7D00">var</font></b> entryName = dataDir.name + dataDir.separator + f; 
+175:                                             solveModel( def, oplModelFile.absolutePath, entryName, kpiFile);
+176:                                                                 
+177:                                                 f = dataDir.getNextFileName();
+178:                                         }
+179:                                         def.end();      
+180:                                         source.end();
+181:                                         <b><font color="#007D00">// Close the kpi file</font></b>
+182:                                         kpiFile.close();
+183:                                 }
+184:                         }
+185:                 }
+186:                 <b><font color="EA7D00">return</font></b> <b><font color="EA7D00">true</font></b>;
+187:         }
+188:         <b><font color="#007D00">/*</font></b>
+189: <b><font color="#007D00">         * Adds a datFileName in the array if not already added.</font></b>
+190: <b><font color="#007D00">         */</font></b>
+191:         <b><font color="EA7D00">function</font></b> addDatFileName(datFileName ) {
+192:                 <b><font color="EA7D00">var</font></b> found = <b><font color="EA7D00">false</font></b>;
+193:                 <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> j=0; (j &lt;datFileNames.length) &amp;&amp; !found; j++) {
+194:                         <b><font color="EA7D00">if</font></b> (datFileNames[j]==datFileName) {
+195:                                 found = <b><font color="EA7D00">true</font></b>;
+196:                         }
+197:                 }
+198:                 <b><font color="EA7D00">if</font></b> (found==<b><font color="EA7D00">false</font></b>) {
+199:                         datFileNames[datFileNames.length] = datFileName;
+200:                 }
+201:         }
+202:         
+203:         
+204:         <b><font color="#007D00">//**********************************************************/</font></b>
+205:         <b><font color="EA7D00">var</font></b> status = <b><font color="EA7D00">true</font></b>;
+206:         <b><font color="#0000FF">thisOplModel</font></b>.generate();
+207:         
+208:         <b><font color="EA7D00">var</font></b> oplDataPath = <b><font color="#0000FF">thisOplModel</font></b>.dataElements.dataPath;           
+209:         <b><font color="EA7D00">var</font></b> datFileNames = <b><font color="EA7D00">new</font></b> Array();
+210:         
+211:         <b><font color="#007D00">// Check the validity of the data directory</font></b>
+212:         <b><font color="EA7D00">var</font></b> dataDir = <b><font color="EA7D00">new</font></b> IloOplFile(oplDataPath);
+213:         <b><font color="EA7D00">if</font></b>( !dataDir.exists ) {
+214:                 writeln( <b><font color="#8A2BE2">"ERROR : Cannot find specified file: "</font></b>, oplDataPath);
+215:                 status = <b><font color="EA7D00">false</font></b>;
+216:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> (dataDir.isDirectory != <b><font color="EA7D00">true</font></b>) {
+217:                 writeln( <b><font color="#8A2BE2">"ERROR : Not a directory: "</font></b>, oplDataPath);
+218:                 status = <b><font color="EA7D00">false</font></b>;
+219:         }
+220:         
+221:         <b><font color="#007D00">// Solve the opl models if needed and generate the related kpi files</font></b>
+222:         <b><font color="EA7D00">if</font></b> (status) { 
+223:                 status = solveModels(dataDir, <b><font color="#0000FF">thisOplModel</font></b>.models);
+224:         }
+225:         <b><font color="#007D00">// Generate the html kpi comparator</font></b>
+226:         <b><font color="EA7D00">if</font></b> (status) {
+227:                 <b><font color="EA7D00">var</font></b> htmlFileName = <b><font color="#8A2BE2">"report.html"</font></b>;
+228:                 <b><font color="EA7D00">var</font></b> html = <b><font color="EA7D00">new</font></b> HtmlReportFile(htmlFileName);
+229:                 <b><font color="EA7D00">var</font></b> modelNames = <b><font color="EA7D00">new</font></b> Array();
+230:                 <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> model <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.models ) {
+231:                         modelNames[modelNames.length] = model.name;
+232:                 }               
+233:                 status = html.generateReport(modelNames, datFileNames);
+234:         }
+235:         status;
+236: }
+</tt></pre>

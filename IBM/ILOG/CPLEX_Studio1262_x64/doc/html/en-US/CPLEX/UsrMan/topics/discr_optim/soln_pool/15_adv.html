@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Advanced use: interaction of MIP optimization and populate" />
+<meta name="abstract" content="Explains when to invoke the populate procedure." />
+<meta name="Description" content="Explains when to invoke the populate procedure." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/13_pop_vs_accum_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solnpool.1048859" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/13_pop_vs_accum_title_synopsis.html" />
+<title>Advanced use: interaction of MIP optimization and populate</title>
+</head>
+<body role="main" id="User_manual.uss_solnpool.1048859">
+<h1 class="title topictitle1">Advanced use: interaction of MIP optimization and populate</h1>
+<div class="body"><p class="shortdesc">Explains when to invoke the populate procedure.</p>
+<p class="p">Should you call MIP optimization and then populate, or
+should you call populate alone? </p>
+<p class="p">You can call populate after you call the MIP optimizer,
+or you can call populate on its own after you read or create a model.
+In order to decide which to do, you need to know more about the two
+procedures.</p>
+<p class="p">Recall that the algorithm underlying populate works in
+two phases. If you call the MIP optimizer after the model is read,
+it will gather and store information about the search as it solves
+the model. In practice, its activity constitutes the first phase of
+the populate algorithm. In the general case, if you then call populate,
+populate will re-use the information stored by the MIP optimizer and
+carry out only the second phase.</p>
+<p class="p">In contrast, if you call populate immediately after the
+model is read, populate will perform both the first phase and the
+second phase.</p>
+<p class="p">If you specify a nondefault setting of the pool intensity
+parameter, then calling the MIP optimizer and afterwards calling populate
+will give the same results in terms of performance and solutions generated
+as calling populate alone. (The exception to this generalization occurs
+when the pool intensity parameter is set at its default value, 0 (zero)
+that is, automatic. For details about that case, see the documentation
+of the solution pool intensity parameter.)</p>
+<p class="p">Calling populate alone is simpler than calling populate
+after MIP optimization. However, if you want more control over the
+details of the two phases (for example, if you want to specify different
+stopping criteria for each phase), then you need to call MIP optimization
+followed by populate, instead of calling populate alone. The risk
+associated with this approach is that populate might not be able to
+reuse the information about the tree from the previous MIP optimization;
+in that case, populate will start from scratch; that is, it again
+performs the first phase, followed by the second phase. In particular,
+this repetition of the first phase will happen if you increase the
+pool intensity parameter between the call to MIP optimization and
+the call to populate.</p>
+<p class="p">More information about this topic can be found in the
+documentation about the <a class="xref" href="../../../../Parameters/topics/SolnPoolIntensity.html" title="Controls the trade-off between the number of solutions generated for the solution pool and the amount of time or memory consumed.">solution pool intensity</a> parameter
+(<samp class="ph codeph">SolnPoolIntensity</samp>, <samp class="ph codeph">CPX_PARAM_SOLNPOOLINTENSITY</samp>)
+in the <em class="ph i">CPLEX</em> <em class="ph i">Parameters Reference Manual</em>.</p>
+<p class="p">In short, if you want the simplicity of a black box,
+call populate alone; if you need more control, call MIP optimization,
+then populate.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/13_pop_vs_accum_title_synopsis.html" title="Explains differences between accumulating incumbents and generating multiple solutions in the solution pool.">Choosing whether to accumulate or populate</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The pasta production example" />
+<meta name="abstract" content="Presents the production problem and shows the code for the model and data." />
+<meta name="Description" content="Presents the production problem and shows the code for the model and data." />
+<meta name="DC.subject" content="production planning example, models, production planning, code samples, product.mod, files, product.mod file, product.dat file, product.dat file, product.dat" />
+<meta name="keywords" content="production planning example, models, production planning, code samples, product.mod, files, product.mod file, product.dat file, product.dat file, product.dat" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/gsoplide/topics/opl_ide_gs_tut_create_proj.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="gsoplide.uss_ide_gettingstarted.1076544" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/gsoplide/topics/opl_ide_gs_tut_create_proj.html" />
+<title>The pasta production example</title>
+</head>
+<body role="main" id="gsoplide.uss_ide_gettingstarted.1076544">
+<h1 class="title topictitle1">The pasta production example</h1>
+<div class="body"><p class="shortdesc">Presents the production problem and shows the
+code for the model and data.</p>
+<p class="p">You could write your own model from scratch by following
+the syntax rules from the <a class="xref" href="../../opllangref/topics/opl_langref_TOP.html" title="This manual provides reference information about IBM ILOG Optimization Programming Language (OPL), the modeling language used in CPLEX Studio. For details of prerequisites, naming conventions, and other general information, see How to use the documentation in the Starting Kit.">Language Reference Manual</a> and
+the <a class="xref" href="../../opllanguser/topics/opl_languserTOP.html" title="Describes how to use OPL, the IBM ILOG Optimization Programming Language. The language is documented in two manuals (the Language User’s Manual and the Language Reference Manual), both partly based on Pascal Van Hentenryck’s book, The OPL Optimization Programming Language, published by The MIT Press, 1999, Cambridge, Massachusetts. This Language User’s Manual is composed mostly of tutorials for both OPL and IBM ILOG Script for OPL.">Language User’s Manual</a>,
+but since this tutorial does not aim at teaching you the modeling
+or scripting languages, you are going to reuse the pasta production
+example, described in <a class="xref" href="../../opllanguser/topics/opl_languser_app_areas_LP_prod.html" title="Uses again the model production.mod.">A production problem</a> in the <em class="ph i">Language User’s Manual</em>, for
+the purpose of this exercise.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">The pasta production model is designed
+to be solved by the CPLEX engine.
+However, the content of this section would be the same for a model
+solved by the CP Optimizer engine, except where explicitly mentioned.</p>
+ </div>
+<p class="p">The problem is as follows. To meet the demands of its
+customers, a company manufactures its products in its own factories
+(<em class="ph i">inside</em> production) or buys the products from other
+companies (<em class="ph i">outside</em> production). </p>
+<p class="p">The inside production is subject to resource constraints:
+each product consumes a certain amount of each resource. In contrast,
+the outside production is theoretically unlimited. The problem is
+to determine how much of each product should be produced inside the
+company and how much outside, while minimizing the overall production
+cost, meeting the demand, and satisfying the resource constraints. </p>
+<p class="p">The code extract below (<samp class="ph codeph">product.mod</samp> file)
+shows an OPL model (the tuple version) for this example. This model
+is part of the <samp class="ph codeph">production</samp> project, which
+is available at the following location: </p>
+<p class="p"> <samp class="ph codeph">&lt;Install_dir&gt;\opl\examples\opl\production</samp> </p>
+<p class="p">where <samp class="ph codeph">&lt;Install_dir&gt;</samp> is
+your installation directory.</p>
+<div class="example" id="gsoplide.uss_ide_gettingstarted.1076544__gsoplide.uss_ide_gettingstarted.1076606"><h2 class="title sectiontitle">OPL model for the production planning example (<samp class="ph codeph">product.mod</samp>) </h2><pre class="pre codeblock"><code>{string} Products = ...;
+{string} Resources = ...;
+tuple productData {
+   float demand;
+   float insideCost;
+   float outsideCost;
+   float consumption[Resources];
+}
+productData Product[Products] = ...;
+float Capacity[Resources] = ...;
+
+dvar float+ Inside[Products];
+dvar float+ Outside[Products];
+
+execute CPX_PARAM {
+  cplex.preind = 0;   
+  cplex.simdisplay = 2;   
+}
+
+
+minimize
+  sum( p in Products ) 
+    (Product[p].insideCost * Inside[p] + 
+    Product[p].outsideCost * Outside[p] );
+subject to {
+  forall( r in Resources )
+    ctInside: 
+      sum( p in Products ) 
+        Product[p].consumption[r] * Inside[p] &lt;= Capacity[r];
+  forall( p in Products )
+    ctDemand: 
+      Inside[p] + Outside[p] &gt;= Product[p].demand;
+}</code></pre>
+</div>
+<p class="p">The following code extract (<samp class="ph codeph">product.dat</samp> file)
+shows the data declaration for the problem.</p>
+<div class="example" id="gsoplide.uss_ide_gettingstarted.1076544__gsoplide.uss_ide_gettingstarted.1076631"><h2 class="title sectiontitle">OPL data for the production planning example (<samp class="ph codeph">product.dat</samp>) </h2><pre class="pre codeblock"><code>Products =  { "kluski", "capellini", "fettucine" };
+Resources = { "flour", "eggs" };
+Product = #[
+      kluski : &lt; 100, 0.6, 0.8, [ 0.5, 0.2 ] &gt;,
+      capellini : &lt; 200, 0.8, 0.9, [ 0.4, 0.4 ] &gt;,
+      fettucine : &lt; 300, 0.3, 0.4, [ 0.3, 0.6 ] &gt;
+          ]#;
+Capacity = [ 20, 40 ];</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/gsoplide/topics/opl_ide_gs_tut_create_proj.html" title="Walks you through creating a project file, adding model and data, and setting mathematical programming options.">Creating a project</a></div>
+</div>
+</div></body>
+</html>

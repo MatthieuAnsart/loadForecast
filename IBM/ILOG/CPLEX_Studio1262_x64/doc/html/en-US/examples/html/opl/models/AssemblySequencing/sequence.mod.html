@@ -1,0 +1,142 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/*  ----------------------------------------------------</font></b>
+013: <b><font color="#007D00">OPL Model for Computer Assembly Line Sequencing Example </font></b>
+014: 
+015: <b><font color="#007D00">This model is to determine the processing order of a set of custom </font></b>
+016: <b><font color="#007D00">computers on an assembly line. Once the order is assigned, </font></b>
+017: <b><font color="#007D00">it is kept from start to finish.  The custom computers have </font></b>
+018: <b><font color="#007D00">different lists of components to be contained, which are given </font></b>
+019: <b><font color="#007D00">in the array "computer".  </font></b>
+020: 
+021: <b><font color="#007D00">The ordering of the computers is constrained by the assembly </font></b>
+022: <b><font color="#007D00">rules of each component:  </font></b>
+023: <b><font color="#007D00">1) There must be a minimum number of computers in a row </font></b>
+024: <b><font color="#007D00">   that need this component ("minSeq"); </font></b>
+025: <b><font color="#007D00">2) There is a upper bound on the number of computers in a row </font></b>
+026: <b><font color="#007D00">   that can have that component;  </font></b>
+027: <b><font color="#007D00">3) Each component also has a list of illegal followers </font></b>
+028: <b><font color="#007D00">   ("illegalFollowers") meaning that if a computer has this </font></b>
+029: <b><font color="#007D00">   component, then the next computer cannot have a component </font></b>
+030: <b><font color="#007D00">   which appears in the illegal followers list of this component.  </font></b>
+031: <b><font color="#007D00">These restrictions may be due to set-up times, bottlenecks, etc.</font></b>
+032: 
+033: <b><font color="#007D00">----------------------------------------------------- */</font></b>
+034: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+035: 
+036: 
+037: <b><font color="#0000FF">execute</font></b>{
+038:         }
+039: 
+040: // The number of computers we need to build
+041: int     nComputers  = ... ;
+042: range   AllComputers = 1..nComputers ;
+043: 
+044: {string} ComponentTypes = ...; ;
+045: 
+046: tuple ComponentInfo
+047: {
+048:    <b><font color="#0000FF">int</font></b> maxSeq;
+049:    <b><font color="#0000FF">int</font></b> minSeq;
+050:    {string} illegalFollowers;
+051: };
+052: 
+053: // Assembly rules for each component 
+054: ComponentInfo    components[ComponentTypes]  = ...;
+055: 
+056: // List of components needed by a computer
+057: {string} computer[AllComputers] = ...;
+058: assert {
+059:    forall (a <b><font color="EA7D00">in</font></b> AllComputers)
+060:      forall (s <b><font color="EA7D00">in</font></b> computer[a])
+061:         s <b><font color="EA7D00">in</font></b> ComponentTypes;
+062: }
+063: 
+064: // Components that are actually in computers to build
+065: {string} UsedComponentTypes = { c | c <b><font color="EA7D00">in</font></b> ComponentTypes, a <b><font color="EA7D00">in</font></b> AllComputers : c <b><font color="EA7D00">in</font></b> computer[a] };
+066: assert {
+067:    forall (u <b><font color="EA7D00">in</font></b> UsedComponentTypes)
+068:       u <b><font color="EA7D00">in</font></b> ComponentTypes;
+069: }
+070: 
+071: // Components that have illegal followers
+072: {string} HasIllegalFollowers = { c | c <b><font color="EA7D00">in</font></b> UsedComponentTypes, d <b><font color="EA7D00">in</font></b> UsedComponentTypes 
+073:                                      : d <b><font color="EA7D00">in</font></b> components[c].illegalFollowers };
+074: assert {
+075:    forall (u <b><font color="EA7D00">in</font></b> HasIllegalFollowers)
+076:       u <b><font color="EA7D00">in</font></b> ComponentTypes;
+077: }                                     
+078: // Which computers contain the component
+079: {<b><font color="#0000FF">int</font></b>}  componentInComputer[c in UsedComponentTypes] = {i | i <b><font color="EA7D00">in</font></b> AllComputers : c <b><font color="EA7D00">in</font></b> computer[i] };
+080: assert {
+081:    forall (c <b><font color="EA7D00">in</font></b> UsedComponentTypes)
+082:       forall (u <b><font color="EA7D00">in</font></b> componentInComputer[c]) {
+083:          u &gt;=1;
+084:          u &lt;= nComputers;
+085:       }
+086: }
+087: 
+088: /*  ----------------------------------------------------
+089:  *   Variables:
+090:  *   order -- if order[i]=j, it means computer[i] is jth in the 
+091:  *          sequence
+092:  *   --------------------------------------------------- */
+093: dvar int order[AllComputers] in AllComputers;
+094: 
+095: /*  ----------------------------------------------------
+096:  *   Constraints
+097:  *   --------------------------------------------------- */
+098: 
+099: subject to
+100: {
+101:    allDifferent(order);
+102: 
+103:    <b><font color="#007D00">// Min/Max sequences</font></b>
+104:    forall (c <b><font color="EA7D00">in</font></b> UsedComponentTypes) {
+105:       forall ( p <b><font color="EA7D00">in</font></b> 1..nComputers - components[c].maxSeq )
+106:          <b><font color="#007D00">// If there are maxSeq # of component c in a row starting from position p to p+maxSeq-1, </font></b>
+107:          <b><font color="#007D00">// =&gt; the (p+ maxSeq)th computer must not contain component c.  </font></b>
+108:          (sum(s <b><font color="EA7D00">in</font></b> p..p+components[c].maxSeq-1) (order[s] <b><font color="EA7D00">in</font></b> componentInComputer[c]) == components[c].maxSeq) 
+109:          =&gt; 
+110:          <b><font color="#007D00">//not (order[p+components[c].maxSeq] in componentInComputer[c]);</font></b>
+111:          order[p+components[c].maxSeq] not <b><font color="EA7D00">in</font></b> componentInComputer[c];
+112:         
+113:       <b><font color="#007D00">// The componenets in the 1st computer must appear at least minSeq # of times in a row.   </font></b>
+114:       (order[1] <b><font color="EA7D00">in</font></b> componentInComputer[c]) 
+115:       =&gt; 
+116:       ((sum( s <b><font color="EA7D00">in</font></b> 1..components[c].minSeq) (order[s] <b><font color="EA7D00">in</font></b> componentInComputer[c])) &gt;= components[c].minSeq);
+117: 
+118: 
+119:       forall ( p <b><font color="EA7D00">in</font></b> 1..nComputers-components[c].minSeq )
+120:             <b><font color="#007D00">// Every component that is not in computer p but appears in computer p+1</font></b>
+121:             <b><font color="#007D00">// must appear minSeq # of times in a row from p+1 to p+minSeq.  </font></b>
+122:             (((order[p] not <b><font color="EA7D00">in</font></b> componentInComputer[c])
+123:                &amp;&amp; (order[p+1] <b><font color="EA7D00">in</font></b> componentInComputer[c])) =&gt;
+124:             (sum(s <b><font color="EA7D00">in</font></b> p+1..p+components[c].minSeq) (order[s] <b><font color="EA7D00">in</font></b> componentInComputer[c]))
+125:                  == components[c].minSeq);
+126:    };
+127: 
+128:    forall (c <b><font color="EA7D00">in</font></b> HasIllegalFollowers) <b><font color="#007D00">// for component c that has an illegal follower,</font></b>
+129:       forall( p <b><font color="EA7D00">in</font></b> 1..nComputers-1)  <b><font color="#007D00">// for computer p</font></b>
+130:          forall( c2 <b><font color="EA7D00">in</font></b> UsedComponentTypes : c2 <b><font color="EA7D00">in</font></b> components[c].illegalFollowers) 
+131:             <b><font color="#007D00">// If computer p has component c and c2 is c's illegal follower =&gt; </font></b>
+132:             <b><font color="#007D00">// c2 must not in computer p+1 </font></b>
+133:             (order[p] <b><font color="EA7D00">in</font></b> componentInComputer[c] )  =&gt;
+134:                (order[p+1] not <b><font color="EA7D00">in</font></b> componentInComputer[c2]);
+135:                
+136: };
+137: 
+</tt></pre>

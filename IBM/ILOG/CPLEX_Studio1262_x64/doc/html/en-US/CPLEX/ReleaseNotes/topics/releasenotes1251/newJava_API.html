@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="New features of the Concert Java API" />
+<meta name="abstract" content="Introduces new features of the Concert Java API in CPLEX V12.5.1." />
+<meta name="Description" content="Introduces new features of the Concert Java API in CPLEX V12.5.1." />
+<meta name="DC.subject" content="release notes CPLEX V12.5.1, new features (Java API)" />
+<meta name="keywords" content="release notes CPLEX V12.5.1, new features (Java API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/home.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="NewJava_API12510" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/home.html" />
+<title>New features of the Concert Java API</title>
+</head>
+<body role="main" id="NewJava_API12510">
+<h1 class="title topictitle1">New features of the Concert Java API</h1>
+<div class="body"><p class="shortdesc">Introduces new features of the Concert Java API in CPLEX
+V12.5.1.</p>
+<p class="p">These notes highlight new features of interest to users of  the
+Concert Java API in CPLEX V12.5.1.</p>
+<div class="section"><h2 class="title sectiontitle">New parameter CalcQCPDuals and its symbolic values</h2>  <div class="p">To
+support the new parameter,  <a class="xref" href="../../../Parameters/topics/CalcQCPDuals.html" title="Instructs CPLEX to calculate the dual values of a quadratically constrained problem">calculate QCP dual values</a>,  CPLEX
+V12.5.1 introduces a new class and new constants in the Java API.
+This new class <span class="keyword apiname">IloCplex.CalcQCPDuals</span>  enumerates
+possible values of the parameter <span class="keyword apiname">CalcQCPDuals</span>.
+ <ul class="ul"><li class="li"><span class="keyword apiname">QCPDualsNo</span> Do not calculate dual values for
+the QCP.</li>
+<li class="li"><span class="keyword apiname">QCPDualsIfPossible</span> Calculate dual values for
+the QCP  as long as the calculations do not interfere with presolve
+reductions.  <strong class="ph b">default</strong> </li>
+<li class="li"><span class="keyword apiname">QCPDualsForce</span> Calculate dual values and disable
+ any presolve reductions that interfere with these calculations. </li>
+</ul>
+ </div>
+ </div>
+<div class="section"><h2 class="title sectiontitle">Remote object available in Concert Java API</h2>  <p class="p"> The
+CPLEX remote object is now also available in the Concert Java API.
+The example <span class="ph filepath">RemoteParBenders.java</span>  illustrates
+how to use the remote object through the Concert Java API.  There
+is a new constructor in the class   <a class="xref hardcodedApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a>. The new constructor
+instantiates a CPLEX remote object in a Java application. </p>
+ <pre class="pre codeblock"><code>IloCplex(String transport, String[] args);</code></pre>
+ <p class="p">The arguments  <samp class="ph codeph">transport</samp> and  <samp class="ph codeph">args</samp> 
+of that new constructor accepts the same values as the Callable Library
+(C API) routine  <samp class="ph codeph"><a class="xref" href="../../../../refcallablelibrary/cpxremoteapi/openCPLEXremote.html" title="This routine opens a handle to a remote object.">CPXXopenCPLEXremote</a></samp>.
+ Those arguments specify how to connect to the remote object worker. </p>
+ <p class="p">Internally, that constructor creates a remote object
+master that  off-loads all work to the remote object worker specified
+by those connection arguments. Function calls to the remote object
+worker  are transparent; that is, you can not distinguish between
+instances  of the class  <a class="xref hardcodedApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">IloCplex</a>  that were
+created with a remote object and  those that were not created with
+a remote object. In fact, you do  not need to distinguish whether
+an instance of <span class="keyword apiname">IloCplex</span>  was created with a remote
+object. All work the same.</p>
+  <p class="p">A new class,  <a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">AsyncHandle</a>,  supports asynchronous
+execution in the remote object. For each method that  supports asynchronous
+execution, CPLEX offers a refined subclass of  this class (<span class="keyword apiname">AsyncHandle</span>)
+to allow you to query  information that is specific to that method.
+ The <em class="ph i">CPLEX Java Reference Manual</em>,  available online in this
+information center,   documents each of these new, asynchronous methods. </p>
+  <p class="p">A
+new method,  <a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html#userFunction" title="(Opens in a new tab or window)">userFunction</a>,   invokes a
+user function that has already been registered for the remote object
+ to extend the remote object dynamically.  (You must implement the
+user function by routines of the Callable Library (C API),  but the
+user function can be registered and used then in a Java application.) </p>
+ <p class="p">A
+new class,   <a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">Serializer</a>,   supports
+serialization of data into a buffer that can then be passed to your
+ user function. In the other direction, the new class  <a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">DeSerializer</a>  accepts a buffer
+obtained from a user function and  de-serializes the data.  This serialization
+is independent of byte-order and other  machine-specific details,
+thus making your application portable.  </p>
+ <p class="p">You can subclass a
+new class,   <a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html" title="(Opens in a new tab or window)">RemoteInfoHandler</a>,   and implement
+its pure virtual function  <span class="keyword apiname">IloCplex.RemoteInfoHandler.main</span> 
+yourself in order to capture messages sent from the remote worker
+in your Java application. </p>
+ <p class="p">New methods (overloading existing
+methods) support the implementation  of your applications with the
+remote object. Here is a partial list of those  methods. For details
+and for other new remote methods, see the reference manual.</p>
+ <ul class="ul"><li class="li"><a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html#solve(boolean)" title="(Opens in a new tab or window)">solve</a> </li>
+<li class="li"><a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html#tuneParam(boolean)" title="(Opens in a new tab or window)">tuneParam</a> </li>
+<li class="li"><a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html#feasOpt(IloConstraint[],%20double[],%20boolean)" title="(Opens in a new tab or window)">feasOpt</a> </li>
+<li class="li"><a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html#refineConflict(IloConstraint[],%20double[],%20boolean)" title="(Opens in a new tab or window)">refineConflict</a> </li>
+<li class="li"><a class="xref logicalApiLink" href="../../../../refjavacplex/html/ilog/cplex/IloCplex.html#populate(boolean)" title="(Opens in a new tab or window)">populate</a> </li>
+</ul>
+  </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/home.html" title="These release notes highlight improvements and new features of CPLEX, the optimization engine for mathematical programming in IBM ILOG CPLEX Optimization Studio V12.5.1. Please review these notes before using CPLEX V12.5.1.">Release notes for CPLEX Optimizers V12.5.1</a></div>
+</div>
+</div></body>
+</html>

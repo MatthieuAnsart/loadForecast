@@ -1,0 +1,126 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2014. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// This example illustrates how to use an external function</font></b>
+013: <b><font color="#007D00">// implemented in Java. It works only if you compile Knapsack.java </font></b>
+014: <b><font color="#007D00">// in examples\java\javaknapsack\src\javaknapsack first. </font></b>
+015: include <b><font color="#8A2BE2">"javaknapsack.mod"</font></b>;
+016: <b><font color="#0000FF">int</font></b> RollWidth = ...;
+017: <b><font color="#0000FF">int</font></b> NbItems = ...;
+018: 
+019: <b><font color="#0000FF">range</font></b> Items = 1..NbItems;
+020: <b><font color="#0000FF">int</font></b> Size[Items] = ...;
+021: <b><font color="#0000FF">int</font></b> Amount[Items] = ...;
+022: 
+023: 
+024: <b><font color="#0000FF">tuple</font></b>  pattern {
+025:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+026:    <b><font color="#0000FF">int</font></b> cost;
+027:    <b><font color="#0000FF">int</font></b> fill[Items];
+028: }
+029: 
+030: 
+031: {pattern} Patterns = ...;
+032: 
+033: 
+034: <b><font color="#007D00">// for knapsack</font></b>
+035: <b><font color="#0000FF">float</font></b> Duals[Items] = ...;
+036: <b><font color="#0000FF">int</font></b> NewPattern[i <b><font color="#0000FF">in</font></b> Items] = 0;
+037: 
+038: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b> Cut[Patterns] <b><font color="#0000FF">in</font></b> 0..1000000;
+039:      
+040: <b><font color="#0000FF">minimize</font></b>
+041:   <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Patterns ) 
+042:     p.cost * Cut[p];
+043: 
+044: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+045:   <b><font color="#7D007D">forall</font></b>( i <b><font color="#0000FF">in</font></b> Items ) 
+046:     ctFill:
+047:       <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Patterns ) 
+048:         p.fill[i] * Cut[p] &gt;= Amount[i];
+049: }
+050: <b><font color="#0000FF">tuple</font></b> r {
+051:    pattern p;
+052:    <b><font color="#0000FF">float</font></b> cut;
+053: };
+054: 
+055: {r} Result = {&lt;p,Cut[p]&gt; | p <b><font color="#0000FF">in</font></b> Patterns : Cut[p] &gt; 1e-3};
+056: 
+057: <b><font color="#0000FF">execute</font></b> DISPLAY_RESULT {
+058:    writeln(Result);
+059: }
+060: main {
+061:    <b><font color="EA7D00">var</font></b> masterOpl = <b><font color="#0000FF">thisOplModel</font></b>;
+062:    masterOpl.generate();
+063: 
+064:   <b><font color="EA7D00">var</font></b> RC_EPS = 1.0e-6;
+065:   
+066:   <b><font color="EA7D00">var</font></b> masterDef = masterOpl.modelDefinition;
+067:   <b><font color="EA7D00">var</font></b> masterCplex = <b><font color="#0000FF">cplex</font></b>;
+068:   <b><font color="EA7D00">var</font></b> masterData = masterOpl.dataElements; 
+069:    <b><font color="#007D00">// Create a subproblem instance:</font></b>
+070:    <b><font color="EA7D00">var</font></b> knapsack = <b><font color="EA7D00">new</font></b> Knapsack();
+071:    <b><font color="EA7D00">var</font></b> best;
+072:    <b><font color="EA7D00">var</font></b> curr = Infinity;
+073: 
+074:     <b><font color="EA7D00">while</font></b> ( best != curr ) {
+075:       best = curr;
+076:       writeln(<b><font color="#8A2BE2">"Solve master."</font></b>);
+077:         <b><font color="EA7D00">if</font></b> ( masterCplex.solve() ) {
+078:         curr = masterCplex.getObjValue();
+079:           writeln();
+080:           writeln(<b><font color="#8A2BE2">"MASTER OBJECTIVE: "</font></b>,curr);
+081:        } <b><font color="EA7D00">else</font></b> {
+082:           writeln(<b><font color="#8A2BE2">"No solution!"</font></b>);
+083:         <b><font color="EA7D00">break</font></b>;
+084:        }
+085:         
+086: 
+087:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> masterOpl.Items) {
+088:          masterOpl.Duals[i] = masterOpl.ctFill[i].dual;
+089:       }
+090: 
+091:       
+092:       writeln(<b><font color="#8A2BE2">"Solve sub."</font></b>);
+093:       knapsack.updateInputs(masterOpl.Size, masterOpl.Duals);
+094:       <b><font color="EA7D00">var</font></b> solutionValue = knapsack.solve(masterOpl.NewPattern, masterOpl.RollWidth);
+095:         <b><font color="EA7D00">if</font></b> ( solutionValue &gt; 1+RC_EPS) {
+096:           writeln();
+097:           writeln(<b><font color="#8A2BE2">"SUB OBJECTIVE: "</font></b>,solutionValue);
+098:         } <b><font color="EA7D00">else</font></b> {
+099:           writeln(<b><font color="#8A2BE2">"No solution!"</font></b>);
+100:         <b><font color="EA7D00">break</font></b>;
+101:         }
+102: 
+103:       <b><font color="#007D00">// Prepare the next iteration:</font></b>
+104:       masterData = masterOpl.dataElements;
+105:       masterData.Patterns.add(masterData.Patterns.size,1,masterOpl.NewPattern);
+106: 
+107:       <b><font color="EA7D00">if</font></b> ( masterOpl!=<b><font color="#0000FF">thisOplModel</font></b> ) {
+108:          masterOpl.end();
+109:       }
+110:       masterOpl = <b><font color="EA7D00">new</font></b> IloOplModel(masterDef,masterCplex);
+111:       masterOpl.addDataSource(masterData);
+112:       masterOpl.generate();
+113:    }
+114:    masterOpl.postProcess();
+115:    <b><font color="EA7D00">if</font></b> ( masterOpl!=<b><font color="#0000FF">thisOplModel</font></b> ) {
+116:       masterOpl.end();
+117:    }
+118:  
+119:    
+120:    0;
+121: }
+</tt></pre>

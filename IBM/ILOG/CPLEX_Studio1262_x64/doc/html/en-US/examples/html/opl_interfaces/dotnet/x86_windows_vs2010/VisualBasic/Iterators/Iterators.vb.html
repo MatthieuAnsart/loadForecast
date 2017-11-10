@@ -1,0 +1,231 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: REM ------------------------------------------------ -*- Visual Basic .Net -*-
+002: REM File: Iterators.vb
+003: REM --------------------------------------------------------------------------
+004: REM Licensed Materials - Property of IBM
+005: REM 
+006: REM 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 
+007: REM Copyright IBM Corporation 1998, 2013. All Rights Reserved.
+008: REM
+009: REM Note to U.S. Government Users Restricted Rights:
+010: REM Use, duplication or disclosure restricted by GSA ADP Schedule
+011: REM Contract with IBM Corp.
+012: REM --------------------------------------------------------------------------
+013: 
+014: REM --------------------------------------------------------------------------
+015: REM Visual Basic version of iterators.cpp of OPL distrib
+016: REM --------------------------------------------------------------------------
+017: 
+018: Imports ILOG.OPL
+019: Imports ILOG.Concert
+020: Imports ILOG.CPLEX
+021: 
+022: Module Iterators
+023:   Const DATADIR As String = <b><font color="#8A2BE2">"../.."</font></b>
+024: 
+025: REM The purpose of <b><font color="EA7D00">this</font></b> sample is to check the result of filtering by iterating on the generated data element.
+026: REM
+027: REM The data element is an array of strings that is indexed by a set of strings.
+028: REM It is filled as the result of an iteration on a set of tuples by filtering out the duplicates.
+029: REM It is based on the model used in <b><font color="#8A2BE2">"Sparsity"</font></b> run configuration of the <b><font color="#8A2BE2">"transp"</font></b> example.
+030: REM
+031: REM
+032: REM The simplified model is:
+033: REM
+034: REM {string} Products = ...;
+035: REM tuple Route { string p; string o; string d; }
+036: REM {Route} Routes = ...;
+037: REM {string} orig[p in Products] = { o | &lt;p,o,d&gt; in Routes };
+038: REM
+039:   Function Sample1() As Integer
+040:     Dim status As Integer = 127
+041:     Try
+042:       OplFactory.DebugMode = True
+043:       Dim oplF As OplFactory = New OplFactory
+044: 
+045:       Dim rc As OplRunConfiguration = oplF.CreateOplRunConfiguration(DATADIR + <b><font color="#8A2BE2">"/transp2.mod"</font></b>, DATADIR + <b><font color="#8A2BE2">"/transp2.dat"</font></b>)
+046:       Dim opl As OplModel = rc.OplModel
+047:       rc.Cplex.SetOut(Nothing)
+048: 
+049:       Console.Out.WriteLine(<b><font color="#8A2BE2">"Verification of the computation of orig:"</font></b>)
+050: 
+051:       REM Get the orig, Routes, Product elements from the OplModel.
+052:       Dim orig As ISymbolSetMap = opl.GetElement(<b><font color="#8A2BE2">"Orig"</font></b>).AsSymbolSetMap()
+053:       Dim Routes As ITupleSet = opl.GetElement(<b><font color="#8A2BE2">"Routes"</font></b>).AsTupleSet()
+054:       Dim Products As ISymbolSet = opl.GetElement(<b><font color="#8A2BE2">"Products"</font></b>).AsSymbolSet()
+055: 
+056:       REM Iterate through the orig to see the result of the data element filtering.
+057:       Dim it1 As IEnumerator = Products.GetEnumerator
+058:       While it1.MoveNext
+059:         Dim p As String = it1.Current
+060:         REM We are in the last dimension of the array (as it is a 1 dimensional array), so we can use the get method directly.
+061:         Dim mSet As ISymbolSet = orig.Get(p)
+062:         Console.Out.Write(<b><font color="#8A2BE2">"for p = "</font></b> + p)
+063:         Console.Out.Write(<b><font color="#8A2BE2">" we have ["</font></b>)
+064:         Dim i As Integer
+065:         For i = 0 To mSet.Size - 1
+066:           Console.Out.Write(mSet.GetValue(i) + <b><font color="#8A2BE2">" "</font></b>)
+067:         Next
+068:         Console.WriteLine(<b><font color="#8A2BE2">"]"</font></b>)
+069:       End While
+070: 
+071:       Console.WriteLine(<b><font color="#8A2BE2">"---------------------"</font></b>)
+072: 
+073:       REM Iterate through the TupleSet.
+074:       Dim it2 As IEnumerator = Routes.GetEnumerator
+075:       While it2.MoveNext
+076:         Dim t As ITuple = it2.Current
+077:         REM Get the string <b><font color="#8A2BE2">"p"</font></b> from the tuple.
+078:         Dim p As String = t.GetStringValue(<b><font color="#8A2BE2">"p"</font></b>)
+079:         REM <b><font color="EA7D00">if</font></b> <b><font color="#8A2BE2">"p"</font></b> is in the indexer, we will <b><font color="EA7D00">try</font></b> to add the <b><font color="#8A2BE2">"o"</font></b> string to the array.
+080:         If (Products.Contains(p)) Then
+081:           Console.Out.Write(<b><font color="#8A2BE2">"for p = "</font></b> + p + <b><font color="#8A2BE2">" we will have "</font></b> + t.GetStringValue(<b><font color="#8A2BE2">"o"</font></b>) + <b><font color="#8A2BE2">" from "</font></b>)
+082:           Console.Out.WriteLine(t)
+083:         End If
+084:       End While
+085:       Console.Out.WriteLine(<b><font color="#8A2BE2">"---------------------"</font></b>)
+086:       status = 0
+087:     Catch ex As ILOG.OPL.OplException
+088:         Console.Out.WriteLine(ex.Message)
+089:         Status = 2
+090:     Catch ex As ILOG.Concert.Exception
+091:         Console.Out.WriteLine(ex.Message)
+092:         Status = 3
+093:     Catch ex As System.Exception
+094:         Console.Out.WriteLine(ex.Message)
+095:         Status = 4
+096:     End Try
+097:     Return status
+098:   End Function
+099: 
+100: 
+101: REM The purpose of <b><font color="EA7D00">this</font></b> sample is to output a multidimensional array x[i][j] to illustrate how arrays and sub-arrays are managed.
+102: REM To access the elements of an array, you must first access the sub-arrays until the last dimension, then you can get the values.
+103: REM  Here, as there are two dimensions, you have to get one sub-array from which you can directly get the values. 
+104: REM
+105: REM The array of integers is indexed by two sets of strings..
+106: REM
+107: REM The simplified model is:
+108: REM
+109: REM {string} s1 = ...;
+110: REM {string} s2 = ...;
+111: REM {<b><font color="#0000FF">int</font></b>} x[s1][s2] = ...;
+112: REM
+113:   Function Sample2() As Integer
+114:     Dim status As Integer = 127
+115:     Try
+116:       OplFactory.DebugMode = True
+117:       Dim oplF As OplFactory = New OplFactory
+118: 
+119:       Dim rc As OplRunConfiguration = oplF.CreateOplRunConfiguration(DATADIR + <b><font color="#8A2BE2">"/iterators.mod"</font></b>)
+120:       rc.Cplex.SetOut(Nothing)
+121:       Dim opl As OplModel = rc.OplModel
+122: 
+123:       REM Get the x, s1 and s2 elements from the OplModel.
+124:       Dim x As IIntMap = opl.GetElement(<b><font color="#8A2BE2">"x"</font></b>).AsIntMap()
+125:       Dim s1 As ISymbolSet = opl.GetElement(<b><font color="#8A2BE2">"s1"</font></b>).AsSymbolSet()
+126:       Dim s2 As ISymbolSet = opl.GetElement(<b><font color="#8A2BE2">"s2"</font></b>).AsSymbolSet()
+127: 
+128:       REM Iterate on the first indexer.
+129:       Dim it1 As IEnumerator = s1.GetEnumerator
+130:       While it1.MoveNext
+131:         Dim sub1 As String = it1.Current
+132:         REM Get the 2nd dimension array from the 1st dimension.
+133:         Dim subM As IIntMap = x.GetSub(sub1)
+134:         REM Iterate on the second indexer of x (that is the indexer of the sub array).
+135:         Dim it2 As IEnumerator = s2.GetEnumerator
+136:         While it2.MoveNext
+137:           Dim sub2 As String = it2.Current
+138:           Console.Out.Write(sub1 + <b><font color="#8A2BE2">" "</font></b> + sub2 + <b><font color="#8A2BE2">" "</font></b>)
+139:           REM We are in the last dimension of the array, so we can directly use the get method.
+140:           Console.Out.WriteLine(subM.Get(sub2))
+141:         End While
+142:       End While
+143:       Console.Out.WriteLine(<b><font color="#8A2BE2">"---------------------"</font></b>)
+144:       status = 0
+145:     Catch ex As ILOG.OPL.OplException
+146:         Console.Out.WriteLine(ex.Message)
+147:         Status = 2
+148:     Catch ex As ILOG.Concert.Exception
+149:       Console.WriteLine(ex.Message)
+150:       status = 3
+151:     Catch ex As System.Exception
+152:         Console.Out.WriteLine(ex.Message)
+153:         Status = 4
+154:     End Try
+155:     Return status
+156:   End Function
+157: 
+158: 
+159:     REM The purpose of <b><font color="EA7D00">this</font></b> sample is to output an array of tuples arrayT[i], 
+160:     REM to illustrate how tuple elements can be accessed.
+161:     REM The simplified model is:
+162:     REM tuple t
+163:     REM {
+164:     REM   <b><font color="#0000FF">int</font></b> a;
+165:     REM   <b><font color="#0000FF">int</font></b> b;
+166:     REM }
+167:     REM {string} ids={<b><font color="#8A2BE2">"id1"</font></b>,<b><font color="#8A2BE2">"id2"</font></b>,<b><font color="#8A2BE2">"id3"</font></b>};
+168:     REM t arrayT[ids]=[&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];
+169: 
+170:     Function getModelTextSample3() As String
+171:         Dim model As String
+172:         model = <b><font color="#8A2BE2">"tuple t{int a;int b;}"</font></b> &amp; vbCrLf &amp; _
+173:                 <b><font color="#8A2BE2">"{string} ids = {""id1"",""id2"", ""id3""};"</font></b> &amp; vbCrLf &amp; _
+174:                 <b><font color="#8A2BE2">"t arrayT[ids] = [&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];"</font></b>
+175:         Return model
+176:     End Function
+177: 
+178:     Function sample3() As Integer
+179:         Dim status As Integer = 0
+180:         OplFactory.DebugMode = True
+181:         Dim oplF As OplFactory = New OplFactory
+182:         Try
+183:             Dim errHandler As OplErrorHandler = oplF.CreateOplErrorHandler(Console.Out)
+184:             Dim settings As OplSettings = oplF.CreateOplSettings(errHandler)
+185:             Dim src As OplModelSource = oplF.CreateOplModelSourceFromString(getModelTextSample3(), <b><font color="#8A2BE2">"tuple array iterator"</font></b>)
+186:             Dim def As OplModelDefinition = oplF.CreateOplModelDefinition(src, settings)
+187:             Dim cplex As Cplex = oplF.CreateCplex()
+188:             Dim opl As OplModel = oplF.CreateOplModel(def, cplex)
+189:             opl.Generate()
+190: 
+191:             REM get the string set used to index the array of tuples
+192:             Dim arrayT As ITupleMap = opl.GetElement(<b><font color="#8A2BE2">"arrayT"</font></b>).AsTupleMap()
+193:             Dim ids As ISymbolSet = opl.GetElement(<b><font color="#8A2BE2">"ids"</font></b>).AsSymbolSet()
+194:             REM iterate on the index set to retrieve the tuples stored in the array
+195:             Dim it As IEnumerator = ids.GetEnumerator()
+196:             While it.MoveNext()
+197:                 Console.Out.Write(<b><font color="#8A2BE2">"arrayT["</font></b> + it.Current + <b><font color="#8A2BE2">"] = "</font></b>)
+198:                 Dim id As IMapIndexArray = oplF.MapIndexArray(0)
+199:                 id.Add(it.Current.ToString)
+200:                 Dim t As ITuple = arrayT.MakeTuple()
+201:                 arrayT.GetAt(id, t)
+202:                 Console.Out.WriteLine(t)
+203:             End While
+204:         Catch ex As ILOG.OPL.OplException
+205:            Console.Out.WriteLine(ex.Message)
+206:            Status = 2
+207:         Catch ex As ILOG.Concert.Exception
+208:            Console.WriteLine(ex.Message)
+209:            status = 3
+210:         Catch ex As System.Exception
+211:            Console.Out.WriteLine(ex.Message)
+212:            Status = 4        
+213:         End Try
+214:         oplF.End()
+215:         Return status
+216:     End Function
+217: 
+218:     Sub Main()
+219:         Dim res1 As Integer = Sample1()
+220:         Dim res2 As Integer = Sample2()
+221:         Dim res3 As Integer = Sample3()
+222:         Environment.ExitCode = res1 + res2 + res3
+223:         Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>)
+224:         Console.ReadLine()
+225:     End Sub
+226: End Module
+</tt></pre>

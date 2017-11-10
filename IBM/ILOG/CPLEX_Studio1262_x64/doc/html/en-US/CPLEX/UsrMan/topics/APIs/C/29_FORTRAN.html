@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="FORTRAN interface" />
+<meta name="abstract" content="Describes coding conventions of the C API to support interface with a FORTRAN application." />
+<meta name="Description" content="Describes coding conventions of the C API to support interface with a FORTRAN application." />
+<meta name="DC.subject" content="example, FORTRAN" />
+<meta name="keywords" content="example, FORTRAN" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callableLibrary.639197" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<title>FORTRAN interface</title>
+</head>
+<body role="main" id="User_manual.uss_callableLibrary.639197">
+<h1 class="title topictitle1">FORTRAN interface</h1>
+<div class="body"><p class="shortdesc">Describes coding conventions of the C API to support
+interface with a FORTRAN application.</p>
+<p class="p">The Callable Library can be interfaced with FORTRAN applications.
+Although they are no longer distributed with the product, you can
+download examples of a FORTRAN application from the technotes of the product support
+web site. At the portal of your product, search for CPLEX and FORTRAN 
+to locate relevant technotes, such as "Calling CPLEX from FORTRAN" 
+or "Calling CPLEX C API from Fortran using Open Watcom" </p>
+<p class="p">Those examples were compiled with CPLEX versions 7.0
+and earlier on a particular platform. Since C-to-FORTRAN interfaces
+vary across platforms (operating system, hardware, compilers, etc.),
+you may need to modify the examples for your own system.</p>
+<p class="p">Whether you need intermediate routines for the interface
+depends on your operating system. As a first step in building such
+an interface, it is a good idea to study your system documentation
+about C-to-FORTRAN interfaces. In that context, this section lists
+a few considerations particular to CPLEX in building a FORTRAN interface.</p>
+<div class="section" id="User_manual.uss_callableLibrary.639197__User_manual.uss_callableLibrary.639204"><h2 class="title sectiontitle">Case-sensitivity</h2><p class="p">As you know, FORTRAN is a case-insensitive language,
+whereas routines in the Callable Library have names with mixed case.
+Most FORTRAN compilers have an option, such as the option <samp class="ph codeph">-U</samp> 
+on UNIX systems, that treats symbols in a case-sensitive way. It is
+a good idea to use this option in any file that calls Callable Library
+routines.</p>
+<p class="p">On some operating systems, certain intrinsic FORTRAN
+functions must be in all upper case (that is, capital letters) for
+the compiler to accept those functions.</p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.639197__User_manual.uss_callableLibrary.639205"><h2 class="title sectiontitle">Underscore</h2><p class="p">On some systems, all FORTRAN external symbols are created
+with an underscore character (that is, _) added to the end of the
+symbol name. Some systems have an option to turn off this feature.
+If you are able to turn off those postpended underscores, you may
+not need other “glue” routines.</p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.639197__User_manual.uss_callableLibrary.639206"><h2 class="title sectiontitle">Six-character identifiers</h2><p class="p">FORTRAN 77 allows identifiers that are unique only
+up to six characters. However, in practice, most FORTRAN compilers
+allow you to exceed this limit. Since routines in the Callable Library
+have names greater than six characters, you need to verify whether
+your FORTRAN compiler enforces this limit or allows longer identifiers.</p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.639197__User_manual.uss_callableLibrary.639207"><h2 class="title sectiontitle">Call by reference</h2><p class="p">By default, FORTRAN passes arguments by reference; that
+is, the <em class="ph i">address</em> of
+a variable is passed to a routine, not its value. In contrast, many
+routines of the Callable Library require arguments passed by value.
+To accommodate those routines, most FORTRAN compilers have the VMS
+FORTRAN extension <samp class="ph codeph">%VAL()</samp> . This operator
+used in calls to external functions or subroutines causes its argument
+to be passed by value (rather than by the default FORTRAN convention
+of passed by reference). For example, with that extension, you can
+call the routine <samp class="ph codeph">CPXprimopt</samp>  with this
+FORTRAN statement:  </p>
+<pre class="pre codeblock"><code>status = CPXprimopt (%val(env), %val(lp))</code></pre>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.639197__User_manual.uss_callableLibrary.639260"><h2 class="title sectiontitle">Pointers</h2><p class="p">Certain CPLEX routines return a pointer to memory. In
+FORTRAN 77, such a pointer cannot be de-referenced; however,
+you can store its value in an appropriate integer type, and you can
+then pass it to other CPLEX routines. On most 32-bit operating systems, the
+default integer type of four bytes is sufficient to hold pointer variables.
+On 64-bit operating systems, a variable of type <samp class="ph codeph">INTEGER*8</samp> may
+be needed. Consult your system documentation to learn the appropriate
+integer type to hold variables that are C pointers.</p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.639197__User_manual.uss_callableLibrary.639210"><h2 class="title sectiontitle">Strings</h2><p class="p">When you pass strings to routines of the Callable Library,
+they expect C strings; that is, strings terminated by an ASCII <samp class="ph codeph">NULL</samp> character,
+denoted <samp class="ph codeph">\0</samp> in C. Consequently, when you
+pass a FORTRAN string, you must add a terminating <samp class="ph codeph">NULL</samp> character;
+you do so by means of the FORTRAN intrinsic function <samp class="ph codeph">CHAR(0)</samp> .</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" title="Lists some of the programming practices the CPLEX team observes in developing and maintaining the Callable Library (C API).">CPLEX programming practices</a></div>
+</div>
+</div></body>
+</html>

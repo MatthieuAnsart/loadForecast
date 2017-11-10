@@ -1,0 +1,56 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/*********************************************</font></b>
+13: <b><font color="#007D00"> * LP relaxation model</font></b>
+14: <b><font color="#007D00"> *********************************************/</font></b>
+15: 
+16:  <b><font color="#007D00">/* LP relaxation model */</font></b> 
+17: 
+18: <b><font color="#0000FF">int</font></b> build_limit = ...; 
+19: 
+20: <b><font color="#007D00">//import int nbCities;</font></b>
+21: <b><font color="#0000FF">int</font></b> nbCities = ...;
+22: <b><font color="#0000FF">range</font></b> cities = 1..nbCities; 
+23: 
+24: <b><font color="#0000FF">int</font></b> send[cities] = ...;
+25: <b><font color="#0000FF">int</font></b> request[cities] = ...; 
+26: <b><font color="#0000FF">int</font></b> ship_cost[cities, cities]  = ...; 
+27: 
+28: <b><font color="#007D00">// decision variables</font></b>
+29: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b> Build[cities] <b><font color="#0000FF">in</font></b> 0..1; 
+30: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b> Ship[cities,cities] <b><font color="#0000FF">in</font></b> 0..maxint;  
+31: 
+32: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> shipping_obj = <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> cities, j <b><font color="#0000FF">in</font></b> cities) ship_cost[i,j] * Ship[i,j]; 
+33: 
+34: <b><font color="#007D00">// constraints</font></b>
+35: <b><font color="#0000FF">constraint</font></b> Supply_Constraint[cities];
+36: <b><font color="#0000FF">constraint</font></b> Demand_Constraint[cities]; 
+37: 
+38: 
+39: <b><font color="#0000FF">minimize</font></b> shipping_obj; 
+40: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+41:     
+42:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> cities) { 
+43:     Supply_Constraint[i] : <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> cities) Ship[i,j] &lt;= send[i] * Build[i];
+44:   } 
+45:       
+46:   <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> cities) { 
+47:     Demand_Constraint[j] : <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> cities) Ship[i,j] &gt;= request[j]; 
+48:   }    
+49: 
+50:   Limit_Constraint : <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> cities) Build[i] &lt;= build_limit;     
+51: };
+</tt></pre>

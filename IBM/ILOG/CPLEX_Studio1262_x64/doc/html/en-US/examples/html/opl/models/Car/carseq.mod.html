@@ -1,0 +1,65 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: 
+15: <b><font color="#007D00">//</font></b>
+16: <b><font color="#007D00">// Raw data</font></b>
+17: <b><font color="#007D00">//</font></b>
+18: <b><font color="#0000FF">int</font></b> nbConfs   = ...; 
+19: <b><font color="#0000FF">int</font></b> nbOptions = ...;
+20: <b><font color="#0000FF">range</font></b> Confs = 1..nbConfs;
+21: <b><font color="#0000FF">range</font></b> Options = 1..nbOptions;
+22: <b><font color="#0000FF">int</font></b> demand[Confs] = ...;
+23: <b><font color="#0000FF">tuple</font></b> CapacitatedWindow {
+24:   <b><font color="#0000FF">int</font></b> l;
+25:   <b><font color="#0000FF">int</font></b> u;
+26: };
+27: CapacitatedWindow capacity[Options] = ...; 
+28: 
+29: <b><font color="#007D00">//</font></b>
+30: <b><font color="#007D00">// Data for modified model with "blank" configurations</font></b>
+31: <b><font color="#007D00">//</font></b>
+32: <b><font color="#0000FF">range</font></b> AllConfs = 0..nbConfs;
+33: <b><font color="#0000FF">int</font></b> nbCars = <b><font color="#7D007D">sum </font></b>(c <b><font color="#0000FF">in</font></b> Confs) demand[c];
+34: <b><font color="#0000FF">int</font></b> nbSlots = <b><font color="#7D007D">ftoi</font></b>(<b><font color="#7D007D">floor</font></b>(nbCars * 1.1 + 5)); <b><font color="#007D00">// 10% slack + 5 slots</font></b>
+35: <b><font color="#0000FF">int</font></b> nbBlanks = nbSlots - nbCars;
+36: <b><font color="#0000FF">range</font></b> Slots = 1..nbSlots;
+37: <b><font color="#0000FF">int</font></b> option[Options,Confs] = ...; 
+38: <b><font color="#0000FF">int</font></b> allOptions[o <b><font color="#0000FF">in</font></b> Options, c <b><font color="#0000FF">in</font></b> AllConfs] = (c == 0) ? 0 : option[o][c];
+39: 
+40: <b><font color="#007D00">//</font></b>
+41: <b><font color="#007D00">// Decision variables</font></b>
+42: <b><font color="#007D00">//</font></b>
+43: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> slot[Slots] <b><font color="#0000FF">in</font></b> AllConfs;
+44: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> lastSlot <b><font color="#0000FF">in</font></b> nbCars..nbSlots;
+45: 
+46: <b><font color="#0000FF">minimize</font></b> lastSlot - nbCars; <b><font color="#007D00">// Try to get to zero meaning all blanks at the end</font></b>
+47: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+48:   <b><font color="#007D00">// Cardinality of configurations</font></b>
+49:   <b><font color="#7D007D">count</font></b>(slot, 0) == nbBlanks;
+50:   <b><font color="#7D007D">forall </font></b>(c <b><font color="#0000FF">in</font></b> Confs)
+51:     <b><font color="#7D007D">count</font></b>(slot, c) == demand[c];
+52: 
+53:   <b><font color="#007D00">// Capacity of gliding windows</font></b>
+54:   <b><font color="#7D007D">forall</font></b>(o <b><font color="#0000FF">in</font></b> Options, s <b><font color="#0000FF">in</font></b> Slots : s + capacity[o].u - 1 &lt;= nbSlots)
+55:     <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> s .. s + capacity[o].u - 1) allOptions[o][slot[j]] &lt;= capacity[o].l;
+56: 
+57:   <b><font color="#007D00">// Last slot</font></b>
+58:   <b><font color="#7D007D">forall </font></b>(s <b><font color="#0000FF">in</font></b> nbCars + 1 .. nbSlots)
+59:     (s &gt; lastSlot) =&gt; slot[s] == 0;
+60: };
+</tt></pre>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Step 12: Create variables" />
+<meta name="abstract" content="Shows lines to create variables in a model built by columns." />
+<meta name="Description" content="Shows lines to create variables in a model built by columns." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/dotNET/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_csharpCplex.1028715" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/dotNET/01_title_synopsis.html" />
+<title>Step 12: Create variables</title>
+</head>
+<body role="main" id="User_manual.uss_csharpCplex.1028715">
+<h1 class="title topictitle1">Step 12: Create variables</h1>
+<div class="body"><p class="shortdesc">Shows lines to create variables in a model built by columns.</p>
+<p class="p">Go to the comment Step 12 in <samp class="ph codeph">Dietlesson.cs</samp>,
+and add the following lines to create each of the variables.</p>
+<pre class="pre codeblock"><code>      for (int j = 0; j &lt; nFoods; j++) {
+
+         Column col = model.Column(cost, data.foodCost[j]);
+
+         for (int i = 0; i &lt; nNutrs; i++) {
+            col = col.And(model.Column(constraint[i], 
+                                       data.nutrPerFood[i][j]));
+         }
+
+         Buy[j] = model.NumVar(col, data.foodMin[j], data.foodMax[j], type);
+
+      }
+   }
+</code></pre>
+<p class="p">For each food <samp class="ph codeph">j</samp>, a column
+object <samp class="ph codeph">col</samp> is first created to represent
+how the new variable for that food is to be added to the objective
+function and constraints. Then that column object is used to construct
+the variable <samp class="ph codeph">Buy[j]</samp> that represents the
+amount of food <samp class="ph codeph">j</samp> to be purchased for the
+diet. At this time, the new variable will be installed in the objective
+function and constraints as defined by the column object <samp class="ph codeph">col</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/dotNET/01_title_synopsis.html" title="Explores the features that CPLEX offers to users of C#.NET through Concert Technology.">Concert Technology for .NET users</a></div>
+</div>
+</div></body>
+</html>

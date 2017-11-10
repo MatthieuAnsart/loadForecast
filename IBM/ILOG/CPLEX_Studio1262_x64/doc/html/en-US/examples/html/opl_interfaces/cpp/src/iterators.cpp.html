@@ -1,0 +1,219 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+002: <b><font color="#007D00">// File: iterators.cpp</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">//</font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">///////////////////////////////////////////////////////////////////////////////</font></b>
+013: 
+014: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+015: 
+016: #include <b><font color="#8A2BE2">&lt;sstream&gt;</font></b>
+017: 
+018: #ifndef DATADIR
+019: #ifdef ILO_WINDOWS
+020: #define DIRSEP <b><font color="#8A2BE2">"</font></b>\\<b><font color="#8A2BE2">"</font></b>
+021: #else
+022: #define DIRSEP <b><font color="#8A2BE2">"/"</font></b>
+023: #endif
+024: #define DATADIR <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b>  DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">"opl"</font></b> DIRSEP
+025: #endif
+026: 
+027: ILOSTLBEGIN
+028: 
+029: <b><font color="#007D00">// The purpose of this sample is to check the result of filtering by iterating on the generated data element.</font></b>
+030: <b><font color="#007D00">//</font></b>
+031: <b><font color="#007D00">// The data element is an array of strings that is indexed by a set of strings.</font></b>
+032: <b><font color="#007D00">// It is filled as the result of an iteration on a set of tuples that filters out the duplicates.</font></b>
+033: <b><font color="#007D00">// It is based on the model used in "Sparsity" run configuration of the "transp" example.</font></b>
+034: <b><font color="#007D00">//</font></b>
+035: <b><font color="#007D00">//</font></b>
+036: <b><font color="#007D00">// The simplified model is:</font></b>
+037: <b><font color="#007D00">//</font></b>
+038: <b><font color="#007D00">// {string} Products = ...;</font></b>
+039: <b><font color="#007D00">// tuple Route { string p; string o; string d; }</font></b>
+040: <b><font color="#007D00">// {Route} Routes = ...;</font></b>
+041: <b><font color="#007D00">// {string} orig[p in Products] = { o | &lt;p,o,d&gt; in Routes };</font></b>
+042: <b><font color="#007D00">//</font></b>
+043: <b><font color="#0000FF">int</font></b> sample1() {
+044:     IloEnv env;
+045:     <b><font color="#0000FF">int</font></b> status = 127;
+046:     <b><font color="EA7D00">try</font></b> {
+047:         IloOplRunConfiguration rc(env,
+048:             DATADIR <b><font color="#8A2BE2">"transp"</font></b> DIRSEP <b><font color="#8A2BE2">"transp2.mod"</font></b>,
+049:             DATADIR <b><font color="#8A2BE2">"transp"</font></b> DIRSEP <b><font color="#8A2BE2">"transp2.dat"</font></b>);
+050:         IloOplModel opl = rc.getOplModel();
+051:         opl.generate();
+052: 
+053:         cout &lt;&lt; <b><font color="#8A2BE2">"Verification of the computation of orig: </font></b>\n<b><font color="#8A2BE2">"</font></b>;
+054: 
+055:         <b><font color="#007D00">// Get the orig, Routes, Product elements from the OplModel.</font></b>
+056:         IloSymbolSetMap orig = opl.getElement(<b><font color="#8A2BE2">"Orig"</font></b>).asSymbolSetMap();
+057:         IloTupleSet Routes = opl.getElement(<b><font color="#8A2BE2">"Routes"</font></b>).asTupleSet();
+058:         IloSymbolSet Products = opl.getElement(<b><font color="#8A2BE2">"Products"</font></b>).asSymbolSet();
+059: 
+060:         <b><font color="#007D00">// Iterate through the orig to see the result of the data element filtering.</font></b>
+061:         <b><font color="EA7D00">for</font></b> (IloSymbolSetIterator it2(Products); it2.ok(); ++it2){
+062:             <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* p = *it2;
+063:             <b><font color="#007D00">// This is the last dimension of the array (as it is a one-dimensional array), so you can use the get method directly.</font></b>
+064:             cout &lt;&lt; <b><font color="#8A2BE2">"for p = "</font></b> &lt;&lt; p &lt;&lt; <b><font color="#8A2BE2">" we have "</font></b> &lt;&lt; orig.get(p) &lt;&lt; <b><font color="#8A2BE2">"</font></b>\n<b><font color="#8A2BE2">"</font></b>;
+065:         }
+066:         cout &lt;&lt; <b><font color="#8A2BE2">"---------------------</font></b>\n<b><font color="#8A2BE2">"</font></b>;
+067: 
+068:         <b><font color="#007D00">// Iterate through the TupleSet.</font></b>
+069:         <b><font color="EA7D00">for</font></b> (IloTupleIterator it1(Routes); it1.ok(); ++it1){
+070:             IloTuple t = *it1;
+071:             <b><font color="#007D00">// Get the string "p" from the tuple.</font></b>
+072:             <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* p = t.getStringValue(<b><font color="#8A2BE2">"p"</font></b>);
+073:             <b><font color="#007D00">// if "p" is in the indexer, we will try to add the "o" string to the array.</font></b>
+074:             <b><font color="EA7D00">if</font></b> (Products.contains(p)) cout &lt;&lt; <b><font color="#8A2BE2">"for p = "</font></b> &lt;&lt; p &lt;&lt; <b><font color="#8A2BE2">" we will have "</font></b> &lt;&lt; t.getStringValue(<b><font color="#8A2BE2">"o"</font></b>) &lt;&lt; <b><font color="#8A2BE2">" from "</font></b> &lt;&lt; t &lt;&lt; <b><font color="#8A2BE2">"</font></b>\n<b><font color="#8A2BE2">"</font></b>;
+075:         }
+076:         cout &lt;&lt; <b><font color="#8A2BE2">"---------------------</font></b>\n<b><font color="#8A2BE2">"</font></b>;
+077:         status = 0;
+078:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+079:         status = 1;
+080:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+081:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+082:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+083:         e.print(cout);
+084:         status = 2;
+085:     } <b><font color="EA7D00">catch</font></b> (...) {
+086:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+087:         status = 3;
+088:     }
+089: 
+090:     env.end();
+091: 
+092:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+093:     getchar();
+094: 
+095:     <b><font color="EA7D00">return</font></b> status;
+096: }
+097: 
+098: <b><font color="#007D00">// The purpose of this sample is to output a multidimensional array x[i][j] to illustrate how arrays and subarrays are managed.</font></b>
+099: <b><font color="#007D00">// To access the elements of an array, you must first access the subarrays up to  the last dimension, then you can get the values.</font></b>
+100: <b><font color="#007D00">//  Here, as there are two dimensions, you have to get one subarray from which you can directly get the values.</font></b>
+101: <b><font color="#007D00">//</font></b>
+102: <b><font color="#007D00">// The array of integers is indexed by two sets of strings..</font></b>
+103: <b><font color="#007D00">//</font></b>
+104: <b><font color="#007D00">// The simplified model is:</font></b>
+105: <b><font color="#007D00">//</font></b>
+106: <b><font color="#007D00">// {string} s1 = ...;</font></b>
+107: <b><font color="#007D00">// {string} s2 = ...;</font></b>
+108: <b><font color="#007D00">// {int} x[s1][s2] = ...;</font></b>
+109: <b><font color="#007D00">//</font></b>
+110: <b><font color="#0000FF">int</font></b> sample2() {
+111:     IloEnv env;
+112:     <b><font color="#0000FF">int</font></b> status = 0;
+113:     <b><font color="EA7D00">try</font></b> {
+114:         IloOplRunConfiguration rc(env,DATADIR <b><font color="#8A2BE2">"iterators"</font></b> DIRSEP <b><font color="#8A2BE2">"iterators.mod"</font></b>);
+115:         IloOplModel opl = rc.getOplModel();
+116:         opl.generate();
+117: 
+118:         <b><font color="#007D00">// Get the x, s1 and s2 elements from the OplModel.</font></b>
+119:         IloIntMap x = opl.getElement(<b><font color="#8A2BE2">"x"</font></b>).asIntMap();
+120:         IloSymbolSet s1 = opl.getElement(<b><font color="#8A2BE2">"s1"</font></b>).asSymbolSet();
+121:         IloSymbolSet s2 = opl.getElement(<b><font color="#8A2BE2">"s2"</font></b>).asSymbolSet();
+122: 
+123:         <b><font color="#007D00">// Iterate on the first indexer.</font></b>
+124:         <b><font color="EA7D00">for</font></b> (IloSymbolSetIterator it1(s1); it1.ok(); ++it1){
+125:             <b><font color="#007D00">// Get the second dimension array from the first dimension.</font></b>
+126:             IloIntMap sub = x.getSub(*it1);
+127:             <b><font color="#007D00">// Iterate on the second indexer of x (that is the indexer of the subarray).</font></b>
+128:             <b><font color="EA7D00">for</font></b> (IloSymbolSetIterator it2(s2); it2.ok(); ++it2){
+129:                 <b><font color="#007D00">// This is the last dimension of the array, so you can directly use the get method.</font></b>
+130:                 cout &lt;&lt; *it1 &lt;&lt; <b><font color="#8A2BE2">" "</font></b> &lt;&lt; *it2 &lt;&lt; <b><font color="#8A2BE2">" "</font></b> &lt;&lt; sub.get(*it2) &lt;&lt; <b><font color="#8A2BE2">"</font></b>\n<b><font color="#8A2BE2">"</font></b>;
+131:             }
+132:         }
+133:         cout &lt;&lt; <b><font color="#8A2BE2">"---------------------</font></b>\n<b><font color="#8A2BE2">"</font></b>;
+134:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+135:         status = 1;
+136:                 cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+137:         } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+138:         cout &lt;&lt; <b><font color="#8A2BE2">"### exception: "</font></b>;
+139:         e.print(cout);
+140:         status = 2;
+141:     } <b><font color="EA7D00">catch</font></b> (...) {
+142:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+143:         status = 3;
+144:     }
+145: 
+146:     env.end();
+147:     <b><font color="EA7D00">return</font></b> 0;
+148: }
+149: 
+150: <b><font color="#007D00">// The purpose of this sample is to output an array of tuples arrayT[i],</font></b>
+151: <b><font color="#007D00">// to illustrate how tuple elements can be accessed.</font></b>
+152: <b><font color="#007D00">// The simplified model is:</font></b>
+153: <b><font color="#007D00">// tuple t</font></b>
+154: <b><font color="#007D00">// {</font></b>
+155: <b><font color="#007D00">//   int a;</font></b>
+156: <b><font color="#007D00">//   int b;</font></b>
+157: <b><font color="#007D00">// }</font></b>
+158: <b><font color="#007D00">// {string} ids={"id1","id2","id3"};</font></b>
+159: <b><font color="#007D00">// t arrayT[ids]=[&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];</font></b>
+160: 
+161: <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">char</font></b>* getModelTextSample3 () {
+162:         <b><font color="EA7D00">return</font></b> (<b><font color="#0000FF">char</font></b>*)<b><font color="#8A2BE2">"tuple t{int a;int b;} \</font></b>
+163: <b><font color="#8A2BE2">                  {string} ids = {</font></b>\"<b><font color="#8A2BE2">id1</font></b>\"<b><font color="#8A2BE2">,</font></b>\"<b><font color="#8A2BE2">id2</font></b>\"<b><font color="#8A2BE2">, </font></b>\"<b><font color="#8A2BE2">id3</font></b>\"<b><font color="#8A2BE2">};\</font></b>
+164: <b><font color="#8A2BE2">                  t arrayT[ids] = [&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];"</font></b>;
+165: }
+166: <b><font color="#0000FF">int</font></b> sample3() {
+167:     <b><font color="#0000FF">int</font></b> status = 0;
+168:     IloEnv env;
+169:     <b><font color="EA7D00">try</font></b> {
+170:         std::istringstream ins( getModelTextSample3() );
+171:         IloOplModelSource src (env,ins,<b><font color="#8A2BE2">"tuple array iterator"</font></b>);
+172:         IloOplErrorHandler errHandler(env, cout);
+173:         IloOplSettings settings(env,errHandler);
+174:         IloOplModelDefinition def(src, settings);
+175:         IloCplex cplex(env);
+176:         IloOplModel opl(def, cplex);
+177:         opl.generate();
+178: 
+179:         <b><font color="#007D00">// get the string set used to index the array of tuples</font></b>
+180:         IloTupleMap arrayT = opl.getElement(<b><font color="#8A2BE2">"arrayT"</font></b>).asTupleMap();
+181:         IloSymbolSet ids = IloAdvCollectionHelper::asSymbolSet(arrayT.getIndexer());
+182:         <b><font color="#007D00">// iterate on the index set to retrieve the tuples stored in the array</font></b>
+183:         <b><font color="EA7D00">for</font></b> (IloSymbolSetIterator it(ids); it.ok(); ++it){
+184:             cout &lt;&lt; <b><font color="#8A2BE2">"arrayT["</font></b> &lt;&lt; *it &lt;&lt; <b><font color="#8A2BE2">"] = "</font></b>;
+185:             IloMapIndexArray id(env,0);
+186:             id.add(*it);
+187:             IloTuple t = arrayT.makeTuple();
+188:             arrayT.getAt(id,t);
+189:             cout &lt;&lt; t &lt;&lt; endl;
+190:         }
+191:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+192:         status = 1;
+193:                 cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+194:         } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+195:         cout &lt;&lt; <b><font color="#8A2BE2">"### exception: "</font></b>;
+196:         e.print(cout);
+197:         status = 2;
+198:     } <b><font color="EA7D00">catch</font></b> (...) {
+199:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+200:         status = 3;
+201:     }
+202:     env.end();
+203:     <b><font color="EA7D00">return</font></b> status;
+204: }
+205: 
+206: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+207:     <b><font color="#0000FF">int</font></b> status = 0;
+208:     status = status + sample1();
+209:     status = status + sample2();
+210:     status = status + sample3();
+211:     <b><font color="EA7D00">return</font></b> status;
+212: }
+213: 
+214: 
+</tt></pre>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Initializing sets" />
+<meta name="abstract" content="You can initialize sets in three different ways." />
+<meta name="Description" content="You can initialize sets in three different ways." />
+<meta name="DC.subject" content="initializing, sets, external data, internal data, generic sets, generic, generic sets, and sparsity, sparsity, and sets" />
+<meta name="keywords" content="initializing, sets, external data, internal data, generic sets, generic, generic sets, and sparsity, sparsity, and sets" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_data_init.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datasources.1060280" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_data_init.html" />
+<title>Initializing sets</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datasources.1060280">
+<h1 class="title topictitle1">Initializing sets</h1>
+<div class="body"><p class="shortdesc">You can initialize sets in three different ways.</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1060280__section1326991219285">Externally</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1060280__section1326991225457">Internally</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="#usropllangref.uss_langref_datasources.1060280__section1326991236739">As generic sets</a></p>
+ </li>
+</ul>
+<div class="section" id="usropllangref.uss_langref_datasources.1060280__section1326991219285"><h2 class="title sectiontitle">Externally</h2><p class="p">As
+stated in <a class="xref" href="opl_langref_datastructures_sets.html#usropllangref.uss_langref_datatypes.1061973__usropllangref.uss_langref_datatypes.1059988">Initializing sets</a>,
+in the <em class="ph i">Sets</em> topic, the simplest way to initialize a set is
+by listing its values explicitly in the <span class="ph filepath">.dat</span> file.</p>
+<p class="p">For
+example, the declaration:</p>
+<pre class="pre codeblock"><code>/* .mod file */
+tuple Precedence {
+  int before;
+  int after;
+}
+{Precedence} precedences = ...;
+/* .dat file */
+precedences = {&lt;1,2&gt;, &lt;1,3&gt;, &lt;3,4&gt;};</code></pre>
+<p class="p">initializes a set of tuples.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1060280__section1326991225457"><h2 class="title sectiontitle">Internally</h2><p class="p">You
+can also initialize sets internally (in the <span class="ph filepath">.mod</span> file),
+more precisely by using set expressions using previously defined sets
+and operations such as union, intersection, difference, and symmetric
+difference. The symmetric difference of two sets <em class="ph i">A</em> and <em class="ph i">B</em> is </p>
+<p class="p">(A <img class="image" src="../images/union.jpg" alt="union symbol" /> B) \ (A <img class="image" src="../images/intrsect.jpg" alt="intersection symbol" /> B)</p>
+<p class="p">described in <a class="xref" href="opl_langref_expressions.html" title="Describes data and decision variable identifiers, integer and float expressions, aggregate operators, piecewise-linear functions (continuous and discontinuous), set expressions, and Boolean expressions.">Expressions</a>. </p>
+<p class="p">For example, the
+declarations:</p>
+<pre class="pre codeblock"><code>{int} s1 = {1,2,3}; 
+{int} s2 = {1,4,5}; 
+{int} i = s1 inter s2; 
+{int} j = {1,4,8,10} inter s2; 
+{int} u = s1 union {5,7,9}; 
+{int} d = s1 diff s2; 
+{int} sd = s1 symdiff {1,4,5}; </code></pre>
+<p class="p">initialize <samp class="ph codeph">i</samp> to <samp class="ph codeph">{1}</samp>, <samp class="ph codeph">u</samp> to <samp class="ph codeph">{1,2,3,5,7,9}</samp>, <samp class="ph codeph">d</samp> to <samp class="ph codeph">{2,3}</samp>,
+and <samp class="ph codeph">sd</samp> to <samp class="ph codeph">{2,3,4,5}</samp>. </p>
+<p class="p">It is
+also possible to initialize a set from a range expression. For example,
+the declaration:</p>
+<pre class="pre codeblock"><code>{int} s = asSet(1..10) </code></pre>
+<p class="p">initializes <samp class="ph codeph">s</samp> to <samp class="ph codeph">{1,2,..,10}</samp> </p>
+<p class="p">It
+is important to point out at this point that sets initialized by ranges
+are represented explicitly (unlike ranges). As a consequence, a declaration
+of the form </p>
+<pre class="pre codeblock"><code>{int} s = asSet(1..100000); </code></pre>
+<p class="p">creates a set where all the values <samp class="ph codeph">1</samp>, <samp class="ph codeph">2</samp>,
+..., <samp class="ph codeph">100000</samp> are explicitly represented, while the
+range </p>
+<pre class="pre codeblock"><code>range s = 1..100000; </code></pre>
+<p class="p">represents only the bounds explicitly.</p>
+<p class="p">Note that
+when writing the assignment <samp class="ph codeph">s2=s1</samp>, you add one element
+to <samp class="ph codeph">s1</samp>, that element is also added to <samp class="ph codeph">s2</samp>.
+If you do not want this, write </p>
+<p class="p"><samp class="ph codeph">s1={i|i in s2}</samp> </p>
+<p class="p">For
+example, compare the statements in the table below.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three-column table comparing the results of two different assignment statements." id="usropllangref.uss_langref_datasources.1060280__table1218108332210" class="table VertShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Initializing
+sets in the model file</span></caption><tbody class="tbody"><tr class="row"><td class="entry ShadedHead" align="left" valign="top">If you write</td>
+<td class="entry" align="left" valign="top"><p class="p"><samp class="ph codeph">{int} s1={1,2};</samp> </p>
+<p class="p"><samp class="ph codeph">{int} s2=s1;</samp> </p>
+<p class="p"><samp class="ph codeph">execute</samp> </p>
+<p class="p"><samp class="ph codeph">{</samp> </p>
+<p class="p"><samp class="ph codeph">s2.add(3);</samp> </p>
+<p class="p"><samp class="ph codeph">writeln(s1);</samp> </p>
+<p class="p">}</p>
+</td>
+<td class="entry" align="left" valign="top"><p class="p"><samp class="ph codeph">{int} s1={1,2};</samp> </p>
+<p class="p"><samp class="ph codeph">{int} s2={
+i | i in s1};</samp> </p>
+<p class="p"><samp class="ph codeph">//{int} s2=s1;</samp> </p>
+<p class="p"><samp class="ph codeph">execute</samp> </p>
+<p class="p"><samp class="ph codeph">{</samp> </p>
+<p class="p"><samp class="ph codeph">s2.add(3);</samp> </p>
+<p class="p"><samp class="ph codeph">writeln(s1);</samp> </p>
+<p class="p">}</p>
+</td>
+</tr>
+<tr class="row"><td class="entry ShadedHead" align="left" valign="top">the result is</td>
+<td class="entry" align="left" valign="top"><samp class="ph codeph">{1 2 3}</samp> </td>
+<td class="entry" align="left" valign="top"><samp class="ph codeph">{1 2}</samp> </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="usropllangref.uss_langref_datasources.1060280__section1326991236739"><h2 class="title sectiontitle">As generic sets</h2><p class="p">OPL
+supports <em class="ph i">generic sets</em> which have an expressive power similar
+to relational database queries. For example, the declaration:</p>
+<pre class="pre codeblock"><code>{int} s = {i | i in 1..10: i mod 3 == 1}; </code></pre>
+<p class="p">initializes <samp class="ph codeph">s</samp> with the set <samp class="ph codeph">{1,4,7,10}</samp>.
+A generic set is a conjunction of expressions of the form </p>
+<pre class="pre codeblock"><code>p in S : condition </code></pre>
+<p class="p">where <samp class="ph codeph">p</samp> is a parameter (or a tuple
+of parameters), <samp class="ph codeph">S</samp> is a range or a finite set, and <samp class="ph codeph">condition</samp> is
+a Boolean expression. These expressions are also used in <samp class="ph codeph">forall</samp> statements
+and aggregate operators and are discussed in detail in <a class="xref" href="opl_langref_formalParams.html" title="Describes basic formal parameters, tuples of parameters, and filtering in tuples of parameters.">Formal parameters</a>. </p>
+<p class="p">The
+declaration:</p>
+<pre class="pre codeblock"><code>{string} Resources ...; 
+{string} Tasks ...; 
+Tasks res[Resources] = ...; 
+tuple Disjunction { 
+     {string} first; 
+     {string} second; 
+} 
+{Disjunction} disj = {&lt;i,j&gt; | 
+       r in Resources, ordered i,j in res[r] 
+}; </code></pre>
+<p class="p">is a more interesting example, showing a conjunction
+of expressions, and is explained in detail in <a class="xref" href="opl_langref_formalParams.html" title="Describes basic formal parameters, tuples of parameters, and filtering in tuples of parameters.">Formal parameters</a>. Generic sets are often
+useful when you transform a data structure (e.g. the data stored in
+a file) into a data structure more appropriate for stating the model
+effectively. Consider, for example, the declarations:</p>
+<pre class="pre codeblock"><code>{string} Nodes ...; 
+int edges[Nodes][Nodes] = ...; </code></pre>
+<p class="p">which describe the edges of a graph in terms of a Boolean
+adjacency matrix. It may be important for the model to use a sparse
+representation of the edges (because, for instance, edges are used
+to index an array). The declaration:</p>
+<pre class="pre codeblock"><code>tuple Edge { 
+    Nodes o; 
+    Nodes d; 
+}
+{Edge} setEdges = {&lt;o,d&gt; | o,d in Nodes : edges[o][d]==1}; </code></pre>
+<p class="p">computes this sparse representation using a simple
+generic set. It is of course possible to define generic arrays of
+sets. For example, the declaration:</p>
+<pre class="pre codeblock"><code>{int} a[i in 3..4] = {e | e in 1..10: e mod i == 0};</code></pre>
+<p class="p">initializes <samp class="ph codeph">a[3]</samp> to <samp class="ph codeph">{3,6,9}</samp> and <samp class="ph codeph">a[4]</samp> to <samp class="ph codeph">{4,8}</samp>. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_data_init.html" title="Defines internal versus external initialization, describes how to initialize arrays, tuples, and sets, and discusses memory allocation aspects of data initialization.">Data initialization</a></div>
+</div>
+</div></body>
+</html>

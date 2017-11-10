@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Decrease the number of variables" />
+<meta name="abstract" content="Decreasing the number of variables, and thus reducing the size of the search space, is one model design principle to consider." />
+<meta name="Description" content="Decreasing the number of variables, and thus reducing the size of the search space, is one model design principle to consider." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/design.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerdesign.1009708" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/design.html" />
+<title>Decrease the number of variables</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerdesign.1009708">
+<h1 class="title topictitle1">Decrease the number of variables</h1>
+<div class="body"><p class="shortdesc">Decreasing the number of variables, and thus reducing the
+size of the search space, is one model design principle to consider.</p>
+<p class="p">The unknowns of a given problem are typically represented in the
+model by decision variables. There are practical ways of decreasing
+the number of variables and thus reducing the size of the model and
+its search space.</p>
+<p class="p">Problems best solved with constraint-based programming are generally
+subject to intrinsic combinatorial growth. Even if reducing the domains
+of variables by propagating constraints makes it possible to reduce
+the search space, the initial size of this search space still remains
+a weighty factor in the execution time. </p>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1009708__migration.uss_usrcpoptimizerdesign.1009825"><h2 class="title sectiontitle">Principle</h2><p class="p">Consequently,
+good practice in designing a model should attempt to minimize the
+size of the search space in the first place. This size increases exponentially
+with the number of variables. Thus, limiting the number of such variables
+(even at the expense of enlarging their domains) can reduce the combinatorial
+complexity.</p>
+</div>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1009708__migration.uss_usrcpoptimizerdesign.1009828"><h2 class="title sectiontitle">Example</h2><p class="p">This
+principle of reducing the number of decision variables can often be
+applied advantageously to resource allocation problems. For example,
+assume that <em class="ph i">C</em> consumers must choose among <em class="ph i">R</em> resources
+where: </p>
+<ul class="ul"><li class="li"><p class="p">all the resources are available to every consumer; </p>
+</li>
+<li class="li"><p class="p">if consumer <em class="ph i">i</em> chooses resource <em class="ph i">j</em>, he or she incurs <em class="ph i">cost[i,j]</em>; </p>
+ </li>
+<li class="li"><p class="p">each consumer uses at most one resource. </p>
+ </li>
+</ul>
+</div>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1009708__migration.uss_usrcpoptimizerdesign.1009711"><h2 class="title sectiontitle">First
+model</h2><p class="p">This problem is often represented in the following
+way:</p>
+<ul class="ul"><li class="li"><p class="p">Create <em class="ph i">C*R</em> constrained integer variables <em class="ph i">supplier</em><sub class="ph sub">i,j</sub> with
+domain [0, 1] such that <em class="ph i">supplier</em><sub class="ph sub">i,j</sub> = 1 if consumer <em class="ph i">i</em> uses
+resource <em class="ph i">j</em>. </p>
+ </li>
+<li class="li"><p class="p">The constraints stating that each consumer uses at most one
+resource are represented this way: for each <em class="ph i">i</em>, <img class="image" src="../images/usrcpoptimizerdesigni.gif" alt="The summation over j=0 to R-1 of supplier [i,j] is less than or equal to 1." /></p>
+</li>
+<li class="li"><p class="p">The goal is to maximize <img class="image" src="../images/usrcpoptimizerdesign2.gif" alt="The summation over i=0 to C-1 of the summation over j=0 to R-1 of cost[i,j] times supplier [i,j]" /> </p>
+</li>
+</ul>
+<p class="p">To evaluate the combinatorial complexity of the problem, consider
+the maximum number of configurations, called the <em class="ph i">apparent complexity</em> of
+the problem. This figure is the size of the search space, that is,
+the worst case complexity of a generate and test algorithm. </p>
+<p class="p">In
+this model, the apparent complexity is 2<sup class="ph sup">R*C</sup>, which is around
+10<sup class="ph sup">30</sup> if <em class="ph i">R</em>=<em class="ph i">C</em>=10. </p>
+</div>
+<div class="section" id="migration.uss_usrcpoptimizerdesign.1009708__migration.uss_usrcpoptimizerdesign.1009712"><h2 class="title sectiontitle">Second
+model: using fewer variables</h2><p class="p">With CP Optimizer, a more efficient
+model can be represented. The alternate model can be written this
+way:</p>
+<ul class="ul"><li class="li"><p class="p">Create a fake resource numbered 0. </p>
+ </li>
+<li class="li"><p class="p">Create C constrained integer variables <em class="ph i">supplier</em><sub class="ph sub">i</sub> with
+domain [0..<em class="ph i">R</em>] so that </p>
+</li>
+</ul>
+<p class="p"><em class="ph i">      supplier</em><sub class="ph sub">i</sub> = 0 if consumer <em class="ph i">i</em> uses
+no resource, </p>
+<p class="p"><em class="ph i">      supplier</em><sub class="ph sub">i</sub> = <em class="ph i">j</em> if
+consumer <em class="ph i">i</em> uses resource <em class="ph i">j</em>. </p>
+<p class="p">The constraints stating
+that each consumer uses at most one resource are necessarily satisfied,
+since a constrained integer variable can be fixed with only one value. </p>
+<ul class="ul"><li class="li"><p class="p">The goal is to maximize <img class="image" src="../images/usrcpoptimizerdesign3.gif" alt="Summation over i=0 to C-1 of cost indexed by i and supplier i" />.</p>
+</li>
+</ul>
+<p class="p">The maximum number of solutions of this representation is <em class="ph i">(R+1)</em><sup class="ph sup">C</sup>,
+which is 11<sup class="ph sup">10</sup> if <em class="ph i">R</em>=<em class="ph i">C</em>=10. This value is much
+smaller than 10<sup class="ph sup">30</sup> from the first model.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/design.html" title="While developing models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing models</a></div>
+</div>
+</div></body>
+</html>

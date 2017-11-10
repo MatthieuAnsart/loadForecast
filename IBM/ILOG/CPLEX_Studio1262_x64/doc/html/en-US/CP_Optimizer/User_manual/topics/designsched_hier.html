@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling hierarchical models and “Work Breakdown Structures”" />
+<meta name="abstract" content="Hierarchical models and Work Breakdown Structures can be used to model task decompositions." />
+<meta name="Description" content="Hierarchical models and Work Breakdown Structures can be used to model task decompositions." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="dOGgz6fy" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Modeling hierarchical models and “Work Breakdown Structures”</title>
+</head>
+<body role="main" id="dOGgz6fy">
+<h1 class="title topictitle1">Modeling hierarchical models and “Work Breakdown Structures”</h1>
+<div class="body"><p class="shortdesc">Hierarchical models and Work Breakdown Structures can be
+used to model task decompositions.</p>
+<p class="p">Hierarchical models in which a high-level task decomposes into
+a set of lower-level ones are common in scheduling. For instance,
+it may correspond to the Work Breakdown Structure of a project in
+project scheduling. Many variants are possible: the depth of the hierarchy
+may be constant or dependent on the tasks, some tasks in the hierarchy
+may be optional and there may be different way to decompose a given
+task.</p>
+<p class="p">Consider a task <em class="ph i">T</em> in the hierarchy.  In the simplest case,
+task <em class="ph i">T</em> decomposes into a set of subtasks <em class="ph i">ST1,...,STn</em>.
+This can be modeled using a span constraint between <em class="ph i">T</em> and its
+set of subtasks <em class="ph i">STs = {ST1,...,STn}</em>; task <em class="ph i">T</em> will be
+constrained to start at the start time of the first subtask in the
+set <em class="ph i">ST1,...,STn</em> and to end at the end of the last subtask in
+this set. </p>
+<pre class="pre codeblock"><code>IloIntervalVar T(env);
+IloIntervalVar STs(env,n);
+for (i=0; i&lt;n; i++)
+   STs[i] = IloIntervalVar(env);
+m.add(IloSpan(env,T, STs);</code></pre>
+<p class="p"> </p>
+<p class="p">Suppose now that some subtasks of a task <em class="ph i">T</em> in the hierarchy
+are non-compulsory. In other words, even if <em class="ph i">T</em> is executed,
+these subtasks may be left unperformed, perhaps incurring an additional
+cost. Reciprocally, if a subtask <em class="ph i">ST</em> of a task <em class="ph i">T</em> is compulsory,
+then if task <em class="ph i">T</em> is executed, subtask <em class="ph i">ST</em> will have to
+be executed as well. Of course, <em class="ph i">T</em> may be non-compulsory. This
+notion can be modeled by using optional interval variables in the
+hierarchy. If subtask <em class="ph i">ST</em> is compulsory, we simply add the constraint <samp class="ph codeph">IloIfThen(env,IloPresenceOf(env,T),IloPresenceOf(env,ST))</samp>.
+If the top-level task of the hierarchy is compulsory, it must not
+be defined as optional but as a necessarily present interval variable.
+ </p>
+<pre class="pre codeblock"><code>IloBoolArray compulsory(env,n);  //compulsory populated 
+IloIntervalVar T(env); 
+T.setOptional(); 
+IloIntervalVar STs(env,n); 
+for (i=0; i&lt;n; i++) { 
+   STs[i] = IloIntervalVar(env); 
+   STs[i].setOptional(); 
+   if (compulsory[i]) 
+    m.add(IloIfThen(env,IloPresenceOf(env,T),IloPresenceOf(env,STs[i]))); 
+} 
+m.add(IloSpan(env,T, STs); </code></pre>
+<p class="p"></p>
+<p class="p">In some applications, there are several alternative ways <em class="ph i">T1,...,Tm</em> to
+decompose a given task <em class="ph i">T</em>. A given decomposition <em class="ph i">Ti</em> is
+described by a set of subtasks <em class="ph i">STi1,...,STij,...,STin</em> that
+will be executed if decomposition <em class="ph i">Ti</em> is selected. This can
+be modeled by an alternative constraint between <em class="ph i">T</em> and the set
+of alternatives <em class="ph i">T1,...,Tm</em> (each decomposition is modeled by
+an optional interval variable) and by representing each decomposition <em class="ph i">Ti</em> with
+a span constraint between <em class="ph i">Ti</em> and its subtasks <em class="ph i">STi1,...,STij,...,STin</em>. </p>
+<pre class="pre codeblock"><code>IloIntArray nSubTasks(env,m); 
+// populated with number of subtasks of each Ts[i]
+IloIntervalVar T(env);
+IloIntervalVarArray Ts(env,m);
+for (IloInt i=0; i&lt;m; i++) {
+  Ts[i] = IloIntervalVar(env);
+  Ts[i].setOptional();
+  IloIntervalArray subTasks(env,nSubTasks[i]);
+  for (j=0;j&lt;nSubTasks[i]; j++) {
+    subTasks[j] = IloIntervalVar(env);
+    subTasks[j].setOptional();
+  }
+  m.add(IloSpan(env,Ts[i], subTasks));
+}
+m.add(IloAlternative(env,T,Ts));</code></pre>
+<p class="p"></p>
+<p class="p">The final case illustrates a more complex situation that mixes
+the elementary cases above: it models a complete task hierarchy with
+non-compulsory subtasks and alternative decompositions. Each possible
+task in the hierarchy is indexed by an integer <samp class="ph codeph">i</samp> in <samp class="ph codeph">0..n-1</samp>.
+The possible decompositions of a task <samp class="ph codeph">i</samp> are described
+by two arrays containing the decomposed task and the set of subtasks
+induced by this decomposition. A Boolean integer array <samp class="ph codeph">compulsory</samp> tells
+whether or not a task <samp class="ph codeph">i</samp> is compulsory in the hierarchy.
+ The number of possible decompositions of a task<samp class="ph codeph">i</samp>is
+represented by <samp class="ph codeph">taskDecompositions[i].getSize()</samp>. 
+This is used to detect leaf tasks that cannot be decomposed further
+(<samp class="ph codeph">taskDecompositions[i].getSize()=0</samp>).  The array <samp class="ph codeph">taskNbParents[]</samp> counts
+the number of times a given task is contained in the subtasks of a
+decomposition.  This is used to detect top-level tasks in the hierarchy
+(<samp class="ph codeph">taskNbParents[i]=0</samp>). Each task and each possible
+decomposition is represented as an optional interval variable. Each
+compulsory top level task is constrained to be present. If a task <samp class="ph codeph">i</samp> is
+not a leaf task, then task <samp class="ph codeph">i</samp> is constrained to be
+the alternative of all its possible decompositions and each decomposition
+of task <samp class="ph codeph">i</samp> is constrained to span the decomposition
+subtasks. Finally, each compulsory subtask of a decomposition is constrained
+to be present if the decomposition is selected.</p>
+<pre class="pre codeblock"><code>// Data defining the work-breakdown structure 
+IloInt n=...; 
+IloInt totalNbDecompositions=...; 
+IloBoolArray compulsory(env,n); // populated 
+IloIntArray decomposedTask(env,totalNbDecompositions); // populated 
+IloIntArray2 decompositionSubtasks(env,totalNbDecompositions); // populated 
+
+IloIntervalVarArray tasks(env,n); 
+IloIntArray taskNbParents(env,n); 
+IloIntervalVarArray2 taskDecompositions(env,n); 
+for (IloInt i=0; i&lt;n; i++) { 
+  tasks[i] = IloIntervalVar(env); 
+  tasks[i].setOptional(); 
+  taskNbParents[i] = 0; 
+  taskDecompositions[i] = IloIntervalVarArray(env); 
+} 
+  
+for (IloInt d=0; d&lt;totalNbDecompositions; d++) { 
+  IloIntervalVar dec(env); 
+  dec.setOptional(); 
+  IloInt i = decomposedTask[d]; 
+  taskDecompositions[i].add(dec); 
+  IloIntervalVarArray subtasks(env); 
+  for (IloInt s=0; s&lt;decompositionSubtasks[d].getSize(); s++) { 
+    IloInt j = decompositionSubtasks[d][s]; 
+    taskNbParents[j]++; 
+    subtasks.add(tasks[j]); 
+    if (compulsory[j]) 
+      m.add(IloIfThen(env,IloPresenceOf(env,dec), IloPresenceOf(env,tasks[j]))); 
+  } 
+  m.add(IloSpan(env,dec, subtasks)); 
+} 
+  
+for (IloInt i=0; i&lt;n; i++) { 
+  if (taskNbParents[i]==0 &amp;&amp; compulsory[i]) 
+    m.add(IloPresenceOf(env, tasks[i])); 
+  if (taskDecompositions[i].getSize()&gt;0) { 
+    m.add(IloAlternative(env,tasks[i], taskDecompositions[i])); 
+  } 
+} </code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

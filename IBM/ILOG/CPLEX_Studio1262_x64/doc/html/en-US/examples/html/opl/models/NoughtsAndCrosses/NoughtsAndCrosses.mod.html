@@ -1,0 +1,67 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">range</font></b> r=1..3;
+13: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> cell[r][r][r];
+14: 
+15: <b><font color="#0000FF">tuple</font></b> t
+16: {
+17:    <b><font color="#0000FF">int</font></b> x1;
+18:    <b><font color="#0000FF">int</font></b> x2;
+19:    <b><font color="#0000FF">int</font></b> x3;
+20:    <b><font color="#0000FF">int</font></b> y1;
+21:    <b><font color="#0000FF">int</font></b> y2;
+22:    <b><font color="#0000FF">int</font></b> y3;
+23:    <b><font color="#0000FF">int</font></b> z1;
+24:    <b><font color="#0000FF">int</font></b> z2;
+25:    <b><font color="#0000FF">int</font></b> z3;   
+26: }
+27: 
+28: {t} lines={&lt;x1,y1,z1,x2,y2,z2,x3,y3,z3&gt; | x1,x2,x3,y1,y2,y3,z1,z2,z3 <b><font color="#0000FF">in</font></b> r 
+29: : (x2-x1==x3-x2) &amp;&amp; (y2-y1==y3-y2) &amp;&amp; (z2-z1==z3-z2) &amp;&amp; (x1*9+y1*3+z1&lt;x3*9+y3*3+z3) };
+30: 
+31: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">card</font></b>(lines)==49;
+32: 
+33: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> monocolor[lines];
+34: 
+35: <b><font color="#007D00">// minimize the number of mono color lines</font></b>
+36: <b><font color="#0000FF">minimize</font></b> <b><font color="#7D007D">sum</font></b>(l <b><font color="#0000FF">in</font></b> lines) monocolor[l];
+37: 
+38: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b>
+39: {
+40:   <b><font color="#007D00">// a line is mono color implies all the cells in the line have the same color </font></b>
+41:   <b><font color="#7D007D">forall</font></b>(&lt;x1,y1,z1,x2,y2,z2,x3,y3,z3&gt; <b><font color="#0000FF">in</font></b> lines) 
+42:     (monocolor[&lt;x1,y1,z1,x2,y2,z2,x3,y3,z3&gt;]==0) =&gt; 
+43:     (cell[x1][y1][z1]+cell[x2][y2][z2]+cell[x3][y3][z3]&gt;=1 &amp;&amp; 
+44:     cell[x1][y1][z1]+cell[x2][y2][z2]+cell[x3][y3][z3]&lt;=2);
+45:   
+46:   <b><font color="#007D00">// 14 cells of the same color</font></b>
+47:   <b><font color="#7D007D">sum</font></b>(i,j,k <b><font color="#0000FF">in</font></b> r) cell[i][j][k]==14; 
+48: }
+49: 
+50: <b><font color="#0000FF">tuple</font></b> monoT{
+51:         t id;
+52:         <b><font color="#0000FF">int</font></b> value;
+53: }
+54: {monoT} monocolorSolution = {&lt;t, monocolor[t]&gt; | t <b><font color="#0000FF">in</font></b> lines};
+55: <b><font color="#0000FF">tuple</font></b> cellsT{
+56:         <b><font color="#0000FF">int</font></b> a;
+57:         <b><font color="#0000FF">int</font></b> b;
+58:         <b><font color="#0000FF">int</font></b> c;
+59:         <b><font color="#0000FF">int</font></b> value;
+60: }
+61: {cellsT} cellSolution = {&lt;i,j,k,cell[i][j][k]&gt; | i,j,k <b><font color="#0000FF">in</font></b> r};
+62: 
+</tt></pre>

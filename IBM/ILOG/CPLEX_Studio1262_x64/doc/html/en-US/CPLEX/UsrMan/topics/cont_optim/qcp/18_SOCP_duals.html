@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Accessing dual values and reduced costs of SOCP solutions" />
+<meta name="abstract" content="Outlines a procedure for accessing dual values and reduced costs from SOCP solutions." />
+<meta name="Description" content="Outlines a procedure for accessing dual values and reduced costs from SOCP solutions." />
+<meta name="DC.subject" content="second order cone program (SOCP), Lagrangian of, examples: dual values and, accessing, reduced costs of SOCP, dual values of SOCP, examples: reduced costs and" />
+<meta name="keywords" content="second order cone program (SOCP), Lagrangian of, examples: dual values and, accessing, reduced costs of SOCP, dual values of SOCP, examples: reduced costs and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/01_QCP_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="topic1319029378939" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/01_QCP_title_synopsis.html" />
+<title>Accessing dual values and reduced costs of SOCP solutions</title>
+</head>
+<body role="main" id="topic1319029378939">
+<h1 class="title topictitle1">Accessing dual values and reduced costs of SOCP solutions</h1>
+<div class="body"><p class="shortdesc">Outlines a procedure for accessing dual values and reduced costs from SOCP solutions.</p>
+<p class="p">The CPLEX routines and methods that query dual values
+and reduced costs in linear programs (LPs) also access dual values
+and reduced costs for second order cone programs, that is, SOCP models.
+In order to use these routines and methods effectively in your applications
+to solve SOCPs, recall these points about <strong class="ph b">Lagrangian</strong> functions and
+SOCPs. First of all, the 
+<strong class="ph b">Lagrangian primal of the second order cone program</strong> 
+that you saw in <a class="xref" href="06_SOCPasLagrangian.html" title="Recalls mathematical principles useful in creating and manipulating second order cone programs.">Representing SOCP as Lagrangian</a> looks like this:</p>
+<img class="image" src="../../../images/LagrangianPrimalSOCP.jpg" /><p class="p">Similarly, the 
+<strong class="ph b">Lagrangian dual of the second order cone program</strong> 
+of that same model looks like this:</p>
+<img class="image" src="../../../images/LagrangianDualSOCP.jpg" /><p class="p">In fact, you probably recall that for any 
+vector<em class="ph i"> (a<sub class="ph sub">1</sub>, a<sub class="ph sub">2</sub>, ... a<sub class="ph sub">n</sub>)</em>,
+the following equality holds:</p>
+<img class="image" src="../../../images/LagrangianVectorNorm.jpg" /><p class="p">With that equivalence in mind, you can rewrite the sample
+problem like this:</p>
+<img class="image" src="../../../images/LagrangianRewriteSOCP.jpg" /><p class="p">Given that restatement of the original SOCP in Lagrangian
+terms, you can set the derivative (with respect to <em class="ph i">x</em>)
+to zero, and define the vector <em class="ph i">z<sub class="ph sub">k</sub></em> like
+this:</p>
+<img class="image" src="../../../images/z_k.jpg" /><p class="p">Then the dual of the same model looks like this:</p>
+<img class="image" src="../../../images/LagrangianDualRewrite.jpg" /><p class="p">After you solve a primal second order cone program in
+the form shown here, you can query values of λ (lambda) of the
+corresponding dual of the SOCP model. To query those values, use these
+routines and methods:</p>
+<ul class="ul"><li class="li"><p class="p">In the Callable Library (C API), use <span class="keyword apiname">CPXXgetpi</span>.</p>
+</li>
+<li class="li"><p class="p">In the C++ API, use the methods <span class="keyword apiname">IloCplex::getDuals</span>.</p>
+</li>
+<li class="li"><p class="p">In the Java API, use the methods <span class="keyword apiname">IloCplex.getDuals</span>.</p>
+</li>
+<li class="li"><p class="p">In the .NET API, use the methods <span class="keyword apiname">Cplex.GetDuals</span>.</p>
+</li>
+<li class="li"><p class="p">In the Python API, use the methods <span class="keyword apiname">SolutionInterface.get_dual_values</span>.</p>
+</li>
+</ul>
+<p class="p">To query the dual multipliers μ<sub class="ph sub">k</sub> for
+the second order cone constraints:</p>
+<img class="image" src="../../../images/socpVectorXsubiGEzero.jpg" /><p class="p">first query the <em class="ph i">z</em> vector, that is, the dual slack vector. 
+Then use  the idea that μ<sub class="ph sub">k</sub> = <em class="ph i">z<sub class="ph sub">k1</sub></em>.</p>
+<ul class="ul"><li class="li">In the Callable Library (C API), you can obtain the <em class="ph i">z</em> vector by summing 
+<span class="keyword apiname">CPXXgetdj</span> and 
+<span class="keyword apiname">CPXXgetqconstrdslack</span>. </li>
+<li class="li">In the C++ API, sum the results of both  
+    <span class="keyword apiname">IloCplex::getReducedCosts</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">IloCplex::getQCDSlack</span>.</li>
+<li class="li">In the Java API, sum the results of both  
+    <span class="keyword apiname">IloCplex.getReducedCosts</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">IloCplex.getQCDSlack</span>.</li>
+<li class="li">In the .NET API, sum the results of both  
+    <span class="keyword apiname">Cplex.GetReducedCosts</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">Cplex.GetQCDSlack</span>.</li>
+<li class="li">In the Python API, sum the results of both 
+    <span class="keyword apiname">cplex.solution.get_reduced_costs</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">cplex.solution.get_quadratic_dualslack</span>.</li>
+</ul>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">A pure SOCP does not have bound constraints, 
+so <span class="keyword apiname">CPXXgetdj</span> returns the zero vector. However, by
+definition, the dual slack vector is the sum of 
+<samp class="ph codeph">CPXXgetdj <strong class="ph b">and</strong> CPXXgetqconstrdslack</samp>
+where <span class="keyword apiname">CPXXgetqconstrdslack</span> is for each quadratic constraint.</p>
+
+<p class="p">(That observation applies to the equivalent methods in other APIs as well.)</p>
+</div>
+<p class="p"><strong class="ph b">Examples: querying dual values and reduced costs of a SOCP</strong></p>
+<p class="p">The following examples show you how to apply that procedure to
+query the dual values and reduced costs of a problem stated as a
+second order cone program (SOCP).
+Each of the examples defines a function <samp class="ph codeph">checkkkt</samp>,
+which reads the dual values λ, queries the values of <em class="ph i">z</em>,
+constructs μ, then tests that these vectors satisfy the Karush-Kuhn-Tucker
+conditions for the model in the example.</p>
+<ul class="ul"><li class="li"><p class="p">Among the examples of the Callable Library
+(C API), see <span class="ph filepath">socpex1.c</span> and <span class="ph filepath">xsocpex1.c</span>.</p>
+</li>
+<li class="li"><p class="p">Among the examples of the C++ API, see <span class="ph filepath">ilosocpex1.cpp</span>.</p>
+</li>
+<li class="li"><p class="p">Among the examples of the Java API, see <span class="ph filepath">SocpEx1.java</span>.</p>
+</li>
+<li class="li"><p class="p">Among the examples of the .NET API, see <span class="ph filepath">SocpEx1.cs</span> and <span class="ph filepath">SocpEx1.vb</span>.</p>
+</li>
+<li class="li"><p class="p">Among the examples of the Python API, see <span class="ph filepath">socpex1.py</span>.</p>
+</li>
+<li class="li"><p class="p">Among the examples of the MATLAB connector,
+see <span class="ph filepath">socpex1.m</span>.</p>
+</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/01_QCP_title_synopsis.html" title="Documents the solution of quadratically constrained programming problems (QCPs), including the special case of second order cone programming problems (SOCPs).">Solving problems with quadratic constraints (QCP)</a></div>
+</div>
+</div></body>
+</html>

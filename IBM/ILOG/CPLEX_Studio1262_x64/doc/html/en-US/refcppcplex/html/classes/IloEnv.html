@@ -1,0 +1,406 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloEnv</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloEnv.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloEnv</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/iloenv.h</span></div><div><img
+                src="IloEnv.png" border="0" usemap="#svg_map_IloEnv"
+                    alt="Map of IloEnv"><map name="svg_map_IloEnv"><area
+                        href="../classes/IloEnv.html" shape="rect"
+                        alt="IloEnv"
+                        coords="10.0,10.0,44.0,27.6357421875" /><area
+                        href="../classes/IloEnv.html" shape="rect"
+                        alt="IloEnv"
+            coords="10.0,10.0,44.0,27.6357421875" /></map></img></div>
+The class of environments for models or algorithms in Concert Technology.
+    <div
+                        class="description"><p>An instance of this class is an environment, managing memory and
+ identifiers for modeling objects. Every Concert Technology object, such as
+ an extractable object, a model, or an algorithm, must belong to an
+ environment. In C++ terms, when you construct a model (an instance of
+ <code><a
+                        href="../classes/IloModel.html">IloModel</a></code>) or an algorithm (an instance of
+ <code>IloCplex</code>, <code>IloCP</code>, or <code>IloSolver</code>, for
+ example), then you must pass one instance of <code>IloEnv</code> as an
+ argument of that constructor.</p><p><strong>Environment and Memory Management</strong></p><p>An environment (an instance of <code>IloEnv</code>) efficiently manages
+ memory allocations for the objects constructed with that environment as an
+ argument. For example, when Concert Technology objects in your model are
+ extracted by an algorithm, those extracted objects are handled as efficiently
+ as possible
+ with respect to memory management; there is no unnecessary copying that
+ might cause memory explosions in your application on the part of Concert
+ Technology.</p><p>When your application deletes an instance of <code>IloEnv</code>, Concert
+ Technology will automatically delete all models and algorithms depending on
+ that environment as well. You delete an environment by calling the member
+ function <code>env.end</code>.  </p><p>The memory allocated for Concert Technology arrays, expressions, sets,
+ and columns is not freed until all references to these objects have
+ terminated and the objects themselves have been deleted.</p><p>Certain classes documented in this manual, such as <code><a
+                        href="../classes/IloFastMutex.html">IloFastMutex</a></code>, are known as system classes. They do not
+ belong to a Concert Technology environment; in other words, an instance of
+ <code>IloEnv</code> is <em>not</em> an argument in their constructors. As a
+ consequence, a Concert Technology environment does <em>not</em> attempt to
+ manage their memory allocation and de-allocation; a call of
+ <code>IloEnv:end</code> will <em>not</em> delete an instance of a system
+ class. These system classes are clearly designated in this documentation,
+ and the appropriate constructors and destructors for them are documented in
+ this manual as well.</p><p><strong>Environment and Initialization</strong></p><p>An instance of <code>IloEnv</code> in your application initializes
+ certain data structures and modeling facilities for Concert Technology. For
+ example, <code>IloEnv</code> initializes the symbolic constant
+ <code><a
+                    href="../variables/IloInfinity.html">IloInfinity</a></code>.</p><p>The environment also specifies the current assumptions about
+ normalization or the reduction of terms in linear expressions. For an
+ explanation of this concept, see the concept <a
+                        href="../normalization.html">Normalization: Reducing linear terms</a></p><p><strong>Environment and Communication Streams</strong></p><p>An instance of <code>IloEnv</code> in your application initializes the
+ default output streams for general information, for error messages, and for
+ warnings.</p><p><strong>Environment and Extractable Objects</strong></p><p>Every extractable object in your problem must belong to an instance of
+ <code>IloEnv</code>. In C++ terms, in the constructor of certain extractable
+ objects that you create, such as a constrained variable, you must pass an
+ instance of <code>IloEnv</code> as an argument to specify which environment
+ the extractable object belongs to. An extractable object (that is, an
+ instance of <code><a
+                    href="../classes/IloExtractable.html">IloExtractable</a></code> or one of its
+ derived subclasses) is tied throughout its lifetime to the environment where
+ it is created. It can be used only with extractable objects belonging to the
+ same environment. It can be extracted only for an algorithm attached to the
+ same environment.</p><p>Two different environments cannot share the same extractable object.</p><p>You can extract objects from only one environment into a given
+ algorithm. In other words, algorithms do not extract objects from two or
+ more different environments.</p><p>Most member functions in this class contain <code>assert</code>
+ statements. For an explanation of the macro <code>NDEBUG</code> (a way to
+ turn on or turn off these <code>assert</code> statements), see the concept
+ <a
+            href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloException.html">IloException</a>, <a
+                href="../classes/IloModel.html">IloModel</a>, <a
+            href="../functions/operatornew.html">operator new</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_end">end</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public ostream &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_error">error</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExtractableI *</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloEnv.html#method_getExtractable">getExtractable</a>(<a
+                    href="../typedefs/IloInt.html">IloInt</a> id)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloEnvI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getImpl">getImpl</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getMaxId">getMaxId</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getMemoryUsage">getMemoryUsage</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public ostream &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getNullStream">getNullStream</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloRandom.html">IloRandom</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getRandom">getRandom</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getTime">getTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getTotalMemoryUsage">getTotalMemoryUsage</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public const char *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_getVersion">getVersion</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_IloEnv">IloEnv</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_IloEnv">IloEnv</a>(IloEnvI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloEnv.html#method_isValidId">isValidId</a>(<a
+                    href="../typedefs/IloInt.html">IloInt</a> id) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public ostream &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_out">out</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_printTime">printTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloEnv.html#method_setDeleter">setDeleter</a>(<a
+                    href="../enumerations/IloDeleterMode.html">IloDeleterMode</a> mode) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_setError">setError</a>(ostream &amp; s)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloEnv.html#method_setNormalizer">setNormalizer</a>(<a
+                    href="../typedefs/IloBool.html">IloBool</a> val) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_setOut">setOut</a>(ostream &amp; s)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_setWarning">setWarning</a>(ostream &amp; s)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloEnv.html#method_unsetDeleter">unsetDeleter</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public ostream &amp;</code></td><td
+                            width="100%"><code><a
+            href="../classes/IloEnv.html#method_warning">warning</a>() const</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloEnv">IloEnv</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloEnv</span>()</div><div
+                class="description"><p>This constructor creates an environment to manage the extractable objects
+ in Concert Technology.</p></div><hr /><h3><a
+            name="method_IloEnv">IloEnv</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloEnv</span>(IloEnvI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description"><p>This constructor creates an environment (a handle) from its
+ implementation object.  </p></div><hr /><h3><a
+            name="method_end">end</a></h3><div
+                class="prototype">public void <span
+            class="function-name">end</span>()</div><div
+                        class="description"><p>When you call this member function, it cleans up the invoking
+ environment. In other words, it deletes all the extractable objects
+ (instances of <code><a
+                        href="../classes/IloExtractable.html">IloExtractable</a></code> and its
+ subclasses) created in that environment and frees the memory allocated for
+ them. It also deletes all algorithms (instances of <code><a
+                href="../classes/IloAlgorithm.html">IloAlgorithm</a></code> and its subclasses) created in that environment
+ and frees memory allocated for them as well, including the representations
+ of extractable objects extracted for those algorithms.</p></div><hr /><h3><a
+            name="method_error">error</a></h3><div
+                class="prototype">public ostream &amp; <span
+            class="function-name">error</span>() const</div><div
+                class="description"><p>This member function returns a reference to the output stream
+ currently used for error messages from the invoking environment. It is
+ initialized as <code>cerr</code>.</p></div><hr /><h3><a
+            name="method_getExtractable">getExtractable</a></h3><div
+                class="prototype">public IloExtractableI * <span
+                class="function-name">getExtractable</span>(<a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">id</span>)</div><div
+                class="description"><p>This member function returns the extractable associated with the
+ specified identifier <code>id</code>.</p></div><hr /><h3><a
+            name="method_getImpl">getImpl</a></h3><div
+                class="prototype">public IloEnvI * <span
+            class="function-name">getImpl</span>() const</div><div
+                class="description"><p>This member function returns the implementation object of the invoking
+ environment.  </p></div><hr /><h3><a
+            name="method_getMaxId">getMaxId</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="function-name">getMaxId</span>() const</div><div
+                class="description"><p> This member function returns the highest id of all extractables int the current <code>IloEnv</code></p></div><hr /><h3><a
+            name="method_getMemoryUsage">getMemoryUsage</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="function-name">getMemoryUsage</span>() const</div><div
+                class="description"><p>This member function returns a value in bytes specifying how full the
+ heap is.</p></div><hr /><h3><a
+            name="method_getNullStream">getNullStream</a></h3><div
+                class="prototype">public ostream &amp; <span
+            class="function-name">getNullStream</span>() const</div><div
+                class="description"><p>This member function calls the null stream of the environment. This
+ member function can be used with <code>IloAlgorithm::setOut()</code> to
+ suppress screen output by redirecting it to the null stream.</p></div><hr /><h3><a
+            name="method_getRandom">getRandom</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloRandom.html">IloRandom</a> <span
+            class="function-name">getRandom</span>() const</div><div
+                class="description"><p>Each instance of <code>IloEnv</code> contains a random number
+  generator, an instance of the class <code>IloRandom</code>.
+  This member function returns that <code>IloRandom</code> instance.</p></div><hr /><h3><a
+            name="method_getTime">getTime</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getTime</span>() const</div><div
+                        class="description"><p>This member function returns the amount of time elapsed in seconds since
+ the construction of the invoking environment. (The member function
+ <code><a
+                href="../classes/IloEnv.html#method_printTime">IloEnv::printTime</a></code> directs this information to
+ the output stream of the invoking environment.)</p></div><hr /><h3><a
+            name="method_getTotalMemoryUsage">getTotalMemoryUsage</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="function-name">getTotalMemoryUsage</span>() const</div><div
+                class="description"><p>This member function returns a value in bytes specifying how large the
+ heap is.</p></div><hr /><h3><a
+            name="method_getVersion">getVersion</a></h3><div
+                class="prototype">public const char * <span
+            class="function-name">getVersion</span>() const</div><div
+                class="description"><p>This member function returns a string specifying the version of IBM ILOG
+ Concert Technology.</p></div><hr /><h3><a
+            name="method_isValidId">isValidId</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isValidId</span>(<a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">id</span>) const</div><div
+                class="description"><p>This methods tells you if the current <code>id</code> is associated with a live extractable.</p></div><hr /><h3><a
+            name="method_out">out</a></h3><div
+                class="prototype">public ostream &amp; <span
+            class="function-name">out</span>() const</div><div
+                class="description"><p>This member function returns a reference to the output stream currently
+ used for logging. General output from the invoking environment is accessible
+ through this member function. By default, the logging output stream is
+ defined by an instance of <code>IloEnv</code> as <code>cout</code>.</p></div><hr /><h3><a
+            name="method_printTime">printTime</a></h3><div
+                class="prototype">public void <span
+            class="function-name">printTime</span>() const</div><div
+                        class="description"><p>This member function directs the output of the member function
+ <code><a
+                        href="../classes/IloEnv.html#method_getTime">IloEnv::getTime</a></code> to the output stream of the
+ invoking environment. (The member function <code><a
+                href="../classes/IloEnv.html#method_getTime">IloEnv::getTime</a></code> accesses the elapsed time in seconds since
+ the creation of the invoking environment.)  </p></div><hr /><h3><a
+            name="method_setDeleter">setDeleter</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setDeleter</span>(<a
+                href="../enumerations/IloDeleterMode.html">IloDeleterMode</a> <span
+            class="parameter-name">mode</span>) const</div><div
+                    class="description"><p>This member function sets the mode for the deletion of extractables, as
+ described in the concept
+ <a
+                href="../deletion-of-extractables.html">Deletion of Extractable Objects in CPLEX</a>.
+ The mode can be <code>IloLinearDeleterMode</code> or
+ <code>IloSafeDeleterMode</code>.</p><p>Not for use with CP Optimizer.</p></div><hr /><h3><a
+            name="method_setError">setError</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setError</span>(ostream &amp; <span
+            class="parameter-name">s</span>)</div><div
+                        class="description"><p>This member function sets the stream for errors generated by the invoking
+ environment. By default, the stream is defined by an instance of
+ <code><a
+                href="../classes/IloEnv.html">IloEnv</a></code> as <code>cerr</code>.</p></div><hr /><h3><a
+            name="method_setNormalizer">setNormalizer</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setNormalizer</span>(<a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+            class="parameter-name">val</span>) const</div><div
+                class="description"><p>This member function turns on or off the facilities in 
+ Concert Technology
+ for normalizing linear or quadratic expressions. Normalizing linear
+ or quadratic expressions is also
+ known as reducing the terms of a linear or quadratic expression. 
+ In this context, a linear or quadratic expression 
+ that does not contain multiple terms with the same
+ variable or pair of variables is said to be normalized. 
+ The concept in this manual offers examples of this idea.</p><p>When <code>val</code> is <code>IloTrue</code>, (the default), 
+ Concert Technology analyzes linear and quadratic expressions 
+ to determine whether any
+ variable appears more than once in a given linear expression and
+ whether any pair of variables appears more than once in a given
+ quadratic expression. It then
+ combines terms in the linear or quadratic expressions expression to
+ eliminate any such duplication.
+ This mode may require more time during preliminary computation,
+ but it avoids the possibility of an assertion failing in the case of
+ duplicated variables in the terms of a linear or quadratic expression.
+ </p><p>When <code>val</code> is <code>IloFalse</code>, 
+ Concert Technology assumes that all linear and quadratic expressions 
+ in the invoking environment have
+ already been processed to reduce them to their most efficient form. 
+ In other words, Concert Technology assumes that 
+ linear and quadratic expressions have been
+ normalized. This mode may save time during computation, 
+ but it entails the risk that a linear or quadratic expression 
+ may contain one or more variables, each of
+ which appears in one or more terms. This situation will cause certain
+ <code>assert</code> statements in Concert Technology to fail 
+ if you do not compile with the flag <code>-DNDEBUG</code>.</p></div><hr /><h3><a
+            name="method_setOut">setOut</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setOut</span>(ostream &amp; <span
+            class="parameter-name">s</span>)</div><div
+                        class="description"><p>This member function redirects the <code>out()</code> stream with the
+ stream given as an argument.</p><p>This member function can be used with
+ <code><a
+                href="../classes/IloEnv.html#method_getNullStream">IloEnv::getNullStream</a></code> to suppress screen
+ output by redirecting it to the null stream.</p></div><hr /><h3><a
+            name="method_setWarning">setWarning</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setWarning</span>(ostream &amp; <span
+            class="parameter-name">s</span>)</div><div
+                        class="description"><p>This member function sets the stream for warnings from the invoking environment.
+ By default, the stream is defined by an instance of
+ <code><a
+                href="../classes/IloEnv.html">IloEnv</a></code> as <code>cout</code>.</p></div><hr /><h3><a
+            name="method_unsetDeleter">unsetDeleter</a></h3><div
+                class="prototype">public void <span
+            class="function-name">unsetDeleter</span>() const</div><div
+                    class="description"><p>This member function unsets the mode for the deletion of extractables, as
+ described in the concept
+ <a
+                href="../deletion-of-extractables.html">Deletion of Extractable Objects in CPLEX</a>.
+ </p><p>Not for use with CP Optimizer.</p></div><hr /><h3><a
+            name="method_warning">warning</a></h3><div
+                class="prototype">public ostream &amp; <span
+            class="function-name">warning</span>() const</div><div class="description"><p>This member function returns a reference to the output stream currently
+ used for warnings from the invoking environment. By default, the warning
+ output stream is defined by an instance of <code>IloEnv</code> as
+ <code>cout</code>.</p></div><hr /></body>
+</html>

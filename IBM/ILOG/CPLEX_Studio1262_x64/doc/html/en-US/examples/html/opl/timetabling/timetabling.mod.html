@@ -1,0 +1,307 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+013: 
+014: <b><font color="#007D00">/* </font></b>
+015: <b><font color="#007D00"> This model solves a school time tabling problem.</font></b>
+016: <b><font color="#007D00"> Given teacher skills, room equipment and pupil course requirement,</font></b>
+017: <b><font color="#007D00"> the model generates for each course a time table specifying :</font></b>
+018: <b><font color="#007D00">    - a teacher</font></b>
+019: <b><font color="#007D00">    - a start time</font></b>
+020: <b><font color="#007D00">    - a room</font></b>
+021: <b><font color="#007D00">  </font></b>
+022: <b><font color="#007D00">constraints are used to:</font></b>
+023: 
+024: <b><font color="#007D00">   - ensure the course ends after it starts         </font></b>
+025: <b><font color="#007D00">   - ensure course numerotation is chronological     </font></b>
+026: <b><font color="#007D00">   - ensure that a teacher is required once at any time point.  </font></b>
+027: <b><font color="#007D00">   - ensure the teacher can teach the discipline </font></b>
+028: <b><font color="#007D00">   - ensure that a room is required once at any time point.</font></b>
+029: <b><font color="#007D00">   - ensure the room can support the discipline</font></b>
+030: <b><font color="#007D00">   - ensure that a class follows one course at a time      </font></b>
+031: <b><font color="#007D00">   - ensure that for given class and discipline, the teacher is always the same  </font></b>
+032: <b><font color="#007D00">   - ensure a course starts and end the same halfday</font></b>
+033: <b><font color="#007D00">   - insert break duration between specified disciplines</font></b>
+034: <b><font color="#007D00">   - avoid to have the same discipline taught twice a day</font></b>
+035: <b><font color="#007D00">   - ensure that the morning disciplines end in the morning</font></b>
+036: 
+037: 
+038: <b><font color="#007D00">Note: To reduce the amount of decision variable, we choose to use</font></b>
+039: <b><font color="#007D00">course start times as time points where uniqueness of resources (classes, </font></b>
+040: <b><font color="#007D00">teachers and rooms) is enforced.</font></b>
+041: 
+042: <b><font color="#007D00">This model is greater than the size allowed in trial mode. </font></b>
+043: <b><font color="#007D00">If you want to run this example with the large data set, you need a commercial edition of CPLEX Studio to run this example. </font></b>
+044: <b><font color="#007D00">If you are a student or teacher, you can also get a full version through</font></b>
+045: <b><font color="#007D00">the IBM Academic Initiative. </font></b>
+046: <b><font color="#007D00">*/</font></b>
+047:   
+048: <b><font color="#0000FF">execute</font></b>{
+049:         }
+050:         
+051: tuple Pair {
+052:   string a;
+053:   string b;
+054: };
+055: tuple Requirement {
+056:    string Class;            <b><font color="#007D00">// a set of pupils</font></b>
+057:    string discipline;       <b><font color="#007D00">// what will be taught</font></b>
+058:    <b><font color="#0000FF">int</font></b>    Duration;         <b><font color="#007D00">// course duration</font></b>
+059:    <b><font color="#0000FF">int</font></b>    repetition;       <b><font color="#007D00">// how many time the course is repeated</font></b>
+060: };
+061: //
+062: // user given model data
+063: //
+064: 
+065: {Pair} NeedBreak = ...;                   // disciplines that should not be contiguous in time
+066: {string} MorningDiscipline = ...;         // disciplines that must be taught in the morning
+067: {Pair} TeacherDisciplineSet = ...;        // what are the teacher skills
+068: {Pair} DedicatedRoomSet = ...;            // a set of disciplines requiring special rooms
+069: {Requirement} RequirementSet = ...;       // the educational program
+070: {string} Room = ...;                      // the set of available rooms
+071: int BreakDuration = ...;                  // time interval between two disciplines
+072: int DayDuration = ...;                    // must be even (morning duration equals afternoon duration)
+073: int NumberOfDaysPerPeriod = ...;          // how many worked days per period
+074: //
+075: // vocabularies
+076: //
+077: 
+078: {string} Class = {c | &lt;c,d,u,n&gt; <b><font color="EA7D00">in</font></b> RequirementSet };
+079: {string} Teacher = { t | &lt;t,d&gt; <b><font color="EA7D00">in</font></b> TeacherDisciplineSet };
+080: {string} Discipline =  {d | &lt;t,d&gt; <b><font color="EA7D00">in</font></b> TeacherDisciplineSet };
+081: 
+082: 
+083: //
+084: // time expressions
+085: //
+086: int HalfDayDuration = DayDuration div 2;
+087: int MaxTime = DayDuration*NumberOfDaysPerPeriod;
+088: range Time = 0..MaxTime-1;
+089: //
+090: // convenience expressions for room compatibility
+091: //
+092: int PossibleRoom[d in Discipline, x in Room] = 
+093:   &lt;x,d&gt; in DedicatedRoomSet 
+094:   || 0 == card({&lt;z,k&gt; | z <b><font color="EA7D00">in</font></b> Room, k <b><font color="EA7D00">in</font></b> Discipline
+095:                : (&lt;x,k&gt; <b><font color="EA7D00">in</font></b> DedicatedRoomSet) 
+096:                  || (&lt;z,d&gt; <b><font color="EA7D00">in</font></b> DedicatedRoomSet)});
+097: int NbRoom = card(Room);
+098: range RoomId = 0..NbRoom-1;
+099: {<b><font color="#0000FF">int</font></b>} PossibleRoomIds[d in Discipline] = 
+100:   {i | i <b><font color="EA7D00">in</font></b> RoomId, z <b><font color="EA7D00">in</font></b> Room
+101:    :  (PossibleRoom[d,z] == 1) &amp;&amp; (i == ord(Room,z))};
+102: //
+103: // convenience expressions for teacher skills
+104: //
+105: 
+106: // possible teacher disciplines
+107: {string} PossibleTeacherDiscipline[x in Teacher] = {d | &lt;x,d&gt; <b><font color="EA7D00">in</font></b> TeacherDisciplineSet };
+108: int NbTeacher = card(Teacher);
+109: range TeacherId = 0..NbTeacher-1;
+110: 
+111: // possible teacher ids
+112: {<b><font color="#0000FF">int</font></b>} PossibleTeacherIds[d in Discipline] =
+113: {i | i <b><font color="EA7D00">in</font></b> TeacherId, z <b><font color="EA7D00">in</font></b> Teacher 
+114:    : i == ord(Teacher, z) 
+115:      &amp;&amp; d <b><font color="EA7D00">in</font></b> PossibleTeacherDiscipline[z] };
+116: 
+117: //
+118: // convenience expressions for requirement instantiation
+119: //
+120: 
+121: // for a given requirement, an instance is one course occurrence
+122: tuple Instance {
+123:   string Class;
+124:   string discipline;
+125:   <b><font color="#0000FF">int</font></b>    Duration;
+126:   <b><font color="#0000FF">int</font></b>    repetition;
+127:   <b><font color="#0000FF">int</font></b>    id;
+128:   <b><font color="#0000FF">int</font></b>    requirementId;
+129: };
+130: {Instance} InstanceSet = { 
+131:   &lt;c,d,t,r,i,z&gt; | &lt;c,d,t,r&gt; <b><font color="EA7D00">in</font></b> RequirementSet
+132:                 , z <b><font color="EA7D00">in</font></b> ord(RequirementSet,&lt;c,d,t,r&gt;) .. ord(RequirementSet,&lt;c,d,t,r&gt;)
+133:                 , i <b><font color="EA7D00">in</font></b> 1..r
+134: };
+135: //
+136: // decision variables
+137: //
+138: dvar int Start[InstanceSet] in Time;               // the course starting point
+139: dvar int room[InstanceSet] in RoomId;              // the room in which the course is held
+140: dvar int teacher[InstanceSet] in TeacherId;        // the teacher in charge of the course
+141: //
+142: // helper variables
+143: //
+144: 
+145: dvar int End[InstanceSet] in Time;                    // the course end time
+146: dvar int classTeacher[Class,Discipline] in TeacherId; // teacher working once per time point
+147: dvar int makespan in Time;                            // ending date of last course
+148: //
+149: // search setup
+150: //
+151: 
+152: execute {
+153:    writeln(<b><font color="#8A2BE2">"MaxTime = "</font></b>, MaxTime);
+154:    writeln(<b><font color="#8A2BE2">"DayDuration = "</font></b>, DayDuration);
+155:    writeln(<b><font color="#8A2BE2">"Teacher = "</font></b>, Teacher);
+156:    writeln(<b><font color="#8A2BE2">"Discipline = "</font></b>, Discipline);
+157:    writeln(<b><font color="#8A2BE2">"Class = "</font></b>, Class);
+158:    <b><font color="EA7D00">var</font></b> f = cp.factory;
+159:    <b><font color="EA7D00">var</font></b> selectVar = f.selectSmallest(f.domainSize());
+160:    <b><font color="EA7D00">var</font></b> selectValue = f.selectRandomValue();
+161:    <b><font color="EA7D00">var</font></b> assignRoom = f.searchPhase(room, selectVar, selectValue);
+162:    <b><font color="EA7D00">var</font></b> assignTeacher = f.searchPhase(teacher, selectVar, selectValue);
+163:    <b><font color="EA7D00">var</font></b> assignStart = f.searchPhase(Start, selectVar, selectValue);
+164:    cp.setSearchPhases(assignTeacher, assignStart, assignRoom);
+165:    <b><font color="EA7D00">var</font></b> p = cp.param;
+166:    p.logPeriod = 10000;
+167:    p.searchType = <b><font color="#8A2BE2">"DepthFirst"</font></b>;
+168:    p.timeLimit = 600;
+169: }
+170: 
+171: // minimize makespan
+172: minimize makespan;
+173: 
+174: subject to { 
+175:   makespan == max(r <b><font color="EA7D00">in</font></b> InstanceSet) End[r];
+176:   <b><font color="#007D00">// help proving optimality</font></b>
+177:   makespan &gt;= max(c <b><font color="EA7D00">in</font></b> Class) sum(r <b><font color="EA7D00">in</font></b> InstanceSet : r.Class == c) r.Duration;
+178:   <b><font color="#007D00">// ensure the course ends after it starts</font></b>
+179:   forall(r <b><font color="EA7D00">in</font></b> InstanceSet)
+180:     End[r] == r.Duration + Start[r];
+181:   <b><font color="#007D00">// ensure course numerotation is chronological</font></b>
+182:   forall(i, j <b><font color="EA7D00">in</font></b> InstanceSet 
+183:          : i.id &lt; j.id 
+184:            &amp;&amp; i.requirementId == j.requirementId) 
+185:     Start[i] &lt; Start[j];
+186:   <b><font color="#007D00">// ensure that a teacher is required once at any time point.</font></b>
+187:   forall(r <b><font color="EA7D00">in</font></b> InstanceSet, x <b><font color="EA7D00">in</font></b> Teacher) {
+188:     <b><font color="EA7D00">if</font></b>(r.discipline <b><font color="EA7D00">in</font></b> PossibleTeacherDiscipline[x])
+189:       (sum(o <b><font color="EA7D00">in</font></b> InstanceSet
+190:                                 : r.discipline <b><font color="EA7D00">in</font></b> PossibleTeacherDiscipline[x])
+191:         (Start[o] &gt;= Start[r])
+192:         *(Start[o] &lt; End[r])
+193:         *(teacher[o] == ord(Teacher,x))) &lt; 2;
+194:   }
+195:   <b><font color="#007D00">// ensure the teacher can teach the discipline</font></b>
+196:   forall(r <b><font color="EA7D00">in</font></b> InstanceSet) 
+197:     teacher[r] <b><font color="EA7D00">in</font></b> PossibleTeacherIds[r.discipline];
+198:      
+199:   <b><font color="#007D00">// ensure that a room is required once at any time point.</font></b>
+200:   forall(r <b><font color="EA7D00">in</font></b> InstanceSet, x <b><font color="EA7D00">in</font></b> Room) {
+201:     <b><font color="EA7D00">if</font></b>(PossibleRoom[r.discipline,x] == 1)
+202:       (sum(o <b><font color="EA7D00">in</font></b> InstanceSet : 1 == PossibleRoom[o.discipline,x])
+203:         (Start[o] &gt;= Start[r])
+204:         *(Start[o] &lt; End[r])
+205:         *(room[o] == ord(Room,x))) &lt; 2;            
+206:   } 
+207:   <b><font color="#007D00">// ensure the room can support the discipline</font></b>
+208:   forall(r <b><font color="EA7D00">in</font></b> InstanceSet)
+209:     room[r] <b><font color="EA7D00">in</font></b> PossibleRoomIds[r.discipline];
+210:   <b><font color="#007D00">// ensure that a class follows one course at a time</font></b>
+211:   forall(r <b><font color="EA7D00">in</font></b> InstanceSet, x <b><font color="EA7D00">in</font></b> Class) {
+212:     <b><font color="EA7D00">if</font></b>(r.Class == x)
+213:       (sum(o <b><font color="EA7D00">in</font></b> InstanceSet : o.Class == x) 
+214:        (1 == (Start[o] &gt;= Start[r])*(Start[o] &lt; End[r]))) &lt; 2;
+215:   }
+216:   <b><font color="#007D00">// ensure that for given class and discipline, the teacher is always the same</font></b>
+217:   forall(c <b><font color="EA7D00">in</font></b> Class, d <b><font color="EA7D00">in</font></b> Discipline, r <b><font color="EA7D00">in</font></b> InstanceSet 
+218:          : r.Class == c &amp;&amp; r.discipline == d) 
+219:     teacher[r] == classTeacher[c, d];
+220:    
+221:   <b><font color="#007D00">// ensure a course starts and end the same halfday</font></b>
+222:   forall(i <b><font color="EA7D00">in</font></b> InstanceSet : i.Duration &gt; 1)
+223:     (Start[i] div HalfDayDuration) == ((End[i]-1) div HalfDayDuration);
+224:   <b><font color="#007D00">// insert break duration between specified disciplines</font></b>
+225:   forall(ordered i, j <b><font color="EA7D00">in</font></b> InstanceSet, a,b <b><font color="EA7D00">in</font></b> Discipline
+226:          : (&lt;b,a&gt; <b><font color="EA7D00">in</font></b> NeedBreak || &lt;a,b&gt; <b><font color="EA7D00">in</font></b> NeedBreak)
+227:          &amp;&amp; i != j
+228:          &amp;&amp; i.Class == j.Class
+229:          &amp;&amp; ((i.discipline == a &amp;&amp; j.discipline == b)
+230:              || (i.discipline == b &amp;&amp; j.discipline == a)))
+231:     <b><font color="#007D00">// courses do not belong to the same day</font></b>
+232:     ((Start[i] div DayDuration) != (Start[j] div DayDuration)) ||
+233:     <b><font color="#007D00">// courses do not belong to the same halfday</font></b>
+234:     ((Start[i] div HalfDayDuration) != (Start[j] div HalfDayDuration)) ||
+235:     <b><font color="#007D00">// courses are separated by BreakDuration</font></b>
+236:     ((Start[i] &gt; End[j])*(Start[i] - End[j]) + 
+237:      (Start[j] &gt; End[i])*(Start[j] - End[i])) &gt;= BreakDuration;
+238:   <b><font color="#007D00">// avoid to have the same discipline taught twice a day</font></b>
+239:   forall(ordered i,j <b><font color="EA7D00">in</font></b> InstanceSet: i.discipline == j.discipline &amp;&amp; i.Class == j.Class) 
+240:     (Start[i] div DayDuration) != (Start[j] div DayDuration);
+241:   <b><font color="#007D00">// ensure that the morning disciplines end in the morning</font></b>
+242:   forall(d <b><font color="EA7D00">in</font></b> MorningDiscipline, i <b><font color="EA7D00">in</font></b> InstanceSet
+243:          : i.discipline == d) 
+244:     (Start[i] % DayDuration) &lt; HalfDayDuration;
+245: };
+246: 
+247: //
+248: // generate time table
+249: //
+250: tuple Course {
+251:    string teacher;
+252:    string discipline;
+253:    string room;
+254:    <b><font color="#0000FF">int</font></b>    id;
+255:    <b><font color="#0000FF">int</font></b>    repetition;
+256: };
+257: 
+258: {Course} timetable[t in Time][c in Class] = {
+259:   &lt;p,d,r,i,n&gt; 
+260:   | d <b><font color="EA7D00">in</font></b> Discipline
+261:   , r <b><font color="EA7D00">in</font></b> Room
+262:   , x <b><font color="EA7D00">in</font></b> InstanceSet
+263:   , n <b><font color="EA7D00">in</font></b> x.repetition..x.repetition
+264:   , p <b><font color="EA7D00">in</font></b> Teacher 
+265:   , i <b><font color="EA7D00">in</font></b> x.id..x.id
+266:   : (t &gt;= Start[x])
+267:   &amp;&amp; (t &lt; End[x])
+268:   &amp;&amp; (x.Class == c)
+269:   &amp;&amp; (room[x] == ord(Room,r))
+270:   &amp;&amp; (ord(Teacher,p) == teacher[x])
+271:   &amp;&amp; (d == x.discipline) 
+272: };
+273:    
+274: // force execution of postprocessing expressions
+275: execute POST_PROCESS {
+276:   timetable;
+277:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> c <b><font color="EA7D00">in</font></b> Class) {
+278:     writeln(<b><font color="#8A2BE2">"Class "</font></b>, c);
+279:     <b><font color="EA7D00">var</font></b> day = 0;
+280:     <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> t = 0; t &lt; makespan; t++) {
+281:       <b><font color="EA7D00">if</font></b>(t % DayDuration == 0) {
+282:         day++;
+283:         writeln(<b><font color="#8A2BE2">"Day "</font></b>, day);
+284:       }
+285:       <b><font color="EA7D00">if</font></b>(t % DayDuration == HalfDayDuration) 
+286:         writeln(<b><font color="#8A2BE2">"Lunch break"</font></b>);
+287:       <b><font color="EA7D00">var</font></b> activity = 0;
+288:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> x <b><font color="EA7D00">in</font></b> timetable[t][c]) {
+289:         activity++;
+290:         writeln((t % DayDuration)+1, <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">"</font></b>,
+291:                 x.room, <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">"</font></b>, 
+292:                 x.discipline, <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">"</font></b>, 
+293:                 x.id, <b><font color="#8A2BE2">"/"</font></b>, 
+294:                 x.repetition, <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">"</font></b>, 
+295:                 x.teacher);
+296:       }
+297:       <b><font color="EA7D00">if</font></b>(activity == 0)
+298:         writeln((t % DayDuration)+1, <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">Free time"</font></b>);
+299:     }
+300:   }
+301: }
+302:  
+</tt></pre>

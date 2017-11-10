@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the house building with worker allocation problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the house building with worker allocation problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/schedoptional.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerschedoptional.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/schedoptional.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerschedoptional.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the house building with worker allocation
+problem has been described using natural language, you then use Concert
+Technology classes to model the constraint programming problem.</p>
+<p class="p">After you have written a description of your problem,
+you can use IBM® ILOG® Concert Technology
+classes to model it. </p>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159668"><h2 class="title sectiontitle">Step 2: Open the example file</h2><p class="p">Open the
+example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/sched_optional_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You will enter the missing code in each step
+in this lesson. At the end, you will have completed the program code,
+and you can compile and run the program.</p>
+<p class="p">In
+this lesson, you include the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>.
+To catch exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code for creating the environment and model and for printing out
+the solution found by the CP Optimizer engine is provided.</p>
+<p class="p">In addition, the data related to the tasks, such as the tasks
+(<samp class="ph codeph">Tasks</samp>), the number of tasks (<samp class="ph codeph">NbTasks</samp>),
+the names of the tasks (<samp class="ph codeph">TaskNames</samp>) and sizes
+of the tasks (<samp class="ph codeph">TaskDurations</samp>) and the data
+related to the workers, such as the workers (<samp class="ph codeph">Workers</samp>),
+number of workers (<samp class="ph codeph">NbWorkers</samp>) and the names
+of workers (<samp class="ph codeph">WorkerNames</samp>), are provided.
+The matrix of skill levels (<samp class="ph codeph">SkillsMatrix</samp>),
+one level for each worker/task pair and functions to return the skill
+level based on worker and task identifiers are also provided.</p>
+<p class="p">After you create an environment and a model, you need to
+define the decision variables and add the constraints and objective
+to the model. Since the requirements for each of the five houses are
+similar, you use a function <samp class="ph codeph">MakeHouse</samp>. to
+create the decision variables, constraints and objective associated
+with each house. Information about individual houses that must be
+shared with the main function includes the expressions needed to create
+the objective function and, for each worker, the array of interval
+variables associated with the worker, in order to create the constraint
+regarding non overlapping intervals. In order to display the results
+of the optimization, it is also useful to maintain an array of all
+the interval variables. </p>
+<p class="p">To access this information,
+you create objects that will be updated in the <samp class="ph codeph">MakeHouse</samp> function.
+The objective expression is represented by the integer expression <samp class="ph codeph">skill</samp>. An array of task interval variables, <samp class="ph codeph">allTasks</samp>, stores all the interval variables that
+are created. To maintain the interval variables related to each worker,
+you use an array of arrays of interval variables called <samp class="ph codeph">workerTasks</samp>,
+that will be filled by the calls to <samp class="ph codeph">MakeHouse</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159657"><h2 class="title sectiontitle">Step 3: Declare the objects needed for MakeHouse</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare
+the objects needed for MakeHouse</samp>  </p>
+<pre class="pre codeblock"><code>    IloInt nbHouses = 5;
+    IloInt deadline = 318;
+    IloModel model(env);
+    IloIntExpr skill(env);
+    IloIntervalVarArray allTasks(env);
+    IloIntervalVarArray2 workerTasks(env, NbWorkers);
+    IloInt h, w;
+    for (w=0; w&lt;NbWorkers; ++w)
+      workerTasks[w] = IloIntervalVarArray(env);
+</code></pre>
+<p class="p">You need to pass the model, the objective
+expression, the array of all tasks, the matrix of worker interval
+variables, the house identifier and the overall deadline as arguments
+to the <samp class="ph codeph">MakeHouse</samp> function. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159646"><h2 class="title sectiontitle">Step 4: Create the MakeHouse function</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Create the MakeHouse function</samp> </p>
+<pre class="pre codeblock"><code>void MakeHouse(IloModel model,
+         IloIntExpr skill,
+         IloIntervalVarArray allTasks,
+         IloIntervalVarArray2 workerTasks,
+         IloInt id,
+         IloInt deadline) {
+</code></pre>
+<p class="p">Each house has a list of <samp class="ph codeph">NbTasks</samp> that
+must be scheduled. Task <samp class="ph codeph">i</samp>, where <samp class="ph codeph">i</samp> is in <samp class="ph codeph">0..NbTasks-1</samp>,
+has a size of <samp class="ph codeph">TaskDurations[i]</samp> and the name <samp class="ph codeph">TaskNames[i]</samp>.   Using these, you build an array <samp class="ph codeph">tasks</samp> of interval variables. </p>
+<p class="p"> Each
+task also requires one of the three workers from the start to the
+end of the interval. The worker assigned must have a non-negative
+level of skill on the task. To model this worker choice, you create
+an array of interval variables, one interval variable for each possible
+worker. You set these interval variables to be optional, so that each
+one may or may not be present in the solution. You also add each interval
+variable to the array <samp class="ph codeph">allTasks</samp> that will
+be used to display the solution once the schedule has been determined.
+You also store these interval variables in a matrix called <samp class="ph codeph">TaskMatrix</samp>, which is indexed on task and worker.
+This matrix will be used within the <samp class="ph codeph">MakeHouse</samp> function
+in a later step.</p>
+<p class="p">If one of these interval variables
+is present in the solution, then its presence must be counted in the
+objective. Thus for each of these possible tasks, you increment the
+objective by the product of the skill level and the expression representing
+the presence of the time interval in the solution. The function <samp class="ph codeph">IloPresenceOf</samp> takes the environment and an interval
+variable and returns a constraint that is true if the interval variable
+is present and false if it is absent.</p>
+<p class="p">To constrain
+the solution so that exactly one of this array of interval variables
+is to be present in the solution, you use the specialized constraint <samp class="ph codeph">IloAlternative</samp>.     </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Alternative intervals constraint</strong> </p>
+ <p class="p"> With
+the specialized constraint <samp class="ph codeph">IloAlternative</samp>,
+you can create a constraint between an interval variable and a set
+of interval variables that specifies that if the given interval variable
+is present in the solution, then exactly one interval variable of
+the set is present in the solution.</p>
+ <p class="p">In other words,
+consider an alternative constraint created with an interval variable <samp class="ph codeph">a</samp> and an array of interval variables <samp class="ph codeph">bs</samp>.
+If <samp class="ph codeph">a</samp> is present in the solution, then exactly
+one of the interval variables in <samp class="ph codeph">bs</samp> will
+be present, and <samp class="ph codeph">a</samp> starts and ends together
+with this chosen interval. If <samp class="ph codeph">a</samp> is absent
+in the solution, then none of the interval variables in <samp class="ph codeph">bs</samp> will
+be present. </p>
+ </div>
+<p class="p">The first argument passed to the
+constructor of the class <samp class="ph codeph">IloAlternative</samp> is
+the environment. The second argument is the interval variable. The
+third argument is the array of interval variables that are the “alternatives".
+The final argument is an optional name used for debug and trace purposes.
+Here is a constructor:        </p>
+<pre class="pre codeblock"><code>  IloAlternative(const IloEnv env, 
+                 const IloIntervalVar a,
+                 const IloIntervalVarArray bs, 
+                 const char* name =0);
+</code></pre>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159635"><h2 class="title sectiontitle">Step 5: Create the interval variables</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the
+interval variables</samp> </p>
+<pre class="pre codeblock"><code>  char name[128];
+  IloIntervalVarArray  tasks(env, NbTasks);
+  IloIntervalVarArray2 taskMatrix(env, NbTasks);
+
+  for (IloInt i=0; i&lt;NbTasks; ++i) {
+    sprintf(name, "H%ld-%s ", id, TaskNames[i]);
+    tasks[i] = IloIntervalVar(env, TaskDurations[i], name);
+    taskMatrix[i] = IloIntervalVarArray(env, NbWorkers);
+
+    /* ALLOCATING TASKS TO WORKERS. */
+    IloIntervalVarArray alttasks(env);
+    for (IloInt w=0; w&lt;NbWorkers; ++w) {
+      if (HasSkill(w, i)) {
+        sprintf(name, "H%ld-%s-%s ", id, TaskNames[i], WorkerNames[w]);
+        IloIntervalVar wtask(env, TaskDurations[i], name);
+        wtask.setOptional();
+        alttasks.add(wtask);
+        taskMatrix[i][w]=wtask;
+        workerTasks[w].add(wtask);
+        allTasks.add(wtask);
+        /* DEFINING MAXIMIZATION OBJECTIVE. */
+        skill += SkillLevel(w, i)*IloPresenceOf(env, wtask);
+      }
+    }
+    model.add(IloAlternative(env, tasks[i], alttasks));
+  }
+</code></pre>
+<p class="p">The tasks in the model have precedence constraints
+that are added to the model. Moreover, the “moving” task must be complete
+by the deadline. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159624"><h2 class="title sectiontitle">Step 6: Add the temporal constraints</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the temporal
+constraints</samp> </p>
+<pre class="pre codeblock"><code>  tasks[moving].setEndMax(deadline);
+  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[carpentry]));
+  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[plumbing]));
+  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[ceiling]));
+  model.add(IloEndBeforeStart(env, tasks[carpentry], tasks[roofing]));
+  model.add(IloEndBeforeStart(env, tasks[ceiling],   tasks[painting]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[windows]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing],  tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing],  tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[windows],   tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[facade],    tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[garden],    tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[painting],  tasks[moving]));
+</code></pre>
+<p class="p">For each house and each given pair of tasks
+and worker that must have continuity, you constrain that if the interval
+variable for one of the two tasks for the worker is present, then
+the interval variable associated with that worker and the other task
+must also be present. To represent if a task is performed by a worker,
+you again use the constraint <samp class="ph codeph">IloPresenceOf</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159611"><h2 class="title sectiontitle">Step 7: Add the same worker constraints</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add same worker
+constraints</samp> </p>
+<pre class="pre codeblock"><code>  model.add(IloPresenceOf(env, taskMatrix[masonry][joe]) ==
+            IloPresenceOf(env, taskMatrix[carpentry][joe]));
+  model.add(IloPresenceOf(env, taskMatrix[roofing][jack]) ==
+            IloPresenceOf(env, taskMatrix[facade][jack]));
+  model.add(IloPresenceOf(env, taskMatrix[carpentry][joe]) ==
+            IloPresenceOf(env, taskMatrix[roofing][joe]));
+  model.add(IloPresenceOf(env, taskMatrix[garden][jim]) ==
+            IloPresenceOf(env, taskMatrix[moving][jim]));
+</code></pre>
+<p class="p">This completes the <samp class="ph codeph">MakeHouse</samp> function.
+In the main function, you now call the <samp class="ph codeph">MakeHouse</samp> function,
+once for each house. At each call, the objective expression, <samp class="ph codeph">skill</samp>, is updated and additional elements are appended
+to the arrays  <samp class="ph codeph">allTasks</samp> and the arrays in
+the matrix <samp class="ph codeph">workerTasks</samp>. The deadline and
+house identifier are also passed to the <samp class="ph codeph">MakeHouse</samp> function.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159600"><h2 class="title sectiontitle">Step 8: Create the houses</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create
+the houses</samp> </p>
+<pre class="pre codeblock"><code>    for (h=0; h&lt;nbHouses; ++h)
+      MakeHouse(model, skill, allTasks, workerTasks, h, deadline);
+</code></pre>
+<p class="p">To add the constraints that a given worker
+can be assigned only one task at a time, you use the classes <samp class="ph codeph">IloIntervalSequenceVar</samp> and <samp class="ph codeph">IloNoOverlap</samp> as
+in <a class="xref" href="schedseq.html" title="In this lesson, you will learn how to find a solution to a house building with workers problem using CP Optimizer and the three-stage method.">Using no overlap constraints on interval variables: house building with workers</a>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159589"><h2 class="title sectiontitle">Step 9: Add the no overlap constraints</h2><p class="p"> Add
+the following code after the comment <samp class="ph codeph">//Add the no
+overlap constraints</samp> </p>
+<pre class="pre codeblock"><code>    for (w=0; w&lt;NbWorkers; ++w) {
+      IloIntervalSequenceVar seq(env, workerTasks[w], WorkerNames[w]);
+      model.add(IloNoOverlap(env, seq));
+    }
+</code></pre>
+<p class="p">The objective of this problem is to maximize
+the skill levels used for all the tasks, so you maximize the expression
+in the array <samp class="ph codeph">skill</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedoptional.114936__migration.uss_gscpoptimizerschedoptional.159578"><h2 class="title sectiontitle">Step 10: Add the objective</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the objective</samp> </p>
+<pre class="pre codeblock"><code>    model.add(IloMaximize(env, skill));
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/schedoptional.html" title="In this lesson, you will learn how to find a solution to a house building with worker allocation problem using CP Optimizer and the three-stage method.">Using alternatives of interval variables: house building with worker allocation</a></div>
+</div>
+</div></body>
+</html>

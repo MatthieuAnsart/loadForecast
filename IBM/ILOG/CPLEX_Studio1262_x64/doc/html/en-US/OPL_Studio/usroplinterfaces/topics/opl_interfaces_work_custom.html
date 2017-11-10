@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Custom data sources" />
+<meta name="abstract" content="Describes how to provide custom data sources for your model by extending the class IloOplDataSourceBaseII" />
+<meta name="Description" content="Describes how to provide custom data sources for your model by extending the class IloOplDataSourceBaseII" />
+<meta name="DC.subject" content="custom data sources, data sources, custom, IloOplDataSourceBaseI class, IloOplDataHandlerI interface, getDataHandler method, initializing, CustomOplDataSource class" />
+<meta name="keywords" content="custom data sources, data sources, custom, IloOplDataSourceBaseI class, IloOplDataHandlerI interface, getDataHandler method, initializing, CustomOplDataSource class" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllib.uss_lib_opl.1000703" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" />
+<title>Custom data sources</title>
+</head>
+<body role="main" id="usropllib.uss_lib_opl.1000703">
+<h1 class="title topictitle1">Custom data sources</h1>
+<div class="body"><p class="shortdesc">Describes how to provide custom data sources for your
+model by extending the class <span class="keyword apiname">IloOplDataSourceBaseI</span>I</p>
+<p class="p">You can provide OPL models with custom data sources by
+extending the class <span class="keyword apiname">IloOplDataSourceBaseI</span> .
+All you need to do is implement the <span class="keyword apiname">read</span> method,
+which will be called by the OPL interpreter as necessary. A custom
+data source uses the interface <span class="keyword apiname">IloOplDataHandler</span> to
+transfer data to the model, and the method <span class="keyword apiname">getDataHandler</span> to
+access the associated data handler and send events. The handler API
+is event-driven, similar to SAX interfaces for XML.</p>
+<p class="p">Two examples of how these handlers could be used to initialize
+custom data sources are given below:</p>
+<p class="p paragrouptitle">Initialization of a multi-dimensional array custom data
+source</p>
+<div class="p"><pre class="pre codeblock"><code>            handler.StartElement("cost") 
+            handler.StartIndexedArray() 
+            For i = 1 To NUMDEMAND 
+                handler.SetItemStringIndex(dtin.Rows(i - 1)(0)) 
+                handler.StartIndexedArray() 
+                For j = 1 To NUMSUPPLY 
+                    handler.SetItemStringIndex(dtin.Columns(j).ColumnName) 
+                    handler.AddNumItem(dtin.Rows(i - 1)(j)) 
+                Next j 
+                handler.EndIndexedArray() 
+            Next i 
+            handler.EndIndexedArray() 
+            handler.EndElement() </code></pre>
+</div>
+<p class="p paragrouptitle">Initialization of a string set custom data source</p>
+<div class="p"><pre class="pre codeblock"><code>            handler.StartElement("Plants") 
+            handler.StartSet() 
+            For j = 1 To NUMSUPPLY 
+                handler.AddStringItem(dtin.Columns(j).ColumnName) 
+            Next j 
+            handler.EndSet() 
+            handler.EndElement() </code></pre>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1000703__usropllib.uss_lib_opl.1008309"><h2 class="title sectiontitle">C++</h2><pre class="pre codeblock"><code>class MyParams: public IloOplDataSourceBaseI {
+    int _nbWarehouses;
+    int _nbStores;
+    int _fixed;
+    IloBool _disaggregate;
+
+    void usage();
+public:
+    MyParams(IloEnv&amp; env, int argc, char* argv[]);
+    void read() const;
+};</code></pre>
+<p class="p exampletitle" id="usropllib.uss_lib_opl.1000703__usropllib.uss_lib_opl.1007612">C++: Providing custom data sources</p>
+<pre class="pre codeblock"><code>void MyParams::read() const {
+    IloOplDataHandler handler = getDataHandler();
+
+    handler.startElement("nbWarehouses");
+    handler.addIntItem(_nbWarehouses);
+    handler.endElement();
+
+    handler.startElement("nbStores");
+    handler.addIntItem(_nbStores);
+    handler.endElement();
+
+    handler.startElement("fixed");
+    handler.addIntItem(_fixed);
+    handler.endElement();
+
+    handler.startElement("disaggregate");
+    handler.addIntItem(_disaggregate);
+    handler.endElement();
+}</code></pre>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1000703__usropllib.uss_lib_opl.1003514"><h2 class="title sectiontitle">Java</h2><p class="p exampletitle" id="usropllib.uss_lib_opl.1000703__usropllib.uss_lib_opl.1003518">Java: Providing custom data sources</p>
+<pre class="pre codeblock"><code>    static class MyParams extends IloCustomOplDataSource
+    {
+        int _nbWarehouses;
+        int _nbStores;
+        int _fixed;
+        int _disaggregate;
+
+        MyParams(IloOplFactory oplF,int nbWarehouses,int nbStores,int fixed,int disaggregate)
+        {
+            super(oplF);
+            _nbWarehouses = nbWarehouses;
+            _nbStores = nbStores;
+            _fixed = fixed;
+            _disaggregate = disaggregate;
+        }
+
+        public void customRead()
+        {
+            IloOplDataHandler handler = getDataHandler();
+
+            handler.startElement("nbWarehouses");
+            handler.addIntItem(_nbWarehouses);
+            handler.endElement();
+
+            handler.startElement("nbStores");
+            handler.addIntItem(_nbStores);
+            handler.endElement();
+
+            handler.startElement("fixed");
+            handler.addIntItem(_fixed);
+            handler.endElement();
+
+            handler.startElement("disaggregate");
+            handler.addIntItem(_disaggregate);
+            handler.endElement();
+        }
+    };</code></pre>
+</div>
+<div class="section" id="usropllib.uss_lib_opl.1000703__usropllib.uss_lib_opl.1007699"><h2 class="title sectiontitle">.NET (C#)</h2><p class="p exampletitle" id="usropllib.uss_lib_opl.1000703__usropllib.uss_lib_opl.1009218">Accessing the values a decision variable within a solution</p>
+<pre class="pre codeblock"><code>    internal class MyParams : CustomOplDataSource
+    {
+        int _nbWarehouses;
+        int _nbStores;
+        int _fixed;
+        int _disaggregate;
+
+        internal MyParams(OplFactory oplF, int nbWarehouses, int nbStores, int fixedP, int disaggregate)
+            : base(oplF)
+        {
+            _nbWarehouses = nbWarehouses;
+            _nbStores = nbStores;
+            _fixed = fixedP;
+            _disaggregate = disaggregate;
+        }</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" title="Explains in more general terms how to work with the OPL C++, Java and .NET Interfaces. This section is also illustrated by code samples for each language.">Working with OPL interfaces</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the house building with earliness and tardiness costs problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the house building with earliness and tardiness costs problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/schedtime.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerschedtime.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/schedtime.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerschedtime.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the house building with earliness and tardiness costs
+problem has been described using natural language, you then use Concert
+Technology classes to model the constraint programming problem. </p>
+<p class="p">After you have written a description of your problem, you can use IBM® ILOG® Concert
+Technology classes to model it. </p>
+<div class="section" id="migration.uss_gscpoptimizerschedtime.114936__migration.uss_gscpoptimizerschedtime.151414"><h2 class="title sectiontitle">Step
+2: Open the example file</h2><p class="p">Open the example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/sched_time_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You will enter the missing code in each step
+in this lesson. At the end, you will have completed the program code,
+and you can compile and run the program.</p>
+<p class="p">In this lesson, you
+include the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>. To catch
+exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code for creating the environment and model and for printing the
+solution found by the CP Optimizer engine is provided.</p>
+<p class="p">IBM ILOG Concert
+Technology gives you the means to represent the unknowns in this problem,
+the interval in which each task will occur, as interval variables.
+   </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Interval decision variable</strong> </p>
+ <p class="p">Tasks are
+represented by the class <samp class="ph codeph">IloIntervallVar</samp> in IBM ILOG Concert
+Technology.</p>
+ <p class="p">An interval has a start time, an end time, a size and
+a length. An interval variable allows for these values to be variable
+in the model.  </p>
+ <p class="p"> The length of a present interval variable
+is equal to the difference between its end time and its start time.
+The size is the actual amount of time the task takes to process. By
+default, the size is equal to the length, which is the difference
+between the end and the start of the interval. In general, the size
+is a lower bound on the length.</p>
+ <p class="p">An interval variable may be
+optional. Whether an interval is present in the solution or not is
+represented by a decision variable. If an interval is not present
+in the solution, this means that any constraints on this interval act like the interval is
+“not there.” Exact semantics will depend on the specific constraint. </p>
+ <p class="p">Logical
+relations can be expressed between the presence statuses of interval
+variables, allowing, for instance, to state that whenever the interval
+variable <samp class="ph codeph">a</samp> is present then the interval variable <samp class="ph codeph">b</samp> must
+also be present.  </p>
+ </div>
+<p class="p">After you create an environment and
+a model, you declare the interval variables, one for each task. Each
+variable represents the unknown information, the scheduled interval
+for each activity. After the problem is solved, the values assigned
+to these interval variables will represent the solution to the problem.
+To improve the display of the solution, it is useful to assign a name
+to each of the interval variables.</p>
+<p class="p">Here is the constructor for
+the class <samp class="ph codeph">IloIntervalVar</samp> that you use in this lesson:
+   </p>
+<pre class="pre codeblock"><code>  IloIntervalVar(const IloEnv env,
+                 IloInt       sz,
+                 const char*  name = 0);
+</code></pre>
+<p class="p">The first argument that is passed to this constructor
+of the class <samp class="ph codeph">IloIntervalVar</samp> is the environment. The
+second argument is the size of the task. The third argument is an
+optional name that is used for debug and trace purposes. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedtime.114936__migration.uss_gscpoptimizerschedtime.151430"><h2 class="title sectiontitle">Step
+3: Declare the interval variables</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Declare the interval variables</samp>  </p>
+<pre class="pre codeblock"><code>    IloIntervalVar masonry  (env, 35, "masonry   ");
+    IloIntervalVar carpentry(env, 15, "carpentry ");
+    IloIntervalVar plumbing (env, 40, "plumbing  ");
+    IloIntervalVar ceiling  (env, 15, "ceiling   ");
+    IloIntervalVar roofing  (env, 5,  "roofing   ");
+    IloIntervalVar painting (env, 10, "painting  ");
+    IloIntervalVar windows  (env, 5,  "windows   ");
+    IloIntervalVar facade   (env, 10, "facade    ");
+    IloIntervalVar garden   (env, 5,  "garden    ");
+    IloIntervalVar moving   (env, 5,  "moving    ");
+</code></pre>
+<p class="p">In this example, certain tasks can start only after
+other tasks have been completed. CP Optimizer allows you to express constraints involving
+temporal relationships between pairs of interval variables using <em class="ph i">precedence constraints</em>.
+   </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Precedence constraint</strong> </p>
+ <p class="p">Constraints
+are represented by the class <samp class="ph codeph">IloConstraint</samp> in IBM ILOG Concert
+Technology.</p>
+ <p class="p">Precedence constraints are used to specify when
+one interval variable must start or end with respect to the start
+or end time of another interval. The following types of precedence
+constraints are available; if <samp class="ph codeph">a</samp> and <samp class="ph codeph">b</samp> denote
+interval variables, both interval variables are present and <samp class="ph codeph">delay</samp> is
+a number or integer expression (0 by default), then: </p>
+ <ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">IloEndBeforeEnd(env, a, b, delay)</samp> constrains
+that at least the given delay should elapse between the end of <samp class="ph codeph">a</samp> and
+the end of <samp class="ph codeph">b</samp>. It imposes the inequality <samp class="ph codeph">endTime(a)
++ delay &lt;= endTime(b)</samp>. </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">IloEndBeforeStart(env, a, b, delay)</samp> constrains
+that at least the given delay should elapse between the end of <samp class="ph codeph">a</samp> and
+the start of <samp class="ph codeph">b</samp>. It imposes the inequality <samp class="ph codeph">endTime(a)
++ delay &lt;= startTime(b)</samp>. </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloEndAtEnd(env, a, b, delay)</samp> constrains the given
+delay to separate the end of <samp class="ph codeph">a</samp> and the end of <samp class="ph codeph">b</samp>.
+It imposes the equality <samp class="ph codeph">endTime(a) + delay == endTime(b)</samp>. </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloEndAtStart(env, a, b, delay)</samp> constrains
+the given delay to separate the end of <samp class="ph codeph">a</samp> and the
+start of <samp class="ph codeph">b</samp>. It imposes the equality <samp class="ph codeph">endTime(a)
++ delay == startTime(b)</samp>. </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloStartBeforeEnd(env, a, b, delay)</samp> constrains
+that at least the given delay should elapse between the start of <samp class="ph codeph">a</samp> and
+the end of <samp class="ph codeph">b</samp>. It imposes the inequality <samp class="ph codeph">startTime(a)
++ delay &lt;= endTime(b)</samp>. </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">IloStartBeforeStart(env, a, b, delay)</samp> constrains
+that at least the given delay should elapse between the start of <samp class="ph codeph">a</samp> and
+the start of <samp class="ph codeph">b</samp>. It imposes the inequality <samp class="ph codeph">startTime(a)
++ delay &lt;= startTime(b)</samp>. </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloStartAtEnd(env, a, b, delay)</samp> constrains
+the given delay to separate the start of <samp class="ph codeph">a</samp> and the
+end of <samp class="ph codeph">b</samp>. It imposes the equality <samp class="ph codeph">startTime(a)
++ delay == endTime(b)</samp>. </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">IloStartAtStart(env, a, b, delay)</samp> constrains
+the given delay to separate the start of <samp class="ph codeph">a</samp> and the
+start of <samp class="ph codeph">b</samp>. It imposes the equality <samp class="ph codeph">startTime(a)
++ delay == startTime(b)</samp>. </p>
+ </li>
+</ul>
+ <p class="p">If either interval <samp class="ph codeph">a</samp> or <samp class="ph codeph">b</samp> is
+not present in the solution, the constraint is automatically satisfied,
+and it is as if the constraint was never imposed. </p>
+ </div>
+<p class="p">You
+use the member function <samp class="ph codeph">IloModel::add</samp> to add constraints
+to the model. You must explicitly add a constraint to the model object
+or the CP Optimizer engine will not use it in the search for a solution.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedtime.114936__migration.uss_gscpoptimizerschedtime.151441"><h2 class="title sectiontitle">Step
+4: Add the precedence constraints</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the precedence constraints</samp> </p>
+<pre class="pre codeblock"><code>    model.add(IloEndBeforeStart(env, masonry,   carpentry));
+    model.add(IloEndBeforeStart(env, masonry,   plumbing));
+    model.add(IloEndBeforeStart(env, masonry,   ceiling));
+    model.add(IloEndBeforeStart(env, carpentry, roofing));
+    model.add(IloEndBeforeStart(env, ceiling,   painting));
+    model.add(IloEndBeforeStart(env, roofing,   windows));
+    model.add(IloEndBeforeStart(env, roofing,   facade));
+    model.add(IloEndBeforeStart(env, plumbing,  facade));
+    model.add(IloEndBeforeStart(env, roofing,   garden));
+    model.add(IloEndBeforeStart(env, plumbing,  garden));
+    model.add(IloEndBeforeStart(env, windows,   moving));
+    model.add(IloEndBeforeStart(env, facade,    moving));
+    model.add(IloEndBeforeStart(env, garden,    moving));
+    model.add(IloEndBeforeStart(env, painting,  moving));
+</code></pre>
+<p class="p">To model the cost for starting a task earlier than
+the preferred starting date, you write a function that is based on
+the expression that represents the starting date of the given task.
+This lesson illustrates two methods for creating this function. Concert
+Technology provides the expression, <samp class="ph codeph">IloStartOf</samp>, to
+represent the start time of an interval variable as an integer expression.
+The single argument that is passed to the function <samp class="ph codeph">IloStartOf</samp> is
+the appropriate interval variable. Here is the function:    </p>
+<pre class="pre codeblock"><code>  IloIntExprArg IloStartOf (const IloIntervalVar a);
+</code></pre>
+<p class="p">To model the cost for starting a task earlier than
+the preferred starting date, you use the expression <samp class="ph codeph">IloStartOf</samp> that
+represents the start time of an interval variable as an integer expression. </p>
+<p class="p">For
+each task that has an earliest preferred start date, you determine
+how many days before the preferred date it is scheduled to start using
+the expression <samp class="ph codeph">IloStartOf</samp>; this expression can be
+negative if the task starts after the preferred date. By taking the
+maximum of this value and 0 using <samp class="ph codeph">IloMax</samp>, you determine
+how many days early the task is scheduled to start. Weighting this
+value with the cost per day of starting early, you determine the cost
+that is associated with the task. </p>
+<p class="p">Alternatively, you can represent
+the earliness cost as a piecewise linear function. Concert Technology
+provides the class <samp class="ph codeph">IloNumToNumSegmentFunction</samp> to
+model a piecewise linear function.  </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Segment function</strong> </p>
+ <p class="p">Piecewise
+linear functions are represented by the class <samp class="ph codeph">IloNumToNumSegmentFunction</samp> in IBM ILOG Concert
+Technology. </p>
+ <p class="p"> Each interval <em class="ph i">[x1, x2)</em> on which the function
+is linear is called a <em class="ph i">segment</em>. </p>
+ <p class="p">When two consecutive
+segments of the function are colinear, these segments are merged so
+that the function is always represented with the minimal number of
+segments. </p>
+ </div>
+<p class="p">In this case, to create an instance of the <samp class="ph codeph">IloNumToNumSegmentFunction</samp>,
+you use the function <samp class="ph codeph">IloPiecewiseLinear</samp>. The first argument
+that is passed to the function is the environment. The second argument
+is an array of points that are the endpoints of the segments. The
+third argument is an array of slopes. The fourth argument is a point,
+and the fifth argument is the value of the function at that point.
+The sixth argument is an optional name that is used for debug and
+trace purposes. Here is the function:     </p>
+<pre class="pre codeblock"><code>  IloNumToNumSegmentFunction 
+                IloPiecewiseLinearFunction(const IloEnv env,
+                                           const IloNumArray point,
+                                           const IloNumArray slope,
+                                           IloNum a,
+                                           IloNum fa,
+                                           const char* name = 0);
+</code></pre>
+<p class="p">The piecewise linear function for the earliness function
+in this problem has two segments, one from <samp class="ph codeph">-IloInfinity</samp> to
+the preferred earliest start date and then one from the preferred
+earliest start date to <samp class="ph codeph">IloInfinity</samp>. The cost function
+on the leftmost interval is <samp class="ph codeph">-weight</samp>; on the rightmost
+interval, the function value is 0. </p>
+<p class="p">The function <samp class="ph codeph">IloStartEval</samp>,
+when called with an interval variable and a segment function, returns
+an expression that represents the value of the function at the start
+of the interval. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedtime.114936__migration.uss_gscpoptimizerschedtime.151452"><h2 class="title sectiontitle">Step
+5: Add the earliness function</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the earliness function</samp> </p>
+<pre class="pre codeblock"><code>IloNumExpr EarlinessCost(IloIntervalVar task, IloInt rd, IloNum weight, IloBool useFunction) {
+  IloEnv env = task.getEnv();
+  if (useFunction) {
+    IloNumToNumSegmentFunction f = 
+      IloPiecewiseLinearFunction(env, 
+         IloNumArray(env, 1, rd),
+         IloNumArray(env, 2, -weight, 0.0),
+         rd, 0.0);
+    return IloStartEval(task, f);
+  }
+  else
+    return weight * IloMax(0, rd-IloStartOf(task));
+}
+</code></pre>
+<p class="p">The cost for ending a task later than the preferred
+date is modeled in a similar manner, using the <samp class="ph codeph">IloEndOf</samp> function
+or the <samp class="ph codeph">IloNumToNumSegmentFunction</samp> class and <samp class="ph codeph">IloEndEval</samp> function provided
+by Concert Technology.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedtime.114936__migration.uss_gscpoptimizerschedtime.151463"><h2 class="title sectiontitle">Step
+5: Add the tardiness function</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Add the tardiness function</samp> </p>
+<pre class="pre codeblock"><code>IloNumExpr TardinessCost(IloIntervalVar task, IloInt dd, IloNum weight, IloBool useFunction) {
+  IloEnv env = task.getEnv();
+  if (useFunction) {
+   IloNumToNumSegmentFunction f = 
+      IloPiecewiseLinearFunction(env, 
+         IloNumArray(env, 1, dd),
+         IloNumArray(env, 2, 0.0, weight),
+         dd, 0.0);
+    return IloEndEval(task, f);
+  }
+  else
+    return weight * IloMax(0, IloEndOf(task)-dd);
+}
+</code></pre>
+<p class="p">These two cost functions are used to create an expression
+that models the overall cost. The resulting <samp class="ph codeph">IloNumExpr</samp> is
+passed to an <samp class="ph codeph">IloMinimize</samp> function, and the objective
+added to the model.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedtime.114936__migration.uss_gscpoptimizerschedtime.151472"><h2 class="title sectiontitle">Step
+6: Add the objective</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the objective</samp> </p>
+<pre class="pre codeblock"><code>    IloBool useFunction = IloTrue;
+    IloNumExpr cost(env);
+    cost += EarlinessCost(masonry,   25, 200.0, useFunction);
+    cost += EarlinessCost(carpentry, 75, 300.0, useFunction);
+    cost += EarlinessCost(ceiling,   75, 100.0, useFunction);
+    cost += TardinessCost(moving,   100, 400.0, useFunction);
+    model.add(IloMinimize(env, cost));
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/schedtime.html" title="In this lesson, you will learn how to find a solution to a house building with earliness and tardiness costs problem using CP Optimizer and the three-stage method.">Using expressions on interval variables: house building with earliness and tardiness costs</a></div>
+</div>
+</div></body>
+</html>

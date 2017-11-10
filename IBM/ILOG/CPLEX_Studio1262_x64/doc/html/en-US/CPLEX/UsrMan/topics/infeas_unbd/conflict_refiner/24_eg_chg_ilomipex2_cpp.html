@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: modifying ilomipex2.cpp" />
+<meta name="abstract" content="Describes modifications of ilomipex2.cpp to demonstrate the conflict refiner." />
+<meta name="Description" content="Describes modifications of ilomipex2.cpp to demonstrate the conflict refiner." />
+<meta name="DC.subject" content="conflict refiner, C++ API example" />
+<meta name="keywords" content="conflict refiner, C++ API example" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/23_appli_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_refineConflict.1046177" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/23_appli_title_synopsis.html" />
+<title>Example: modifying ilomipex2.cpp</title>
+</head>
+<body role="main" id="User_manual.uss_refineConflict.1046177">
+<h1 class="title topictitle1">Example: modifying ilomipex2.cpp</h1>
+<div class="body"><p class="shortdesc">Describes modifications of ilomipex2.cpp to demonstrate
+the conflict refiner.</p>
+<p class="p">Here is an example using the conflict refiner in the
+C++ API of Concert Technology. You will modify one of the standard
+examples <samp class="ph codeph">ilomipex2.cpp</samp>  distributed with
+the product. Starting from that example, locate this statement in
+it:  </p>
+<pre class="pre codeblock"><code>cplex.solve();</code></pre>
+<p class="p">Immediately after that statement, insert the following
+lines to prepare for and invoke the conflict refiner:  </p>
+<pre class="pre codeblock"><code> if ( ( cplex.getStatus() == IloAlgorithm::Infeasible ) ||
+           ( cplex.getStatus() == IloAlgorithm::InfeasibleOrUnbounded  ) ) {
+         cout &lt;&lt; endl &lt;&lt; "No solution - starting Conflict refinement" &lt;&lt; endl;
+
+         IloConstraintArray infeas(env);
+         IloNumArray preferences(env);
+
+         infeas.add(rng); 
+         infeas.add(sos1); infeas.add(sos2);
+         if ( lazy.getSize() || cuts.getSize() ) {
+           cout &lt;&lt; "Lazy Constraints and User Cuts ignored" &lt;&lt; endl;
+         }
+         for (IloInt i = 0; i&lt;var.getSize(); i++) {
+            if ( var[i].getType() != IloNumVar::Bool ) {
+              infeas.add(IloBound(var[i], IloBound::Lower));
+              infeas.add(IloBound(var[i], IloBound::Upper));
+            }
+         }
+
+         for (IloInt i = 0; i&lt;infeas.getSize(); i++) {
+           preferences.add(1.0);  // user may wish to assign unique preferences
+         }
+
+         if ( cplex.refineConflict(infeas, preferences) ) {
+          IloCplex::ConflictStatusArray conflict = cplex.getConflict(infeas);
+            env.getImpl()-&gt;useDetailedDisplay(IloTrue);
+            cout &lt;&lt; "Conflict :" &lt;&lt; endl;
+            for (IloInt i = 0; i&lt;infeas.getSize(); i++) {
+              if ( conflict[i] == IloCplex::ConflictMember)
+                   cout &lt;&lt; "Proved  : " &lt;&lt; infeas[i] &lt;&lt; endl;
+              if ( conflict[i] == IloCplex::ConflictPossibleMember)
+                   cout &lt;&lt; "Possible: " &lt;&lt; infeas[i] &lt;&lt; endl;
+            }
+         }
+         else
+            cout &lt;&lt; "Conflict could not be refined" &lt;&lt; endl;
+         cout &lt;&lt; endl;
+      }</code></pre>
+<p class="p"> Now run this modified version with the model you have
+seen in <a class="xref" href="08_eg_model.html" title="Describes a model to exercise the conflict refiner in the Interactive Optimizer.">A model for the conflict refiner</a>.
+You will see results like these:  </p>
+<pre class="pre codeblock"><code>No solution - starting Conflict refinement
+
+Refine conflict on 14 members...
+
+ Iteration  Max Members  Min Members
+         1           11            0
+         2            9            0
+         3            5            0
+         4            3            0
+         5            2            0
+         6            2            1
+         7            2            2
+Conflict :
+Proved  : c2( 2.1 &lt;= ( x1 + x2 + 0.8 * x3 + 0.6 * x4 + 0.4 * x5 ) )
+Proved  : c8( ( x2 + x3 + x4 + x5 )  &lt;= 0)</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/23_appli_title_synopsis.html" title="Describes an application using the conflict refiner in the C++ API.">Using the conflict refiner in an application</a></div>
+</div>
+</div></body>
+</html>

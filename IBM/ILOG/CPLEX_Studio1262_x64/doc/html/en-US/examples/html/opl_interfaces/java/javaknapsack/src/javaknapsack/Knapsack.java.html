@@ -1,0 +1,138 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*/</font></b> 
+010: 
+011: package javaknapsack;
+012: import ilog.concert.*;
+013: import ilog.opl.*;
+014: 
+015: <b><font color="#007D00">// This is an simple Knapsack algorithm used to illustrate how to </font></b>
+016: <b><font color="#007D00">// call java functions from OPL.</font></b>
+017: <b><font color="#007D00">// Refer to the description of the example cutstock_ext_main in the</font></b>
+018: <b><font color="#007D00">// OPL documentation for more information</font></b>
+019: 
+020: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> Knapsack 
+021: {
+022:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">int</font></b>[] weights, solution;
+023:         <b><font color="EA7D00">private</font></b> <b><font color="#0000FF">double</font></b>[] values;
+024:  
+025:         <b><font color="EA7D00">public</font></b> Knapsack()       {}
+026: 
+027:         <b><font color="#0000FF">double</font></b> solve(<b><font color="#0000FF">int</font></b> target)
+028:         {
+029:                 <b><font color="#007D00">// V is the array of current value</font></b>
+030:                 <b><font color="#0000FF">double</font></b> V[] = <b><font color="EA7D00">new</font></b> <b><font color="#0000FF">double</font></b> [target+1];
+031:                 <b><font color="#007D00">// W is the array stating which element to use</font></b>
+032:                 <b><font color="#0000FF">int</font></b> W[] = <b><font color="EA7D00">new</font></b> <b><font color="#0000FF">int</font></b> [target+1];
+033:                 
+034:                 <b><font color="#007D00">// build the first column</font></b>
+035:                 V[0] = 0;
+036:                 W[0] = -1;
+037:                                 
+038:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j = 0; j &lt;= target; j++) 
+039:                 {
+040:                         V[j] = 0;
+041:                         W[j] = -1;
+042:                 }
+043:                 
+044:                 <b><font color="#0000FF">int</font></b> best = -1;
+045:                 <b><font color="#0000FF">double</font></b> bestValue = 0;
+046: 
+047:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j = 1; j &lt;= target; j++) {
+048:                         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 1; i &lt;= values.length; i++) {                                                              
+049:                                 <b><font color="EA7D00">if</font></b> (j - weights[i-1] &gt;= 0) <b><font color="#007D00">// if possible to add element </font></b>
+050:                                 {
+051:                                         <b><font color="#007D00">// pre-compute the column value</font></b>
+052:                                         <b><font color="#0000FF">double</font></b> tmp = values[i-1] + V[j-weights[i-1]];
+053:                                         <b><font color="EA7D00">if</font></b> (V[j] &lt; tmp) <b><font color="#007D00">// if better solution.</font></b>
+054:                                         {
+055:                                                 V[j] = tmp;
+056:                                                 W[j] = i-1;
+057:                                                 <b><font color="EA7D00">if</font></b> (tmp &gt; bestValue) 
+058:                                                 {                                                       
+059:                                                         bestValue = tmp;
+060:                                                         best = j;
+061:                                                 }
+062: 
+063:                                         }
+064:                                 } <b><font color="#007D00">// end else                   </font></b>
+065:                         } <b><font color="#007D00">// end for i loop                     </font></b>
+066:                 } <b><font color="#007D00">// end for j loop</font></b>
+067: 
+068:                 <b><font color="#007D00">// Store the optimal solution (indicated by best) into the solution array</font></b>
+069:                 <b><font color="#0000FF">int</font></b> i = best;
+070:                 <b><font color="#0000FF">double</font></b> solutionValue = V[i];
+071:                 solution = <b><font color="EA7D00">new</font></b> <b><font color="#0000FF">int</font></b> [weights.length];
+072:                 <b><font color="EA7D00">while</font></b> (W[i]&gt;=0) 
+073:                 {                       
+074:                         solution[W[i]]++;
+075:                         i -= weights[W[i]];
+076:                 }
+077:                 <b><font color="EA7D00">return</font></b> solutionValue;                           
+078:         } <b><font color="#007D00">// end solve</font></b>
+079: 
+080:         
+081:         <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> updateInputs(IloOplElement oplWeights, IloOplElement oplValues) 
+082:         {
+083:                 <b><font color="EA7D00">try</font></b> 
+084:                 {
+085:                         <b><font color="#0000FF">int</font></b> nbItems = oplWeights.asIntMap().getSize();
+086: 
+087:                         weights = <b><font color="EA7D00">new</font></b> <b><font color="#0000FF">int</font></b>[nbItems];
+088:                         values = <b><font color="EA7D00">new</font></b> <b><font color="#0000FF">double</font></b>[nbItems];
+089: 
+090:                         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0; i &lt; nbItems; i++)
+091:                         {
+092:                                 weights[i] = (<b><font color="#0000FF">int</font></b>)oplWeights.asIntMap().get(1+i);  <b><font color="#007D00">// indexing from 1 to nbItems in OPL</font></b>
+093:                                 values[i] = (<b><font color="#0000FF">double</font></b>)oplValues.asNumMap().get(1+i);
+094:                         }
+095: 
+096:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+097:             System.err.println(<b><font color="#8A2BE2">"### OPL exception in Knapsack.updateInputs: "</font></b> + ex.getMessage());
+098:             ex.printStackTrace();
+099:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+100:             System.err.println(<b><font color="#8A2BE2">"### CONCERT exception in Knapsack.updateInputs: "</font></b> + ex.getMessage());
+101:             ex.printStackTrace();
+102:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+103:             System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR in Knapsack.updateInputs..."</font></b>);
+104:             ex.printStackTrace();
+105:         }
+106: 
+107:         } <b><font color="#007D00">// end updateInputs</font></b>
+108: 
+109:         <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">double</font></b> solve(IloOplElement oplSolution, <b><font color="#0000FF">int</font></b> size) 
+110:         {               
+111:                 <b><font color="EA7D00">try</font></b> 
+112:                 {
+113:                         <b><font color="#0000FF">double</font></b> solutionValue  = solve(size);
+114: 
+115:                         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0; i &lt; weights.length; i++)  
+116:                         {
+117:                                 oplSolution.asIntMap().set(1+i, solution[i]);  <b><font color="#007D00">// indexing from 1 to Nbitems in OPL</font></b>
+118:                         }
+119:                         
+120:                         <b><font color="EA7D00">return</font></b> solutionValue;
+121:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+122:             System.err.println(<b><font color="#8A2BE2">"### OPL exception in Knapsack.solve: "</font></b> + ex.getMessage());
+123:             ex.printStackTrace();
+124:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+125:             System.err.println(<b><font color="#8A2BE2">"### CONCERT exception in Knapsack.solve: "</font></b> + ex.getMessage());
+126:             ex.printStackTrace();
+127:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+128:             System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR in Knapsack.solve..."</font></b>);
+129:             ex.printStackTrace();
+130:         }
+131:                 <b><font color="EA7D00">return</font></b> 0;
+132:         } <b><font color="#007D00">// end solve</font></b>
+133: }
+</tt></pre>

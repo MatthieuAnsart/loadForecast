@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Purpose of the preprocessing scripts" />
+<meta name="abstract" content="Explains how to initialize an array, set a CPLEX parameter, set an OPL option, and set the display of variables." />
+<meta name="Description" content="Explains how to initialize an array, set a CPLEX parameter, set an OPL option, and set the display of variables." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_script_transp.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usroplide.uss_ide_scripting.144896" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_script_transp.html" />
+<title>Purpose of the preprocessing scripts</title>
+</head>
+<body role="main" id="usroplide.uss_ide_scripting.144896">
+<h1 class="title topictitle1">Purpose of the preprocessing scripts</h1>
+<div class="body"><p class="shortdesc">Explains how to initialize an array, set a CPLEX
+parameter, set an OPL option, and set the display of variables.</p>
+<p class="p">In this model, preprocessing scripts are used for:</p>
+<ul class="ul"><li class="li"><p class="p"> <a class="xref" href="opl_ide_script_transp_purpose.html#usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.136334">Initializing an array</a> </p>
+ </li>
+<li class="li"><p class="p"> <a class="xref" href="opl_ide_script_transp_purpose.html#usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.136340">Setting a CPLEX parameter</a> </p>
+ </li>
+<li class="li"><p class="p"> <a class="xref" href="opl_ide_script_transp_purpose.html#usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.142285">Setting an OPL option</a> </p>
+ </li>
+<li class="li"><p class="p"> <a class="xref" href="opl_ide_script_transp_purpose.html#usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.136349">Setting the display of variables</a> </p>
+ </li>
+</ul>
+<div class="section" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.136334"><h2 class="title sectiontitle">Initializing an array</h2><p class="p">The recommended syntax to initialize arrays is via generic
+indexed arrays, as shown in the code extract below, which sets up
+a cost array for the routes.</p>
+<p class="p exampletitle" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.138152">Generic indexed arrays, an example <samp class="ph codeph">(transp4.mod)</samp> </p>
+<pre class="pre codeblock"><code>float Cost[Routes] = [ &lt;t.p,&lt;t.o,t.d&gt;&gt;:t.cost | t in TableRoutes ];</code></pre>
+<p class="p">This cost array is used in the objective, which aims to minimize
+the sum of transportation costs along all routes. See also <a class="xref" href="../../opllangref/topics/opl_langref_data_init_arrays.html#usropllangref.uss_langref_datasources.1064637__section1326898893369">As generic indexed arrays</a> in
+the <em class="ph i">Language Reference Manual</em>.</p>
+<p class="p">However, you can also use a preprocessing <samp class="ph codeph">execute</samp> block
+as shown in the following code extract, which contains a script named <samp class="ph codeph">INITIALIZE</samp>.</p>
+<p class="p exampletitle" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.138156">Preprocessing script: initializing an array <samp class="ph codeph">(transp4.mod)</samp> </p>
+<pre class="pre codeblock"><code>float Cost[Routes];
+execute INITIALIZE {
+  for( var t in TableRoutes ) {
+      Cost[Routes.get(t.p,Connections.get(t.o,t.d))] = t.cost;
+   }
+}</code></pre>
+</div>
+<div class="section" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.136340"><h2 class="title sectiontitle">Setting a CPLEX parameter</h2><p class="p">The script named <samp class="ph codeph">PARAMS</samp> sets a CPLEX parameter for the algorithm.</p>
+<p class="p exampletitle" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.127979">Preprocessing script: setting a CPLEX parameter  (<samp class="ph codeph">transp4.mod</samp>)</p>
+<pre class="pre codeblock"><code>execute PARAMS {
+  cplex.tilim = 100;
+}</code></pre>
+<p class="p">This parameter sets a time limit on each call to the optimizer.
+See <a class="xref" href="../../opllanguser/topics/opl_languser_script_intro_prechange.html#usropllangtut.uss_langtut_script_intro.1013882">Changing CPLEX parameters</a> in the <em class="ph i">Language User’s Manual</em>.</p>
+</div>
+<div class="section" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.142285"><h2 class="title sectiontitle">Setting an OPL option</h2><p class="p">The script statement named <samp class="ph codeph">SETTINGS</samp> sets
+the display of the component name on 40 characters.</p>
+<p class="p exampletitle" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.142261">Preprocessing script: setting an OPL option  (<samp class="ph codeph">transp4.mod</samp>)</p>
+<pre class="pre codeblock"><code>execute SETTINGS {
+  settings.displayComponentName = true;
+  settings.displayWidth = 40;
+  writeln("Routes: ",Routes);
+}</code></pre>
+</div>
+<div class="section" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.136349"><h2 class="title sectiontitle">Setting the display of
+variables</h2><p class="p">The script statement named <samp class="ph codeph">DISPLAY</samp> displays the
+routes in the <samp class="ph codeph">Routes</samp> tuple set in the format : product: origin --&gt;
+destination.</p>
+<p class="p">The <samp class="ph codeph">DISPLAY</samp> script uses a function to do this. You can see this
+display of the routes in the <span class="ph uicontrol">Scripting Log</span>
+tab.</p>
+<p class="p exampletitle" id="usroplide.uss_ide_scripting.144896__usroplide.uss_ide_scripting.136295">Preprocessing script: displaying
+variables
+<samp class="ph codeph">(transp4.mod)</samp></p>
+<pre class="pre codeblock"><code>execute DISPLAY {
+  function printRoute(r) {
+    write("  ",r.p,":");
+    writeln(r.e.o,"-&gt;",r.e.d);
+  }
+
+  writeln("Routes:");
+  for (var r in Routes) {
+    printRoute(r);
+  }
+}</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_script_transp.html" title="Presents the example and explains how to execute it and debug the preprocessing script.">The transportation example</a></div>
+</div>
+</div></body>
+</html>

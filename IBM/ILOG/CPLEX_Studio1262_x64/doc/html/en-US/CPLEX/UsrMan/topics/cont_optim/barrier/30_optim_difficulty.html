@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Difficulties during optimization" />
+<meta name="abstract" content="Suggests strategies for overcoming difficulties during optimization with the barrier optimizer." />
+<meta name="Description" content="Suggests strategies for overcoming difficulties during optimization with the barrier optimizer." />
+<meta name="DC.subject" content="numeric difficulties, barrier optimizer and, performance, barrier, numeric difficulties and, barrier optimizer, tolerance, convergence and numeric inconsistencies, convergence tolerance, effect of tightness" />
+<meta name="keywords" content="numeric difficulties, barrier optimizer and, performance, barrier, numeric difficulties and, barrier optimizer, tolerance, convergence and numeric inconsistencies, convergence tolerance, effect of tightness" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/26_numeric_difficulty_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveBarrier.654282" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/26_numeric_difficulty_title_synopsis.html" />
+<title>Difficulties during optimization</title>
+</head>
+<body role="main" id="User_manual.uss_solveBarrier.654282">
+<h1 class="title topictitle1">Difficulties during optimization</h1>
+<div class="body"><p class="shortdesc">Suggests strategies for overcoming difficulties during
+optimization with the barrier optimizer.</p>
+<p class="p">Numeric difficulties can degrade performance of the CPLEX
+barrier optimizer or even prevent convergence toward a solution. There
+are several possible sources of numeric difficulties:</p>
+<ul class="ul"><li class="li"><p class="p">elimination of too many dense columns
+may cause numeric instability;</p>
+</li>
+<li class="li"><p class="p">tight convergence tolerance may aggravate
+small numeric inconsistencies in a problem;</p>
+</li>
+<li class="li"><p class="p">unbounded optimal faces may remain undetected
+and thus prevent convergence.</p>
+</li>
+</ul>
+<p class="p">The following subsections offer guidance about overcoming
+those difficulties.</p>
+<div class="section" id="User_manual.uss_solveBarrier.654282__User_manual.uss_solveBarrier.654293"><h2 class="title sectiontitle">Numeric instability due to elimination of too many dense
+columns</h2><p class="p"> <a class="xref" href="23_dense_cols.html" title="Explains the effect of dense columns in the model on performance of the barrier optimizer.">Detecting and eliminating dense columns</a> explains
+how to change parameters to encourage CPLEX to detect and eliminate
+as many dense columns as possible. However, in some problems, if CPLEX
+removes too many dense columns, it may cause numeric instability. </p>
+<p class="p">You can check how many dense columns CPLEX removes by
+looking at the preprocessing statistics at the beginning of the log
+file. For example, the following log file shows that CPLEX removed
+2249 columns, of which nine were dense.  </p>
+
+<pre class="pre codeblock"><code>Selected objective sense:  MINIMIZE
+Selected objective  name:  obj
+Selected RHS        name:  rhs
+Selected bound      name:  bnd
+
+Problem 'XXX.mps' read.
+Read time =    0.03 sec. (0.69 ticks)
+Tried aggregator 1 time.
+LP Presolve eliminated 2200 rows and 2249 columns.
+Aggregator did 8 substitutions.
+Reduced LP has 171 rows, 182 columns, and 1077 nonzeros.
+Presolve time =    0.02 sec. (0.46 ticks)
+
+***NOTE: Found 9 dense columns.
+
+Number of nonzeros in lower triangle of A*A' = 6071
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (0.23 ticks)
+Summary statistics for Cholesky factor:
+  Rows in Factor            = 180
+  Integer space required    = 313
+  Total non-zeros in factor = 7286
+  Total FP ops to factor    = 416448</code></pre>
+
+
+<p class="p">If you observe that the removal of too many dense columns
+results in numeric instability in your problem, then increase the
+column nonzeros parameter, <samp class="ph codeph">BarColNz</samp>. </p>
+
+<p class="p">The default value of the column nonzeros parameter is <samp class="ph codeph">0</samp> 
+(zero); that value tells CPLEX to calculate the parameter automatically.</p>
+
+<p class="p">To see the current value of the column nonzeros parameter
+(either one you have set or one CPLEX has automatically calculated)
+you need to look at the level two display, by setting the <samp class="ph codeph">BarDisplay</samp> parameter
+to <samp class="ph codeph">2</samp>.</p>
+<p class="p">If you decide that the current value of the column nonzeros
+parameter is inappropriate for your problem and thus tells CPLEX to
+remove too many dense columns, then you can increase the parameter <samp class="ph codeph">BarColNz</samp> to
+keep the number of dense columns removed low.</p>
+</div>
+<div class="section" id="User_manual.uss_solveBarrier.654282__User_manual.uss_solveBarrier.654349"><h2 class="title sectiontitle">Small numeric inconsistencies and tight convergence tolerance</h2>
+
+
+
+
+<p class="p">If your problem contains small numeric inconsistencies,
+it may be difficult for the CPLEX barrier optimizer to achieve a satisfactory
+solution at the default setting of the complementarity convergence
+tolerance. In such a case, you should increase the convergence tolerance
+parameter (<samp class="ph codeph">BarEpComp</samp> for LP or QP models, <samp class="ph codeph">BarQCPEpComp</samp> for
+QCP models). </p>
+</div>
+<div class="section" id="User_manual.uss_solveBarrier.654282__User_manual.uss_solveBarrier.654370"><h2 class="title sectiontitle">Unbounded variables and unbounded optimal faces</h2>
+
+
+
+
+
+<p class="p">An unbounded optimal face occurs in a model that contains
+a sequence of optimal solutions, all with the same value for the objective
+function and unbounded variable values. The CPLEX barrier optimizer
+will fail to terminate normally if an undetected unbounded optimal
+face exists.</p>
+
+<p class="p">Normally, the CPLEX barrier optimizer uses its barrier
+growth parameter, <samp class="ph codeph">BarGrowth</samp> , to detect
+such conditions. If this parameter is increased beyond its default
+value, the CPLEX barrier optimizer will be less likely to detect that
+the problem has an unbounded optimal face and more likely to encounter
+numeric difficulties.</p>
+
+<p class="p">Consequently, you should change the barrier growth parameter
+only if you find that the CPLEX barrier optimizer is terminating its
+work before it finds the true optimum because it has falsely detected
+an unbounded face.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/26_numeric_difficulty_title_synopsis.html" title="Documents ways to cope with numeric difficulties in the barrier optimizer.">Overcoming numeric difficulties</a></div>
+</div>
+</div></body>
+</html>

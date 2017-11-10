@@ -1,0 +1,86 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: <b><font color="#007D00">// Total number of wells.</font></b>
+15: <b><font color="#0000FF">int</font></b> nbWells = ...;
+16: 
+17: <b><font color="#007D00">// Number of wells that can work simultaneously.</font></b>
+18: <b><font color="#0000FF">int</font></b> wellLimit =...;
+19: 
+20: <b><font color="#007D00">// Number of operations in each well (= number of pay sands in each well).</font></b>
+21: <b><font color="#0000FF">int</font></b> nbOperations = ...;
+22: 
+23: <b><font color="#007D00">// Number of pay sand types.</font></b>
+24: <b><font color="#0000FF">int</font></b> nbSands =...;
+25: 
+26: <b><font color="#007D00">// Ranges.</font></b>
+27: <b><font color="#0000FF">range</font></b> Wells      = 1..nbWells;
+28: <b><font color="#0000FF">range</font></b> Operations = 1..nbOperations;
+29: <b><font color="#0000FF">range</font></b> Sands      = 1..nbSands;
+30: 
+31: <b><font color="#007D00">// Production rate on each well and for each type of sand.</font></b>
+32: <b><font color="#0000FF">int</font></b> rate[Wells][Sands] = ...;
+33: 
+34: <b><font color="#007D00">// List of sands in a well.</font></b>
+35: <b><font color="#0000FF">int</font></b> composition[Wells][Operations] = ...;
+36: 
+37: <b><font color="#007D00">// Depth of each pay sand in each well.</font></b>
+38: <b><font color="#0000FF">int</font></b> depth[Wells][Operations] = ...;
+39: 
+40: <b><font color="#007D00">// Duration of the workover. It depends on the type of sand that follows.</font></b>
+41: <b><font color="#0000FF">int</font></b> workDuration[Sands] = ...;
+42: 
+43: <b><font color="#007D00">// Operations for digging the pay sands in each wells.</font></b>
+44: <b><font color="#007D00">// Their duration is computed by multiplying the rate by the the depth.</font></b>
+45: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> operations[w <b><font color="#0000FF">in</font></b> Wells][o <b><font color="#0000FF">in</font></b> Operations] <b><font color="#0000FF">size</font></b> depth[w][o]*rate[w][composition[w][o]];
+46: 
+47: <b><font color="#007D00">// Operations for the workovers. </font></b>
+48: <b><font color="#007D00">// Their duration depends on the composition of the sand.</font></b>
+49: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> workovers[w <b><font color="#0000FF">in</font></b> Wells][o <b><font color="#0000FF">in</font></b> Operations] <b><font color="#0000FF">size</font></b> workDuration[composition[w][o]];
+50: 
+51: <b><font color="#007D00">// Cumul for limiting the number of wells that can run simultaneouly.</font></b>
+52: <b><font color="#0000FF">cumulFunction</font></b> wellUsage = <b><font color="#7D007D">sum </font></b>(w <b><font color="#0000FF">in</font></b> Wells, o <b><font color="#0000FF">in</font></b> Operations) <b><font color="#7D007D">pulse</font></b>(operations[w][o], 1);
+53: 
+54: <b><font color="#0000FF">execute</font></b> {
+55:                 cp.param.FailLimit = 5000;
+56: }
+57: 
+58: minimize max(w in Wells) endOf(operations[w,nbOperations]);
+59: subject to {
+60:     
+61:     <b><font color="#007D00">// In each well: </font></b>
+62:     forall(w <b><font color="EA7D00">in</font></b> Wells) {
+63:         <b><font color="#007D00">// Workovers are before the operations on the sand,</font></b>
+64:         forall(o <b><font color="EA7D00">in</font></b> Operations)
+65:             endBeforeStart(workovers[w][o], operations[w][o]);
+66:         <b><font color="#007D00">// Each operation is followed by a workover.</font></b>
+67:         forall(o <b><font color="EA7D00">in</font></b> 1..nbOperations-1)
+68:             endBeforeStart(operations[w][o], workovers[w][o+1]);
+69:     }
+70:     
+71:     <b><font color="#007D00">// All the workovers need the rig so they cannot overlap.</font></b>
+72:     noOverlap(workovers);
+73:     
+74:     <b><font color="#007D00">// At any time, no more than wellLimit wells can be used.</font></b>
+75:     wellUsage &lt;= wellLimit;
+76: };
+77: 
+78: 
+79: execute {
+80:   writeln(operations);
+81: }
+</tt></pre>

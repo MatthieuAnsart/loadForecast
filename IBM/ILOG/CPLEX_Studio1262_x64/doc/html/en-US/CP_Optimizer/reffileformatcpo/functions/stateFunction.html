@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="stateFunction" />
+<meta name="abstract" content="Creates a new state function." />
+<meta name="Description" content="Creates a new state function." />
+<meta name="DC.subject" content="stateFunction" />
+<meta name="keywords" content="stateFunction" />
+<meta name="DC.Relation" scheme="URI" content="../../../refcppcpoptimizer/html/state_functions.html" />
+<meta name="DC.Relation" scheme="URI" content="alwaysEqual.html" />
+<meta name="DC.Relation" scheme="URI" content="alwaysConstant.html" />
+<meta name="DC.Relation" scheme="URI" content="alwaysNoState.html" />
+<meta name="DC.Relation" scheme="URI" content="alwaysIn.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="stateFunction" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<title>stateFunction</title>
+</head>
+<body role="main" id="stateFunction">
+<h1 class="title topictitle1">stateFunction</h1>
+<div class="body refbody"><p class="shortdesc">Creates a new state function.</p>
+<div class="section">
+<p class="p">Note: this section describes the function <samp class="ph codeph"><a class="xref" href="../syntax/130_MoreTypes.html#More_types__Type_stateFunction">stateFunction</a></samp>. There is also a type with
+the same name, see <a class="xref" href="../syntax/130_MoreTypes.html#More_types__Type_stateFunction">stateFunction</a>. The semantics of state functions are
+also described elsewhere, see <a class="xref" href="../../../refcppcpoptimizer/html/state_functions.html">State functions in CP Optimizer</a>.</p>
+
+</div>
+<div class="section" id="stateFunction__Syntax"><h2 class="title sectiontitle">Syntax</h2>
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/130_MoreTypes.html#More_types__Type_stateFunction">stateFunction</a> <strong class="ph b">stateFunction</strong>(<a class="xref" href="../syntax/130_MoreTypes.html#More_types__Type_transitionMatrix">transitionMatrix</a> dist = null)</code></pre>
+</div>
+<div class="section" id="stateFunction__Parameters"><h2 class="title sectiontitle">Parameters</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">dist</samp>: an optional transition matrix defining the transition distance between consecutive states of the state function.
+  </li>
+</ul>
+
+</div>
+<div class="section" id="stateFunction__Description"><h2 class="title sectiontitle">Description</h2>
+<p class="p">Informally speaking, a state function is a decision variable whose value is a set of non-overlapping intervals over which the function maintains a particular non-negative integer state. In between those intervals, the state of the function is not defined, typically because of an ongoing transition between two states.</p>
+
+
+<p class="p">For instance a state function could be used to describe the evolution of an oven's temperature over time. Assuming there are 3 possible temperature levels (indexed by 0, 1, and 2), a fixed value for this state function could be the following set of non-overlapping valued intervals:</p>
+
+
+<ul class="ul"><li class="li">    [start=0, end=100): state=0,
+  </li>
+<li class="li">    [start=150, end=250): state=1,
+  </li>
+<li class="li">    [start=250, end=300): state=1,
+  </li>
+<li class="li">    [start=320, end=420): state=2,
+  </li>
+<li class="li">    [start=460, end=560): state=0, ...
+  </li>
+</ul>
+
+
+<p class="p">A set of constraints is available to restrict the evolution of a state function. These constraints allow you to specify:</p>
+
+
+<ul class="ul"><li class="li">    That the state of the function must be defined and should remain equal to a given state everywhere over a given fixed or variable interval (<a class="xref" href="alwaysEqual.html" title="This constraint fixes a given state for a state function during a variable or fixed interval.">alwaysEqual</a>).
+  </li>
+<li class="li">    That the state of the function must be defined and should remain constant (no matter its value) everywhere over a given fixed or variable interval (<a class="xref" href="alwaysConstant.html" title="This constraint ensures a constant state for a state function on an interval.">alwaysConstant</a>).
+  </li>
+<li class="li">    That intervals requiring the state of the function to be defined cannot overlap a given fixed or variable interval (<a class="xref" href="alwaysNoState.html" title="This constraint ensures that a state function is undefined on an interval.">alwaysNoState</a>).
+  </li>
+<li class="li">    That everywhere over a given fixed or variable interval, the state of the function, if defined, must remain within a given range of states [vmin, vmax] (<a class="xref" href="alwaysIn.html" title="These constraints restrict the possible values of a cumulExpr or stateFunction to a particular range during a variable or fixed interval.">alwaysIn</a>).
+  </li>
+</ul>
+
+</div>
+<div class="section" id="stateFunction__Example"><h2 class="title sectiontitle">Example</h2>
+<p class="p">The value of the state function described above is a possible solution to the following problem.</p>
+
+
+<pre class="pre codeblock"><code>a1 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=100);
+a2 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=150);
+a3 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=100);
+a4 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=50);
+a5 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=100);
+a6 = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(size=100);
+<span class="ph commentemph">// A transition matrix between temperature levels [0,1,2]</span>
+dist = <a class="xref" href="transitionMatrix.html" title="Creates a new square matrix of minimum transition times.">transitionMatrix</a>(
+           0, 50, 30, 
+          30,  0, 20, 
+          40, 20,  0,);
+temperature = <strong class="ph b">stateFunction</strong>(dist);
+<a class="xref" href="alwaysEqual.html" title="This constraint fixes a given state for a state function during a variable or fixed interval.">alwaysEqual</a>(temperature, a1, 0);
+<a class="xref" href="alwaysIn.html" title="These constraints restrict the possible values of a cumulExpr or stateFunction to a particular range during a variable or fixed interval.">alwaysIn</a>(temperature, a2, 1, 2);
+<a class="xref" href="alwaysEqual.html" title="This constraint fixes a given state for a state function during a variable or fixed interval.">alwaysEqual</a>(temperature, a3, 1, 1, 1);
+<a class="xref" href="alwaysEqual.html" title="This constraint fixes a given state for a state function during a variable or fixed interval.">alwaysEqual</a>(temperature, a4, 1, 1, 1);
+<a class="xref" href="alwaysEqual.html" title="This constraint fixes a given state for a state function during a variable or fixed interval.">alwaysEqual</a>(temperature, a5, 2);
+<a class="xref" href="alwaysEqual.html" title="This constraint fixes a given state for a state function during a variable or fixed interval.">alwaysEqual</a>(temperature, a6, 0);</code></pre>
+</div>
+<div class="section" id="stateFunction__Requirements"><h2 class="title sectiontitle">Requirements</h2>
+<ul class="ul"><li class="li">    If a transition matrix <samp class="ph codeph">dist</samp> is specified, this matrix should satisfy the triangle inequality.
+  </li>
+</ul>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="alwaysEqual.html" title="This constraint fixes a given state for a state function during a variable or fixed interval.">alwaysEqual</a></div>
+<div><a class="link" href="alwaysConstant.html" title="This constraint ensures a constant state for a state function on an interval.">alwaysConstant</a></div>
+<div><a class="link" href="alwaysNoState.html" title="This constraint ensures that a state function is undefined on an interval.">alwaysNoState</a></div>
+<div><a class="link" href="alwaysIn.html" title="These constraints restrict the possible values of a cumulExpr or stateFunction to a particular range during a variable or fixed interval.">alwaysIn</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../../../refcppcpoptimizer/html/state_functions.html">State functions in CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

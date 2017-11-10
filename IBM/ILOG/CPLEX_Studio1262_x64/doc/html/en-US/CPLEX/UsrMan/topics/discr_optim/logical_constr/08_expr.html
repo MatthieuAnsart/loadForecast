@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Which nonlinear expressions can be extracted?" />
+<meta name="abstract" content="Describes certain nonlinear expressions as logical constraints." />
+<meta name="Description" content="Describes certain nonlinear expressions as logical constraints." />
+<meta name="DC.subject" content="nonlinear expression, definition" />
+<meta name="keywords" content="nonlinear expression, definition" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/logical_constr/01_logical_constr_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingLogical.1008193" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/logical_constr/01_logical_constr_title_synopsis.html" />
+<title>Which nonlinear expressions can be extracted?</title>
+</head>
+<body role="main" id="User_manual.uss_usingLogical.1008193">
+<h1 class="title topictitle1">Which nonlinear expressions can be extracted?</h1>
+<div class="body"><p class="shortdesc">Describes certain nonlinear expressions as logical constraints.</p>
+<p class="p">Some expressions are easily recognized as <em class="ph i">nonlinear</em>, for example, a function
+such as x<sup class="ph sup">2</sup> + y<sup class="ph sup">2</sup> ≤
+1. However, other nonlinearities are less obvious, such as absolute
+value as a function. In a very real sense, MIP is a class of nonlinearly
+constrained problems because the integrality restriction destroys
+the property of convexity which any linear constraints otherwise might
+possess. Because of that characteristic, certain (although not all)
+nonlinearities are capable of being converted to a MIP formulation,
+and thus can be solved by CPLEX. In fact, <samp class="ph codeph">IloCplex</samp> can
+extract the following nonlinear expressions in a C++ application:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">IloMin</samp> 
+the minimum of an array of numeric expressions or over a numeric expression
+and a constant in C++ </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloMax</samp> 
+the maximum of an array of numeric expressions or over a numeric expression
+and a constant in C++ </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloAbs</samp> 
+the absolute value of a numeric expression</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloPiecewiseLinear</samp> 
+the piecewise linear combination of a  numeric expression,</p>
+</li>
+<li class="li"><p class="p">A linear constraint can appear as a
+term in a logical constraint.</p>
+</li>
+</ul>
+<p class="p">For example, given these variables and arrays:  </p>
+<pre class="pre codeblock"><code>IloIntVarArray x(env, 5, 0, 1000);
+IloNumVar y(env, -1000, 5000);
+IloNumVar z(env, -1000, 1000);</code></pre>
+<p class="p"> <samp class="ph codeph">IloCplex</samp> in a C++ application
+recognizes the following constraint as valid and extracts it:  </p>
+<pre class="pre codeblock"><code>IloMin(x) &gt;= IloAbs(y)
+</code></pre>
+<p class="p">In fact, ranges containing logical expressions can, in
+turn, appear in logical constraints. For example, the following constraint
+is valid and extractable by <samp class="ph codeph">IloCplex</samp>:  </p>
+<pre class="pre codeblock"><code>IloIfThen(env, (IloAbs(y) &lt;= 100), (z &lt;= 300));
+</code></pre>
+<p class="p">It is important to note here that only <em class="ph i">linear</em> constraints can appear as
+arguments of logical constraints extracted by CPLEX. That is, quadratic
+constraints are not handled in logical constraints. Similarly, quadratic
+terms can not appear as arguments of logical expressions such as <samp class="ph codeph">IloMin</samp>, <samp class="ph codeph">IloMax</samp>, <samp class="ph codeph">IloAbs</samp>,
+and <samp class="ph codeph">IloPiecewiseLinear</samp>. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/logical_constr/01_logical_constr_title_synopsis.html" title="Describes logical constraints in CPLEX with Concert Technology.">Logical constraints in optimization</a></div>
+</div>
+</div></body>
+</html>

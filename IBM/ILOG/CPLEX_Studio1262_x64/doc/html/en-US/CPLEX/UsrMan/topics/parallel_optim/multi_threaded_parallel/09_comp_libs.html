@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using parallel optimizers in the Component Libraries" />
+<meta name="abstract" content="Describes parallel optimization in the Component Libraries." />
+<meta name="Description" content="Describes parallel optimization in the Component Libraries." />
+<meta name="DC.subject" content="opportunistic search, component libraries and" />
+<meta name="keywords" content="opportunistic search, component libraries and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="parallelComponentLibs" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" />
+<title>Using parallel optimizers in the Component Libraries</title>
+</head>
+<body role="main" id="parallelComponentLibs">
+<h1 class="title topictitle1">Using parallel optimizers in the Component Libraries</h1>
+<div class="body"><p class="shortdesc">Describes parallel optimization in the Component Libraries.</p>
+<p class="p">When you use one of the Component Libraries, such as
+the Callable Library, follow these steps to invoke parallel optimization.</p>
+<ol class="ol"><li class="li">Create your CPLEX environment and initialize a problem
+object in the usual way. See <a class="xref" href="../../APIs/C/07_init_env.html" title="Tells how to initialize the environment in the C API.">Initialize the CPLEX environment</a> 
+and <a class="xref" href="../../APIs/C/08_instantiate_prob_obj.html" title="Tells how to instantiate a problem object in the C API.">Instantiate the problem as an object</a> for details.</li>
+<li class="li">Enter and populate your problem object in the usual way,
+as in <a class="xref" href="../../APIs/C/09_data_prob_obj.html" title="Tells how to populate a problem object with data in the C API.">Put data in the problem object</a>.</li>
+<li class="li">If you want to use an opportunistic parallel algorithm,
+set the <a class="xref" href="../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> (<samp class="ph codeph">ParallelMode</samp>, <samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>)
+in your application. If you want to use deterministic mode with fewer
+than the maximum number of available threads, set both the parallel
+mode and the threads parameter in your application. See <a class="xref" href="07_determinism.html" title="Defines determinism and describes its effect in parallel optimization.">Determinism of results</a> for
+background about this step.</li>
+<li class="li">Call the parallel optimizer with the appropriate method or routine 
+(identified from the table).</li>
+</ol>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three-column table showing the name of each optimizer, its method in Concert Technology (C++, Java, .NET APIs), and its routine in the Callable Library (C API)." id="parallelComponentLibs__User_manual.uss_parallel.1035942" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Parallel optimizer methods and routines of the Component Libraries</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="33.33333333333333%" id="d449031e68"> Optimizer </th>
+<th class="entry" align="left" valign="top" width="33.33333333333333%" id="d449031e70"> Concert IloCplex Method </th>
+<th class="entry" align="left" valign="top" width="33.33333333333333%" id="d449031e72"> Callable Library </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d449031e68 "> parallel MIP optimizer </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d449031e70 "> <span class="keyword apiname">solve</span>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d449031e72 ">  <span class="keyword apiname">CPXmipopt</span>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d449031e68 "> parallel barrier optimizer </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d449031e70 "> <span class="keyword apiname">setParam(RootAlg, Barrier)</span> and
+then <span class="keyword apiname">solve</span>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d449031e72 ">  <span class="keyword apiname">CPXbaropt</span> 
+or <span class="keyword apiname">CPXhybbaropt</span>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d449031e68 "> concurrent optimizer </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d449031e70 "> <span class="keyword apiname">setParam(RootAlg, Concurrent)</span> and
+then <span class="keyword apiname">solve</span></td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d449031e72 "> <p class="p"><span class="keyword apiname">CPXsetintparam(env,</span></p>
+<p class="p"><span class="keyword apiname">CPX_PARAM_LPMETHOD,</span></p>
+<p class="p"> <span class="keyword apiname">CPX_ALG_CONCURRENT)</span></p>
+<p class="p">and
+then <span class="keyword apiname">CPXlpopt</span> or <span class="keyword apiname">CPXqpopt</span> </p>
+ </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" title="Documents the CPLEX multithreaded parallel optimizers.">Multithreaded parallel optimizers</a></div>
+</div>
+</div></body>
+</html>

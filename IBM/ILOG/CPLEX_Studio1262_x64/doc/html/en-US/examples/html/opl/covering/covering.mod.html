@@ -1,0 +1,46 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">int</font></b> NbWorkers = ...;
+13: <b><font color="#0000FF">range</font></b> Workers = 1..NbWorkers;
+14: {<b><font color="#0000FF">string</font></b>} Tasks = ...;
+15: {<b><font color="#0000FF">int</font></b>} Qualified[Tasks] = ...;
+16: <b><font color="#0000FF">assert</font></b> 
+17:   <b><font color="#7D007D">forall</font></b>( t <b><font color="#0000FF">in</font></b> Tasks , i <b><font color="#0000FF">in</font></b> Qualified[t] ) i <b><font color="#0000FF">in</font></b> <b><font color="#7D007D">asSet</font></b>(Workers);
+18: <b><font color="#007D00">//alternate formulation:</font></b>
+19: <b><font color="#0000FF">assert</font></b> 
+20:   <b><font color="#7D007D">forall</font></b>( t <b><font color="#0000FF">in</font></b> Tasks ) 
+21:     <b><font color="#7D007D">card</font></b>(Qualified[t] <b><font color="#0000FF">inter</font></b> <b><font color="#7D007D">asSet</font></b>(Workers))==<b><font color="#7D007D">card</font></b>(Qualified[t]);
+22: <b><font color="#0000FF">int</font></b> Cost[Workers] = ...;
+23: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Hire[Workers];
+24: 
+25: <b><font color="#0000FF">minimize</font></b> 
+26:   <b><font color="#7D007D">sum</font></b>(c <b><font color="#0000FF">in</font></b> Workers) Cost[c] * Hire[c];
+27: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+28:   <b><font color="#7D007D">forall</font></b>(j <b><font color="#0000FF">in</font></b> Tasks)
+29:     ct:
+30:       <b><font color="#7D007D">sum</font></b>( c <b><font color="#0000FF">in</font></b> Qualified[j] ) 
+31:         Hire[c] &gt;= 1;
+32: }
+33: <b><font color="#0000FF">tuple</font></b> solutionT{
+34:         <b><font color="#0000FF">int</font></b> Crew;
+35: };
+36: {solutionT} Crew = { &lt;c&gt; | c <b><font color="#0000FF">in</font></b> Workers : Hire[c] == 1 };
+37: <b><font color="#0000FF">execute</font></b> DISPLAY {
+38:   writeln(<b><font color="#8A2BE2">"Crew="</font></b>,Crew);
+39: }
+40: 
+41: 
+</tt></pre>

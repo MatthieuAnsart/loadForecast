@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the house building with state incompatibilities problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the house building with state incompatibilities problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/schedstate.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerschedstate.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/schedstate.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerschedstate.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the house building with state incompatibilities
+problem has been described using natural language, you then use Concert
+Technology classes to model the constraint programming problem.</p>
+<p class="p">After you have written a description of your problem,
+you can use IBM® ILOG® Concert Technology
+classes to model it. </p>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159941"><h2 class="title sectiontitle">Step 2: Open the example file</h2><p class="p">Open the
+example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/sched_state_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You will enter the missing code in each step
+in this lesson. At the end, you will have completed the program code,
+and you can compile and run the program.</p>
+<p class="p">In
+this lesson, you include the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>.
+To catch exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code for creating the environment and model and for printing out
+the solution found by the CP Optimizer engine is provided.</p>
+<p class="p">In addition, the data related to the tasks, such as the tasks
+(<samp class="ph codeph">Tasks</samp>), the number of tasks (<samp class="ph codeph">NbTasks</samp>),
+the names of the tasks (<samp class="ph codeph">TaskNames</samp>) and sizes
+of the tasks (<samp class="ph codeph">TaskDurations</samp>) and constants
+representing the number of houses (<samp class="ph codeph">NbHouses</samp>),
+the number of workers (<samp class="ph codeph">NbWorkers</samp>) and the
+two cleanliness states (<samp class="ph codeph">Clean</samp> and <samp class="ph codeph">Dirty</samp>) are provided.</p>
+<p class="p">After you create
+an environment and a model, you need to define the decision variables
+and add the constraints and objective to the model. Since the requirements
+for each of the five houses are similar, you use a function <samp class="ph codeph">MakeHouse</samp>. to create the decision variables, constraints
+and objective associated with each house. Information about individual
+houses that must be shared with the main function includes the expressions
+needed to create the objective function and information about worker
+usage. In order to display the results of the optimization, it is
+also useful to maintain an array of all the interval variables. </p>
+<p class="p">To access this information, you create objects that will
+be updated in the <samp class="ph codeph">MakeHouse</samp> function. The
+cost expression involves the date at which moving is completed for
+each house; the integer expression array <samp class="ph codeph">ends</samp> is
+used to store this information. An array of task interval variables, <samp class="ph codeph">allTasks</samp>, stores all the interval variables that
+are created. In addition, the expression used to represent worker
+usage is included in the global information that is updated in each
+call to the <samp class="ph codeph">MakeHouse</samp> function.</p>
+<p class="p">Since
+the workers are equivalent in this problem, it is better to represent
+them as one pool of workers instead of as individual workers with
+no overlap constraints as was done in the earlier examples. This representation
+removes symmetry. The cumulative function expression representing
+usage of the pool of workers can be modified by the interval variables
+that require a worker. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159929"><h2 class="title sectiontitle">Step 3: Declare the objects needed for MakeHouse</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare
+the objects needed for MakeHouse</samp>  </p>
+<pre class="pre codeblock"><code>    IloInt i;
+    IloModel model(env);
+    IloIntExprArray ends(env);
+    IloIntervalVarArray allTasks(env);
+    IloCumulFunctionExpr workers(env);
+</code></pre>
+<p class="p">The transition time from a dirty state to
+a clean state is the same value for all houses. Thus you can create
+one <samp class="ph codeph">IloTransitionDistance</samp> object that can
+be shared by all houses. Here there are two transition types.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159910"><h2 class="title sectiontitle">Step 4: Create the transition times</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the
+transition times</samp>  </p>
+<pre class="pre codeblock"><code>    IloTransitionDistance ttime(env, 2);
+    ttime.setValue(Dirty, Clean, 1);
+</code></pre>
+<p class="p">You need to pass the model, the house identifier,
+the array of expressions representing the completion dates of the
+houses, the array of all tasks, the cumulative function expression
+for the worker usage and the transition object as arguments to the <samp class="ph codeph">MakeHouse</samp> function.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159899"><h2 class="title sectiontitle">Step 5: Create the MakeHouse function</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the
+MakeHouse function</samp> </p>
+<pre class="pre codeblock"><code>void MakeHouse(IloModel model,
+         IloInt id,
+         IloIntExprArray ends,
+         IloIntervalVarArray allTasks,
+         IloCumulFunctionExpr&amp; workers,
+         IloTransitionDistance ttime) {
+</code></pre>
+<p class="p">Each house has a list of <samp class="ph codeph">NbTasks</samp> that
+must be scheduled. Task <samp class="ph codeph">i</samp>, where <samp class="ph codeph">i</samp> is in <samp class="ph codeph">0..NbTasks-1</samp>,
+has a size of <samp class="ph codeph">TaskDurations[i]</samp> and the name <samp class="ph codeph">TaskNames[i]</samp>.   Using these, you build an array <samp class="ph codeph">tasks</samp> of interval variables. </p>
+<p class="p">Each
+task also requires one worker from the start to the end of the task
+interval. To represent the fact that a worker is required for the
+task, you modify the cumulative function expression, <samp class="ph codeph">workerUsage</samp>,
+using the function <samp class="ph codeph">IloPulse</samp>.</p>
+<p class="p">You
+also add each interval variable to the array <samp class="ph codeph">allTasks</samp> that
+will be used to display the solution once the schedule has been determined.
+   </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159889"><h2 class="title sectiontitle">Step 6: Create the interval variables</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the
+interval variables</samp> </p>
+<pre class="pre codeblock"><code>  char name[128];
+  IloIntervalVarArray tasks(env, NbTasks);
+  for (IloInt i=0; i&lt;NbTasks; ++i) {
+    sprintf(name, "H%ld-%s", id, TaskNames[i]);
+    tasks[i] = IloIntervalVar(env, TaskDurations[i], name);
+    workers += IloPulse(tasks[i], 1);
+    allTasks.add(tasks[i]);
+  }
+</code></pre>
+<p class="p">The tasks in the model have precedence constraints
+that are added to the model. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159878"><h2 class="title sectiontitle">Step 7: Add the temporal constraints</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the temporal constraints</samp> </p>
+<pre class="pre codeblock"><code>  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[carpentry]));
+  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[plumbing]));
+  model.add(IloEndBeforeStart(env, tasks[masonry],   tasks[ceiling]));
+  model.add(IloEndBeforeStart(env, tasks[carpentry], tasks[roofing]));
+  model.add(IloEndBeforeStart(env, tasks[ceiling],   tasks[painting]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[windows]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing],  tasks[facade]));
+  model.add(IloEndBeforeStart(env, tasks[roofing],   tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[plumbing],  tasks[garden]));
+  model.add(IloEndBeforeStart(env, tasks[windows],   tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[facade],    tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[garden],    tasks[moving]));
+  model.add(IloEndBeforeStart(env, tasks[painting],  tasks[moving]));
+</code></pre>
+<p class="p">Certain tasks require the house to be clean,
+and other tasks cause the house to be dirty. To model the possible
+states of the house, Concert Technology provides the class <samp class="ph codeph">IloStateFunction</samp> to represent the disjoint states
+through time.    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">State
+function</strong> </p>
+ <p class="p">A state function, represented in IBM ILOG Concert Technology by <samp class="ph codeph">IloStateFunction</samp>, is a decision variable whose value
+is a set of non-overlapping intervals over which the function maintains
+a particular non-negative integer state. In between those intervals,
+the state of the function is not defined, typically because of an
+ongoing transition between two states. </p>
+ </div>
+<p class="p">You
+create one state function object in each execution of <samp class="ph codeph">MakeHouse</samp>,
+one for each house. </p>
+<p class="p">The first argument passed to the
+constructor of the class <samp class="ph codeph">IloStateFunction</samp> is
+the environment. The second argument is the transition time object.
+The final argument is an optional name used for debug and trace purposes.
+Here is a constructor:    </p>
+<pre class="pre codeblock"><code>  IloStateFunction(const IloEnv env,  
+                   const IloTransitionDistance tdist,
+                   const char* name =0);
+</code></pre>
+<p class="p">To model the state required or imposed by
+a task, you create a constraint that specifies the state of the house
+throughout the interval variable representing that task.    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Constraint on cumul function expression</strong> </p>
+ <p class="p">With the specialized constraint <samp class="ph codeph">IloAlwaysEqual</samp>,
+you can create a constraint that specifies the value of a state function
+over the interval variable.    </p>
+ <p class="p">The constraint takes
+a state function, an interval variable and a state value. Whenever
+the interval variable is present, then the state function is defined
+everywhere between the start and the end of the interval variable
+and remains equal to the specified state value over this interval. </p>
+ </div>
+<p class="p">The first argument passed to the function <samp class="ph codeph">IloAlwaysEqual</samp> is
+the environment. The second argument is the state function. The third
+argument is the interval variable on which you want to place the constraint.
+The fourth argument is the state value that the state function must
+take during the interval.</p>
+<p class="p">Here is a function signature:
+    </p>
+<pre class="pre codeblock"><code>  IloConstraint IloAlwaysEqual(const IloEnv env,
+                               const IloStateFunction f,
+                               const IloIntervalVar a,
+                               IloInt v);
+</code></pre>
+<p class="p">You create a state function and constrain
+the state function to take the appropriate values during the tasks
+that require the house to be in a specific state. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159867"><h2 class="title sectiontitle">Step 8: Add the state constraints</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the state constraints</samp> </p>
+<pre class="pre codeblock"><code>  IloStateFunction houseState(env, ttime);
+  model.add(IloAlwaysEqual(env, houseState, tasks[masonry],   Dirty));
+  model.add(IloAlwaysEqual(env, houseState, tasks[carpentry], Dirty));
+  model.add(IloAlwaysEqual(env, houseState, tasks[plumbing],  Clean));
+  model.add(IloAlwaysEqual(env, houseState, tasks[ceiling],   Clean));
+  model.add(IloAlwaysEqual(env, houseState, tasks[roofing],   Dirty));
+  model.add(IloAlwaysEqual(env, houseState, tasks[painting],  Clean));
+  model.add(IloAlwaysEqual(env, houseState, tasks[windows],   Dirty));
+</code></pre>
+<p class="p">To model the cost of building the houses,
+you will need to determine the maximum completion date among the individual
+house projects. To access the expression representing the completion
+date of the house currently in consideration, you use the function <samp class="ph codeph">IloEndOf</samp> on the last task in building a house (here,
+it is the moving task) and store this expression in the array <samp class="ph codeph">ends</samp>.   </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159856"><h2 class="title sectiontitle">Step 9: Add the cost expression</h2><p class="p">Add the
+following code after the comment <samp class="ph codeph">//Add the cost expression</samp> </p>
+<pre class="pre codeblock"><code>  ends.add(IloEndOf(tasks[moving]));
+</code></pre>
+<p class="p">This completes the <samp class="ph codeph">MakeHouse</samp> function.
+In the main function, you now call the <samp class="ph codeph">MakeHouse</samp> function,
+once for each house. At each call, the cumulative expression, <samp class="ph codeph">workers</samp>, is updated and additional elements are
+appended to the arrays  <samp class="ph codeph">ends</samp> and <samp class="ph codeph">allTasks</samp>. The model, house identifier and transition
+object are also passed to the <samp class="ph codeph">MakeHouse</samp> function.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159845"><h2 class="title sectiontitle">Step 10: Create the houses</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Create the
+houses</samp> </p>
+<pre class="pre codeblock"><code>    for (i=0; i&lt;NbHouses; ++i) {
+      MakeHouse(model, i, ends, allTasks, workers, ttime);
+    }
+</code></pre>
+<p class="p">To add the constraint that there can be only
+two workers working at a given time, you constrain the cumulative
+function expression representing worker usage to be no greater than
+the value <samp class="ph codeph">NbWorkers</samp>.     </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159834"><h2 class="title sectiontitle">Step 11: Add the cumulative constraints</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the cumulative
+constraints</samp> </p>
+<pre class="pre codeblock"><code>    model.add(workers &lt;= NbWorkers);
+</code></pre>
+<p class="p">The objective of this problem is to minimize
+the overall completion date (the completion date of the house that
+is completed last). To do this, you minimize the maximal expression
+in the array <samp class="ph codeph">ends</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerschedstate.114936__migration.uss_gscpoptimizerschedstate.159823"><h2 class="title sectiontitle">Step 12: Add the objective</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the objective</samp> </p>
+<pre class="pre codeblock"><code>    model.add(IloMinimize(env, IloMax(ends)));
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/schedstate.html" title="In this lesson, you will learn how to find a solution to a house building with state incompatibilities problem using CP Optimizer and the three-stage method.">Using state functions: house building with state incompatibilities</a></div>
+</div>
+</div></body>
+</html>

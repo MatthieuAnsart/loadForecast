@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Syntax of piecewise linear functions" />
+<meta name="abstract" content="Describes the syntax to represent a piecewise linear function." />
+<meta name="Description" content="Describes the syntax to represent a piecewise linear function." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/pwl/01_pwl_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingPiecewiseLin.1003431" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/pwl/01_pwl_title_synopsis.html" />
+<title>Syntax of piecewise linear functions</title>
+</head>
+<body role="main" id="User_manual.uss_usingPiecewiseLin.1003431">
+<h1 class="title topictitle1">Syntax of piecewise linear functions</h1>
+<div class="body"><p class="shortdesc">Describes the syntax to represent a piecewise linear
+function.</p>
+<p class="p">To define a piecewise linear function in Concert Technology,
+you need these components:</p>
+<ul class="ul"><li class="li"><p class="p">the independent variable of the piecewise
+linear function;</p>
+</li>
+<li class="li"><p class="p">the breakpoints of the piecewise linear
+function;</p>
+</li>
+<li class="li"><p class="p">the slope of each segment (that is,
+the rate of increase or decrease of the function between two breakpoints);</p>
+</li>
+<li class="li"><p class="p">the geometric coordinates of at least
+one point of the function.</p>
+</li>
+</ul>
+<p class="p">In other words, for a piecewise linear function of <samp class="ph codeph">n</samp> 
+breakpoints, you need to know <samp class="ph codeph">n+1</samp>  slopes. </p>
+<p class="p">Typically, the breakpoints of a piecewise linear function
+are specified as an array of numeric values. For example, the breakpoints
+of the function <samp class="ph codeph">f(x)</samp>  as it appears in <a class="xref" href="02_pwl_defn.html#User_manual.uss_usingPiecewiseLin.1003384__User_manual.uss_usingPiecewiseLin.1003400">Figure 1</a> are specified
+in this way, where the first argument, <samp class="ph codeph">env</samp> ,
+specifies the environment, the second argument specifies the number
+of breakpoints under consideration, and the remaining arguments specify
+the x-coordinate of the breakpoints:  </p>
+<pre class="pre codeblock"><code>IloNumArray (env, 3, 4., 5., 7.)</code></pre>
+<p class="p">The slopes of its segments are indicated as an array
+of numeric values as well. For example, the slopes of <samp class="ph codeph">f(x)</samp> 
+are specified in this way, where the first argument again specifies
+the environment, the second argument specifies the number of slopes
+given, and the remaining arguments specify the slope of the segments:
+ </p>
+<pre class="pre codeblock"><code>IloNumArray (env, 4, -0.5, 1., -1., 2.)</code></pre>
+<p class="p">The geometric coordinates of at least one point of the
+function, <samp class="ph codeph">(x, f(x))</samp>  must also be
+specified; for example,<samp class="ph codeph"> (4, 2)</samp> . Then
+in Concert Technology, those elements are brought together in an instance
+of the class <samp class="ph codeph">IloPiecewiseLinear</samp>  in this
+way:  </p>
+<pre class="pre codeblock"><code>IloPiecewiseLinear(x, 
+                   IloNumArray(env, 3, 4., 5., 7.), 
+                   IloNumArray(env, 4, -0.5, 1., -1., 2.), 
+                   4, 2)</code></pre>
+<p class="p">Another way to specify a piecewise linear function is
+to give the slope of the first segment, two arrays for the coordinates
+of the breakpoints, and the slope of the last segment. In this approach,
+the example <samp class="ph codeph">f(x)</samp>  from <a class="xref" href="02_pwl_defn.html#User_manual.uss_usingPiecewiseLin.1003384__User_manual.uss_usingPiecewiseLin.1003400">Figure 1</a> looks like
+this:  </p>
+<pre class="pre codeblock"><code>IloPiecewiseLinear(x, -0.5, IloNumArray(env, 3, 4., 5., 7.),
+                            IloNumArray(env, 3, 2., 3., 1.), 2);</code></pre>
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">It may help you understand the signatures of these functions
+to recall the familiar Cartesian representation of a line or segment
+in two dimensions, x and y: </p>
+
+<p class="p">y = ax + b </p>
+
+<p class="p">where a represents the slope of the line or segment and
+b represents the height at which the line theoretically crosses the
+y-axis at the point (0, b).  </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/pwl/01_pwl_title_synopsis.html" title="Demonstrates the use of piecewise linear functions to solve a transportation problem.">Using piecewise linear functions in optimization: a transport example</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: complex termination criteria in a callback" />
+<meta name="abstract" content="Illustrates how to use a callback to set complex criteria for termination in the Python API." />
+<meta name="Description" content="Illustrates how to use a callback to set complex criteria for termination in the Python API." />
+<meta name="DC.subject" content="termination criterion, simple (Python API), multiple (Python API)" />
+<meta name="keywords" content="termination criterion, simple (Python API), multiple (Python API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1268150173078" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" />
+<title>Example: complex termination criteria in a callback</title>
+</head>
+<body role="main" id="descriptiveTopic1268150173078">
+<h1 class="title topictitle1">Example: complex termination criteria in a callback</h1>
+<div class="body"><p class="shortdesc">Illustrates how to use a callback to set complex criteria
+for termination in the Python API.</p>
+<p class="p">This example uses the class of informational MIP callbacks, <samp class="ph codeph">MIPInfoCallback</samp>,
+to set <strong class="ph b">multiple criteria for termination</strong> of
+a Python application. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">For simple, straight forward termination of CPLEX (for
+example, in response to control-C entered by a user), a callback is
+not necessary. Instead, use the method <samp class="ph codeph">terminate</samp> of
+the <samp class="ph codeph">Cplex</samp> object.</p>
+</div>
+<p class="p">The class  <samp class="ph codeph">MIPInfoCallback</samp> can
+also query the incumbent solution vector, slacks on linear constraints,
+slacks on quadratic constraints, and other measures of progress.</p>
+<pre class="pre codeblock"><code>&gt;&gt;&gt; class StopCriterion(cplex.callbacks.MIPInfoCallback):
+...   def __call__(self):
+...     if self.get_num_nodes() &gt; 1000:
+...       if self.get_MIP_relative_gap() &lt; 0.1:
+...         self.terminate()
+...         return
+...     else: # we’ve processed fewer than 1000 nodes
+...       if self.get_MIP_relative_gap() &lt; 0.001:
+...         self.terminate()
+...         return
+&gt;&gt;&gt; c = cplex.Cplex("myprob.mps")
+&gt;&gt;&gt; c.register_callback(StopCriterion)
+&gt;&gt;&gt; c.solve()
+[. . . CPLEX log . . .]
+&gt;&gt;&gt; c.solution.MIP.get_mip_relative_gap()
+0.093
+&gt;&gt;&gt; c.solution.progress.get_num_nodes_processed()
+223</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" title="Explores the features that CPLEX offers to users of Python to solve mathematical programming problems.">CPLEX for Python users</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The oil database data file" />
+<meta name="abstract" content="Describes the data file in the project." />
+<meta name="Description" content="Describes the data file in the project." />
+<meta name="DC.subject" content="data files, oil database example, code samples, oilDB.dat, keywords, DBConnection, DBConnection, OPL keyword, Access databases, connection to, database connection, ODBC, database connection through Access, reading columns and rows from a database, reading, columns/rows from a database, creating a table, creating, a database table, database table, creating, new database table, updating, updating a database, database connection, storing results in a database, DBExecute, DBExecute, OPL keyword, SQL requests, syntax of placeholders, placeholder syntax, Oracle, placeholders in database systems, vs. ODBC, vs. Oracle, DBUpdate, OPL keyword, ODBC vs. Oracle" />
+<meta name="keywords" content="data files, oil database example, code samples, oilDB.dat, keywords, DBConnection, DBConnection, OPL keyword, Access databases, connection to, database connection, ODBC, database connection through Access, reading columns and rows from a database, reading, columns/rows from a database, creating a table, creating, a database table, database table, creating, new database table, updating, updating a database, database connection, storing results in a database, DBExecute, DBExecute, OPL keyword, SQL requests, syntax of placeholders, placeholder syntax, Oracle, placeholders in database systems, vs. ODBC, vs. Oracle, DBUpdate, OPL keyword, ODBC vs. Oracle" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_extdata_oil_db.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usroplide.uss_ide_datasources.131235" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_extdata_oil_db.html" />
+<title>The oil database data file</title>
+</head>
+<body role="main" id="usroplide.uss_ide_datasources.131235">
+<h1 class="title topictitle1">The oil database data file</h1>
+<div class="body"><p class="shortdesc">Describes the data file in the project.</p>
+<p class="p">Double-click the <samp class="ph codeph">oilDB.dat</samp> file
+in the project tree to see the contents of the data file.</p>
+<div class="example" id="usroplide.uss_ide_datasources.131235__usroplide.uss_ide_datasources.132474"><h2 class="title sectiontitle">Data for the Oil Database example (<samp class="ph codeph">oilDB.dat</samp>)</h2><pre class="pre codeblock"><code>DBConnection db("access","oilDB.mdb");
+Gasolines from DBRead(db,"SELECT name FROM GasData");
+Oils from DBRead(db,"SELECT name FROM OilData");
+GasData from DBRead(db,"SELECT * FROM GasData");
+OilData from DBRead(db,"SELECT * FROM OilData");
+MaxProduction = 14000;
+ProdCost = 4;
+DBExecute(db,"drop table Result");
+DBExecute(db,"create table Result(oil varchar(10), gas varchar(10), blend real, a real)");
+Result to DBUpdate(db,"INSERT INTO Result(oil,gas,blend,a) VALUES(?,?,?,?)");</code></pre>
+</div>
+<p class="p">Notice that the data file starts with the <samp class="ph codeph">DBConnection</samp> statement
+used to connect to the database. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">You can have multiple data files and,
+within any of them, multiple connections to databases. </p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_extdata_oil_db.html" title="Describes the oil database tables and project, and its execution.">The oil database example</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="usroplide.uss_ide_datasources.142041"><h2 class="title topictitle2">Connecting to the database from OPL</h2>
+<div class="body"><p class="p">The connection is established to an Access database by
+the following statement in <samp class="ph codeph">oilDB.dat</samp>:</p>
+<pre class="pre codeblock"><code>DBConnection db("access","oilDB.mdb");</code></pre>
+<p class="p">The string passed as first argument indicates that you
+want to connect to an Access database. The string passed as second
+argument designates the Access database file. This is a helper implementation
+actually based on ODBC and you do not need to specify the full path
+name. Path names are resolved relatively to the directory of the current <samp class="ph codeph">.dat</samp> file.</p>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usroplide.uss_ide_datasources.119456"><h2 class="title topictitle2">Reading from the database</h2>
+<div class="body"><div class="section" id="usroplide.uss_ide_datasources.119456__usroplide.uss_ide_datasources.115172"><h3 class="title sectiontitle">Reading database columns</h3><p class="p">You can read columns from any table
+into an OPL set using the <samp class="ph codeph">DBRead</samp> statement,
+as shown in <samp class="ph codeph">oilDB.dat</samp>.</p>
+<p class="p exampletitle" id="usroplide.uss_ide_datasources.119456__usroplide.uss_ide_datasources.138363">Reading database columns to an OPL set (<samp class="ph codeph">oilDB.dat</samp>)</p>
+<pre class="pre codeblock"><code>Gasolines from DBRead(db,"SELECT name FROM GasData");
+Oils from DBRead(db,"SELECT name FROM OilData");</code></pre>
+<p class="p">You can also read from any table into a tuple and its indexing
+set, as shown in the data file <samp class="ph codeph">oilDB2.dat</samp>.</p>
+<p class="p exampletitle" id="usroplide.uss_ide_datasources.119456__usroplide.uss_ide_datasources.140809">Reading database columns to a tuple array <samp class="ph codeph">(oilDB2.dat)</samp></p>
+<pre class="pre codeblock"><code>Gasolines,Gas from DBRead(db,"SELECT name,name,demand,price,octane,lead FROM GasData");
+Oils,Oil from DBRead(db,"SELECT name,name,capacity,price,octane,lead FROM OilData");</code></pre>
+<p class="p"><samp class="ph codeph">oilDB2.dat</samp> 
+is more efficient than <samp class="ph codeph">oilDB.dat</samp> because:</p>
+<ul class="ul"><li class="li"><p class="p">the code is shorter</p>
+ </li>
+<li class="li"><p class="p">data is not duplicated</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="usroplide.uss_ide_datasources.119456__usroplide.uss_ide_datasources.138398"><h3 class="title sectiontitle">Reading database rows</h3><p class="p">You can read rows
+from any table into an OPL tuple set using the <samp class="ph codeph">DBRead</samp> statement,
+as shown in <samp class="ph codeph">oilDB.dat</samp>. </p>
+<p class="p exampletitle" id="usroplide.uss_ide_datasources.119456__usroplide.uss_ide_datasources.138403">Reading database rows (<samp class="ph codeph">oilDB.dat</samp>)</p>
+<pre class="pre codeblock"><code>GasData from DBRead(db,"SELECT * FROM GasData");
+OilData from DBRead(db,"SELECT * FROM OilData");</code></pre>
+<p class="p">Note that the data file also initializes some variables directly;
+it does not only take data from the database.</p>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usroplide.uss_ide_datasources.115199"><h2 class="title topictitle2">Creating a new table and updating the database</h2>
+<div class="body"><p class="p">At the end of the optimization process, you need to store
+the optimal blends and advertising expenditures in a new database
+table.</p>
+<p class="p">Use the OPL statement <samp class="ph codeph">DBExecute</samp> in
+the data file to create a new table called <samp class="ph codeph">Result</samp>,
+which has four columns, corresponding to the fields in the tuple <samp class="ph codeph">Result</samp>.</p>
+<p class="p">With Microsoft Access, the instructions to delete the
+Result table if it exists and then (re)create it are:</p>
+<p class="p"><strong class="ph b">Deleting and recreating the Result table</strong></p>
+<p class="p exampletitle" id="usroplide.uss_ide_datasources.115199__usroplide.uss_ide_datasources.138432"></p>
+<pre class="pre codeblock"><code>DBExecute(db,"drop table Result");
+DBExecute(db,"create table Result(oil varchar(10), gas varchar(10), blend real, a real)");</code></pre>
+<p class="p">You can then insert the <samp class="ph codeph">oil</samp>, <samp class="ph codeph">gas</samp>, <samp class="ph codeph">blend</samp>, and <samp class="ph codeph">a</samp> arrays as columns in the table <samp class="ph codeph">Result</samp> using
+a <samp class="ph codeph">DBUpdate</samp> statement.</p>
+<p class="p">With Microsoft Access, the insertion is made by the instruction:</p>
+<p class="p"><strong class="ph b">Creating a Result table</strong></p>
+<p class="p exampletitle" id="usroplide.uss_ide_datasources.115199__usroplide.uss_ide_datasources.138457"></p>
+<pre class="pre codeblock"><code>Result to DBUpdate(db,"INSERT INTO Result(oil,gas,blend,a) VALUES(?,?,?,?)");</code></pre>
+<p class="p">The difference between the <samp class="ph codeph">DBUpdate</samp> instruction
+with ODBC (Microsoft Access) and the <samp class="ph codeph">DBUpdate</samp> instruction
+with Oracle lies in the different syntax for the placeholders inside
+the SQL request, imposed by the two database systems. In the case
+of ODBC, you use a query sign as a placeholder, while in Oracle you
+use a column sign followed by a column number, with the columns numbered
+starting from one.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Cut callback" />
+<meta name="abstract" content="Describes special considerations of the cut callback." />
+<meta name="Description" content="Describes special considerations of the cut callback." />
+<meta name="DC.subject" content="callback, user cut, cut callback: see user cut callback, CPXsetcutcallbackfunc, CPXgetcallbacknodex, CPXgetcallbacklp, CPXgetcallbackgloballb, CPXcutcallbackadd, constraint, lazy, lazy constraint, adding with user-written callback, CPX_PARAM_PRELINEAR, advanced MIP control and, CPX_PARAM_REDUCE, lazy constraints and advanced MIP control, CPX_PARAM_MIPCBREDLP, user defined cuts and, user cut callback" />
+<meta name="keywords" content="callback, user cut, cut callback: see user cut callback, CPXsetcutcallbackfunc, CPXgetcallbacknodex, CPXgetcallbacklp, CPXgetcallbackgloballb, CPXcutcallbackadd, constraint, lazy, lazy constraint, adding with user-written callback, CPX_PARAM_PRELINEAR, advanced MIP control and, CPX_PARAM_REDUCE, lazy constraints and advanced MIP control, CPX_PARAM_MIPCBREDLP, user defined cuts and, user cut callback" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advMIPcontrolInterface.998475" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" />
+<title>Cut callback</title>
+</head>
+<body role="main" id="User_manual.uss_advMIPcontrolInterface.998475">
+<h1 class="title topictitle1">Cut callback</h1>
+<div class="body"><p class="shortdesc">Describes special considerations of the cut callback.</p>
+<p class="p">The next example to consider is the user cut callback routine.
+The user calls <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/setusercutcallbackfunc.html" title="The routine CPXXsetusercutcallbackfunc/CPXsetusercutcallbackfunc sets and modifies the user-written callback for adding cuts.">CPXsetusercutcallbackfunc</a></samp> to
+set a user cut callback. Then CPLEX calls the user's callback routine
+at every viable node of the branch &amp; cut tree. See the sample <samp class="ph codeph">admipex5.c</samp> 
+for a detailed demonstration.</p>
+<p class="p">A likely sequence of events after the user cut callback function
+is called goes like this. First, the routine calls  <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacknodex.html" title="The routine CPXXgetcallbacknodex/CPXgetcallbacknodex retrieves the primal variable (x) values for the subproblem at the current node during MIP optimization from within a user-written callback.">CPXgetcallbacknodex</a></samp> to
+get the relaxation solution for the current node. It possibly also
+gathers other information about the problem (through such routines
+as   <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacklp.html" title="The routine CPXXgetcallbacklp/CPXgetcallbacklp retrieves the pointer to the MIP problem that is in use when the user-written callback function is called.">CPXgetcallbacklp</a></samp>, <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbackgloballb.html" title="The routine CPXXgetcallbackgloballb/CPXgetcallbackgloballb retrieves the best known global lower bound values during MIP optimization from within a user-written callback.">CPXgetcallbackgloballb</a></samp>,
+ and others). It then calls a user separation routine to identify
+violated user cuts. These cuts are then added to the problem by a
+call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/cutcallbackadd.html" title="The routine CPXXcutcallbackadd/CPXcutcallbackadd adds lazy constraints and globally valid cuts to the current node LP subproblem during MIP branch and cut.">CPXcutcallbackadd</a></samp>,
+ and the callback returns. You can add local cuts, that is, cuts that
+apply to the subtree of which the current node is the root, by means
+of the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/cutcallbackaddlocal.html" title="The routine CPXXcutcallbackaddlocal/CPXcutcallbackaddlocal adds local cuts during MIP branch and cut.">CPXcutcallbackaddlocal</a></samp>. </p>
+<p class="p">CPLEX supports two rather different types of constraints that might
+both be regarded as cuts in some sense. </p>
+<ul class="ul"><li class="li"><p class="p">The first type is the conventional <strong class="ph b">MIP cutting plane</strong>.
+A MIP cutting plane is a constraint that can be derived from other
+constraints in the problem. Equally important, a MIP cutting plane
+does not cut off any integer feasible solutions. This type is known
+as a user cut in CPLEX. To add a MIP cutting plane (that is, a user
+cut), use the routine  <span class="keyword apiname">CPXsetusercutcallbackfunc</span>. </p>
+ </li>
+<li class="li"><p class="p">The second type is a <strong class="ph b">lazy constraint</strong>  that is, a constraint
+that can not be derived from other constraints and potentially cuts
+off integer feasible solutions. In other words, a lazy constraint
+changes the feasible region of the model. To add a lazy constraint,
+use the routine  <span class="keyword apiname">CPXsetlazyconstraintcallbackfunc</span>. </p>
+ </li>
+</ul>
+<p class="p">As with the heuristic callback, the user can choose whether to
+work with presolved values or original values of the model. If the
+user chooses to work with original values, a few parameters must be
+modified: </p>
+<ul class="ul"><li class="li"><p class="p"> If the user adds only cutting planes to the original problem,
+the user can set the advanced presolve  <a class="xref" href="../../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a>  (<samp class="ph codeph">CPX_PARAM_PRELINEAR</samp>)
+to <samp class="ph codeph">CPX_OFF</samp>  (0). This parameter forbids certain presolve
+reductions that make translation from original values to presolved
+values impossible.  What happens if the user does not turn off this
+parameter? If the user chooses to leave this parameter on,  it can
+happen that certain user cuts cannot be  transformed into the presolved-problem
+space; in that case, a call to the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/cutcallbackadd.html" title="The routine CPXXcutcallbackadd/CPXcutcallbackadd adds lazy constraints and globally valid cuts to the current node LP subproblem during MIP branch and cut.">CPXcutcallbackadd</a></samp> to
+add such a cut returns the error <span class="keyword apiname">CPXERR_PRESLV_CRUSHFORM</span>.
+As user cuts are optional for solving a MIP problem,  the user can
+safely ignore this error status code.  However, the user must realize
+that the cut was not added  to the LP relaxation of the problem. </p>
+ </li>
+<li class="li"> <p class="p">If the user adds any lazy constraints, CPLEX detects the lazy
+constraints and automatically turns off dual presolve reductions.
+ That is, CPLEX resets two parameters. CPLEX sets the  <a class="xref" href="../../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a> 
+ <samp class="ph codeph">CPX_PARAM_REDUCE</samp> to the value <samp class="ph codeph">CPX_PREREDUCE_PRIMALONLY</samp>.
+CPLEX sets the presolve  <a class="xref" href="../../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a>   <samp class="ph codeph">CPX_PARAM_PRELINEAR</samp> to
+off. Consequently,  the user must think carefully about whether constraints
+added through the cut interface are implied by existing constraints
+(in which case,  these additions are user cuts and thus nonlinear
+reductions and  dual presolve reductions can be left on) or whether
+they are not (in which case, these additions are lazy constraints
+and thus nonlinear  reductions and dual presolve reductions are forbidden).</p>
+ </li>
+</ul>
+<p class="p">Concert Technology users use the class   <samp class="ph codeph">IloCplex::LazyConstraintCallbackI</samp> 
+when adding lazy constraints.  CPLEX then automatically turns off
+dual reductions and nonlinear reductions.</p>
+<p class="p">Concert Technology users use the class  <samp class="ph codeph">IloCplex::UserCutCallbackI</samp> when
+adding cutting planes. In this case, CPLEX does not adjust parameters
+because these parameter changes are not  required for user cuts.</p>
+<p class="p">One scenario that merits special attention is when the user knows
+a large set of cuts because of prior knowledge. Rather than adding
+them to the original problem one by one, the user can  add them only
+when they are violated. The CPLEX advanced MIP control interface provides
+more than one mechanism for accomplishing this. The first and probably
+most obvious at this point is to install a lazy constraint callback
+that checks each of them at each node, adding those that are violated. </p>
+<p class="p">Another, perhaps simpler alternative is to add them to a pool of
+user cuts or lazy constraints before optimization begins. The topic
+ <a class="xref" href="../usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" title="Documents pools of user-defined cuts and lazy constraints.">User-cut and lazy-constraint pools</a> discusses
+pools in greater detail. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" title="Documents the advanced MIP control interface.">Advanced MIP control interface</a></div>
+</div>
+</div></body>
+</html>

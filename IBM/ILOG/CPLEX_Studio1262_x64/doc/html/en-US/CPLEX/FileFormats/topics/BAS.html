@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="BAS file format: advanced basis" />
+<meta name="abstract" content="The BAS file format supports an advanced basis." />
+<meta name="Description" content="The BAS file format supports an advanced basis." />
+<meta name="DC.subject" content="BAS file format, MPS file format, advanced basis in, variable, structural, structural variable, row, row variable" />
+<meta name="keywords" content="BAS file format, MPS file format, advanced basis in, variable, structural, structural variable, row, row variable" />
+<meta name="DC.Relation" scheme="URI" content="../../../CPLEX/homepages/reffileformatscplex.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="File_formats_reference.uss_reffileformatscplex.167149" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CPLEX/homepages/reffileformatscplex.html" />
+<title>BAS file format: advanced basis</title>
+</head>
+<body role="main" id="File_formats_reference.uss_reffileformatscplex.167149">
+<h1 class="title topictitle1">BAS file format: advanced basis</h1>
+<div class="body"><p class="shortdesc">The BAS file format supports an advanced basis.</p>
+<p class="p">An MPS basis file, known as a BAS file, contains the
+information needed by CPLEX to
+define an advanced basis. Like an MPS file, the BAS file begins with
+a <samp class="ph codeph">NAME</samp>  indicator record and ends with
+an <samp class="ph codeph">ENDATA</samp>  record. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">A BAS file is a text-based format that relies on each
+variable and each constraint having a name. If names do not exist,
+they will be created automatically, as needed, during a write operation.
+If you anticipate reading and writing BAS files, it is a good idea
+to assign a name to each variable (column) and to each constraint
+(row) yourself when you create the model. </p>
+</div>
+<p class="p">A basis defines a list of basic structural variables
+and row variables. A structural variable is one of the variables (columns)
+defined in the MPS problem file. A row variable is actually the slack,
+surplus, or artificial variable associated with a row. </p>
+<p class="p">For linear programs, the total number of basic variables—both
+structural and row—is equal to the number of rows in the constraint
+matrix. Additionally, the number of basic structural variables is
+equal to the number of nonbasic row variables. By convention, an MPS
+basis file is built on the assumption that all row variables are basic
+and that all structural variables are nonbasic with values at their
+lower bound. The data records in a BAS file list structural and row
+variables that violate this assumption. This convention minimizes
+the size of the BAS file.</p>
+<p class="p">For quadratic programs, the total number of basic variables
+can exceed the number of rows and so not all basic variables can be
+paired with a nonbasic row variable.  </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table listing the possible status of a variable and the meaning of each status." id="File_formats_reference.uss_reffileformatscplex.167149__File_formats_reference.uss_reffileformatscplex.157205" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Status indicators for variables in a BAS file</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="50%" id="d22887e62"> Value </th>
+<th class="entry" align="left" valign="top" width="50%" id="d22887e64"> Status </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d22887e62 ">  <samp class="ph codeph">XU</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d22887e64 "> Variable 1 is basic; variable 2 is nonbasic
+at its upper bound </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d22887e62 ">  <samp class="ph codeph">XL</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d22887e64 "> Variable 1 is basic; variable 2 is nonbasic
+at its lower bound </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d22887e62 ">  <samp class="ph codeph">UL</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d22887e64 "> Variable 1 is nonbasic and is at its upper
+bound </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d22887e62 ">  <samp class="ph codeph">LL</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d22887e64 "> Variable 1 is nonbasic and is at its lower
+bound </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d22887e62 ">  <samp class="ph codeph">BS</samp>  </td>
+<td class="entry" valign="top" width="50%" headers="d22887e64 "> Variable 1 is basic. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Field 1: Indicator specifying status of the named variables
+in Fields 2 and 3. Acceptable values appear in <a class="xref" href="BAS.html#File_formats_reference.uss_reffileformatscplex.167149__File_formats_reference.uss_reffileformatscplex.157205" title="A two-column table listing the possible status of a variable and the meaning of each status.">Table 1</a>.</p>
+<p class="p">Field 2: Variable 1 identifier</p>
+<p class="p">Field 3: Variable 2 identifier (ignored if Field 1 is <samp class="ph codeph">UL</samp> , <samp class="ph codeph">LL</samp> 
+or <samp class="ph codeph">BS</samp> )</p>
+<p class="p">Variable 1 specifies a structural variable identifier
+which has entered the basis. By convention, this structural variable
+must displace one of the row variables. Variable 2 is a row variable
+that has left the basis. No relationship between structural variables
+entering the basis and row variables leaving the basis is implied
+within the BAS file.</p>
+<p class="p">In the <a class="xref" href="MPS_example.html" title="Shows formatted sample MPS file.">Example of MPS file format</a>,
+variables <samp class="ph codeph">x2</samp>  and <samp class="ph codeph">x3</samp> 
+are basic and the two constraints (row variables) are nonbasic. Also, <samp class="ph codeph">x1</samp> 
+was forced to its upper limit of 40. The optimal basis for that example
+appears in the following sample. CPLEX adds
+the number of iterations to the <samp class="ph codeph">NAME</samp>  record.
+The iteration count is useful if the basis file was automatically
+generated during a previously aborted run. The <samp class="ph codeph">XL</samp> 
+indicator in the first two data records indicates that <samp class="ph codeph">x3</samp> 
+and <samp class="ph codeph">x2</samp>  are basic and that the row variables
+for <samp class="ph codeph">c1</samp>  and <samp class="ph codeph">c2</samp> 
+are nonbasic at their lower bound. The third record shows that structural
+variable <samp class="ph codeph">x1</samp>  is nonbasic and at its upper
+bound.  </p>
+<pre class="pre codeblock"><code>NAME          example2.bas  Iterations 3  Rows 2  Cols 3
+ XL x3        c1
+ XL x2        c2
+ UL x1
+ENDATA</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CPLEX/homepages/reffileformatscplex.html">File formats supported by CPLEX</a></div>
+</div>
+</div></body>
+</html>

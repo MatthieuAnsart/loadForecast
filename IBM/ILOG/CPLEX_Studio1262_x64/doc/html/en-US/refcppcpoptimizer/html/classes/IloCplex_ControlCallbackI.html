@@ -1,0 +1,977 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>ControlCallbackI</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloCplex_ControlCallbackI.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloCplex::ControlCallbackI</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilcplex/ilocplexi.h</span></div><div><img
+                src="IloCplex_ControlCallbackI.png" border="0"
+                usemap="#svg_map_IloCplex::ControlCallbackI"
+                    alt="Map of IloCplex::ControlCallbackI"><map
+                        name="svg_map_IloCplex::ControlCallbackI"><area
+                        href="../classes/IloCplex_ControlCallbackI.html"
+                        shape="rect" alt="IloCplex::ControlCallbackI"
+                        coords="10.0,120.54296875,180.0,138.1787109375" /><area
+                        href="../classes/IloCplex_BranchCallbackI.html"
+                        shape="rect" alt="IloCplex::BranchCallbackI"
+                        coords="105.0,148.1787109375,275.0,165.814453125" /><area
+                        href="../classes/IloCplex_HeuristicCallbackI.html"
+                        shape="rect" alt="IloCplex::HeuristicCallbackI"
+                        coords="105.0,175.814453125,275.0,193.4501953125" /><area
+                        href="../classes/IloCplex_LazyConstraintCallbackI.html"
+                        shape="rect"
+                        alt="IloCplex::LazyConstraintCallbackI"
+                        coords="105.0,203.4501953125,275.0,221.0859375" /><area
+                        href="../classes/IloCplex_SolveCallbackI.html"
+                        shape="rect" alt="IloCplex::SolveCallbackI"
+                        coords="105.0,231.0859375,275.0,248.7216796875" /><area
+                        href="../classes/IloCplex_UserCutCallbackI.html"
+                        shape="rect" alt="IloCplex::UserCutCallbackI"
+                        coords="105.0,258.7216796875,275.0,276.357421875" /><area
+                        href="../classes/IloCplex_ControlCallbackI.html"
+                        shape="rect" alt="IloCplex::ControlCallbackI"
+                        coords="10.0,120.54296875,180.0,138.1787109375" /><area
+                        href="../classes/IloCplex_MIPCallbackI.html"
+                        shape="rect" alt="IloCplex::MIPCallbackI"
+                        coords="105.0,92.9072265625,275.0,110.54296875" /><area
+                        href="../classes/IloCplex_MIPInfoCallbackI.html"
+                        shape="rect" alt="IloCplex::MIPInfoCallbackI"
+                        coords="200.0,65.271484375,370.0,82.9072265625" /><area
+                        href="../classes/IloCplex_OptimizationCallbackI.html"
+                        shape="rect"
+                        alt="IloCplex::OptimizationCallbackI"
+                        coords="295.0,37.6357421875,465.0,55.271484375" /><area
+                        href="../classes/IloCplex_CallbackI.html"
+                        shape="rect" alt="IloCplex::CallbackI"
+            coords="390.0,10.0,560.0,27.6357421875" /></map></img></div><div
+                class="description"><div class="note"><div
+                    class="noteTitle">Note</div><div
+                            class="noteText"><p>This is an advanced class. Advanced classes typically demand a profound
+ understanding of the algorithms used by CPLEX. Thus they incur a
+ higher risk of incorrect behavior in your application, behavior that can
+ be difficult to debug. Therefore, the team encourages you to consider
+ carefully whether you can accomplish the same task by means of other
+ classes instead. </p></div></div><p>This class defines the common application programming interface (API)
+ for the following classes that allow you to control the MIP search:</p><ul>
+<li><code><a
+                            href="../classes/IloCplex_SolveCallbackI.html">IloCplex::SolveCallbackI</a></code></li><li><code><a
+                            href="../classes/IloCplex_UserCutCallbackI.html">IloCplex::UserCutCallbackI</a></code></li><li><code><a
+                            href="../classes/IloCplex_LazyConstraintCallbackI.html">IloCplex::LazyConstraintCallbackI</a></code></li><li><code><a
+                            href="../classes/IloCplex_HeuristicCallbackI.html">IloCplex::HeuristicCallbackI</a></code></li><li><code><a
+                        href="../classes/IloCplex_BranchCallbackI.html">IloCplex::BranchCallbackI</a></code></li>
+</ul><p>An instance of one of these classes
+ represents a user-written callback that intervenes in the search for a
+ solution at a given node in an application that uses an instance of
+ <code>IloCplex</code> to solve a mixed integer program (MIP). Control
+ callbacks are tied to a node. They are called at each node during
+ <code>IloCplex</code> branch-and-cut search.  The user never subclasses
+ the <code>IloCplex::ControlCallbackI</code> class directly; it only
+ defines the common interface of thosee listed callbacks.</p><p>In particular, <code>SolveCallbackI</code> is called before solving the
+ node relaxation and optionally allows substitution of its solution.
+ <code>IloCplex</code> does this by default. Then the node relaxation is
+ solved, either by an instance of <code>SolveCallbackI</code> or by
+ <code>IloCplex</code>. If the solution is integer feasible or the
+ relaxation is unbounded
+ <code><a
+                            href="../classes/IloCplex_LazyConstraintCallbackI.html">IloCplex::LazyConstraintCallbackI</a></code> is
+ invoked; otherwise, the other control callbacks are called in the
+ following order:</p><ol>
+<li><code><a
+                            href="../classes/IloCplex_UserCutCallbackI.html">IloCplex::UserCutCallbackI</a></code></li><li><code><a
+                            href="../classes/IloCplex_HeuristicCallbackI.html">IloCplex::HeuristicCallbackI</a></code></li><li><code><a
+            href="../classes/IloCplex_BranchCallbackI.html">IloCplex::BranchCallbackI</a></code></li>
+</ol><p>If the cut callback added new cuts to the node relaxation, the node
+ relaxation will be solved again using the solve callback, if used. The same
+ is true if <code>IloCplex</code> generated its own cuts.</p><p>The methods of this class are protected and its constructor is
+ private; you cannot directly subclass this class; you must derive from its
+ subclasses. </p><p>If an attempt is made to access information not available to an instance
+ of this class, an exception is thrown.</p><strong>Unbounded rays</strong><p>In the case where the node LP is unbounded, the methods 
+ <code>getValue</code> return a vector that corresponds to an
+ unbounded direction. The vector is scaled in such a way that the
+ maximum absolute value of one of its elements is
+ <code>CPX_INFBOUND</code>.  Thus, often the vector
+ can be used directly, for example to separate lazy constraints.  However,
+ due to the large values, care must be taken to deal with potential 
+ numerical errors.  If in doubt, rescale the vector, and use it as an
+ unbounded ray rather than as a primal vector.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloCplex.html">IloCplex</a>, <a
+                href="../classes/IloCplex_Callback.html">IloCplex::Callback</a>, <a
+                href="../classes/IloCplex_CallbackI.html">IloCplex::CallbackI</a>, <a
+                href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a>, <a
+                href="../typedefs/ControlCallbackI_IntegerFeasibilityArray.html">ControlCallbackI::IntegerFeasibilityArray</a>, <a
+                href="../classes/IloCplex_MIPCallbackI.html">IloCplex::MIPCallbackI</a>, <a
+            href="../classes/IloCplex_OptimizationCallbackI.html">IloCplex::OptimizationCallbackI</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getDownPseudoCost">getDownPseudoCost</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getDownPseudoCost">getDownPseudoCost</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getFeasibilities">getFeasibilities</a>(<a
+                            href="../typedefs/ControlCallbackI_IntegerFeasibilityArray.html">ControlCallbackI::IntegerFeasibilityArray</a> stat, const <a
+                    href="../classes/IloIntVarArray.html">IloIntVarArray</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getFeasibilities">getFeasibilities</a>(<a
+                            href="../typedefs/ControlCallbackI_IntegerFeasibilityArray.html">ControlCallbackI::IntegerFeasibilityArray</a> stat, const <a
+                    href="../classes/IloNumVarArray.html">IloNumVarArray</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getFeasibility">getFeasibility</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getFeasibility">getFeasibility</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getFeasibility">getFeasibility</a>(const <a
+                    href="../classes/IloSOS2.html">IloSOS2</a> sos) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getFeasibility">getFeasibility</a>(const <a
+                    href="../classes/IloSOS1.html">IloSOS1</a> sos) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getLB">getLB</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getLB">getLB</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getLBs">getLBs</a>(<a
+                            href="../classes/IloNumArray.html">IloNumArray</a> val, const <a
+                    href="../classes/IloIntVarArray.html">IloIntVarArray</a> vars) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getLBs">getLBs</a>(<a
+                            href="../classes/IloNumArray.html">IloNumArray</a> val, const <a
+                    href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public NodeData *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_ControlCallbackI.html#method_getNodeData">getNodeData</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public NodeId</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_ControlCallbackI.html#method_getNodeId">getNodeId</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_ControlCallbackI.html#method_getObjValue">getObjValue</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getSlack">getSlack</a>(const <a
+                    href="../classes/IloRange.html">IloRange</a> rng) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getSlacks">getSlacks</a>(<a
+                            href="../classes/IloNumArray.html">IloNumArray</a> val, const <a
+                    href="../classes/IloRangeArray.html">IloRangeArray</a> con) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getUB">getUB</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getUB">getUB</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getUBs">getUBs</a>(<a
+                            href="../classes/IloNumArray.html">IloNumArray</a> val, const <a
+                    href="../classes/IloIntVarArray.html">IloIntVarArray</a> vars) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getUBs">getUBs</a>(<a
+                            href="../classes/IloNumArray.html">IloNumArray</a> val, const <a
+                    href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getUpPseudoCost">getUpPseudoCost</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getUpPseudoCost">getUpPseudoCost</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getValue">getValue</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getValue">getValue</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_ControlCallbackI.html#method_getValue">getValue</a>(const IloExprArg expr) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getValues">getValues</a>(<a
+                            href="../classes/IloNumArray.html">IloNumArray</a> val, const <a
+                    href="../classes/IloIntVarArray.html">IloIntVarArray</a> vars) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_getValues">getValues</a>(<a
+                            href="../classes/IloNumArray.html">IloNumArray</a> val, const <a
+                    href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_isSOSFeasible">isSOSFeasible</a>(const <a
+                    href="../classes/IloSOS2.html">IloSOS2</a> sos2) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_ControlCallbackI.html#method_isSOSFeasible">isSOSFeasible</a>(const <a
+                    href="../classes/IloSOS1.html">IloSOS1</a> sos1) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public NodeData *</code></td><td
+                            width="100%"><code><a
+            href="../classes/IloCplex_ControlCallbackI.html#method_setNodeData">setNodeData</a>(NodeData * data)</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloCplex_MIPCallbackI.html">MIPCallbackI</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoef"></a><a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoef">getObjCoef</a>, <a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoef"></a><a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoef">getObjCoef</a>, <a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoefs"></a><a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoefs">getObjCoefs</a>, <a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoefs"></a><a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getObjCoefs">getObjCoefs</a>, <a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getType"></a><a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getType">getType</a>, <a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getUserThreads"></a><a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_getUserThreads">getUserThreads</a>, <a
+                            href="../classes/IloCplex_MIPCallbackI.html#method_MIPCallbackI"></a><a
+            href="../classes/IloCplex_MIPCallbackI.html#method_MIPCallbackI">MIPCallbackI</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloCplex_MIPInfoCallbackI.html">MIPInfoCallbackI</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getBestObjValue"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getBestObjValue">getBestObjValue</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getCutoff"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getCutoff">getCutoff</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getDirection"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getDirection">getDirection</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getDirection"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getDirection">getDirection</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentObjValue"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentObjValue">getIncumbentObjValue</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentSlack"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentSlack">getIncumbentSlack</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentSlacks"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentSlacks">getIncumbentSlacks</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValue"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValue">getIncumbentValue</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValue"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValue">getIncumbentValue</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValue"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValue">getIncumbentValue</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValues"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValues">getIncumbentValues</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValues"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getIncumbentValues">getIncumbentValues</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getMIPRelativeGap"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getMIPRelativeGap">getMIPRelativeGap</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getMyThreadNum"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getMyThreadNum">getMyThreadNum</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNcliques"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNcliques">getNcliques</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNcovers"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNcovers">getNcovers</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNcuts"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNcuts">getNcuts</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNdisjunctiveCuts"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNdisjunctiveCuts">getNdisjunctiveCuts</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNflowCovers"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNflowCovers">getNflowCovers</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNflowPaths"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNflowPaths">getNflowPaths</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNfractionalCuts"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNfractionalCuts">getNfractionalCuts</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNGUBcovers"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNGUBcovers">getNGUBcovers</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNimpliedBounds"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNimpliedBounds">getNimpliedBounds</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNiterations"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNiterations">getNiterations</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNiterations64"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNiterations64">getNiterations64</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNMIRs"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNMIRs">getNMIRs</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNnodes"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNnodes">getNnodes</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNnodes64"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNnodes64">getNnodes64</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNremainingNodes"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNremainingNodes">getNremainingNodes</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNremainingNodes64"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNremainingNodes64">getNremainingNodes64</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNzeroHalfCuts"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getNzeroHalfCuts">getNzeroHalfCuts</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getPriority"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getPriority">getPriority</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getPriority"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getPriority">getPriority</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getQuality"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getQuality">getQuality</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getType"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_getType">getType</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_hasIncumbent"></a><a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_hasIncumbent">hasIncumbent</a>, <a
+                            href="../classes/IloCplex_MIPInfoCallbackI.html#method_MIPInfoCallbackI"></a><a
+            href="../classes/IloCplex_MIPInfoCallbackI.html#method_MIPInfoCallbackI">MIPInfoCallbackI</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloCplex_OptimizationCallbackI.html">OptimizationCallbackI</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_OptimizationCallbackI.html#method_getModel"></a><a
+                            href="../classes/IloCplex_OptimizationCallbackI.html#method_getModel">getModel</a>, <a
+                            href="../classes/IloCplex_OptimizationCallbackI.html#method_getNcols"></a><a
+                            href="../classes/IloCplex_OptimizationCallbackI.html#method_getNcols">getNcols</a>, <a
+                            href="../classes/IloCplex_OptimizationCallbackI.html#method_getNQCs"></a><a
+                            href="../classes/IloCplex_OptimizationCallbackI.html#method_getNQCs">getNQCs</a>, <a
+                            href="../classes/IloCplex_OptimizationCallbackI.html#method_getNrows"></a><a
+            href="../classes/IloCplex_OptimizationCallbackI.html#method_getNrows">getNrows</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloCplex_CallbackI.html">CallbackI</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloCplex_CallbackI.html#method_abort"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_abort">abort</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_duplicateCallback"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_duplicateCallback">duplicateCallback</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getCplexTime"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getCplexTime">getCplexTime</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getDetTime"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getDetTime">getDetTime</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getEndDetTime"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getEndDetTime">getEndDetTime</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getEndTime"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getEndTime">getEndTime</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getEnv"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getEnv">getEnv</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getStartDetTime"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getStartDetTime">getStartDetTime</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getStartTime"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getStartTime">getStartTime</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_getType"></a><a
+                            href="../classes/IloCplex_CallbackI.html#method_getType">getType</a>, <a
+                            href="../classes/IloCplex_CallbackI.html#method_main"></a><a
+            href="../classes/IloCplex_CallbackI.html#method_main">main</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                        colspan="1">Inner Enumeration</th></tr><tr><td><a
+            href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                        colspan="1">Inner Typedef</th></tr><tr><td><a
+            href="../typedefs/ControlCallbackI_IntegerFeasibilityArray.html">ControlCallbackI::IntegerFeasibilityArray</a></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                        colspan="1">Inner Class</th></tr><tr><td><a
+            href="../classes/ControlCallbackI_PresolvedVariableException.html">ControlCallbackI::PresolvedVariableException</a></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_getDownPseudoCost">getDownPseudoCost</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getDownPseudoCost</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the current pseudo cost for branching
+ downward on the variable <code>var</code>.
+ </p></div><hr /><h3><a
+            name="method_getDownPseudoCost">getDownPseudoCost</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getDownPseudoCost</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the current pseudo cost for branching
+ downward on the variable <code>var</code>.
+ </p></div><hr /><h3><a
+            name="method_getFeasibilities">getFeasibilities</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getFeasibilities</span>(<a
+                href="../typedefs/ControlCallbackI_IntegerFeasibilityArray.html">ControlCallbackI::IntegerFeasibilityArray</a> <span
+                class="parameter-name">stat</span>, const <a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method specifies whether each of the variables
+ in the array <code>vars</code> is integer feasible,
+ integer infeasible, or implied integer feasible by putting
+ the status in the corresponding element of the array
+ <code>stats</code>.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>getFeasibilities</code>.</p></div><hr /><h3><a
+            name="method_getFeasibilities">getFeasibilities</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getFeasibilities</span>(<a
+                href="../typedefs/ControlCallbackI_IntegerFeasibilityArray.html">ControlCallbackI::IntegerFeasibilityArray</a> <span
+                class="parameter-name">stat</span>, const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method specifies whether each of the variables
+ in the array <code>vars</code> is integer feasible,
+ integer infeasible, or implied integer feasible by putting
+ the status in the corresponding element of the array
+ <code>stats</code>.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>getFeasibilities</code>.</p></div><hr /><h3><a
+            name="method_getFeasibility">getFeasibility</a></h3><div
+                class="prototype">public <a
+                href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a> <span
+                class="function-name">getFeasibility</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method specifies whether the variable
+ <code>var</code> is integer feasible, integer infeasible,
+ or implied integer feasible in the current node solution.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>getFeasibility</code>.</p></div><hr /><h3><a
+            name="method_getFeasibility">getFeasibility</a></h3><div
+                class="prototype">public <a
+                href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a> <span
+                class="function-name">getFeasibility</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method specifies whether the variable
+ <code>var</code> is integer feasible, integer infeasible,
+ or implied integer feasible in the current node solution.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>getFeasibility</code>.</p></div><hr /><h3><a
+            name="method_getFeasibility">getFeasibility</a></h3><div
+                class="prototype">public <a
+                href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a> <span
+                class="function-name">getFeasibility</span>(const <a
+                href="../classes/IloSOS2.html">IloSOS2</a> <span
+            class="parameter-name">sos</span>) const</div><div
+                class="description"><p>This method specifies whether the Special Ordered Set
+ <code>sos</code> is integer feasible, integer infeasible,
+ or implied integer feasible in the current node solution.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>getFeasibility</code>.</p></div><hr /><h3><a
+            name="method_getFeasibility">getFeasibility</a></h3><div
+                class="prototype">public <a
+                href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a> <span
+                class="function-name">getFeasibility</span>(const <a
+                href="../classes/IloSOS1.html">IloSOS1</a> <span
+            class="parameter-name">sos</span>) const</div><div
+                class="description"><p>This method specifies whether the Special Ordered Set
+ <code>sos</code> is integer feasible, integer infeasible,
+ or implied integer feasible in the current node solution.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>getFeasibility</code>.</p></div><hr /><h3><a
+            name="method_getLB">getLB</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getLB</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the lower bound of
+ <code>var</code> at the current node. This bound is
+ likely to be different from the bound in the original
+ model because an instance of <code>IloCplex</code>
+ tightens bounds when it branches from a node to its subnodes.
+ The corresponding solution value from <code>getValue</code> may
+ violate this bound at a node where a new incumbent has been found
+ because the bound is tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks a lower bound, then <code>getLB</code>
+ returns <code>-IloInfinity</code> (that is, the system-specific 
+ least value).</p></div><hr /><h3><a
+            name="method_getLB">getLB</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getLB</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the lower bound of
+ <code>var</code> at the current node. This bound is
+ likely to be different from the bound in the original
+ model because an instance of <code>IloCplex</code>
+ tightens bounds when it branches from a node to its subnodes.
+ The corresponding solution value from <code>getValue</code> may
+ violate this bound at a node where a new incumbent has been found
+ because the bound is tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks a lower bound, then <code>getLB</code>
+ returns <code>-IloInfinity</code> (that is, the system-specific
+ least value).</p></div><hr /><h3><a
+            name="method_getLBs">getLBs</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getLBs</span>(<a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">val</span>, const <a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+            class="parameter-name">vars</span>) const</div><div
+                class="description"><p>For each element of the array <code>vars</code>, 
+ this method puts the lower bound at the current node 
+ into the corresponding element of the array <code>vals</code>.
+ These bounds are likely to be different from the bounds
+ in the original model because an instance of <code>IloCplex</code>
+ tightens bounds when it branches from a node to its subnodes.
+ The corresponding solution values from <code>getValues</code> may
+ violate these bounds at a node where a new incumbent has been found
+ because the bounds are tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks a lower bound, then <code>getLBs</code>
+ returns <code>-IloInfinity</code> (that is, the system-specific 
+ least value).</p></div><hr /><h3><a
+            name="method_getLBs">getLBs</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getLBs</span>(<a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">val</span>, const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+            class="parameter-name">vars</span>) const</div><div
+                class="description"><p>This method puts the lower bound at the
+ current node of each element of the array <code>vars</code>
+ into the corresponding element of the array <code>vals</code>.
+ These bounds are likely to be different from the bounds
+ in the original model because an instance of <code>IloCplex</code>
+ tightens bounds when it branches from a node to its subnodes.
+ The corresponding solution values from <code>getValues</code> may
+ violate these bounds at a node where a new incumbent has been found
+ because the bounds are tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks a lower bound, then <code>getLBs</code>
+ returns <code>-IloInfinity</code> (that is, the system-specific 
+ least value).</p></div><hr /><h3><a
+            name="method_getNodeData">getNodeData</a></h3><div
+                class="prototype">public NodeData * <span
+            class="function-name">getNodeData</span>() const</div><div
+                class="description"><p>This method retrieves the <code>NodeData</code>
+ object that may have previously been assigned to the current node
+ by the user with
+ the method <code>IloCplex::BranchCallbackI::makeBranch</code>.
+ If no data object has been assigned to the current node,
+ the method returns 0 (zero). 
+ </p></div><hr /><h3><a
+            name="method_getNodeId">getNodeId</a></h3><div
+                class="prototype">public NodeId <span
+            class="function-name">getNodeId</span>() const</div><div
+                        class="description"><p>Returns the <code>NodeId</code> of the current node.</p><p>See <code><a
+                href="../structs/MIPCallbackI_NodeId.html">MIPCallbackI::NodeId</a></code>.</p></div><hr /><h3><a
+            name="method_getObjValue">getObjValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getObjValue</span>() const</div><div
+                        class="description"><p>This method returns the objective value of the
+ solution at the current node.
+ </p><p>If you need the object representing the objective itself, 
+ consider the method 
+ <code><a
+                href="../classes/IloCplex.html#method_getObjective">IloCplex::getObjective</a></code> instead. </p></div><hr /><h3><a
+            name="method_getSlack">getSlack</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getSlack</span>(const <a
+                href="../classes/IloRange.html">IloRange</a> <span
+            class="parameter-name">rng</span>) const</div><div
+                class="description"><p>This method returns the slack value for
+ the constraint specified  by <code>rng</code> in
+ the solution of the relaxation at the current node.
+ </p></div><hr /><h3><a
+            name="method_getSlacks">getSlacks</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getSlacks</span>(<a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">val</span>, const <a
+                href="../classes/IloRangeArray.html">IloRangeArray</a> <span
+            class="parameter-name">con</span>) const</div><div
+                class="description"><p>For each of the constraints in the array of ranges <code>rngs</code>, 
+ this method puts the slack value in the solution of the relaxation
+ at the current node 
+ into the corresponding element of the array <code>vals</code>.
+ </p></div><hr /><h3><a
+            name="method_getUB">getUB</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getUB</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the upper bound
+ of the variable <code>var</code>
+ at the current node. This bound is likely to be
+ different from the bound in the original model
+ because an instance of <code>IloCplex</code> tightens
+ bounds when it branches from a node to its subnodes.
+ The corresponding solution value from <code>getValue</code> may
+ violate this bound at a node where a new incumbent has been found
+ because the bound is tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks an upper bound, then <code>getUB</code>
+ returns <code>IloInfinity</code> (that is, the system-specific 
+ greatest value).</p></div><hr /><h3><a
+            name="method_getUB">getUB</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getUB</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the upper bound
+ of the variable <code>var</code>
+ at the current node. This bound is likely to be
+ different from the bound in the original model
+ because an instance of <code>IloCplex</code> tightens
+ bounds when it branches from a node to its subnodes.
+ The corresponding solution value from <code>getValue</code> may
+ violate this bound at a node where a new incumbent has been found
+ because the bound is tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks an upper bound, then <code>getUB</code>
+ returns <code>IloInfinity</code> (that is, the system-specific 
+ greatest value).</p></div><hr /><h3><a
+            name="method_getUBs">getUBs</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getUBs</span>(<a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">val</span>, const <a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+            class="parameter-name">vars</span>) const</div><div
+                class="description"><p>For each element in the array <code>vars</code>,
+ this method puts the upper bound at the current node
+ into the
+ corresponding element of the array <code>vals</code>.
+ The bounds are those in the relaxation at the current node.
+ These bounds are likely to be different from the bounds
+ in the original model because an instance of
+ <code>IloCplex</code> tightens
+ bounds when it branches from a node to its subnodes.
+ The corresponding solution values from <code>getValues</code> may
+ violate these bounds at a node where a new incumbent has been found
+ because the bounds are tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks an upper bound, then <code>getUBs</code>
+ returns <code>IloInfinity</code> (that is, the system-specific 
+ greatest value).</p></div><hr /><h3><a
+            name="method_getUBs">getUBs</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getUBs</span>(<a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">val</span>, const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+            class="parameter-name">vars</span>) const</div><div
+                class="description"><p>For each element in the array <code>vars</code>,
+ this method puts the upper bound at the current node
+ into the
+ corresponding element of the array <code>vals</code>.
+ The bounds are those in the relaxation at the current node.
+ These bounds are likely to be different from the bounds
+ in the original model because an instance of
+ <code>IloCplex</code> tightens
+ bounds when it branches from a node to its subnodes.
+ The corresponding solution values from <code>getValues</code> may
+ violate these bounds at a node where a new incumbent has been found
+ because the bounds are tightened when an incumbent is found.
+ </p><p><strong>Unbounded Variables</strong></p><p>If a variable lacks an upper bound, then <code>getUBs</code>
+ returns <code>IloInfinity</code> (that is, the system-specific 
+ greatest value).</p></div><hr /><h3><a
+            name="method_getUpPseudoCost">getUpPseudoCost</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getUpPseudoCost</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the current pseudo cost for branching
+ upward on the variable <code>var</code>.
+ </p></div><hr /><h3><a
+            name="method_getUpPseudoCost">getUpPseudoCost</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getUpPseudoCost</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the current pseudo cost for branching
+ upward on the variable <code>var</code>.
+ </p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getValue</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                    class="description"><p>This method returns the value of the
+ variable <code>var</code> in the solution of
+ the relaxation at the current node.
+ </p><p>For special considerations about integrality, 
+ truncation, and rounding applicable to this method, see the concept
+ <a
+                href="../integer_values.html">Integer values, integrality tolerance, and round-off in CPLEX Optimizers</a>.</p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getValue</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This method returns the value of the
+ variable <code>var</code> in the solution of
+ the relaxation at the current node.
+ </p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getValue</span>(const IloExprArg <span
+            class="parameter-name">expr</span>) const</div><div
+                class="description"><p>This method returns the value of the
+ expression <code>expr</code> in the solution of
+ the relaxation at the current node.
+ </p></div><hr /><h3><a
+            name="method_getValues">getValues</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getValues</span>(<a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">val</span>, const <a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+            class="parameter-name">vars</span>) const</div><div
+                    class="description"><p>For each variable in the array <code>vars</code>, 
+ this method puts the value in the solution of the relaxation
+ at the current node into the corresponding
+ element of the array <code>vals</code>.
+ </p><p>For special considerations about integrality, 
+ truncation, and rounding applicable to this method, see the concept
+ <a
+                href="../integer_values.html">Integer values, integrality tolerance, and round-off in CPLEX Optimizers</a>.</p></div><hr /><h3><a
+            name="method_getValues">getValues</a></h3><div
+                class="prototype">public void <span
+                class="function-name">getValues</span>(<a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+                class="parameter-name">val</span>, const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+            class="parameter-name">vars</span>) const</div><div
+                class="description"><p>For each variable in the array <code>vars</code>,
+ this method puts the value in the solution of the relaxation
+ at the current node into the corresponding
+ element of the array <code>vals</code>.
+ </p></div><hr /><h3><a
+            name="method_isSOSFeasible">isSOSFeasible</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isSOSFeasible</span>(const <a
+                href="../classes/IloSOS2.html">IloSOS2</a> <span
+            class="parameter-name">sos2</span>) const</div><div
+                class="description"><p>This method returns <code>IloTrue</code>
+ if the solution of the LP at the current node is
+ SOS feasible for the special ordered set specified 
+ in its argument. The SOS set passed as a parameter
+ to this method may be of type 2.
+ See the <em>CPLEX User's Manual</em> for more explanation of
+ types of special ordered sets.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>isSOSFeasible</code>.</p></div><hr /><h3><a
+            name="method_isSOSFeasible">isSOSFeasible</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isSOSFeasible</span>(const <a
+                href="../classes/IloSOS1.html">IloSOS1</a> <span
+            class="parameter-name">sos1</span>) const</div><div
+                class="description"><p>This method returns <code>IloTrue</code>
+ if the solution of the LP at the current node is
+ SOS feasible for the special ordered set specified 
+ in its argument. The SOS set passed as a parameter
+ to this method may be of type 1.
+ See the <em>CPLEX User's Manual</em> for more explanation about 
+ these types of special ordered sets.
+ </p><p>Before you query the feasibility of a solution from
+ a solve callback, a solution must exist. That is, 
+ you must first create the solution by calling the CPLEX
+ optimization method <code>solve</code>, and then you
+ must verify that the method <code>solve</code>
+ generated a solution by checking its return value
+ <strong>before</strong> you invoke the method
+ <code>isSOSFeasible</code>.</p></div><hr /><h3><a
+            name="method_setNodeData">setNodeData</a></h3><div
+                class="prototype">public NodeData * <span
+                class="function-name">setNodeData</span>(NodeData * <span
+            class="parameter-name">data</span>)</div><div
+            class="description"><p>This method sets the <code>NodeData</code> object assigned to the
+ the current node. If a <code>NodeData</code> object has already been 
+ set for the current node, then the method replaces this object 
+ and returns the old object. 
+ Otherwise, the method returns 0 (zero). </p></div><hr /><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Inner Enumeration Detail</th></tr></table><h1><a
+            name="enumeration_IntegerFeasibility">Enumeration IntegerFeasibility</a></h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcplex/ilocplexi.h</span></div><div
+                        class="description"><p>The enumeration
+ <code>IloCplex::ControlCallbackI::IntegerFeasibility</code>  is an
+ enumeration limited in scope to the class 
+ <code><a
+            href="../classes/IloCplex_ControlCallbackI.html">IloCplex::ControlCallbackI</a></code>. 
+ This enumeration is used by
+ <code>IloCplex::ControlCallbackI::getFeasibility</code> to represent the
+ integer feasibility of a variable or SOS in the current node solution:</p><ul>
+<li><code>Feasible</code> specifies the variable or SOS is integer
+ feasible.</li><li><code>ImpliedFeasible</code> specifies the variable or SOS has
+ been presolved out. It will be feasible when all other integer variables
+ or SOS are integer feasible. </li><li><code>Infeasible</code> specifies the variable or SOS is
+ integer infeasible.</li>
+</ul></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloCplex.html">IloCplex</a>, <a
+            href="../typedefs/ControlCallbackI_IntegerFeasibilityArray.html">ControlCallbackI::IntegerFeasibilityArray</a></p><table
+            border="1" cellspacing="0" width="100%"><tr><th
+            colspan="0">Fields</th></tr></table><br /><table border="0"
+            width="100%" cellpadding="5" cellspacing="0"><tr><td
+                    valign="top" align="left"
+                    width="20%"><code>ImpliedInfeasible = -1</code></td><td
+                    valign="top" align="left">&nbsp;</td></tr><tr><td
+                    valign="top" align="left"
+                    width="20%"><code>Feasible = CPX_INTEGER_FEASIBLE</code></td><td
+                    valign="top" align="left"><div
+                    valign="top">
+ Not applicable   = CPX_INTEGER_FEASIBLE  
+                </div></td></tr><tr><td
+                    valign="top" align="left"
+                    width="20%"><code>Infeasible = CPX_INTEGER_INFEASIBLE</code></td><td
+                    valign="top" align="left"><div
+                    valign="top">
+ = CPX_INTEGER_INFEASIBLE  
+                </div></td></tr><tr><td
+                    valign="top" align="left"
+                    width="20%"><code>ImpliedFeasible = CPX_IMPLIED_INTEGER_FEASIBLE</code></td><td
+                    valign="top" align="left"><div
+            valign="top">
+ = CPX_IMPLIED_INTEGER_FEASIBLE  
+                </div></td></tr></table><br /><table
+            border="1" cellspacing="0" width="100%"><tr><th
+            colspan="0">Inner Typedef Detail</th></tr></table><h1>Typedef IntegerFeasibilityArray</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcplex/ilocplexi.h</span></div><p
+            class="prototype">IloArray&lt; IntegerFeasibility &gt; IntegerFeasibilityArray          </p><div
+            class="description"><p>This type defines an array-type for
+ <code>IloCplex::ControlCallbackI::IntegerFeasibility</code>.
+ The fully qualified name of an integer feasibility array is
+ <code>IloCplex::ControlCallbackI::IntegerFeasibility::Array</code>.
+ </p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloCplex.html">IloCplex</a>, <a
+                href="../classes/IloCplex_ControlCallbackI.html">IloCplex::ControlCallbackI</a>, <a href="../enumerations/ControlCallbackI_IntegerFeasibility.html">ControlCallbackI::IntegerFeasibility</a></p></body>
+</html>

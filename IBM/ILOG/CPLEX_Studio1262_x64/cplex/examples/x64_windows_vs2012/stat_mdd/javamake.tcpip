@@ -1,0 +1,33 @@
+WORKERPID		=	workerpid
+
+# Transport specific flags for running examples. Note that we use a
+# different port for each example
+RemoteParBendersPort          = 12349
+RemoteParBendersTransportArgs= -address=127.0.0.1:$(RemoteParBendersPort) \
+                           -address=127.0.0.1:$(RemoteParBendersPort) \
+                           -address=127.0.0.1:$(RemoteParBendersPort) \
+                           -address=127.0.0.1:$(RemoteParBendersPort) \
+                           -address=127.0.0.1:$(RemoteParBendersPort)
+
+# How to run a single example
+# We first start the worker in the background in a minized window
+# (using "start /min") and wait 5 seconds to be sure it has started
+# up before we start the master (we run tasklist after waiting to
+# make sure the worker has indeed started). Using command line option -pidfile
+# we ask the worker to store its task id in file $(WORKERPID).
+# Then we start the master and after the master is finished we kill the
+# worker using the task id found in $(WORKERPID)
+WORKERID=test
+remote-run-RemoteParBenders: $(TRANSPORT)/RemoteParBenders.class
+	DEL /Q $(WORKERPID) 2>NUL
+	SET PATH=%PATH%;$(REMOTEBINDIR)
+	START /MIN $(WORKER) -worker=tcpip \
+		-address=127.0.0.1:$(RemoteParBendersPort) \
+		-logfile=RemoteParBenders.srvlog -pidfile=$(WORKERPID)
+	START /MIN /WAIT TIMEOUT 5
+	FOR /f %%P IN ($(WORKERPID)) DO (TASKLIST /fo LIST /fi "PID eq %%P")
+	$(REMOTEJAVA) -Dilog.cplex.transport=$(TRANSPORT)transport \
+		RemoteParBenders \
+		$(RemoteParBendersTransportArgs) $(RemoteParBendersArgs) 
+	FOR /f %%P IN ($(WORKERPID)) DO (TASKKILL /t /f /pid %%P)
+	DEL /Q $(WORKERPID)

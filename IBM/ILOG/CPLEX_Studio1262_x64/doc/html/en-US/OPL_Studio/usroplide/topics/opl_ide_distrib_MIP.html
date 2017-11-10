@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using the CPLEX distributed MIP algorithm with OPL" />
+<meta name="abstract" content="You can use the distributed MIP algorithm to solve a standalone OPL model from the IDE, from the OPL APIs, or from OPLScript." />
+<meta name="Description" content="You can use the distributed MIP algorithm to solve a standalone OPL model from the IDE, from the OPL APIs, or from OPLScript." />
+<meta name="DC.subject" content="distributed MIP algorithm (CPLEX), CPLEX distributed MIP algorithm, VMC file for CPLEX distributed MIP" />
+<meta name="keywords" content="distributed MIP algorithm (CPLEX), CPLEX distributed MIP algorithm, VMC file for CPLEX distributed MIP" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_tutorialsTOP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="topic_rmj_bwy_c4" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_tutorialsTOP.html" />
+<title>Using the CPLEX distributed MIP algorithm with OPL</title>
+</head>
+<body role="main" id="topic_rmj_bwy_c4">
+<h1 class="title topictitle1">Using the CPLEX distributed MIP algorithm with OPL</h1>
+<div class="body"><p class="shortdesc">You can use the distributed MIP algorithm to solve a standalone OPL model from the IDE,
+    from the OPL APIs, or from OPLScript.</p>
+<div class="section"><h2 class="title sectiontitle">Distributed MIP from the OPL IDE</h2><p class="p">Before using the distributed MIP
+        algorithm to solve a standalone OPL model, you need to create a Virtual Machine
+        Configuration (VMC) file to specify the machines to be used as workers for the distributed
+        computation. The format of the VMC file is described in the CPLEX documentation: <a class="xref" href="../../../CPLEX/FileFormats/topics/VMC.html#File_formats_referenceVMC" title="File format to specify a virtual machine configuration for distributed parallel optimization">VMC file format: virtual machine configuration for distributed parallel optimization</a>.</p>
+<p class="p"><strong class="ph b">The distMIP example</strong></p>
+<p class="p">An OPL example, <samp class="ph codeph">distMIP</samp>,
+        illustrates the use of distributed MIP. An example of a VMC file is provided with
+          <samp class="ph codeph">distMIP</samp>, and can be found in your installation of CPLEX Optimization
+        Studio. The default installation for Windows is:</p>
+<p class="p"><span class="ph filepath">C:\Program
+          Files\IBM\ILOG\CPLEX_Studio&lt;version&gt;\opl\examples\opl\distMIP</span></p>
+<p class="p">To
+        import the <samp class="ph codeph">distMIP</samp> model into the IDE:</p>
+<p class="p"><span class="ph menucascade"><span class="ph uicontrol">File &gt; Import &gt; Example &gt; IBM ILOG OPL Examples &gt; Sorted by Technique &gt; Integer
+            Programming &gt; distMIP</span></span></p>
+<img class="image" src="../images/distMIP_project.jpg" alt="distMIP project in the IDE project manager" /><p class="p">The three run configurations illustrate the various ways in which the VMC file can
+        be specified: </p>
+<ul class="ul"><li class="li">including it in a settings file</li>
+<li class="li">reading it with a CPLEX method</li>
+<li class="li">including it in an OPLScript block</li>
+</ul>
+<p class="p">The only known limitation to the use of distributed MIP in the OPL IDE is the fact
+        that you cannot use the MPI (Message Passing Interface) protocol.</p>
+<p class="p"><strong class="ph b">The VMC
+        file</strong></p>
+<p class="p">Edit the file <span class="ph filepath">process.vmc</span> to indicate where CPLEX
+        Optimization Studio is installed. Replace the four occurrences of the string</p>
+<p class="p">        <samp class="ph codeph">$(CPLEX_STUDIO_DIR&lt;version&gt;)</samp> with your installation directory, for
+        example: </p>
+<p class="p"><span class="ph filepath">C:\Program
+        Files\IBM\ILOG\CPLEX_Studio&lt;version&gt;\</span></p>
+<p class="p">The edited
+          <span class="ph filepath">process.vmc</span> file looks something like
+        this.</p>
+<pre class="pre codeblock"><code>&lt;vmc&gt;
+  &lt;machine name="machine1"&gt;
+    &lt;transport type="process"&gt;
+      &lt;cmdline&gt;
+        &lt;item value="C:/Program Files/IBM/ILOG/CPLEX_Studio1262/cplex/bin/x64_win64/cplex.exe"/&gt;
+        &lt;item value="-worker=process"/&gt;
+        &lt;item value="-libpath=&amp;quot;C:/Program Files/IBM/ILOG/CPLEX_Studio1262/cplex/bin/x64_win64&amp;quot;"/&gt;
+      &lt;/cmdline&gt;
+    &lt;/transport&gt;
+  &lt;/machine&gt;
+  &lt;machine name="machine2"&gt;
+    &lt;transport type="process"&gt;
+      &lt;cmdline&gt;
+        &lt;item value="C:/Program Files/IBM/ILOG/CPLEX_Studio1262/cplex/bin/x64_win64/cplex.exe"/&gt;
+        &lt;item value="-worker=process"/&gt;
+        &lt;item value="-libpath=&amp;quot;C:/Program Files/IBM/ILOG/CPLEX_Studio1262/cplex/bin/x64_win64&amp;quot;"/&gt;
+      &lt;/cmdline&gt;
+    &lt;/transport&gt;
+  &lt;/machine&gt;
+&lt;/vmc&gt;</code></pre>
+<p class="p">Then,
+        from the IDE, link the VMC file to a run configuration by editing the settings
+          (<samp class="ph codeph">.ops</samp>) file of the project.</p>
+<p class="p"><strong class="ph b">The settings file</strong></p>
+<p class="p">The
+        settings file <samp class="ph codeph">life.ops</samp> is provided in the example. Click this file to open
+        it in the editor.</p>
+<p class="p">In the settings editor, go to: <span class="ph menucascade"><span class="ph uicontrol">Mathematical Programming / Mixed Integer Programming / General / Virtual
+            machine configuration</span></span> and enter the name and path of your CPLEX VMC file. For
+          example:</p>
+<p class="p"><samp class="ph codeph">C:\Program
+          Files\IBM\ILOG\CPLEX_Studio&lt;version&gt;\opl\examples\opl\distMIP\process.vmc</samp></p>
+<p class="p">Save
+        the settings file.</p>
+<img class="image" src="../images/VMC_setting.jpg" alt="VMC field in an OPL settings file." /><p class="p">When you execute the run configuration of your project, OPL loads the specified VMC
+        file into CPLEX. The VMC file indicates that CPLEX must use distributed parallel MIP with
+        the machines specified in the file. Distributed parallel MIP is invoked only if the model to
+        be solved is a MIP.</p>
+<p class="p">It is preferable to specify an <strong class="ph b">absolute</strong> path to the VMC
+        file in the settings editor. Otherwise, CPLEX may not be able to find your VMC file,
+        depending on how and where the project is executed.</p>
+<p class="p">Instead of using a settings file
+        in the IDE, you can specify the VMC file in an OPLScript execute block at the beginning of
+        the model file.</p>
+<p class="p"><strong class="ph b">Documentation</strong></p>
+<p class="p">For detailed information about the
+        distributed MIP algorithm and transport protocols, refer to the CPLEX document: <a class="xref" href="../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html#distributedMIPtitleSynopsis" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a>.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Distributed MIP from the APIs and OPLScript</h2>      
+      <p class="p">You can use the distributed MIP from all the OPL APIs (C++, Java, .NET) and from OPLScript. </p>
+
+      <p class="p">Several examples named <samp class="ph codeph">distMIP</samp> are available from the OPL example
+        libraries to show how to use the distributed MIP. These examples can be found in your
+        installation directory, for example:</p>
+
+      <p class="p"><span class="ph filepath">C:\Program
+          Files\IBM\ILOG\CPLEX_Studio&lt;version&gt;\opl\examples\opl_interfaces</span></p>
+
+      <p class="p">The methods <samp class="ph codeph">readVMConfig</samp>, <samp class="ph codeph">hasVMConfig</samp>,
+          <samp class="ph codeph">delVMConfig</samp> and <samp class="ph codeph">copyVMConfig</samp> are available in C++, Java,
+        .NET (from the CPLEX C++ library, OPL jar and OPL .NET DLL), and in OPLScript.</p>
+
+      <p class="p">To make these examples run, only the paths to the VMC file and the path to the CPLEX
+        libraries in these VMC files need to be updated.</p>
+
+      <p class="p">To learn how to use the methods, see the CPLEX document: <a class="xref" href="../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html#distributedMIPtitleSynopsis" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a>.</p>
+
+      <div class="note note"><span class="notetitle">Note:</span>  To use the Message Passing Interface (MPI) transport protocol, an application that
+        calls the OPL API must be started with <samp class="ph codeph">mpirun</samp>.</div>
+
+      <p class="p">Refer to the <em class="ph i">User's Manual for CPLEX</em> for information about how to use the MPI
+        transport protocol with <samp class="ph codeph">distMIP</samp>. For example: <a class="xref" href="../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/02_transport_mpi.html#refManRemoteObjTransportTypes" title="Documents the message passing interface (MPI), a transport protocol supporting the remote object.">Transport types for the remote object: MPI</a>.</p>
+
+    </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_tutorialsTOP.html" title="The tutorials use examples from the product distribution to illustrate typical features and use cases of the CPLEX Studio IDE.">IDE Tutorials</a></div>
+</div>
+</div></body>
+</html>

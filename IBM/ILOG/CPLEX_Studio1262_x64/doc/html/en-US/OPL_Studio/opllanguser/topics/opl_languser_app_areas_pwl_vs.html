@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Piecewise-linear vs. linear" />
+<meta name="abstract" content="Enforces a constraint that results in a mixed integer-linear program." />
+<meta name="Description" content="Enforces a constraint that results in a mixed integer-linear program." />
+<meta name="DC.subject" content="linear programming, vs. piecewise linear, piecewise linear programming, vs. linear programming" />
+<meta name="keywords" content="linear programming, vs. piecewise linear, piecewise linear programming, vs. linear programming" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_pwl.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1047817" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_pwl.html" />
+<title>Piecewise-linear vs. linear</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1047817">
+<h1 class="title topictitle1">Piecewise-linear vs. linear</h1>
+<div class="body"><p class="shortdesc">Enforces a constraint that results in a mixed
+integer-linear program.</p>
+<p class="p">Note that <em class="ph i">not all</em> piecewise linear programs
+are linear programs. Recall the <em class="ph i">Note</em> and assume that
+the cost of extra boats decreases to $350, for instance (because of
+economies of scale). The transformation would not be correct, because
+a linear program would tend to use <span class="q">"extra"</span>boats before
+all the “regular” boats have been built. The transformation must enforce
+a constraint stipulating that “extra” boats can only be used when
+all the “regular” boats have been manufactured. The resulting program
+is a mixed integer-linear program.</p>
+<div class="section" id="usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1049499"><h2 class="title sectiontitle">A solution to sailcopwg.mod</h2><p class="p">For the
+instance data given in <a class="xref" href="opl_languser_app_areas_pwl_vs.html#usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047932">Data for the generalized piecewise-linear model (<samp class="ph codeph">sailcopwg1.dat</samp>)</a>,
+OPL returns the optimal solution </p>
+<pre class="pre codeblock"><code>Final Solution with objective 72200.0000:
+  boat = [90.0000 -0.0000 100.0000 0.0000];
+  inv = [10.0000 60.0000 0.0000 25.0000 0.0000];</code></pre>
+<p class="p">This solution is interesting since it uses
+“extra” boats as much as possible while trying to minimize the use
+of boats in inventory. As a result, there is no production in the
+second and fourth periods. <a class="xref" href="opl_languser_app_areas_pwl_inventory.html#usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1022023">A simple inventory model (sailco.mod)</a> can be generalized further to include more pieces. <a class="xref" href="opl_languser_app_areas_pwl_vs.html#usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047907">A generalized piecewise-linear model for the simple inventory
+problem (<samp class="ph codeph">sailcopwg.mod)</samp></a> depicts such a model. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047907">A generalized piecewise-linear
+model for the simple inventory problem (<samp class="ph codeph">sailcopwg.mod)</samp></p>
+<pre class="pre codeblock"><code>int NbPeriods = ...;
+range Periods = 1..NbPeriods;
+int NbPieces = ...;
+
+float Cost[1..NbPieces] = ...;
+float Breakpoint[1..NbPieces-1] = ...;
+float Demand[Periods] = ...;
+float Inventory = ...;
+float InventoryCost = ...;
+
+dvar float+ Boat[Periods];
+dvar float+ Inv[0..NbPeriods];
+
+
+minimize
+  sum( t in Periods )
+    piecewise(i in 1..NbPieces-1) { 
+      Cost[i] -&gt; Breakpoint[i]; 
+      Cost[NbPieces] 
+    } Boat[t] +
+  InventoryCost  * ( sum( t in Periods ) Inv[t] );
+   
+subject to {
+  ctInit:  
+    Inv[0] == Inventory;
+  forall( t in Periods ) 
+    ctBoat: 
+      Boat[t] + Inv[t-1] == Inv[t] + Demand[t];
+           
+}</code></pre>
+<p class="p">The
+interesting feature is the objective function </p>
+<pre class="pre codeblock"><code>minimize
+  sum( t in Periods )
+    piecewise(i in 1..NbPieces-1) { 
+      Cost[i] -&gt; Breakpoint[i]; 
+      Cost[NbPieces] 
+    } Boat[t] +
+  InventoryCost  * ( sum( t in Periods ) Inv[t] );</code></pre>
+<p class="p">which
+is now generic in the number of pieces. <a class="xref" href="opl_languser_app_areas_pwl_vs.html#usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047932">Data for the generalized piecewise-linear model (<samp class="ph codeph">sailcopwg1.dat</samp>)</a> describes
+the same instance data for this model. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047932">Data for the generalized piecewise-linear
+model (<samp class="ph codeph">sailcopwg1.dat</samp>)</p>
+<pre class="pre codeblock"><code>NbPeriods = 4;
+Demand = [ 40, 60, 75, 25 ];
+NbPieces = 2;
+Cost = [ 400, 450 ];
+Breakpoint = [ 40 ];
+Inventory = 10;
+InventoryCost = 20;</code></pre>
+<p class="p">Consider
+now adding a constraint stipulating that the maximum number of boats
+produced in each period cannot exceed fifty on the instance data depicted
+in <a class="xref" href="opl_languser_app_areas_pwl_vs.html#usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047956">Another instance data item for the generalized piecewise-linear
+model <samp class="ph codeph">(sailcopwg2.dat</samp>)</a>. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047956">Another instance data item for
+the generalized piecewise-linear model <samp class="ph codeph">(sailcopwg2.dat</samp>)</p>
+<pre class="pre codeblock"><code>NbPeriods = 4;
+Demand = [ 40, 60, 75, 25 ];
+NbPieces = 3;
+Cost = [ 300, 400, 450 ];
+Breakpoint = [ 30, 40 ];
+Inventory = 10;
+InventoryCost = 20;</code></pre>
+<p class="p">This
+new constraint has a dramatic effect on the model, which is now infeasible.
+Piecewise linear functions can be used here to understand where the
+infeasibility comes from. The key insight is to replace the capacity
+constraint by yet another piece in the piecewise linear function and
+to associate a huge cost with this new piece. <a class="xref" href="opl_languser_app_areas_pwl_vs.html#usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047979">Instance data to deal with infeasibility (<samp class="ph codeph">sailcopwg3.dat</samp>)</a> depicts
+the instance data needed to do this: </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_linearInteger.1047817__usropllangtut.uss_langtut_linearInteger.1047979">Instance data to deal with infeasibility
+(<samp class="ph codeph">sailcopwg3.dat</samp>)</p>
+<pre class="pre codeblock"><code>NbPeriods = 4;
+Demand = [ 40, 60, 75, 25 ];
+NbPieces = 4;
+Cost = [ 300, 400, 450, 100000 ];
+Breakpoint = [ 30, 40, 50 ];
+Inventory = 10;
+InventoryCost = 20;</code></pre>
+<p class="p">OPL
+produces the following optimal solution: </p>
+<pre class="pre codeblock"><code>Final Solution with objective 1560600.0000:
+  boat = [50.0000 50.0000 65.0000 25.0000];
+  inv = [10.0000 20.0000 10.0000 0.0000 0.0000];</code></pre>
+<p class="p">which indicates clearly where the bottlenecks
+(i.e., the third period) are located. The result may help Sailco to
+plan ahead and take appropriate measures. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_pwl.html" title="Defines piecewise linear programming, describes an inventory problem with piecewise linear functions, compares pwl to plain linear programming, and indicates complexity issues.">Piecewise linear programming</a></div>
+</div>
+</div></body>
+</html>

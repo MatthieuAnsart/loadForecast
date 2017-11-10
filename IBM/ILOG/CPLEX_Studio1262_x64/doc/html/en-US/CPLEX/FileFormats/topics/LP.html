@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="LP file format: algebraic representation" />
+<meta name="abstract" content="CPLEX conforms to these rules for the LP file format." />
+<meta name="Description" content="CPLEX conforms to these rules for the LP file format." />
+<meta name="DC.subject" content="LP file format, syntax rules" />
+<meta name="keywords" content="LP file format, syntax rules" />
+<meta name="DC.Relation" scheme="URI" content="../../../CPLEX/homepages/reffileformatscplex.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="File_formats_reference.uss_reffileformatscplex.162381" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CPLEX/homepages/reffileformatscplex.html" />
+<title>LP file format: algebraic representation</title>
+</head>
+<body role="main" id="File_formats_reference.uss_reffileformatscplex.162381">
+<h1 class="title topictitle1">LP file format: algebraic representation</h1>
+<div class="body"><p class="shortdesc">CPLEX conforms to these rules for the LP file format.</p>
+<p class="p">CPLEX provides a facility for entering a problem in a
+natural, algebraic LP formulation from the keyboard. The problem can
+be modified and saved from within CPLEX. This procedure is one way
+to create a file in a format that  CPLEX can read. An alternative
+technique is to create a similar file using a standard text editor
+and to read it into CPLEX.</p>
+<p class="p">The CPLEX LP format is provided as an input alternative
+to the MPS file format. An LP format file may be easier to generate
+than an MPS file if your problem already exists in an algebraic format
+or if you have an application which generates the problem file more
+readily in algebraic format (such as a C application). <a class="xref" href="../../UsrMan/topics/progr_consid/input_output/manageIO_file_formats_LP.html" title="Describes programming considerations for working with LP file format.">Working with LP files</a> in the <em class="ph i">CPLEX
+User’s Manual</em> in the chapter about managing input and output explains
+the implications of using LP format rather than MPS format.</p>
+<p class="p">CPLEX accepts any problem saved in an ASCII file provided
+that it adheres to the following syntax rules.</p>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177161"><h2 class="title sectiontitle">Comments</h2><p class="p">Anything that
+follows a backslash (\) is a comment and is ignored until a return
+is encountered. Blank lines are also ignored. Blank lines and comment
+lines may be placed anywhere and as frequently as you want in the
+file.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177168"><h2 class="title sectiontitle">White space and line length</h2><p class="p">In
+general, white space between characters is irrelevant as it is skipped
+when a file is read. However, white space is not allowed in the keywords
+used to introduce a new section, such as <samp class="ph codeph">MAX</samp> , <samp class="ph codeph">MIN</samp> , <samp class="ph codeph">ST</samp> , or <samp class="ph codeph">BOUNDS</samp> . Also the keywords must be separated by
+white space from the rest of the file and must be at the beginning
+of a line. The maximum length for any name is 255. The maximum length
+of any line of input is 560.</p>
+<p class="p">Skipping spaces may cause
+CPLEX to misinterpret (and accept) an invalid entry, such as the following:
+ </p>
+<pre class="pre codeblock"><code> x1 x2 = 0</code></pre>
+<p class="p">If the user intended to enter that example
+as a nonlinear constraint, CPLEX would instead interpret it as a constraint
+specifying that one variable named <samp class="ph codeph">x1x2</samp> must
+be equal to zero. </p>
+<p class="p">To indicate a quadratic constraint
+in this section, use explicit notation for multiplication and exponentiation
+(not space).</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177178"><h2 class="title sectiontitle">Problem sense</h2><p class="p">The problem
+statement must begin with the word <samp class="ph codeph">MINIMIZE</samp> or <samp class="ph codeph">MAXIMIZE</samp>, <samp class="ph codeph">MINIMUM</samp>  or <samp class="ph codeph">MAXIMUM</samp>, or the abbreviations <samp class="ph codeph">MIN</samp> or <samp class="ph codeph">MAX</samp> , in any combination of upper- and lowercase
+characters. The word introduces the objective function section.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177185"><h2 class="title sectiontitle">Variables</h2><p class="p">Variables can
+be named anything provided that the name does not exceed 255 characters,
+all of which must be alphanumeric (a-z, A-Z, 0-9) or one of these
+symbols: ! " # $ % &amp; ( ) , . ; ? @ _ ‘ ’ { } ~. Longer names are
+truncated to 255 characters. A variable name can not begin with a
+number or a period. </p>
+<p class="p">The letter <samp class="ph codeph">E</samp> 
+or <samp class="ph codeph">e</samp> , alone or followed by other valid
+symbols, or followed by another <samp class="ph codeph">E</samp>  or <samp class="ph codeph">e</samp> , should be avoided as this notation is reserved
+for exponential entries. Thus, variables can not be named <samp class="ph codeph">e9</samp> , <samp class="ph codeph">E-24</samp> , <samp class="ph codeph">E8cats</samp> ,
+or other names that could be interpreted as an exponent. Even variable
+names such as <samp class="ph codeph">eels</samp>  or <samp class="ph codeph">example</samp> 
+can cause a read error, depending on their placement in an input line.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177192"><h2 class="title sectiontitle">Objective function</h2><p class="p">The
+objective function definition must follow <samp class="ph codeph">MINIMIZE</samp> 
+or <samp class="ph codeph">MAXIMIZE</samp> . It may be entered on multiple
+lines as long as no variable, constant, or sense indicator is split
+by a return. For example, this objective function <samp class="ph codeph">1x1 + 2x2 +3x3</samp> 
+can be entered like this:  </p>
+<pre class="pre codeblock"><code>1x1 + 2x2
++ 3x3</code></pre>
+<p class="p">but not like this:  </p>
+<pre class="pre codeblock"><code>1x1 + 2x
+2 + 3x3         \ a bad idea</code></pre>
+<p class="p">because the second style splits the variable
+name <samp class="ph codeph">x2</samp>  with a return.</p>
+<p class="p">The
+objective function may be named by typing a name and a colon before
+the objective function. The objective function name and the colon
+must appear on the same line. Objective function names must conform
+to the same guidelines as variable names. (See the rule about 
+<a class="xref" href="LP.html#File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177185">Variables</a>). 
+If no objective function name is specified, CPLEX
+assigns the name <samp class="ph codeph">obj</samp> .</p>
+<p class="p">An
+objective function may be quadratic. For an example and details about
+formatting a quadratic objective function, see the rule about 
+<a class="xref" href="LP.html#File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177305">Quadratic terms</a>.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Objective offset</h2>
+<div class="p">You can optionally include an 
+objective offset as a final constant term in the objective function.
+For example, the following line declares an objective offset of 3.1415. 
+<pre class="pre codeblock"><code>obj:  x1 + 2 x2 + 3.1415</code></pre>
+</div>
+
+<div class="p">Likewise, the objective offset follows any quadratic expressions in LP 
+ file format of a quadratic program, like the following line:
+ <pre class="pre codeblock"><code> obj: x + 2 y + [ x ^2 - 3 x * y ] / 2 + 3.1415
+ </code></pre>
+
+ </div>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177204"><h2 class="title sectiontitle">Constraints</h2><p class="p">The constraints
+section is introduced by the keyword <samp class="ph codeph">subject to</samp> .
+This expression can also appear as <samp class="ph codeph">such that</samp> , <samp class="ph codeph">st</samp> , <samp class="ph codeph">S.T.</samp> , or <samp class="ph codeph">ST.</samp>  in any mix of upper- and lowercase characters.
+One of these expressions must precede the first constraint and be
+separated from it by at least one space.</p>
+<p class="p">Each constraint
+definition must begin on a new line. A constraint may be named by
+typing a name and a colon before the constraint. The constraint name
+and the colon must appear on the same line. Constraint names must
+adhere to the same guidelines as variable names. (See the rule about
+names of <a class="xref" href="LP.html#File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177185">Variables</a>.) If no constraint names are specified, CPLEX assigns
+the names <samp class="ph codeph">c1</samp>, <samp class="ph codeph">c2</samp>, <samp class="ph codeph">c3</samp>, etc.</p>
+<p class="p">The constraints are entered
+in the same way as the objective function; however, a constraint must
+be followed by an indication of its sense and a righthand side coefficient.
+The righthand side coefficient must be typed on the same line as the
+sense indicator. Acceptable sense indicators are &lt;, &lt;=, =&lt;, &gt;, &gt;=,
+=&gt;, and =. These are interpreted as ≤, ≤, ≤, ≥, ≥, ≥, and =, respectively. </p>
+<p class="p">For example, here is a named constraint:  </p>
+<pre class="pre codeblock"><code>time: x1 + x2 &lt;= 10</code></pre>
+<p class="p">Quadratic constraints are allowed in this
+section. Quadratic terms are specified inside square brackets<samp class="ph codeph"> []</samp>  as detailed in the rule about <a class="xref" href="LP.html#File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177305">Quadratic terms</a>. The specification of a quadratic constraint differs
+from the specification of a quadratic objective in one important way:
+in a quadratic constraint, the terms are not divided by two; that
+is, they are not multiplied by 1/2, as they must be in a quadratic
+objective.</p>
+<p class="p">Indicator constraints are also allowed in
+this section. The rule about <a class="xref" href="LP.html#File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177287">MIP indicator constraints</a> explains how to specify indicator constraints.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177208"><h2 class="title sectiontitle">Bounds</h2>
+<p class="p">The optional <samp class="ph codeph">bounds</samp>  section follows the mandatory constraint
+section. It is preceded by the word <samp class="ph codeph">bounds</samp> 
+or <samp class="ph codeph">bound</samp>  in any mix of lower- and uppercase
+characters.</p>
+<p class="p">Each bound definition must begin on a new
+line. The format for a bound is l<sub class="ph sub">n</sub> <sub class="ph sub"> </sub>≤x<sub class="ph sub">n</sub>≤ u<sub class="ph sub">n</sub> except in the following cases.</p>
+<p class="p">Upper and lower bounds may also be entered separately as </p>
+<p class="p">l<sub class="ph sub">n</sub> ≤x<sub class="ph sub">n</sub> </p>
+<p class="p">x<sub class="ph sub">n </sub>≤ u<sub class="ph sub">n</sub> </p>
+<p class="p">with the
+default lower bound of 0 (zero) and the default upper bound of +∞
+remaining in effect until the bound is explicitly changed.</p>
+<p class="p">Bounds that fix a variable can be entered as simple equalities.
+For example, <samp class="ph codeph">x5 = 5.6</samp>  is equivalent to <samp class="ph codeph">5.6 &lt;= x5 &lt;= 5.6</samp> .</p>
+<p class="p">The bounds
++∞ (positive infinity) and -∞ (negative infinity) must be entered
+as words: <samp class="ph codeph">+infinity</samp> , <samp class="ph codeph">-infinity</samp> ,<samp class="ph codeph"> +inf</samp> , <samp class="ph codeph">-inf</samp> .</p>
+<p class="p">A variable with a negative infinity lower bound and positive
+infinity upper bound may be entered as <samp class="ph codeph">free</samp> ,
+in any mix of upper- and lowercase characters, with a space separating
+the variable name and the word <samp class="ph codeph">free</samp> . For
+example, <samp class="ph codeph">x7 free</samp>  is equivalent to <samp class="ph codeph">- infinity &lt;= x7 &lt;= + infinity</samp> .</p>
+<p class="p">The
+last bound entered takes precedence over previously entered bounds.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Arrays of variables</h2>
+<p class="p">When CPLEX translates your algebraic model to the LP format, 
+it must transform all multi-dimenational arrays of variables into scalar variables. 
+This transformation assigns a different name to each element of each such array. 
+In renaming the elements of arrays of variables, CPLEX does not simply concatenate
+the indices of an element to approximate a new multi-digit index because 
+simply concatenating the indices of elements as they are does not rename the elements unambiguously.
+For example, consider a two-dimensional array named myarray with elements such as
+myarray[1][23] and myarray[12][3].  Simple concatenation produces one ambiguous name, myarray[123],
+for both of those distinct elements. Consequently, to avoid such ambiguity in renaming 
+the elements of a multi-dimensional array of variables, the transformation to LP format 
+introduces a separator (#). In this example, myarray[1][23] is renamed as myarray#1#23 and
+myarray[12][3] is renamed as myarray#12#3.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177257"><h2 class="title sectiontitle">End of file</h2><p class="p">The file must
+end with the word <samp class="ph codeph">end</samp>  in any combination
+of upper- and lowercase characters, alone on a line, when it is created
+with the <samp class="ph codeph">enter</samp>  command. This word is not
+required for files that are read in to CPLEX, but it is a good practice
+to use it. Files that have been corrupted can frequently be detected
+by a missing last line.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177264"><h2 class="title sectiontitle">MIP integer variables</h2><p class="p">This rule applies to the CPLEX MIP optimizer. </p>
+<p class="p">To
+specify any of the variables as general integer variables, add a <samp class="ph codeph">GENERAL</samp>  section; to specify any of the variables
+as binary integer variables, add a <samp class="ph codeph">BINARY</samp> 
+section. The <samp class="ph codeph">GENERAL</samp>  and <samp class="ph codeph">BINARY</samp> 
+sections follow the <samp class="ph codeph">BOUNDS</samp>  section, if
+one is present; otherwise, they follow the constraints section. Either
+of the <samp class="ph codeph">GENERAL</samp>  or <samp class="ph codeph">BINARY</samp> 
+sections can precede the other. The <samp class="ph codeph">GENERAL</samp> 
+section is preceded by the word <samp class="ph codeph">GENERAL</samp> , <samp class="ph codeph">GENERALS</samp> , or <samp class="ph codeph">GEN</samp>  in
+any mix of upper- and lowercase characters which must appear alone
+on a line. The following line or lines should list the names of all
+variables which are to be restricted to general integer values, separated
+by at least one space. The <samp class="ph codeph">BINARY</samp>  section
+is preceded by the word <samp class="ph codeph">BINARY</samp> , <samp class="ph codeph">BINARIES</samp> , or <samp class="ph codeph">BIN</samp>  in
+any mix of upper- and lowercase characters which must appear alone
+on a line. The following line or lines should list the names of all
+variables which are to be restricted to binary integer values, separated
+by at least one space. Binary variables are automatically given bounds
+of 0 (zero) and 1 (one), unless alternative bounds are specified in
+the <samp class="ph codeph">BOUNDS</samp>  section, in which case a warning
+message is issued.</p>
+<p class="p">Here is an example of a problem
+formulation in LP format where <samp class="ph codeph">x4</samp>  is a
+general integer:  </p>
+<pre class="pre codeblock"><code>Maximize
+ obj: x1 + 2 x2 + 3 x3 + x4
+Subject To
+ c1: - x1 + x2 + x3 + 10 x4 &lt;= 20
+ c2: x1 - 3 x2 + x3 &lt;= 30
+ c3: x2 - 3.5 x4 = 0
+Bounds
+ 0 &lt;= x1 &lt;= 40
+ 2 &lt;= x4 &lt;= 3
+General
+ x4
+End</code></pre>
+<p class="p">If branching priorities or branching directions
+exist, enter this information through ORD files, as documented in <a class="xref" href="ORD.html" title="The ORD file format supports priorities and branching orders.">ORD file format: priorities and branching orders</a>.</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177272"><h2 class="title sectiontitle">MIP semi-continuous variables</h2><p class="p">This rule applies to the
+CPLEX MIP optimizer. </p>
+<p class="p">To specify any of the variables
+as semi-continuous variables, that is as variables that may take the
+value <samp class="ph codeph">0</samp>  or values between the specified
+lower and upper bounds, use a <samp class="ph codeph">SEMI-CONTINUOUS</samp> 
+section. This section must follow the <samp class="ph codeph">BOUNDS</samp> , <samp class="ph codeph">GENERALS</samp> , and <samp class="ph codeph">BINARIES</samp> 
+sections. The <samp class="ph codeph">SEMI-CONTINUOUS</samp>  section is
+preceded by the keyword <samp class="ph codeph">SEMI-CONTINUOUS</samp> , <samp class="ph codeph">SEMI</samp> , or <samp class="ph codeph">SEMIS</samp> . The
+following line or lines should list the names of all the variables
+which are to be declared semi-continuous, separated by at least one
+space.</p>
+<p class="p"> <samp class="ph codeph">Semi-continuous</samp> </p>
+<p class="p"> <samp class="ph codeph">x1 x2 x3</samp> </p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177280"><h2 class="title sectiontitle">MIP special ordered sets</h2>
+<p class="p">This rule applies to the CPLEX MIP optimizer. To specify
+special ordered sets, use an SOS section, which is preceded by the
+SOS keyword. The SOS section should follow the Bounds, General, Binaries
+and Semi-Continuous sections. Special ordered sets of type 1 require
+that, of the variables in the set, one at most may be nonzero. Special
+ordered sets of type 2 require that at most two variables in the set
+may be nonzero, and if there are two nonzeros, they must be adjacent.
+Adjacency is defined by the weights, which must be unique within a
+set given to the variables. The sorted weights define the order of
+the special ordered set. For MIP branch and cut, the order is used
+to decide how the variables are branched upon. See the <em class="ph i">CPLEX
+User’s Manual</em> for more information. The set is specified by an
+optional set name followed by a colon and then either of the S1 or
+S2 keywords (specifying the type) followed by a double colon. The
+set member names are listed on this line or lines, with their weights.
+Variable names and weights are separated by a colon, for example:</p>
+<p class="p"> <samp class="ph codeph">SOS</samp> </p>
+<p class="p"> <samp class="ph codeph">  set1: S1::  x1:10  x2:13</samp> </p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177287"><h2 class="title sectiontitle">MIP indicator constraints</h2><p class="p">This rule applies
+to CPLEX MIP optimizer.</p>
+<p class="p">To specify an indicator constraint,
+enter it among any other constraints in the model, like this:  </p>
+<pre class="pre codeblock"><code>[constraintname:]  binaryvariable = value  -&gt;  linear constraint</code></pre>
+<p class="p">The constraint name, followed by a colon,
+is optional. The hyphen followed by the greater-than symbol (<samp class="ph codeph">-&gt;</samp>), separates the indicator variable and its
+value from the linear constraint that is controlled. The indicator
+variable must be declared as a binary variable, and the value it is
+compared to must be either 0 (zero) or 1 (one).</p>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177305"><h2 class="title sectiontitle">Quadratic terms</h2><p class="p">This rule applies to applications that solve problems with
+quadratic terms in them, that is, quadratic programming problems and
+quadratically constrained programs (QPs and QCPs). Quadratic coefficients
+may appear in the objective function. Quadratic coefficients may also
+appear in constraints under certain conditions. If there are quadratically
+constrained variables in the problem, see also rules about <a class="xref" href="LP.html#File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177185">Variables</a>, <a class="xref" href="LP.html#File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177204">Constraints</a>, and <a class="xref" href="../../UsrMan/topics/cont_optim/qcp/01_QCP_title_synopsis.html" title="Documents the solution of quadratically constrained programming problems (QCPs), including the special case of second order cone programming problems (SOCPs).">Solving problems with quadratic constraints (QCP)</a> in the <em class="ph i">CPLEX
+User’s Manual</em>.</p>
+<p class="p">The algebraic coefficients of the
+function x'Qx are specified inside square brackets<samp class="ph codeph"> []</samp> .
+The square brackets must be followed by a divide sign followed by
+the number 2. This convention denotes that all coefficients inside
+the square brackets will be divided by 2 in evaluating the quadratic
+terms of the objective function. All quadratic coefficients must appear
+inside square brackets. Multiple square bracket sections may be specified.</p>
+<p class="p">Inside of the square brackets, two variables are multiplied
+by an asterisk (<samp class="ph codeph">*</samp>). For example, <samp class="ph codeph">[4x*y]</samp> indicates that the coefficients of both of
+the off-diagonal terms of Q, corresponding to the variables <samp class="ph codeph">x</samp>  and <samp class="ph codeph">y</samp>  in the model
+are 2, since <samp class="ph codeph">4x*y</samp>  equals <samp class="ph codeph">2x*y + 2x*y</samp>.
+Each pair of off-diagonal terms of Q is specified only once. CPLEX
+automatically creates both off-diagonal entries of Q. Diagonal terms
+in Q (that is, terms with an exponent of 2) are indicated by the caret
+(<samp class="ph codeph">^</samp> ) followed by 2. For example, <samp class="ph codeph">4x^2</samp> indicates that the coefficient of the diagonal
+term of Q corresponding to the variable <samp class="ph codeph">x</samp> in
+the model is 4.</p>
+<p class="p">For example, this problem</p>
+<p class="p">Minimize
+a + b + 1/2(a<sup class="ph sup">2</sup> + 4ab +7b<sup class="ph sup">2</sup>)</p>
+<p class="p">subject to a + b ≥ 10 and a, b ≥ 0</p>
+<p class="p">in LP format
+looks like this:  </p>
+<pre class="pre codeblock"><code>Minimize
+obj: a + b + [ a^2 + 4 a * b + 7 b^2 ]/2
+Subject To
+c1: a + b &gt;= 10
+End</code></pre>
+</div>
+<div class="section" id="File_formats_reference.uss_reffileformatscplex.162381__File_formats_reference.uss_reffileformatscplex.177320"><h2 class="title sectiontitle">Pools of lazy constraints and user-defined
+cuts</h2><p class="p">This rule is of interest only to advanced users. </p>
+<p class="p">It is possible to include pools of lazy constraints and user
+defined cuts in an LP file. A pool of lazy constraints or of user-defined
+cuts must not contain any quadratic constraints. For more about these
+concepts, see <a class="xref" href="../../UsrMan/topics/progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" title="Documents pools of user-defined cuts and lazy constraints.">User-cut and lazy-constraint pools</a> in the <em class="ph i">CPLEX
+User’s Manual</em>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CPLEX/homepages/reffileformatscplex.html">File formats supported by CPLEX</a></div>
+</div>
+</div></body>
+</html>

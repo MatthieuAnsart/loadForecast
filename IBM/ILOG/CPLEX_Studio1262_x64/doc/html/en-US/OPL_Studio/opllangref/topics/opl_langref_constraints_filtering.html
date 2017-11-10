@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Filtering with constraints" />
+<meta name="abstract" content="Describes the process of using constraints to filter decision variables or aggregates." />
+<meta name="Description" content="Describes the process of using constraints to filter decision variables or aggregates." />
+<meta name="DC.subject" content="filtering, with constraints, constraints, for filtering" />
+<meta name="keywords" content="filtering, with constraints, constraints, for filtering" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_using.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_constraints.1077022" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_using.html" />
+<title>Filtering with constraints</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_constraints.1077022">
+<h1 class="title topictitle1">Filtering with constraints</h1>
+<div class="body"><p class="shortdesc">Describes the process of using constraints to filter
+decision variables or aggregates.</p>
+<p class="p">In addition to applying constraints to decision variables,
+you can also create constraints on formal parameters to filter aggregates,
+like this:</p>
+<div class="example" id="usropllangref.uss_langref_constraints.1077022__usropllangref.uss_langref_constraints.1077053"><h2 class="title sectiontitle">Filtering with constraints</h2><pre class="pre codeblock"><code>// The cities where we are doing business
+{string} cities={"Paris","Berlin","Washington","Rio"};
+
+{string} EuropeanMainCapitals = {"London","Paris","Berlin","Madrid","Roma"};
+
+// Should we expand business in this city ?
+dvar boolean x[cities];
+
+// We want to expand business in Europe
+maximize sum(c in cities: c in EuropeanMainCapitals) x[c];
+
+subject to
+{
+   // We can expand business in 2 cities
+   sum(c in cities) x[c]&lt;=2;  
+}
+
+{string} expanded_cities = {c | c in cities : x[c]==1};
+
+execute
+{
+  for(c in expanded_cities) writeln("We should expand business in ",c);  
+}</code></pre>
+</div>
+<p class="p">The result is:</p>
+<pre class="pre codeblock"><code>We should expand business in Paris
+We should expand business in Berlin</code></pre>
+<p class="p">In this context, filtering means placing a condition
+on an iteration to limit the iteration loop. See <a class="xref" href="opl_langref_formalParams.html" title="Describes basic formal parameters, tuples of parameters, and filtering in tuples of parameters.">Formal parameters</a> for more examples.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_using.html" title="Explains how to apply a constraint to a decision variable and, possibly, conditionalize it. Also explains why constraints are identified by a label, and why constraints are used for filtering purposes.">Using constraints</a></div>
+</div>
+</div></body>
+</html>

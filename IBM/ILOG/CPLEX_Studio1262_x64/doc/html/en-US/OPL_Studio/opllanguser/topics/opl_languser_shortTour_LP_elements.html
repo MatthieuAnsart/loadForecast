@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Elements of the production model" />
+<meta name="abstract" content="Describes the details of this linear programming model." />
+<meta name="Description" content="Describes the details of this linear programming model." />
+<meta name="DC.subject" content="linear programming, definition, arrays, index sets, index of arrays, production planning problem, using arrays, models, genericity, code samples, volsay.mod, data, declaration, declaring, gas.dat, quantifiers, aggregate operators, gas1.mod, operator, aggregate, constraints, use of the universal quantifier, universal quantifier, data files, model files, separated from model, model/data separation, projects, gas.mod, ellipsis, as syntax for model/data separation, ellipsis, initialization, initializing, gasn.dat, in production planning, using tuples, tuples, as defined in OPL, production.mod, capacities, of resources, in production-planning problem, production.dat" />
+<meta name="keywords" content="linear programming, definition, arrays, index sets, index of arrays, production planning problem, using arrays, models, genericity, code samples, volsay.mod, data, declaration, declaring, gas.dat, quantifiers, aggregate operators, gas1.mod, operator, aggregate, constraints, use of the universal quantifier, universal quantifier, data files, model files, separated from model, model/data separation, projects, gas.mod, ellipsis, as syntax for model/data separation, ellipsis, initialization, initializing, gasn.dat, in production planning, using tuples, tuples, as defined in OPL, production.mod, capacities, of resources, in production-planning problem, production.dat" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_shortTour.1005523" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Elements of the production model</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_shortTour.1005523">
+<h1 class="title topictitle1">Elements of the production model</h1>
+<div class="body"><p class="shortdesc">Describes the details of this linear programming model.</p>
+<p class="p">The <samp class="ph codeph">volsay</samp> model shown in <a class="xref" href="opl_languser_shortTour_LP_prodplanning.html#usropllangtut.uss_langtut_shortTour.1054894__usropllangtut.uss_langtut_shortTour.1047246">A simple production problem (volsay.mod)</a> is a linear programming model. Linear programming is the class of problems that can be expressed as the optimization of a linear objective function subject to a set of linear constraints (i.e., linear equations and inequalities) over real numbers. Linear programming models can be solved for large numbers of variables and constraints and are, from a computational standpoint, the simplest applications considered in this manual.</p>
+<p class="p">This section examines:</p>
+<ul class="ul"><li class="li"><p class="p">Arrays</p>
+</li>
+<li class="li"><p class="p">Data declarations</p>
+ </li>
+<li class="li"><p class="p">Aggregate operators and quantifiers</p>
+ </li>
+<li class="li"><p class="p">Isolating the data</p>
+ </li>
+<li class="li"><p class="p">Data initialization</p>
+ </li>
+<li class="li"><p class="p">Tuples</p>
+</li>
+<li class="li"><p class="p">Displaying results</p>
+ </li>
+<li class="li"><p class="p">Setting CPLEX parameters</p>
+ </li>
+<li class="li"><p class="p">Integer programming: the knapsack problem</p>
+ </li>
+<li class="li"><p class="p">Mixed integer-linear programming: a blending problem</p>
+</li>
+</ul>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1045940"><h2 class="title topictitle2">For more information</h2>
+<div class="body"><p class="p"><a class="xref" href="opl_languser_app_areas_linearInteger.html" title="Studies the application of OPL to linear programming, integer programming, mixed integer-linear programming, and piecewise linear programming.">Applications of linear and integer programming</a> studies the application of OPL to linear programming, integer programming, mixed-integer linear programming, and piecewise-linear programming.</p>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1005525"><h2 class="title topictitle2">Arrays</h2>
+<div class="body"><p class="p">The above statement is very specific to the application at hand. In general, it is desirable to write generic models that can be extended, modified easily, and applied in different contexts. The next sections describe a number of OPL concepts to simplify the process of creating such models. A first step towards more genericity is the use of arrays, which makes it easier, for instance, to accommodate new products in the future.</p>
+<p class="p">The Volsay production planning model can be rewritten using arrays as: </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005525__usropllangtut.uss_langtut_shortTour.1047279">The volsay production model with arrays</p>
+<pre class="pre codeblock"><code>{string} Products =  {"gas","chloride"};
+dvar float production[Products]; 
+maximize 
+      40 * production["gas"] + 50 * production["chloride"]; 
+subject to {
+      production["gas"] + production["chloride"] &lt;= 50; 
+      3 * production["gas"] + 4 * production["chloride"] &lt;= 180; 
+      production["chloride"] &lt;= 40; 
+}</code></pre>
+<p class="p">This new statement illustrates several features of the language. First, the instruction</p>
+<pre class="pre codeblock"><code>{string} Products =  {"gas","chloride"};</code></pre>
+<p class="p">declares a set of strings <samp class="ph codeph">Products</samp> that represents the set of products of the company. The declaration </p>
+<pre class="pre codeblock"><code>dvar float production[Products]; </code></pre>
+<p class="p">declares an array of two decision variables, <samp class="ph codeph">production["gas"]</samp> and <samp class="ph codeph">production["chloride"]</samp>, to represent the optimal production of ammoniac gas and ammonium chloride. These decision variables are used in the rest of the statement, which remains essentially the same as in <a class="xref" href="opl_languser_shortTour_LP_prodplanning.html#usropllangtut.uss_langtut_shortTour.1054894__usropllangtut.uss_langtut_shortTour.1047246">A simple production problem (volsay.mod)</a>. As will become clear subsequently, one of the novel features of OPL is the generality of its arrays: OPL arrays can have an arbitrary number of dimensions and their index sets can be arbitrary finite sets, possibly involving complex data structures. </p>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1005545"><h2 class="title topictitle2">Data declarations</h2>
+<div class="body"><p class="p">A second fundamental step towards more genericity in the model amounts to representing the problem data explicitly. In addition to the products, the problem data obviously consists of the components (nitrogen, hydrogen, and chloride), the demand of each product for each component, the profit of each product, and the stock available for each component. The example below, <samp class="ph codeph">gas.dat</samp>,  declares and initializes the data.</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005545__usropllangtut.uss_langtut_shortTour.1051910">Declaring and initializing data (<samp class="ph codeph">gas.dat</samp>)</p>
+<pre class="pre codeblock"><code>Products = { "gas" "chloride" };
+Components = { "nitrogen" "hydrogen" "chlorine" };
+
+Demand = [ [1 3 0] [1 4 1] ];
+Profit = [30 40];
+Stock = [50 180 40];</code></pre>
+<p class="p">The data element <samp class="ph codeph">Components</samp> is a set of strings that defines the chemical components necessary for the products, <samp class="ph codeph">demand</samp> is a two-dimensional array whose element <samp class="ph codeph">demand[p][c]</samp> represents the demand of product <samp class="ph codeph">p</samp> for component <samp class="ph codeph">c</samp>, and <samp class="ph codeph">profit</samp> and <samp class="ph codeph">stock</samp> are two arrays representing the profit of each product and the stock available for each component. The rest of the statement can be obtained easily by replacing the numbers by the relevant data items. For instance, the objective function is simply written as </p>
+<pre class="pre codeblock"><code>maximize
+  sum( p in Products ) 
+    Profit[p] * Production[p];</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1050528"><h2 class="title topictitle2">Aggregate operators and quantifiers</h2>
+<div class="body"><p class="p">It should be clear, however, that the statement above contains much redundancy. All constraints, and all arithmetic terms in these constraints and in the objective function, are similar: they differ only in their indices.</p>
+<p class="p">OPL has two features to factorize these commonalities, aggregate operators and quantifiers, as shown in the model below, <samp class="ph codeph">gas1.mod</samp>.</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1050528__usropllangtut.uss_langtut_shortTour.1060047">A simple production model (<samp class="ph codeph">gas1.mod</samp>).</p>
+<pre class="pre codeblock"><code>{string} Products = { "gas", "chloride" };
+{string} Components = { "nitrogen", "hydrogen", "chlorine" };
+
+float Demand[Products][Components] = [ [1, 3, 0], [1, 4, 1] ];
+float Profit[Products] = [30, 40];
+float Stock[Components] = [50, 180, 40];
+
+dvar float+ Production[Products];
+
+maximize
+  sum( p in Products ) 
+    Profit[p] * Production[p];
+subject to {
+  forall( c in Components )
+    ct:
+      sum( p in Products ) 
+        Demand[p][c] * Production[p] &lt;= Stock[c];
+}</code></pre>
+<p class="p">The objective function</p>
+<pre class="pre codeblock"><code>maximize
+  sum( p in Products ) 
+    Profit[p] * Production[p];</code></pre>
+<p class="p">illustrates the use of the aggregate operator <samp class="ph codeph">sum</samp> to take the summation of the individual profits. A variety of aggregate operators are available in OPL, including <samp class="ph codeph">sum</samp>, <samp class="ph codeph">prod</samp>, <samp class="ph codeph">min</samp>, and <samp class="ph codeph">max</samp>. </p>
+<p class="p">The instruction </p>
+<pre class="pre codeblock"><code>subject to {
+  forall( c in Components )
+    ct:
+      sum( p in Products ) 
+        Demand[p][c] * Production[p] &lt;= Stock[c];
+}</code></pre>
+<p class="p">shows how the universal quantifier <samp class="ph codeph">forall</samp> can be used to state closely related constraints. It generates one constraint for each chemical component, each constraint stating that the total demand for the component cannot exceed its available stock. OPL supports rich parameter specifications in aggregate operators and quantifiers (see <a class="xref" href="../../opllangref/topics/opl_langref_expressions.html" title="Describes data and decision variable identifiers, integer and float expressions, aggregate operators, piecewise-linear functions (continuous and discontinuous), set expressions, and Boolean expressions.">Expressions</a> in the <em class="ph i">Language Reference Manual</em>).</p>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1005592"><h2 class="title topictitle2">Isolating the data</h2>
+<div class="body"><p class="p">Another fundamental step in making models reusable is to separate the model and the instance data. OPL supports this clean separation through the notion of <em class="ph i">projects</em>. </p>
+<p class="p">A project is the association of a model file, one or more data files (optional), and one or more settings files (optional), associated in run configurations. A minimal project has one run configuration containing only one model. Model files use the file name extension<samp class="ph codeph">.mod </samp> while data files use the file name extension<samp class="ph codeph">.dat</samp>. The model declares the data but does not initialize it. The data files contain the initialization instructions for each declared data item. See <a class="xref" href="../../oplquickstart/topics/opl_quickstart_understanding.html" title="CPLEX Studio handles OPL project files, data files, model files, setting files, and run configurations.">Understanding OPL projects</a> in <em class="ph i">Quick Start</em>.</p>
+<p class="p">Here we do not describe the details of IBM ILOG OPL, but generally describe applications by giving the model and the instance data separately.</p>
+<p class="p">For instance, the model below, <samp class="ph codeph">gas.mod</samp>, and the instance data, <samp class="ph codeph">gas.dat</samp>, together make up a project for the Volsay production-planning problem. The model part is essentially the same as the one presented earlier, except that it declares the data but does not initialize it. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005592__usropllangtut.uss_langtut_shortTour.1070310">The production model (<samp class="ph codeph">gas.mod</samp>)</p>
+<pre class="pre codeblock"><code>{string} Products = ...;
+{string} Components = ...;
+
+float Demand[Products][Components] = ...;
+float Profit[Products] = ...;
+float Stock[Components] = ...;
+dvar float+ Production[Products];
+
+maximize
+  sum( p in Products ) 
+    Profit[p] * Production[p];
+subject to {
+  forall( c in Components )
+    ct:
+      sum( p in Products ) 
+        Demand[p][c] * Production[p] &lt;= Stock[c];
+}</code></pre>
+<p class="p">A declaration of the form </p>
+<pre class="pre codeblock"><code>float profit[Products] = ...;</code></pre>
+<p class="p">declares the array <samp class="ph codeph">profit</samp> and specifies that its initialization is given in a data file. The data file simply associates an initialization with each non-initialized piece of data. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005592__usropllangtut.uss_langtut_shortTour.1070360">Instance data for the production model (<samp class="ph codeph">gas.dat</samp>)</p>
+<pre class="pre codeblock"><code>Products = { "gas" "chloride" };
+Components = { "nitrogen" "hydrogen" "chlorine" };
+
+Demand = [ [1 3 0] [1 4 1] ];
+Profit = [30 40];
+Stock = [50 180 40];</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1005617"><h2 class="title topictitle2">Data initialization</h2>
+<div class="body"><p class="p">OPL offers a variety of ways of initializing data. One particularly useful feature is the possibility of associating indices with values to avoid various kinds of errors. The instance data below, <samp class="ph codeph">gasn.dat</samp>,  illustrates this feature on the instance data for the Volsay production model. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005617__usropllangtut.uss_langtut_shortTour.1005641">Instance data with indices for the production model (<samp class="ph codeph">gasn.dat</samp>)</p>
+<pre class="pre codeblock"><code>Products = { "gas", "chloride" };
+Components = { "nitrogen", "hydrogen", "chlorine" };
+
+Profit = #["gas":30, "chloride":40]#;
+Stock = #["nitrogen":50, "hydrogen":180, "chlorine":40]#;
+Demand = #[
+            "gas":      #[ "nitrogen":1 "hydrogen":3 "chlorine":0 ]#,
+            "chloride": #[ "nitrogen":1 "hydrogen":4 "chlorine":1 ]#
+          ]#;</code></pre>
+<p class="p">The initialization </p>
+<pre class="pre codeblock"><code>profit = #["gas":30 "chloride":40]#; </code></pre>
+<p class="p">describes the initialization of array <samp class="ph codeph">profit</samp> by associating the value 30 with index <samp class="ph codeph">gas</samp> and the value 40 with index <samp class="ph codeph">chloride</samp>. (Of course, the order of the pairs has no importance in these initializations.) When using <samp class="ph codeph">index:value</samp> pairs, the delimiters <samp class="ph codeph">#[</samp> and <samp class="ph codeph">]#</samp> must be used instead of <samp class="ph codeph">[</samp> and <samp class="ph codeph">]</samp>. Note also that, in data files, the items can be initialized in any order and the commas can be omitted freely.</p>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_shortTour.1005660"><h2 class="title topictitle2">Tuples</h2>
+<div class="body"><p class="p">OPL offers a variety of data structures in addition to arrays and sets of strings. Tuples, a fundamental tool for structuring the application data, offer an alternative to the traditional approach of representing data in parallel arrays. To see the use of tuples in OPL, consider the following production-planning model. To meet the demands of its customers, a company manufactures its products in its own factories (<em class="ph i">inside</em> production) or buys them from other companies (<em class="ph i">outside</em> production).</p>
+<p class="p">Inside production is subject to some resource constraints: each product consumes a certain amount of each resource. In contrast, outside production is theoretically unlimited. The problem is to determine how much of each product should be produced inside and outside the company while minimizing the overall production cost, meeting the demand, and satisfying the resource constraints. The example below, <samp class="ph codeph">production.mod</samp>, depicts an OPL model for this problem that uses only the concepts introduced so far, and <samp class="ph codeph">production.dat</samp>  presents the data for a specific instance. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1034929">A production-planning problem (<samp class="ph codeph">production.mod</samp>)</p>
+<pre class="pre codeblock"><code>{string} Products = ...;
+{string} Resources = ...;
+
+float Consumption[Products][Resources] = ...;
+float Capacity[Resources] = ...;
+float Demand[Products] = ...;
+float InsideCost[Products] = ...;
+float OutsideCost[Products]  = ...;
+
+dvar float+ Inside[Products];
+dvar float+ Outside[Products];
+
+minimize
+  sum( p in Products ) 
+    ( InsideCost[p] * Inside[p] + OutsideCost[p] * Outside[p] );
+   
+subject to {
+  forall( r in Resources )
+    ctCapacity: 
+      sum( p in Products ) 
+        Consumption[p][r] * Inside[p] &lt;= Capacity[r];
+
+  forall(p in Products)
+    ctDemand:
+      Inside[p] + Outside[p] &gt;= Demand[p];
+}</code></pre>
+<p class="p">An instance of the problem must specify the products, the resources, the capacity of the resources, the demand for each product, the consumption of resources by the different products, and the inside and outside costs of each product. These various data items are specified in the standard way in <samp class="ph codeph">production.dat</samp> below. The model contains two arrays of variables: element <samp class="ph codeph">Inside[p]</samp> (respectively <samp class="ph codeph">Outside[p]</samp>) represents the inside (respectively outside) production of product <samp class="ph codeph">p</samp>. The objective function specifies that the production cost must be minimized.</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1005726">Data for the production-planning problem (<samp class="ph codeph">production.dat</samp>)</p>
+<pre class="pre codeblock"><code>Products =  { "kluski", "capellini", "fettucine" };
+Resources = { "flour", "eggs" };
+
+Consumption = [ [0.5, 0.2], [0.4, 0.4], [0.3, 0.6] ];
+Capacity = [ 20, 40 ];
+Demand = [ 100, 200, 300 ];
+InsideCost = [ 0.6, 0.8, 0.3 ];
+OutsideCost  = [ 0.8, 0.9, 0.4 ];</code></pre>
+<p class="p">The production cost is simply the sum of the individual production costs, which are obtained by multiplying the inside and outside productions of the given product by their respective costs. Finally, the model has two types of constraints. The first set of constraints expresses the capacity constraints, the second set states the demand constraints. The model is once again a linear programming problem.</p>
+<div class="section" id="usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1059880"><h3 class="title sectiontitle">A solution to production.mod</h3><p class="p">For the instance data given in <a class="xref" href="opl_languser_shortTour_LP_elements.html#usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1005726">Data for the production-planning problem (<samp class="ph codeph">production.dat</samp>)</a>, OPL outputs the following solution:</p>
+<pre class="pre codeblock"><code>Final Solution with objective 372.0000:
+  inside = [40.0000 0.0000 0.0000];
+  outside = [60.0000 200.0000 300.0000];</code></pre>
+<p class="p">Although the model is simple, it is inconvenient in separating the data associated with each product in different arrays: for instance, array <samp class="ph codeph">demand</samp> stores the demand for the products, while array <samp class="ph codeph">insideCost</samp> stores their inside costs. This technique, sometimes called <em class="ph i">parallel arrays</em>, may be error-prone and less readable for more complicated models. Tuples provide a simple way to cluster related data and impose more structure on a model. This is illustrated in the revisited example below, <samp class="ph codeph">product.mod</samp>, and the revised data <samp class="ph codeph">product.dat</samp>, which exhibit an alternative model for the production-planning problem.</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1005765">The production-planning problem revisited (<samp class="ph codeph">product.mod</samp>)</p>
+<pre class="pre codeblock"><code>{string} Products = ...;
+{string} Resources = ...;
+tuple productData {
+   float demand;
+   float insideCost;
+   float outsideCost;
+   float consumption[Resources];
+}
+productData Product[Products] = ...;
+float Capacity[Resources] = ...;
+
+dvar float+ Inside[Products];
+dvar float+ Outside[Products];
+
+execute CPX_PARAM {
+  cplex.preind = 0;   
+  cplex.simdisplay = 2;   
+}
+
+
+minimize
+  sum( p in Products ) 
+    (Product[p].insideCost * Inside[p] + 
+    Product[p].outsideCost * Outside[p] );
+subject to {
+  forall( r in Resources )
+    ctInside: 
+      sum( p in Products ) 
+        Product[p].consumption[r] * Inside[p] &lt;= Capacity[r];
+  forall( p in Products )
+    ctDemand: 
+      Inside[p] + Outside[p] &gt;= Product[p].demand;
+}</code></pre>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1005779">Data for the revised production-planning problem (<samp class="ph codeph">product.dat</samp>)</p>
+<pre class="pre codeblock"><code>Products =  { "kluski", "capellini", "fettucine" };
+Resources = { "flour", "eggs" };
+Product = #[
+      kluski : &lt; 100, 0.6, 0.8, [ 0.5, 0.2 ] &gt;,
+      capellini : &lt; 200, 0.8, 0.9, [ 0.4, 0.4 ] &gt;,
+      fettucine : &lt; 300, 0.3, 0.4, [ 0.3, 0.6 ] &gt;
+          ]#;
+Capacity = [ 20, 40 ];</code></pre>
+<p class="p">The instruction </p>
+<pre class="pre codeblock"><code>tuple productData {
+   float demand;
+   float insideCost;
+   float outsideCost;
+   float consumption[Resources];
+}</code></pre>
+<p class="p">declares a tuple type with four fields. The first three fields, of type <samp class="ph codeph">float</samp>, are used to represent the demand and costs of a product; the last field is an array representing the resource consumptions of the product. These fields are intended to hold all the data related to a given product. </p>
+<p class="p">The instruction </p>
+<pre class="pre codeblock"><code>ProductData product[Products] = ...; </code></pre>
+<p class="p">declares an array of these tuples, one for each product. The initialization </p>
+<pre class="pre codeblock"><code>Product = #[
+      kluski : &lt; 100, 0.6, 0.8, [ 0.5, 0.2 ] &gt;,
+      capellini : &lt; 200, 0.8, 0.9, [ 0.4, 0.4 ] &gt;,
+      fettucine : &lt; 300, 0.3, 0.4, [ 0.3, 0.6 ] &gt;
+          ]#;</code></pre>
+<p class="p">from <a class="xref" href="opl_languser_shortTour_LP_elements.html#usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1005779">Data for the revised production-planning problem (<samp class="ph codeph">product.dat</samp>)</a> specifies these various data items: tuples are initialized by giving values for each of their fields. It is of course possible to use a named initialization for the tuple, as shown in <a class="xref" href="opl_languser_shortTour_LP_results.html#usropllangtut.uss_langtut_shortTour.1005820__usropllangtut.uss_langtut_shortTour.1062374">Named data for the revised production-planning problem (<samp class="ph codeph">productn.dat</samp>)</a>, in which case the initialization is enclosed with <samp class="ph codeph">#&lt;</samp> and <samp class="ph codeph">&gt;#</samp>. Tuple fields can be obtained by suffixing the tuple with a dot and the field name. For instance, in the objective function </p>
+<pre class="pre codeblock"><code>minimize
+  sum( p in Products ) 
+    (Product[p].insideCost * Inside[p] + 
+    Product[p].outsideCost * Outside[p] );</code></pre>
+<p class="p">the expression <samp class="ph codeph">product[p].insideCost</samp> represents the field <samp class="ph codeph">insideCost</samp> of the tuple <samp class="ph codeph">product[p]</samp>. </p>
+<p class="p">Similarly, in the constraint </p>
+<pre class="pre codeblock"><code>forall(r in Resources) 
+   sum(p in Products) product[p].consumption[r] * inside[p] &lt;= capacity[r];</code></pre>
+<p class="p">the expression <samp class="ph codeph">product[p].consumption</samp> represents the field consumption of tuple <samp class="ph codeph">product[p]</samp>. This field is an array that can be subscripted in the traditional way.</p>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Data File Grammar" />
+<meta name="abstract" content="The grammar for OPL data files" />
+<meta name="Description" content="The grammar for OPL data files" />
+<meta name="DC.subject" content="grammar, of data files" />
+<meta name="keywords" content="grammar, of data files" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_syntax.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplhelp.uss_opl_grammar.1013695" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_syntax.html" />
+<title>Data File Grammar</title>
+</head>
+<body role="main" id="oplhelp.uss_opl_grammar.1013695">
+<h1 class="title topictitle1">Data File Grammar</h1>
+<div class="body"><p class="shortdesc">The grammar for OPL data files</p>
+<pre class="pre codeblock"><code>    0 $accept: CompilationUnit $end
+
+    1 CompilationUnit: /* empty */
+    2                | Prepare_opt Elements
+
+    3 Elements: Element Invoke_opt ';'
+    4         | Elements Element Invoke_opt ';'
+    5         | error ';'
+
+    6 @1: /* empty */
+
+    7 Element: Id @1 '=' Item
+    8        | Connection
+    9        | Read
+   10        | Publish
+
+   11 String: "(string-literal)"
+   12       | Id
+
+   13 Id: "(identifier)"
+
+   14 IdOrPath: "(identifier path)"
+   15         | Id
+
+   16 IdOrPathList: IdOrPath IdOrPath
+   17             | IdOrPathList IdOrPath
+
+   18 Connection: "DBConnection" Id '(' String String ')'
+   19           | "SheetConnection" Id '(' String ')'
+   20           | CustomConnection Id '(' String String ')'
+
+   21 Read: IdOrPath "from" "DBRead" '(' Id String ')' PlaceHolders_opt
+   22     | IdOrPathList "from" "DBRead" '(' Id String ')' PlaceHolders_opt
+   23     | IdOrPath "from" "SheetRead" '(' Id String ')'
+   24     | IdOrPath "from" CustomRead '(' Id String ')'
+
+   25 PlaceHolders_opt: /* empty */
+   26                 | '(' PlaceHolders ')'
+
+   27 PlaceHolders: PlaceHolder
+   28             | PlaceHolders PlaceHolder
+
+   29 PlaceHolder: Id
+
+   30 Publish: "DBExecute" '(' Id String ')'
+   31        | IdOrPath "to" "DBUpdate" '(' Id String ')'
+   32        | IdOrPath "to" "SheetWrite" '(' Id String ')'
+   33        | IdOrPath "to" CustomPublish '(' Id String ')'
+
+   34 CustomConnection: "*Connection"
+
+   35 CustomRead: "*Read"
+
+   36 CustomPublish: "*Publish"
+
+   37 Items: Item
+   38      | Items Item
+
+   39 Items_opt: /* empty */
+   40          | Items
+
+   41 Item: Primitive
+   42     | Array
+   43     | Tuple
+   44     | Set
+
+   45 Primitive: "(int-literal)"
+   46          | "(float-literal)"
+   47          | "(string-literal)"
+   48          | "(identifier)"
+
+   49 @2: /* empty */
+
+   50 Array: "[" @2 Items_opt "]"
+
+   51 @3: /* empty */
+
+   52 Array: "#[" @3 IndexedItems "]#"
+   53      | error "]"
+   54      | error "]#"
+
+   55 IndexedItems: IndexedItem
+   56             | IndexedItems IndexedItem
+
+   57 IndexedItem: Index ':' Item
+
+   58 Index: "(int-literal)"
+   59      | "(float-literal)"
+   60      | "(string-literal)"
+   61      | Id
+   62      | IndexTuple
+
+   63 @4: /* empty */
+
+   64 IndexTuple: "&lt;" @4 Items "&gt;"
+   65           | error "&gt;"
+
+   66 @5: /* empty */
+
+   67 Tuple: "&lt;" @5 Items "&gt;"
+
+   68 @6: /* empty */
+
+   69 Tuple: "#&lt;" @6 NamedItems "&gt;#"
+   70      | error "&gt;"
+   71      | error "&gt;#"
+
+   72 NamedItems: NamedItem
+   73           | NamedItems NamedItem
+
+   74 NamedItem: Name ':' Item
+
+   75 Name: Id
+
+   76 @7: /* empty */
+
+   77 Set: "{" @7 Items_opt "}"
+   78    | error "}"
+
+   79 Prepare_opt: /* empty */
+   80            | Prepare
+
+   81 Prepare: "prepare" "(execute-block)"
+
+   82 Invoke_opt: /* empty */
+   83           | Invoke
+
+   84 Invoke: "invoke" Id</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_syntax.html" title="Grammar of the modeling language.">OPL Syntax</a></div>
+</div>
+</div></body>
+</html>

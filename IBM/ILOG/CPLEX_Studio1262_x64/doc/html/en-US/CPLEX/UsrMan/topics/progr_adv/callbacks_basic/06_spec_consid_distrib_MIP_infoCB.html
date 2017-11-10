@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Informational callbacks and distributed MIP: some special considerations" />
+<meta name="abstract" content="Documents special considerations about informational callbacks to support distributed parallel optimization of mixed integer programs (MIP)." />
+<meta name="Description" content="Documents special considerations about informational callbacks to support distributed parallel optimization of mixed integer programs (MIP)." />
+<meta name="DC.subject" content="informational callback, distributed parallel optimization and, distributed MIP and, callback, informational, distributed MIP, distributed parallel optimization, informational callbacks and" />
+<meta name="keywords" content="informational callback, distributed parallel optimization and, distributed MIP and, callback, informational, distributed MIP, distributed parallel optimization, informational callbacks and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/03_info_cb_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="specConsidDistribMIPinfoCB" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/03_info_cb_title_synopsis.html" />
+<title>Informational callbacks and distributed MIP: some special considerations</title>
+</head>
+<body role="main" id="specConsidDistribMIPinfoCB">
+<h1 class="title topictitle1">Informational callbacks and distributed MIP: some special considerations</h1>
+<div class="body"><p class="shortdesc">Documents special considerations about informational callbacks to support 
+distributed parallel optimization of mixed integer programs (MIP).</p>
+<div class="p">Because of the distributed aspects of an application of distributed parallel MIP 
+optimization, special 
+considerations apply to informational callbacks in such an application. 
+For example, when you query certain information by means of 
+<a class="xref" href="../../../../../refcallablelibrary/cpxapi/getcallbackinfo.html" title="The routine CPXXgetcallbackinfo/CPXgetcallbackinfo accesses information about the current optimization process from within a user-written callback function.">CPXXgetcallbackinfo and CPXgetcallbackinfo</a> 
+in the Callable Library (C API), the following considerations apply:
+
+    <ul class="ul"><li class="li">Queries about cut counts, such as 
+    <span class="keyword apiname">CPX_CALLBACK_INFO_COVER_COUNT</span>, always 
+    return 0 (zero).</li>
+<li class="li">Queries about MIP kappa statistics, such as 
+    <span class="keyword apiname">CPX_CALLBACK_INFO_KAPPA_MAX</span>, 
+    result in the error message <span class="keyword apiname">CPXERR_NO_KAPPASTATS</span>.</li>
+<li class="li">The number of threads, 
+    as queried by <span class="keyword apiname">CPX_CALLBACK_INFO_USER_THREADS</span>, is 
+    always 1 (one).
+    </li>
+<li class="li">The user thread index as identified by 
+    <span class="keyword apiname">CPX_CALLBACK_INFO_MY_THREAD_NUM</span> is always 0 (zero).
+    </li>
+<li class="li">Queries about the current node count, the number of 
+    nodes left, and the iteration count all return correct values during 
+    distributed MIP tree search (that is, branch and bound) after ramp up terminates.
+    However, during ramp up, the following queries always return 0 (zero):
+        <ul class="ul"><li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODE_COUNT</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODE_COUNT_LONG</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODES_LEFT</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_NODES_LEFT_LONG</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_MIP_ITERATIONS</span></li>
+<li class="li"><span class="keyword apiname">CPX_CALLBACK_INFO_MIP_ITERATIONS_LONG</span></li>
+</ul>
+
+    </li>
+<li class="li">The informational callback is only called at synchronization points 
+    during distributed MIP optimization; that is, less frequently than in 
+    conventional MIP optimization in shared memory.
+    </li>
+</ul>
+
+Similar considerations apply to analogous queries in other APIs of CPLEX.</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/03_info_cb_title_synopsis.html" title="Documents informational callbacks.">Informational callbacks</a></div>
+</div>
+</div></body>
+</html>

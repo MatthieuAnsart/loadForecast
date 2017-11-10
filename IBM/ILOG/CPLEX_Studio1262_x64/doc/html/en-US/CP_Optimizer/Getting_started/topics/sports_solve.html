@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solve" />
+<meta name="abstract" content="Once the sports scheduling problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="Description" content="Once the sports scheduling problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/sports.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizersports.133677" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/sports.html" />
+<title>Solve</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizersports.133677">
+<h1 class="title topictitle1">Solve</h1>
+<div class="body"><p class="shortdesc">Once the sports scheduling problem has been described
+and modeled, you use CP Optimizer classes and functions to solve the
+constraint programming problem. </p>
+<p class="p">Solving the problem consists of finding values for all
+of the decision variables in such a way that the values simultaneously
+satisfy the constraints and minimize the objective representing the
+cost of the solution. To solve the problem expressed in the model,
+you create an instance of the class <samp class="ph codeph">IloCP</samp>.</p>
+<div class="section" id="migration.uss_gscpoptimizersports.133677__migration.uss_gscpoptimizersports.157893"><h2 class="title sectiontitle">Step 19: Create an instance of IloCP</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create
+an instance of IloCP</samp> </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+</code></pre>
+<p class="p">The search for an optimal solution in this
+problem could potentiality take a long time, so you place a <em class="ph i">time
+limit</em> on the solve process. The search will stop when the time
+limit is reached, even if optimality of the current best solution
+is not guaranteed. You also add the code to change the display frequency
+of the progress log of the search. Both of these are done by setting
+parameters on the optimizer.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.133677__migration.uss_gscpoptimizersports.157904"><h2 class="title sectiontitle">Step 20: Add the time limit</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the time limit</samp> </p>
+<pre class="pre codeblock"><code>    cp.setParameter(IloCP::TimeLimit, 60);
+    cp.setParameter(IloCP::LogPeriod, 10000);
+</code></pre>
+<p class="p">Since you know information about the structure
+of this problem, you can tune the optimizer to help it perform better.
+While modeling the problem, you have introduced quite a few auxiliary
+variables. However, the array <samp class="ph codeph">allGames</samp> contains
+the solution, so it is best to assign its values first. In fact, after
+all the decision variables in the array <samp class="ph codeph">allGames</samp> have
+been assigned values, the values for all of the other variables in
+the model will have been determined through constraint propagation.
+A search strategy that chooses the variable in this array which currently
+has the smallest index and assigns it a random value works well in
+this problem. </p>
+<p class="p">To tune the optimizer, you first indicate
+that the search strategy should select from the variables of <samp class="ph codeph">allGames</samp> the variable with the smallest index that
+has not been assigned a value. To do this, you pass the instance of
+the class <samp class="ph codeph">IloIntVarEval</samp> that is returned
+by the function <samp class="ph codeph">IloVarIndex</samp> to the selector <samp class="ph codeph">IloSelectSamllest</samp> and add this to a variable selector
+array.</p>
+<p class="p">To indicate that you want the search strategy
+to try to assign a random value to the variable that has been chosen,
+you pass the selector returned by the <samp class="ph codeph">IloSelectRandomValue</samp> function
+to a value selector array.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.133677__migration.uss_gscpoptimizersports.157917"><h2 class="title sectiontitle">Step 21: Create the search selectors</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the search selectors</samp> </p>
+<pre class="pre codeblock"><code>    IloVarSelectorArray varSel(env);
+    varSel.add(IloSelectSmallest(IloVarIndex(env, allGames)));
+    IloValueSelectorArray valSel(env);
+    valSel.add(IloSelectRandomValue(env));
+</code></pre>
+<p class="p">To inform the optimizer to use these selectors,
+you create an instance of the class <samp class="ph codeph">IloSearchPhase</samp>,
+which is the container for the information regarding tuning the search
+strategy.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.133677__migration.uss_gscpoptimizersports.157947"><h2 class="title sectiontitle">Step 22: Create the tuning object</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the tuning object</samp> </p>
+<pre class="pre codeblock"><code>    IloSearchPhase phase(env, allGames, varSel, valSel);
+</code></pre>
+<p class="p">As the search will likely terminate before
+optimality has been proven, you use a search that allows you to examine
+intermediate solutions instead of using <samp class="ph codeph">IloCP::solve</samp>.
+To be able to display intermediate solutions, you use three other
+member functions of the class <samp class="ph codeph">IloCP</samp>. You
+first use the member function <samp class="ph codeph">IloCP::startNewSearch</samp>,
+whose argument is an instance of <samp class="ph codeph">IloSearchPhase,</samp> to
+initialize the optimizer.</p>
+<p class="p">To look for a solution, you
+call <samp class="ph codeph">IloCP::next</samp> in a loop. This tells the
+optimizer to:</p>
+<ul class="ul"><li class="li"><p class="p">search for a solution in the manner defined
+by the tuning object passed to <samp class="ph codeph">IloCP::startNewSearch</samp> and</p>
+ </li>
+<li class="li"><p class="p">add the constraint that the following solution
+must be better than the solution found previously. </p>
+ </li>
+</ul>
+<p class="p">In other words, each time <samp class="ph codeph">IloCP::next</samp> is
+called, the new solution will yield a better value for the objective.
+If no limit has been specified with a search parameter, the last solution
+found is the optimal solution. </p>
+<p class="p">In this lesson, you
+use a loop to find better and better solutions and print the cost
+for each solution found.</p>
+<p class="p">After the while loop terminates,
+you should use the member function <samp class="ph codeph">IloCP::end</samp> to
+terminate the search and delete internal objects created by CP Optimizer
+to carry out the search. The code for ending the optimizer is given
+for you in the lesson code.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.133677__migration.uss_gscpoptimizersports.157962"><h2 class="title sectiontitle">Step 23: Search for a solution</h2><p class="p">Add the
+following code after the comment <samp class="ph codeph">//Search for a solution</samp>  </p>
+<pre class="pre codeblock"><code>    cp.startNewSearch(phase);
+    while (cp.next()) {
+</code></pre>
+<p class="p">The objective for each solution found is displayed.
+The code for displaying each solution is provided for you in the lesson
+code. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.133677__migration.uss_gscpoptimizersports.157977"><h2 class="title sectiontitle">Step 24: Compile and run the program</h2><p class="p">Compile
+and run the program. Your results may vary from the ones reported
+here since on different systems the time limit will be reached at
+different points in the search. </p>
+<pre class="pre codeblock"><code>Solution at 40
+</code></pre>
+<p class="p">The complete program can be viewed online
+in the file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/sports.cpp</samp>. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/sports.html" title="In this lesson, you will learn how to use CP Optimizer to find a solution to a sports scheduling problem.">Using specialized constraints and tuples: scheduling teams</a></div>
+</div>
+</div></body>
+</html>

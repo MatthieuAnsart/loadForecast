@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Working with interval variables" />
+<meta name="abstract" content="Scheduling constraints in the engine are built using the interval variables in the engine." />
+<meta name="Description" content="Scheduling constraints in the engine are built using the interval variables in the engine." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1271679351351" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<title>Working with interval variables</title>
+</head>
+<body role="main" id="descriptiveTopic1271679351351">
+<h1 class="title topictitle1">Working with interval variables</h1>
+<div class="body"><p class="shortdesc">Scheduling constraints in the engine are built using
+the interval variables in the engine.</p>
+<p class="p">The primary reason for developing a custom search goal
+is the recognition of global knowledge of the model which allows for
+an efficient search to be built:</p>
+<ul class="ul"><li class="li"><p class="p">The requirements of the problem do not
+fit with the automatic search, for example, in the sample <samp class="ph codeph">schedsearch_greedyrelax.cpp</samp>,
+the objective is to build the schedule greedily at each step of the
+relaxation.</p>
+</li>
+<li class="li"><p class="p">The automatic search does not find a
+good enough solution to efficiently start the automatic optimization
+procedure. The solution the user-defined goal is then used as starting
+point for the optimization.</p>
+</li>
+<li class="li"><p class="p">You want to write a sophisticated search
+procedure. Examples of this, given in an academic context, are studies
+of search procedures which take advantage of the propagation  algorithm,
+the reversibility properties and the search tree traversal delivered
+by CP Optimizer.</p>
+</li>
+</ul>
+<p class="p">The basic principles useful in writing a goal involving
+instances of <samp class="ph codeph">IlcIntervalVar</samp> include:</p>
+<ul class="ul"><li class="li"><p class="p">building a chronological schedule by
+fixing the starting point and, eventually, the end point after candidate
+selection at the frontier of the partial schedule and</p>
+</li>
+<li class="li"><p class="p">interleave a goal that raises precedences
+or extends sequences with a chronological schedule decision. </p>
+</li>
+</ul>
+<p class="p">An important point when writing a user-defined search
+procedure is fixing the presence of an interval.  A general strategy
+is to decide its presence value before scheduling it (or making any
+actual decision that affects the interval domain).  </p>
+<p class="p">In a model, there exist instances of interval (or integer)
+variables whose fixing depend on the fixing  of some other interval
+and integer variables. The classic example of this dependence in CP
+Optimizer is the master interval of a spanning or alternative constraint;
+a master interval is fixed whenever the spanned or alternative intervals
+are fixed. Chronological schedule building decisions should not be
+made on this type of master interval. Eventually, due to specific
+knowledge of the problem, you are aware that there are some intervals
+whose fixing heavily depends upon some dominant intervals. In schedule
+building, it is best to wait for the dominant intervals to be fixed
+before making any (residual) decisions on the dominated interval.
+ </p>
+<p class="p">The function <samp class="ph codeph">IlcGoal IlcSimpleCompletionGoal(IloCP
+cp);</samp> returns a goal that fixes all variables of the
+model. This goal should be used whenever the user-define goal terminates
+with some variables remaining unfixed. Using this goal is mandatory
+whenever the model contains state functions (instances of <samp class="ph codeph">IloStateFunction</samp>).</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" title="Custom constraints and goals for scheduling can be written using engine extensions.">Writing custom scheduling constraints and goals</a></div>
+</div>
+</div></body>
+</html>

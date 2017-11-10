@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Basic types" />
+<meta name="abstract" content="Each expression in the CPO file format has an automatically computed type (it is not possible to specify the type of an expression explicitly)." />
+<meta name="Description" content="Each expression in the CPO file format has an automatically computed type (it is not possible to specify the type of an expression explicitly)." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/syntax.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Basic_types" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/syntax.html" />
+<title>Basic types</title>
+</head>
+<body role="main" id="Basic_types">
+<h1 class="title topictitle1">Basic types</h1>
+<div class="body conbody"><p class="shortdesc">Each expression in the CPO file format has an automatically computed type
+(it is not possible to specify the type of an expression explicitly).</p>
+<div class="section">
+<p class="p">Note that there are no user-defined types in CPO file format.</p>
+
+
+<p class="p">This section describes only basic types. Additional types
+are described in sections <a class="xref" href="130_MoreTypes.html" title="This section describes additional types.">More types</a> and 
+<a class="xref" href="../search/040_Types.html" title="All statements in the search section must be related to the fixing strategy. For example, it is not possible to declare new variables in the search section. Therefore there is a limitation in respect of types that can be used within search section.">Types in search section</a>.</p>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/syntax.html" title="This section describes the elements of the CPO file format such as statements, expressions, types, variables, constants or directives, and how to use them.">CP Optimizer file format syntax</a></div>
+</div>
+</div><div class="topic concept nested1" id="Numerical_types"><h2 class="title topictitle2">Numerical types</h2>
+<div class="body conbody"><p class="p">Numerical constants in CPO files have type <samp class="ph codeph">int</samp> or <samp class="ph codeph">float</samp>:</p>
+<dl class="dl"><dt class="dt dlterm" id="Numerical_types__int"><samp class="ph codeph">int</samp></dt>
+<dd class="dd">Integer in range <samp class="ph codeph"><a class="xref" href="040_Constants.html#Constants__intmin">intmin</a>..<a class="xref" href="040_Constants.html#Constants__intmax">intmax</a></samp>.</dd>
+<dt class="dt dlterm" id="Numerical_types__float"><samp class="ph codeph">float</samp></dt>
+<dd class="dd"><samp class="ph codeph">float</samp> for floating-point constants. It corresponds to <samp class="ph codeph">double</samp>
+type in C.</dd>
+</dl>
+<p class="p">The type <samp class="ph codeph">int</samp> is preferred. That is, whenever the number can be represented
+as <samp class="ph codeph">int</samp> in the range <samp class="ph codeph"><a class="xref" href="040_Constants.html#Constants__intmin">intmin</a>..<a class="xref" href="040_Constants.html#Constants__intmax">intmax</a></samp> then the type <samp class="ph codeph">int</samp> is used, otherwise the type is <samp class="ph codeph">float</samp> is used. Note that it does not matter
+whether the number is written with or without a decimal point, for example the type of constant <samp class="ph codeph">4.0</samp> is also <samp class="ph codeph">int</samp>.</p>
+<p class="p">Certain functions require <samp class="ph codeph">int</samp> arguments within a certain range.
+In this case the function may require a parameter of one of the
+following types:</p>
+<dl class="dl"><dt class="dt dlterm" id="Numerical_types__uint"><samp class="ph codeph">uint</samp></dt>
+<dd class="dd">Non-negative integer in range <samp class="ph codeph">0..<a class="xref" href="040_Constants.html#Constants__intmax">intmax</a></samp></dd>
+<dt class="dt dlterm" id="Numerical_types__sint"><samp class="ph codeph">sint</samp></dt>
+<dd class="dd">Integer in range <samp class="ph codeph"><a class="xref" href="040_Constants.html#Constants__intervalmin">intervalmin</a>..<a class="xref" href="040_Constants.html#Constants__intervalmax">intervalmax</a></samp>. Used in scheduling.</dd>
+<dt class="dt dlterm" id="Numerical_types__bit"><samp class="ph codeph">bit</samp></dt>
+<dd class="dd">Bit constant. Possible values are only <samp class="ph codeph">0</samp> and <samp class="ph codeph">1</samp>.</dd>
+</dl>
+<p class="p">Conversions from type <samp class="ph codeph">int</samp> to types <samp class="ph codeph">uint</samp>, <samp class="ph codeph">sint</samp> and <samp class="ph codeph">bit</samp> are
+automatic, however if the provided value is not within the requested range
+then an error is raised.</p>
+<div class="section" id="Numerical_types__Example"><h3 class="title sectiontitle">Example</h3>
+<pre class="pre codeblock"><code>pi = 3.14159265359; <span class="ph commentemph">// Constant, type float</span>
+n = 10;   <span class="ph commentemph">// Constant, type int</span>
+q = 5.0;  <span class="ph commentemph">// Constant, type int</span>
+zero = 0; <span class="ph commentemph">// Constant, type int</span>
+<span class="ph commentemph">// Function stepAt takes sint and uint parameters:</span>
+step = <a class="xref" href="../functions/stepAt.html" title="Returns an elementary cumul function of constant value after a given point.">stepAt</a>(10, q);</code></pre>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" id="Variable_types"><h2 class="title topictitle2">Variable types</h2>
+<div class="body conbody"><p class="p">Each variable type has its own type:</p>
+<dl class="dl"><dt class="dt dlterm" id="Variable_types__intVar"><samp class="ph codeph">intVar</samp></dt>
+<dd class="dd">Integer decision variable. Note that <samp class="ph codeph">intVar</samp> is the
+type name and
+also the name of function <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable."><samp class="ph codeph">intVar</samp></a> (a
+"constructor" of integer variable).</dd>
+<dt class="dt dlterm" id="Variable_types__intervalVar"><samp class="ph codeph">intervalVar</samp></dt>
+<dd class="dd">Interval decision variable. Again, <samp class="ph codeph">intervalVar</samp> is the
+type name and also name of function <a class="xref" href="../functions/intervalVar.html" title="Creates a new interval variable."><samp class="ph codeph">intervalVar</samp></a>.</dd>
+<dt class="dt dlterm" id="Variable_types__sequenceVar"><samp class="ph codeph">sequenceVar</samp></dt>
+<dd class="dd">Interval sequence decision variable. There is also the function <a class="xref" href="../functions/sequenceVar.html" title="Creates new sequence variable."><samp class="ph codeph">sequenceVar</samp></a> with the same name.</dd>
+<dt class="dt dlterm" id="Variable_types__stateFunction"><samp class="ph codeph">stateFunction</samp></dt>
+<dd class="dd">State function. There is also the function <a class="xref" href="../functions/stateFunction.html" title="Creates a new state function."><samp class="ph codeph">stateFunction</samp></a> with the same name.</dd>
+</dl>
+</div>
+</div>
+<div class="topic concept nested1" id="Expression_types"><h2 class="title topictitle2">Expression types</h2>
+<div class="body conbody"><p class="p">Variables and constants can be combined together into compound expressions.
+The most common expression types are:</p>
+<dl class="dl"><dt class="dt dlterm" id="Expression_types__intExpr"><samp class="ph codeph">intExpr</samp></dt>
+<dd class="dd">Integer expressions. For example, if <samp class="ph codeph">x</samp> and <samp class="ph codeph">y</samp> are
+integer variables then <samp class="ph codeph">x+1</samp>, <samp class="ph codeph">y-2</samp> and <samp class="ph codeph">(x+1)*(y-2)</samp> are integer
+expressions.</dd>
+<dt class="dt dlterm" id="Expression_types__floatExpr"><samp class="ph codeph">floatExpr</samp></dt>
+<dd class="dd"><samp class="ph codeph">floatExpr</samp> for floating point expressions such as <samp class="ph codeph">x + 0.5</samp>.</dd>
+<dt class="dt dlterm" id="Expression_types__boolExpr"><samp class="ph codeph">boolExpr</samp></dt>
+<dd class="dd"><samp class="ph codeph">boolExpr</samp> for Boolean expressions. For example <samp class="ph codeph">x &lt; 5</samp>,
+<samp class="ph codeph">y == 7</samp> and <samp class="ph codeph">x &lt; 5 || y == 7</samp> are  Boolean expressions.
+When a Boolean expression is true then its value is 1, otherwise 0.</dd>
+</dl>
+<p class="p">Note that constant propagation is not carried out when a CPO file is read.
+Instead, such expressions are evaluated by CP Optimizer during presolve.
+Therefore <samp class="ph codeph">1+2</samp> is integer expression, not an integer constant.</p>
+<p class="p">For complete list of supported operators and functions see
+<a class="xref" href="100_Expressions.html#Operator_expressions">Operator expressions</a> and
+<a class="xref" href="../functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a>.</p>
+<div class="section" id="Expression_types__Example2"><h3 class="title sectiontitle">Example</h3>
+<pre class="pre codeblock"><code>x = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..10); <span class="ph commentemph">// type intVar</span>
+y = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..10); <span class="ph commentemph">// type intVar</span>
+halfx1 = x / 2;    <span class="ph commentemph">// type floatExpr</span>
+halfx2 = x div 2;  <span class="ph commentemph">// type intExpr</span>
+total = x + y;     <span class="ph commentemph">// type intExpr</span></code></pre>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" id="Type_constraint"><h2 class="title topictitle2">Type <samp class="ph codeph">constraint</samp></h2>
+<div class="body conbody"><p class="p">The <samp class="ph codeph">constraint</samp> type represents a condition that is required to hold in
+every solution. Any <samp class="ph codeph"><a class="xref" href="070_Types.html#Expression_types__boolExpr">boolExpr</a></samp> can be turned into <samp class="ph codeph">constraint</samp>.
+Additionally there are functions such as <samp class="ph codeph"><a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a></samp> that return <samp class="ph codeph">constraint</samp>. Therefore <samp class="ph codeph"><a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a>([x, y, z])</samp> is a valid constraint however
+<samp class="ph codeph"><a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a>([x, y, z]) or <a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a>([a, b, c])</samp> is invalid (operator <samp class="ph codeph">or</samp>
+requires two <samp class="ph codeph"><a class="xref" href="070_Types.html#Expression_types__boolExpr">boolExpr</a></samp> arguments).</p>
+<div class="section" id="Type_constraint__Example3"><h3 class="title sectiontitle">Example</h3>
+<pre class="pre codeblock"><code><span class="ph stringemph">"x[0]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(0..2);
+<span class="ph stringemph">"x[1]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(0..2);
+<span class="ph stringemph">"x[2]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(0..2);
+x = [<span class="ph stringemph">"x[0]"</span>, <span class="ph stringemph">"x[1]"</span>, <span class="ph stringemph">"x[2]"</span>]; <span class="ph commentemph">// x is an array of three integer variables</span>
+<span class="ph stringemph">"y[0]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(0..2);
+<span class="ph stringemph">"y[1]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(0..2);
+<span class="ph stringemph">"y[2]"</span> = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(0..2);
+y = [<span class="ph stringemph">"y[0]"</span>, <span class="ph stringemph">"y[1]"</span>, <span class="ph stringemph">"y[2]"</span>]; <span class="ph commentemph">// y is an array of three integer variables</span>
+<a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a>(x);    <span class="ph commentemph">// constraint: each x[i] must take different value</span>
+<a class="xref" href="../functions/alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a>(y);    <span class="ph commentemph">// constraint: each y[i] must take different value</span>
+<a class="xref" href="../functions/inverse.html" title="Constrains elements of one array to be inverses of another.">inverse</a>(x, y); <span class="ph commentemph">// constraint: for each i in 0..2: x[y[i]] == i</span></code></pre>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" id="Type_objective"><h2 class="title topictitle2">Type <samp class="ph codeph">objective</samp></h2>
+<div class="body conbody"><p class="p">For the user, some solutions may be better than others. The objective allows to
+compare different solutions so that CP Optimizer can search for the best one.</p>
+<div class="section" id="Type_objective__Example4"><h3 class="title sectiontitle">Example</h3>
+<pre class="pre codeblock"><code>x = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..100);
+<a class="xref" href="../functions/minimize.html" title="A function to specify an optimization problem. It asks CP Optimizer to seek to minimize the value of an expression.">minimize</a>(x); <span class="ph commentemph">// Search for solution with minimum value of x</span>
+...</code></pre>
+</div>
+</div>
+</div>
+<div class="topic concept nested1" id="Hierarchy_of_basic_types"><h2 class="title topictitle2">Hierarchy of basic types</h2>
+<div class="body conbody"><p class="p">An <samp class="ph codeph"><a class="xref" href="070_Types.html#Numerical_types__int">int</a></samp> constant can be used anywhere where <samp class="ph codeph"><a class="xref" href="070_Types.html#Expression_types__intExpr">intExpr</a></samp> or <samp class="ph codeph"><a class="xref" href="070_Types.html#Expression_types__floatExpr">floatExpr</a></samp>
+is expected. The following diagram shows the type hierarchy of basic types.</p>
+<div class="imageleft"><img class="image syntaxdiagram" src="../diagrams/diagram7.png" /></div></div>
+</div>
+</body>
+</html>

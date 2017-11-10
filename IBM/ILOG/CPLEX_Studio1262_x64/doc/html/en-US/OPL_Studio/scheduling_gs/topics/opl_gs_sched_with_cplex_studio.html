@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Scheduling with IBM ILOG CPLEX Studio" />
+<meta name="abstract" content="Introduces the basic building blocks of a scheduling model." />
+<meta name="Description" content="Introduces the basic building blocks of a scheduling model." />
+<meta name="DC.subject" content="scheduling building blocks, interval, constraint, temporal, specialized" />
+<meta name="keywords" content="scheduling building blocks, interval, constraint, temporal, specialized" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="irismtx5" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Scheduling with IBM ILOG CPLEX Studio</title>
+</head>
+<body role="main" id="irismtx5">
+<h1 class="title topictitle1">Scheduling with IBM ILOG CPLEX Studio</h1>
+<div class="body"><p class="shortdesc">Introduces the basic building blocks of a scheduling model.</p>
+<p class="p">In this section, you will learn:</p>
+<ul class="ul"><li class="li"><p class="p">The basic building blocks of a scheduling model</p>
+</li>
+<li class="li"><p class="p">How to run a sample project to ensure your installation is
+working correctly.</p>
+</li>
+</ul>
+<p class="p">CPLEX Studio is a rapid development system for optimization models
+with interfaces to embed models into standalone applications.</p>
+<p class="p">Scheduling models can be run in the CPLEX Studio IDE or using the
+command line executable, <span class="ph filepath">oplrun</span>.</p>
+<ul class="ul"><li class="li"><p class="p">For details on how to open an example in the IDE, please refer
+to <a class="xref" href="../../gsoplide/topics/opl_ide_gettingstarted_TOC.html" title="An Introduction to the CPLEX Studio IDE, and the Getting Started Tutorial explain how to launch the CPLEX Studio IDE, create an empty project, enter an OPL model, add data and a settings file, create run configurations and execute the final project.">Getting Started with the IDE</a></p>
+</li>
+<li class="li"><p class="p">For details on using <samp class="ph codeph">oplrun</samp>, please refer
+to <a class="xref" href="../../refoplrun/topics/oplrun_TOP.html" title="Explains how to execute OPL models and projects from the command line.">oplrun Command Line Interface</a></p>
+</li>
+</ul>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="zBYcu4v3"><h2 class="title topictitle2">Prerequisites</h2>
+<div class="body"><p class="p">To follow the examples in this section, you should have some knowledge
+about optimization (math programming or constraint programming) and
+about modeling optimization problems. </p>
+<p class="p">You should also be somewhat familiar with the CPLEX Studio IDE
+and how to work with it. If you are not, you should complete the tutorials
+in <a class="xref" href="../../gsoplide/topics/opl_ide_gettingstarted_TOC.html" title="An Introduction to the CPLEX Studio IDE, and the Getting Started Tutorial explain how to launch the CPLEX Studio IDE, create an empty project, enter an OPL model, add data and a settings file, create run configurations and execute the final project.">Getting Started with the IDE</a> before
+continuing with this manual.</p>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="SLIYdEr8"><h2 class="title topictitle2">Tutorial project</h2>
+<div class="body"><p class="p">The <samp class="ph codeph">scheduling_tutorial</samp> project is located at <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/tutorial/</span>.</p>
+<p class="p">To access this project in the CPLEX Studio IDE, use the following
+procedure:</p>
+<ol class="ol"><li class="li"><p class="p">In the IDE main menu, choose <span class="ph menucascade"><span class="ph uicontrol">File </span> &gt; <span class="ph uicontrol"> New </span> &gt; <span class="ph uicontrol"> Example</span></span> to launch the New Example wizard.</p>
+ </li>
+<li class="li"><p class="p">On the first screen of the wizard, select <span class="ph uicontrol">IBM ILOG
+OPL Examples</span> and click <span class="ph uicontrol">Next</span>.</p>
+ </li>
+<li class="li"><p class="p">On the next screen of the wizard, navigate to the <strong class="ph b">Scheduling
+tutorial</strong> example, highlight it, and click <span class="ph uicontrol">Finish</span>. </p>
+ <p class="p">Note
+that the <span class="ph uicontrol">Scheduling tutorial</span> example is located
+under the <span class="ph uicontrol">Basic</span> group on the default <span class="ph uicontrol">Sorted
+by Complexity</span> tab of the wizard. You can also access it
+quickly by typing <span class="ph uicontrol">tutorial</span> into the filter
+text field.</p>
+ </li>
+<li class="li"><p class="p">The example opens in the IDE, and appears in the OPL Projects
+Navigator window with the project title <span class="ph uicontrol">scheduling_tutorial</span>.</p>
+ </li>
+</ol>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="VK3Sb4cl"><h2 class="title topictitle2">Scheduling building blocks</h2>
+<div class="body"><p class="p">Scheduling is the act of creating a schedule, which is a timetable
+for planned occurrences. Scheduling may also involve allocating resources
+to activities over time. A scheduling problem can be viewed as a constraint
+satisfaction problem or as a constrained optimization problem, but
+regardless of how it is viewed, a scheduling problem is defined by:</p>
+<ul class="ul"><li class="li"><p class="p">A set of time intervals--definitions of activities, operations,
+or tasks to be completed</p>
+ </li>
+<li class="li"><p class="p">A set of temporal constraints--definitions of possible relationships
+between the start and end times of the intervals</p>
+ </li>
+<li class="li"><p class="p">A set of specialized constraints--definitions of the complex
+relationships on a set of intervals due to the state and finite capacity
+of resources.</p>
+</li>
+</ul>
+<p class="p">In CPLEX Studio, a scheduling project contains one or more model
+files and, optionally, one or more data files and one or more settings
+files. The following sections provide deeper explanations of how the
+OPL language facilitates the representation of scheduling problems.</p>
+<div class="section" id="VK3Sb4cl__OLOp6dcQ"><h3 class="title sectiontitle">The model files</h3><p class="p">Model files (<span class="ph filepath">.mod</span> extension)
+contain all of the OPL statements. The following components are usually
+present in a model file:</p>
+<ul class="ul"><li class="li"><p class="p">the declarations of data</p>
+ </li>
+<li class="li"><p class="p">the declarations of decision variables</p>
+ </li>
+<li class="li"><p class="p">the declaration of engine</p>
+ </li>
+<li class="li"><p class="p">an objective function</p>
+ </li>
+<li class="li"><p class="p">the constraints</p>
+ </li>
+<li class="li"><p class="p">script statements.</p>
+ </li>
+</ul>
+<p class="p">The data, the objective function, and scripting statements
+are not mandatory.</p>
+</div>
+<div class="section" id="VK3Sb4cl__bCWVM55n"><h3 class="title sectiontitle">Declarations of data</h3><p class="p">Data declarations allow you to name your
+data so that you can reference it easily in your model. For example,
+if your data in a table defines the cost of shipping one unit of material
+from location <em class="ph i">i</em> to location <em class="ph i">j</em>, you might want to call
+your item of data <strong class="ph b">cost</strong><em class="ph i">ij</em> where <em class="ph i">i=1,..., n</em>, <em class="ph i">j=1,...,
+n</em>, and <em class="ph i">n</em> is the number of locations in your model. You
+tell OPL that your model uses this data by declaring:</p>
+<pre class="pre codeblock"><code>   int n = ... ;
+   float cost[1..n][1..n] = ... ;</code></pre>
+<p class="p">The … (ellipsis) means
+that the actual values for your table are located in a data file,
+which must be listed in the current project.</p>
+<p class="p">You could also
+list the data explicitly in the model file. However, it is recommended
+that you construct model files without specifying values for data
+so that you can later easily solve many instances of the same model
+by simply changing the data file.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">The <samp class="ph codeph">int</samp> type
+declared means that the numbers in the data file must be integers.
+If the numbers in the data file are floating-point numbers, use the <span class="keyword apiname">float</span> type
+instead. </p>
+ </div>
+</div>
+<div class="section" id="VK3Sb4cl__Jbaatzg4"><h3 class="title sectiontitle">Declarations of decision variables</h3><p class="p">Variable
+declarations name and define the type of each variable in the model.
+For example, if you want to create a variable that equals the amount
+of material shipped from location <em class="ph i">i</em> to location <em class="ph i">j</em>, you
+can create a variable named <strong class="ph b">ship</strong><em class="ph i">ij</em>:</p>
+<pre class="pre codeblock"><code>   dvar int+ ship[1..n][1..n];</code></pre>
+<p class="p">The <span class="keyword apiname">dvar</span> keyword
+indicates that you are declaring a decision variable. Since <samp class="ph codeph">int+</samp> indicates
+that the variables are nonnegative, this statement declares an array
+of nonnegative integer variables.</p>
+<p class="p">There is a restriction for
+constraint programming in OPL; float decision variables cannot be
+used. Instead, if you need to set constraints on float expressions,
+you should use <span class="keyword apiname">float dexpr</span>; see the section <a class="xref" href="../../opllangref/topics/opl_langref_expressions_int.html" title="Describes the use of constants, data, decision variables, and operators within OPL expressions.">Integer and float expressions</a> in
+the <em class="ph i">Language Reference Manual</em>.</p>
+<p class="p">For
+scheduling there are specific additional decision variables, namely:</p>
+<ul class="ul"><li class="li"><p class="p"><span class="keyword apiname">interval</span></p>
+ </li>
+<li class="li"><p class="p"><span class="keyword apiname">sequence</span></p>
+ </li>
+</ul>
+<p class="p">In OPL, activities, operations and tasks are represented as
+interval decision variables.</p>
+<p class="p">An interval has a start, an end,
+a length, and a size. An interval variable allows for these values
+to be variable within the model. The start is the lower endpoint of
+the interval and the end is the upper endpoint of the interval. By
+default, the size is equal to the length, which is the difference
+between the end and the start of the interval. In general, the size
+is a lower bound on the length.</p>
+<p class="p">Also, an interval variable may
+be optional, and whether or not an interval is present in the solution
+is represented by a decision variable. If an interval is not present
+in the solution, this means that any constraints on this interval
+acts like the interval is “not there.” The exact semantics will depend
+on the specific constraint.</p>
+<p class="p">The following example contains a
+two-dimensional array of interval decision variables where the sizes
+of the interval variables are fixed:</p>
+<pre class="pre codeblock"><code>dvar interval itvs  [h in Houses][t in TaskNames] size Duration[t];</code></pre>
+</div>
+<div class="section" id="VK3Sb4cl__fMoMv8Pu"><h3 class="title sectiontitle">Declaration of engine</h3><p class="p">A scheduling model starts with the declaration
+of the engine as follows:</p>
+<pre class="pre codeblock"><code>using CP;</code></pre>
+<p class="p">This
+declaration tells OPL to use the CP engine to solve the problem. In
+addition, it allows the use of constraints that are specific to constraint
+programming or to scheduling.</p>
+</div>
+<div class="section" id="VK3Sb4cl__zyLHboVE"><h3 class="title sectiontitle">Objective function</h3><p class="p">The objective function is an expression that
+you want to optimize. This function must consist of variables and
+data that you have declared earlier in the model file. The objective
+function is introduced by either the <span class="keyword apiname">minimize</span> or
+the <span class="keyword apiname">maximize</span> keyword. For example:</p>
+<pre class="pre codeblock"><code>   minimize endOf(tasks["moving"]);</code></pre>
+<p class="p">This
+statement indicates that you want to minimize the end of the interval
+variable <samp class="ph codeph">tasks["moving"]</samp>.</p>
+</div>
+<div class="section" id="VK3Sb4cl__J66P9wCO"><h3 class="title sectiontitle">Constraints</h3><p class="p">Constraints
+indicate the conditions necessary for a feasible solution to your
+model. You declare constraints within a <samp class="ph codeph">subject to</samp> block.
+For example:</p>
+<pre class="pre codeblock"><code>   subject to {
+     forall(t in Tasks)
+       forall(s in successors[t])
+         endBeforeStart(tasks[t], tasks[s]);
+   }</code></pre>
+<p class="p">This statement declares one set of precedence constraints.</p>
+<p class="p">Several
+types of constraints can be placed on interval variables:</p>
+<ul class="ul"><li class="li"><p class="p">precedence constraints, which ensure that relative positions
+of intervals in the solution (For example a precedence constraint
+can model a requirement that an interval <samp class="ph codeph">a</samp> must end
+before interval <samp class="ph codeph">b</samp> starts, optionally with some minimum
+delay <samp class="ph codeph">z</samp>);</p>
+ </li>
+<li class="li"><p class="p">no overlap constraints, which ensure that positions of intervals
+in the solution are disjointed in time;</p>
+ </li>
+<li class="li"><p class="p">span constraints, which ensure that one interval to cover those
+intervals in a set of intervals;</p>
+ </li>
+<li class="li"><p class="p">alternative constraints, which ensure that exactly one of a
+set of intervals be present in the solution;</p>
+ </li>
+<li class="li"><p class="p">synchronize constraints, which ensure that a set of intervals
+start and end at the same time as a given interval variable if it
+is present in the solution;</p>
+ </li>
+<li class="li"><p class="p">cumulative expression constraints, which restrict the bounds
+on the domains of cumulative expressions.</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="VK3Sb4cl__qIfviiIw"><h3 class="title sectiontitle">Script statements</h3><p class="p">Between the various blocks of a model (declaration
+of data, declaration of variables, constraints) or after the constraints,
+it is possible to add some script statements. This is useful for instance
+to preprocess input data, display it, or to display result data. These
+statements are written in IBM ILOG Script, an extension of the JavaScript
+language for OPL.</p>
+<p class="p">IBM
+ILOG Script for OPL enables you to:</p>
+<ul class="ul"><li class="li"><p class="p">add preprocessing instructions to prepare data for the model;</p>
+</li>
+<li class="li"><p class="p">control the flow while the model is solved;</p>
+</li>
+<li class="li"><p class="p">set CPLEX parameters, CP Optimizer parameters, CP Optimizer
+search phases, and OPL options;</p>
+ </li>
+<li class="li"><p class="p">add postprocessing instructions to aggregate, transform, and
+format data (including results data) for display or for sending to
+another application, for example, a spreadsheet;</p>
+ </li>
+<li class="li"><p class="p">solve repeated instances of the same model;</p>
+</li>
+<li class="li"><p class="p">create algorithmic solutions where the output of one model
+instance is used as the input of a second model instance.</p>
+</li>
+</ul>
+<p class="p">When you use IBM ILOG Script for OPL, you avoid having to
+compile and link; you just add script statements to your model file.</p>
+<p class="p">There
+are two possible top-level statements:</p>
+<ul class="ul"><li class="li"><p class="p">the <samp class="ph codeph">main</samp> statement for a flow control script,
+and</p>
+</li>
+<li class="li"><p class="p">the <samp class="ph codeph">execute</samp> statement for preprocessing and
+postprocessing scripts.</p>
+ </li>
+</ul>
+<pre class="pre codeblock"><code>   minimize endOf(tasks["moving"]);
+   subject to {
+     ...
+   }
+   
+   execute DISPLAY {
+     writeln("end=", tasks["moving"].end);
+   }</code></pre>
+</div>
+<div class="section" id="VK3Sb4cl__oDVJwOm4"><h3 class="title sectiontitle">Data files</h3><p class="p">You can organize
+large problems better by separating the model of the problem from
+the instance data. In this case, you store the instance data in one
+or more data files (<span class="ph filepath">.dat</span> extension). Data files
+store the actual values of the data used in the model. A data file
+will look something like this:</p>
+<pre class="pre codeblock"><code>  n = 3;
+
+  c = [[0.0 1.5 2.3]
+      [1.5 0.0 3.7]
+      [2.3 3.7 0.0]];</code></pre>
+<p class="p">Each data file may specify one or more connections
+to data sources, such as a relational database or a spreadsheet, to
+read and write data. From the IDE, you can export external data and
+internal data to a <span class="ph filepath">.dat</span> file, which you can later
+use as input. Only the data actually used in the model is exported
+to data files.</p>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="F1D5Sv1o"><h2 class="title topictitle2">Execute and test</h2>
+<div class="body"><p class="p">In future sections, you will work through tutorials by describing,
+modeling, and solving problems using IBM ILOG CPLEX Studio. In this
+section, you are provided with a completed example model so that you
+can test your installation of CPLEX Studio. In the next section, <em class="ph i">Modeling
+and Solving a Simple Problem: House Building</em>, you will learn about
+the language features used in this model.</p>
+<div class="section" id="F1D5Sv1o__ERWHdJpW"><h3 class="title sectiontitle">Description of the problem</h3><p class="p">The
+problem is a house building problem in which there are ten tasks of
+fixed size, each of which needs to be assigned a starting time. The
+statements for creating the interval variables that represent the
+tasks are: </p>
+<pre class="pre codeblock"><code>using CP;
+
+dvar interval masonry    size 35;
+dvar interval carpentry  size 15;
+dvar interval plumbing   size 40;
+dvar interval ceiling    size 15;
+dvar interval roofing    size 5;
+dvar interval painting   size 10;
+dvar interval windows    size 5;
+dvar interval facade     size 10;
+dvar interval garden     size 5;
+dvar interval moving     size 5;</code></pre>
+</div>
+<div class="section" id="F1D5Sv1o__kWh46pxl"><h3 class="title sectiontitle">Adding the constraints</h3><p class="p">The
+constraints in this problem are precedence constraints; some tasks
+cannot start until other tasks have ended. For example, the ceilings
+must be completed before painting can begin. The set of precedence
+constraints for this problem can be added to the model with the block:</p>
+<pre class="pre codeblock"><code>subject to {
+  endBeforeStart(masonry,   carpentry);
+  endBeforeStart(masonry,   plumbing);
+  endBeforeStart(masonry,   ceiling);
+  endBeforeStart(carpentry, roofing);
+  endBeforeStart(ceiling,   painting);
+  endBeforeStart(roofing,   windows);
+  endBeforeStart(roofing,   facade);
+  endBeforeStart(plumbing,  facade);
+  endBeforeStart(roofing,   garden);
+  endBeforeStart(plumbing,  garden);
+  endBeforeStart(windows,   moving);
+  endBeforeStart(facade,    moving);
+  endBeforeStart(garden,    moving);
+  endBeforeStart(painting,  moving);
+}</code></pre>
+<p class="p">Here there is a special constraint, <span class="keyword apiname">endBeforeStart</span>,
+which ensures that one interval variable ends before the other starts.
+This constraint has a special treatment in the engine. One reason
+is to correctly treat the presence of intervals so that if one of
+the interval variables is not present, the constraint is automatically
+satisfied, and another reason is for stronger inference in constraint
+propagation.</p>
+</div>
+<div class="section" id="F1D5Sv1o__TpP7P6uu"><h3 class="title sectiontitle">Displaying the solution</h3><p class="p">The
+interval variables and precedence constraints completely describe
+this simple problem. An <samp class="ph codeph">execute</samp> block is used to
+display a solution to the model, after values have been assigned to
+the start and end of each of the interval variables in the model.
+The last part of the code for this example is:</p>
+<pre class="pre codeblock"><code>execute {
+  writeln("Masonry  : " + masonry.start   + ".." + masonry.end);
+  writeln("Carpentry: " + carpentry.start + ".." + carpentry.end);
+  writeln("Plumbing : " + plumbing.start  + ".." + plumbing.end);
+  writeln("Ceiling  : " + ceiling.start   + ".." + ceiling.end);
+  writeln("Roofing  : " + roofing.start   + ".." + roofing.end);
+  writeln("Painting : " + painting.start  + ".." + painting.end);
+  writeln("Windows  : " + windows.start   + ".." + windows.end);
+  writeln("Facade   : " + facade.start    + ".." + facade.end);
+  writeln("Garden   : " + garden.start    + ".." + garden.end);
+  writeln("Moving   : " + moving.start    + ".." + moving.end);
+}</code></pre>
+</div>
+<div class="section" id="F1D5Sv1o__BEo5uGbK"><h3 class="title sectiontitle">Executing the example</h3><p class="p">Run
+the example model <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_intro/sched_intro.mod</span> either
+by loading it in the IDE or by using the executable <samp class="ph codeph">oplrun</samp>.
+When you run the model, you should get results similar to this output:</p>
+<pre class="pre codeblock"><code>&lt;&lt;&lt; setup
+
+
+&lt;&lt;&lt; generate
+
+ ! ----------------------------------------------------------------------------
+ ! Satisfiability problem - 10 variables, 14 constraints
+ ! Initial process time : 0.00s (0.00s extraction + 0.00s propagation)
+ !  . Log search space  : 300.0 (before), 300.0 (after)
+ !  . Memory usage      : 283.0 Kb (before), 283.0 Kb (after)
+ ! ----------------------------------------------------------------------------
+ !   Branches  Non-fixed                Branch decision
+ *         13      0.00s                         -
+ ! ----------------------------------------------------------------------------
+ ! Solution status        : Terminated normally, solution found
+ ! Number of branches     : 13
+ ! Number of fails        : 0
+ ! Total memory usage     : 432.3 Kb (315.0 Kb CP Optimizer + 117.3 Kb Concert)
+ ! Time spent in solve    : 0.00s (0.00s engine + 0.00s extraction)
+ ! Search speed (br. / s) : 1300.0
+ ! ----------------------------------------------------------------------------
+
+&lt;&lt;&lt; solve
+
+
+
+OBJECTIVE: no objective
+Masonry  : 0..35
+Carpentry: 35..50
+Plumbing : 35..75
+Ceiling  : 35..50
+Roofing  : 50..55
+Painting : 50..60
+Windows  : 55..60
+Facade   : 75..85
+Garden   : 75..80
+Moving   : 85..90
+
+&lt;&lt;&lt; post process</code></pre>
+<p class="p">To understand the solution found by OPL to this satisfiability
+scheduling problem, consider the line:</p>
+<pre class="pre codeblock"><code>  Masonry  : 0..35</code></pre>
+<p class="p">The
+interval variable representing the masonry task, which has size 35,
+has been assigned the interval [0,35). Masonry starts at time 0 and
+ends at the time point 35.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Displaying interval variables</strong></p>
+ <p class="p">After
+a time interval has been assigned a start value (say <samp class="ph codeph">s</samp>)
+and an end value (say <samp class="ph codeph">e</samp>), the interval is written
+as <samp class="ph codeph">[s,e)</samp>. The time interval does not include the
+endpoint <samp class="ph codeph">e</samp>. If another interval variable is constrained
+to be placed after this interval, it can start at the time <samp class="ph codeph">e</samp>.</p>
+ </div>
+<p class="p">In
+subsequent sections, the log output is not included. You can view
+the log information when you run the completed projects.</p>
+</div>
+</div>
+</div>
+</body>
+</html>

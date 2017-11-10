@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using logical constraints" />
+<meta name="abstract" content="Describes how logical constraints are automatically transformed in OPL as based on the CPLEX solving engine." />
+<meta name="Description" content="Describes how logical constraints are automatically transformed in OPL as based on the CPLEX solving engine." />
+<meta name="DC.subject" content="logical constraints, used to express an objective" />
+<meta name="keywords" content="logical constraints, used to express an objective" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_cplex.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_logicalconstraints.1047180" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_cplex.html" />
+<title>Using logical constraints</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_logicalconstraints.1047180">
+<h1 class="title topictitle1">Using logical constraints</h1>
+<div class="body"><p class="shortdesc">Describes how logical constraints are automatically transformed
+in OPL as based on the CPLEX solving engine.</p>
+<p class="p">You have already seen how to represent the logical constraints
+of this problem in <a class="xref" href="opl_languser_app_areas_cplex_dataconstr.html" title="Describes how to represent the various constraints in the problem.">What are the constraints?</a>.
+However, they deserve a second glance because they illustrate an important
+point about logical constraints and automatic transformation in OPL
+as based on the CPLEX solving engine.</p>
+<div class="example"><pre class="pre codeblock"><code>    forall( m in Months ) {
+      // Using some constraints as boolean expressions to state that at least
+      // 2 of the given 5 constraints must be true.
+      ctUse7:  
+        (Use[m]["v1"] == 0) + (Use[m]["v2"] == 0) + (Use[m]["o1"] == 0) +
+                   (Use[m]["o2"] == 0) + (Use[m]["o3"] == 0) &gt;= 2;
+
+      // Using the "or" operator, set each Use variable to be
+      // zero or greather than 20.
+      forall( p in Products )
+        ctUse8:    
+          (Use[m][p] == 0) || (Use[m][p] &gt;= 20);
+
+      // Using "or" and "implication" operator, set that if one of 2 given products 
+      // is used more than 20 then a third one must be used more than 20 too.
+      ctUse9:
+        (Use[m]["v1"] &gt;= 20) || (Use[m]["v2"] &gt;= 20) =&gt; Use[m]["o3"] &gt;= 20;</code></pre>
+</div>
+<p class="p">Consider, for example, the constraint that the blended
+product cannot use more than three oils in a batch. Given that constraint,
+many programmers might naturally write the following statement (or
+something similar):</p>
+<pre class="pre codeblock"><code>(use[i][v1] != 0)
++ (use[i][v2] != 0)
++ (use[i][o1] != 0)
++ (use[i][o2] != 0)
++ (use[i][o3] != 0)
+&lt;= 3;</code></pre>
+<p class="p">That statement expresses the same constraint without
+changing the set of solutions to the problem. However, the formulations
+are different and can lead to different running times and different
+amounts of memory used for the search tree. In other words, given
+a logical English expression, there may be more than one logical constraint
+for expressing it, and the different logical constraints may perform
+differently in terms of computing time and memory.</p>
+<p class="p"><em class="ph i">Logical constraints for
+CPLEX</em> in the section <a class="xref" href="../../opllangref/topics/opl_langref_constraints.html" title="Specifies the constraints supported by OPL and discusses various subclasses of constraints to illustrate the support available for modeling combinatorial optimization applications.">Constraints</a> of the <em class="ph i">Language
+Reference Manual</em> introduces overloaded logical operators
+that you can use to combine linear, or piecewise linear constraints
+in OPL. In this example, notice the logical operators <samp class="ph codeph">==</samp>, <samp class="ph codeph">&gt;=</samp>, <samp class="ph codeph">||</samp> that
+appear in these logical constraints.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_cplex.html" title="Demonstrates how to use logical constraints in an application.">Tutorial: Using CPLEX logical constraints</a></div>
+</div>
+</div></body>
+</html>

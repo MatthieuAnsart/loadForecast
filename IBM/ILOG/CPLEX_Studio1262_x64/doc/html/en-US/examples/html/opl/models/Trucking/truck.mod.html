@@ -1,0 +1,239 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/************************************************************************************</font></b>
+013: 
+014: <b><font color="#007D00">  OPL Model for Trucking Problem</font></b>
+015: <b><font color="#007D00"> </font></b>
+016: <b><font color="#007D00">  This model is described in the documentation. </font></b>
+017: <b><font color="#007D00">See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+018: 
+019: 
+020: <b><font color="#007D00">**************************************************************************************/</font></b>
+021: 
+022: {<b><font color="#0000FF">string</font></b>} Location = ...;
+023: {<b><font color="#0000FF">string</font></b>} TruckTypes = ...;
+024: 
+025: {<b><font color="#0000FF">string</font></b>} Spokes = ...;
+026: {<b><font color="#0000FF">string</font></b>} Hubs = ...;
+027: 
+028: <b><font color="#0000FF">tuple</font></b> spokeInfo {
+029:   <b><font color="#0000FF">int</font></b>     minDepTime; <b><font color="#007D00">// Earliest departure time at spoke </font></b>
+030:   <b><font color="#0000FF">int</font></b>     maxArrTime; <b><font color="#007D00">// Latest arrive time at spoke</font></b>
+031: };   
+032: 
+033: spokeInfo Spoke[Spokes] = ...;
+034: 
+035: <b><font color="#007D00">// Make sure the data is consistent: latest arrive time &gt;= earliest departure time</font></b>
+036: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(s <b><font color="#0000FF">in</font></b> Spokes) Spoke[s].maxArrTime &gt; Spoke[s].minDepTime;
+037: 
+038: <b><font color="#0000FF">tuple</font></b> truckTypeInfo {
+039:   <b><font color="#0000FF">int</font></b>   capacity;
+040:   <b><font color="#0000FF">int</font></b>   costPerMile;  
+041:   <b><font color="#0000FF">int</font></b>   milesPerHour; <b><font color="#007D00">//speed</font></b>
+042: }
+043: 
+044: truckTypeInfo TruckTypeInfos[TruckTypes] = ...;
+045: <b><font color="#0000FF">int</font></b> LoadTime[Hubs][TruckTypes] = ...; <b><font color="#007D00">// in minutes; loadTime = unloadTime</font></b>
+046: 
+047: <b><font color="#0000FF">tuple</font></b> routeInfo {
+048:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>   spoke;
+049:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>   hub;
+050:   <b><font color="#0000FF">int</font></b>      distance;  <b><font color="#007D00">// in miles</font></b>
+051: }
+052: {routeInfo} Routes = ...;
+053: 
+054: <b><font color="#007D00">// The following assertion is to make sure that the spoke </font></b>
+055: <b><font color="#007D00">// in each route is indeed in the set of Spokes.</font></b>
+056: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(r <b><font color="#0000FF">in</font></b> Routes : r.spoke <b><font color="#0000FF">not</font></b> <b><font color="#0000FF">in</font></b> Spokes) 1 == 0;
+057: 
+058: <b><font color="#007D00">// The following assertion is to make sure that the hub</font></b>
+059: <b><font color="#007D00">// in each route are indeed in the set of Hubs.</font></b>
+060: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(r <b><font color="#0000FF">in</font></b> Routes : r.hub <b><font color="#0000FF">not</font></b> <b><font color="#0000FF">in</font></b> Hubs) 1 == 0;
+061: 
+062: <b><font color="#0000FF">tuple</font></b> triple {
+063:   <b><font color="#0000FF">string</font></b> origin;
+064:   <b><font color="#0000FF">string</font></b> hub;
+065:   <b><font color="#0000FF">string</font></b> destination;
+066: }
+067: 
+068: {triple} Triples =  <b><font color="#007D00">// feasible pathes from spokes to spokes via one hub  </font></b>
+069: {&lt;r1.spoke,r1.hub,r2.spoke&gt; | r1,r2 <b><font color="#0000FF">in</font></b> Routes : r1 != r2 &amp;&amp; r1.hub == r2.hub};
+070:  
+071: <b><font color="#0000FF">tuple</font></b> shipment {
+072:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>   origin;
+073:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>   destination;
+074:   <b><font color="#0000FF">int</font></b>       totalVolume;
+075: }
+076: {shipment} Shipments = ...;
+077: 
+078: <b><font color="#007D00">// The following assertion is to make sure that the origin </font></b>
+079: <b><font color="#007D00">// of each shipment is indeed in the set of Spokes.</font></b>
+080: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(s <b><font color="#0000FF">in</font></b> Shipments : s.origin <b><font color="#0000FF">not</font></b> <b><font color="#0000FF">in</font></b> Spokes) 1 == 0;
+081: 
+082: <b><font color="#007D00">// The following assertion is to make sure that the destination </font></b>
+083: <b><font color="#007D00">// of each shipment is indeed in the set of Spokes.</font></b>
+084: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">forall</font></b>(s <b><font color="#0000FF">in</font></b> Shipments : s.destination <b><font color="#0000FF">not</font></b> <b><font color="#0000FF">in</font></b> Spokes) 1 == 0;
+085: 
+086: <b><font color="#0000FF">int</font></b> PossibleTruckOnRoute[Routes][TruckTypes];
+087: 
+088: <b><font color="#007D00">// the earliest unloading time at a hub for each type of trucks  </font></b>
+089: <b><font color="#0000FF">int</font></b> EarliestUnloadingTime[Routes][TruckTypes]; 
+090: <b><font color="#007D00">// the latest loading time at a hub for each type of trucks</font></b>
+091: <b><font color="#0000FF">int</font></b> LatestLoadingTime[Routes][TruckTypes];
+092: 
+093: <b><font color="#007D00">// Compute possible truck types that can be assigned on a route</font></b>
+094: <b><font color="#0000FF">execute</font></b> INITIALIZE {
+095:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> r <b><font color="EA7D00">in</font></b> Routes)
+096:     <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> t <b><font color="EA7D00">in</font></b> TruckTypes) {
+097:       EarliestUnloadingTime[r][t] = Math.ceil(LoadTime[r.hub][t] + Spoke[r.spoke].minDepTime + 60*r.distance/TruckTypeInfos[t].milesPerHour);
+098:       LatestLoadingTime[r][t] = Math.floor(Spoke[r.spoke].maxArrTime - LoadTime[r.hub][t] - 60*r.distance/TruckTypeInfos[t].milesPerHour);
+099:       <b><font color="#007D00">// A type of truck can be assigned on a route only if it can make it to the hub and back </font></b>
+100:       <b><font color="#007D00">//  before the max arrival time at the spoke.</font></b>
+101:       <b><font color="EA7D00">if</font></b> ( EarliestUnloadingTime[r][t] &lt; LatestLoadingTime[r][t]) { 
+102:         PossibleTruckOnRoute[r][t] = 1;
+103:       }
+104:       <b><font color="EA7D00">else</font></b> {
+105:         PossibleTruckOnRoute[r][t] = 0;
+106:       }   
+107:     }
+108: }
+109: 
+110: int MaxTrucks = 100;  // Maximum # of trucks for each type on a route 
+111: 
+112: // Maximum Volume of goods that can be handled 
+113: // on each path for each type of trucks
+114: int MaxVolume = 5000; 
+115: 
+116: dvar int+ TruckOnRoute[Routes][TruckTypes] in 0..MaxTrucks;
+117: 
+118: // This represents the volumes shipped out from each hub 
+119: // by each type of trucks on each triple
+120: // The volumes are distinguished by trucktypes because trucks of different types 
+121: // arrive at a hub at different times and the timing is used in defining 
+122: // the constraints for volume availability for the trucks leaving the hub. 
+123: dvar int+ OutVolumeThroughHubOnTruck[Triples][TruckTypes] in 0..MaxVolume;
+124: 
+125: // This represents the volume shipped into each hub by each type of trucks on each triple
+126: // It is used in defining timing constraints. 
+127: dvar int+ InVolumeThroughHubOnTruck[Triples][TruckTypes] in 0..MaxVolume;
+128: 
+129: dexpr float TotalCost = 
+130:   sum(r in Routes, t in TruckTypes) 2*r.distance*TruckTypeInfos[t].costPerMile*TruckOnRoute[r][t];
+131:   
+132: minimize TotalCost;
+133: 
+134: subject to {      
+135:   <b><font color="#007D00">// The # of trucks of each type should be less than "maxTrucks", and if a type of truck </font></b>
+136:   <b><font color="#007D00">// is impossible for a route, its # should be zero </font></b>
+137:   forall(r <b><font color="EA7D00">in</font></b> Routes, t <b><font color="EA7D00">in</font></b> TruckTypes)
+138:     ctMaxTruck: 
+139:       TruckOnRoute[r][t] &lt;= PossibleTruckOnRoute[r][t]*MaxTrucks;
+140: 
+141:   <b><font color="#007D00">// On each route s-h, the total inbound volume carried by trucks of each type </font></b>
+142:   <b><font color="#007D00">// should be less than the total capacity of the trucks of this type.</font></b>
+143:   forall(&lt;s,h,dist&gt; <b><font color="EA7D00">in</font></b> Routes, t <b><font color="EA7D00">in</font></b> TruckTypes)
+144:     ctInCapacity: 
+145:       sum(&lt;s,h,dest&gt; <b><font color="EA7D00">in</font></b> Triples) InVolumeThroughHubOnTruck[&lt;s,h,dest&gt;][t] 
+146:          &lt;= TruckOnRoute[&lt;s,h,dist&gt;][t]*TruckTypeInfos[t].capacity;
+147:          
+148:   <b><font color="#007D00">// On each route s-h, the total outbound volume carried by each truck type should be less than </font></b>
+149:   <b><font color="#007D00">// the total capacity of this type of truck.</font></b>
+150: 
+151:   forall(&lt;s,h,dist&gt; <b><font color="EA7D00">in</font></b> Routes, t <b><font color="EA7D00">in</font></b> TruckTypes)
+152:     ctOutCapacity:      
+153:       sum(&lt;o,h,s&gt; <b><font color="EA7D00">in</font></b> Triples) OutVolumeThroughHubOnTruck[&lt;o,h,s&gt;][t]
+154:            &lt;= TruckOnRoute[&lt;s,h,dist&gt;][t]*TruckTypeInfos[t].capacity;
+155:    
+156:   <b><font color="#007D00">// On any triple, the total flows in the hub = the total flows out the hub</font></b>
+157:   forall (tr <b><font color="EA7D00">in</font></b> Triples) 
+158:     ctFlow: 
+159:       sum(t <b><font color="EA7D00">in</font></b> TruckTypes) InVolumeThroughHubOnTruck[tr][t]
+160:         == sum(t <b><font color="EA7D00">in</font></b> TruckTypes) OutVolumeThroughHubOnTruck[tr][t];
+161:    
+162:   <b><font color="#007D00">// The sum of flows between any origin-destination pair via all hubs is equal to the shipment between the o-d pair.</font></b>
+163: 
+164:   forall (&lt;o,d,v&gt; <b><font color="EA7D00">in</font></b> Shipments )
+165:     ctOrigDest: 
+166:       sum(t <b><font color="EA7D00">in</font></b> TruckTypes, &lt;o,h,d&gt; <b><font color="EA7D00">in</font></b> Triples) InVolumeThroughHubOnTruck[&lt;o,h,d&gt;][t] == v;
+167:    
+168:           
+169:   <b><font color="#007D00">// There must be enough volume for a truck before it leaves a hub. </font></b>
+170:   <b><font color="#007D00">// In another words, the shipments for a truck must arrive </font></b>
+171:   <b><font color="#007D00">// at the hub from all spokes before the truck leaves.</font></b>
+172:   <b><font color="#007D00">// The constraint can be expressed as the following:</font></b>
+173:   <b><font color="#007D00">// For each route s-h and leaving truck of type t:</font></b>
+174:   <b><font color="#007D00">// Cumulated inbound volume arrived before the loading time of the truck &gt;=</font></b>
+175:   <b><font color="#007D00">// Cumulated outbound volume upto the loading time of the truck(including the shipments being loaded).    </font></b>
+176:   forall (&lt;s,h,dist&gt; <b><font color="EA7D00">in</font></b> Routes, t <b><font color="EA7D00">in</font></b> TruckTypes)  
+177:     ctTiming: 
+178:       sum (&lt;o,h,s&gt; <b><font color="EA7D00">in</font></b> Triples, t1 <b><font color="EA7D00">in</font></b> TruckTypes, &lt;o,h,dist1&gt; <b><font color="EA7D00">in</font></b> Routes :
+179:           <b><font color="#007D00">// The expression below defines the indices of the trucks unloaded before truck t starts loading.  </font></b>
+180:           EarliestUnloadingTime[&lt;o,h,dist1&gt;][t1] &lt;= LatestLoadingTime[&lt;s,h,dist&gt;][t]) 
+181:           InVolumeThroughHubOnTruck[&lt;o,h,s&gt;][t1] &gt;=
+182:       sum (&lt;o,h,s&gt; <b><font color="EA7D00">in</font></b> Triples, t2 <b><font color="EA7D00">in</font></b> TruckTypes, &lt;o,h,dist2&gt; <b><font color="EA7D00">in</font></b> Routes : 
+183:           <b><font color="#007D00">// The expression below defines the indices of the trucks left before truck t starts loading.</font></b>
+184:           LatestLoadingTime[&lt;o,h,dist2&gt;][t2] &lt;= LatestLoadingTime[&lt;s,h,dist&gt;][t]) 
+185:           OutVolumeThroughHubOnTruck[&lt;o,h,s&gt;][t2];
+186: }
+187: 
+188: 
+189: /************************************************************
+190:        POST-PROCESSING                                    
+191: *************************************************************/
+192: // Post processing: result data structures are exported as post-processed tuple or tuple sets
+193: // Solve objective value
+194: tuple result {
+195:   <b><font color="#0000FF">float</font></b> totalCost;
+196: }
+197: result Result = &lt;TotalCost&gt;;
+198: 
+199: // Number of trucks assigned to each route, for each truck type
+200: tuple nbTrucksOnRouteRes {
+201:   key string    spoke;
+202:   key string    hub;
+203:   key string    truckType;
+204:   <b><font color="#0000FF">int</font></b>                   nbTruck;
+205: }
+206: {nbTrucksOnRouteRes} NbTrucksOnRouteRes = {&lt;r.spoke, r.hub, t, TruckOnRoute[r][t]&gt; | r <b><font color="EA7D00">in</font></b> Routes, t <b><font color="EA7D00">in</font></b> TruckTypes};
+207: 
+208: // Volume shipped into each hub by each type of trucks and each pair (origin, destination)
+209: tuple inVolumeThroughHubOnTruckRes {
+210:   key string    origin;
+211:   key string    hub;
+212:   key string    destination;
+213:   key string    truckType;
+214:   <b><font color="#0000FF">int</font></b>                   quantity;
+215: }
+216: {inVolumeThroughHubOnTruckRes} InVolumeThroughHubOnTruckRes =
+217:         {&lt;tr.origin, tr.hub, tr.destination, t, InVolumeThroughHubOnTruck[tr][t]&gt; | tr <b><font color="EA7D00">in</font></b> Triples, t <b><font color="EA7D00">in</font></b> TruckTypes};
+218: 
+219: // Volume shipped from each hub by each type of trucks and each pair (origin, destination)
+220: tuple outVolumeThroughHubOnTruckRes {
+221:   key string    origin;
+222:   key string    hub;
+223:   key string    destination;
+224:   key string    truckType;
+225:   <b><font color="#0000FF">int</font></b>                   quantity;
+226: }
+227: {outVolumeThroughHubOnTruckRes} OutVolumeThroughHubOnTruckRes =
+228:         {&lt;tr.origin, tr.hub, tr.destination, t, OutVolumeThroughHubOnTruck[tr][t]&gt; | tr <b><font color="EA7D00">in</font></b> Triples, t <b><font color="EA7D00">in</font></b> TruckTypes};
+229: 
+230: execute {
+231:   Result;
+232:   NbTrucksOnRouteRes;
+233:   InVolumeThroughHubOnTruckRes;
+234:   OutVolumeThroughHubOnTruckRes;
+235: }</tt></pre>

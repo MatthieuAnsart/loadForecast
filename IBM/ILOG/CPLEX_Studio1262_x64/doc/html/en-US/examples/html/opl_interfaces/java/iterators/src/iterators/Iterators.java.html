@@ -1,0 +1,235 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*/</font></b>
+010: 
+011: <b><font color="#007D00">// -------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">//Java version of iterators.cpp of OPL distrib</font></b>
+013: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+014: package iterators;
+015: 
+016: import ilog.concert.*;
+017: import ilog.cplex.*;
+018: import ilog.opl.*;
+019: 
+020: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> Iterators {
+021:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> String DATADIR = <b><font color="#8A2BE2">"."</font></b>;
+022: 
+023:     <b><font color="#007D00">// The purpose of this sample is to check the result of filtering by</font></b>
+024:     <b><font color="#007D00">// iterating on the generated data element.</font></b>
+025:     <b><font color="#007D00">//</font></b>
+026:     <b><font color="#007D00">// The data element is an array of strings that is indexed by a set of</font></b>
+027:     <b><font color="#007D00">// strings.</font></b>
+028:     <b><font color="#007D00">// It is filled as the result of an iteration on a set of tuples by</font></b>
+029:     <b><font color="#007D00">// filtering out the duplicates.</font></b>
+030:     <b><font color="#007D00">// It is based on the model used in "Sparsity" run configuration of the "transp" example.</font></b>
+031:     <b><font color="#007D00">//</font></b>
+032:     <b><font color="#007D00">//</font></b>
+033:     <b><font color="#007D00">// The simplified model is:</font></b>
+034:     <b><font color="#007D00">//</font></b>
+035:     <b><font color="#007D00">// {string} Products = ...;</font></b>
+036:     <b><font color="#007D00">// tuple Route { string p; string o; string d; }</font></b>
+037:     <b><font color="#007D00">// {Route} Routes = ...;</font></b>
+038:     <b><font color="#007D00">// {string} orig[p in Products] = { o | &lt;p,o,d&gt; in Routes };</font></b>
+039:     <b><font color="#007D00">//</font></b>
+040: <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> sample1() <b><font color="EA7D00">throws</font></b> Exception
+041:     {
+042:         <b><font color="#0000FF">int</font></b> status = 127;
+043:         <b><font color="EA7D00">try</font></b> {
+044:             IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+045:             IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+046: 
+047:             IloOplRunConfiguration rc = oplF.createOplRunConfiguration(DATADIR
+048:                     + <b><font color="#8A2BE2">"/transp2.mod"</font></b>,DATADIR
+049:                     + <b><font color="#8A2BE2">"/transp2.dat"</font></b>);
+050:             IloOplModel opl = rc.getOplModel();
+051:             opl.generate();
+052: 
+053:             System.out.println(<b><font color="#8A2BE2">"Verification of the computation of orig:"</font></b>);
+054: 
+055:             <b><font color="#007D00">// Get the orig, Routes, Product elements from the OplModel.</font></b>
+056:             IloSymbolSetMap orig = opl.getElement(<b><font color="#8A2BE2">"Orig"</font></b>).asSymbolSetMap();
+057:             IloTupleSet Routes = opl.getElement(<b><font color="#8A2BE2">"Routes"</font></b>).asTupleSet();
+058:             IloSymbolSet Products = opl.getElement(<b><font color="#8A2BE2">"Products"</font></b>).asSymbolSet();
+059: 
+060:             <b><font color="#007D00">// Iterate through the orig to see the result of the data element</font></b>
+061:             <b><font color="#007D00">// filtering.</font></b>
+062:             <b><font color="EA7D00">for</font></b> (java.util.Iterator it2 = Products.iterator(); it2.hasNext(); )
+063:             {
+064:                 String p = (String)it2.next();
+065:                 <b><font color="#007D00">// We are in the last dimension of the array (as it is a 1</font></b>
+066:                 <b><font color="#007D00">// dimensional array), so we can use the get method directly.</font></b>
+067:                 System.out.println(<b><font color="#8A2BE2">"for p = "</font></b> + p + <b><font color="#8A2BE2">" we have "</font></b> + (IloSymbolSet)orig.get(p));
+068:             }
+069:             System.out.println(<b><font color="#8A2BE2">"---------------------"</font></b>);
+070: 
+071:             <b><font color="#007D00">// Iterate through the TupleSet.</font></b>
+072:             <b><font color="EA7D00">for</font></b> (java.util.Iterator it1 = Routes.iterator(); it1.hasNext(); )
+073:             {
+074:                 IloTuple t = (IloTuple)it1.next();
+075:                 <b><font color="#007D00">// Get the string "p" from the tuple.</font></b>
+076:                 String p = t.getStringValue(<b><font color="#8A2BE2">"p"</font></b>);
+077:                 <b><font color="#007D00">// if "p" is in the indexer, we will try to add the "o" string to</font></b>
+078:                 <b><font color="#007D00">// the array.</font></b>
+079:                 <b><font color="EA7D00">if</font></b> (Products.contains(p))
+080:                     System.out.println(<b><font color="#8A2BE2">"for p = "</font></b> + p + <b><font color="#8A2BE2">" we will have "</font></b> + t.getStringValue(<b><font color="#8A2BE2">"o"</font></b>) + <b><font color="#8A2BE2">" from "</font></b> + t.toString());
+081:             }
+082: 
+083:             System.out.println(<b><font color="#8A2BE2">"---------------------"</font></b>);
+084:             status = 0;
+085:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+086:             System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+087:             ex.printStackTrace();
+088:             status = 2;
+089:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+090:             System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+091:             ex.printStackTrace();
+092:             status = 3;
+093:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+094:             System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+095:             ex.printStackTrace();
+096:             status = 4;
+097:         }
+098:         System.exit(status);
+099:     }
+100:     <b><font color="#007D00">// The purpose of this sample is to output a multidimensional array x[i][j]</font></b>
+101:     <b><font color="#007D00">// to illustrate how arrays and sub-arrays are managed.</font></b>
+102:     <b><font color="#007D00">// To access the elements of an array, you must first access the sub-arrays</font></b>
+103:     <b><font color="#007D00">// until the last dimension, then you can get the values.</font></b>
+104:     <b><font color="#007D00">// Here, as there are two dimensions, you have to get one sub-array from</font></b>
+105:     <b><font color="#007D00">// which you can directly get the values.</font></b>
+106:     <b><font color="#007D00">//</font></b>
+107:     <b><font color="#007D00">// The array of integers is indexed by two sets of strings..</font></b>
+108:     <b><font color="#007D00">//</font></b>
+109:     <b><font color="#007D00">// The simplified model is:</font></b>
+110:     <b><font color="#007D00">//</font></b>
+111:     <b><font color="#007D00">// {string} s1 = ...;</font></b>
+112:     <b><font color="#007D00">// {string} s2 = ...;</font></b>
+113:     <b><font color="#007D00">// {int} x[s1][s2] = ...;</font></b>
+114:     <b><font color="#007D00">//</font></b>
+115:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> sample2() <b><font color="EA7D00">throws</font></b> Exception {
+116:         <b><font color="#0000FF">int</font></b> status = 127;
+117:         <b><font color="EA7D00">try</font></b> {
+118:         IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+119:         IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+120: 
+121:         IloOplRunConfiguration rc = oplF.createOplRunConfiguration(DATADIR
+122:                 + <b><font color="#8A2BE2">"/iterators.mod"</font></b>);
+123:         IloOplModel opl = rc.getOplModel();
+124:         opl.generate();
+125: 
+126:         <b><font color="#007D00">// Get the x, s1 and s2 elements from the OplModel.</font></b>
+127:         IloIntMap x = opl.getElement(<b><font color="#8A2BE2">"x"</font></b>).asIntMap();
+128:         IloSymbolSet s1 = opl.getElement(<b><font color="#8A2BE2">"s1"</font></b>).asSymbolSet();
+129:         IloSymbolSet s2 = opl.getElement(<b><font color="#8A2BE2">"s2"</font></b>).asSymbolSet();
+130: 
+131:         <b><font color="#007D00">// Iterate on the first indexer.</font></b>
+132:         <b><font color="EA7D00">for</font></b> (java.util.Iterator it1 = s1.iterator(); it1.hasNext();) {
+133:             String sub1 = (String) it1.next();
+134:             <b><font color="#007D00">// Get the 2nd dimension array from the 1st dimension.</font></b>
+135:             IloIntMap sub = x.getSub(sub1);
+136:             <b><font color="#007D00">// Iterate on the second indexer of x (that is the indexer of the</font></b>
+137:             <b><font color="#007D00">// sub array).</font></b>
+138:             <b><font color="EA7D00">for</font></b> (java.util.Iterator it2 = s2.iterator(); it2.hasNext();) {
+139:                 String sub2 = (String) it2.next();
+140:                 <b><font color="#007D00">// We are in the last dimension of the array, so we can directly</font></b>
+141:                 <b><font color="#007D00">// use the get method.</font></b>
+142:                 System.out.println(sub1 + <b><font color="#8A2BE2">" "</font></b> + sub2 + <b><font color="#8A2BE2">" "</font></b> + sub.get(sub2));
+143:             }
+144:         }
+145:         System.out.println(<b><font color="#8A2BE2">"---------------------"</font></b>);
+146:         status = 0;
+147:         }
+148:         <b><font color="EA7D00">catch</font></b> (IloOplException e) {
+149:         e.printStackTrace();
+150:         status = 2;
+151:         }
+152:         <b><font color="EA7D00">catch</font></b> (IloException e) {
+153:         e.printStackTrace();
+154:         status = 3;
+155:         }
+156:         <b><font color="EA7D00">catch</font></b> (Exception e) {
+157:         e.printStackTrace();
+158:         status = 4;
+159:         }
+160:         System.exit(status);
+161:     }
+162: 
+163:     <b><font color="#007D00">// The purpose of this sample is to output an array of tuples arrayT[i],</font></b>
+164:     <b><font color="#007D00">// to illustrate how tuple elements can be accessed.</font></b>
+165:     <b><font color="#007D00">// The simplified model is:</font></b>
+166:     <b><font color="#007D00">// tuple t</font></b>
+167:     <b><font color="#007D00">// {</font></b>
+168:     <b><font color="#007D00">//   int a;</font></b>
+169:     <b><font color="#007D00">//   int b;</font></b>
+170:     <b><font color="#007D00">// }</font></b>
+171:     <b><font color="#007D00">// {string} ids={"id1","id2","id3"};</font></b>
+172:     <b><font color="#007D00">// t arrayT[ids]=[&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];</font></b>
+173: 
+174:     <b><font color="EA7D00">static</font></b> String getModelTextSample3 () {
+175:         String model = <b><font color="#8A2BE2">""</font></b>;
+176:         model += <b><font color="#8A2BE2">"tuple t{int a;int b;}"</font></b>;
+177:         model += <b><font color="#8A2BE2">" {string} ids = {</font></b>\"<b><font color="#8A2BE2">id1</font></b>\"<b><font color="#8A2BE2">,</font></b>\"<b><font color="#8A2BE2">id2</font></b>\"<b><font color="#8A2BE2">, </font></b>\"<b><font color="#8A2BE2">id3</font></b>\"<b><font color="#8A2BE2">};"</font></b>;
+178:         model += <b><font color="#8A2BE2">" t arrayT[ids] = [&lt;1,2&gt;,&lt;2,3&gt;,&lt;1,3&gt;];"</font></b>;
+179:         <b><font color="EA7D00">return</font></b> model;
+180:     }
+181:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> sample3() <b><font color="EA7D00">throws</font></b> Exception {
+182:         <b><font color="#0000FF">int</font></b> status = 127;
+183:             <b><font color="EA7D00">try</font></b> {
+184:         IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+185:         IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+186:         IloOplErrorHandler errHandler = oplF.createOplErrorHandler(System.out);
+187:         IloOplSettings settings = oplF.createOplSettings(errHandler);
+188:         IloOplModelSource src = oplF.createOplModelSourceFromString(getModelTextSample3(),<b><font color="#8A2BE2">"tuple array iterator"</font></b>);
+189:         IloOplModelDefinition def = oplF.createOplModelDefinition(src, settings);
+190:         IloCplex cplex = oplF.createCplex();
+191:         IloOplModel opl = oplF.createOplModel(def, cplex);
+192:         opl.generate();
+193:         <b><font color="#007D00">// get the string set used to index the array of tuples</font></b>
+194:         IloSymbolSet ids = opl.getElement(<b><font color="#8A2BE2">"ids"</font></b>).asSymbolSet();
+195:         IloTupleMap arrayT = opl.getElement(<b><font color="#8A2BE2">"arrayT"</font></b>).asTupleMap();
+196:         <b><font color="#007D00">// iterate on the index set to retrieve the tuples stored in the array</font></b>
+197:         <b><font color="EA7D00">for</font></b> (java.util.Iterator it = ids.iterator(); it.hasNext();) {
+198:             String s = (String)it.next();
+199:             System.out.print(<b><font color="#8A2BE2">"arrayT["</font></b> + s + <b><font color="#8A2BE2">"] = "</font></b>);
+200:             IloMapIndexArray id = oplF.mapIndexArray(0);
+201:             id.add(s);
+202:             IloTuple t = arrayT.makeTuple();
+203:             arrayT.getAt(id,t);
+204:             System.out.println(t);
+205:         }
+206:         oplF.end();
+207:         status = 0;
+208:         }
+209:         <b><font color="EA7D00">catch</font></b> (IloOplException e) {
+210:         e.printStackTrace();
+211:         status = 2;
+212:         }
+213:         <b><font color="EA7D00">catch</font></b> (IloException e) {
+214:         e.printStackTrace();
+215:         status = 3;
+216:         }
+217:         <b><font color="EA7D00">catch</font></b> (Exception e) {
+218:         e.printStackTrace();
+219:         status = 4;
+220:         }
+221:         System.exit(status);
+222:     }
+223: 
+224: 
+225:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception {
+226:         sample1();
+227:         sample2();
+228:         sample3();
+229:     }
+230: }
+</tt></pre>

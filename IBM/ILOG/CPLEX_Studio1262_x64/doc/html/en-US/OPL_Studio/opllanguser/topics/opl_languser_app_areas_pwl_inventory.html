@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="An inventory application with piecewise linear functions" />
+<meta name="abstract" content="Describes the problem, with its solution, and presents the model and data files." />
+<meta name="Description" content="Describes the problem, with its solution, and presents the model and data files." />
+<meta name="DC.subject" content="code samples, sailco.dat, code samples, sailco.mod" />
+<meta name="keywords" content="code samples, sailco.dat, code samples, sailco.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_pwl.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1069030" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_pwl.html" />
+<title>An inventory application with piecewise linear functions</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1069030">
+<h1 class="title topictitle1">An inventory application with piecewise linear functions</h1>
+<div class="body"><p class="shortdesc">Describes the problem, with its solution, and
+presents the model and data files.</p>
+<p class="p">This section introduces piecewise linear programs using
+an inventory application. This piecewise linear application is adapted
+from <em class="ph i">Applications and Algorithms</em> by W. Winston (see
+the Bibliography). </p>
+<p class="p">The company Sailco must determine how many sailboats to
+produce over four time periods. The demand for the four periods is
+known (40, 60, 75, 25) and, in addition, an inventory of ten boats
+is available initially. In each period, Sailco can produce 40 boats
+at a cost of $400 per boat. Additional boats can be produced at a
+cost of $450 per boat. The inventory cost is $20 per boat and per
+period. <a class="xref" href="opl_languser_app_areas_pwl_inventory.html#usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1022023">A simple inventory model (sailco.mod)</a> describes a linear program for this application and <a class="xref" href="opl_languser_app_areas_pwl_inventory.html#usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1021405">Data for the simple inventory model (sailco.dat)</a>describes the instance data. </p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1022023"><h2 class="title sectiontitle">A simple inventory model (<samp class="ph codeph">sailco.mod</samp>)</h2><pre class="pre codeblock"><code>int NbPeriods = ...;
+range Periods = 1..NbPeriods;
+
+float Demand[Periods] = ...;
+float RegularCost = ...;
+float ExtraCost = ...;
+float Capacity = ...;
+float Inventory = ...;
+float InventoryCost = ...;
+
+dvar float+ RegulBoat[Periods];
+dvar float+ ExtraBoat[Periods];
+dvar float+ Inv[0..NbPeriods];
+
+
+minimize
+   RegularCost * 
+   ( sum( t in Periods ) RegulBoat[t] ) +
+   ExtraCost * 
+   ( sum( t in Periods ) ExtraBoat[t] ) +
+   InventoryCost * 
+   ( sum(t in Periods ) Inv[t] );
+   
+subject to {
+  ctInit:  
+    Inv[0] == Inventory;
+  forall( t in Periods ) 
+    ctCapacity:
+      RegulBoat[t] &lt;= Capacity;
+  forall( t in Periods )
+    ctBoat: 
+      RegulBoat[t] + ExtraBoat[t] + Inv[t-1] == Inv[t] + Demand[t];
+}</code></pre>
+</div>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1021405"><h2 class="title sectiontitle">Data for the simple inventory model (<samp class="ph codeph">sailco.dat</samp>) </h2><pre class="pre codeblock"><code>NbPeriods = 4;
+Demand = [ 40, 60, 75, 25 ];
+RegularCost = 400;
+ExtraCost = 450;
+Capacity = 40;
+Inventory = 10;
+InventoryCost = 20;</code></pre>
+</div>
+<p class="p">The key idea underlying this model is to use two sets
+of variables for describing the production: variables <samp class="ph codeph">regulBoat[t]</samp> represent
+the number of boats built at the regular price ($400 in the instance
+data) for period <samp class="ph codeph">t</samp>, while <samp class="ph codeph">extraBoat[t]</samp> represents
+the number of extra boats, i.e., boats built at the higher price.
+The model also contains inventory variables. Most of the constraints
+are typical for inventory problems. </p>
+<p class="p">In addition, the constraint </p>
+<pre class="pre codeblock"><code>  forall( t in Periods ) 
+    ctCapacity:
+      RegulBoat[t] &lt;= Capacity;</code></pre>
+<p class="p">states that there is a capacity constraint on the regular
+boats. This constraint could be expressed directly as a bound but
+this is not of concern since it will disappear in the next model.
+Note also that all the variables will be given integral values for
+this application, although they are of type float. This is due to
+the problem structure, not to chance. </p>
+<p class="p">The constraint matrix of this problem is totally unimodular,
+which guarantees that the optimum has only integer values for integer
+data. See for instance <em class="ph i">Combinatorial Optimization: Algorithms
+and Complexity</em> by <em class="ph i">C.H. Papadimitriou and K. Steiglitz</em> for
+a discussion of total unimodularity (see the Bibliography). </p>
+<div class="section" id="usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1049476"><h2 class="title sectiontitle">A solution to sailco.mod</h2><p class="p">For the instance data given in <a class="xref" href="opl_languser_app_areas_pwl_inventory.html#usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1021405">Data for the simple inventory model (sailco.dat)</a>, OPL returns the optimal solution </p>
+<pre class="pre codeblock"><code>Final Solution with objective 78450.0000:
+  regulBoat = [40.0000 40.0000 40.0000 25.0000];
+  extraBoat = [0.0000 10.0000 35.0000 0.0000];
+  inv = [10.0000 10.0000 0.0000 0.0000 0.0000];</code></pre>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">It is interesting to observe
+that the model does not preclude producing extra boats even if the
+production of regular boats does not reach its full capacity. This
+is not an issue in this model, since the extra boats are more expensive
+and thus are not produced in an optimal solution. It would become
+an issue, of course, if the cost of the extra boats is less than the
+regular price (because of, say, economies of scale). This case is
+discussed in <a class="xref" href="opl_languser_app_areas_pwl_vs.html" title="Enforces a constraint that results in a mixed integer-linear program.">Piecewise-linear vs. linear</a>. </p>
+ </div>
+<p class="p">A piecewise linear model for this application is given in <a class="xref" href="opl_languser_app_areas_pwl_inventory.html#usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1022800">A piecewise linear model for the simple inventory problem
+(<span class="ph filepath">sailcopw.mod</span>)</a>. </p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1022800">A piecewise linear model for the
+simple inventory problem (<samp class="ph codeph">sailcopw.mod</samp>)</p>
+<pre class="pre codeblock"><code>int NbPeriods = ...;
+range Periods = 1..NbPeriods;
+
+float Demand[Periods] = ...;
+float RegularCost = ...;
+float ExtraCost = ...;
+float Capacity = ...;
+float Inventory = ...;
+float InventoryCost = ...;
+
+dvar float+ Boat[Periods];
+dvar float+ Inv[0..NbPeriods];
+
+
+minimize
+   sum(t in Periods)
+       piecewise{ RegularCost -&gt; Capacity ; ExtraCost } Boat[t] +
+                  InventoryCost  * (sum(t in Periods) Inv[t]);
+              
+subject to  {
+  ctInventory:
+    Inv[0] == Inventory;
+  forall(t in Periods)
+    ctDemand:
+      Boat[t] + Inv[t-1] == Inv[t] + Demand[t];
+}</code></pre>
+<p class="p">The
+data description is similar in this model. What differs from the previous
+model presented in <a class="xref" href="opl_languser_app_areas_pwl_inventory.html#usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1022023">A simple inventory model (sailco.mod)</a> is the choice of variables, the objective function,
+and the constraints. There is only one type of production variable
+in this model and hence there is no distinction between <span class="q">"regular"</span> boats
+and <span class="q">"extra"</span> boats. In this model, <samp class="ph codeph">boat[t]</samp> represents
+the total production of boats during period <samp class="ph codeph">t</samp>.
+Even more interesting is how the objective function is described:
+it makes it explicit that the cost of building the boats is in fact
+a piecewise linear function of the production </p>
+<pre class="pre codeblock"><code>       piecewise{ RegularCost -&gt; Capacity ; ExtraCost } Boat[t] +</code></pre>
+<p class="p">OPL
+recognizes that this statement is in fact a linear program, applies
+a transformation to obtain the same code as in <a class="xref" href="opl_languser_app_areas_pwl_inventory.html#usropllangtut.uss_langtut_linearInteger.1069030__usropllangtut.uss_langtut_linearInteger.1022023">A simple inventory model (sailco.mod)</a>, and returns the same optimal solution. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_pwl.html" title="Defines piecewise linear programming, describes an inventory problem with piecewise linear functions, compares pwl to plain linear programming, and indicates complexity issues.">Piecewise linear programming</a></div>
+</div>
+</div></body>
+</html>

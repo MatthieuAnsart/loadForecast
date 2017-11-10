@@ -1,0 +1,83 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/*  ----------------------------------------------------</font></b>
+13: <b><font color="#007D00"> *   OPL Model for Production planning Example</font></b>
+14: <b><font color="#007D00"> *</font></b>
+15: <b><font color="#007D00"> *   This model is described in the documentation. </font></b>
+16: <b><font color="#007D00"> *   See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+17: <b><font color="#007D00"> *   --------------------------------------------------- */</font></b>
+18: 
+19: {<b><font color="#0000FF">string</font></b>} ComputerTypes = ...;
+20: {<b><font color="#0000FF">string</font></b>} ComponentTypes = ...;
+21: <b><font color="#0000FF">int</font></b> NbPeriods = ...;
+22: <b><font color="#0000FF">range</font></b> Periods = 1..NbPeriods;
+23: <b><font color="#0000FF">int</font></b> MaxBuildPerPeriod[Periods] = ...;
+24: <b><font color="#0000FF">int</font></b> MinDemand[ComputerTypes][Periods] = ...;
+25: <b><font color="#0000FF">int</font></b> MaxDemand[ComputerTypes][Periods] = ...;
+26: <b><font color="#0000FF">tuple</font></b> computersToBuild {
+27:    {<b><font color="#0000FF">string</font></b>} components;
+28:    <b><font color="#0000FF">int</font></b>      price;
+29:    <b><font color="#0000FF">int</font></b>      maxInventory;
+30: }
+31: computersToBuild Computers[ComputerTypes] = ...;
+32: <b><font color="#0000FF">float</font></b> TotalBuild[ComputerTypes] = ...;
+33: 
+34: <b><font color="#0000FF">int</font></b> MaxInventory = 15;
+35: 
+36: <b><font color="#007D00">/*  ----------------------------------------------------</font></b>
+37: <b><font color="#007D00"> *   Variables:</font></b>
+38: <b><font color="#007D00"> *   build --   How many of each computer type to build</font></b>
+39: <b><font color="#007D00"> *         in each period</font></b>
+40: <b><font color="#007D00"> *   inStockAtEndOfPeriod --   How many of each computer </font></b>
+41: <b><font color="#007D00"> *   type to hold over in inventory at the end of each</font></b>
+42: <b><font color="#007D00"> *         period</font></b>
+43: <b><font color="#007D00"> *   --------------------------------------------------- */</font></b>
+44: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Build[ComputerTypes][Periods];
+45: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Sell[ComputerTypes][Periods];
+46: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ InStockAtEndOfPeriod[ComputerTypes][Periods];
+47: 
+48: 
+49: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+50:    
+51:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> Periods)  
+52:     ctInventoryCapacity:  
+53:       <b><font color="#7D007D">sum</font></b>(c <b><font color="#0000FF">in</font></b> ComputerTypes) InStockAtEndOfPeriod[c][p] &lt;= MaxInventory;
+54: 
+55:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> ComputerTypes, p <b><font color="#0000FF">in</font></b> Periods)
+56:     ctUnderMaxDemand: Sell[c][p] &lt;= MaxDemand[c][p];
+57:      
+58: 
+59:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> ComputerTypes, p <b><font color="#0000FF">in</font></b> Periods)
+60:     ctOverMinDemand: Sell[c][p] &gt;= MinDemand[c][p];
+61:       
+62:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> ComputerTypes, p <b><font color="#0000FF">in</font></b> Periods)
+63:     ctComputerTypeInventoryCapacity:     
+64:       InStockAtEndOfPeriod[c][p] &lt;= Computers[c].maxInventory;
+65:   
+66:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> ComputerTypes)
+67:     ctTotalToBuild:      
+68:       <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> Periods) Build[c][p] == TotalBuild[c];
+69: 
+70:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> ComputerTypes)
+71:     Build[c][1] == Sell[c][1] + InStockAtEndOfPeriod[c][1];
+72:      
+73:    <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> ComputerTypes, p <b><font color="#0000FF">in</font></b> 2..NbPeriods)
+74:      ctInventoryBalance:      
+75:        InStockAtEndOfPeriod[c][p-1] + Build[c][p] == 
+76:          Sell[c][p] + InStockAtEndOfPeriod[c][p]; 
+77:          
+78: }
+</tt></pre>

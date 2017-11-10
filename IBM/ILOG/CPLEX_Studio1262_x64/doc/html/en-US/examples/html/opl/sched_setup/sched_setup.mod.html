@@ -1,0 +1,123 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">Problem Description</font></b>
+015: <b><font color="#007D00">-------------------</font></b>
+016: 
+017: <b><font color="#007D00">This example solves a scheduling problem on two alternative</font></b>
+018: <b><font color="#007D00">heterogeneous machines. A set of tasks {a_1,...,a_n} has to be</font></b>
+019: <b><font color="#007D00">executed on either one of the two machines. Different types of tasks</font></b>
+020: <b><font color="#007D00">are distinguished, the type of task a_i is denoted tp_i.  </font></b>
+021: 
+022: <b><font color="#007D00">A machine m needs a sequence dependent setup time setup(tp,tp') to</font></b>
+023: <b><font color="#007D00">switch from a task of type tp to the next task of type</font></b>
+024: <b><font color="#007D00">tp'. Furthermore some transitions tp-&gt;tp' are forbidden.</font></b>
+025: 
+026: <b><font color="#007D00">The two machines are different: they process tasks with different</font></b>
+027: <b><font color="#007D00">speed and have different setup times and forbidden transitions.</font></b>
+028: 
+029: <b><font color="#007D00">The objective is to minimize the makespan.</font></b>
+030: 
+031: <b><font color="#007D00">The model uses transition distances and noOverlap constraints to model</font></b>
+032: <b><font color="#007D00">machines setup times. The noOverlap constraint is specified to enforce</font></b>
+033: <b><font color="#007D00">transition distance between immediate successors on the</font></b>
+034: <b><font color="#007D00">sequence. Forbidden transitions are modeled with a very large</font></b>
+035: <b><font color="#007D00">transition distance.</font></b>
+036: 
+037: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+038: 
+039: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+040: 
+041: <b><font color="#0000FF">int</font></b> nbTypes = 5;
+042: <b><font color="#0000FF">range</font></b> Types = 0..nbTypes-1;
+043: 
+044: <b><font color="#0000FF">int</font></b> nbMachines = 2;
+045: <b><font color="#0000FF">range</font></b> Machines = 0..nbMachines-1;
+046: 
+047: <b><font color="#0000FF">int</font></b> setup[Machines][Types][Types] = [
+048:  <b><font color="#007D00">// Setups on machine 0; -1 means forbidden transition</font></b>
+049:  [ [ 0, 26,  8,  3, -1],
+050:    [22,  0, -1,  4, 22],
+051:    [28,  0,  0, 23,  9],
+052:    [29, -1, -1,  0,  8],
+053:    [26, 17, 11,  7,  0]
+054:    ],
+055:  <b><font color="#007D00">// Setups on machine 1; -1 means forbidden transition</font></b>
+056:  [ [ 0,  5, 28, -1,  2],
+057:    [-1,  0, -1,  7, 10],
+058:    [19, 22,  0, 28, 17],
+059:    [ 7, 26, 13,  0, -1],
+060:    [13, 17, 26, 20,  0]
+061:    ]
+062:  ];
+063: 
+064: <b><font color="#0000FF">int</font></b> nbTasks = 50;
+065: <b><font color="#0000FF">range</font></b> Tasks = 0..nbTasks-1;
+066: 
+067: <b><font color="#0000FF">int</font></b> taskDur[Machines][Tasks] = [
+068:  <b><font color="#007D00">// Task duration if executed on machine 0</font></b>
+069:  [ 4, 17,  4,  7, 17, 14,  2, 14,  2,  8,
+070:   11, 14,  4, 18,  3,  2,  9,  2,  9, 17,
+071:   18, 19,  5,  8, 19, 12, 17, 11,  6,  3,
+072:   13,  6, 19,  7,  1,  3, 13,  5,  3,  6,
+073:   11, 16, 12, 14, 12, 17,  8,  8,  6,  6 ],
+074:  <b><font color="#007D00">// Task duration if executed on machine 1</font></b>
+075:  [12,  3, 12, 15,  4,  9, 14,  2,  5,  9,
+076:   10, 14,  7,  1, 11,  3, 15, 19,  8,  2,
+077:   18, 17, 19, 18, 15, 14,  6,  6,  1,  2,
+078:    3, 19, 18,  2,  7, 16,  1, 18, 10, 14,
+079:    2,  3, 14,  1,  1,  6, 19,  5, 17,  4 ]
+080: ];
+081: 
+082: <b><font color="#0000FF">int</font></b> taskType[Tasks]= [
+083:   3, 3, 1, 1, 1, 1, 2, 0, 0, 2,
+084:   4, 4, 3, 3, 2, 3, 1, 4, 4, 2,
+085:   2, 1, 4, 2, 2, 0, 3, 3, 2, 1,
+086:   2, 1, 4, 3, 3, 0, 2, 0, 0, 3,
+087:   2, 0, 3, 2, 2, 4, 1, 2, 4, 3
+088: ];
+089: 
+090: <b><font color="#0000FF">tuple</font></b> triplet { <b><font color="#0000FF">int</font></b> t1; <b><font color="#0000FF">int</font></b> t2; <b><font color="#0000FF">int</font></b> v; }
+091: {triplet} tt[m <b><font color="#0000FF">in</font></b> Machines] = 
+092:   { &lt;t1,t2,setup[m][t1][t2]&gt; | t1,t2 <b><font color="#0000FF">in</font></b> Types : 0&lt;=setup[m][t1][t2]} <b><font color="#0000FF">union</font></b>
+093:   { &lt;t1,t2,(maxint <b><font color="#0000FF">div</font></b> 2)-1&gt; | t1,t2 <b><font color="#0000FF">in</font></b> Types : setup[m][t1][t2]&lt;0 }; <b><font color="#007D00">// Forbidden transitions</font></b>
+094: 
+095: <b><font color="#0000FF">execute</font></b> {
+096:                 cp.param.FailLimit = 100000;
+097:         cp.param.LogPeriod = 10000;
+098: }
+099: 
+100: dvar interval a[i in Tasks];
+101: dvar interval alt[i in Tasks][m in Machines] optional size taskDur[m][i];
+102: dvar sequence s[m in Machines] 
+103:   in    all(i in Tasks) alt[i][m] 
+104:   types all(i in Tasks) taskType[i];
+105: 
+106: minimize max(i in Tasks) endOf(a[i]);
+107: subject to {
+108:   forall (i <b><font color="EA7D00">in</font></b> Tasks)
+109:     alternative(a[i], all(m <b><font color="EA7D00">in</font></b> Machines) alt[i][m]);
+110:   forall (m <b><font color="EA7D00">in</font></b> Machines)
+111:     noOverlap(s[m],tt[m],1);
+112: }
+113: 
+114: execute {
+115:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> m <b><font color="EA7D00">in</font></b> Machines) {
+116:     writeln(s[m]);
+117:   }
+118: };
+</tt></pre>

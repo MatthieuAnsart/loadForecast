@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Search API for scheduling in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="sched_search_api.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="80"><div
+                class="section-title1">Search API for scheduling in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                href="isomorphism.html">PREVIOUS</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%"><tr><td><a
+                            href="sched_search_api.html#81">Interval variables</a></td></tr><tr><td><a
+                            href="sched_search_api.html#82">Precedence and presence constraints between pairs of interval variables</a></td></tr><tr><td><a
+                            href="sched_search_api.html#83">Cumul element variables</a></td></tr><tr><td><a
+                href="sched_search_api.html#84">Interval sequence variables</a></td></tr></table><div
+                            class="section-body"><p>While the modeling objects provided by Concert Technology and the algorithms
+provided by CP Optimizer will generally be sufficient to model and
+solve your problem, in some situations you may need the full flexibility of writing and
+maintaining the solution process in various ways, such as writing
+custom constraints or custom constructive search by means of goals.</p><p>A number of classes and functions are provided in the CP Optimizer engine extensions
+for implementing custom constraints and custom search. The classes include 
+<code><a
+                            href="classes/IlcConstraint.html">IlcConstraint</a></code>, 
+<code><a
+                            href="classes/IlcGoal.html">IlcGoal</a></code> and <code><a
+                            href="classes/IlcDemon.html">IlcDemon</a></code>.  
+For scheduling applications, the engine classes 
+<code><a
+                            href="classes/IlcIntervalVar.html">IlcIntervalVar</a></code>,
+<code><a
+                            href="classes/IlcIntervalSequenceVar.html">IlcIntervalSequenceVar</a></code> and 
+<code><a
+                        href="classes/IlcCumulElementVar.html">IlcCumulElementVar</a></code> can be used in writing custom constraints and search.</p><p>These classes of decision variables make it possible to write custom search procedures and constraints. Each 
+class has members and member functions to aid the user in implementing customizations:</p><ul>
+<li> Boolean member functions which return whether the decision variable is fixed or partially fixed.</li><li> Member functions which access the possible values in the current domain of the decision variable.</li><li> Member functions which modify the domain of possible values in the current domain of the decision variable.</li><li> For constraint posting, member functions which post a demon on the event of a change of the possible values in the current domain of the decision variable. 
+These functions can only be used at the time of posting the constraint.</li><li> For constraint propagation of particular global constraints, member functions which access the domain-delta of for an event change 
+of the domain of the decision variable. This domain-delta distinguishes the current domain on which propagation applies and the old 
+domain from the last time the variable had been processed by the optimizer. These functions can only be used in the propagation of a 
+constraint or a demon.</li>
+</ul><p>The instances of these classes are counterparts in the optimizer to instances of modeling classes. They are available via member 
+functions of the class <code>IloCP</code>. For example, <code>IlcIntervalVar IloCP::getInterval(const IloIntervalVar var) const</code>. 
+Moreover, member functions of <code>IloCP</code> give access to the values of the domain of a variable after a successful 
+search.</p><p>For more information on the counterpart modeling classes of <code>IlcIntervalVar</code>, <code>IlcCumulElementVar</code> 
+and <code>IlcIntervalSequenceVar</code>, please refer to <a
+                    href="introduction.html">Introduction to Scheduling Concepts in CP Optimizer</a>.</p><div
+                        class="section"><a name="81"><div
+                        class="section-title2">Interval variables</div>
+</a><div
+                                    class="section-body"><p> An instance of the class <code>IlcIntervalVar</code> is a constrained interval variable in
+ the CP Optimizer engine. This class is the counterpart of the modeling class <code><a
+                                href="classes/IloIntervalVar.html">IloIntervalVar</a></code>, 
+discussed in the concept <a
+                                    href="interval_variables.html">Interval variables in CP Optimizer</a>. 
+The member functions of this class give access to the domain 
+ of an optimizer engine interval variable. The domain of an interval variable 
+ is comprised of the integer range
+ domains for start, end, length, and size as well as the Boolean range 
+ for the presence. 
+Recall the start, end, length and size range are meaningless if the interval is absent.
+A solution for an interval is fixed integers for the start, end, length and size if the interval is present; 
+see <code><a
+                                href="classes/IloCP.html">IloCP</a></code> for more information on how to access these values after 
+a successful solve.
+</p><p>Member functions give access to 
+ the delta domains and events for constraint propagation 
+ implementations. These members functions are
+ available only during the search process of the optimizer engine.
+These domain-deltas are also valid outside of the processing of the interval variable.
+</p><p>Figure 1 shows the domain-deltas for the change in the interval integer ranges start, end, length, and size from the last processing of the variable; 
+for example the old domain is <em>[oldstart_{min}, oldstart_{max}])</em> and the current domain is <em>[start_{min}, start_{max}]</em> 
+which is included in the unchanged range <em>[oldstart_{min}, oldstart_{max}])</em>.</p><p><img
+                                src="images/schedsearch1.png"
+                                alt="image" /></p><p><strong>Figure 1: Interval Variables Anytime Delta Domain Interval Domain Change Event</strong></p><p>The domain-delta of change of the range of the presence Boolean is trivial: the change is from an unfixed presence status to present or absent. 
+Member functions <code>isOldAbsent()</code> and <code>isOldPresent()</code> access the old value of the presence Boolean. Recall the interval 
+integer domain ranges start, end, length, and size are meaningless if the interval is absent. Similarly, the domain-delta for the old interval 
+integer ranges start, end, length, and size are meaningless if the interval is old absent; in other words, if the interval was absent the last time it was 
+processed by the optimizer engine. Figure 2 shows the domain-delta of a change in the presence of an interval variable. Note that if the presence 
+status is set to absent, the domain range of start, end, length and size are no longer displayed.</p><p><img
+                                src="images/schedsearch2.png"
+                    alt="image" /></p><p><strong>Figure 2: Interval Variables, Anytime Delta Domain Presence Fixing Event</strong></p></div></div><div
+                        class="section"><a name="82"><div
+                        class="section-title2">Precedence and presence constraints between pairs of interval variables</div>
+</a><div
+                                class="section-body"><p>A large range of useful algorithms for scheduling concerns pairs of intervals. These algorithms may involve:</p><ul>
+<li>Buiding a non-chronological schedule based on precedence between interval variables.</li><li>Constraints that deduce the conjunction or disjunction of presence of interval variables.</li><li>Constraints that deduce the temporal disjunction or synchronization of interval variables.</li>
+</ul><p>For implementing these algorithms, CP Optimizer provides access to binary constraints. Note that these constraints do not 
+support the logical constraint protocol of the optimizer engines. You may consider them as arcs on the temporal 
+and logical networks of interval variable in the optimizer engines.  For more information on constraints, see the concept page
+<a
+                                href="constraints_basic.html">Basic constraints on interval variables in CP Optimizer</a>.</p><p>The precedence constraints on interval constraints are:</p><ul>
+<li>The constraints that state the relative distance of the end-points of an interval variable such 
+      as <code>void IlcEndBeforeStart(const IlcIntervalVar x1, const IlcIntervalVar x2, const IlcInt z=0)</code> and 
+      its companions <code>IlcStartBeforeStart</code>, <code>IlcStartBeforeEnd</code>, and <code>IlcEndBeforeEnd</code>.</li><li>The constraints that synchronize the end-points of an interval variable such as 
+      <code>void IlcEndAtStart(const IlcIntervalVar x1, const IlcIntervalVar x2, const IlcInt z=0)</code>
+      and its companions <code>IlcStartAtStart</code>, <code>IlcStartAtEnd</code>, and <code>IlcEndAtEnd</code>.</li>
+</ul><p>Recall these constraints depend on the presence state of the interval variables. In other words, if one 
+of the interval variables is absent, then the constraint no longer has an effect on the schedule.</p><p>For the specific binary constraints on interval variables that are members of an interval variable sequence, 
+two constraints regarding sequences are avaibale in the optimizer engine:</p><ul>
+<li>The previous constraint constrains the immediate neighbor of two present interval variables in the 
+  sequence: <code> void IlcIntervalSequenceVar::setPrevious(const IlcIntervalVar prev, const IlcIntervalVar next) const;</code>.</li><li>The before constraint constrains the relative position of two present interval variables in the sequence: 
+  <code> void IlcIntervalSequenceVar::setBefore(const IlcIntervalVar before, const IlcIntervalVar after) const;</code>.</li>
+</ul><p>For more information, please refer to the concept page <a
+                    href="interval_sequence.html">Interval variable sequencing in CP Optimizer</a>.</p><p>The logical presence constraints are:</p><ul>
+<li>the implication constraint <code> void IlcPresenceImply(const IlcIntervalVar x1, const IlcIntervalVar x2);</code>,
+      which is useful for constraint propagation.</li><li>the disimplication constraint <code>IlcPresenceImplyNot(const IlcIntervalVar x1, const IlcIntervalVar x2);</code>,
+      which is its own opposite and is particulary useful for constraint propagation.</li><li>the disjunction constraint <code>IlcPresenceOr(const IlcIntervalVar x1, const IlcIntervalVar x2);</code>, which is the 
+      opposite of both intervals being present and is useful for building choice points on the absolute presence of the  interval variables.</li><li>the equality of presence constraint <code>IlcPresenceEqual(const IlcIntervalVar x1, const IlcIntervalVar x2);</code> and 
+      its opposite excluse disjunction constraint <code>IlcPresenceDiffferent(const IlcIntervalVar x1, const IlcIntervalVar x2);</code>,
+      which are useful for building choice points on the relative presence of the interval variables.</li>
+</ul><p>Note all the constraints presented in this paragraph do not support the mechanism of logical constraints in the 
+pptimizer engine.</p></div></div><div
+                        class="section"><a name="83"><div
+                        class="section-title2">Cumul element variables</div>
+</a><div
+                                class="section-body"><p> An instance of the class <code>IlcCumulElementVar</code> is a constrained cumul element function in
+ the optimizer engine. A cumul element function in the
+ model layer is built by the shape functions
+ <code>IloPulse</code>,
+ <code>IloStepAtStart</code> or <code>IloStepAtEnd</code> with an
+ instance of <code>IloIntervalVar</code> as the first argument.  See <a
+                                href="cumul_functions.html">Cumul functions in CP Optimizer</a> 
+for more information.</p><p>Taking <code>start</code> and <code>end</code> as the end points
+ of the instance of <code>IlcIntervalVar</code> in the cumul element function,
+ an instance of <code>IlcCumulElementVar</code> is a constrained
+ positive integer range function that is nonzero everywhere except for 
+ on the segment related to its shape: <code>[start, end)</code>
+ for a pulse, from <code>start</code> for a step at start function and from 
+ <code>end</code> for a step at end function. The value on this segment is a 
+ positive integer range domain, the height, that is to be fixed
+ by the search if the element function is not the null function.
+ The cumul element is zero everywhere (the null function) if the 
+ interval variable is absent, the height range is
+ fixed to zero, or if <code>length = end - start = 0</code> for a
+ pulse. The propagation may find that the cumul element
+ function is to be the null function without fixing the presence, height or length.
+ In such a case, the height range domain is meaningless. To summarize, an instance of the 
+class <code>IlcCumulElementVar</code> 
+is a constrained integer range domain for the height decision, except in some special cases 
+where the function is the null function.</p><p>Figure 3 shows the domain of the cumul function for a pulse shaped element with present and non-absent intervals. Two cases appear, 
+if the maximum start point of the interval is strictly less than the minimum end point of the interval (left side of the figure), the 
+minimum cumul function is at least the minimum of the height if the interval is present. Otherwise, there is no abscissa point where 
+the function is surely not null at this point.</p><p><img
+                                src="images/schedsearch3.png"
+                                alt="image" /></p><p><strong>Figure 3: Pulse Cumul Element Domain</strong></p><p>Figure 4 shows the domain of the cumul function for step at start and step at end shaped elements with present and 
+non-absent intervals. For a present interval and a nonzero minimum height, the function is nonzero everywhere 
+after its starting point.</p><p><img
+                                src="images/schedsearch4.png"
+                    alt="image" /></p><p><strong>Figure 4: Step Cumul Element Domain</strong></p><p> The member functions of this class
+ give access to the search engine data structure of the cumul element
+ function, including the interval variable, the shape, the integer
+ range domain for the height. The member functions also include the
+ height domain setters and getters and give access to the delta domains and events for
+ custom constraint propagation implementations. These members functions are
+ available only at search time of the optimizer engine.</p></div></div><div
+                        class="section"><a name="84"><div
+                        class="section-title2">Interval sequence variables</div>
+</a><div
+                                    class="section-body"><p> An instance of the <code>IlcIntervalSequenceVar</code> class is a constrained interval 
+ sequence variable in the optimizer engine.  The purpose of this class is to sequence a set of intervals,
+ instances of <code>IlcIntervalVariable</code>. The modeling counterpart of this class is 
+<code><a
+                                href="classes/IloIntervalSequenceVar.html">IloIntervalSequenceVar</a></code>, 
+discussed in the concept <a
+                                href="interval_sequence.html">Interval variable sequencing in CP Optimizer</a>. 
+The sequence is a succession of interval variables that is associated with a chronology 
+in a scheduling model.</p><ul>
+<li> In a solution, an interval can be present or absent. In CP Optimizer, an absent interval does not participate in the 
+schedule. Similarly, an interval can be present or absent in the sequence. If absent, the interval does not participate 
+in the sequence. Note that being present (absent) for an interval or present (absent) in the sequence may not be identical 
+during the propagation of the optimizer.</li><li> In a solution, any interval in the chronological sequence is present, and the chronology begins with the first interval of the sequence 
+and traverses the immediate successor (next) intervals until reaching the last interval of the sequence. Conversely, the 
+reverse chronology begins with the last interval of the sequence and traverses the immediate predecessor (previous) intervals 
+until reaching the first interval of the sequence.</li><li> Before any interval in the sequence, we define a formal sink for the chronological sequence. In the programming interface of the sequence 
+variable, this sink is a null handle instance of <code>IlcIntervalVariable</code>. Similarly, after all intervals 
+in the sequence there exits 
+a formal sink for the  reverse chronological sequence, in the programming interface of the sequence variable; this sink is a 
+null handle instance of <code>IlcIntervalVariable</code>.</li>
+</ul><p>The full constrained representation of a sequence is a precedence graph whose nodes are the sinks and the intervals valued 
+by the presence value. The arcs are directed from a non-absent interval or a sink and point to another non-absent interval 
+or a sink. The arcs are valued by the enumeration: possibly/surely/not immediate successor, possibly/surely/not immediate
+ predecessor, possibly/surely/not successor and possibly/surely/not predecessor. In other words, the arcs define the sets
+ of immediate successors and predecessors or indirect successors and predecessors of an interval. Reducing the domain consists 
+in setting an interval present or absent and removing intervals from the different sets of the domain (that is changing the 
+valuation of an arc). The main drawbacks of the precedence graph is the quadratic data structure (in terms of the number of 
+intervals) for memory usage and the at least linear time maintenance for a change or a decision. Moreover, the 
+precedence graph contains more information than needed for chronological heuristics scheduling solution building.</p><p>CP Optimizer supplies a more accurate constrained data structure: the Head-Tail Sequence Graph. The 
+constrained domain of the Head-Tail Sequence 
+Graph is a restriction of the precedence by a chronologically based partition of the intervals 
+of the sequence. Figure 5 shows this restriction with a present interval as a plain circle, and a non-absent interval as a dashed circle.</p><p><img
+                                src="images/schedsearch5.png"
+                                    alt="image" /></p><p><strong>Figure 5: Interval Sequence Variable Head-Tail Graph Domain</strong></p><ul>
+<li>The head of the sequence is a chronologically ordered set (a subsequence) from the head sink. These intervals are 
+&quot;in head&quot; and sequenced. The sink of the head is also in the head and is always present. Upon becoming absent, an interval 
+in the head is removed from this subsequence. The first interval in the head is the &quot;earliest in head&quot; interval, and 
+the last interval in the head is the &quot;latest in head&quot; interval.</li><li> The tail of the sequence is a reverse chronologically ordered set (a subsequence) from the tail sink. These intervals 
+are &quot;in tail&quot; and sequenced. The sink of the tail is also in the tail and is always present. Upon becoming absent, an interval 
+in the tail is removed from this subsequence. The first interval in the tail is the &quot;earliest in tail&quot; interval, and the last 
+interval in the tail is the &quot;latest in tail&quot; interval.</li><li>The remaining intervals are not sequenced. In order of to have a complete description of the not sequenced 
+neighborhood of the head and tail subsequences, these intervals may belong to two unordered subsets. From the head point 
+of view, the set of &quot;candidate head&quot; intervals are the intervals that can chronologically extend the head subsequence. 
+From the tail point of view, the set of &quot;candidate tail&quot; intervals are the intervals that can extend the tail subsequence.</li>
+</ul><p>The sequence is sequenced when any non-absent interval is in the tail or in the head. The sequence is fixed when it is sequenced and 
+any interval in the tail or in the head is present in the sequence. Note that if the Head-Tail Graph is not sequenced, there 
+is at least one candidate head interval and one candidate tail interval. The sequence solution is given by joining the 
+latest interval in the head and latest interval in the tail as immediate neighbors. The solution available from the instance of 
+<code><a
+                                href="classes/IloCP.html">IloCP</a></code> consists in the first and last intervals and the next and previous interval of a 
+present interval.</p><p>The Head-Tail Sequence Graph is linear in memory and changes need O(1) or at most linear
+algorithms for propagation and decision making in the context of a chronological a reverse chronological) schedule building.</p><p>An iterator traverses the subsets of the sequence: tail, head, not sequenced, candidate head or candidate tail. As 
+shown on Figure 5, the traversal is oriented by the chronology for the head subsequence and by reverse chronology for the 
+tail subsequences. Note the iterator is not stable in the case of a change of the Head-Tail Sequence Graph.</p><p>Figure 6 shows the changes that can affect the head subsequence of the Head-Tail graph. Tail subsequence changes are similar.</p><ul>
+<li>The first change is the setting of the presence or absence of an interval. Note that, for sake of regularity, you can set 
+as present the head or tail sink (no effect) or set as absent the head or tail sink (failure raised by the optimizer engine).</li><li>Building the sequence consists of extending the head with a candidate head interval or extending the tail with a 
+candidate tail interval.</li><li> If the head (tail) extension by a candidate head (tail) interval is not allowed, then a remove candidate head (tail) change applies. 
+Note that each time the head is extended, the candidate head list of intervals is fully recomputed.</li>
+</ul><p><img
+                                src="images/schedsearch6.png"
+                                alt="image" /></p><p><strong>Figure 6: Interval Sequence Variable Head-Tail Graph Head Changes</strong></p><p>The presence in sequence of intervals in one subsequence, the head/tail extension, or removing of a candidate from the other 
+subsequence are the events 
+on the Head-Tail Graph. Each of these events corresponds to a domain-delta only available at the processing time of the Head-Tail Graph 
+by the optimizer engine. Figure 7 shows the domain-delta for presence change and head extension change.</p><p><img
+                                src="images/schedsearch7.png"
+                alt="image" /></p><p><strong>Figure 7: Interval Sequence Variable Head-Tail Graph Delta Domain</strong></p><ul>
+<li>Presence change: The interval whose presence is fixed is the domain-delta of this event. If the interval becomes absent, 
+it is removed from the partition of the sequence after the change has been processed; for example, it remains in the head if it 
+was there. This makes it possible to initialize an iterator on a newly absent interval in a propagation algorithm.</li><li>Extension change: the domain-delta is defined from the interval that is the latest in head from the last time the 
+head extension was processed: the &quot;earliest newly in head&quot; interval. The head subsequence is partitioned into two 
+chronological oriented sets: from the &quot;earliest in head&quot; interval to the &quot;latest in old head&quot;, which is possibly empty, 
+and from the &quot;earliest newly in head&quot; interval to the &quot;latest in head&quot; interval is the head-delta, this subsequence being surely 
+non-empty. A similar domain-delta is defined on tail extension events.</li>
+</ul><p>Notes about decision making:</p><p>Suppose that a chronological schedule is being built. Sequencing an interval sequence variable consists of 
+choosing from among the 
+candidate head intervals the one that will extend the head subsequence. We suggest that before any extension decision, 
+the search traversal fix the presence of all intervals in head. When the sequence is sequenced, it may not be fixed because the 
+constraint propagation engine could have placed some not present intervals in the tail. In such a case, the search traversal must 
+(chronologically) fix the presence of the intervals in the tail. By chronologically, we means from the &quot;latest in tail&quot; interval 
+to the &quot;earliest in tail&quot; interval.</p><p>Sequencing an interval sequence variable is not scheduling the intervals in the sequence, nor is it scheduling the entirety of the interval 
+variables in the model. The start and end dates of the intervals must be fixed, and this in a chronological manner. We emphasize you may 
+need to interleave sequencing decisions with scheduling and presence setting decisions in a custom search.</p><p>To help you with decisions, CP Optimizer provides an iterator on the in head, in tail, candidate head and candidate tail intervals. 
+Furthermore, it defines two choice points for Head-Tail extension: 
+<code>IlcGoal IlcIntervalSequenceVar::tryExtendHead(const IlcIntervalVar var) const;</code> and 
+<code>IlcGoal IlcIntervalSequenceVar::tryExtendHead(const IlcIntervalVar var) const;</code>.</p><p>Notes about constraint propagation:</p><p>Propagating a constraint on a head-tail interval consists of implementing the filtering algorithm on the events of presence change 
+and head-tail extension. The presence change for an interval in head and the head extension filtering algorithm must ensure that 
+the constraint conditions hold on the head subsequence. This generally makes it possible to set as absent some intervals in the head. 
+A similar filtering 
+algorithm exists for the presence in tail change and tail extension.</p><p>The second aspect to consider is the sets of candidate head and tail intervals. An interval must be removed from the set of 
+candidate head intervals when it cannot be the immediate successor of an interval between the &quot;latest present in head&quot; interval and 
+the &quot;latest in head&quot; interval.</p><p>Lastly, when the sequence variable is sequenced, the head and tail subsequences must be joined. The constraint condition 
+must be enforced on the full sequence &quot;earliest in head&quot;-&gt;...-&gt;&quot;latest in head&quot;-&gt;&quot;latest in tail&quot;-&gt;&quot;earliest in tail&quot;.</p><p>To help you with writing the filtering algorithm, CP Optimizer provides access to the immediate neighborhood of an interval 
+in head and tail, to the domain-deltas of all events and to two pure sequencing modifiers that constrain the Head-Tail 
+Graph: <code>void IlcIntervalSequenceVar::setPrevious(const IlcIntervalVar prev, const IlcIntervalVar next) const</code> and 
+<code>IlcIntervalSequenceVar::setBefore(const IlcIntervalVar before, const IlcIntervalVar after) const</code>. </p></div></div></div><div
+                    align="right"><a href="isomorphism.html">PREVIOUS</a></div></div></body>
+</html>

@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Numeric difficulties" />
+<meta name="abstract" content="Documents CPLEX behavior with respect to numeric difficulties in LP models." />
+<meta name="Description" content="Documents CPLEX behavior with respect to numeric difficulties in LP models." />
+<meta name="DC.subject" content="numeric difficulties, definition (LP)" />
+<meta name="keywords" content="numeric difficulties, definition (LP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/18_performance_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveLP.638490" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/18_performance_title_synopsis.html" />
+<title>Numeric difficulties</title>
+</head>
+<body role="main" id="User_manual.uss_solveLP.638490">
+<h1 class="title topictitle1">Numeric difficulties</h1>
+<div class="body"><p class="shortdesc">Documents CPLEX behavior with respect to numeric difficulties
+in LP models.</p>
+<p class="p">CPLEX is designed to handle the numeric difficulties of linear
+programming automatically. In this context, numeric difficulties mean
+such phenomena as:</p>
+<ul class="ul"><li class="li"><p class="p">repeated occurrence of singularities; </p>
+ </li>
+<li class="li"><p class="p">little or no progress toward reaching the optimal objective
+function value; </p>
+</li>
+<li class="li"><p class="p">little or no progress in scaled infeasibility; </p>
+ </li>
+<li class="li"><p class="p">repeated problem perturbations; and</p>
+ </li>
+<li class="li"><p class="p">repeated occurrences of the solution becoming infeasible. </p>
+</li>
+</ul>
+<p class="p">While CPLEX will usually achieve an optimal solution in spite of
+these difficulties, you can help it do so more efficiently. This section
+characterizes situations in which you can help.</p>
+<p class="p">Some problems will not be solvable even after you take the measures
+suggested here. For example, problems can be so poorly conditioned
+that their optimal solutions are beyond the numeric precision of your
+computer.</p>
+<div class="section" id="User_manual.uss_solveLP.638490__User_manual.uss_solveLP.675119"><h2 class="title sectiontitle">Numerical emphasis
+settings</h2><p class="p">The <a class="xref" href="../../../../Parameters/topics/NumericalEmphasis.html" title="Emphasizes precision in numerically unstable or difficult problems.">numerical precision emphasis</a> parameter
+controls the degree of numerical caution used during optimization
+of a model. </p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">C++ Name NumericalEmphasis</samp> in Concert Technology</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">C Name CPX_PARAM_NUMERICALEMPHASIS</samp> in the
+Callable Library</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">emphasis numerical</samp> in the Interactive Optimizer</p>
+</li>
+</ul>
+<p class="p">At its default setting, CPLEX employs ordinary caution in
+dealing with the numerical properties of the computations it must
+perform. Under the optional setting, CPLEX uses extreme caution.</p>
+<p class="p">This
+emphasis parameter is different in style from the various tolerance
+parameters in CPLEX. The purpose of the emphasis parameter is to relieve
+the user of the need to analyze which tolerances or other algorithmic
+controls to try. Instead, the user tells CPLEX that the model about
+to be solved is known to be susceptible to unstable numerical behavior
+and lets CPLEX make the decisions about how best to proceed.</p>
+<p class="p">There
+may be a trade-off between solution speed and numerical caution. You
+should not be surprised if your model solves less rapidly at the optional
+setting of this parameter, because each iteration may potentially
+be noticeably slower than at the default. On the other hand, if the
+numerical difficulty has been causing the optimizer to proceed less
+directly to the optimal solution, it is possible that the optional
+setting will reduce the number of iterations, thus leading to faster
+solution. When the user chooses an emphasis on extreme numerical caution,
+solution speed is in effect treated as no longer the primary emphasis.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.638490__User_manual.uss_solveLP.655471"><h2 class="title sectiontitle">Numerically sensitive
+data</h2><p class="p">There is no absolute link
+between the form of data in a model and the numeric difficulty the
+problem poses. Nevertheless, certain choices in how you present the
+data to CPLEX can have an adverse effect.</p>
+<p class="p">Placing large upper
+bounds (say, in the neighborhood of <em class="ph i">1e9</em> to <em class="ph i">1e12</em>) on
+individual variables can cause difficulty during Presolve. If you
+intend for such large bounds to mean “no bound is really in effect”
+it is better to simply not include such bounds in the first place. </p>
+<p class="p">Large
+coefficients anywhere in the model can likewise cause trouble at various
+points in the solution process. Even if the coefficients are of more
+modest size, a wide variation (say, six or more orders of magnitude)
+in coefficients found in the objective function or right hand side,
+or in any given row or column of the matrix, can cause difficulty
+either in Presolve when it makes substitutions, or in the optimizer
+routines, particularly the barrier optimizer, as convergence is approached.</p>
+<p class="p">A
+related source of difficulty is the form of rounding when fractions
+are represented as decimals; expressing 1/3 as .33333333 on a computer
+that in principle computes values to about 16 digits can introduce
+an apparent “exact” value that will be treated as given but may not
+represent what you intend. This difficulty is compounded if similar
+or related values are represented a little differently elsewhere in
+the model. </p>
+<p class="p">For example, consider the constraint <samp class="ph codeph">1/3
+x1 + 2/3 x2 = 1</samp>. In perfect arithmetic, it is equivalent
+to <samp class="ph codeph">x1 + 2 x2 = 3</samp>. However, if you express the fractional
+form with decimal data values, some truncation is unavoidable. If
+you happen to include the truncated decimal form of the constraint
+in the same model with some differently-truncated form or even the
+exact-integer data form, an unexpected result could easily occur.
+Consider the following problem formulation:</p>
+<pre class="pre codeblock"><code>Maximize
+ obj: x1 + x2
+Subject To
+ c1: 0.333333 x1 + 0.666667 x2  = 1
+ c2: x1 + 2 x2  = 3
+End</code></pre>
+<p class="p">With default numeric tolerances, this will deliver
+an optimal solution of <samp class="ph codeph">x1=1.0</samp> and <samp class="ph codeph">x2=1.0</samp> ,
+giving an objective function value of <samp class="ph codeph">2.0</samp> . Now,
+see what happens when using slightly more accurate data (in terms
+of the fractional values that are clearly intended to be expressed):</p>
+<pre class="pre codeblock"><code>Maximize
+ obj: x1 + x2
+Subject To
+ c1: 0.333333333 x1 + 0.666666667 x2  = 1
+ c2: x1 + 2 x2  = 3
+End</code></pre>
+<p class="p">The solution to this problem has <samp class="ph codeph">x1=3.0</samp> and <samp class="ph codeph">x2=0.0</samp>,
+giving an optimal objective function value of <samp class="ph codeph">3.0</samp> ,
+a result qualitatively different from that of the first model. Since
+this latter result is the same as would be obtained by removing constraint <samp class="ph codeph">c1</samp> from
+the model entirely, this is a more satisfactory result. Moreover,
+the numeric stability of the optimal basis (as indicated by the condition
+number, discussed in the next section), is vastly improved. </p>
+<p class="p">The
+result of the extra precision of the input data is a model that is
+less likely to be sensitive to rounding error or other effects of
+solving problems on finite-precision computers, or in extreme cases
+will be more likely to produce an answer in keeping with the intended
+model. The first example, above, is an instance where the data truncation
+has fundamentally distorted the problem being solved. Even if the
+exact-integer data form of the constraint is not present with the
+decimal form, the truncated decimal form no longer exactly represents
+the intended meaning and, in conjunction with other constraints in
+your model, could give unintended answers that are "accurate" in the
+context of the specific data being fed to the optimizer.</p>
+<p class="p">Be
+particularly wary of data in your model that has been computed (within
+your program, or transmitted to your program from another via an input
+file) using single-precision (32-bit) arithmetic. For example, in
+C, this situation would arise from using type <samp class="ph codeph">float</samp> instead
+of <samp class="ph codeph">double</samp>. Such data will be accurate only to about
+8 decimal digits, so that (for example) if you print the data, you
+might see values like <samp class="ph codeph">0.3333333432674408</samp> instead
+of <samp class="ph codeph">0.3333333333333333</samp>. CPLEX uses double-precision
+(64-bit) arithmetic in its computations, and truncated single-precision
+data carries the risk that it will convey a different meaning than
+the user intends.</p>
+<p class="p">The underlying principle behind all the cautions
+in this section is that information contained in the data needs to
+reflect actual meaning or the optimizer may reach unstable solutions
+or encounter algorithmic difficulties.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.638490__User_manual.uss_solveLP.638613"><h2 class="title sectiontitle">Measuring problem
+sensitivity with basis condition number kappa</h2>   <p class="p">Ill-conditioned matrices are sensitive
+to minute changes in problem data. That is, in such problems, small
+changes in data can lead to very large changes in the reported problem
+solution. CPLEX provides a basis condition number to measure the sensitivity
+of a linear system to the problem data. You might also think of the
+basis condition number as the number of places in precision that can
+be lost. </p>
+<p class="p">For example, if the basis condition number at optimality
+is <samp class="ph codeph">1e+13</samp>, then a change in a single matrix coefficient
+in the thirteenth place (counting from the right) may dramatically
+alter the solution. Furthermore, since many computers provide about
+16 places of accuracy in double precision, only three accurate places
+are left in such a solution. Even if an answer is obtained, perhaps
+only the first three significant digits are reliable.</p>
+<p class="p">Specifically,
+condition numbers on the order of <samp class="ph codeph">1e+7</samp> indicate virtually
+no chance of ill conditioning. Condition numbers on the order of <samp class="ph codeph">1e+8</samp> to <samp class="ph codeph">1e+9</samp> indicate
+only a slight chance of ill conditioning, and only if the model is
+also poorly scaled or has some other numerical problems.  Condition
+numbers on the order of <samp class="ph codeph">1e+10</samp> to <samp class="ph codeph">1e+13</samp> have
+some potential for ill conditioning.  Nonetheless, because the condition
+number provides an upper bound on the sensitivity to change, CPLEX
+usually solves models with condition numbers in this range with little
+or no trouble. However, when the order of magnitude of the condition
+number exceeds <samp class="ph codeph">1e+13</samp>, numerical problems are more
+likely to occur.  </p>
+<p class="p">More generally, for a given order of magnitude
+for the feasibility and optimality tolerances, dividing the feasibility
+tolerance by the machine precision specifies the lower threshold for
+the condition number at which point the potential for numerical difficulties
+begins.  For example,  with the default feasibility of CPLEX and optimality
+tolerances of <samp class="ph codeph">1e-6</samp> and machine precision of <samp class="ph codeph">1e-16</samp>, <samp class="ph codeph">1e+10</samp> is
+the smallest  condition number for which algorithmic decisions might
+be made based on round-off error.  This calculation explains why,
+with default parameter settings, condition numbers of <samp class="ph codeph">1e+10</samp> define
+the lower threshold at which point ill conditioning may occur.</p>
+<p class="p">Because
+of this effective loss of precision for matrices with high basis condition
+numbers, CPLEX may be unable to select an optimal basis. In other
+words, a high basis condition number can make it impossible to find
+a solution. </p>
+<ul class="ul"><li class="li"><p class="p">In the Interactive Optimizer, use the command <samp class="ph codeph">display solution kappa</samp> in
+order to see the basis condition number of a resident basis matrix. </p>
+ </li>
+<li class="li"><p class="p">In Concert Technology, use the method: </p>
+ <p class="p"> <samp class="ph codeph">IloCplex::getQuality(IloCplex::Kappa)</samp> 
+(C++)</p>
+ <p class="p"> <samp class="ph codeph">IloCplex.getQuality(IloCplex.QualityType.Kappa)</samp> 
+(Java)</p>
+ <p class="p"> <samp class="ph codeph">Cplex.GetQuality(Cplex.QualityType.Kappa)</samp> 
+(.NET)</p>
+ </li>
+<li class="li"><p class="p">In the Callable Library, use the routine<samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getdblquality.html" title="The routine CPXXgetdblquality/CPXgetdblquality accesses double-valued information about the quality of the current solution of a problem.">CPXgetdblquality</a></samp> to
+access the condition number in the double-precision variable <samp class="ph codeph">dvalue</samp>,
+like this: </p>
+ <pre class="pre codeblock"><code>status = CPXgetdblquality(env, lp, &amp;dvalue, CPX_KAPPA);</code></pre>
+ </li>
+</ul>
+</div>
+<div class="section" id="User_manual.uss_solveLP.638490__User_manual.uss_solveLP.638612"><h2 class="title sectiontitle">Repeated singularities</h2><p class="p">Whenever
+CPLEX encounters a singularity, it removes a column from the current
+basis and proceeds with its work. CPLEX reports such actions to the
+log file (by default) and to the screen (if you are working in the
+Interactive Optimizer or if the <a class="xref" href="../../../../Parameters/topics/SCRIND.html" title="Decides whether or not results are displayed on screen in an application of the C API.">messages to screen switch</a> <samp class="ph codeph">CPX_PARAM_SCRIND</samp> is
+set to <samp class="ph codeph">1</samp> (one)). After it finds an optimal solution
+under these conditions, CPLEX will then re-include the discarded column
+to be sure that no better solution is available. If no better objective
+value can be obtained, then the problem has been solved. Otherwise,
+CPLEX continues its work until it reaches optimality.</p>
+<p class="p">Occasionally,
+new singularities occur, or the same singularities recur. CPLEX observes
+a limit on the number of singularities it tolerates. The parameter <samp class="ph codeph">SingLim</samp> specifies
+this limit. By default, the limit is ten. After encountering this
+many singularities, CPLEX will save in memory the best factorable
+basis found so far and stop its solution process. You may want to
+save this basis to a file for later use.</p>
+<p class="p">To save the best factorable
+basis found so far in the Interactive Optimizer, use the <samp class="ph codeph">write</samp> command
+with the file type <samp class="ph codeph">bas</samp>. When using the Component
+Libraries, use the method <samp class="ph codeph">cplex.writeBasis</samp> or the
+routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/writeprob.html" title="The routine CPXXwriteprob/CPXwriteprob writes a CPLEX problem object to a file in one of the formats in the table.">CPXwriteprob</a></samp>.</p>
+<p class="p">If
+CPLEX encounters repeated singularities in your problem, you may want
+to try alternative scaling on the problem (rather than simply increasing
+CPLEX tolerance for singularities). <a class="xref" href="17_params_simplex.html#User_manual.uss_solveLP.637848__User_manual.uss_solveLP.638148">Scaling</a> explains
+how to try alternative scaling.</p>
+<p class="p">If alternate scaling does not
+help, another tactic to try is to increase the Markowitz tolerance.
+The Markowitz tolerance controls the kinds of pivots permitted. If
+you set it near its maximum value of <samp class="ph codeph">0.99999</samp> , it
+may make iterations slower but more numerically stable. <a class="xref" href="20_num_difficulty.html#User_manual.uss_solveLP.638490__User_manual.uss_solveLP.638496">Inability to stay feasible</a> shows
+how to change the Markowitz tolerance.</p>
+<p class="p">If none of these ideas
+help, you may need to alter the model of your problem. Consider removing
+the offending variables manually from your model, and review the model
+to find other ways to represent the functions of those variables.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.638490__User_manual.uss_solveLP.638494"><h2 class="title sectiontitle">Stalling due to
+degeneracy</h2><p class="p">Highly
+degenerate linear programs tend to stall optimization progress in
+the primal and dual simplex optimizers. When stalling occurs with
+the primal simplex optimizer, CPLEX automatically perturbs the variable
+bounds; when stalling occurs with the dual simplex optimizer, CPLEX
+perturbs the objective function.</p>
+<p class="p">In either case, perturbation
+creates a different but closely related problem. After CPLEX has solved
+the perturbed problem, it removes the perturbation by resetting problem
+data to their original values.</p>
+<p class="p">If CPLEX automatically perturbs
+your problem early in the solution process, you should consider starting
+the solution process yourself with a perturbation. (Starting in this
+way will save the time that would be wasted if you first allowed optimization
+to stall and then let CPLEX perturb the problem automatically.) </p>
+<p class="p">To
+start perturbation yourself, set the parameter <samp class="ph codeph">PerInd</samp> to <samp class="ph codeph">1</samp> instead
+of its default value of <samp class="ph codeph">0</samp> (zero). The perturbation
+constant, <samp class="ph codeph">EpPer</samp>, is usually appropriate at its default
+value of 1e-6, but can be set to any value 1e-8 or larger.</p>
+<p class="p">If
+you observe that your problem has been perturbed more than once, then
+the perturbed problem may differ too greatly from your original problem.
+In such a case, consider reducing the value of the <a class="xref" href="../../../../Parameters/topics/EpPer.html" title="Sets the amount by which CPLEX perturbs the upper and lower bounds or objective coefficients on the variables when a problem is perturbed in the simplex algorithm.">perturbation constant</a> perturbation
+constant (<samp class="ph codeph">EpPer</samp> in Concert Technology, <samp class="ph codeph">CPX_PARAM_EPPER</samp> in
+the Callable Library).</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.638490__User_manual.uss_solveLP.638496"><h2 class="title sectiontitle">Inability to stay
+feasible</h2><p class="p">If a problem repeatedly
+becomes infeasible in Phase II (that is, after CPLEX has achieved
+a feasible solution), then numeric difficulties may be occurring.
+It may help to increase the Markowitz tolerance in such a case. By
+default, the value of the parameter <samp class="ph codeph">EpMrk</samp> is <samp class="ph codeph">0.01</samp>,
+and suitable values range from <samp class="ph codeph">0.0001</samp> to <samp class="ph codeph">0.99999</samp>.</p>
+<p class="p">Sometimes
+slow progress in Phase I (the period when CPLEX calculates the first
+feasible solution) is due to similar numeric difficulties, less obvious
+because feasibility is not gained and lost. In the progress reported
+in the log file, an increase in the printed sum of infeasibilities
+may be a symptom of this case. If so, it may be worthwhile to set
+a higher Markowitz tolerance, just as in the more obvious case of
+numeric difficulties in Phase II.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/18_performance_title_synopsis.html" title="While some linear programming models offer opportunities for performance tuning, others, unfortunately, entail outright performance problems that require diagnosis and correction. This section indicates how to diagnose and correct such performance problems as lack of memory or numeric difficulties.">Diagnosing performance problems</a></div>
+</div>
+</div></body>
+</html>

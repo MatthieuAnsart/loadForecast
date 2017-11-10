@@ -1,0 +1,130 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/**************************************************************</font></b>
+013: <b><font color="#007D00">Outscourcing Example</font></b>
+014: 
+015: <b><font color="#007D00">This model is described in the documentation. </font></b>
+016: <b><font color="#007D00">See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+017: <b><font color="#007D00">   </font></b>
+018: <b><font color="#007D00">**************************************************************/</font></b>
+019: 
+020: <b><font color="#0000FF">int</font></b> NumAmts = ...; <b><font color="#007D00">// # of discount ranges</font></b>
+021: {<b><font color="#0000FF">string</font></b>} Items = ...;
+022: {<b><font color="#0000FF">string</font></b>} Suppliers = ...;
+023: {<b><font color="#0000FF">string</font></b>} AUDsuppliers = ...; <b><font color="#007D00">// AUD (All-Units-Discount) suppliers</font></b>
+024: {<b><font color="#0000FF">string</font></b>} CQDsuppliers = ...; <b><font color="#007D00">// ICD (Incremental-Quantity-Discount) suppliers </font></b>
+025: 
+026: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">card</font></b>(CQDsuppliers <b><font color="#0000FF">union</font></b> AUDsuppliers) == <b><font color="#7D007D">card</font></b>(Suppliers);
+027: 
+028: <b><font color="#0000FF">range</font></b> Amts = 1..NumAmts; <b><font color="#007D00">// Indices of the discount ranges</font></b>
+029: 
+030: <b><font color="#0000FF">int</font></b> ItemDemand[Items] = ...; 
+031: <b><font color="#0000FF">int</font></b> TotalSupplierCap[Suppliers] = ...; <b><font color="#007D00">// Supply capacity for all items at each supplier</font></b>
+032: <b><font color="#0000FF">int</font></b> BreakAmts[1..NumAmts+1] = ...; <b><font color="#007D00">// Discount Breaks</font></b>
+033: <b><font color="#0000FF">int</font></b> SetupCost[Suppliers] = ...;
+034: 
+035: <b><font color="#007D00">//float+ basicCost[Items][Suppliers] = ...;</font></b>
+036: <b><font color="#0000FF">float</font></b> CostInRanges[Items][Suppliers][Amts] = ...; <b><font color="#007D00">//Cost difference between consecutive discount ranges</font></b>
+037: 
+038: <b><font color="#0000FF">int</font></b> MaxN = <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Suppliers) TotalSupplierCap[i];
+039: 
+040: 
+041: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Quantity[Items][Suppliers][Amts] <b><font color="#0000FF">in</font></b> 0..MaxN;
+042: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> SupAmt[Items][Suppliers][Amts] <b><font color="#0000FF">in</font></b> 0..1; <b><font color="#007D00">// For AUD</font></b>
+043: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> TotalQuantity[Items][Suppliers] <b><font color="#0000FF">in</font></b> 0..MaxN;
+044: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Setup[Suppliers] <b><font color="#0000FF">in</font></b> 0..1;
+045: 
+046: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> TotalVariableCost =
+047:   <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Items, s <b><font color="#0000FF">in</font></b> Suppliers, a <b><font color="#0000FF">in</font></b> Amts) CostInRanges[i][s][a] 
+048:                                                  * Quantity[i][s][a] ;
+049: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> TotalSetupCost =
+050:   <b><font color="#7D007D">sum</font></b>(s <b><font color="#0000FF">in</font></b> Suppliers) SetupCost[s]*Setup[s];                                            
+051:   
+052: <b><font color="#0000FF">minimize</font></b> TotalVariableCost + TotalSetupCost;
+053:                                                  
+054: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+055:   <b><font color="#007D00">// Capacity Constraints</font></b>
+056:   <b><font color="#7D007D">forall</font></b>(s <b><font color="#0000FF">in</font></b> Suppliers)
+057:     ctCaps: <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Items, a <b><font color="#0000FF">in</font></b> Amts) Quantity[i][s][a] &lt;= TotalSupplierCap[s];
+058:        
+059:   <b><font color="#007D00">// Satisfy Demand</font></b>
+060:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Items)
+061:     ctDem: <b><font color="#7D007D">sum</font></b>(s <b><font color="#0000FF">in</font></b> Suppliers, a <b><font color="#0000FF">in</font></b> Amts) Quantity[i][s][a] &gt;= ItemDemand[i];
+062:       
+063:   <b><font color="#007D00">// supAmt in one range only for each item and each All-Unit-Discount supplier</font></b>
+064:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Items, s <b><font color="#0000FF">in</font></b> AUDsuppliers)
+065:     <b><font color="#7D007D">sum</font></b>(a <b><font color="#0000FF">in</font></b> Amts) SupAmt[i][s][a] == 1;
+066:         
+067:   <b><font color="#007D00">// Force AUD quantity to be in correct range</font></b>
+068:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Items, s <b><font color="#0000FF">in</font></b> AUDsuppliers, a <b><font color="#0000FF">in</font></b> Amts) {
+069:     Quantity[i][s][a] &lt;= (BreakAmts[a+1]-1) * SupAmt[i][s][a];
+070:     Quantity[i][s][a] &gt;= (BreakAmts[a]) * SupAmt[i][s][a];
+071:   }
+072:    
+073:   <b><font color="#007D00">//Setup indicator variables: If a supplier orders any positive quantity of any items, </font></b>
+074:   <b><font color="#007D00">// a setup cost occurs.</font></b>
+075:   <b><font color="#7D007D">forall</font></b>(s <b><font color="#0000FF">in</font></b> Suppliers) 
+076:     ctSetup: Setup[s]*MaxN &gt;= <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Items, a <b><font color="#0000FF">in</font></b> Amts) Quantity[i][s][a];
+077: 
+078:   <b><font color="#007D00">//Force quantity in discount range at CQD supplier to be incremental </font></b>
+079:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Items, s <b><font color="#0000FF">in</font></b> CQDsuppliers, a <b><font color="#0000FF">in</font></b> Amts) {
+080:     <b><font color="#7D007D">forall</font></b>(k <b><font color="#0000FF">in</font></b> 1..a-1) {
+081:       <b><font color="#007D00">// Because the "quantity" for CQDs is incremental, if CQD order quantity lies </font></b>
+082:       <b><font color="#007D00">// in discount interval a, namely, sup[i,s,a]=1, then</font></b>
+083:       <b><font color="#007D00">// the quantities in interval 1 to a-1, should be the length of those ranges.  </font></b>
+084:       Quantity[i][s][k] &gt;= (BreakAmts[k+1]-BreakAmts[k])*SupAmt[i][s][a];
+085:     }
+086:     <b><font color="#007D00">// quantity in each range is no greater than the width of the range      </font></b>
+087:     Quantity[i][s][a] &lt;= (BreakAmts[a+1]-BreakAmts[a])*SupAmt[i][s][a];             
+088:   }
+089: 
+090:   <b><font color="#007D00">// Total Quantity ordered for each item from each supplier</font></b>
+091:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Items, s <b><font color="#0000FF">in</font></b> Suppliers)
+092:     <b><font color="#7D007D">sum</font></b>(a <b><font color="#0000FF">in</font></b> Amts) Quantity[i][s][a] == TotalQuantity[i][s];
+093:       
+094: }
+095: 
+096: 
+097: <b><font color="#0000FF">tuple</font></b> QuantitySolutionT{ 
+098:         <b><font color="#0000FF">string</font></b> Items; 
+099:         <b><font color="#0000FF">string</font></b> Suppliers; 
+100:         <b><font color="#0000FF">int</font></b> Amts; 
+101:         <b><font color="#0000FF">int</font></b> value; 
+102: };
+103: {QuantitySolutionT} QuantitySolution = {&lt;i0,i1,i2,Quantity[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> Items,i1 <b><font color="#0000FF">in</font></b> Suppliers,i2 <b><font color="#0000FF">in</font></b> Amts};
+104: <b><font color="#0000FF">tuple</font></b> SetupSolutionT{ 
+105:         <b><font color="#0000FF">string</font></b> Suppliers; 
+106:         <b><font color="#0000FF">int</font></b> value; 
+107: };
+108: {SetupSolutionT} SetupSolution = {&lt;i0,Setup[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Suppliers};
+109: <b><font color="#0000FF">tuple</font></b> SupAmtSolutionT{ 
+110:         <b><font color="#0000FF">string</font></b> Items; 
+111:         <b><font color="#0000FF">string</font></b> Suppliers; 
+112:         <b><font color="#0000FF">int</font></b> Amts; 
+113:         <b><font color="#0000FF">int</font></b> value; 
+114: };
+115: {SupAmtSolutionT} SupAmtSolution = {&lt;i0,i1,i2,SupAmt[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> Items,i1 <b><font color="#0000FF">in</font></b> Suppliers,i2 <b><font color="#0000FF">in</font></b> Amts};
+116: <b><font color="#0000FF">tuple</font></b> TotalQuantitySolutionT{ 
+117:         <b><font color="#0000FF">string</font></b> Items; 
+118:         <b><font color="#0000FF">string</font></b> Suppliers; 
+119:         <b><font color="#0000FF">int</font></b> value; 
+120: };
+121: {TotalQuantitySolutionT} TotalQuantitySolution = {&lt;i0,i1,TotalQuantity[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Items,i1 <b><font color="#0000FF">in</font></b> Suppliers};
+122: 
+123: <b><font color="#0000FF">execute</font></b> DISPLAY {
+124:    writeln(<b><font color="#8A2BE2">"TotalQuantity = "</font></b>, TotalQuantity);
+125: }
+</tt></pre>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling classical finite capacity resources" />
+<meta name="abstract" content="Classical finite capacity resources such as disjunctive/unary resources, non-renewable/discrete resources, and renewable/producible/consumable resources can be modeled efficiently in CP Optimizer." />
+<meta name="Description" content="Classical finite capacity resources such as disjunctive/unary resources, non-renewable/discrete resources, and renewable/producible/consumable resources can be modeled efficiently in CP Optimizer." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Kt67foEV" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Modeling classical finite capacity resources</title>
+</head>
+<body role="main" id="Kt67foEV">
+<h1 class="title topictitle1">Modeling classical finite capacity resources</h1>
+<div class="body"><p class="shortdesc">Classical finite capacity resources such as disjunctive/unary
+resources, non-renewable/discrete resources, and renewable/producible/consumable
+resources can be modeled efficiently in CP Optimizer.</p>
+<p class="p">Disjunctive resources are resources that can only process
+one activity at a time and thus enforce a total order over the set
+of activities processed on the resource. There are two ways to model
+disjunctive resources in CP Optimizer: using a no overlap constraint
+or a cumulative function with a maximal level of 1:</p>
+<ul class="ul"><li class="li"><p class="p">If the disjunctive resource is associated
+with a sequence dependent setup time, the model using a no overlap
+constraint should be chosen because the cumul function does not allow
+the expression of transition distances.</p>
+
+<pre class="pre codeblock"><code>IloInt n = ...; // nActivities
+IloInt m = ...; // nTypes
+IloTransitionDistance setups(env, m);
+for (IloInt i=0; i&lt;m; ++i) 
+  for (IloInt j=0; j&lt;m; ++j)
+    setups.setValue(i, j, IloAbs(i-j));
+IloIntArray type(env,n); // populate
+IloIntArray ptime(env,n); // populate
+IloIntervalVarArray act(env,n);
+for (i=0; i&lt;n; i++) 
+   act[i] = IloIntervalVar(env,ptime[i]);
+IloIntervalSequenceVar res(env,act,type);
+m.add(IloNoOverlap(env,res,setups));</code></pre>
+</li>
+<li class="li"><p class="p"> If the disjunctive resource is associated
+with a minimal capacity profile (specifying that the resource should
+be in use over some time windows, then a cumulative Function should
+be used specifying a constraint <samp class="ph codeph">IloAlwaysIn(env,s,e,1,1)</samp> over
+each time-window <samp class="ph codeph">[s,e)</samp> where the resource
+must be in use.</p>
+
+<pre class="pre codeblock"><code>IloInt n = ...;   
+IloIntArray ptime(env,n); // populate
+IloInt nMustBeInUse = ...;
+IloIntArray start(env,nMustBeInUse); // populate
+IloIntArray end(env,nMustBeInUse); // populate
+IloIntervalVarArray act(env,n);
+IloCumulFunctionExpr res(env);
+for (i=0; i&lt;n; i++)  {
+   act[i] = IloIntervalVar(env,ptime[i]);
+   res += IloPulse(act,1);  
+}
+m.add(res &lt;= 1);
+for (IloInt w=0;w&lt;nMustBeInUse; w++)
+  m.add(IloAlwaysIn(env,res, start[w], end[w], 1, 1);  </code></pre>
+</li>
+<li class="li"><p class="p">If the resource is unavailable over
+some time-windows, it is preferable to use a cumul function with a
+set of “always in” constraints, such as <samp class="ph codeph">IloAlwaysIn(env,s,e,0,0)</samp>,
+over each time-window <samp class="ph codeph">[s,e)</samp> where the resource
+is unavailable unless the number of unavailability time windows is
+small enough in which case, adding fake fixed interval variables in
+the no overlap could make sense if there are specific reasons to use
+the no overlap constraint. </p>
+</li>
+</ul>
+<p class="p"> Non-renewable resources are resources with a finite
+capacity <em class="ph i">Q</em> such
+that the total resource usage by all activities executing at a time
+point <em class="ph i">t</em> do not exceed <em class="ph i">Q</em>. Each activity executing on the
+resource requires a given amount of resource from its start time to
+its end time. In CP Optimizer, non-renewable resources are modeled
+using a cumul function defined as a sum of elementary pulse functions.
+Constraints <samp class="ph codeph">&lt;=</samp>, <samp class="ph codeph">&gt;=</samp> or <samp class="ph codeph">IloAlwaysIn</samp> are
+used to constrain the maximal or minimal amount of resource used over
+time. </p>
+<pre class="pre codeblock"><code>IloInt nSteps = ...;
+IloIntArray start(env,nSteps); // populate
+IloIntArray end(env,nSteps); // populate
+IloIntArray capmax(env,nSteps); // populate
+IloInt n = ...;   
+IloIntArray ptime(env,n); // populate 
+IloIntArray qty(env,n); // populate
+IloIntervalVarArray act(env,n);
+IloCumulFunctionExpr res(env);
+for (IloInt i=0; i&lt;n; i++)  {
+   act[i] = IloIntervalVar(env,ptime[i]);
+   res += IloPulse(act,qty[i]);  
+}
+ for (IloInt s=0; s&lt;nSteps; s++) 
+  m.add(IloAlwaysIn(env,res, start[s], end[s], 0, capmax[s]));</code></pre>
+<p class="p">Renewable resources are resources that can be produced
+and consumed by activities. In CP Optimizer a renewable resource can
+be modeled as a cumul function defined as a sum of elementary step
+functions or their opposite. Resource production can be modeled as
+a +<samp class="ph codeph">IloStepAtStart</samp> (if the activity produces
+at its start time) or a +<samp class="ph codeph">IloStepAtEnd</samp> function
+(if the activity produces at its end time). Resource consumption can
+be modeled as a -<samp class="ph codeph">IloStepAtStart</samp> (if the
+activity consumes at its start time) or a -<samp class="ph codeph">IloStepAtEnd</samp> function
+(if the activity consumes at its end time). Constraints &lt;=, &gt;=
+or <samp class="ph codeph">IloAlwaysIn</samp> are used to constrain the
+maximal or minimal amount of resource over time. The following sample
+illustrates a renewable resource representing a tank with a maximal
+capacity and a safety level with activities producing or consuming
+material stored in the tank.</p>
+<pre class="pre codeblock"><code>IloInt Horizon = ...;   
+IloInt Capacity = ...;   
+IloInt SafetyLevel = ...;   
+IloInt StartLevel = ...;   
+IloInt NProd = ...;
+IloInt NCons = ...;
+IloIntArray QProd(env,NProd); // populate
+IloIntArray QCons(env,NCons); // populate
+IloCumulFunctionExpr level(env);
+level += IloStep(env,0,StartLevel);
+IloIntervalVarArray AProd(env,NProd);
+for (IloInt i=0; i&lt;NProd; i++) {
+  AProd[i]=IloIntervalArray(env,1);
+  level += IloStepAtEnd(AProd[i], QProd[i])
+}
+for (i=0; i&lt;NCons; i++) {
+  ACons[i]=IloIntervalArray(env,1);
+  level -= IloStepAtStart(ACons[i], QCons[i]);
+}
+m.add(IloAlwaysIn(env,level, 0, Horizon, SafetyLevel, Capacity));</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

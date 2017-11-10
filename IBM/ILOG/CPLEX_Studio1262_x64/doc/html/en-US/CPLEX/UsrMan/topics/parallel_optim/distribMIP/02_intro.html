@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Distributed optimization of MIPs: the algorithm" />
+<meta name="abstract" content="Introduces the algorithm for optimization of a mixed integer program (MIP) in a distributed computing environment." />
+<meta name="Description" content="Introduces the algorithm for optimization of a mixed integer program (MIP) in a distributed computing environment." />
+<meta name="DC.subject" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, rampup" />
+<meta name="keywords" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, rampup" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="introDistributedMIPusr" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<title>Distributed optimization of MIPs: the algorithm</title>
+</head>
+<body role="main" id="introDistributedMIPusr">
+<h1 class="title topictitle1">Distributed optimization of MIPs: the algorithm</h1>
+<div class="body"><p class="shortdesc">Introduces the algorithm for optimization of a mixed integer program (MIP) 
+in a distributed computing environment.</p>
+<p class="p">The topic 
+<a class="xref" href="../remote_obj/00_remote_obj_synopsis.html" title="Introduces the remote object available in CPLEX for distributed parallel optimization.">Remote object for distributed parallel optimization</a>
+introduced the idea of a remote object to support distributed parallel applications 
+of CPLEX optimizers. </p>
+<p class="p">This topic goes further in that direction, introducing the 
+CPLEX algorithm to support a distributed application designed to solve 
+a mixed integer program (MIP) in parallel. Specifically, this topic outlines an  
+algorithm that implements a variation of branch and bound suitable for application 
+across multiple machines (or multiple nodes of a single machine) to solve a difficult 
+mixed integer program (MIP) in parallel.</p>
+<p class="p">This distributed parallel MIP algorithm runs on a single master associated with multiple workers. 
+The master and the workers can be physical or virtual machines. Indeed, in this context, a 
+virtual machine may simply be a process in the operating system of a machine. Throughout the 
+runtime of this algorithm, the master coordinates the workers, and the workers perform the 
+"heavy lifting" (that is, the actual solving of the MIP).</p>
+<p class="p">The algorithm begins by presolving the MIP on the master. After presolving, the algorithm sends 
+the reduced model to each of the workers.</p>
+<p class="p">Each of the workers then starts to solve the reduced model. Each worker has its own 
+parameter settings, possibly different from the parameter settings of other workers. Each worker 
+solves the reduced model with its own parameter settings for a limited period of time. 
+This phase is known as <strong class="ph b">ramp up</strong>.  During ramp up, each worker conducts its own search, 
+according to its own parameter settings. 
+Ramp up stops when the master concludes that at 
+least one of the workers has created a sufficiently large search tree.</p>
+<p class="p">At that point, when ramp up stops, the master decides which of the workers performed best. 
+In other words, the master selects a winner. The parameter settings used by the winning worker 
+during ramp up  
+are the basis for the master to determine which parameter settings to use in the ensuing 
+distributed branch and bound search.</p>
+<p class="p">The search tree on each of the non-winning workers is deleted. The search tree of the winning 
+worker is distributed over all workers, so that authentic distributed parallel branch and bound 
+starts from this point.  In other words, all workers now work on the same search tree, with the 
+master coordinating the search in the distributed tree.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Multicast: invoking the same methods on a group of objects" />
+<meta name="abstract" content="Introduces the idea of multicasting for the remote object." />
+<meta name="Description" content="Introduces the idea of multicasting for the remote object." />
+<meta name="DC.subject" content="remote object, multicast, remote object and" />
+<meta name="keywords" content="remote object, multicast, remote object and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="remoteOjbMulticast" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<title>Multicast: invoking the same methods on a group of objects</title>
+</head>
+<body role="main" id="remoteOjbMulticast">
+<h1 class="title topictitle1">Multicast: invoking the same methods on a group of objects</h1>
+<div class="body"><p class="shortdesc">Introduces the idea of multicasting for the remote object.</p>
+<p class="p">In certain situations, you need to call the same function on all remote objects, or possibly
+on a group of remote objects. Of course, one option is to loop over all the remote objects 
+in the group, 
+invoking the function for each object individually. However, if great amounts of data 
+(such as a large matrix) must be transferred as the arguments of the function, then 
+calling the function repeatedly in a loop quickly introduces too much overhead.  Some transport 
+protocols offer improved data handling 
+in situations where one knows that the same data must be sent to multiple machines. 
+In that context, the following paragraphs explain how to send data to multiple 
+remote objects at the same time, a practice known as <strong class="ph b">multicasting</strong>.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">Multicasting is available in all transport protocols supported by CPLEX. The performance 
+improvement of multicasting (as compared with a loop over all remote targets) is more obvious 
+in some transport protocols, such as message passing interfaces (MPI), than in others. </p>
+
+<p class="p">Multicasting is available in the Callable Library (C API). It is not available in 
+the C++ API, nor in the Java API.</p>
+</div>
+<p class="p"><strong class="ph b">Creating an environment group</strong></p>
+<p class="p">Since each remote object is represented by a pointer to a CPLEX environment 
+<span class="keyword apiname">CPXENVptr</span>, there is a reliable correspondance between each remote 
+objects and its CPLEX environment (<samp class="ph codeph">env</samp>). Consequently, invoking a function
+on multiple remote objects has the same effect as invoking that function on a group
+of environments. In order to call the same function on a group of environments,
+you first need to create such a group. To do so, use the function 
+<span class="keyword apiname">CPXXcreateenvgroup</span>.</p>
+<pre class="pre codeblock"><code>int CPXXcreateenvgroup (CPXENVGROUPptr *group_p, int nenvs,
+                        CPXENVptr const *envs)</code></pre>
+<p class="p">This function creates a group from the number of environments 
+<samp class="ph codeph">nenvs</samp> specified in <samp class="ph codeph">envs</samp>. 
+It stores a pointer to the newly created group in <samp class="ph codeph">group_p</samp>.
+Each environment can appear only once in the group. That is, 
+it is an error to include duplicates in the array of environments.
+After the group is created, you can invoke other functions on the group,
+rather than on individual environments.</p>
+<p class="p">The reference manual documents the following functions, which are 
+available for operations on a group of environments.</p>
+<ul class="ul"><li class="li"><samp class="ph codeph">void CPXXfreeenvgroup (CPXENVGROUPptr *group_p)</samp></li>
+<li class="li"><samp class="ph codeph">int CPXXgetenvgroupsize (CPXCENVGROUPptr group)</samp></li>
+<li class="li"><samp class="ph codeph">CPXENVptr CPXXgetenvgroupenv (CPXCENVGROUPptr group, int idx)</samp></li>
+</ul>
+<p class="p"><strong class="ph b">Which routines are available for multicasts?</strong></p>
+<p class="p">For every CPLEX Callable Library routine that accepts an environment <samp class="ph codeph">env</samp> 
+and a pointer to a linear programming problem <samp class="ph codeph">lp</samp>, (such as
+<samp class="ph codeph">CPXXfoo(env, lp, ...)</samp>),  there is <samp class="ph codeph">CPXXfoo_multicast(group, ...)</samp> 
+available for use with the remote object.  Likewise, for every
+CPLEX Callable Library routine that accepts only an environment <samp class="ph codeph">env</samp>  
+(such as, for example, <samp class="ph codeph">CPXbar(env, ...)</samp>), there is a corresponding multicast 
+routine <samp class="ph codeph">CPXbar_multicast(group, ...)</samp>. In both cases, (whether the routine 
+accepts only an environment, or whether the routine accepts 
+both an environment and a linear programming problem) the rest of the argument list of the multicast 
+routine replicates the argument list of the original routine.</p>
+<p class="p">In short, not all CPLEX Callable Library routines have a corresponding 
+multicast function.  To support a multicast implementation, a CPLEX 
+routine must satisfy these criteria:</p>
+<ul class="ul"><li class="li">No output arguments except a status return value</li>
+<li class="li">At most, one problem object as an input argument</li>
+<li class="li">An environment as an input argument</li>
+</ul>
+<p class="p"><strong class="ph b">Example: calling a function on a group of environments</strong></p>
+<p class="p">After you have created a group of environments, it is easy to call 
+the same function on each environment in the group simultaneously. As an 
+example, suppose you want to enable screen output for all the environments 
+in a group. In other words, you want to turn on the screen indicator 
+parameter (<span class="keyword apiname">CPX_PARAM_SCRIND</span>). Of course, it would be 
+inefficient and time-consuming to loop over the environments like this:</p>
+<pre class="pre codeblock"><code>   /* inefficient implementation */
+   for (i = 0; i &lt; NUMENVS; ++i) {
+      status = CPXXsetintparam (envs[i], CPX_PARAM_SCRIND, CPX_ON);
+      /* Check status here. */
+      ...
+   }</code></pre>
+<p class="p">Instead, you can invoke a multicast function on the group of environments, like this:</p>
+<pre class="pre codeblock"><code>   CPXENVGROUPptr group;
+   int status;
+
+   status = CPXXcreateenvgroup (&amp;group, NUMENVS, envs);
+   /* Check status here */
+   ...
+   status = CPXXsetintparam_multicast (group, CPX_PARAM_SCRIND, CPX_ON);
+   /* Check status here */
+   ...</code></pre>
+<p class="p">In other words, instead of calling <span class="keyword apiname">CPXXsetintparam</span> 
+with a single CPLEX environment pointer <span class="keyword apiname">CPXENVptr</span> as 
+argument, you call <span class="keyword apiname">CPXXsetintparam_multicast</span> 
+with an environment group as argument. The status returned by 
+<span class="keyword apiname">CPXXsetintparam_multicast</span> is 0 (zero) only if the
+invocation of the function succeeds on <strong class="ph b">all</strong> remote objects in the group.</p>
+<p class="p"><strong class="ph b">Problem object and multicasting</strong></p>
+<p class="p">Consider for a moment a typical modification of a model, such as 
+deleting rows from the problem object, and recall the signature of 
+the CPLEX routine for such a task.</p>
+<pre class="pre codeblock"><code>int CPXXdelrows (CPXCENVptr env, CPXLPptr lp, CPXDIM begin, CPXDIM end)</code></pre>
+<p class="p">That routine deletes the rows with indices specified by the 
+arguments <samp class="ph codeph">[begin, end]</samp> from the problem object 
+referenced by <samp class="ph codeph">lp</samp>.</p>
+<p class="p">The signature of the multicast version of that routine looks like this:</p>
+<pre class="pre codeblock"><code>int CPXdelrows_multicast (CPXENVGROUPptr group, CPXDIM begin, CPXDIM end)</code></pre>
+<p class="p">Notice that there is no problem object in the signature of the 
+multicast function. In fact, the problem object reference would be 
+different for different remote objects and a meaningful multicast 
+would no longer be possible. To allow multicasts with functions 
+that have a problem object argument (either a pointer to a 
+CPLEX linear program <span class="keyword apiname">CPXLPptr</span> or to a 
+CPLEX network program <span class="keyword apiname">CPXNETptr</span>) the problem object 
+argument is <em class="ph i">implied</em> for multicast functions. In other words, 
+each remote object holds at most one problem object.  When it 
+performs a multicast, CPLEX assumes that this
+unique problem object is the argument for the function (if a problem
+object is required at all). </p>
+<p class="p">This convention implies that when you 
+invoke a multicast function on an environment group, every environment
+in the group has a problem object of the appropriate type. In other words,
+it is an error to invoke a multicast function on an environment group 
+in which not every environment has a problem object of the required type.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" title="Introduces the remote object available in CPLEX for distributed parallel optimization.">Remote object for distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

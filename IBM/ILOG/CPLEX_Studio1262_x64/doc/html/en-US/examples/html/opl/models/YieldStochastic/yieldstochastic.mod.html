@@ -1,0 +1,228 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/******************************************************************************</font></b>
+013: <b><font color="#007D00"> * </font></b>
+014: <b><font color="#007D00"> * OPL Model for Airline Yield Management</font></b>
+015: <b><font color="#007D00"> * Stochastic formulation</font></b>
+016: <b><font color="#007D00"> * </font></b>
+017: <b><font color="#007D00"> *</font></b>
+018: <b><font color="#007D00"> * This model implements the example of Yield Management </font></b>
+019: <b><font color="#007D00"> * from "Model Building in Mathematical Programming"</font></b>
+020: <b><font color="#007D00"> * by H. Paul Williams </font></b>
+021: <b><font color="#007D00"> *</font></b>
+022: <b><font color="#007D00">******************************************************************************/</font></b>
+023: 
+024: <b><font color="#007D00">// Data</font></b>
+025: <b><font color="#007D00">//=======</font></b>
+026: 
+027: <b><font color="#007D00">// Seat classes available in the plane</font></b>
+028: <b><font color="#007D00">// 10% of seats from a class can be transferred to an adjacent class.</font></b>
+029: {<b><font color="#0000FF">string</font></b>} classes = {<b><font color="#8A2BE2">"First"</font></b>, <b><font color="#8A2BE2">"Business"</font></b>, <b><font color="#8A2BE2">"Economy"</font></b>};
+030: <b><font color="#0000FF">int</font></b> capacity[classes] = [37, 38, 47];
+031: 
+032: <b><font color="#007D00">// Planned periods </font></b>
+033: <b><font color="#0000FF">range</font></b> periods = 1..3;
+034: 
+035: <b><font color="#007D00">// 3 scenarios are studied with their corresponding probability</font></b>
+036: <b><font color="#0000FF">range</font></b> scenarios = 1..3;
+037: <b><font color="#0000FF">float</font></b> probaScenarios[scenarios] = [0.1, 0.7, 0.2];
+038: 
+039: <b><font color="#007D00">// 3 pricing options for each class and period</font></b>
+040: <b><font color="#0000FF">range</font></b> options = 1..3;
+041: <b><font color="#0000FF">int</font></b> priceOptions[periods][classes][options] = ...;
+042: 
+043: <b><font color="#007D00">// Demands given by analytics for each period, scenario, class and price option</font></b>
+044: <b><font color="#0000FF">int</font></b> demand[periods][scenarios][classes][options] = ...;
+045: 
+046: <b><font color="#0000FF">int</font></b> planeBookPrice = ...;
+047: 
+048: <b><font color="#007D00">// Decision variables</font></b>
+049: <b><font color="#007D00">//=====================</font></b>
+050: 
+051: <b><font color="#007D00">// Boolean variables for each period and each class on selected price option</font></b>
+052: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> PriceLevel1[classes][options];
+053: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> PriceLevel2[scenarios][classes][options];
+054: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> PriceLevel3[scenarios][scenarios][classes][options];
+055: 
+056: <b><font color="#007D00">// Number of seats </font></b>
+057: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Seats1[scenarios][classes][options]; <b><font color="#007D00">// seats sold in wk 1 for scenario s, class c, price option o </font></b>
+058: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Seats2[scenarios][scenarios][classes][options]; <b><font color="#007D00">// seats sold in wk 2 for scenario s1 for wk1, s2 for wk2, class c, price option o</font></b>
+059: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Seats3[scenarios][scenarios][scenarios][classes][options]; <b><font color="#007D00">//seats sold in wk 3 for scenario s1 for wk1, s2 for wk2, s3 for wk3, class c, price option o </font></b>
+060: 
+061: <b><font color="#007D00">// Slack and Excess of capacity per class</font></b>
+062: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ U[scenarios][scenarios][scenarios][classes];
+063: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ V[scenarios][scenarios][scenarios][classes];
+064: 
+065: <b><font color="#007D00">// Number of planes to book (up to 6)</font></b>
+066: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> NbPlanes <b><font color="#0000FF">in</font></b> 1..6; 
+067: 
+068: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Revenue1[s1 <b><font color="#0000FF">in</font></b> scenarios][c <b><font color="#0000FF">in</font></b> classes][o <b><font color="#0000FF">in</font></b> options] ;
+069: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Revenue2[s1 <b><font color="#0000FF">in</font></b> scenarios][s2 <b><font color="#0000FF">in</font></b> scenarios][c <b><font color="#0000FF">in</font></b> classes][o <b><font color="#0000FF">in</font></b> options] ;
+070: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Revenue3[s1 <b><font color="#0000FF">in</font></b> scenarios][s2 <b><font color="#0000FF">in</font></b> scenarios][s3 <b><font color="#0000FF">in</font></b> scenarios][c <b><font color="#0000FF">in</font></b> classes][o <b><font color="#0000FF">in</font></b> options];
+071: 
+072:   
+073: <b><font color="#007D00">// Objective</font></b>
+074: <b><font color="#007D00">//============ </font></b>
+075: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> revenue1 = <b><font color="#7D007D">sum </font></b>(s1 <b><font color="#0000FF">in</font></b> scenarios,c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options) probaScenarios[s1]*Revenue1[s1][c][o];
+076: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> revenue2 = <b><font color="#7D007D">sum</font></b>(s1,s2 <b><font color="#0000FF">in</font></b> scenarios,c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options) probaScenarios[s1]*probaScenarios[s2]*Revenue2[s1][s2][c][o];
+077: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> revenue3 = <b><font color="#7D007D">sum</font></b>(s1,s2,s3 <b><font color="#0000FF">in</font></b> scenarios,c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options) probaScenarios[s1]*probaScenarios[s2]*probaScenarios[s3]*Revenue3[s1][s2][s3][c][o];
+078: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> planeCost = planeBookPrice * NbPlanes;
+079: 
+080: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> totalObj = revenue1 + revenue2 + revenue3 - planeCost;
+081:  
+082: <b><font color="#0000FF">maximize</font></b> revenue1 + revenue2 + revenue3 - planeCost;
+083: 
+084: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+085:    <b><font color="#007D00">// linearisation</font></b>
+086:    <b><font color="#7D007D">forall </font></b>(s1 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options) {
+087:       Revenue1[s1][c][o] - priceOptions[1][c][o]*Seats1[s1][c][o] &lt;= 0;
+088:       priceOptions[1][c][o]*Seats1[s1][c][o] - Revenue1[s1][c][o] + priceOptions[1][c][o]*demand[1][s1][c][o]*PriceLevel1[c][o] &lt;= priceOptions[1][c][o]*demand[1][s1][c][o]; 
+089:    }
+090:    <b><font color="#7D007D">forall </font></b>(s1,s2 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options) {
+091:       Revenue2[s1][s2][c][o] - priceOptions[2][c][o]*Seats2[s1][s2][c][o] &lt;= 0;
+092:       priceOptions[2][c][o]*Seats2[s1][s2][c][o] - Revenue2[s1][s2][c][o] + priceOptions[2][c][o]*demand[2][s2][c][o]*PriceLevel2[s1][c][o] &lt;= priceOptions[2][c][o]*demand[2][s2][c][o]; 
+093:    }
+094:    <b><font color="#7D007D">forall </font></b>(s1,s2,s3 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options) {
+095:       Revenue3[s1][s2][s3][c][o] - priceOptions[3][c][o]*Seats3[s1][s2][s3][c][o] &lt;= 0;
+096:       priceOptions[3][c][o]*Seats3[s1][s2][s3][c][o] - Revenue3[s1][s2][s3][c][o] + priceOptions[3][c][o]*demand[3][s3][c][o]*PriceLevel3[s1][s2][c][o] &lt;= priceOptions[3][c][o]*demand[3][s3][c][o]; 
+097:    }
+098: 
+099:    <b><font color="#007D00">// At each period, and for each class, only one price option is selected.</font></b>
+100:    <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> classes) 
+101:       <b><font color="#7D007D">sum </font></b>(o <b><font color="#0000FF">in</font></b> options) PriceLevel1[c][o] == 1;
+102:    <b><font color="#7D007D">forall </font></b>(c <b><font color="#0000FF">in</font></b> classes, s1 <b><font color="#0000FF">in</font></b> scenarios) 
+103:       <b><font color="#7D007D">sum </font></b>(o <b><font color="#0000FF">in</font></b> options) PriceLevel2[s1][c][o] == 1;
+104:    <b><font color="#7D007D">forall </font></b>(c <b><font color="#0000FF">in</font></b> classes, s1,s2 <b><font color="#0000FF">in</font></b> scenarios) 
+105:       <b><font color="#7D007D">sum </font></b>(o <b><font color="#0000FF">in</font></b> options) PriceLevel3[s1][s2][c][o] == 1;
+106:  
+107:    <b><font color="#007D00">// Seat Capacity  </font></b>
+108:    <b><font color="#7D007D">forall</font></b>(s1,s2,s3 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes) 
+109:       ctSeatCapacities: 
+110:          <b><font color="#7D007D">sum </font></b>(o <b><font color="#0000FF">in</font></b> options) (Seats1[s1][c][o] + Seats2[s1][s2][c][o] + Seats3[s1][s2][s3][c][o]) 
+111:          &lt;= capacity[c]*NbPlanes + U[s1][s2][s3][c] - V[s1][s2][s3][c];  
+112:    <b><font color="#7D007D">forall</font></b>(s1,s2,s3 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes) {
+113:       U[s1][s2][s3][c] &lt;= 0.1*capacity[c];
+114:       V[s1][s2][s3][c] &lt;= 0.1*capacity[c];
+115:    }
+116:    <b><font color="#7D007D">forall</font></b>(s1,s2,s3 <b><font color="#0000FF">in</font></b> scenarios)
+117:      <b><font color="#7D007D">sum </font></b>(c <b><font color="#0000FF">in</font></b> classes) (U[s1][s2][s3][c] - V[s1][s2][s3][c]) == 0;
+118:      
+119:    <b><font color="#007D00">// Number of seats sold is lower than demand at each period    </font></b>
+120:    <b><font color="#7D007D">forall </font></b>(s1 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options)
+121:       ctDemand1: Seats1[s1][c][o] &lt;= demand[1][s1][c][o]*PriceLevel1[c][o];    
+122:    <b><font color="#7D007D">forall </font></b>(s1,s2 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options)
+123:       ctDemand2: Seats2[s1][s2][c][o] &lt;= demand[2][s2][c][o]*PriceLevel2[s1][c][o];  
+124:    <b><font color="#7D007D">forall </font></b>(s1,s2,s3 <b><font color="#0000FF">in</font></b> scenarios, c <b><font color="#0000FF">in</font></b> classes, o <b><font color="#0000FF">in</font></b> options)
+125:       ctDemand3: Seats3[s1][s2][s3][c][o] &lt;= demand[3][s3][c][o]*PriceLevel3[s1][s2][c][o];  
+126: 
+127: };
+128: 
+129: 
+130: <b><font color="#0000FF">tuple</font></b> Revenue1SolutionT{ 
+131:         <b><font color="#0000FF">int</font></b> scenarios; 
+132:         <b><font color="#0000FF">string</font></b> classes; 
+133:         <b><font color="#0000FF">int</font></b> options; 
+134:         <b><font color="#0000FF">int</font></b> value; 
+135: };
+136: {Revenue1SolutionT} Revenue1Solution = {&lt;i0,i1,i2,Revenue1[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> classes,i2 <b><font color="#0000FF">in</font></b> options};
+137: <b><font color="#0000FF">tuple</font></b> Revenue2SolutionT{ 
+138:         <b><font color="#0000FF">int</font></b> scenarios1; 
+139:         <b><font color="#0000FF">int</font></b> scenarios2; 
+140:         <b><font color="#0000FF">string</font></b> classes; 
+141:         <b><font color="#0000FF">int</font></b> options; 
+142:         <b><font color="#0000FF">int</font></b> value; 
+143: };
+144: {Revenue2SolutionT} Revenue2Solution = {&lt;i0,i1,i2,i3,Revenue2[i0][i1][i2][i3]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> scenarios,i2 <b><font color="#0000FF">in</font></b> classes,i3 <b><font color="#0000FF">in</font></b> options};
+145: <b><font color="#0000FF">tuple</font></b> Revenue3SolutionT{ 
+146:         <b><font color="#0000FF">int</font></b> scenarios1; 
+147:         <b><font color="#0000FF">int</font></b> scenarios2; 
+148:         <b><font color="#0000FF">int</font></b> scenarios3; 
+149:         <b><font color="#0000FF">string</font></b> classes; 
+150:         <b><font color="#0000FF">int</font></b> options; 
+151:         <b><font color="#0000FF">int</font></b> value; 
+152: };
+153: {Revenue3SolutionT} Revenue3Solution = {&lt;i0,i1,i2,i3,i4,Revenue3[i0][i1][i2][i3][i4]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> scenarios,i2 <b><font color="#0000FF">in</font></b> scenarios,i3 <b><font color="#0000FF">in</font></b> classes,i4 <b><font color="#0000FF">in</font></b> options};
+154: <b><font color="#0000FF">tuple</font></b> Seats1SolutionT{ 
+155:         <b><font color="#0000FF">int</font></b> scenarios; 
+156:         <b><font color="#0000FF">string</font></b> classes; 
+157:         <b><font color="#0000FF">int</font></b> options; 
+158:         <b><font color="#0000FF">float</font></b> value; 
+159: };
+160: {Seats1SolutionT} Seats1Solution = {&lt;i0,i1,i2,Seats1[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> classes,i2 <b><font color="#0000FF">in</font></b> options};
+161: <b><font color="#0000FF">tuple</font></b> PriceLevel1SolutionT{ 
+162:         <b><font color="#0000FF">string</font></b> classes; 
+163:         <b><font color="#0000FF">int</font></b> options; 
+164:         <b><font color="#0000FF">int</font></b> value; 
+165: };
+166: {PriceLevel1SolutionT} PriceLevel1Solution = {&lt;i0,i1,PriceLevel1[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> classes,i1 <b><font color="#0000FF">in</font></b> options};
+167: <b><font color="#0000FF">tuple</font></b> Seats2SolutionT{ 
+168:         <b><font color="#0000FF">int</font></b> scenarios1; 
+169:         <b><font color="#0000FF">int</font></b> scenarios2; 
+170:         <b><font color="#0000FF">string</font></b> classes; 
+171:         <b><font color="#0000FF">int</font></b> options; 
+172:         <b><font color="#0000FF">float</font></b> value; 
+173: };
+174: {Seats2SolutionT} Seats2Solution = {&lt;i0,i1,i2,i3,Seats2[i0][i1][i2][i3]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> scenarios,i2 <b><font color="#0000FF">in</font></b> classes,i3 <b><font color="#0000FF">in</font></b> options};
+175: <b><font color="#0000FF">tuple</font></b> PriceLevel2SolutionT{ 
+176:         <b><font color="#0000FF">int</font></b> scenarios; 
+177:         <b><font color="#0000FF">string</font></b> classes; 
+178:         <b><font color="#0000FF">int</font></b> options; 
+179:         <b><font color="#0000FF">int</font></b> value; 
+180: };
+181: {PriceLevel2SolutionT} PriceLevel2Solution = {&lt;i0,i1,i2,PriceLevel2[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> classes,i2 <b><font color="#0000FF">in</font></b> options};
+182: <b><font color="#0000FF">tuple</font></b> Seats3SolutionT{ 
+183:         <b><font color="#0000FF">int</font></b> scenarios1; 
+184:         <b><font color="#0000FF">int</font></b> scenarios2; 
+185:         <b><font color="#0000FF">int</font></b> scenarios3; 
+186:         <b><font color="#0000FF">string</font></b> classes; 
+187:         <b><font color="#0000FF">int</font></b> options; 
+188:         <b><font color="#0000FF">float</font></b> value; 
+189: };
+190: {Seats3SolutionT} Seats3Solution = {&lt;i0,i1,i2,i3,i4,Seats3[i0][i1][i2][i3][i4]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> scenarios,i2 <b><font color="#0000FF">in</font></b> scenarios,i3 <b><font color="#0000FF">in</font></b> classes,i4 <b><font color="#0000FF">in</font></b> options};
+191: <b><font color="#0000FF">tuple</font></b> PriceLevel3SolutionT{ 
+192:         <b><font color="#0000FF">int</font></b> scenarios1; 
+193:         <b><font color="#0000FF">int</font></b> scenarios2; 
+194:         <b><font color="#0000FF">string</font></b> classes; 
+195:         <b><font color="#0000FF">int</font></b> options; 
+196:         <b><font color="#0000FF">int</font></b> value; 
+197: };
+198: {PriceLevel3SolutionT} PriceLevel3Solution = {&lt;i0,i1,i2,i3,PriceLevel3[i0][i1][i2][i3]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> scenarios,i2 <b><font color="#0000FF">in</font></b> classes,i3 <b><font color="#0000FF">in</font></b> options};
+199: <b><font color="#0000FF">tuple</font></b> USolutionT{ 
+200:         <b><font color="#0000FF">int</font></b> scenarios1; 
+201:         <b><font color="#0000FF">int</font></b> scenarios2; 
+202:         <b><font color="#0000FF">int</font></b> scenarios3; 
+203:         <b><font color="#0000FF">string</font></b> classes; 
+204:         <b><font color="#0000FF">int</font></b> value; 
+205: };
+206: {USolutionT} USolution = {&lt;i0,i1,i2,i3,U[i0][i1][i2][i3]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> scenarios,i2 <b><font color="#0000FF">in</font></b> scenarios,i3 <b><font color="#0000FF">in</font></b> classes};
+207: <b><font color="#0000FF">tuple</font></b> VSolutionT{ 
+208:         <b><font color="#0000FF">int</font></b> scenarios1; 
+209:         <b><font color="#0000FF">int</font></b> scenarios2; 
+210:         <b><font color="#0000FF">int</font></b> scenarios3; 
+211:         <b><font color="#0000FF">string</font></b> classes; 
+212:         <b><font color="#0000FF">int</font></b> value; 
+213: };
+214: {VSolutionT} VSolution = {&lt;i0,i1,i2,i3,V[i0][i1][i2][i3]&gt; | i0 <b><font color="#0000FF">in</font></b> scenarios,i1 <b><font color="#0000FF">in</font></b> scenarios,i2 <b><font color="#0000FF">in</font></b> scenarios,i3 <b><font color="#0000FF">in</font></b> classes};
+215: 
+216: 
+217: <b><font color="#0000FF">execute</font></b> DISPLAY_RESULTS {
+218:   writeln(<b><font color="#8A2BE2">"(Provisionally) book "</font></b>, NbPlanes, <b><font color="#8A2BE2">" planes"</font></b>);
+219:   writeln(<b><font color="#8A2BE2">"expected profit = "</font></b>, totalObj);  
+220: };
+221:        
+222:     
+223:     
+</tt></pre>

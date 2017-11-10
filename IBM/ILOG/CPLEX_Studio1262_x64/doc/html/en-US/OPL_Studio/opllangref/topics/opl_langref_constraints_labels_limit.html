@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Limitations on constraint labeling" />
+<meta name="abstract" content="Explains what constraints cannot be labeled or at what cost they can be." />
+<meta name="Description" content="Explains what constraints cannot be labeled or at what cost they can be." />
+<meta name="DC.subject" content="forall, statements, and constraint labels, constraint labeling, limitations, limitations on constraint labeling" />
+<meta name="keywords" content="forall, statements, and constraint labels, constraint labeling, limitations, limitations on constraint labeling" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_labels.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_constraints.1076596" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_labels.html" />
+<title>Limitations on constraint labeling</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_constraints.1076596">
+<h1 class="title topictitle1">Limitations on constraint labeling</h1>
+<div class="body"><p class="shortdesc">Explains what constraints cannot be labeled or
+at what cost they can be.</p>
+<p class="p">Not all constraints can be labeled. Limitations exist
+with respect to <samp class="ph codeph">forall</samp> statements and to
+a variable size indexer.</p>
+<div class="section" id="usropllangref.uss_langref_constraints.1076596__DuBshMd5"><h2 class="title sectiontitle">Labels and forall
+statements</h2><p class="p">You can label only constraints that
+are not nested within a <samp class="ph codeph">forall</samp> statement
+(leaf constraints). However, you can label a <samp class="ph codeph">forall</samp> constraint,
+if it is at the root level of constraints. For example, in the code
+sample <a class="xref" href="opl_langref_constraints_labels_limit.html#usropllangref.uss_langref_constraints.1076596__usropllangref.uss_langref_constraints.1076618">Constraint label within <samp class="ph codeph">forall</samp> statement</a>,
+the constraint</p>
+<pre class="pre codeblock"><code>ct1: forall(i in r1) forall(j in r2) X[i][j] &lt;= i+j;</code></pre>
+<p class="p">can also be written</p>
+<pre class="pre codeblock"><code>forall(i in r1) forall(j in r2) ct1: X[i][j] &lt;= i+j;</code></pre>
+<p class="p">In both cases, the model executes correctly.
+However, if you execute:</p>
+<pre class="pre codeblock"><code>forall(i in r1) ct1: forall(j in r2) X[i][j] &lt;= i+j;</code></pre>
+<p class="p">the IDE reports “Element "ct1" has never been
+used” and the constraint does not appear in the Problem Browser.</p>
+<p class="p exampletitle" id="usropllangref.uss_langref_constraints.1076596__usropllangref.uss_langref_constraints.1076618">Constraint label within <samp class="ph codeph">forall</samp> statement</p>
+<pre class="pre codeblock"><code>range r1 = 1..2;
+range r2 = 1..3;
+
+dvar int X[r1][r2] in 0..5;
+
+constraints {
+ct1: forall(i in r1) forall(j in r2) X[i][j] &lt;= i+j;
+}</code></pre>
+</div>
+<div class="section" id="usropllangref.uss_langref_constraints.1076596__StjvUJti"><h2 class="title sectiontitle">Labels and a variable
+size indexer</h2><p class="p">Constraint labels with a variable
+size indexer are not allowed. For example, this model generates an
+error message.</p>
+<pre class="pre codeblock"><code>tuple RangeTuple
+ {
+     int i;
+     int j;
+     string k;
+ };
+ {RangeTuple} RT = {&lt;1, 2, "bla"&gt;};
+ 
+ minimize 1;
+ 
+ subject to
+ {
+     forall(&lt;p1, p2, p3&gt; in RT)
+         forall(i in p1..p2)
+     rangeLabel:
+     1 == 1;
+}</code></pre>
+<p class="p">Write the following code
+instead.</p>
+<pre class="pre codeblock"><code>tuple RangeTuple
+{
+    int i;
+    int j;
+    string k;
+};
+{RangeTuple} RT = {&lt;1, 2, "bla"&gt;};
+
+{int} s={1,2};
+
+constraint rangeLabel[RT][s];
+
+minimize 1;
+
+subject to
+{
+    forall(&lt;p1, p2, p3&gt; in RT)
+        forall(i in p1..p2)
+    rangeLabel[&lt;p1, p2, p3&gt;,i]:
+     1 == 1;
+}</code></pre>
+<p class="p">Note the difference in <samp class="ph codeph">rangeLabel</samp>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_labels.html" title="Explains why label constraints, the benefits, costs, and limitations, how to label constraints, how to use indexed labels, and how to deal with compatibility between constraint names and labels.">Constraint labels</a></div>
+</div>
+</div></body>
+</html>

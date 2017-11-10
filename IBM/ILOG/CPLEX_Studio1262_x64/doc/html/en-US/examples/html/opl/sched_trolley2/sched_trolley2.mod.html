@@ -1,0 +1,132 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+013: 
+014: {<b><font color="#0000FF">string</font></b>} Jobs   = {<b><font color="#8A2BE2">"j1"</font></b>,<b><font color="#8A2BE2">"j2"</font></b>,<b><font color="#8A2BE2">"j3"</font></b>,<b><font color="#8A2BE2">"j4"</font></b>,<b><font color="#8A2BE2">"j5"</font></b>,<b><font color="#8A2BE2">"j6"</font></b>};
+015: {<b><font color="#0000FF">string</font></b>} Tasks  = {<b><font color="#8A2BE2">"loadA"</font></b>,<b><font color="#8A2BE2">"unload1"</font></b>,<b><font color="#8A2BE2">"process1"</font></b>,<b><font color="#8A2BE2">"load1"</font></b>,<b><font color="#8A2BE2">"unload2"</font></b>,<b><font color="#8A2BE2">"process2"</font></b>,<b><font color="#8A2BE2">"load2"</font></b>,<b><font color="#8A2BE2">"unloadS"</font></b>};
+016: 
+017: {<b><font color="#0000FF">string</font></b>} Machines = {<b><font color="#8A2BE2">"m1"</font></b>,<b><font color="#8A2BE2">"m2"</font></b>,<b><font color="#8A2BE2">"m3"</font></b>};
+018: {<b><font color="#0000FF">string</font></b>} States = Machines <b><font color="#0000FF">union</font></b> {<b><font color="#8A2BE2">"areaA"</font></b>,<b><font color="#8A2BE2">"areaS"</font></b>};
+019: 
+020: <b><font color="#0000FF">int</font></b> Index[s <b><font color="#0000FF">in</font></b> States] = <b><font color="#7D007D">ord</font></b>(States, s);
+021: 
+022: <b><font color="#0000FF">tuple</font></b> jobRecord {
+023:   <b><font color="#0000FF">string</font></b> machine1;
+024:   <b><font color="#0000FF">int</font></b>    durations1;
+025:   <b><font color="#0000FF">string</font></b> machine2;
+026:   <b><font color="#0000FF">int</font></b>    durations2;
+027: };
+028: jobRecord job[Jobs] = [
+029:    &lt;<b><font color="#8A2BE2">"m1"</font></b>, 80, <b><font color="#8A2BE2">"m2"</font></b>, 60&gt;,
+030:    &lt;<b><font color="#8A2BE2">"m2"</font></b>,120, <b><font color="#8A2BE2">"m3"</font></b>, 80&gt;,
+031:    &lt;<b><font color="#8A2BE2">"m2"</font></b>, 80, <b><font color="#8A2BE2">"m1"</font></b>, 60&gt;,
+032:    &lt;<b><font color="#8A2BE2">"m1"</font></b>,160, <b><font color="#8A2BE2">"m3"</font></b>,100&gt;,
+033:    &lt;<b><font color="#8A2BE2">"m3"</font></b>,180, <b><font color="#8A2BE2">"m2"</font></b>, 80&gt;,
+034:    &lt;<b><font color="#8A2BE2">"m2"</font></b>,140, <b><font color="#8A2BE2">"m3"</font></b>, 60&gt;
+035: ];
+036: 
+037: <b><font color="#0000FF">int</font></b> loadDuration = 20;
+038: 
+039: <b><font color="#0000FF">int</font></b> state[Jobs,Tasks];
+040: <b><font color="#0000FF">execute</font></b> {
+041:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> Jobs) {
+042:       state[j][<b><font color="#8A2BE2">"loadA"</font></b>]    = Index[<b><font color="#8A2BE2">"areaA"</font></b>];
+043:       state[j][<b><font color="#8A2BE2">"unload1"</font></b>]  = Index[job[j].machine1];
+044:       state[j][<b><font color="#8A2BE2">"process1"</font></b>] = Index[job[j].machine1];
+045:       state[j][<b><font color="#8A2BE2">"load1"</font></b>]    = Index[job[j].machine1];
+046:       state[j][<b><font color="#8A2BE2">"unload2"</font></b>]  = Index[job[j].machine2];
+047:       state[j][<b><font color="#8A2BE2">"process2"</font></b>] = Index[job[j].machine2];
+048:       state[j][<b><font color="#8A2BE2">"load2"</font></b>]    = Index[job[j].machine2];
+049:       state[j][<b><font color="#8A2BE2">"unloadS"</font></b>]  = Index[<b><font color="#8A2BE2">"areaS"</font></b>];
+050:    };
+051: };
+052: 
+053: int duration[Jobs,Tasks];
+054: execute {
+055:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> Jobs) {
+056:       duration[j][<b><font color="#8A2BE2">"loadA"</font></b>]    = loadDuration;
+057:       duration[j][<b><font color="#8A2BE2">"unload1"</font></b>]  = loadDuration;
+058:       duration[j][<b><font color="#8A2BE2">"process1"</font></b>] = job[j].durations1;
+059:       duration[j][<b><font color="#8A2BE2">"load1"</font></b>]    = loadDuration;
+060:       duration[j][<b><font color="#8A2BE2">"unload2"</font></b>]  = loadDuration;
+061:       duration[j][<b><font color="#8A2BE2">"process2"</font></b>] = job[j].durations2;
+062:       duration[j][<b><font color="#8A2BE2">"load2"</font></b>]    = loadDuration;
+063:       duration[j][<b><font color="#8A2BE2">"unloadS"</font></b>]  = loadDuration;
+064:    }
+065: };
+066: 
+067: tuple triplet { <b><font color="#0000FF">int</font></b> loc1; <b><font color="#0000FF">int</font></b> loc2; <b><font color="#0000FF">int</font></b> value; }; 
+068: {triplet} m = { 
+069:   &lt;Index[<b><font color="#8A2BE2">"m1"</font></b>],    Index[<b><font color="#8A2BE2">"m1"</font></b>],      0&gt;,
+070:   &lt;Index[<b><font color="#8A2BE2">"m1"</font></b>],    Index[<b><font color="#8A2BE2">"m2"</font></b>],     50&gt;,
+071:   &lt;Index[<b><font color="#8A2BE2">"m1"</font></b>],    Index[<b><font color="#8A2BE2">"m3"</font></b>],     60&gt;,
+072:   &lt;Index[<b><font color="#8A2BE2">"m1"</font></b>],    Index[<b><font color="#8A2BE2">"areaA"</font></b>],  50&gt;,
+073:   &lt;Index[<b><font color="#8A2BE2">"m1"</font></b>],    Index[<b><font color="#8A2BE2">"areaS"</font></b>],  90&gt;,
+074:   &lt;Index[<b><font color="#8A2BE2">"m2"</font></b>],    Index[<b><font color="#8A2BE2">"m1"</font></b>],     50&gt;,
+075:   &lt;Index[<b><font color="#8A2BE2">"m2"</font></b>],    Index[<b><font color="#8A2BE2">"m2"</font></b>],      0&gt;,
+076:   &lt;Index[<b><font color="#8A2BE2">"m2"</font></b>],    Index[<b><font color="#8A2BE2">"m3"</font></b>],     60&gt;,
+077:   &lt;Index[<b><font color="#8A2BE2">"m2"</font></b>],    Index[<b><font color="#8A2BE2">"areaA"</font></b>],  90&gt;,
+078:   &lt;Index[<b><font color="#8A2BE2">"m2"</font></b>],    Index[<b><font color="#8A2BE2">"areaS"</font></b>],  50&gt;,
+079:   &lt;Index[<b><font color="#8A2BE2">"m3"</font></b>],    Index[<b><font color="#8A2BE2">"m1"</font></b>],     60&gt;,
+080:   &lt;Index[<b><font color="#8A2BE2">"m3"</font></b>],    Index[<b><font color="#8A2BE2">"m2"</font></b>],     60&gt;,
+081:   &lt;Index[<b><font color="#8A2BE2">"m3"</font></b>],    Index[<b><font color="#8A2BE2">"m3"</font></b>],      0&gt;,
+082:   &lt;Index[<b><font color="#8A2BE2">"m3"</font></b>],    Index[<b><font color="#8A2BE2">"areaA"</font></b>],  80&gt;,
+083:   &lt;Index[<b><font color="#8A2BE2">"m3"</font></b>],    Index[<b><font color="#8A2BE2">"areaS"</font></b>],  80&gt;,
+084:   &lt;Index[<b><font color="#8A2BE2">"areaA"</font></b>], Index[<b><font color="#8A2BE2">"m1"</font></b>],     50&gt;,
+085:   &lt;Index[<b><font color="#8A2BE2">"areaA"</font></b>], Index[<b><font color="#8A2BE2">"m2"</font></b>],     90&gt;,
+086:   &lt;Index[<b><font color="#8A2BE2">"areaA"</font></b>], Index[<b><font color="#8A2BE2">"m3"</font></b>],     80&gt;,
+087:   &lt;Index[<b><font color="#8A2BE2">"areaA"</font></b>], Index[<b><font color="#8A2BE2">"areaA"</font></b>],   0&gt;,
+088:   &lt;Index[<b><font color="#8A2BE2">"areaA"</font></b>], Index[<b><font color="#8A2BE2">"areaS"</font></b>], 120&gt;,
+089:   &lt;Index[<b><font color="#8A2BE2">"areaS"</font></b>], Index[<b><font color="#8A2BE2">"m1"</font></b>],     90&gt;,
+090:   &lt;Index[<b><font color="#8A2BE2">"areaS"</font></b>], Index[<b><font color="#8A2BE2">"m2"</font></b>],     50&gt;,
+091:   &lt;Index[<b><font color="#8A2BE2">"areaS"</font></b>], Index[<b><font color="#8A2BE2">"m3"</font></b>],     80&gt;,
+092:   &lt;Index[<b><font color="#8A2BE2">"areaS"</font></b>], Index[<b><font color="#8A2BE2">"areaA"</font></b>], 120&gt;,
+093:   &lt;Index[<b><font color="#8A2BE2">"areaS"</font></b>], Index[<b><font color="#8A2BE2">"areaS"</font></b>],   0&gt;
+094: };
+095: 
+096: stateFunction trolleyPosition with m;
+097: 
+098: dvar interval act[i in Jobs][j in Tasks] size duration[i][j];
+099: 
+100: execute {
+101:                 cp.param.FailLimit = 10000;
+102: }
+103: 
+104: minimize max(j in Jobs) endOf(act[j]["unloadS"]);
+105: subject to {
+106:   <b><font color="#007D00">// precedence</font></b>
+107:   forall(j <b><font color="EA7D00">in</font></b> Jobs)
+108:     forall(ordered t1, t2 <b><font color="EA7D00">in</font></b> Tasks)
+109:       endBeforeStart(act[j][t1], act[j][t2]);
+110: 
+111:   <b><font color="#007D00">// no-overlap on machines</font></b>
+112:   forall (m <b><font color="EA7D00">in</font></b> Machines) {
+113:     noOverlap( append(
+114:                       all(j <b><font color="EA7D00">in</font></b> Jobs: job[j].machine1==m) act[j][<b><font color="#8A2BE2">"process1"</font></b>],
+115:                       all(j <b><font color="EA7D00">in</font></b> Jobs: job[j].machine2==m) act[j][<b><font color="#8A2BE2">"process2"</font></b>])
+116:                );
+117:   }
+118: 
+119:    <b><font color="#007D00">// state constraints</font></b>
+120:    forall(j <b><font color="EA7D00">in</font></b> Jobs, t <b><font color="EA7D00">in</font></b> Tasks : t != <b><font color="#8A2BE2">"process1"</font></b> &amp;&amp; t != <b><font color="#8A2BE2">"process2"</font></b>)
+121:      alwaysEqual(trolleyPosition, act[j][t], state[j][t]);
+122: }; 
+123: 
+124: 
+125: 
+126: 
+127: 
+</tt></pre>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Customizing the search" />
+<meta name="abstract" content="By writing an execute block." />
+<meta name="Description" content="By writing an execute block." />
+<meta name="DC.subject" content="CP Optimizer, customizing search strategy, search strategy, customizing in time tabling example, execute, IBM ILOG Script block, customizing CP search strategy" />
+<meta name="keywords" content="CP Optimizer, customizing search strategy, search strategy, customizing in time tabling example, execute, IBM ILOG Script block, customizing CP search strategy" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_cp.1069747" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<title>Customizing the search</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_cp.1069747">
+<h1 class="title topictitle1">Customizing the search</h1>
+<div class="body"><p class="shortdesc">By writing an <samp class="ph codeph">execute</samp> block.</p>
+<p class="p">Before writing constraints, you can customize the CP
+Optimizer search strategy by writing an <samp class="ph codeph">execute</samp> block.
+In this time tabling problem, this is done by selecting variables
+by increasing the domain size, and by selecting random values. The
+method consisting in selecting random values helps the search process
+to distribute the courses homogeneously over the scheduling period.</p>
+<pre class="pre codeblock"><code>   var f = cp.factory;
+   var selectVar = f.selectSmallest(f.domainSize());
+   var selectValue = f.selectRandomValue();
+   var assignRoom = f.searchPhase(room, selectVar, selectValue);
+   var assignTeacher = f.searchPhase(teacher, selectVar, selectValue);
+   var assignStart = f.searchPhase(Start, selectVar, selectValue);
+   cp.setSearchPhases(assignTeacher, assignStart, assignRoom);</code></pre>
+<p class="p">Note that the phases are assigned in a specific order:</p>
+<ol class="ol"><li class="li"><p class="p">Teachers, because there are only a few
+to choose from. </p>
+</li>
+<li class="li"><p class="p">Start times, because once teachers are
+determined, there is only a limited number of possible start times
+for courses. </p>
+</li>
+<li class="li"><p class="p">Rooms.</p>
+</li>
+</ol>
+<p class="p"> To specify search method and time limits, you can either
+use a scripting block, like this:</p>
+<pre class="pre codeblock"><code>   var p = cp.param;
+   p.logPeriod = 10000;
+   p.searchType = "DepthFirst";
+   p.timeLimit = 600;</code></pre>
+<p class="p">or edit the <span class="ph uicontrol">Constraint Programming/Search
+Control</span> page in the project settings file (<samp class="ph codeph">timetabling.ops</samp>)
+from the CPLEX Studio IDE. See <a class="xref" href="../../refoplide/topics/opl_gui_setprog.html" title="Use the settings editor to modify options for the Optimization Programming Language (OPL), mathematical programming (MP) and constraint programming (CP).">Setting programming options</a> in <em class="ph i">IDE Reference</em>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" title="Shows how to build a school timetable, given a set of room specifications, teacher skills, and educational requirements.">The time tabling example</a></div>
+</div>
+</div></body>
+</html>

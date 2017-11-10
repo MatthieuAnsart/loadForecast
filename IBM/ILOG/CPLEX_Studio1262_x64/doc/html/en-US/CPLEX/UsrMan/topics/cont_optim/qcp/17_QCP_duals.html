@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Accessing dual values and reduced costs of QCP solutions" />
+<meta name="abstract" content="Outlines a procedure for accessing dual values and reduced costs from QCP solutions." />
+<meta name="Description" content="Outlines a procedure for accessing dual values and reduced costs from QCP solutions." />
+<meta name="DC.subject" content="quadratically constrained program (QCP), Lagrangian of, Karush-Kuhn-Tucker (KKT) conditions and, examples: dual values and, examples: reduced costs and, accessing, reduced costs of QCP, dual values of QCP, Karush-Kuhn-Tucker (KKT) conditions" />
+<meta name="keywords" content="quadratically constrained program (QCP), Lagrangian of, Karush-Kuhn-Tucker (KKT) conditions and, examples: dual values and, examples: reduced costs and, accessing, reduced costs of QCP, dual values of QCP, Karush-Kuhn-Tucker (KKT) conditions" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/01_QCP_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="AccessingDualValuesAndReducedCostsO" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/01_QCP_title_synopsis.html" />
+<title>Accessing dual values and reduced costs of QCP solutions</title>
+</head>
+<body role="main" id="AccessingDualValuesAndReducedCostsO">
+<h1 class="title topictitle1">Accessing dual values and reduced costs of QCP solutions</h1>
+<div class="body"><p class="shortdesc">Outlines a procedure for accessing dual values and reduced costs from QCP solutions.</p>
+<p class="p">The CPLEX routines and methods that query dual values
+and reduced costs in linear programs (LPs) also access dual values
+and reduced costs for quadratically constrained programs, that is,
+QCP models. In order to use these routines and methods effectively
+in your applications to solve SOCPs, recall these points about 
+<strong class="ph b">Lagrangian</strong> functions and QCPs. </p>
+<p class="p">First, recall the conventional statement of a quadratically constrained program:</p>
+<img class="image" src="../../../images/dualQCP_problem_statement.jpg" /><p class="p">In that general statement, assume that the bounds of the model 
+are expressed in the matrix as a subset of the constraints in <em class="ph i">I</em>, like this:</p>
+<img class="image" src="../../../images/dualQCP_bound.jpg" /><p class="p">Now recall the same model stated in Lagrangian terms:</p>
+<img class="image" src="../../../images/dualQCP_LagrangianFcn.jpg" /><p class="p">where: </p>
+<img class="image" src="../../../images/dualQCP_LagrangianFcn2.jpg" /><p class="p">The Lagrangian <strong class="ph b">dual</strong> is expressed generally like this:</p>
+<img class="image" src="../../../images/dualQCP_LagrangianDualFcn.jpg" /><p class="p">Consequently, the Lagrangian dual of this conventional QCP model looks like this:</p>
+<img class="image" src="../../../images/dualQCP_LagrangianDualProblem.jpg" /><p class="p">Also recall that a primal-dual solution pair </p>
+<img class="image" src="../../../images/dualQCP_primal-dual-soln-pair.jpg" /><p class="p">that is an <strong class="ph b">optimal</strong> solution to those Lagrangian statements 
+of the primal and dual QCP model must also 
+satisfy the <strong class="ph b">Karush-Kuhn-Tucker (KKT) conditions</strong>:</p>
+<p class="p"><strong class="ph b">primal feasibility</strong> </p>
+<img class="image" src="../../../images/dualQCP_PrimalFeasibility.jpg" /><p class="p"><strong class="ph b">dual feasibility</strong> </p>
+<img class="image" src="../../../images/dualQCP_DualFeasibility.jpg" /><p class="p"><strong class="ph b">complementary slackness</strong> </p>
+<img class="image" src="../../../images/dualQCP_ComplementarySlackness.jpg" /><p class="p"><strong class="ph b">stationarity</strong> </p>
+<img class="image" src="../../../images/dualQCP_Stationarity.jpg" /><p class="p">In those statements of the KKT conditions, </p>
+<img class="image" src="../../../images/dualQCP_derivative.jpg" /><p class="p">denotes the derivative of <em class="ph i">f(x)</em> evaluated at <em class="ph i">x<sup class="ph sup">*</sup></em>. </p>
+<p class="p">For a quadratic constraint expressed like this: </p>
+<img class="image" src="../../../images/dualQCP_QuadConstrWithRHS.jpg" /><p class="p">a difficulty arises in the stationarity condition for 
+quadratically constrained programs (QCPs) because the
+derivative of: </p>
+<img class="image" src="../../../images/dualQCP_QuadConstr.jpg" /><p class="p">can be undefined at <em class="ph i">x<sup class="ph sup">*</sup></em>. In such a case, 
+KKT conditions cannot be formulated and satisfied.</p>
+<p class="p">The point at which the derivative of a quadratic constraint such as: </p>
+<img class="image" src="../../../images/dualQCP_QuadConstr.jpg" /><p class="p">is likely to be undefined is at the top of the cone representing that constraint. 
+Whether  <em class="ph i">x<sup class="ph sup">*</sup></em> is at the top of the cone or not is determined by 
+numeric tolerances. Because such tolerances depend greatly on the model at hand, 
+CPLEX does not make this decision about <em class="ph i">x<sup class="ph sup">*</sup></em> for you. 
+Instead, CPLEX offers an application programming interface (API) 
+for you to query the values of a primal-dual solution pair:</p>
+<img class="image" src="../../../images/dualQCP_primal-dual-soln-pair.jpg" /><p class="p">For example, in the Callable Library (C API) these 
+routines are available for this purpose:</p>
+<ul class="ul"><li class="li"><span class="keyword apiname">CPXXgetx</span> queries the values <em class="ph i">x<sup class="ph sup">*</sup></em>.</li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXXgetpi</span> queries the dual values of a range of constraints 
+in a (linear or) quadratically constrained problem (QCP);  
+that is: </p>
+
+<img class="image" src="../../../images/dualQCP_muStarSubi.jpg" /></li>
+<li class="li"><p class="p"><span class="keyword apiname">CPXXgetdj</span> queries the reduced costs for a range of variables 
+in a (linear or) quadratically constrained problem (QCP);  that is, it accesses the 
+dual multipliers for bound constraints on the specified variables. </p>
+</li>
+<li class="li"><p class="p">The values:</p>
+
+<img class="image" src="../../../images/dualQCP_nuStarSubi.jpg" />
+<p class="p">cannot be accessed directly. 
+However, for a quadratic constraint <em class="ph i">k<sub class="ph sub">0</sub></em> in the set <em class="ph i">K</em>, 
+<span class="keyword apiname">CPXXgetqconstrdslack</span> returns the slack vector of the dual problem: </p>
+
+<img class="image" src="../../../images/dualQCP_slackVectorOfDualProb.jpg" />
+<p class="p">If the derivative exists at <em class="ph i">x<sup class="ph sup">*</sup></em>, you can compute <em class="ph i">w</em> like this:</p>
+ 
+<img class="image" src="../../../images/dualQCP_compute-w.jpg" /> 
+<p class="p">and thus obtain: </p>
+ 
+<img class="image" src="../../../images/dualQCP_nuKnaught.jpg" /> 
+<p class="p">from the relation:</p>
+ 
+<img class="image" src="../../../images/dualQCP_relation.jpg" /></li>
+</ul>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">The routine <span class="keyword apiname">CPXXgetqconstrdslack</span> 
+(or <span class="keyword apiname">CPXgetqconstrdslack</span>) returns the dual slack for 
+a single quadratic constraint. You can get the full dual slack vector 
+by summing up the results of <span class="keyword apiname">CPXgetdj</span> <strong class="ph b">and</strong>
+<span class="keyword apiname">CPXgetqconstrdslack</span>  (the latter for all quadratic constraints).</p>
+</div>
+<p class="p">For a demonstration of the procedure outlined here to access 
+dual values and reduced costs of a QCP model, see these examples distributed with the product:</p>
+<ul class="ul"><li class="li">In the Callable Library (C API), see the examples <span class="ph filepath">xqcpdual.c</span> and <span class="ph filepath">qcpdual.c</span>.</li>
+<li class="li">In the C++ API, see the example <span class="ph filepath">iloqcpdual.cpp</span>.</li>
+<li class="li">In the Java API, see the example <span class="ph filepath">QCPDual.java</span>.</li>
+<li class="li">In the C#.NET API, see the example <span class="ph filepath">QCPDual.cs</span>.</li>
+<li class="li">In the Python API, see the example <span class="ph filepath">qcpdual.py</span>.</li>
+<li class="li">In the MATLAB connector, see the example <span class="ph filepath">qcpdual.m</span>.</li>
+</ul>
+<p class="p">For reference documentation of these routines and methods, see the reference manual of 
+your preferred application programming interface (API):</p>
+<ul class="ul"><li class="li">Callable Library (C API)
+    <ul class="ul"><li class="li"><span class="keyword apiname">CPXXgetqconstrdslack</span> and <span class="keyword apiname">CPXgetqconstrdslack</span></li>
+</ul>
+
+    </li>
+<li class="li">C++ API
+    <ul class="ul"><li class="li"><span class="keyword apiname">IloCplex::getQCDSlack</span></li>
+</ul>
+
+    </li>
+<li class="li">Java API
+    <ul class="ul"><li class="li"><span class="keyword apiname">IloCplex.getQCDSlack</span></li>
+</ul>
+
+    </li>
+<li class="li">.NET API
+    <ul class="ul"><li class="li"><span class="keyword apiname">Cplex.GetQCDSlack</span></li>
+</ul>
+
+    </li>
+<li class="li">Python API
+    <ul class="ul"><li class="li"><span class="keyword apiname">SolutionInterface.get_quadratic_dualslack</span></li>
+</ul>
+
+    </li>
+<li class="li">MATLAB connector new fields in the <span class="keyword apiname">Cplex.Solution</span> structure
+    <ul class="ul"><li class="li"><span class="keyword apiname">qcpdslack</span></li>
+</ul>
+
+    </li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/01_QCP_title_synopsis.html" title="Documents the solution of quadratically constrained programming problems (QCPs), including the special case of second order cone programming problems (SOCPs).">Solving problems with quadratic constraints (QCP)</a></div>
+</div>
+</div></body>
+</html>

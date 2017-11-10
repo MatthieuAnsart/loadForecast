@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Strong constraints in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="strongcst.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="45"><div
+                class="section-title1">Strong constraints in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                    href="startpoint.html">PREVIOUS</a> <a
+                href="state.html">NEXT</a></div><table class="summary"
+                border="1" cellpadding="3" cellspacing="0"
+                width="100%" /><div
+                    class="section-body"><p>A <em>strong constraint</em> (specified as <code>strong</code>,
+<code>IloStrong</code>, <code>IloCP.strong</code>, <code>CP.Strong</code> in
+OPL, C++, Java, and C# respectively) operates over a given set of variables
+and is a request for CP Optimizer to strengthen the inference performed
+between these variables.</p><p>In CP Optimizer, for reasons of efficiency, not all logical inferences are
+performed which logically could be.  For example, given three integer variables
+<em>x</em>, <em>y</em> and <em>z</em> and the constraint <em>z = x + y</em>,
+then only the <em>bounds</em> of the three variables will be inferred by
+CP Optimizer.  For example if the initial bounds of <em>x</em>, <em>y</em> and
+<em>z</em> are [0..10], [2..7] and [6..9] respectively, then CP Optimizer
+can deduce a tighter maximum value of 7 for <em>x</em> since values of 8, 9 or
+10 for x would necessarily violate the constraint.  This can be deduced quickly
+by examining only at the bounds of the variables.</p><p>Consider now that the domains of <em>x</em>, <em>y</em> and <em>z</em> can be,
+instead of ranges, non-contiguous, for example {0, 3, 5, 7, 9, 10},
+{2, 4, 6, 7} and {6, 7, 8, 9} respectively.  With these initial domains, it
+is impossible to have z = 8 since there is no combination of values for
+x and y which can make 8.  So, a logical inference would be to remove 8
+from the possible domain of z.  However, since, for efficiency, CP Optimizer
+reasons only about ranges on arithmetic constraints, this deduction is
+not made.  Normally, the effort spent making such additional deductions on
+arithmetic constraints is not paid back by equivalent reductions in the
+total search, and so for the most part, fast deductions based on ranges are
+globally the best choice.  However, it can be that for some tightly
+coupled model structures (by tightly coupled we mean there are relatively
+few legal assignments to some subset of the variables and their corresponding
+constraints), modeling with constraints which deduce domains reductions
+based only on examination of bounds or other simple mechanisms is
+inefficient.</p><p>The very strongest domain reductions between variables can be achieved by
+using the <em>allowed assignments</em> constraint (specified as
+<code>allowedAssignments</code>, <code>IloAllowedAssignments</code>,
+<code>IloCP.allowedAssignments</code>, <code>CP.AllowedAssignments</code> in
+OPL, C++, Java, and C# respectively).  This constraint takes as input an
+array of variables and a <em>tuple set</em>.  The tuple set lists all the
+combinations of values that the variables can take.  This constraint
+performs perfect (the strongest) domain reductions over the variables
+specified and is also a natural way of modeling problems with a naturally
+combinatorial structure.  However, where the natural model method uses
+other means, such as arithmetic constraints, modeling via the allowed
+assignments constraint is somewhat cumbersome.</p><p>The idea then of strong constraints is to allow the user to model the
+problem using the constraints which are most natural to them, even if the
+default choice of propagation strength is below what the user would prefer
+(the strength of allowed-assignments would be preferable). By then using
+an additional &quot;strong&quot; constraint on the variables in question, CP Optimizer
+is requested to replace the &quot;strong&quot; constraint with an allowed-assignments
+constraint which admits the same solutions as the user's constraints, but
+provides the maximum strength of inference.  Additionally, if CP Optimizer
+can identify that the new allowed-assignments constraint renders some
+other constraints in the model entirely redundant (in the sense that all
+deductions made are also made by the new allowed-assignments constraint),
+then it removes those redundant constraints.</p><p>The allowed-assignments constraints added to the model are generated by
+performing a complete search using the whole constraint model, but seeking
+only to fix the variables mentioned in the strong constraint during this
+search.  Only those partial assignments which did not lead to an inconsistency
+(a failure) are added to the allowed-assignments constraint.  This can
+actually result in an even stronger model than if the user were to directly
+use their own allowed-assignments constraint since in the case of the
+strong constraint, the inference of all other constraints in the model is
+taken into account.</p><p>For instance reconsidering the example above  
+<em>z = x + y</em> where initial domains of <em>x</em>, <em>y</em> and 
+<em>z</em> are  {0, 3, 5, 7, 9, 10}, 
+{2, 4, 6, 7} and {6, 7, 8, 9}, 
+the strong annotation <em>strong(x, y, z)</em> will generate an 
+<code>allowedAssignments</code> constraint over 
+<em>x</em>, <em>y</em> and <em>z</em> whose tuple set is
+</p><pre
+                class="sample">
+{&lt;0, 6, 6&gt;, 
+&lt;0, 7, 7&gt;, 
+&lt;3, 4, 7&gt;, 
+&lt;3, 6, 9&gt;, 
+&lt;5, 2, 7&gt;, 
+&lt;5, 4, 9&gt;, 
+&lt;7, 2, 9&gt;}
+</pre><p>This <code>allowedAssignments</code> constraint replaces the constraint 
+<em>z = x + y</em> and the strong annotation. It is important to note 
+that for this demonstration we took into account only the constraint 
+<em>z = x + y</em>. In general, other constraints on variables 
+<em>x</em>, <em>y</em> and <em>z</em>, will lead to a smaller tuple set 
+because some of the combinations may not satisfy these other constraints.</p><p>Be aware that the use of strong constraints can be costly for two 
+principal reasons :</p><p>1. The allowed-assignments constraints generated, by their very nature of 
+performing the maximum amount of inference, are more costly than, for example, 
+constraints which only tighten and examine variable bounds. Allowed-assignments 
+constraints (and thus strong constraints) on variables with large domains or high 
+numbers of variables are likely to be inefficient. </p><p>2. The generation process itself requires some time as a search process is 
+carried out during model presolve. The same observations apply as to the first 
+point: large domains or numbers of variables in a strong constraint are likely 
+to take some time during generation.</p><p>Finally, care should be taken on the number of strong constraints used inside 
+a model and to limit their use to the most combinatorial parts. Large numbers of 
+allowed-assignments constraints can make the solving process quite inefficient in 
+terms of the branching speed of CP Optimizer.</p></div><div
+                    align="right"><a
+                    href="startpoint.html">PREVIOUS</a> <a href="state.html">NEXT</a></div></div></body>
+</html>

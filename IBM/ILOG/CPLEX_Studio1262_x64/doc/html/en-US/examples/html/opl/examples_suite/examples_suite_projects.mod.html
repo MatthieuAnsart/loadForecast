@@ -1,0 +1,138 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// This example illustrates how to execute several examples consecutively</font></b>
+013: <b><font color="#007D00">// The models can be solved by either CPLEX or CPO and include scripting or not</font></b>
+014: 
+015: <b><font color="#0000FF">execute</font></b> {
+016:   <b><font color="EA7D00">function</font></b> ProjectInfo(dirName, prjName, runConfigName, expRes) {
+017:     <b><font color="EA7D00">this</font></b>.dir = dirName;
+018:     <b><font color="EA7D00">this</font></b>.name = prjName;
+019:     <b><font color="EA7D00">this</font></b>.runConfig = runConfigName;
+020:     <b><font color="EA7D00">this</font></b>.result = expRes;
+021:   }
+022:   <b><font color="EA7D00">function</font></b> AddProject(projects, dir, name, runConfig, res) {
+023:     projects[projects.length] = <b><font color="EA7D00">new</font></b> ProjectInfo(dir, name, runConfig, res);
+024:   }
+025:   <b><font color="EA7D00">function</font></b> isNearEqual(result, expectedResult) {
+026:     <b><font color="EA7D00">var</font></b> tolerance = 0.000001;
+027:    <b><font color="EA7D00">return</font></b> Math.abs(expectedResult-result)&lt;tolerance;
+028:   }
+029: }
+030: 
+031: main {
+032:   <b><font color="#007D00">// activate end() method in the IDE</font></b>
+033:   <b><font color="#0000FF">thisOplModel</font></b>.settings.mainEndEnabled = <b><font color="EA7D00">true</font></b>;
+034:   
+035:   writeln(<b><font color="#8A2BE2">"Executing some of the distributed examples thru projects ..."</font></b>);
+036:   writeln();
+037:   writeln();
+038:    
+039:   <b><font color="EA7D00">var</font></b> path = <b><font color="#8A2BE2">""</font></b>;
+040:   <b><font color="EA7D00">var</font></b> OK = <b><font color="EA7D00">true</font></b>;
+041: 
+042:   <b><font color="EA7D00">var</font></b> projects = <b><font color="EA7D00">new</font></b> Array();
+043:   <b><font color="EA7D00">var</font></b> projectCurr = 0;
+044: 
+045:   AddProject(projects, <b><font color="#8A2BE2">"../blending"</font></b>, <b><font color="#8A2BE2">""</font></b>, <b><font color="#8A2BE2">""</font></b>, 653.61);
+046:   AddProject(projects, <b><font color="#8A2BE2">"../cutstock"</font></b>, <b><font color="#8A2BE2">""</font></b>, <b><font color="#8A2BE2">"Full integer problem using column generation"</font></b>, 0);
+047:   AddProject(projects, <b><font color="#8A2BE2">"../timetabling"</font></b>, <b><font color="#8A2BE2">""</font></b>, <b><font color="#8A2BE2">"Small data"</font></b>, 20);
+048:   AddProject(projects, <b><font color="#8A2BE2">"../sched_bridge"</font></b>, <b><font color="#8A2BE2">""</font></b>, <b><font color="#8A2BE2">""</font></b>, <b><font color="EA7D00">null</font></b>);
+049: 
+050:   <b><font color="EA7D00">while</font></b> (projectCurr &lt; projects.length ) {
+051:     <b><font color="EA7D00">var</font></b> withData = <b><font color="EA7D00">true</font></b>;
+052:     <b><font color="EA7D00">var</font></b> projectDir = projects[projectCurr].dir;
+053:     <b><font color="EA7D00">var</font></b> projectName = projects[projectCurr].name;
+054:     <b><font color="EA7D00">var</font></b> runConfigName = projects[projectCurr].runConfig;
+055:     <b><font color="EA7D00">var</font></b> expectedResult = projects[projectCurr].result;
+056:     projectName = path + projectDir;
+057:     
+058:     <b><font color="EA7D00">var</font></b> allName=projectName;
+059:     writeln(<b><font color="#8A2BE2">"---------------"</font></b>);
+060:     writeln(<b><font color="#8A2BE2">"solving: "</font></b>, projectName);
+061:     <b><font color="EA7D00">var</font></b> project = <b><font color="EA7D00">new</font></b> IloOplProject(projectName);
+062:     <b><font color="EA7D00">var</font></b> rc;
+063:     write(<b><font color="#8A2BE2">"run configuration: "</font></b>);
+064:     <b><font color="EA7D00">if</font></b> (runConfigName != <b><font color="#8A2BE2">""</font></b>) {
+065:        rc=project.makeRunConfiguration(runConfigName);
+066:        writeln(runConfigName);
+067:     }
+068:     <b><font color="EA7D00">else</font></b> { <b><font color="#007D00">//default run configuration</font></b>
+069:        rc=project.makeRunConfiguration();  
+070:        writeln(<b><font color="#8A2BE2">"default"</font></b>);
+071:     }
+072:        
+073:     <b><font color="EA7D00">var</font></b> result;
+074:     <b><font color="EA7D00">if</font></b> (rc.oplModel.modelDefinition.hasMain()) {
+075:       result = rc.oplModel.main();
+076:       <b><font color="EA7D00">if</font></b> (result != expectedResult) {
+077:         OK = <b><font color="EA7D00">false</font></b>;
+078:         writeln(allName, <b><font color="#8A2BE2">" is NOT OK"</font></b>);
+079:         <b><font color="EA7D00">break</font></b>;
+080:       } <b><font color="EA7D00">else</font></b> {
+081:         writeln(allName, <b><font color="#8A2BE2">" is OK"</font></b>);
+082:       }
+083:     } 
+084:     <b><font color="EA7D00">else</font></b> {
+085:       rc.oplModel.generate();
+086:     
+087:       <b><font color="EA7D00">var</font></b> algo;      
+088:       <b><font color="EA7D00">if</font></b> (rc.oplModel.modelDefinition.isUsingCplex())
+089:       {
+090:         algo = rc.<b><font color="#0000FF">cplex</font></b>;  
+091:       }  
+092:       <b><font color="EA7D00">if</font></b> (rc.oplModel.modelDefinition.isUsingCP())
+093:       {
+094:         algo = rc.cp;       
+095:       }
+096:       <b><font color="EA7D00">if</font></b> ( algo.solve() ) {
+097:         result = algo.getObjValue();
+098:         <b><font color="EA7D00">if</font></b> (expectedResult != <b><font color="EA7D00">null</font></b>) {
+099:           <b><font color="EA7D00">if</font></b> (isNearEqual(result,expectedResult)) {
+100:             writeln(allName, <b><font color="#8A2BE2">" is OK"</font></b>);
+101:             rc.oplModel.postProcess();
+102:           } <b><font color="EA7D00">else</font></b> {
+103:             writeln(<b><font color="#8A2BE2">"Fail to solve: "</font></b>, allName);
+104:             writeln(<b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">Expected result: "</font></b>, expectedResult, <b><font color="#8A2BE2">" found result: "</font></b>, result);
+105:             OK = <b><font color="EA7D00">false</font></b>;
+106:             <b><font color="EA7D00">break</font></b>;
+107:           }
+108:         }
+109:       } <b><font color="EA7D00">else</font></b> {
+110:         writeln(<b><font color="#8A2BE2">"Fail to solve: "</font></b>, allName);
+111:         writeln(<b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2">No solution found!"</font></b>);
+112:         OK = <b><font color="EA7D00">false</font></b>;
+113:         <b><font color="EA7D00">break</font></b>;
+114:       }
+115:     }
+116:     rc.end();
+117:     project.end();
+118:     projectCurr = projectCurr + 1;
+119:   }
+120:   writeln(<b><font color="#8A2BE2">"---------------"</font></b>);
+121:   writeln();
+122:   <b><font color="EA7D00">if</font></b> (OK) {
+123:     writeln(<b><font color="#8A2BE2">"All projects have been solved."</font></b>);
+124:   } <b><font color="EA7D00">else</font></b> {
+125:     writeln(<b><font color="#8A2BE2">"Not all projects have been solved as expected."</font></b>);
+126:   }
+127:   writeln();
+128:   
+129:   (OK)?0:1;
+130: }
+131: 
+132: 
+133: 
+</tt></pre>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Propagation of arithmetic constraints" />
+<meta name="abstract" content="Propagation of arithmetic constraints works to reduce the bounds of the incident decision variables." />
+<meta name="Description" content="Propagation of arithmetic constraints works to reduce the bounds of the incident decision variables." />
+<meta name="DC.subject" content="bound reduction, constraint, arithmetic, domain, holes, domain reduction, absolute value, arithmetic constraint, domain reduction, bound, expression" />
+<meta name="keywords" content="bound reduction, constraint, arithmetic, domain, holes, domain reduction, absolute value, arithmetic constraint, domain reduction, bound, expression" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerpropagate.1021156" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate.html" />
+<title>Propagation of arithmetic constraints</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerpropagate.1021156">
+<h1 class="title topictitle1">Propagation of arithmetic constraints</h1>
+<div class="body"><p class="shortdesc">Propagation of arithmetic constraints works to reduce the
+bounds of the incident decision variables.</p>
+<p class="p">In the C++ API, CP Optimizer can handle arithmetic expressions
+created with the operators <samp class="ph codeph">+</samp>, <samp class="ph codeph">-</samp>, <samp class="ph codeph">*</samp> and <samp class="ph codeph">/</samp>.
+Arithmetic constraints are created with arithmetic expressions and
+operators like <samp class="ph codeph">==</samp>, <samp class="ph codeph">&lt;=</samp>, <samp class="ph codeph">&gt;=</samp>, <samp class="ph codeph">&lt;</samp> and <samp class="ph codeph">&gt;</samp>. </p>
+<p class="p">For example, the constraint <em class="ph i">17*p*q + x/y &lt;= 100</em>, where <em class="ph i">p</em>, <em class="ph i">q</em>, <em class="ph i">x</em> and <em class="ph i">y</em> are
+decision variables, can be handled by CP Optimizer. These operators
+are discussed in more detail in the section <a class="xref" href="constraints_arithmetic.html" title="Arithmetic constraints and expressions may consist of linear and nonlinear arithmetic terms.">Arithmetic constraints and expressions</a>. The Java™ API and C# API equivalents of the operators
+are listed there as well.</p>
+<p class="p">Apart from a few cases that are described below, arithmetic constraints
+do not achieve full domain reduction because there does not always
+exist an efficient algorithm for full domain reduction. Thus, domain
+reduction is mostly applied to bounds of decision variables and is
+called bound reduction. Bound reduction is considered as a good trade-off
+between the number of values removed and the efficiency of the domain
+reduction algorithm.</p>
+<p class="p">For example, consider the model:  </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, -7, 7);
+    IloIntVar y(env, -7, 7);
+    IloModel model(env);
+    model.add(0.5*x + 3*y == 5);
+</code></pre>
+<p class="p">The two solutions of this model are <em class="ph i">x = -2, y = 2 </em>and <em class="ph i">x
+= 4, y = 1</em>. Full constraint propagation would give the domain
+of <em class="ph i">x</em> as [-2 4] and the domain of <em class="ph i">y</em> as [1 2]. However,
+CP Optimizer does not perform this domain reduction. The constraint
+propagation engine does not create “holes” in the domain of <em class="ph i">x</em>.
+The reduced domain of <em class="ph i">x</em> is [-2..4]. </p>
+<p class="p">There are exceptions to this behavior. These are binary constraints
+of the form <em class="ph i">y == a*x + b</em>, where <em class="ph i">y</em> and <em class="ph i">x</em> are variables
+and <em class="ph i">a</em> and <em class="ph i">b</em> are numerical values. In this case, full
+domain reduction is achieved.</p>
+<p class="p"> For instance consider the constraint <em class="ph i">y == 2*x</em> over the
+variables <em class="ph i">x</em> with domain [1..3] and <em class="ph i">y</em> with domain [0..10].
+This constraint forces <em class="ph i">y</em> to be even. Full domain reduction
+is performed and reduces the domain of <em class="ph i">y</em> to [2 4 6]. The main
+reason for achieving full domain reduction in this case is that it
+does not hurt the efficiency of constraint propagation, and it can
+be effective to propagate holes in domains from a constraint to another
+when there are linking constraints like <em class="ph i">x == y</em> in a model.</p>
+<p class="p">Another case is that of linear inequalities such as <em class="ph i">x + 3y -
+4z &lt;= 10</em>. Achieving bound reduction for these constraints is
+sufficient to achieve full domain reduction. </p>
+<p class="p">CP Optimizer provides bound reduction for expressions such as absolute
+value, minimum, maximum and piecewise linear functions. On these expressions,
+achieving bound reduction is sufficient to maintain full domain reduction.</p>
+<p class="p">In the C++ API, an absolute value expression is created with the
+function <samp class="ph codeph">IloAbs</samp>. Consider the following code:  </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, -10, 20);
+    IloIntVar y(env, -3, 4);
+    IloModel model(env);
+    model.add(y == IloAbs(x));
+    IloCP cp(model);
+    if (cp.propagate()){
+      cp.out() &lt;&lt; " Domains reduced: " &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of x = " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of y = " &lt;&lt; cp.domain(y) &lt;&lt; std::endl;
+    }else{
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+    }
+</code></pre>
+<p class="p">Running this code, the domains of both <em class="ph i">x</em> and <em class="ph i">y</em> are
+reduced. The domain of <em class="ph i">y</em> is reduced so that it is positive
+and the domain of <em class="ph i">x</em> is reduced to take into account the maximum
+value of <em class="ph i">y</em>:  </p>
+<pre class="pre codeblock"><code> Domains reduced:
+ Domain of x = [-4..4]
+ Domain of y = [0..4]
+</code></pre>
+<p class="p">In the C++ API, minimum and maximum values expressions over a set
+of variables are created with the <samp class="ph codeph">IloMin</samp> and <samp class="ph codeph">IloMax</samp> expressions.
+For example consider the model:  </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 10);
+    IloIntVar y(env, 4, 6);
+    IloIntVar u(env, 2, 10);
+    IloModel model(env);
+    model.add(u == IloMin(x, y));
+    IloCP cp(model);
+	 if ( cp.propagate() ) {
+      cp.out() &lt;&lt; " Domains reduced: " &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of x = " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of y = " &lt;&lt; cp.domain(y) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of u = " &lt;&lt; cp.domain(u) &lt;&lt; std::endl;
+    }else{
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+    }
+</code></pre>
+<p class="p">The value of <em class="ph i">u</em> cannot exceed the smallest upper bound of <em class="ph i">x</em> and <em class="ph i">y</em>,
+that is 6. Moreover, <em class="ph i">x</em> nor <em class="ph i">y</em> cannot have a value smaller
+than the lower bound of <em class="ph i">u</em>, which is 2. The domains of the variables
+after running this code are:  </p>
+<pre class="pre codeblock"><code> Domains reduced:
+ Domain of x = [2..10]
+ Domain of y = [4..6]
+ Domain of u = [2..6]
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate.html" title="CP Optimizer solves a model using constraint propagation and constructive search with search strategies.">Constraint propagation in CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

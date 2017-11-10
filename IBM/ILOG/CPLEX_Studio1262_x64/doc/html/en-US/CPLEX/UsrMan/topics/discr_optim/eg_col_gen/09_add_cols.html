@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Adding columns to a model" />
+<meta name="abstract" content="Shows how to add generated columns to a master model." />
+<meta name="Description" content="Shows how to add generated columns to a master model." />
+<meta name="DC.subject" content="model, adding columns to" />
+<meta name="keywords" content="model, adding columns to" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/06_model_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingColumnGen.1003316" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/06_model_title_synopsis.html" />
+<title>Adding columns to a model</title>
+</head>
+<body role="main" id="User_manual.uss_usingColumnGen.1003316">
+<h1 class="title topictitle1">Adding columns to a model</h1>
+<div class="body taskbody"><p class="shortdesc">Shows how to add generated columns to a master model.</p>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><ol class="ol steps"><li class="li step"><span class="ph cmd">Create a column expression defining the new column.</span></li>
+<li class="li step"><span class="ph cmd">Create a variable using that column expression and add
+the variable to the model.</span></li>
+</ol>
+<div class="section result"><div class="tasklabel"><h2 class="sectiontitle tasklabel">Results</h2></div><p class="p">For example, in this problem, <samp class="ph codeph">RollsUsed</samp>  is an instance of <samp class="ph codeph">IloObjective</samp>. The
+statement <samp class="ph codeph">RollsUsed(1)</samp>  creates a term
+in a column expression defining how to add a new variable as a linear
+term with a coefficient of 1 (one) to the expression <samp class="ph codeph">RollsUsed</samp> . </p>
+
+<p class="p">The terms of a column expression are connected to one
+another by the overloaded <samp class="ph codeph">operator +</samp> .</p>
+
+<p class="p">The master model is initialized with one variable for
+each size. Each such variable represents the pattern of cutting a
+roll into as many strips of that size as possible. These variables
+are stored as they are created in the array <samp class="ph codeph">Cut</samp> by the following loop:  </p>
+
+<pre class="pre codeblock"><code>IloInt nWdth = size.getSize();
+for (j = 0; j &lt; nWdth; j++)
+   Cut.add(IloNumVar(RollsUsed(1) + Fill(1)(int(rollWidth / size[j]))));</code></pre>
+
+<p class="p">Consequently, the variable <samp class="ph codeph">Cut[j]</samp> will have an objective coefficient of 1 (one) and only one other
+nonzero coefficient (<samp class="ph codeph">rollWidth/size[j]</samp>)
+for constraint <samp class="ph codeph">Fill[j]</samp>. Later, in the column
+generation loop, new variables will be added. Those variables will
+have coefficients defined by the solution vectors of the subproblem
+stored in the array <samp class="ph codeph">newPatt</samp>.</p>
+
+<p class="p">According to that two-step procedure for adding a column
+to a model, the following lines create the column with coefficient
+1 (one) for the objective <samp class="ph codeph">RollsUsed</samp> and
+with coefficient <samp class="ph codeph">newPatt[i]</samp> for constraint <samp class="ph codeph">Fill[i]</samp>; they also create the new variable with bounds
+at 0 (zero) and at <samp class="ph codeph">MAXCUT</samp>.  </p>
+
+<pre class="pre codeblock"><code>IloNumColumn col = RollsUsed(1);
+for (IloInt i = 0; i &lt; Fill.getSize(); ++i)
+     col += Fill[i](newPatt[i]);
+IloNumVar var(col, 0, MAXCUT);</code></pre>
+
+<p class="p">(However, those lines do not appear in the example at
+hand.) Concert Technology offers a shortcut in the <samp class="ph codeph">operator()</samp>  for an array of range constraints. Those lines of code can be condensed
+into the following line:  </p>
+
+<pre class="pre codeblock"><code>IloNumVar var(RollsUsed(1) + Fill(newPatt), 0, MAXCUT);</code></pre>
+
+<p class="p">In other words, <samp class="ph codeph">Fill(newPatt)</samp> returns the column expression that the loop would create. You see
+a similar shortcut in the example.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_col_gen/06_model_title_synopsis.html" title="Describes column generation in this application with generalizations about other applications.">Developing the model: building and modifying</a></div>
+</div>
+</div></body>
+</html>

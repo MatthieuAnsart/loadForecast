@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling and solving a simple problem: house building" />
+<meta name="abstract" content="Presents a simple problem of scheduling the tasks to build a house in such a manner that minimizes an objective." />
+<meta name="Description" content="Presents a simple problem of scheduling the tasks to build a house in such a manner that minimizes an objective." />
+<meta name="DC.subject" content="start property, end property" />
+<meta name="keywords" content="start property, end property" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ySZOMdFV" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Modeling and solving a simple problem: house building</title>
+</head>
+<body role="main" id="ySZOMdFV">
+<h1 class="title topictitle1">Modeling and solving a simple problem: house building</h1>
+<div class="body"><p class="shortdesc">Presents a simple problem of scheduling the tasks to build a house in such a manner that minimizes an objective.</p>
+<p class="p">In this section, you will learn how to:</p>
+<ul class="ul"><li class="li"><p class="p">use the <span class="keyword apiname">dvar</span> interval;</p>
+ </li>
+<li class="li"><p class="p">use the constraint <span class="keyword apiname">endBeforeStart</span>;</p>
+ </li>
+<li class="li"><p class="p">use the expressions <span class="keyword apiname">startOf</span> and <span class="keyword apiname">endOf</span>.</p>
+ </li>
+</ul>
+<p class="p">You will learn how to model and solve a simple problem, a problem of scheduling the tasks involved in building a house in a way that minimizes an objective. Here the objective is the cost associated with performing specific tasks before a preferred earliest start date or after a preferred latest end date. Some tasks must necessarily take place before other tasks, and each task has a given duration. To find a solution to this problem using OPL, you will use the three-stage method: describe, model, and solve.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="upbrE5IR"><h2 class="title topictitle2">Describe</h2>
+<div class="body"><p class="p">The problem consists of assigning start dates to tasks in such a way that the resulting schedule satisfies precedence constraints and minimizes a criterion. The criterion for this problem is to minimize the earliness costs associated with starting certain tasks earlier than a given date and tardiness costs associated with completing certain tasks later than a given date.</p>
+<p class="p">For each task in the house building project, the following table shows the duration (measured in days) of the task along with the tasks that must finish before the task can start.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three column table that lists the ten tasks in the house building problem, the duration, in days, of each task, and the tasks that must precede each task." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. House construction tasks</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d746106e58">Task</th>
+<th class="entry" align="left" valign="top" id="d746106e60">Duration</th>
+<th class="entry" align="left" valign="top" id="d746106e62">Preceding tasks</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">35</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 "> </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">15</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">plumbing</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">40</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">15</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">roofing</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">5</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">carpentry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">painting</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">10</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">ceiling</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">windows</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">5</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">roofing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">facade</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">10</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">garden</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">5</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e58 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d746106e60 ">5</td>
+<td class="entry" align="left" valign="top" headers="d746106e62 ">windows, facade, garden, painting </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">The other information for the problem includes the earliness and tardiness costs associated with some tasks.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three column table that lists three tasks and their associated earliness costs. The second column gives the preferred earliest start date for each task. The third column gives the cost per day for starting early." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. House construction task earliness costs</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d746106e149">Task</th>
+<th class="entry" align="left" valign="top" id="d746106e151">Preferred earliest start date</th>
+<th class="entry" align="left" valign="top" id="d746106e153">Cost per day for starting early</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d746106e149 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d746106e151 ">25</td>
+<td class="entry" align="left" valign="top" headers="d746106e153 ">200.0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e149 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d746106e151 ">75</td>
+<td class="entry" align="left" valign="top" headers="d746106e153 ">300.0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d746106e149 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d746106e151 ">75</td>
+<td class="entry" align="left" valign="top" headers="d746106e153 ">100.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three column table that shows the moving task and its associated tardiness cost. The second column gives the preferred latest end date, and the third column gives the cost per day for ending late." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 3. House construction task tardiness costs</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d746106e189">Task</th>
+<th class="entry" align="left" valign="top" id="d746106e191">Preferred latest end date</th>
+<th class="entry" align="left" valign="top" id="d746106e193">Cost per day for ending late</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d746106e189 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d746106e191 ">100</td>
+<td class="entry" align="left" valign="top" headers="d746106e193 ">400.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Solving the problem consists of identifying starting dates for the tasks such that the cost, determined by the earliness and lateness costs, is minimized.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">In OPL, the unit of time represented by an interval variable is not defined. As a result, the size of the masonry task in this problem could be 35 hours or 35 weeks or 35 months.</p>
+ </div>
+<div class="section" id="upbrE5IR__x7i9kmgj"><h3 class="title sectiontitle">Step 1: Describe the problem</h3><p class="p">The first step in modeling and solving the problem is to write a natural language description of the problem, identifying the decision variables and the constraints on these variables.</p>
+<p class="p">Write a natural language description of this problem. Answer these questions:</p>
+<ul class="ul"><li class="li"><p class="p">What is the known information in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the decision variables or unknowns in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the constraints on these variables?</p>
+ </li>
+<li class="li"><p class="p">What is the objective?</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="upbrE5IR__Ixkt1TfQ"><h3 class="title sectiontitle">Discussion</h3><p class="p">What is the known information in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">There are ten house building tasks, each with a given duration. For each task, there is a list of tasks that must be completed before the task can start. Some tasks also have costs associated with an early start date or late end date.</p>
+ </li>
+</ul>
+<p class="p">What are the decision variables or unknowns in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">The unknowns are the date that each task will start. The cost is determined by the assigned start dates.</p>
+ </li>
+</ul>
+<p class="p">What are the constraints on these variables?</p>
+<ul class="ul"><li class="li"><p class="p">In this case, each constraint specifies that a particular task may not begin until one or more given tasks have been completed.</p>
+</li>
+</ul>
+<p class="p">What is the objective?</p>
+<ul class="ul"><li class="li"><p class="p">The objective is to minimize the cost incurred through earliness and tardiness costs.</p>
+ </li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="EhCoXM1K"><h2 class="title topictitle2">Model</h2>
+<div class="body"><p class="p">After you have written a description of your problem, you can use OPL to model and solve it.</p>
+<div class="section" id="EhCoXM1K__xU51PtVd"><h3 class="title sectiontitle">Step 2: Open the example file</h3><ul class="ul"><li class="li"><p class="p">Still working with the <span class="ph uicontrol">scheduling_tutorial</span> project, open the <span class="ph uicontrol">sched_time.mod</span> file in the IDE editing area.</p>
+</li>
+</ul>
+<p class="p">This file is an OPL model that is only partially completed. You will add the missing code in each step of this lesson. At the end, you will have completed the OPL model. IBM ILOG OPL gives you the means to represent the unknowns in this problem, the interval in which each task will occur, as interval variables.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Interval variable</strong></p>
+ <p class="p">Tasks are represented by the decision variable type <samp class="ph codeph">interval</samp> in OPL.</p>
+ <p class="p">An interval has a start, an end, a size and a length. An interval variable allows these values to be variable in the model.</p>
+ <p class="p">The length of a present interval variable is equal to the difference between its end time and its start time. The size is the actual amount of time the task takes to process. By default, the size is equal to the length, which is the difference between the end and the start of the interval. In general, the size is a lower bound on the length.</p>
+ <p class="p">An interval variable may be optional. Whether an interval is present in the solution or not is represented by a decision variable. If an interval is not present in the solution, this means that any constraint on this interval acts like the interval is “not there.” Exact semantics will depend on the specific constraint.</p>
+ <p class="p">Logical relations can be expressed between the presence statuses of interval variables, allowing, for instance, to state that whenever the interval variable <samp class="ph codeph">a</samp> is present then the interval variable <samp class="ph codeph">b</samp> must also be present.</p>
+ </div>
+<p class="p">In your model, you first declare the interval variables, one for each task. Each variable represents the unknown information, the scheduled interval for each activity. After the model is executed, the values assigned to these interval variables will represent the solution to the problem.</p>
+<p class="p">For example, to create an interval with size 35 in OPL:</p>
+<pre class="pre codeblock"><code>  dvar interval masonry size 35;</code></pre>
+</div>
+<div class="section" id="EhCoXM1K__njSBsvsD"><h3 class="title sectiontitle">Step 3: Declare the interval variables</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare the interval variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar interval masonry    size 35;
+dvar interval carpentry  size 15;
+dvar interval plumbing   size 40;
+dvar interval ceiling    size 15;
+dvar interval roofing    size 5;
+dvar interval painting   size 10;
+dvar interval windows    size 5;
+dvar interval facade     size 10;
+dvar interval garden     size 5;
+dvar interval moving     size 5;</code></pre>
+<p class="p">In this example, certain tasks can start only after other tasks have been completed. IBM ILOG OPL allows you to express constraints involving temporal relationships between pairs of interval variables using <em class="ph i">precedence constraints</em>.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Precedence constraints</strong></p>
+ <p class="p">Precedence constraints are used to specify when one interval variable must start or end with respect to the start or end time of another interval. The following types of precedence constraints are available; if <samp class="ph codeph">a</samp> and <samp class="ph codeph">b</samp> denote interval variables, both interval variables are present, and <samp class="ph codeph">delay</samp> is a number or integer expression (0 by default), then:</p>
+ <ul class="ul"><li class="li"><p class="p"><span class="keyword apiname">endBeforeEnd(a, b, delay)</span> constrains at least the given delay to elapse between the end of <samp class="ph codeph">a</samp> and the end of <samp class="ph codeph">b</samp>. It imposes the inequality <span class="keyword apiname">endTime(a) + delay &lt;= endTime(b)</span>.</p>
+ </li>
+<li class="li"><p class="p"><span class="keyword apiname">endBeforeStart(a, b, delay)</span> constrains at least the given delay to elapse between the end of <samp class="ph codeph">a</samp> and the start of <samp class="ph codeph">b</samp>. It imposes the inequality <span class="keyword apiname">endTime(a) + delay &lt;= startTime(b)</span>.</p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">endAtEnd(a, b, delay)</span> constrains the given delay to separate the end of <samp class="ph codeph">a</samp> and the end of <samp class="ph codeph">ab</samp>. It imposes the equality <span class="keyword apiname">endTime(a) + delay == endTime(b)</span>.</p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">endAtStart(a, b, delay)</span> constrains the given delay to separate the end of <samp class="ph codeph">a</samp> and the start of <samp class="ph codeph">b</samp>. It imposes the equality <span class="keyword apiname">endTime(a) + delay == startTime(b)</span>.</p>
+ </li>
+<li class="li"><p class="p"><span class="keyword apiname">startBeforeEnd(a, b, delay)</span> constrains at least the given delay to elapse between the start of <samp class="ph codeph">a</samp> and the end of <samp class="ph codeph">b</samp>. It imposes the inequality <span class="keyword apiname">startTime(a) + delay &lt;= endTime(b)</span>.</p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">startBeforeStart(a, b, delay)</span> constrains at least the given delay to elapse between the start of <samp class="ph codeph">act1</samp> and the start of <samp class="ph codeph">act2</samp>. It imposes the inequality <span class="keyword apiname">startTime(a) + delay &lt;= startTime(b)</span>.</p>
+ </li>
+<li class="li"><p class="p"><span class="keyword apiname">startAtEnd(a, b, delay)</span> constrains the given delay to separate the start of <samp class="ph codeph">a</samp> and the end of <samp class="ph codeph">b</samp>. It imposes the equality <span class="keyword apiname">startTime(a) + delay == endTime(b)</span>.</p>
+</li>
+<li class="li"><p class="p"><span class="keyword apiname">startAtStart(a, b, delay)</span> constrains the given delay to separate the start of <samp class="ph codeph">a</samp> and the start of <samp class="ph codeph">b</samp>. It imposes the equality <span class="keyword apiname">startTime(a) + delay == startTime(b)</span>.</p>
+ </li>
+</ul>
+ <p class="p">If either interval <samp class="ph codeph">a</samp> or <samp class="ph codeph">b</samp> is not present in the solution, the constraint is automatically satisfied, and it is as if the constraint was never imposed.</p>
+ </div>
+</div>
+<div class="section" id="EhCoXM1K__E4rHxLGr"><h3 class="title sectiontitle">Step 4: Add the precedence constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the precedence constraints</samp>:</p>
+<pre class="pre codeblock"><code>  endBeforeStart(masonry,   carpentry);
+  endBeforeStart(masonry,   plumbing);
+  endBeforeStart(masonry,   ceiling);
+  endBeforeStart(carpentry, roofing);
+  endBeforeStart(ceiling,   painting);
+  endBeforeStart(roofing,   windows);
+  endBeforeStart(roofing,   facade);
+  endBeforeStart(plumbing,  facade);
+  endBeforeStart(roofing,   garden);
+  endBeforeStart(plumbing,  garden);
+  endBeforeStart(windows,   moving);
+  endBeforeStart(facade,    moving);
+  endBeforeStart(garden,    moving);
+  endBeforeStart(painting,  moving);</code></pre>
+<p class="p">To model the cost for starting a task earlier than the preferred starting date, you use the expression <span class="keyword apiname">startOf</span> that represents the start time of an interval variable as an integer expression.</p>
+<p class="p">For each task that has an earliest preferred start date, you determine how many days before the preferred date it is scheduled to start using the expression <span class="keyword apiname">startOf</span>; this expression can be negative if the task starts after the preferred date. By taking the maximum of this value and 0 using <span class="keyword apiname">maxl</span>, you determine how many days early the task is scheduled to start. Weighting this value with the cost per day of starting early, you determine the cost associated with the task.</p>
+<p class="p">The cost for ending a task later than the preferred date is modeled in a similar manner using the expression <span class="keyword apiname">endOf</span>. The earliness and lateness costs can be summed to determine the total cost.</p>
+</div>
+<div class="section" id="EhCoXM1K__PKs7VX8d"><h3 class="title sectiontitle">Step 5: Add the objective</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the objective</samp>:</p>
+<pre class="pre codeblock"><code>minimize 400 * maxl(endOf(moving) - 100, 0)     +
+         200 * maxl(25 - startOf(masonry), 0)   +
+         300 * maxl(75 - startOf(carpentry), 0) +
+         100 * maxl(75 - startOf(ceiling), 0);</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="romkgBVZ"><h2 class="title topictitle2">Solve</h2>
+<div class="body"><p class="p">Solving a problem consists of finding a value for each decision variable so that all constraints are satisfied. You may not always know beforehand whether there is a solution that satisfies all the constraints of the problem. In some cases, there may be no solution. In other cases, there may be many solutions to a problem.</p>
+<div class="section" id="romkgBVZ__YQ6Q8FX6"><h3 class="title sectiontitle">Step 6: Execute and display the solution</h3><p class="p">After a solution has been found, you can use the <span class="keyword apiname">start</span> and <span class="keyword apiname">end</span> properties of the interval variables to access the assigned intervals. The code for displaying the solution has been provided for you:</p>
+<pre class="pre codeblock"><code>execute {
+  writeln("Masonry  : " + masonry.start   + ".." + masonry.end);
+  writeln("Carpentry: " + carpentry.start + ".." + carpentry.end);
+  writeln("Plumbing : " + plumbing.start  + ".." + plumbing.end);
+  writeln("Ceiling  : " + ceiling.start   + ".." + ceiling.end);
+  writeln("Roofing  : " + roofing.start   + ".." + roofing.end);
+  writeln("Painting : " + painting.start  + ".." + painting.end);
+  writeln("Windows  : " + windows.start   + ".." + windows.end);
+  writeln("Facade   : " + facade.start    + ".." + facade.end);
+  writeln("Garden   : " + garden.start    + ".." + garden.end);
+  writeln("Moving   : " + moving.start    + ".." + moving.end);
+}</code></pre>
+</div>
+<div class="section" id="romkgBVZ__Ce4jc4wJ"><h3 class="title sectiontitle">Step 7: Run the model</h3><p class="p">Run the model. You should get the following results:</p>
+<pre class="pre codeblock"><code>OBJECTIVE: 5000
+Masonry  : 20..55
+Carpentry: 75..90
+Plumbing : 55..95
+Ceiling  : 75..90
+Roofing  : 90..95
+Painting : 90..100
+Windows  : 95..100
+Facade   : 95..105
+Garden   : 95..100
+Moving   : 105..110</code></pre>
+<p class="p">As you can see, the overall cost is 5000 and moving will be completed by day 110.</p>
+<p class="p">You can also view the complete program online in the <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_time/sched_time.mod</span> file.</p>
+</div>
+</div>
+</div>
+</body>
+</html>

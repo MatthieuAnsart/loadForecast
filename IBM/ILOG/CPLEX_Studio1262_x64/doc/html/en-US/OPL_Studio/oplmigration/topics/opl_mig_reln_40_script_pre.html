@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Preprocessing" />
+<meta name="abstract" content="Describes the impact of ILOG Script on preprocessing." />
+<meta name="Description" content="Describes the impact of ILOG Script on preprocessing." />
+<meta name="DC.subject" content="preprocessing, initialize sections, keywords, execute, execute, ILOG Script block, ILOG Script, delimiters, curly brackets, delimiters, curly brackets, curly brackets, ILOG Script delimiters, sets, initializing, from an array" />
+<meta name="keywords" content="preprocessing, initialize sections, keywords, execute, execute, ILOG Script block, ILOG Script, delimiters, curly brackets, delimiters, curly brackets, curly brackets, ILOG Script delimiters, sets, initializing, from an array" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplrelnotes.uss_reln_from37to40.1022640" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" />
+<title>Preprocessing</title>
+</head>
+<body role="main" id="oplrelnotes.uss_reln_from37to40.1022640">
+<h1 class="title topictitle1">Preprocessing</h1>
+<div class="body"><p class="shortdesc">Describes the impact of ILOG Script on preprocessing.</p>
+<p class="p">For the preprocessing phase, migrating from OPL Script
+to ILOG Script means replacing all the <samp class="ph codeph">initialize</samp> sections by <samp class="ph codeph">execute</samp> blocks. An <samp class="ph codeph">execute</samp> block is introduced by the keyword <samp class="ph codeph">execute</samp> and enclosed in curly brackets <samp class="ph codeph">{ }</samp>. All the text within an <samp class="ph codeph">execute</samp> block is ILOG Script syntax. The scope (or environment) object for
+an <samp class="ph codeph">execute</samp> block provides access to OPL
+modeling elements as a property with the same name. </p>
+<div class="cautiontitle">CAUTION:</div><div class="note caution"><p class="p">No two <samp class="ph codeph">execute</samp> blocks can
+have the same name within the same model. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" title="In OPL 4.0, the OPL Script language is replaced by an implementation of ECMA-262 (also known as ECMAScript or JavaScript) named “ILOG Script”, with extensions for OPL. This section explains how the replacement of OPL Script by ILOG Script affects your way of writing script statements: abstract models, preprocessing, postprocessing, migration, setting CPLEX parameters, open arrays...">Scripting</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022707"><h2 class="title topictitle2">Initializing a set from an array</h2>
+<div class="body"><div class="section" id="oplrelnotes.uss_reln_from37to40.1022707__oplrelnotes.uss_reln_from37to40.1027423"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">You wrote:</p>
+<pre class="pre codeblock"><code>struct ABC {
+   int a;
+   int b;
+   int c;
+};
+{ABC} sabc= { &lt;1,2,3&gt;, &lt;4,5,6&gt;, &lt;7,8,9&gt;, &lt;10,11,12&gt; };
+struct AB {
+   int a;
+   int b;
+};
+{AB} sab = {&lt;x,y&gt;|&lt;x,y,z&gt; in sabc};
+
+int array[sab];
+
+initialize {
+   forall(i in sabc) {
+      array[&lt;i.a,i.b&gt;] = i.c;
+   }
+};</code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022707__oplrelnotes.uss_reln_from37to40.1027428"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">You write:</p>
+<pre class="pre codeblock"><code>tuple ABC {
+   int a;
+   int b;
+   int c;
+}
+{ABC} sabc= { &lt;1,2,3&gt;, &lt;4,5,6&gt;, &lt;7,8,9&gt;, &lt;10,11,12&gt; };
+
+tuple AB {
+   int a;
+   int b;
+}
+{AB} sab = {&lt;x,y&gt;|&lt;x,y,z&gt; in sabc};
+
+int array[sab];
+
+execute INITIALIZE {
+   for(var i in sabc)
+      array[sab.find(i.a, i.b)] = i.c;
+}</code></pre>
+</div>
+</div>
+</div>
+</body>
+</html>

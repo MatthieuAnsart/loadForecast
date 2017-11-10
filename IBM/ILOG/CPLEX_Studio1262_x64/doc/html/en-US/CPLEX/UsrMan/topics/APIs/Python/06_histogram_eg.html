@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: generating a histogram" />
+<meta name="abstract" content="Illustrates reporting with histograms from the Python API." />
+<meta name="Description" content="Illustrates reporting with histograms from the Python API." />
+<meta name="DC.subject" content="histogram (Python API)" />
+<meta name="keywords" content="histogram (Python API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1269425020308" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" />
+<title>Example: generating a histogram</title>
+</head>
+<body role="main" id="descriptiveTopic1269425020308">
+<h1 class="title topictitle1">Example: generating a histogram</h1>
+<div class="body"><p class="shortdesc">Illustrates reporting with histograms from the Python
+API.</p>
+<p class="p">The Python API also generates formatted reports that
+include histograms. These reports are available either interactively
+in a Python session or programmatically in a Python application. </p>
+<p class="p">To generate a histogram, use methods of the class <samp class="ph codeph">Cplex</samp>.
+If you are interested in a histogram based on the rows (constraints)
+of your model, consider the method <samp class="ph codeph">get_histogram</samp> of
+the <samp class="ph codeph">LinearConstraintInterface</samp>. Similarly,
+if you are interested in a histogram based on the columns (variables)
+of your model, consider the method <samp class="ph codeph">get_histogram</samp> of
+the <samp class="ph codeph">VariablesInterface</samp>.</p>
+<p class="p">The method <samp class="ph codeph">__str__</samp> of the
+histogram object returns a string displaying the number of rows or
+columns with nonzeros in human readable form.  The data member <samp class="ph codeph">orientation</samp> of
+the histogram object specifies either <samp class="ph codeph">columns</samp> (indicating
+that the histogram reflects the nonzero counts for the variables of
+the linear constraint matrix) or <samp class="ph codeph">rows</samp> (indicating
+that the histogram reflects the nonzero counts for the constraints
+of the model).</p>
+<p class="p">Additionally, you can query the histogram object about
+the number of rows or columns with a given nonzero count. That is,
+how many rows have N nonzeros? Or, how many columns have K nonzeros?
+ Here is a sample interactive session querying nonzero columns and
+generating a histogram of them:</p>
+<pre class="pre codeblock"><code>    &gt;&gt;&gt; import cplex
+    &gt;&gt;&gt; c = cplex.Cplex("ind.lp")
+    &gt;&gt;&gt; histogram = c.variables.get_histogram()
+    &gt;&gt;&gt; print histogram
+        Nonzero Count:   1   2    3
+    Number of Columns:   1   6   36
+
+    &gt;&gt;&gt; histogram[2]
+    6
+    &gt;&gt;&gt; histogram[0:4]
+    [0, 1, 6, 36]</code></pre>
+<p class="p">Continuing in the same session, the following lines use
+the histogram to report more elaborate information about nonzeros
+in that problem:</p>
+<pre class="pre codeblock"><code>    &gt;&gt;&gt; maxh = max(histogram)
+    &gt;&gt;&gt; for i, count in histogram:
+    &gt;&gt;&gt;     if histogram[i] == maxh:
+    &gt;&gt;&gt;         print "most common nz count is", maxh, "appearing", count, "times" 
+    most common nz count is 3 appearing 36 times </code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Python/01_title_synopsis.html" title="Explores the features that CPLEX offers to users of Python to solve mathematical programming problems.">CPLEX for Python users</a></div>
+</div>
+</div></body>
+</html>

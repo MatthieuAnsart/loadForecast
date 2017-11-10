@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Problem representation" />
+<meta name="abstract" content="Describes how the problem is represented in the application." />
+<meta name="Description" content="Describes how the problem is represented in the application." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/eg_diet_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cplusIloCplex.123979" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/eg_diet_synopsis.html" />
+<title>Problem representation</title>
+</head>
+<body role="main" id="User_manual.uss_cplusIloCplex.123979">
+<h1 class="title topictitle1">Problem representation</h1>
+<div class="body"><p class="shortdesc">Describes how the problem is represented in the application.</p>
+<p class="p">The problem contains a set of foods, which are the modeling
+variables; a set of nutritional requirements to be satisfied, which
+are the constraints; and an objective of minimizing the total cost
+of the food. There are two ways of looking at this problem:</p>
+<ul class="ul"><li class="li"><p class="p">The problem can be modeled by rows,
+by entering the variables first and then adding the constraints on
+the variables and the objective function.</p>
+</li>
+<li class="li"><p class="p">The problem can be modeled by columns,
+by constructing a series of empty constraints and then inserting the
+variables into the constraints and the objective function.</p>
+</li>
+</ul>
+<p class="p">Concert Technology is equally suited for both kinds of
+modeling; in fact, you can even mix both approaches in the same program.
+If a new food product is created, you can create a new variable for
+it regardless of how the model was originally built. Similarly, if
+a new nutrient is discovered, you can add a new constraint for it.</p>
+<div class="section" id="User_manual.uss_cplusIloCplex.123979__User_manual.uss_cplusIloCplex.123818"><h2 class="title sectiontitle">Creating a model row by row</h2><p class="p">You walk into the store and compile a list of foods that
+are offered. For each food, you store the price per unit and the amount
+in stock. For some foods that you particularly like, you also set
+a minimum amount you would like to use in your diet. Then, for each
+of the foods, you create a modeling variable to represent the quantity
+to be purchased for your diet. </p>
+<p class="p">Now you get a nutrition book and look up which nutrients
+are known and relevant for you. For each nutrient, you note the minimum
+and maximum amounts that should be found in your diet. Also, you go
+through the list of foods and decide how much a food item will contribute
+for each nutrient. This gives you one constraint per nutrient, which
+can naturally be represented as a range constraint in pseudo-code
+like this: </p>
+<pre class="pre codeblock"><code>nutrMin[i] &lt;= sum_j (nutrPer[i][j] * Buy[j]) &lt;= nutrMax[i]</code></pre>
+<p class="p">where <samp class="ph codeph">i</samp>  represents the number
+of the nutrient under consideration, <samp class="ph codeph">nutrMin[i]</samp> 
+and <samp class="ph codeph">nutrMax[i]</samp>  the minimum and maximum
+amount of nutrient <samp class="ph codeph">i</samp>  and <samp class="ph codeph">nutrPer[i][j]</samp> 
+the amount of nutrient <samp class="ph codeph">i</samp>  in food <samp class="ph codeph">j</samp> . </p>
+<p class="p">Finally, you specify your objective function in pseudo-code
+like this: </p>
+<pre class="pre codeblock"><code>minimize sum_j (cost[j] * Buy[j])</code></pre>
+<p class="p">The loop in the example combines those two ideas and
+looks like this:  </p>
+<pre class="pre codeblock"><code>   mod.add(IloMinimize(env, IloScalProd(Buy,foodCost)));
+   for (i = 0; i &lt; m; i++) {
+      IloExpr expr(env);
+      for (j = 0; j &lt; n; j++) {
+         expr += Buy[j] * nutrPer[i][j];
+      }
+      mod.add(nutrMin[i] &lt;= expr &lt;= nutrMax[i]);
+      expr.end();</code></pre>
+<p class="p">This way of creating the model appears in the function <samp class="ph codeph">buildModelByRow</samp> ,
+in the example <samp class="ph codeph">ilodiet.cpp</samp> .</p>
+</div>
+<div class="section" id="User_manual.uss_cplusIloCplex.123979__User_manual.uss_cplusIloCplex.116496"><h2 class="title sectiontitle">Creating a model column by column</h2><p class="p">You start with the nutrition book where you compile the
+list of nutrients that you want to make sure are properly represented
+in your diet. For each of the nutrients, you create an empty constraint:
+ </p>
+<pre class="pre codeblock"><code>nutrMin[i] ≤ ... ≤ nutrMax[i]
+</code></pre>
+<p class="p">where <samp class="ph codeph">...</samp>  is left to be filled
+in after  you walk into the store. Also, you set up the objective
+function to minimize the cost. Constraint <samp class="ph codeph">i</samp> 
+is referred to as <samp class="ph codeph">range[i]</samp>  and to the
+objective as <samp class="ph codeph">cost</samp> . </p>
+<p class="p">Now you walk into the store and, for each food, you check
+the price and nutritional content. With this data you create a variable
+representing the amount you want to buy of the food type and install
+the variable in the objective function and constraints. That is, you
+create the following column in pseudo code, like this:  </p>
+<pre class="pre codeblock"><code>cost(foodCost[j]) "+" "sum_i" (range[i](nutrPer[i][j]))</code></pre>
+<p class="p">where the notation <samp class="ph codeph">+</samp>  and <samp class="ph codeph">sum</samp> 
+indicate in pseudo code that you add the new variable <samp class="ph codeph">j</samp> 
+to the objective <samp class="ph codeph">cost</samp>  and constraints
+range[<samp class="ph codeph">i</samp> ]. The value in parentheses is
+the linear coefficient that is used for the new variable. This notation
+is similar to the syntax actually used in Concert Technology, as demonstrated
+in the function <samp class="ph codeph">buildModelByColumn</samp> , in
+the example <samp class="ph codeph">ilodiet.cpp</samp> .  </p>
+<pre class="pre codeblock"><code>   for (j = 0; j &lt; n; j++) {
+      IloNumColumn col = cost(foodCost[j]);
+      for (i = 0; i &lt; m; i++) {
+         col += range[i](nutrPer[i][j]);
+      }
+      Buy.add(IloNumVar(col, foodMin[j], foodMax[j], type));
+      col.end();
+   }</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/eg_diet_synopsis.html" title="Shows an example of the C++ API.">Example: optimizing the diet problem in C++</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Arrays</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="arrays.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a name="5"><div
+                class="section-title1">Arrays</div>
+</a><div
+                    align="right"><a
+                href="assert-and-ndebug.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%"><tr><td><a
+                            href="arrays.html#6">Arrays in an environment</a></td></tr><tr><td><a
+                            href="arrays.html#7">Extensible arrays</a></td></tr><tr><td><a
+                            href="arrays.html#8">Arrays as handles</a></td></tr><tr><td><a
+                            href="arrays.html#9">Copying arrays</a></td></tr><tr><td><a
+                href="arrays.html#10">Programming hint: Using arrays efficiently</a></td></tr></table><div
+                            class="section-overview"><p>For most basic classes (such as <code>IloIntVar</code> or <code>IloConstraint</code>) 
+      in Concert Technology, there is also a corresponding class of arrays where the elements 
+      of the array are instances of that basic class. For example, elements of an instance of 
+      <code><a
+                href="classes/IloConstraintArray.html">IloConstraintArray</a></code> are instances of the class 
+      <code>IloConstraint</code>. </p></div>
+<div
+                    class="section-body"><div class="section"><a
+                            name="6"><div
+                        class="section-title2">Arrays in an environment</div>
+</a><div
+                                    class="section-body"><p>Every array must belong to an environment (an instance of <code><a
+                                    href="classes/IloEnv.html">IloEnv</a></code>).
+            In other words, when you create a Concert Technology array, you pass an instance of 
+            <code><a
+                    href="classes/IloEnv.html">IloEnv</a></code> as a parameter to the constructor. All the elements of a given	
+            array must belong to the same environment.</p></div></div><div
+                        class="section"><a name="7"><div
+                        class="section-title2">Extensible arrays</div>
+</a><div
+                            class="section-body"><p>Concert Technology arrays are extensible. That is, you can add elements to the array dynamically. You add
+            elements by means of the <code>add</code> member function of the array class.</p><p>You can also remove elements from an array by means of its <code>remove</code> member function.</p><p>References to elements of an array change whenever an element is added to or removed from the array. For example,</p><pre
+                    class="sample">
+IloNumArray x;
+
+IloNum *x1ptr = &amp;(x[1]);
+x.add(1.3);
+*x1ptr no longer valid!
+</pre></div></div><div
+                        class="section"><a name="8"><div
+                        class="section-title2">Arrays as handles</div>
+</a><div
+                    class="section-body"><p>Like other Concert Technology objects, arrays are implemented by means of two classes: a handle class 
+            corresponding to an implementation class. An object of the handle class contains a data member (the handle 
+            pointer) that points to an object (its implementation object) of the corresponding implementation class. 
+            As a Concert Technology user, you will be working primarily with handles.</p></div></div><div
+                        class="section"><a name="9"><div
+                        class="section-title2">Copying arrays</div>
+</a><div
+                            class="section-body"><p>Many handles may point to the same implementation object. This principle holds true for arrays as well 
+              as other handle classes in Concert Technology. When you want to create more than one handle for the same 
+              implementation object, you should use either the copy constructor or the assignment operator of the array 
+              class. For example,</p><pre
+                            class="sample">  
+              IloNumArray array(env);     // creates a handle pointing to new impl  
+              IloNumArray array1(array);  // creates a handle pointing to same impl  
+              IloNumArray array2;         // creates an empty handle  
+              array2 = array;        // sets impl of handle array2 to impl of array</pre><p>To take another example, the following lines add all elements of 
+<code>a1</code> to <code>a2</code>, essentially copying the array. </p><pre
+                    class="sample">
+IloNumArray a1;
+IloNumArray a2;
+
+a2.clear();
+a2.add(a1);
+</pre></div></div><div
+                        class="section"><a name="10"><div
+                        class="section-title2">Programming hint: Using arrays efficiently</div>
+</a><div
+                class="section-body"><p>If your application only reads an array (that is, if your function does not modify an element of the 
+              array), then we recommend that you pass the array to your function as a <code>const</code> parameter. 
+              This practice forces Concert Technology to access the <code>const</code> conversion of the index operator 
+              (that is, <code>operator[]</code>), which is faster.</p></div></div></div><div
+                    align="right"><a href="assert-and-ndebug.html">NEXT</a></div></div></body>
+</html>

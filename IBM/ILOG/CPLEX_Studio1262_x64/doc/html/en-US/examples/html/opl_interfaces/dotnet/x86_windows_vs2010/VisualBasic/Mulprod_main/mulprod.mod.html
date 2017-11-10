@@ -1,0 +1,82 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: {<b><font color="#0000FF">string</font></b>} Products = ...;
+13: {<b><font color="#0000FF">string</font></b>} Resources = ...;
+14: <b><font color="#0000FF">int</font></b> NbPeriods = ...;
+15: <b><font color="#0000FF">range</font></b> Periods = 1..NbPeriods;
+16: 
+17: <b><font color="#0000FF">float</font></b> Consumption[Resources][Products] = ...;
+18: <b><font color="#0000FF">float</font></b> Capacity[Resources] = ...;
+19: <b><font color="#0000FF">float</font></b> Demand[Products][Periods] = ...;
+20: <b><font color="#0000FF">float</font></b> InsideCost[Products] = ...;
+21: <b><font color="#0000FF">float</font></b> OutsideCost[Products]  = ...;
+22: <b><font color="#0000FF">float</font></b> Inventory[Products]  = ...;
+23: <b><font color="#0000FF">float</font></b> InvCost[Products]  = ...;
+24: <b><font color="#0000FF">range</font></b> Periods0 = 0..NbPeriods;
+25: 
+26: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Inside[Products][Periods];
+27: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Outside[Products][Periods];
+28: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Inv[Products][Periods0];
+29: 
+30: 
+31: <b><font color="#0000FF">minimize</font></b>
+32:   <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products, t <b><font color="#0000FF">in</font></b> Periods ) 
+33:       (InsideCost[p]*Inside[p][t] + 
+34:        OutsideCost[p]*Outside[p][t] +
+35:        InvCost[p]*Inv[p][t]);
+36: 
+37: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+38:   <b><font color="#7D007D">forall</font></b>( r <b><font color="#0000FF">in</font></b> Resources, t <b><font color="#0000FF">in</font></b> Periods )
+39:     ctCapacity:
+40:       <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) 
+41:         Consumption[r][p] * Inside[p][t] &lt;= Capacity[r];
+42:   <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products , t <b><font color="#0000FF">in</font></b> Periods )
+43:     ctDemand:
+44:       Inv[p][t-1] + Inside[p][t] + Outside[p][t] == Demand[p][t] + Inv[p][t];
+45:   <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products )
+46:     ctInventory:
+47:       Inv[p][0] == Inventory[p]; 
+48: };
+49: <b><font color="#0000FF">tuple</font></b> plan {
+50:    <b><font color="#0000FF">float</font></b> inside;
+51:    <b><font color="#0000FF">float</font></b> outside;
+52:    <b><font color="#0000FF">float</font></b> inv;
+53: }
+54: plan Plan[p <b><font color="#0000FF">in</font></b> Products][t <b><font color="#0000FF">in</font></b> Periods] = &lt;Inside[p,t],Outside[p,t],Inv[p,t]&gt;;
+55: <b><font color="#0000FF">execute</font></b> DISPLAY {
+56:   writeln(<b><font color="#8A2BE2">"plan="</font></b>,Plan);
+57: }
+58: 
+59: 
+60: tuple InsideSolutionT{ 
+61:         string Products; 
+62:         <b><font color="#0000FF">int</font></b> Periods; 
+63:         <b><font color="#0000FF">float</font></b> value; 
+64: };
+65: {InsideSolutionT} InsideSolution = {&lt;i0,i1,Inside[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Products,i1 <b><font color="EA7D00">in</font></b> Periods};
+66: tuple OutsideSolutionT{ 
+67:         string Products; 
+68:         <b><font color="#0000FF">int</font></b> Periods; 
+69:         <b><font color="#0000FF">float</font></b> value; 
+70: };
+71: {OutsideSolutionT} OutsideSolution = {&lt;i0,i1,Outside[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Products,i1 <b><font color="EA7D00">in</font></b> Periods};
+72: tuple InvSolutionT{ 
+73:         string Products; 
+74:         <b><font color="#0000FF">int</font></b> Periods0; 
+75:         <b><font color="#0000FF">float</font></b> value; 
+76: };
+77: {InvSolutionT} InvSolution = {&lt;i0,i1,Inv[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Products,i1 <b><font color="EA7D00">in</font></b> Periods0};
+</tt></pre>

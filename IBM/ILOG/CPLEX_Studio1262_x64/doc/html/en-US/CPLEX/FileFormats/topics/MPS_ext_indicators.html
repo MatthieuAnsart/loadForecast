@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Indicator constraints in MPS files" />
+<meta name="abstract" content="Describes CPLEX extensions of MPS file format to support indicator constraints." />
+<meta name="Description" content="Describes CPLEX extensions of MPS file format to support indicator constraints." />
+<meta name="DC.Relation" scheme="URI" content="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="File_formats_reference.uss_reffileformatscplex.171905" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" />
+<title>Indicator constraints in MPS files</title>
+</head>
+<body role="main" id="File_formats_reference.uss_reffileformatscplex.171905">
+<h1 class="title topictitle1">Indicator constraints in MPS files</h1>
+<div class="body"><p class="shortdesc">Describes CPLEX extensions of MPS file format to support
+indicator constraints.</p>
+<p class="p">Indicator constraints provide a way for you to express
+relations among variables by identifying a binary (0-1) variable to
+control whether or not a given constraint is active. CPLEX has extended the MPS format
+to express indicator constraints. The constraints to be controlled
+by the binary variable are listed in the <samp class="ph codeph">ROWS</samp> section;
+their linear coefficients appear in the <samp class="ph codeph">COLUMNS</samp> section
+(that is, the same as coefficients from linear constraints). Only
+rows of types E, L, and G may be part of indicator constraints. In
+other words, a row of type N cannot appear as a constraint controlled
+by a binary variable in this sense (that is, an indicator constraint). </p>
+<p class="p">The binary variables that control the linear constraints
+are specified in the <samp class="ph codeph">BOUNDS</samp> section or
+with <samp class="ph codeph">MARKER</samp> lines (that is, like any other
+binary variable). The relationship between the binary variables and
+the constraints they control is specified in the <samp class="ph codeph">INDICATORS</samp> section.
+The <samp class="ph codeph">INDICATORS</samp> section follows any quadratic
+constraint section and any quadratic objective section. Each line
+of the <samp class="ph codeph">INDICATORS</samp> section has a type field
+starting in column 2 or beyond; the type must be "IF" followed
+by the name of the row of the indicator constraint, the name of the
+binary variable, and finally the value 0 (zero) or 1 (one) to indicate
+when the constraint should be active. </p>
+<p class="p">Rows that appear in the <samp class="ph codeph">INDICATORS</samp> section
+cannot be ranged rows. In other words, a row that appears in the <samp class="ph codeph">RANGES</samp> section
+cannot appear also in the <samp class="ph codeph">INDICATORS</samp> section.</p>
+<p class="p">Here is an example of an <samp class="ph codeph">INDICATORS</samp> section:
+ </p>
+<pre class="pre codeblock"><code>NAME          ind1.mps
+ROWS
+ N  obj
+ L  row2
+ L  row4
+ E  row1
+ E  row3
+COLUMNS
+    x         obj                            -1
+    x         row2                            1
+    x         row4                            1
+    x         row1                            1
+    y         row4                            1
+    z         row4                            1
+    z         row3                            1
+RHS
+    rhs       row2                           10
+    rhs       row4                           15
+BOUNDS
+ UI bnd       y                               1
+INDICATORS
+ IF row1      y                               1
+ IF row3      y                               0
+ENDATA
+</code></pre>
+<p class="p">That declaration represents the following model:  </p>
+<pre class="pre codeblock"><code>Minimize
+ obj: - x
+Subject To
+ row2: x &lt;= 10
+ row4: x + y + z &lt;= 15
+ row1: y = 1 -&gt; x  = 0
+ row3: y = 0 -&gt; z  = 0
+Bounds
+ 0 &lt;= y &lt;= 1
+Binaries
+ y
+End</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" title="CPLEX extends the MPS standard in several ways.">Special records in MPS files: CPLEX extensions</a></div>
+</div>
+</div></body>
+</html>

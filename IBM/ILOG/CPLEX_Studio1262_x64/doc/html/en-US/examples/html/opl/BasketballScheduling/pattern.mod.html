@@ -1,0 +1,106 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+013: 
+014: include <b><font color="#8A2BE2">"common.mod"</font></b>;
+015: 
+016: 
+017: PairRound mirror[1..nbPairs] = ...;
+018: 
+019: <b><font color="#0000FF">execute</font></b>{
+020:         cp.param.Workers = 1;
+021: }
+022: 
+023: dvar int pattern[1..nbRounds] in Where;
+024: 
+025: tuple p
+026: {
+027:    <b><font color="#0000FF">int</font></b> v[1..nbRounds];
+028: }
+029: 
+030: {p} patterns;
+031: 
+032: subject to
+033:  {
+034:    forall (i <b><font color="EA7D00">in</font></b> 1..nbPairs) 
+035:       (pattern[mirror[i].pfirst] == home) &amp;&amp; (pattern[mirror[i].plast] == away) ||
+036:       (pattern[mirror[i].pfirst] == away) &amp;&amp; (pattern[mirror[i].plast] == home) ||
+037:       (pattern[mirror[i].pfirst] == bbye) &amp;&amp; (pattern[mirror[i].plast] == bbye);
+038:    
+039:    sum (i <b><font color="EA7D00">in</font></b> 1..nbRounds) (pattern[i] == home) == nbTeams - 1;
+040:    sum (i <b><font color="EA7D00">in</font></b> 1..nbRounds) (pattern[i] == away) == nbTeams - 1;
+041:    sum (i <b><font color="EA7D00">in</font></b> 1..nbRounds) (pattern[i] == bbye) == 2*(nbTeams % 2);
+042:    pattern[nbRounds-1] == away =&gt; pattern[nbRounds] != away;
+043:    forall (i <b><font color="EA7D00">in</font></b> 1..nbRounds-2) 
+044:       sum (j <b><font color="EA7D00">in</font></b> i .. i+2) (pattern[j] == away) &lt;= 2;
+045:    forall (i <b><font color="EA7D00">in</font></b> 1..nbRounds-2) 
+046:       sum (j <b><font color="EA7D00">in</font></b> i..i+2) (pattern[j] == home) &lt;= 2;
+047:    
+048:    forall (i <b><font color="EA7D00">in</font></b> 1..nbRounds-3) {
+049:       sum (j <b><font color="EA7D00">in</font></b> i..i+3) ((pattern[j] == away) || (pattern[j] == bbye)) &lt;= 3;
+050:    };
+051:    forall (i <b><font color="EA7D00">in</font></b> 1..nbRounds-4) {
+052:       sum (j <b><font color="EA7D00">in</font></b> i..i+4) ((pattern[j] == home) || (pattern[j] == bbye)) &lt;= 4;
+053:    };
+054:    forall (i <b><font color="EA7D00">in</font></b> 1..nbRounds-4 : i % 2 == 0) {
+055:       sum (j <b><font color="EA7D00">in</font></b> i..i+4 : j % 2 == 0) (pattern[j] == away) &lt;= 2;
+056: <b><font color="#007D00">//      sum (j in i..i+4 : j % 2 == 0) (pattern[j] == home) &lt;= 2;  /* Nemhauser Trick did not enforce this */</font></b>
+057:    };
+058:    forall (i <b><font color="EA7D00">in</font></b> 1..nbRounds-6 : i % 2 == 0) {
+059:       sum (j <b><font color="EA7D00">in</font></b> i..i+6 : j % 2 == 0) ((pattern[j] == away) || (pattern[j] == bbye)) &lt;= 3;
+060:    };
+061:    forall (i <b><font color="EA7D00">in</font></b> 1..nbRounds-6 : i % 2 == 0) {
+062:       sum (j <b><font color="EA7D00">in</font></b> i..i+6 : j % 2 == 0) ((pattern[j] == home) || (pattern[j] == bbye)) &lt;= 3;
+063:    };
+064:    sum (j <b><font color="EA7D00">in</font></b> 1..nbRounds : j % 2 == 0 ) (pattern[j] == home) == nbTeams div 2;
+065:    sum (j <b><font color="EA7D00">in</font></b> 1..nbRounds : j % 2 == 0 ) (pattern[j] == away) == nbTeams div 2;
+066:    sum (j <b><font color="EA7D00">in</font></b> 1..nbRounds : j % 2 == 0 ) (pattern[j] == bbye) == <b><font color="#007D00">/*nbTeams % 2*/</font></b>1;
+067:    sum (j <b><font color="EA7D00">in</font></b> 1..10 : j % 2 == 0 ) (( pattern[j] == home ) || ( pattern[j] == bbye )) &gt;= 2;
+068:     pattern[1] == bbye =&gt; pattern[nbRounds] == home;
+069:    pattern[1] == bbye =&gt; pattern[nbRounds-1] == away;
+070:    pattern[16] == bbye =&gt; pattern[nbRounds] == home;
+071: <b><font color="#007D00">/* Nemhauser/Trick did enforce the following */</font></b>
+072:    sum (i <b><font color="EA7D00">in</font></b> 1..3) (pattern[i] == home) &gt;= 1;
+073:    sum (i <b><font color="EA7D00">in</font></b> 16..18) (pattern[i] == home) &gt;= 1;
+074: };
+075: 
+076: execute
+077: {
+078:    patterns.add(pattern.solutionValue);
+079:  writeln(pattern);  
+080: }
+081: 
+082: 
+083: main
+084: {
+085:    <b><font color="EA7D00">var</font></b>  n=0;
+086:    <b><font color="#0000FF">thisOplModel</font></b>.generate();
+087:    cp.startNewSearch();
+088:    <b><font color="EA7D00">while</font></b> (cp.next()) { 
+089:      n++;
+090:      writeln(<b><font color="#8A2BE2">"solution "</font></b>,n);  
+091:      <b><font color="#0000FF">thisOplModel</font></b>.postProcess();
+092:       
+093:    }
+094:    
+095:  writeln(<b><font color="#0000FF">thisOplModel</font></b>.patterns);
+096: 
+097: }
+098: 
+099: 
+100: 
+101:    
+</tt></pre>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Writing your own logical constraint" />
+<meta name="abstract" content="Additional virtual functions must be defined to use a custom constraint in a logical constraint." />
+<meta name="Description" content="Additional virtual functions must be defined to use a custom constraint in a logical constraint." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizercsts.1011105" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<title>Writing your own logical constraint</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizercsts.1011105">
+<h1 class="title topictitle1">Writing your own logical constraint</h1>
+<div class="body"><p class="shortdesc">Additional virtual functions must be defined to use a
+custom constraint in a logical constraint.</p>
+<p class="p">If you want to be able to use a custom constraint in
+a logical constraint, you will need to define additional virtual functions
+(besides those you just defined for a new constraint: <samp class="ph codeph">propagate</samp> and <samp class="ph codeph">post</samp>).
+These additional virtual functions are <samp class="ph codeph">isViolated</samp>, <samp class="ph codeph">makeOpposite</samp> and <samp class="ph codeph">metaPostDemon</samp>.
+This section shows you how to define these functions. </p>
+<p class="p">In order to express the idea that the variable <em class="ph i">x</em> is different from some other variable, <em class="ph i">y</em>, or that <em class="ph i">y</em> is different from <em class="ph i">z</em>, you can write that very simply
+by using the logical-OR operator provided by CP Optimizer.  </p>
+<pre class="pre codeblock"><code>     cp.add(DiffConstraint(x, y) || DiffConstraint(y, z));</code></pre>
+<p class="p">Once one of those two constraints proves false, CP Optimizer
+makes the other one true. To do so, CP Optimizer needs to know the
+truth value of these constraints. In fact, CP Optimizer needs only
+to know when one of these constraints is violated. You need to define
+under what conditions <samp class="ph codeph">DiffConstraint</samp> is
+definitely not satisfied. In our example, <em class="ph i">x
+!= y</em> is violated if, and only if, variables <em class="ph i">x</em> and <em class="ph i">y</em> are
+fixed to the same value. Hence, the definition of <samp class="ph codeph">isViolated</samp>:
+ </p>
+<pre class="pre codeblock"><code>IlcBool DiffConstraintI::isViolated() const {
+    return (_x.isFixed() &amp;&amp; _y.isFixed() &amp;&amp;
+            _x.getValue()==_y.getValue());
+}
+</code></pre>
+<p class="p">To detect a violation, the disjunctive constraint has
+to be posted on the variables that are involved. This is the task
+of the <samp class="ph codeph">metaPostDemon</samp> member function.  </p>
+<pre class="pre codeblock"><code>void DiffConstraintI::metaPostDemon(IlcDemonI * ct) {
+    _x.whenValue(ct);
+    _y.whenValue(ct);
+}
+</code></pre>
+<p class="p">Now, if you write:  </p>
+<pre class="pre codeblock"><code> cp.add(DiffConstraint(x, y) || DiffConstraint(y, z));</code></pre>
+<p class="p">the<samp class="ph codeph"> metaPostDemon</samp> is called
+with the disjunctive constraint as its argument. Thus, you get the
+effect that once one of the two constraints proves false (that is, <samp class="ph codeph">isViolated</samp> returns <samp class="ph codeph">IlcTrue</samp>),
+CP Optimizer invokes the <samp class="ph codeph">propagate</samp> function
+of the other one, insuring that the disjunctive constraint is taken
+into account. </p>
+<p class="p">There's still one more point to consider. Assume that
+you want to affirm that the constraint <samp class="ph codeph">DiffConstraint(x,
+y)</samp> is false; in other words, that <em class="ph i">x == y</em> is true. You can use the negation
+operator to write this:  </p>
+<pre class="pre codeblock"><code> cp.add(!DiffConstraint(x, y));</code></pre>
+<p class="p">But if you do so, how will CP Optimizer know that you
+want to impose the negation of a specific constraint? You have to
+tell CP Optimizer explicitly what the opposite constraint is, and
+that is the work of the member function <samp class="ph codeph">makeOpposite</samp>. </p>
+<p class="p">In our example, the opposite constraint of <em class="ph i">x != y</em> is obviously <em class="ph i">x == y</em>. Remember that the constraint <samp class="ph codeph">x
+== y</samp> is a handle. Indeed, it is an instance of the class <samp class="ph codeph">IlcConstraint</samp>.
+With CP Optimizer, you get the object implementation from the <samp class="ph codeph">getImpl</samp> member
+function of the handle class. For example, <samp class="ph codeph">(x == y).getImpl()</samp> returns
+the pointer to the implementation of <samp class="ph codeph">x == y</samp>. </p>
+<p class="p">Thus, the code is:  </p>
+<pre class="pre codeblock"><code>IlcConstraintI* DiffConstraintI::makeOpposite() const {
+    return (_x == _y).getImpl();
+ }
+</code></pre>
+<p class="p">Finally, here is the complete code of the custom constraint <samp class="ph codeph">DiffConstraint</samp>.
+(First, you'll see the definitions of the appropriate class and its
+member functions; then <samp class="ph codeph">DiffConstraint</samp> itself
+near the end.)  </p>
+<pre class="pre codeblock"><code>class DiffConstraintI : public IlcConstraintI {
+    IlcIntVar _x, _y;
+  public:
+    DiffConstraintI(IloCP cp, IlcIntVar x, IlcIntVar y);
+    ~DiffConstraintI(){}; // empty destructor
+
+    virtual void propagate ();
+    virtual void post();
+    virtual IlcBool isViolated() const;
+    virtual IlcConstraintI * makeOpposite() const;
+    virtual void metaPostDemon(IlcDemonI* ct);
+
+
+};
+
+DiffConstraintI::DiffConstraintI(IloCP cp,
+                               IlcIntVar x,
+                               IlcIntVar y)
+    : IlcConstraintI(cp), _x(x), _y(y) {}
+void DiffConstraintI::propagate () {
+    if (_x.isFixed()) _y.removeValue(_x.getValue());
+    if (_y.isFixed()) _x.removeValue(_y.getValue());
+}
+void DiffConstraintI::post(){
+    _x.whenValue(this);
+    _y.whenValue(this);
+}
+IlcBool DiffConstraintI::isViolated() const {
+    return (_x.isFixed() &amp;&amp; _y.isFixed() &amp;&amp;
+            _x.getValue()==_y.getValue());
+}
+
+IlcConstraintI* DiffConstraintI::makeOpposite() const {
+    return (_x == _y).getImpl();
+ }
+void DiffConstraintI::metaPostDemon(IlcDemonI * ct) {
+    _x.whenValue(ct);
+    _y.whenValue(ct);
+}
+</code></pre>
+<p class="p">All the predefined constraints of CP Optimizer are defined
+like this, as constraints that can be used in logical constraints. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" title="A custom constraint can be written using engine extensions.">Writing your own constraint</a></div>
+</div>
+</div></body>
+</html>

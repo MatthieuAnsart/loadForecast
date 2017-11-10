@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Fixed-charge problems" />
+<meta name="abstract" content="Describes the problem and presents the model and data files." />
+<meta name="Description" content="Describes the problem and presents the model and data files." />
+<meta name="DC.subject" content="integer programming, fixed-charge problem, models, fixed charges, fixed-charge production problem, code samples, fixed.dat, fixed.mod" />
+<meta name="keywords" content="integer programming, fixed-charge problem, models, fixed charges, fixed-charge production problem, code samples, fixed.dat, fixed.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1063111" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" />
+<title>Fixed-charge problems</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1063111">
+<h1 class="title topictitle1">Fixed-charge problems</h1>
+<div class="body"><p class="shortdesc">Describes the problem and presents the model and data
+files.</p>
+<p class="p">Fixed-charge problems are another classic application
+of integer programs (see <em class="ph i">Applications
+and Algorithms</em> by W. Winston in the Bibliography).
+They resemble some of the production problems seen previously but
+differ in two respects: the production is an integer value (e.g.,
+a factory must produce bikes or toys), and the factories need to rent
+(or acquire) some tools to produce some of the products. Consider
+the following problem. A company manufactures shirts, shorts, and
+pants. Each product requires a number of hours of labor and a certain
+amount of cloth, and the company has a limited capacity of both. In
+addition, all of these products can be manufactured only by renting
+an appropriate machine. The profit on the products (excluding the
+cost of renting the equipment) are also known. The company would like
+to maximize its profit. </p>
+<p class="p"> <a class="xref" href="opl_languser_app_areas_IP_fixed.html#usropllangtut.uss_langtut_linearInteger.1063111__usropllangtut.uss_langtut_linearInteger.1022668">A fixed-charge model (fixed.mod)</a> shows
+a model for fixed charge problems, while <a class="xref" href="opl_languser_app_areas_IP_fixed.html#usropllangtut.uss_langtut_linearInteger.1063111__usropllangtut.uss_langtut_linearInteger.1022681">Data for the fixed-charge model (fixed.dat)</a> gives
+some instance data. </p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1063111__usropllangtut.uss_langtut_linearInteger.1022668"><h2 class="title sectiontitle">A fixed-charge model (<samp class="ph codeph">fixed.mod</samp>)</h2><pre class="pre codeblock"><code>{string} Machines = ...;
+{string} Products = ...;
+{string} Resources = ...;
+
+int Capacity[Resources] = ...;
+int MaxProduction = max(r in Resources) Capacity[r];
+int RentingCost[Machines] = ...;
+tuple productType {
+   int profit;
+   {string} machines;
+   int use[Resources];
+}
+productType Product[Products] = ...;
+
+dvar boolean Rent[Machines];
+dvar int Produce[Products] in 0..MaxProduction;
+
+constraint ctMaxProd[Products][Machines];
+
+maximize 
+  sum( p in Products ) 
+    Product[p].profit * Produce[p] -
+  sum( m in Machines ) 
+    RentingCost[m] * Rent[m];
+      
+subject to {
+  forall( r in Resources )
+    ctCapacity:
+      sum( p in Products ) 
+        Product[p].use[r] * Produce[p] &lt;= Capacity[r];
+    forall( p in Products , m in Product[p].machines )
+      ctMaxProd[p][m]:
+        Produce[p] &lt;= MaxProduction * Rent[m];
+}</code></pre>
+</div>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1063111__usropllangtut.uss_langtut_linearInteger.1022681"><h2 class="title sectiontitle">Data for the fixed-charge model (<samp class="ph codeph">fixed.dat</samp>)</h2><pre class="pre codeblock"><code>Machines = { shirtM shortM pantM };
+Products = { shirt shorts pants };
+Resources = { labor cloth };
+Capacity = [ 150 160 ];
+RentingCost = [ 200 150 100 ];
+Product = [
+      &lt;6 {shirtM} [ 3 4 ] &gt;
+      &lt;4 {shortM} [ 2 3 ] &gt;
+      &lt;7 {pantM} [ 6 4 ] &gt;
+          ];</code></pre>
+</div>
+<p class="p">The integer program for this model uses two sets of variables:
+production variables and rental variables. A production variable <samp class="ph codeph">produce[p]</samp> describes
+the production of product <samp class="ph codeph">p</samp>; a rental variable <samp class="ph codeph">rent[m]</samp> is
+a <samp class="ph codeph">0-1</samp> variable representing whether machine <samp class="ph codeph">m</samp> is
+rented. Most of the constraints are similar to traditional production
+problems and pose few difficulties. The most delicate aspect of the
+modeling is expressing that a product can be produced only if its
+equipment is rented. </p>
+<p class="p">It is not possible to use the same idea as in the warehouse-location
+problem: e.g., a constraint </p>
+<pre class="pre codeblock"><code>produce[p] &lt;= rent[m] </code></pre>
+<p class="p">is not correct, since <samp class="ph codeph">produce[p]</samp> is
+not a Boolean variable in this model. One might be tempted to write </p>
+<pre class="pre codeblock"><code>produce[p] &lt;= produce[p] * rent[m] </code></pre>
+<p class="p">but this constraint is not linear. The solution adopted
+in the model is to use an integer representing the maximal production
+of any product:</p>
+<pre class="pre codeblock"><code>int MaxProduction = max(r in Resources) Capacity[r];</code></pre>
+<p class="p">and write </p>
+<pre class="pre codeblock"><code>produce[p] &lt;= MaxProduction * rent[m]</code></pre>
+<p class="p">If machine <samp class="ph codeph">m</samp> is rented, then
+the constraint is redundant, since <samp class="ph codeph">MaxProduction</samp> is
+chosen to be larger than <samp class="ph codeph">produce[p]</samp>. Otherwise,
+the right-hand side is zero and product <samp class="ph codeph">p</samp> cannot
+be manufactured. Note the data representation in this model: the type</p>
+<pre class="pre codeblock"><code>tuple productType {
+   int profit;
+   {string} machines;
+   int use[Resources];
+}</code></pre>
+<p class="p">clusters all data related to a product: its profit, the
+set of machines it requires, and the way it uses the resources. Note
+also the constraint </p>
+<pre class="pre codeblock"><code>    forall( p in Products , m in Product[p].machines )
+      ctMaxProd[p][m]:
+        Produce[p] &lt;= MaxProduction * Rent[m];</code></pre>
+<p class="p">which features a <samp class="ph codeph">forall</samp> statement
+that quantifies over each product and over each machine used by the
+product. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_IP.html" title="Defines integer programming and describes a set covering problem, a warehouse location problem, a fixed-charge problem, and integer relaxation.">Integer programming</a></div>
+</div>
+</div></body>
+</html>

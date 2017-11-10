@@ -1,0 +1,79 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">//</font></b>
+13: <b><font color="#007D00">// This example is inspired from the talent hold cost scheduling problem</font></b>
+14: <b><font color="#007D00">// described in:</font></b>
+15: <b><font color="#007D00">//</font></b>
+16: <b><font color="#007D00">// T.C.E Cheng, J. Diamond, B.M.T. Lin.  Optimal scheduling in film</font></b>
+17: <b><font color="#007D00">// production to minimize talent holding cost.  Journal of Optimization</font></b>
+18: <b><font color="#007D00">// Theory and Applications, 79:197-206, 1993.</font></b>
+19: <b><font color="#007D00">//</font></b>
+20: <b><font color="#007D00">// of which the 'Rehearsal problem' is a specific case:</font></b>
+21: <b><font color="#007D00">//</font></b>
+22: <b><font color="#007D00">// Barbara M. Smith.  Constraint Programming In Practice: Scheduling</font></b>
+23: <b><font color="#007D00">//                    a Rehearsal.  Report APES-67-2003, September 2003.</font></b>
+24: <b><font color="#007D00">// </font></b>
+25: <b><font color="#007D00">// See: http://www.csplib.org/Problems/prob039/</font></b>
+26: <b><font color="#007D00">//</font></b>
+27: 
+28: 
+29: 
+30: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+31: 
+32: <b><font color="#0000FF">execute</font></b>{
+33:         }
+34: int numActors = ...;
+35: range Actors = 1..numActors;
+36: int actorPay[Actors] = ...;
+37: int numScenes = ...;
+38: range Scenes = 1..numScenes;
+39: int sceneDuration[Scenes] = ...;
+40: 
+41: int actorInScene[Actors][Scenes]  = ...;
+42: 
+43: dvar int scene[Scenes] in Scenes;
+44: dvar int slot[Scenes] in Scenes;
+45: 
+46: 
+47: // First and last slots where each actor plays
+48: dexpr int firstSlot[a in Actors] = min(s in Scenes:actorInScene[a][s] == 1) slot[s];
+49: dexpr int lastSlot[a in Actors] = max(s in Scenes:actorInScene[a][s] == 1) slot[s];
+50: 
+51: // Expression for the waiting time for each actor
+52: dexpr int actorWait[a in Actors] = sum(s in Scenes: actorInScene[a][s] == 0)  
+53:    (sceneDuration[s] * (firstSlot[a] &lt;= slot[s] &amp;&amp; slot[s] &lt;= lastSlot[a]));
+54: 
+55: // Expression representing the global cost
+56: dexpr int idleCost = sum(a in Actors) actorPay[a] * actorWait[a];
+57: 
+58: minimize idleCost;
+59: subject to {
+60:    <b><font color="#007D00">// use the slot-based secondary model</font></b>
+61:    inverse(scene, slot);
+62: }
+63: 
+64: tuple slotSolutionT{ 
+65:         <b><font color="#0000FF">int</font></b> Scenes; 
+66:         <b><font color="#0000FF">int</font></b> value; 
+67: };
+68: {slotSolutionT} slotSolution = {&lt;i0,slot[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Scenes};
+69: tuple sceneSolutionT{ 
+70:         <b><font color="#0000FF">int</font></b> Scenes; 
+71:         <b><font color="#0000FF">int</font></b> value; 
+72: };
+73: {sceneSolutionT} sceneSolution = {&lt;i0,scene[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Scenes};
+74: 
+</tt></pre>

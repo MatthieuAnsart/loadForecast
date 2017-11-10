@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Integrating OPL with Excel using Visual Studio Tools for Office" />
+<meta name="abstract" content="Explains how to create a Microsoft Excel Add-in. It is coded in C# and uses OPL to solve the warehouse problem with Microsoft Excel." />
+<meta name="Description" content="Explains how to create a Microsoft Excel Add-in. It is coded in C# and uses OPL to solve the warehouse problem with Microsoft Excel." />
+<meta name="DC.subject" content="Excel integration, using Visual Studio Tools for Office, Visual Studio Tools for Office, integrating OPL with Excel" />
+<meta name="keywords" content="Excel integration, using Visual Studio Tools for Office, Visual Studio Tools for Office, integrating OPL with Excel" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllib.uss_lib_opl.1002638" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" />
+<title>Integrating OPL with Excel using Visual Studio Tools for Office</title>
+</head>
+<body role="main" id="usropllib.uss_lib_opl.1002638">
+<h1 class="title topictitle1">Integrating OPL with Excel using Visual Studio Tools for Office</h1>
+<div class="body taskbody"><p class="shortdesc">Explains how to create a Microsoft Excel Add-in. It is coded in C# and uses OPL to solve
+        the warehouse problem with Microsoft Excel.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div> <p class="p">Since the release of MS Office 2003, Microsoft has been
+working towards the integration of Office with .NET. For this purpose,
+Microsoft released a Visual Studio add-on named “Visual Studio
+Tools for Office 2003” which allowed users to extend MS Office
+applications with any .NET language, thus bringing the benefit of
+the Visual Studio environment and tools to Office development.</p>
+ <p class="p">Microsoft
+has replaced the VSTO 2003 add-on with <strong class="ph b">Visual Studio Tools for
+Office 2010</strong> for basically the same purpose.</p>
+<div class="note note"><span class="notetitle">Note:</span> Visual Studio
+Tools for Office 2010 no longer supports Excel 2003. You should use
+Excel 2007 with VSTO 2010.</div>
+<div class="note note"><span class="notetitle">Note:</span> For a list of supported versions
+of Microsoft Excel, please see the detailed system requirements <a class="xref" href="http://www-01.ibm.com/support/docview.wss?uid=swg27019100" target="_blank" title="(Opens in a new tab or window)">http://www-01.ibm.com/support/docview.wss?uid=swg27019100</a>.</div>
+ <p class="p">OPL uses this
+approach to integrate the OPL .NET API. This is demonstrated by the <samp class="ph codeph">ExcelWarehouse</samp> example.
+This file is at the following location:</p>
+ <p class="p"><samp class="ph codeph">&lt;Install_dir&gt;\opl\examples\opl_interfaces\dotnet\&lt;x86
+port&gt;\&lt;CSharp or VisualBasic&gt;\ExcelWarehouse</samp></p>
+ <p class="p">where <span class="ph filepath">&lt;Install_dir&gt;</span> is
+your installation directory.</p>
+ <p class="p">The solve process is triggered
+by a button embedded in the worksheet. The input data is taken from
+the worksheet and the results are written back to the worksheet.</p>
+ <p class="p">This
+walkthrough explains how to create a Microsoft Excel Add-in. It is
+coded in C# and uses OPL to solve the warehouse problem with Excel
+2007.</p>
+ </div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To create a Microsoft Excel Add-in with Visual Studio:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Install Microsoft Visual Studio 2010 and Microsoft Office
+2007.</span> <div class="note note"><span class="notetitle">Note:</span>  <p class="p">Microsoft Visual Studio 2008 is no longer
+supported in CPLEX Optimization Studio.</p>
+ </div>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Download VSTO 2010 from this page:</span> <p class="p"><a class="xref" href="http://msdn.microsoft.com/en-us/office/hh133430.aspx" target="_blank" title="(Opens in a new tab or window)">http://msdn.microsoft.com/en-us/office/hh133430.aspx</a></p>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Open Microsoft Visual Studio 2010 and create a new project:</span> <ol type="a" class="ol substeps"><li class="li substep substepexpand"><span class="ph cmd">Select <span class="ph uicontrol">Visual C#/Office/2007 Add-ins</span> in
+the New Project Wizard.</span></li>
+<li class="li substep substepexpand"><span class="ph cmd">Name it <span class="ph filepath">ExcelWarehouse</span>.</span> <p class="p">A
+new project is created, with a dummy add-in name <span class="ph filepath">ThisAddIn.cs</span> .</p>
+<pre class="pre codeblock"><code>namespace ExcelWarehouse
+     {
+       public partial class ThisAddIn
+          {
+          private void ThisAddIn_Startup(object sender, System.EventArgs e)
+              {
+              }
+
+          private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
+              {
+              }
+
+          &lt;VSTO generated code&gt;
+          }
+      }</code></pre>
+</li>
+</ol>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">In the <span class="ph filepath">ThisAddIn.cs</span> file, insert the
+following lines to create a new command bar and buttons for OPL.</span> <div class="note note"><span class="notetitle">Note:</span> Do not delete the code section VSTO generated code. Without
+this code, the project will not work. By clicking the + sign in the
+margin, you can see the generated code.</div>
+<img class="image" src="../images/vsto_generated_code.jpg" alt="Button in margin to expand VSTO generated code" /><pre class="pre codeblock"><code>namespace ExcelWarehouse
+{
+   public partial class ThisAddIn
+   {
+     private Office.CommandBar AddInMenuBar;
+     private Office.CommandBarButton SetupButton;
+     private Office.CommandBarButton SolveButton;
+
+     private void ThisAddIn_Startup(object sender, System.EventArgs e)
+     {
+          CreateOPLCommands();
+     }
+     private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
+
+          &lt;VSTO generated code&gt;
+
+     {
+          RemoveOPLCommands();
+     }
+
+     private void CreateOPLCommands()
+     {
+        try
+        {
+          // new command bar for OPL:
+          AddInMenuBar = Application.CommandBars.Add(
+            "OPL Commands", Office.MsoBarPosition.msoBarTop, missing, true);
+          // setup button:
+          SetupButton = (Office.CommandBarButton)AddInMenuBar.Controls.Add
+             (Office.MsoControlType.msoControlButton, missing, missing,
+                                                             missing, true);
+          SetupButton.Caption = "OPL Warehouse Setup";
+          SetupButton.Style =
+                         Microsoft.Office.Core.MsoButtonStyle.msoButtonCaption;
+          SetupButton.Click += new
+                         Office._CommandBarButtonEvents_ClickEventHandler(
+          SetupButton_Click);
+
+          // solve button:
+          SolveButton = (Office.CommandBarButton)AddInMenuBar.Controls.Add(
+                         Office.MsoControlType.msoControlButton,
+                          missing, missing, missing, true);
+          SolveButton.Caption = "OPL Warehouse Solve";
+          SolveButton.Style =
+                         Microsoft.Office.Core.MsoButtonStyle.msoButtonCaption;
+          SolveButton.Click += new</code></pre>
+<pre class="pre codeblock"><code>                        Office._CommandBarButtonEvents_ClickEventHandler(
+          SolveButton_Click); 
+          AddInMenuBar.Visible = true;
+                  }
+        catch (Exception ex)
+        {
+          MessageBox.Show(ex.Message, ex.Source, MessageBoxButtons.OK,
+                                                         MessageBoxIcon.Error);
+        }
+     }
+
+     private void RemoveOPLCommands()
+     {
+         SolveButton.Delete(false);
+         SolveButton = null;
+         SetupButton.Delete(false);
+         SetupButton = null;
+         AddInMenuBar = null;
+     }
+
+     private void SolveButton_Click(Office.CommandBarButton Ctrl, 
+                                                        ref bool CancelDefault)
+     {
+       // respond to solve button click
+     }
+
+     private void SetupButton_Click(Office.CommandBarButton Ctrl, ref bool CancelDefault)
+     {
+      // respond to setup button click	}
+     }
+   }
+}</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Add some utility methods to get/set values in cells.</span> <pre class="pre codeblock"><code>static private void setValue(Excel.Worksheet sheet, String cell, String value)
+{
+   sheet.get_Range(cell,
+      cell).set_Value(Excel.XlRangeValueDataType.xlRangeValueDefault, value);
+}
+
+static private String getValue(Excel.Worksheet sheet, String cell)
+{
+   return (String)sheet.get_Range(cell, cell).Text;
+}</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Add the code for the <span class="ph uicontrol">Setup</span> button
+to populate the current Excel sheet.</span> <pre class="pre codeblock"><code>private void SetupButton_Click(Office.CommandBarButton Ctrl, ref bool
+                                                              CancelDefault)
+{
+   Excel.Worksheet sheet =
+             (Excel.Worksheet)this.Application.ActiveWorkbook.ActiveSheet;
+   setValue(sheet, "A1", "Data used by the OPL model:");
+   setValue(sheet, "A2", "nbWarehouses:");
+   setValue(sheet, "B2", "5");
+   setValue(sheet, "A3", "nbStores:");
+   setValue(sheet, "B3", "10");
+   setValue(sheet, "A4", "fixed:");
+   setValue(sheet, "B4", "30");
+   setValue(sheet, "A5", "disaggregate:");
+   setValue(sheet, "B5", "1");
+
+   setValue(sheet, "A8", "Result computed by the OPL model:");
+   setValue(sheet, "A9", "State:");
+   setValue(sheet, "A10", "Objective:");
+   }
+</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Add the code for the <span class="ph uicontrol">Solve</span> button
+to launch the OPL solve process.</span> <pre class="pre codeblock"><code>private void SolveButton_Click(Office.CommandBarButton Ctrl, 
+                                                     ref bool CancelDefault)
+{
+   Excel.Worksheet sheet =
+               (Excel.Worksheet)this.Application.ActiveWorkbook.ActiveSheet;
+   System.IO.StringWriter errHandlerErrors = new System.IO.StringWriter();
+      try
+      {
+          setValue(sheet, "B9", "Computing...");
+          SolveProblem(sheet, errHandlerErrors);
+          setValue(sheet, "B9", "Success");
+      }
+          catch (Exception ex)
+      {
+          setValue(sheet, "B9", "Error:" + ex.ToString() 
+                              + "(" + errHandlerErrors.ToString() + ")");
+      }
+}
+
+private void SolveProblem(Excel.Worksheet sheet, 
+                                    System.IO.StringWriter errHandlerErrors)
+{
+// actually solve the problem with OPL
+}</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Add some references to the OPL .NET APIs used to solve
+the problem.</span> <ol type="a" class="ol substeps"><li class="li substep substepexpand"><span class="ph cmd">In the Solution view, select the project (ExcelWarehouse),
+the References, and click <span class="ph uicontrol">Add Reference</span>.</span></li>
+<li class="li substep substepexpand"><span class="ph cmd">In the <span class="ph uicontrol">Add Reference Wizard</span>,
+select <span class="ph uicontrol">Browse</span>, navigate to the OPL installation,
+and add <span class="ph filepath">&lt;OPL&gt;/lib/oplall.dll</span>.</span></li>
+<li class="li substep substepexpand"><span class="ph cmd">At the top of the <span class="ph filepath">ThisAddIn.cs</span> file,
+append the following lines to the <samp class="ph codeph">using</samp> list.</span> <pre class="pre codeblock"><code>using ILOG.Concert;
+using ILOG.CPLEX;
+using ILOG.OPL;
+using Exception = System.Exception;
+using System.Windows.Forms;</code></pre>
+</li>
+</ol>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Add the code that actually solves the problem using OPL.</span> <pre class="pre codeblock"><code>private void SolveProblem(Excel.Worksheet sheet, 
+                                    System.IO.StringWriter errHandlerErrors)
+{
+   OplFactory.DebugMode = true;
+   OplFactory oplF = new OplFactory();
+   OplErrorHandler errHandler =
+                               oplF.CreateOplErrorHandler(errHandlerErrors);
+   OplModelSource modelSource =
+           oplF.CreateOplModelSourceFromString(GetModelText(), "warehouse");
+   OplSettings settings = oplF.CreateOplSettings(errHandler);
+   OplModelDefinition def = oplF.CreateOplModelDefinition
+                                                    (modelSource, settings);
+   Cplex cplex = oplF.CreateCplex();
+   OplModel opl = oplF.CreateOplModel(def, cplex);
+   OplDataSource dataSource = new MyParams(oplF, sheet);
+   opl.AddDataSource(dataSource);
+   opl.Generate();
+   if (cplex.Solve())
+   {
+      setValue(sheet, "B10", "" + opl.Cplex.ObjValue);
+   }
+   else
+   {
+      setValue(sheet, "B10", "No solution");
+   }
+   oplF.End();
+}
+
+/**
+* This class feeds data to the OPL model from the appropriate cells of the 
+* input Excel worksheet.
+*/
+class MyParams : CustomOplDataSource
+{
+   private Excel.Worksheet _xlDataSheet;
+
+   public MyParams(OplFactory oplF, Excel.Worksheet xlDataSheet): base(oplF)
+   {
+      _xlDataSheet = xlDataSheet;
+   }</code></pre>
+<p class="p"> </p>
+<pre class="pre codeblock"><code>
+   public override void CustomRead()
+   {
+        OplDataHandler handler = this.DataHandler;
+
+        try
+        {
+           handler.StartElement("nbWarehouses");
+           handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B2")));
+           handler.EndElement();
+
+           handler.StartElement("nbStores");
+           handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B3")));
+           handler.EndElement();
+
+           handler.StartElement("fixed");
+           handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B4")));
+           handler.EndElement();
+
+           handler.StartElement("disaggregate");
+           handler.AddIntItem(Int16.Parse(getValue(_xlDataSheet, "B5")));
+           handler.EndElement();
+         }
+         catch (Exception ex)
+         {
+             MessageBox.Show("Exception in custom data source:
+                                                         " + ex.ToString());
+          }
+   }
+}
+</code></pre>
+<p class="p"> </p>
+<pre class="pre codeblock"><code>/**
+* This is the warehouse OPL model:
+*/
+static String GetModelText()
+{
+   String model = "";
+   model += "int   fixed        = ...;";
+   model += "int   nbWarehouses = ...;";
+   model += "int   nbStores     = ...;";
+   model += "int   disaggregate = ...;";
+   model += "assert nbStores &gt; nbWarehouses;";
+
+   model += "range Warehouses = 1..nbWarehouses;";
+   model += "range Stores     = 1..nbStores;";
+
+   model += "int capacity[w in Warehouses] = nbStores div nbWarehouses
+                                      + w mod (nbStores div nbWarehouses);";
+   model += "int supplyCost[s in Stores][w in Warehouses] = 
+                                                     1+((s+10*w) mod 100);";
+
+   model += "dvar float open[Warehouses] in 0..1;";
+   model += "dvar float supply[Stores][Warehouses] in 0..1;";
+
+   model += "minimize ";
+   model += "sum(w in Warehouses) fixed * open[w] +";
+   model += "sum(w in Warehouses, s in Stores) supplyCost[s][w]
+                                                          * supply[s][w];";
+
+   model += "constraints {";
+   model += "  forall(s in Stores)";
+   model += "    sum(w in Warehouses) supply[s][w] == 1;";
+   model += "  forall(w in Warehouses)";
+   model += "    sum(s in Stores) supply[s][w] &lt;= open[w]*capacity[w];";
+   model += "  if (disaggregate == 1) {";
+   model += "   forall(w in Warehouses, s in Stores)";
+   model += "      supply[s][w] &lt;= open[w];";
+   model += "  }";
+   model += "}";
+   return model;
+}</code></pre>
+<p class="p">The code is complete. </p>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Launch Microsoft Excel with your plugin, using the Visual
+Studio <span class="ph uicontrol">Debug/Start Debugging</span> command.</span> <p class="p">Excel
+starts, with the new command bar containing OPL Warehouse Setup and
+OPL Warehouse Solve.</p>
+<div class="note note"><span class="notetitle">Note:</span> If you use Excel 2007, the buttons are
+hidden in the 'Add-Ins' view; they are not directly visible.</div>
+<ol type="a" class="ol substeps"><li class="li substep substepexpand"><span class="ph cmd">Click the button <span class="ph uicontrol">OPL Warehouse Setup</span>.</span> <p class="p">It populates the current sheet with default values for the
+problem.</p>
+</li>
+<li class="li substep substepexpand"><span class="ph cmd">Edit the values as appropriate.</span></li>
+<li class="li substep substepexpand"><span class="ph cmd">Click the button <span class="ph uicontrol">OPL Warehouse Solve</span>.</span> <p class="p">It solves the problem using OPL, displaying results in cell
+B10 (425 for the default values).</p>
+<p class="p"> </p>
+<div class="fig fignone" id="usropllib.uss_lib_opl.1002638__usropllib.uss_lib_opl.1020991"><span class="figcap">Figure 1. Integrating OPL .NET API
+into an MS Excel worksheet</span><div class="image"><img class="image" src="../images/excelresult.jpg" alt="OPL data integrated into a Microsoft Excel spreadsheet" /></div></div>
+</li>
+</ol>
+</li>
+</ol>
+<div class="section postreq"><div class="tasklabel"><h2 class="sectiontitle tasklabel">What to do next</h2></div><p class="p">Useful training material on working with Visual Studio
+Tools for Office is available at:</p>
+<p class="p"><a class="xref" href="http://msdn.microsoft.com/en-us/office/hh133430.aspx" target="_blank" title="(Opens in a new tab or window)">http://msdn.microsoft.com/en-us/office/hh133430.aspx</a></p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplinterfaces/topics/opl_interfaces_work.html" title="Explains in more general terms how to work with the OPL C++, Java and .NET Interfaces. This section is also illustrated by code samples for each language.">Working with OPL interfaces</a></div>
+</div>
+</div></body>
+</html>

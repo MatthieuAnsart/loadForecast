@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Portability" />
+<meta name="abstract" content="Describes coding conventions of the C API to make portable applications." />
+<meta name="Description" content="Describes coding conventions of the C API to make portable applications." />
+<meta name="DC.subject" content="portability (C API)" />
+<meta name="keywords" content="portability (C API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callableLibrary.643882" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<title>Portability</title>
+</head>
+<body role="main" id="User_manual.uss_callableLibrary.643882">
+<h1 class="title topictitle1">Portability</h1>
+<div class="body"><p class="shortdesc">Describes coding conventions of the C API to make portable
+applications.</p>
+<p class="p">CPLEX contains a number of features to help you create Callable
+Library applications that can be easily ported between UNIX and Windows
+platforms. </p>
+<div class="section" id="User_manual.uss_callableLibrary.643882__User_manual.uss_callableLibrary.643888"><h2 class="title sectiontitle">CPXPUBLIC</h2><p class="p">All Callable Library routines except <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/msg.html" title="The routine CPXXmsg/CPXmsg writes a message to a specified channel.">CPXmsg</a></samp> have
+the word <samp class="ph codeph">CPXPUBLIC</samp> as part of their prototype. On
+UNIX platforms, this has no effect. On Win32 platforms, the <samp class="ph codeph">CPXPUBLIC</samp> designation
+tells the compiler that all of the CPLEX functions are compiled with
+the Microsoft <samp class="ph codeph">__stdcall</samp> calling convention. The exception <samp class="ph codeph">CPXmsg</samp> cannot
+be called by <samp class="ph codeph">__stdcall</samp> because it takes a variable
+number of arguments. Consequently, <samp class="ph codeph">CPXmsg</samp>  is declared
+as <samp class="ph codeph">CPXPUBVARARGS</samp>; that calling convention is defined
+as <samp class="ph codeph">__cdecl</samp> for Win32 systems.</p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.643882__User_manual.uss_callableLibrary.643890"><h2 class="title sectiontitle">Function
+pointers</h2><p class="p">All Callable Library routines that
+require pointers to functions expect the passed-in pointers to be
+declared as <samp class="ph codeph">CPXPUBLIC</samp>. Consequently, when your application
+uses such routines as <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addfuncdest.html" title="The routine CPXXaddfuncdest/CPXaddfuncdest adds a function msgfunction to the message destination list for a channel.">CPXaddfuncdest</a></samp> , <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setlpcallbackfunc.html" title="The routine CPXXsetlpcallbackfunc/CPXsetlpcallbackfunc modifies the user-written callback routine to be called after each iteration during the optimization of a linear program, and also periodically during the CPLEX presolve algorithm.">CPXsetlpcallbackfunc</a></samp>,
+and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/setmipcallbackfunc.html" title="The routine CPXXsetmipcallbackfunc/CPXsetmipcallbackfunc sets the user-written callback routine to be called prior to solving each subproblem in the branch-and-cut tree, including the root node, during the optimization of a mixed integer program and during some cut generation routines.">CPXsetmipcallbackfunc</a></samp>,
+it must declare the user-written callback functions with the <samp class="ph codeph">CPXPUBLIC</samp> 
+designation. For UNIX systems, this has no effect. For Win32 systems,
+this will cause the callback functions to be declared with the <samp class="ph codeph">__stdcall</samp> 
+calling convention. For examples of function pointers and callbacks,
+see <a class="xref" href="../../progr_adv/callbacks_basic/29_eg_lpex4_c.html" title="Illustrates callbacks in the C API.">Example: using callbacks lpex4.c</a> and <a class="xref" href="../../progr_consid/input_output/manageIO_msg_ch_Capi_eg.html" title="Demonstrates control of message channels in the C API.">Example: Callable Library message channels</a>.</p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.643882__User_manual.uss_callableLibrary.643892"><h2 class="title sectiontitle">CPXCHARptr,
+CPXCCHARptr, and CPXVOIDptr</h2><p class="p">The types <samp class="ph codeph">CPXCHARptr</samp> , <samp class="ph codeph">CPXCCHARptr,</samp> 
+and <samp class="ph codeph">CPXVOIDptr</samp>  are used in the header file <samp class="ph codeph">cplex.h</samp> 
+to avoid the complicated syntax of using the <samp class="ph codeph">CPXPUBLIC</samp> 
+designation on functions that return <samp class="ph codeph">char*</samp> , <samp class="ph codeph">const
+char*</samp> , or <samp class="ph codeph">void*</samp> . </p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.643882__User_manual.uss_callableLibrary.643894"><h2 class="title sectiontitle">File pointers</h2><p class="p">File pointer arguments for Callable Library
+routines should be declared with the type <samp class="ph codeph">CPXFILEptr</samp> .
+On UNIX platforms, this practice is equivalent to using the file pointer
+type. On Win32 platforms, the file pointers declared this way will
+correspond to the environment of the CPLEX DLL. Any file pointer passed
+to a Callable Library routine should be obtained with a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/fopen.html" title="The routine CPXXfopen/CPXfopen opens files to be used in conjunction with the routines CPXaddfpdest, CPXXdelfpdest/CPXdelfpdest and CPXXsetlogfile/CPXsetlogfile.">CPXfopen</a></samp> and
+closed with <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/fclose.html" title="The routine CPXXfclose/CPXfclose closes files that are used in conjunction with the routines CPXXaddfpdest/CPXaddfpdest, CPXXdelfpdest/CPXdelfpdest, and CPXXsetlogfile/CPXsetlogfile.">CPXfclose</a></samp>.
+Callable Library routines with file pointer arguments include <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setlogfile.html" title="The routine CPXXsetlogfile/CPXsetlogfile modifies the log file to which messages from all four CPLEX-defined channels are written.">CPXsetlogfile</a></samp>, <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addfpdest.html" title="The routine CPXXaddfpdest/CPXaddfpdest adds a file to the list of message destinations for a channel.">CPXaddfpdest</a></samp> , <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/delfpdest.html" title="The routine CPXXdelfpdest/CPXdelfpdest removes a file from the list of message destinations for a channel.">CPXdelfpdest</a></samp> ,
+and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/fputs.html" title="The routine CPXXfputs/CPXfputs can be used to write output to a file opened with CPXXfopen/CPXfopen.">CPXfputs</a></samp> . <a class="xref" href="../../progr_consid/input_output/manageIO_msg_ch_Capi.html" title="Describes routines to control message channels in the C API.">Callable Library routines for message channels</a> discusses
+most of those routines.</p>
+</div>
+<div class="section" id="User_manual.uss_callableLibrary.643882__User_manual.uss_callableLibrary.643896"><h2 class="title sectiontitle">String
+functions</h2><p class="p">Several routines in the Callable Library make
+it easier to work with strings. These functions are helpful when you
+are writing applications in a language, such as Visual Basic, that
+does not allow you to de-reference a pointer. The string routines
+in the Callable Library are <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/strlen.html" title="This routine is deprecated.">CPXstrlen</a></samp>, <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/strcpy.html" title="This routine is deprecated.">CPXstrcpy</a></samp>,
+and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/msgstr.html" title="The routine CPXXmsgstr/CPXmsgstr sends a character string to a CPLEX message channel.">CPXmsgstr</a></samp>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" title="Lists some of the programming practices the CPLEX team observes in developing and maintaining the Callable Library (C API).">CPLEX programming practices</a></div>
+</div>
+</div></body>
+</html>

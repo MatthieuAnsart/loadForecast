@@ -1,0 +1,82 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">/*</font></b>
+02: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+04: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+05: <b><font color="#007D00">*</font></b>
+06: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+07: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+08: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+09: <b><font color="#007D00">*/</font></b> 
+10: 
+11: <b><font color="#007D00">//-------------------------------------------------------------- -*- Java -*-</font></b>
+12: <b><font color="#007D00">//Java version of mulprod_main.cpp of OPL distrib</font></b>
+13: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+14: package mulprod_main;
+15: 
+16: import ilog.concert.*;
+17: import ilog.cplex.*;
+18: import ilog.opl.*;
+19: 
+20: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> Mulprod_main {
+21: 
+22:         <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> String DATADIR = <b><font color="#8A2BE2">"."</font></b>;
+23: 
+24:         <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception {
+25:             <b><font color="#0000FF">int</font></b> status = 127;
+26:             <b><font color="EA7D00">try</font></b> {
+27:             <b><font color="#0000FF">int</font></b> capFlour = 20;
+28:             <b><font color="#0000FF">double</font></b> best;
+29:             <b><font color="#0000FF">double</font></b> curr = Double.MAX_VALUE;
+30: 
+31:             IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+32:             IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+33: 
+34:             IloOplRunConfiguration rc0 = oplF.createOplRunConfiguration(DATADIR
+35:                     + <b><font color="#8A2BE2">"/mulprod.mod"</font></b>, DATADIR + <b><font color="#8A2BE2">"/mulprod.dat"</font></b>);
+36:             IloOplDataElements dataElements = rc0.getOplModel().makeDataElements();
+37: 
+38:             <b><font color="EA7D00">do</font></b> {
+39:                 best = curr;
+40: 
+41:                 IloOplRunConfiguration rc = oplF.createOplRunConfiguration(rc0
+42:                         .getOplModel().getModelDefinition(), dataElements);
+43:                 rc.getCplex().setOut(<b><font color="EA7D00">null</font></b>);
+44:                 rc.getOplModel().generate();
+45: 
+46:                 System.out.println(<b><font color="#8A2BE2">"Solve with capFlour = "</font></b> + capFlour);
+47:                 <b><font color="EA7D00">if</font></b> (rc.getCplex().solve()) {
+48:                     curr = rc.getOplModel().getCplex().getObjValue();
+49:                     System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + curr);
+50:                     status = 0;
+51:                 } <b><font color="EA7D00">else</font></b> {
+52:                     System.out.println(<b><font color="#8A2BE2">"No solution!"</font></b>);
+53:                     status = 1;
+54:                 }
+55:                 capFlour++;
+56:                 dataElements.getElement(<b><font color="#8A2BE2">"Capacity"</font></b>).asNumMap().set(<b><font color="#8A2BE2">"flour"</font></b>,
+57:                         capFlour);
+58: 
+59:                 rc.end();
+60:             } <b><font color="EA7D00">while</font></b> (best != curr &amp;&amp; status == 0);
+61:             oplF.end();
+62:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+63:           System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+64:           ex.printStackTrace();
+65:           status = 2;
+66:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+67:           System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+68:           ex.printStackTrace();
+69:           status = 3;
+70:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+71:           System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+72:           ex.printStackTrace();
+73:           status = 4;
+74:         }
+75:         System.exit(status);
+76:         }
+77: }
+</tt></pre>

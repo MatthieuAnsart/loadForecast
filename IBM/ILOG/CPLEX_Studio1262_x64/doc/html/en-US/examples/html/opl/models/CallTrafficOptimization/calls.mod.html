@@ -1,0 +1,251 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: 
+013: <b><font color="#007D00">/******************************************************************************</font></b>
+014: <b><font color="#007D00"> * </font></b>
+015: <b><font color="#007D00"> * ILOG Script for Call Traffic Optimization</font></b>
+016: <b><font color="#007D00"> * </font></b>
+017: <b><font color="#007D00"> * The number of hops a call takes affects its quality.  </font></b>
+018: <b><font color="#007D00"> * The more hops a call takes, the worse is its quality.  </font></b>
+019: <b><font color="#007D00"> * Using this program, we know the maximum number of hops</font></b>
+020: <b><font color="#007D00"> * that a call may take in a balanced telecom network. First, we solve </font></b>
+021: <b><font color="#007D00"> * a simple multicommodity flow model to balance the</font></b>
+022: <b><font color="#007D00"> * calls throughout a telecom network.  Then, we solve a similar formulation</font></b>
+023: <b><font color="#007D00"> * where the number of "hops" is limited.   We increase the number of hops</font></b>
+024: <b><font color="#007D00"> * until the solution has the same reserve capacity as the solution from the</font></b>
+025: <b><font color="#007D00"> * unlimited problem.  This number is the number of hops the longest call may take.     </font></b>
+026: <b><font color="#007D00"> * </font></b>
+027: <b><font color="#007D00">******************************************************************************/</font></b>
+028: 
+029: 
+030: <b><font color="#007D00">// Network configuration</font></b>
+031: {<b><font color="#0000FF">string</font></b>} Hubs = ...;
+032: 
+033: <b><font color="#0000FF">tuple</font></b> link {
+034:     <b><font color="#0000FF">string</font></b> org;
+035:     <b><font color="#0000FF">string</font></b> dst;
+036: }
+037: 
+038: <b><font color="#0000FF">tuple</font></b> market {
+039:     <b><font color="#0000FF">string</font></b> org;
+040:     <b><font color="#0000FF">string</font></b> dst;
+041: }
+042: 
+043: {link} Links = ...;
+044: {market} Markets = ...;
+045: 
+046: 
+047: <b><font color="#007D00">// Capacities and traffic volume</font></b>
+048: <b><font color="#0000FF">float</font></b> cap[Links] = ...;
+049: <b><font color="#0000FF">float</font></b> vol[Markets] = ...;
+050: 
+051: 
+052: <b><font color="#007D00">// Indicators to represent whether a node is supply, sink, or intermediate</font></b>
+053: <b><font color="#0000FF">int</font></b> supply[Hubs][Markets];
+054: 
+055: <b><font color="#0000FF">execute</font></b> INITIALIZE {
+056: <b><font color="EA7D00">var</font></b> nb1 = 0;
+057: <b><font color="EA7D00">var</font></b> nb0 = 0;
+058: 
+059:     <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> h <b><font color="EA7D00">in</font></b> Hubs)
+060:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> m <b><font color="EA7D00">in</font></b> Markets)
+061:          <b><font color="EA7D00">if</font></b>(h == m.org){ 
+062:             supply[h][m] = -1;
+063:             nb1 ++;
+064:           }            
+065:             
+066:             
+067:     <b><font color="EA7D00">for</font></b>(h <b><font color="EA7D00">in</font></b> Hubs)
+068:       <b><font color="EA7D00">for</font></b>(m <b><font color="EA7D00">in</font></b> Markets)
+069:          <b><font color="EA7D00">if</font></b>(h == m.dst){ 
+070:             supply[h][m] =  1;
+071:             nb0 ++
+072:           }            
+073:             
+074:     <b><font color="EA7D00">for</font></b>(h <b><font color="EA7D00">in</font></b> Hubs)
+075:       <b><font color="EA7D00">for</font></b>(m <b><font color="EA7D00">in</font></b> Markets)
+076:          <b><font color="EA7D00">if</font></b>(h != m.org &amp;&amp; h != m.dst) 
+077:             supply[h][m] = 0;
+078:             
+079:             writeln(nb1, <b><font color="#8A2BE2">" "</font></b>, nb0);
+080: }
+081: 
+082: 
+083: // Variables
+084: dvar float+ traffic[Links][Markets];             // arc traffic
+085: dvar float+ surplus;                             // smallest surplus capacity
+086: 
+087: 
+088: // Constraint labels
+089: constraint csv;
+090: constraint arc;
+091: 
+092: 
+093: 
+094: /************************************************************************
+095:  * LINEAR PROGRAMMING MODEL
+096: ************************************************************************/
+097: 
+098: maximize surplus;
+099: 
+100: subject to {
+101:     <b><font color="#007D00">// Flow conservation</font></b>
+102:     <b><font color="#007D00">// If supply[h,m]=1,  outbound volume for m - inbound volume for m = Volume of the market m</font></b>
+103:     <b><font color="#007D00">// If supply[h,m]=-1, inbound volume for m - outbound volume for m= Volume of the market m</font></b>
+104:     <b><font color="#007D00">// If supply[h,m]=0, the hub is intermediate </font></b>
+105:     <b><font color="#007D00">//     and inbound volume for m - outbound volume for m = 0 </font></b>
+106:     csv =
+107:     forall(h <b><font color="EA7D00">in</font></b> Hubs, m <b><font color="EA7D00">in</font></b> Markets)
+108:        sum(l <b><font color="EA7D00">in</font></b> Links: h == l.dst) traffic[l][m]
+109:               - sum (l <b><font color="EA7D00">in</font></b> Links: h == l.org) traffic[l][m]
+110:               == supply[h][m]*(vol[m]+surplus);
+111:     
+112:     <b><font color="#007D00">// Arc capacities</font></b>
+113:     arc =
+114:     forall(l <b><font color="EA7D00">in</font></b> Links)
+115:        sum(m <b><font color="EA7D00">in</font></b> Markets) traffic[l][m] &lt;= cap[l];
+116:     
+117: }
+118: 
+119: main {
+120:    <b><font color="#0000FF">thisOplModel</font></b>.generate();
+121:         <b><font color="#0000FF">cplex</font></b>.exportModel(<b><font color="#8A2BE2">"toto.lp"</font></b>);
+122:    <b><font color="EA7D00">var</font></b> m = <b><font color="#0000FF">thisOplModel</font></b>;
+123:    <b><font color="EA7D00">var</font></b> def = m.modelDefinition;
+124:    <b><font color="EA7D00">var</font></b> data = m.dataElements;
+125:    
+126:    <b><font color="#007D00">// System epsilon</font></b>
+127:    <b><font color="EA7D00">var</font></b> EPS = 0.0001;
+128:    
+129:    <b><font color="#007D00">// Simple model</font></b>
+130:    writeln(<b><font color="#8A2BE2">"Balancing packet volume throughout the network"</font></b>);
+131: 
+132:    <b><font color="EA7D00">if</font></b>(<b><font color="#0000FF">cplex</font></b>.solve()) {
+133:       writeln(<b><font color="#8A2BE2">"Optimal solution has surplus = "</font></b>, m.surplus.solutionValue);
+134:       <b><font color="EA7D00">var</font></b> msol = m.surplus.solutionValue;
+135: 
+136:       <b><font color="#007D00">// Load hop model and configure for feasibility testing</font></b>
+137:       <b><font color="#0000FF">cplex</font></b>.clearModel();
+138:       <b><font color="EA7D00">var</font></b> source = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"hopcalls.mod"</font></b>);
+139:       <b><font color="EA7D00">var</font></b> defi = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(source);
+140:       <b><font color="EA7D00">var</font></b> subcplex = <b><font color="EA7D00">new</font></b> IloCplex();
+141:       <b><font color="EA7D00">var</font></b> hop0 = <b><font color="EA7D00">new</font></b> IloOplModel(defi, subcplex);
+142:           <b><font color="EA7D00">var</font></b> hop = hop0;
+143:       <b><font color="EA7D00">var</font></b> hubsdata = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"hubs.dat"</font></b>);
+144:       <b><font color="EA7D00">var</font></b> marketsdata = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"markets.dat"</font></b>);
+145:       <b><font color="EA7D00">var</font></b> capacitydata = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"capacity.dat"</font></b>);
+146:       <b><font color="EA7D00">var</font></b> volumedata = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"volume.dat"</font></b>);
+147:       hop.addDataSource(hubsdata);
+148:       hop.addDataSource(marketsdata);
+149:       hop.addDataSource(capacitydata);
+150:       hop.addDataSource(volumedata);
+151:       <b><font color="EA7D00">var</font></b> paramsdata = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+152:       paramsdata.maxHops = 1;
+153:       paramsdata.test = 1;
+154:       hop.addDataSource(paramsdata);
+155:       
+156:       <b><font color="EA7D00">var</font></b> hdata = hop.dataElements;
+157:       hop.generate();
+158:       <b><font color="EA7D00">var</font></b> test = 1;
+159:       <b><font color="EA7D00">var</font></b> maxHops = 1;
+160:       
+161:       writeln(<b><font color="#8A2BE2">"Solving with at most "</font></b>, maxHops, <b><font color="#8A2BE2">" hops"</font></b>);
+162:       
+163:       <b><font color="EA7D00">if</font></b>(test == 1) {
+164:          <b><font color="EA7D00">if</font></b>(subcplex.solve() &amp;&amp;
+165:            hop.infeas.solutionValue &lt; EPS) { <b><font color="#007D00">// If the problem is feasible at current Maxhops, test =0;  </font></b>
+166:             writeln(maxHops, <b><font color="#8A2BE2">" is feasible; changing to optimization problem"</font></b>);
+167:             test = 0;
+168:             maxHops--;
+169:             
+170:          } <b><font color="EA7D00">else</font></b> {
+171:             <b><font color="#0000FF">cplex</font></b>.solve();
+172:             writeln(maxHops, <b><font color="#8A2BE2">" is infeasible"</font></b>);
+173:          }
+174:       } <b><font color="EA7D00">else</font></b> {
+175:          writeln(<b><font color="#8A2BE2">"Optimal solution with "</font></b>, maxHops, <b><font color="#8A2BE2">" hops has surplus = "</font></b>, hop.surplus.solutionValue);
+176:       }
+177:       
+178:       <b><font color="#007D00">// Repeat until the simple and hop models have the same surplus capacity</font></b>
+179:       writeln(<b><font color="#8A2BE2">"XXXX= "</font></b>, hop.surplus.solutionValue - msol);
+180:       <b><font color="EA7D00">while</font></b>(!(Math.abs(hop.surplus.solutionValue - msol) &lt; EPS)) {
+181:          <b><font color="#007D00">// Increment maxHops</font></b>
+182:          maxHops++;
+183:          writeln(<b><font color="#8A2BE2">"Solving with at most "</font></b>, maxHops, <b><font color="#8A2BE2">" hops and test = "</font></b>, test);
+184:                  
+185:          <b><font color="#007D00">// Initialize hop problem</font></b>
+186:          subcplex.clearModel();
+187:          hdata = hop.dataElements;
+188:          hdata.maxHops = maxHops;
+189:          hdata.test = test;
+190: 
+191:                  <b><font color="EA7D00">if</font></b> ( hop!=hop0 ) {
+192:                         hop.end();
+193:                  }
+194: 
+195:          hop = <b><font color="EA7D00">new</font></b> IloOplModel(defi, subcplex);
+196:          hop.addDataSource(hdata);
+197:          hop.generate();
+198: 
+199: 
+200:          <b><font color="EA7D00">if</font></b>(test == 1) {            
+201:             <b><font color="EA7D00">if</font></b>(subcplex.solve()) { <b><font color="#007D00">// If the problem is feasible at current Maxhops, test =0;</font></b>
+202:             writeln(<b><font color="#8A2BE2">"YYY= "</font></b>, hop.infeas.solutionValue);
+203:                 <b><font color="EA7D00">if</font></b> (hop.infeas.solutionValue &lt; EPS){  
+204:                writeln(maxHops, <b><font color="#8A2BE2">" is feasible; changing to optimization problem"</font></b>);
+205:                test = 0;
+206:                maxHops--;
+207:              }               
+208:             } <b><font color="EA7D00">else</font></b> {
+209:                writeln(maxHops, <b><font color="#8A2BE2">" is infeasible"</font></b>);
+210:             }
+211:         
+212:          } <b><font color="EA7D00">else</font></b> {
+213:             subcplex.solve();
+214:             writeln(<b><font color="#8A2BE2">"Optimal solution with "</font></b>, maxHops, <b><font color="#8A2BE2">" hops has surplus = "</font></b>, hop.surplus.solutionValue);
+215:          }
+216: 
+217:       }
+218:     
+219:       <b><font color="#007D00">// Print hop solution; scale to remove surplus capacity</font></b>
+220:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> r <b><font color="EA7D00">in</font></b> hop.Markets)
+221:          <b><font color="EA7D00">if</font></b>(hdata.vol[r] &gt; EPS) {
+222:             writeln(<b><font color="#8A2BE2">"Traffic from "</font></b>, r.org, <b><font color="#8A2BE2">" to "</font></b>, r.dst, <b><font color="#8A2BE2">" = "</font></b>, hop.vol[r]);
+223:             <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> l <b><font color="EA7D00">in</font></b> hop.Links) {
+224:                <b><font color="EA7D00">var</font></b> traffic = 0;
+225:                <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> k <b><font color="EA7D00">in</font></b> hop.HopLinks) { 
+226:                   <b><font color="EA7D00">if</font></b>(k.lnk.org == l.org &amp;&amp; k.lnk.dst == l.dst) {
+227:                      traffic += hop.traffic[k][r].solutionValue;
+228:                   }
+229:                }
+230:                traffic /= (1+hop.surplus.solutionValue/hdata.vol[r]);
+231:                <b><font color="EA7D00">if</font></b>(traffic &gt; EPS) {
+232:                   writeln(<b><font color="#8A2BE2">"    "</font></b>, l.org, <b><font color="#8A2BE2">"-&gt;"</font></b>, l.dst, <b><font color="#8A2BE2">":  "</font></b>, traffic);
+233:                }
+234:                
+235:             }
+236:          }
+237:          
+238:       writeln(<b><font color="#8A2BE2">"DONE: "</font></b>, hop.surplus.solutionValue, <b><font color="#8A2BE2">" surplus capacity and at most "</font></b>, maxHops, <b><font color="#8A2BE2">" hops"</font></b>);
+239: 
+240:    } <b><font color="EA7D00">else</font></b> {
+241:       writeln(<b><font color="#8A2BE2">"No feasible solution exists"</font></b>);
+242:    }
+243:    
+244:    hop0.end();
+245:    subcplex.end();
+246: }
+</tt></pre>

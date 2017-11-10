@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="MIQP: mixed integer programs with quadratic terms in the objective function" />
+<meta name="abstract" content="Distinguishes types of mixed integer programs according to quadratic terms in the objective function or constraints of the model." />
+<meta name="Description" content="Distinguishes types of mixed integer programs according to quadratic terms in the objective function or constraints of the model." />
+<meta name="DC.subject" content="MIP, problem formulation, Mixed Integer Programming (MIP), definition, Mixed Integer Linear Program (MILP), Mixed Integer Quadratic Program (MIQP), first-order optimality, global optimality, local optimality, Mixed Integer Quadratically Constrained Program (MIQCP)" />
+<meta name="keywords" content="MIP, problem formulation, Mixed Integer Programming (MIP), definition, Mixed Integer Linear Program (MILP), Mixed Integer Quadratic Program (MIQP), first-order optimality, global optimality, local optimality, Mixed Integer Quadratically Constrained Program (MIQCP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/mip_quadratic/01_quadratic_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="introNonconvexMIQPusr" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/mip_quadratic/01_quadratic_mip_title_synopsis.html" />
+<title>MIQP: mixed integer programs with quadratic terms in the objective function</title>
+</head>
+<body role="main" id="introNonconvexMIQPusr">
+<h1 class="title topictitle1">MIQP: mixed integer programs with quadratic terms in the objective function</h1>
+<div class="body"><p class="shortdesc">Distinguishes types of mixed integer programs according to 
+quadratic terms in the objective function or constraints of the model.</p>
+<p class="p">As introduced in the topic 
+<a class="xref" href="../mip/02_prob_statement.html" title="Defines the kind of problems that the mixed integer optimizer solves.">Stating a MIP problem</a>,
+a mixed integer programming (MIP) problem can contain
+both integer and continuous variables. If the problem contains an
+objective function with no quadratic term, (a <em class="ph i">linear objective)</em>, then the problem
+is termed a <em class="ph i">Mixed Integer Linear Program</em> (MILP). </p>
+<p class="p">However, if there is a quadratic term in the objective function, 
+the problem is termed a <em class="ph i">Mixed Integer Quadratic Program</em> (MIQP). </p>
+<p class="p">If the model has any constraints
+containing a quadratic term, regardless of the objective function,
+the problem is termed a <em class="ph i">Mixed Integer Quadratically Constrained Program</em> 
+(MIQCP). For more information about solving a MIQCP, see the topic 
+<a class="xref" href="03_introMIQCP.html" title="Distinguishes types of mixed integer quadratically constrained programs according to quadratic terms in the constraints of the model.">MIQCP: mixed integer programs with quadratic terms in the constraints</a>.</p>
+<p class="p">This topic explores MIQP further and documents the features of CPLEX that 
+solve MIQP problems.</p>
+<div class="section"><h2 class="title sectiontitle">Convex and nonconvex MIQP</h2>
+
+<p class="p">The topic 
+<a class="xref" href="../../cont_optim/qp/02_convexity_defn.html" title="Explains how to determine the convexity of a quadratic program.">Distinguishing between convex and nonconvex QPs</a> 
+clarified the difference between convex and nonconvex quadratic programs (QP). 
+That same distinction is relevant to MIQP problems as well. By default, 
+CPLEX can solve MIQPs where the restriction of the problem to its continuous 
+and general integer variables is a <strong class="ph b">convex</strong> quadratic program (QP). 
+If this assumption is not satisfied, CPLEX will return the error 
+<a class="xref" href="../../../../../refcallablelibrary/macros/CPXERR_Q_NOT_POS_DEF.html" title="5002 Q in '%s' is not positive semi-definite">CPXERR_Q_NOT_POS_DEF</a>.</p>
+
+<p class="p">To change this default behavior and thus possibly solve a <strong class="ph b">nonconvex</strong> MIQP, 
+CPLEX offers the parameter 
+<a class="xref" href="../../../../Parameters/topics/OptimalityTarget.html" title="Specifies type of optimality that CPLEX targets (optimal convex or first-order satisfaction) as it searches for a solution">optimality target</a>.
+This parameter can instruct CPLEX to search for a <strong class="ph b">globally</strong> or 
+<strong class="ph b">locally</strong> optimal solution.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Globally optimal solutions to nonconvex models</h2>
+<p class="p">To instruct CPLEX to search for a globally optimal solution regardless of the 
+convexity or nonconvexity of the objective function, you first set the value of this 
+parameter to 3 (<span class="keyword apiname">CPX_OPTIMALITYTARGET_OPTIMALGLOBAL</span>). Then you 
+optimize your problem as usual. For example, in the Interactive Optimizer, you 
+invoke the command <span class="keyword apiname">optimize</span>. In an application of the 
+Callable Library (C API), the user invokes 
+<a class="xref" href="../../../../../refcallablelibrary/mipapi/mipopt.html" title="At any time after a mixed integer program has been created by a call to CPXXcreateprob/CPXcreateprob, the routine CPXXmipopt/CPXmipopt may be used to find a solution to that problem.">CPXXmipopt and CPXmipopt</a>.
+Likewise, in other APIs, the user invokes the appropriate method to optimize.</p>
+
+<p class="p">For an example of setting this parameter and optimizing to find a globally 
+optimal solution, consider one of these samples delivered with the product:</p>
+
+<ul class="ul"><li class="li"><span class="keyword apiname">xglobalmiqpex1.c</span> in the Callable Library (C API) 64-bit</li>
+<li class="li"><span class="keyword apiname">globalmiqpex1.c</span> in the Callable Library (C API) 32-bit</li>
+<li class="li"><span class="keyword apiname">iloglobalqpex1.cpp</span> in the C++ API</li>
+<li class="li"><span class="keyword apiname">GlobalQPex1.java</span> in the Java API</li>
+<li class="li"><span class="keyword apiname">GlobalQPex1.cs</span> in the C#.NET API</li>
+<li class="li"><span class="keyword apiname">globalqpex1.py</span> in the Python API</li>
+<li class="li"><span class="keyword apiname">GlobalQPex1.vb</span> in the Visual Basic.NET API</li>
+<li class="li"><span class="keyword apiname">globalqpex1.m </span> in the MATLAB connector</li>
+</ul>
+
+<p class="p">When your application is solving a nonconvex MIQP, you can also control 
+how CPLEX applies BQP cuts, based on the Boolean Quadric Polytope of your 
+model. For more detail about BQP cuts, see 
+<a class="xref" href="../../../../Parameters/topics/BQPcuts.html" title="Controls the addition of BQP cuts for nonconvex QP or MIQP solved to global optimality.">Boolean Quadric Polytope cuts</a> 
+in the <em class="ph i">CPLEX Parameters Reference Manual</em>. The topic 
+<a class="xref" href="../mip/cuts/28_BQPcuts.html" title="Defines a Boolean Quadric Polytope (BQP) cut.">Boolean Quadric Polytope (BQP) cuts</a> 
+in the <em class="ph i">CPLEX User's Manual</em>
+offers a brief definition of BQP cuts and a bibliographic reference about 
+Boolean Quadric Polytopes for further reading.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Locally optimal solutions and first order optimality</h2>
+
+<p class="p">Similarly, you can instruct CPLEX to search for a <strong class="ph b">locally</strong> 
+optimal solution, satisfying first-order optimality conditions, 
+by setting the solution target type to the value 2 
+(<span class="keyword apiname">CPX_OPTIMALITYTARGET_FIRSTORDER</span>). Then optimize as usual.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Relaxation of nonconvex MIQP</h2>
+
+<p class="p">Perhaps you are familiar with the idea that to solve a MILP, CPLEX relaxes 
+the original problem within bounds and solves the relaxation. Similarly, 
+when you instruct CPLEX to solve a nonconvex MIQP to global optimality, CPLEX 
+uses a variety of techniques (as discussed in the theoretical literature)  
+to relax and solve the original problem. 
+However, in the case of a nonconvex MIQP, it is possible that a given relaxation 
+of the original problem is not bounded. In such a case, CPLEX terminates 
+optimization and returns the status 
+<span class="keyword apiname">CPXMIP_ABORT_RELAXATION_UNBOUNDED</span>. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/mip_quadratic/01_quadratic_mip_title_synopsis.html" title="Documents the solution of mixed integer programs that include quadratic terms in the objective (MIQP) or among the constraints (MIQCP). with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values and in which there can be quadratic terms in the objective function and possibly among the coefficients of the constraints.">Solving mixed integer programming problems with quadratic terms</a></div>
+</div>
+</div></body>
+</html>

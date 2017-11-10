@@ -1,0 +1,85 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: {<b><font color="#0000FF">string</font></b>} ComputerTypes = ...;
+15: {<b><font color="#0000FF">string</font></b>} ActivityTypes = ...;
+16: {<b><font color="#0000FF">string</font></b>} ResourceTypes = ...;
+17: <b><font color="#0000FF">int</font></b> requiredQuantities[ComputerTypes] = ...;
+18: 
+19: <b><font color="#007D00">/* ----------------------------------------------------</font></b>
+20: <b><font color="#007D00"> *   An activity consists of an activity type, a</font></b>
+21: <b><font color="#007D00"> * duration, a unary resource requirement, and a list</font></b>
+22: <b><font color="#007D00"> * of precedences.</font></b>
+23: <b><font color="#007D00"> *   --------------------------------------------------- */</font></b>
+24: <b><font color="#0000FF">tuple</font></b> ActivityInfo {
+25:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>   activity;
+26:    <b><font color="#0000FF">int</font></b>      duration;
+27:    <b><font color="#0000FF">string</font></b>   requirement;
+28:    {<b><font color="#0000FF">string</font></b>} precedences;
+29: };
+30: {ActivityInfo} activities[ComputerTypes] = ...;
+31: 
+32: <b><font color="#0000FF">tuple</font></b> ComputerActivityMatch {
+33:    ActivityInfo activity;
+34:    <b><font color="#0000FF">string</font></b>       computerType;
+35:    <b><font color="#0000FF">int</font></b>          computer;            
+36: };
+37: <b><font color="#007D00">// All activities that must get scheduled</font></b>
+38: {ComputerActivityMatch} allActivities = {&lt;a,c,j&gt; | c <b><font color="#0000FF">in</font></b> ComputerTypes,
+39:                                          a <b><font color="#0000FF">in</font></b> activities[c],
+40:                                          j <b><font color="#0000FF">in</font></b> 1..requiredQuantities[c]};
+41: <b><font color="#007D00">// The activities which must precede activity a</font></b>
+42: {ComputerActivityMatch} precedences[a <b><font color="#0000FF">in</font></b> allActivities] = { b | b <b><font color="#0000FF">in</font></b> allActivities : 
+43:                                  a.computerType == b.computerType &amp;&amp;
+44:                                  a.computer == b.computer &amp;&amp; 
+45:                                  b.activity.activity <b><font color="#0000FF">in</font></b> a.activity.precedences };
+46: 
+47: 
+48: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> activity[a <b><font color="#0000FF">in</font></b> allActivities] <b><font color="#0000FF">size</font></b> a.activity.duration;
+49: 
+50: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">sequence</font></b> resource[r <b><font color="#0000FF">in</font></b> ResourceTypes] <b><font color="#0000FF">in</font></b> 
+51:    <b><font color="#7D007D">all</font></b>(a <b><font color="#0000FF">in</font></b> allActivities: a.activity.requirement==r) activity[a];
+52: 
+53: <b><font color="#0000FF">constraint</font></b> Precedence[allActivities,allActivities];
+54: 
+55: <b><font color="#0000FF">execute</font></b> {
+56:                 cp.param.FailLimit = 10000;
+57: }
+58: 
+59: minimize max(a in allActivities) endOf(activity[a]);
+60: subject to {
+61:   <b><font color="#007D00">// Remove symmetry</font></b>
+62:   forall(a1,a2 <b><font color="EA7D00">in</font></b> allActivities:
+63:         (a1.activity == a2.activity &amp;&amp; 
+64:         a1.computerType == a2.computerType &amp;&amp; 
+65:         a1.computer &lt; a2.computer) )
+66:     
+67:           BreakSymmetry: endBeforeStart(activity[a1], activity[a2]);
+68: 
+69:   <b><font color="#007D00">// Resource Requirements</font></b>
+70:   forall (r <b><font color="EA7D00">in</font></b> ResourceTypes)
+71:     NoOverlap: noOverlap(resource[r]);
+72:     
+73:   <b><font color="#007D00">// Precedences</font></b>
+74:   forall( a <b><font color="EA7D00">in</font></b> allActivities)
+75:     forall( p <b><font color="EA7D00">in</font></b> precedences[a])
+76:       Precedence[a,p]: endBeforeStart(activity[p], activity[a]);
+77: };
+78: 
+79: 
+80:    
+</tt></pre>

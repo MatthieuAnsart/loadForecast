@@ -1,0 +1,163 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*/</font></b> 
+010: 
+011: 
+012: <b><font color="#007D00">//-------------------------------------------------------------- -*- Java -*-</font></b>
+013: <b><font color="#007D00">//Java version of steelmill.cpp of OPL distrib</font></b>
+014: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+015: package steelmill;
+016: 
+017: import ilog.concert.*;
+018: import ilog.cp.*;
+019: import ilog.opl.*;
+020: 
+021: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> SteelMill
+022: {
+023:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">class</font></b> MyData <b><font color="EA7D00">extends</font></b> IloCustomOplDataSource
+024:     {
+025:         MyData(IloOplFactory oplF)
+026:         {
+027:             <b><font color="EA7D00">super</font></b>(oplF);
+028:         }
+029: 
+030:         <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> customRead()
+031:         {
+032:             <b><font color="#0000FF">int</font></b> _nbOrders = 12;
+033:             <b><font color="#0000FF">int</font></b> _nbSlabs = 12;
+034:             <b><font color="#0000FF">int</font></b> _nbColors = 8;
+035:             <b><font color="#0000FF">int</font></b> _nbCap = 20;
+036: 
+037:                         IloOplDataHandler handler = getDataHandler();
+038: 
+039:                         handler.startElement(<b><font color="#8A2BE2">"nbOrders"</font></b>);
+040:                         handler.addIntItem(_nbOrders);
+041:                         handler.endElement();
+042:                         handler.startElement(<b><font color="#8A2BE2">"nbSlabs"</font></b>);
+043:                         handler.addIntItem(_nbSlabs);
+044:                         handler.endElement();
+045:                         handler.startElement(<b><font color="#8A2BE2">"nbColors"</font></b>);
+046:                         handler.addIntItem(_nbColors);
+047:                         handler.endElement();
+048:                         handler.startElement(<b><font color="#8A2BE2">"nbCap"</font></b>);
+049:                         handler.addIntItem(_nbCap);
+050:                         handler.endElement();
+051: 
+052:                         <b><font color="#0000FF">int</font></b>[] _capacity = {0, 11, 13, 16, 17, 19, 20, 23, 24, 25, 26, 27, 28, 29, 30, 33, 34, 40, 43, 45};
+053:                         handler.startElement(<b><font color="#8A2BE2">"capacities"</font></b>);
+054:                         handler.startArray();
+055:                         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;_nbCap; i++)
+056:                                 handler.addIntItem(_capacity[i]);
+057:                         handler.endArray();
+058:                         handler.endElement();
+059: 
+060:                         <b><font color="#0000FF">int</font></b>[] _weight = {22, 9, 9, 8, 8, 6, 5, 3, 3, 3, 2, 2};
+061:                         handler.startElement(<b><font color="#8A2BE2">"weight"</font></b>);
+062:                         handler.startArray();
+063:                         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;_nbOrders; i++)
+064:                                 handler.addIntItem(_weight[i]);
+065:                         handler.endArray();
+066:                         handler.endElement();
+067: 
+068:                         <b><font color="#0000FF">int</font></b>[] _colors = {5, 3, 4, 5, 7, 3, 6, 0, 2, 3, 1, 5};
+069:                         handler.startElement(<b><font color="#8A2BE2">"colors"</font></b>);
+070:                         handler.startArray();
+071:                         <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i=0; i&lt;_nbOrders; i++)
+072:                                 handler.addIntItem(_colors[i]);
+073:                         handler.endArray();
+074:                         handler.endElement();
+075:         }
+076:     };
+077: 
+078:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception
+079:     {
+080:         <b><font color="#0000FF">int</font></b> status = 127;
+081:         <b><font color="EA7D00">try</font></b> {
+082:             IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+083:             IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+084:             IloOplErrorHandler errHandler = oplF.createOplErrorHandler(System.out);
+085:             IloOplModelSource modelSource=oplF.createOplModelSourceFromString(getModelText(),<b><font color="#8A2BE2">"steelmill"</font></b>);
+086:             IloOplSettings settings = oplF.createOplSettings(errHandler);
+087:             IloOplModelDefinition def=oplF.createOplModelDefinition(modelSource,settings);
+088:             IloCP cp = oplF.createCP();
+089:             IloOplModel opl=oplF.createOplModel(def,cp);
+090: 
+091:             IloOplDataSource dataSource=<b><font color="EA7D00">new</font></b> MyData(oplF);
+092:             opl.addDataSource(dataSource);
+093:             opl.generate();
+094:             <b><font color="EA7D00">if</font></b> ( cp.solve() )
+095:             {
+096:                 System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.getCP().getObjValue());
+097:                 opl.postProcess();
+098:                 opl.printSolution(System.out);
+099:                 status = 0;
+100:             } <b><font color="EA7D00">else</font></b> {
+101:                 System.out.println(<b><font color="#8A2BE2">"No solution!"</font></b>);
+102:                 status = 1;
+103:             }
+104: 
+105:             oplF.end();
+106:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+107:             System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+108:             ex.printStackTrace();
+109:             status = 2;
+110:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+111:             System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+112:             ex.printStackTrace();
+113:             status = 3;
+114:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+115:             System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+116:             ex.printStackTrace();
+117:             status = 4;
+118:         }
+119:         System.exit(status);
+120:         }
+121: 
+122:     <b><font color="EA7D00">static</font></b> String getModelText()
+123:     {
+124:         String model=<b><font color="#8A2BE2">""</font></b>;
+125:         model+=<b><font color="#8A2BE2">"using CP;"</font></b>;
+126:                 model+=<b><font color="#8A2BE2">"int nbOrders   = ...;"</font></b>;
+127:                 model+=<b><font color="#8A2BE2">"int nbSlabs = ...;"</font></b>;
+128:                 model+=<b><font color="#8A2BE2">"int nbColors   = ...;"</font></b>;
+129:                 model+=<b><font color="#8A2BE2">"int nbCap      = ...;"</font></b>;
+130:                 model+=<b><font color="#8A2BE2">"int capacities[1..nbCap] = ...;"</font></b>;
+131:                 model+=<b><font color="#8A2BE2">"int weight[1..nbOrders] = ...;"</font></b>;
+132:                 model+=<b><font color="#8A2BE2">"int colors[1..nbOrders] = ...;"</font></b>;
+133:                 model+=<b><font color="#8A2BE2">"int maxLoad = sum(i in 1..nbOrders) weight[i];"</font></b>;
+134:                 model+=<b><font color="#8A2BE2">"int maxCap  = max(i in 1..nbCap) capacities[i];"</font></b>;
+135:                 model+=<b><font color="#8A2BE2">"int loss[c in 0..maxCap] = min(i in 1..nbCap : capacities[i] &gt;= c) capacities[i] - c; "</font></b>;
+136:                 model+=<b><font color="#8A2BE2">"execute {"</font></b>;
+137:                 model+=<b><font color="#8A2BE2">"writeln(</font></b>\"<b><font color="#8A2BE2">loss = </font></b>\"<b><font color="#8A2BE2">, loss);"</font></b>;
+138:                 model+=<b><font color="#8A2BE2">"writeln(</font></b>\"<b><font color="#8A2BE2">maxLoad = </font></b>\"<b><font color="#8A2BE2">, maxLoad);"</font></b>;
+139:                 model+=<b><font color="#8A2BE2">"writeln(</font></b>\"<b><font color="#8A2BE2">maxCap = </font></b>\"<b><font color="#8A2BE2">, maxCap);"</font></b>;
+140:                 model+=<b><font color="#8A2BE2">"};"</font></b>;
+141:                 model+=<b><font color="#8A2BE2">"dvar int where[1..nbOrders] in 1..nbSlabs;"</font></b>;
+142:                 model+=<b><font color="#8A2BE2">"dvar int load[1..nbSlabs] in 0..maxLoad;"</font></b>;
+143:                 model+=<b><font color="#8A2BE2">"execute {"</font></b>;
+144:                 model+=<b><font color="#8A2BE2">"  cp.param.LogPeriod = 50;"</font></b>;
+145:                 model+=<b><font color="#8A2BE2">"  var f = cp.factory;"</font></b>;
+146:                 model+=<b><font color="#8A2BE2">"  cp.setSearchPhases(f.searchPhase(where));"</font></b>;
+147:                 model+=<b><font color="#8A2BE2">"}"</font></b>;
+148:                 model+=<b><font color="#8A2BE2">"dexpr int totalLoss = sum(s in 1..nbSlabs) loss[load[s]];"</font></b>;
+149:                 model+=<b><font color="#8A2BE2">"minimize totalLoss;"</font></b>;
+150:                 model+=<b><font color="#8A2BE2">"subject to {  "</font></b>;
+151:                 model+=<b><font color="#8A2BE2">"  packCt: pack(load, where, weight);"</font></b>;
+152:                 model+=<b><font color="#8A2BE2">"  forall(s in 1..nbSlabs)"</font></b>;
+153:                 model+=<b><font color="#8A2BE2">"        colorCt: sum (c in 1..nbColors) (or(o in 1..nbOrders : colors[o] == c) (where[o] == s)) &lt;= 2; "</font></b>;
+154:         model+=<b><font color="#8A2BE2">"}"</font></b>;
+155:         <b><font color="EA7D00">return</font></b> model;
+156:     }
+157: }
+158: 
+</tt></pre>

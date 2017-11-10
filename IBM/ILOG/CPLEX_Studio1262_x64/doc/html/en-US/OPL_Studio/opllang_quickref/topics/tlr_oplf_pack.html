@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="pack" />
+<meta name="abstract" content="OPL function. A constraint to maintain the load of a set of containers" />
+<meta name="Description" content="OPL function. A constraint to maintain the load of a set of containers" />
+<meta name="DC.subject" content="constraint programming, pack, OPL keyword" />
+<meta name="keywords" content="constraint programming, pack, OPL keyword" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="E9ggbsn9" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<title>pack</title>
+</head>
+<body role="main" id="E9ggbsn9">
+<h1 class="title topictitle1">pack</h1>
+<div class="body refbody"><p class="shortdesc">OPL function. A constraint to maintain the load of a set of containers</p>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod) - Not allowed in a CPLEX constraint block.</td>
+</tr>
+<tr class="strow"><td valign="top" class="stentry">type</td>
+<td valign="top" class="stentry"><pre class="pre msgblock"><code>boolean (1 if the constraint is true, 0 otherwise)</code></pre>
+</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>pack(int[],int[],int[])
+pack(dvar int[ ],dvar int[ ],int[])
+pack(int[],int[],int[],int)
+pack(dvar int[ ],dvar int[ ],int[],dvar int)
+</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">The pack constraint maintains the load of a set of containers or bins, given a set of weighted items and an assignment of items to containers. In the last syntax, the fourth parameter represents the number of times where the first variable takes a nonzero value.</p>
+<p class="p">In the example that follows, consider that we have n items and m containers. Each item i has an integer weight w[i] and a constrained integer variable p[i] associated with it, indicating in which container item i is to be placed. No item can be split up, and so an item can go in only one container. Associated with each container j is an integer variable l[j] representing the load in that container; that is, the sum of the weights of the items that have been assigned to that container. A capacity can be set for each container, placing an upper bound on this load variable. The constraint also ensures that the total sum of the loads of the containers is equal to the sum of the weights of the items being placed.</p>
+<p class="p">This function also works for integer arrays outside constraint blocks both in CP and CPLEX models.</p>
+<p class="p">You can use this function within IBM ILOG Script statements by specifying the OPL namespace:</p>
+<pre class="pre codeblock"><code>( Opl.xxx() )</code></pre>
+<p class="p">In an MP model, you could write this pack constraint as follows:</p>
+<pre class="pre codeblock"><code>forall(i in 1..m) sum(j in 1..n) ((p[j]==i)*(w[j]))==l[i];</code></pre>
+<div class="note note"><span class="notetitle">Note:</span> This constraint cannot be used in a meta-constraint.</div>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><pre class="pre codeblock"><code>using CP;
+int m = 2;
+int n = 3;
+
+dvar int l[j in 1..m] in 0..10000;
+dvar int p[i in 1..n] in 1..m;
+dvar int nb;
+
+int w[1..n] = [i : 1 | i in 1..n];  
+
+subject to {
+   
+  pack(l, p, w, nb); 
+  
+}
+
+assert nb==m-count(l,0);</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" title="Description, syntax, and example for each individual OPL function.">OPL functions</a></div>
+</div>
+</div></body>
+</html>

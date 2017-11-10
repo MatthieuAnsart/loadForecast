@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using delta-domains to propagate efficiently" />
+<meta name="abstract" content="Using delta-domains in propagation can improve performance." />
+<meta name="Description" content="Using delta-domains in propagation can improve performance." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizercsts.1018314" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<title>Using delta-domains to propagate efficiently</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizercsts.1018314">
+<h1 class="title topictitle1">Using delta-domains to propagate efficiently</h1>
+<div class="body"><p class="shortdesc">Using delta-domains in propagation can improve performance.</p>
+<p class="p">When a propagation event is triggered for a decision
+variable, the variable is pushed into the propagation queue if it
+was not already in the queue. Moreover, the modifications of the domain
+of the decision variable are stored in a special set called the domain-delta.
+This domain-delta can be accessed during the propagation of the constraints
+posted on that variable. When all the constraints posted on that variable
+have been processed, then the domain-delta is cleared. If the decision
+variable is modified again, then the whole process begins again. The
+state of the domain-delta is reversible.</p>
+<p class="p">The domain-delta is a special set where the modifications
+of the domain of a constrained variable are stored. This domain-delta
+can be accessed (by means of member functions of the class of the
+decision variable) during the propagation of the constraints posted
+on that variable. When all the constraints posted on that decision
+variable have been processed, then the domain-delta is cleared. If
+the variable is modified again, then the whole process starts over
+again. The state of the domain-delta is reversible.</p>
+<p class="p">The methods of <samp class="ph codeph">IlcIntVar</samp> that
+you might use when examining the domain-delta are listed in the <em class="ph i">CP Optimizer C++ API Reference Manual</em> and
+include <samp class="ph codeph">isInProcess, getMaxDelta</samp>, <samp class="ph codeph">getMinDelta</samp>, <samp class="ph codeph">getOldMax</samp>, <samp class="ph codeph">getOldMin</samp> and <samp class="ph codeph">isInDelta</samp>.
+The domain-delta can be traversed by an iterator, an instance of <samp class="ph codeph">IlcIntVarDeltaIterator</samp>. </p>
+<p class="p">To illustrate the use of the domain-delta and these functions,
+consider a custom constrain to implement the constructive disjunction <em class="ph i">( x==y || x==z)</em> where <em class="ph i">x</em>, <em class="ph i">y</em> and <em class="ph i">z</em> are decision variables. A declaration
+for this class using demons is: </p>
+<pre class="pre codeblock"><code>class DeltaConstraintI : public IlcConstraintI {
+    IlcIntVar _x, _y, _z;
+  public:
+    DeltaConstraintI(IloCP cp, IlcIntVar x, IlcIntVar y, IlcIntVar z);
+    ~DeltaConstraintI(){}; // empty destructor
+
+    virtual void propagate ();
+    virtual void post();
+    void xDemon();
+    void yDemon(IlcIntVar y, IlcIntVar z);
+};
+</code></pre>
+<p class="p">with the demon declarations: </p>
+<pre class="pre codeblock"><code>ILCCTDEMON0(DeltaConstraintI_xDemon,DeltaConstraintI,xDemon);
+ILCCTDEMON2(DeltaConstraintI_yDemon,DeltaConstraintI,yDemon,
+            IlcIntVar,y,IlcIntVar,z);
+</code></pre>
+<p class="p">Considering the constructive disjunction, you can see
+that until the decision variable <em class="ph i">x</em> is
+fixed, no values can be removed for the domains of <em class="ph i">y</em> and <em class="ph i">z</em>.
+[Note that more complete domain reduction would include a test for
+a null intersection of the domains of <em class="ph i">x</em> and <em class="ph i">y</em> (or <em class="ph i">x</em> and <em class="ph i">z</em>).]</p>
+<p class="p">In this custom constraint, the method <samp class="ph codeph">xDemon</samp> is
+called only when the value of <samp class="ph codeph">x</samp> is fixed.
+In this demon, you check if the value of <samp class="ph codeph">x</samp> is
+in the domain of both <samp class="ph codeph">y</samp> and <samp class="ph codeph">z</samp>.
+If it is, then nothing can be deduced. If the value of <samp class="ph codeph">x</samp> is
+in the domain of only one, then you set the value of that variable
+to the value of <samp class="ph codeph">x</samp>. If the value of <samp class="ph codeph">x</samp> is
+in the domain of neither, then the constraint is violated.    </p>
+<pre class="pre codeblock"><code>void DeltaConstraintI::xDemon(){
+  assert(_x.isFixed());
+  IlcInt xval = _x.getValue();
+  IlcInt iny = _y.isInDomain(xval);
+  IlcInt inz = _z.isInDomain(xval);
+  if (iny &amp;&amp; inz)
+    return;
+  if (iny)
+    _y.setValue(xval);
+  if (inz)
+    _z.setValue(xval);
+  if (!iny &amp;&amp; !inz)
+    fail();
+}
+</code></pre>
+<p class="p">When the domain of <samp class="ph codeph">y</samp> changes,
+then for each of the values that have been removed from the domain
+of <samp class="ph codeph">y</samp>, you check that the removed value
+is in <samp class="ph codeph">z</samp>. If it is not, then that value
+should be removed from <samp class="ph codeph">x</samp>. To determine
+what values have been removed from the domain of <samp class="ph codeph">y</samp>,
+you can use the <samp class="ph codeph">IlcIntVarDeltaIterator</samp>. </p>
+<pre class="pre codeblock"><code>void DeltaConstraintI::yDemon(IlcIntVar y, IlcIntVar z){
+  assert(y.isInProcess());
+  for (IlcIntVarDeltaIterator iter(y); iter.ok(); ++iter) {
+     IlcInt val = *iter;
+     IlcInt inz = z.isInDomain(val);
+     if (!inz)
+       _x.removeValue(val);
+ }
+}
+</code></pre>
+<p class="p">Since this relationship is similar for <samp class="ph codeph">x</samp> and <samp class="ph codeph">z</samp>,
+the same demon gets called when the domain of <samp class="ph codeph">z</samp> changes,
+but the arguments are reversed. Thus the <samp class="ph codeph">post</samp> function
+for the custom constraint is:</p>
+<pre class="pre codeblock"><code>void DeltaConstraintI::post(){
+    _x.whenValue(DeltaConstraintI_xDemon(getCP(),this));
+    _y.whenDomain(DeltaConstraintI_yDemon(getCP(),this,_y,_z));
+    _z.whenDomain(DeltaConstraintI_yDemon(getCP(),this,_z,_y));
+}
+</code></pre>
+<p class="p">The propagate function, which will be executed when the
+constraint is posted could be:  </p>
+<pre class="pre codeblock"><code>void DeltaConstraintI::propagate () {
+  if (_x.isFixed()) {
+    xDemon();
+    return;
+  }
+  for (IloInt i = _x.getMin(); i == _x.getNextHigher(i); _x.getNextHigher(i)) {
+    IlcInt iny = _y.isInDomain(i);
+    IlcInt inz = _z.isInDomain(i);
+    if (iny + inz == 0)
+      _x.removeValue(i);
+  }
+}
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" title="A custom constraint can be written using engine extensions.">Writing your own constraint</a></div>
+</div>
+</div></body>
+</html>

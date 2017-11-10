@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Setting parameters on search" />
+<meta name="abstract" content="Parameters can be set on the search to limit the search as well as adjust the tolerance on optimality." />
+<meta name="Description" content="Parameters can be set on the search to limit the search as well as adjust the tolerance on optimality." />
+<meta name="DC.subject" content="optimality tolerance, parameter, search, search parameter, tolerance, optimality" />
+<meta name="keywords" content="optimality tolerance, parameter, search, search parameter, tolerance, optimality" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/search.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizersearch.1017005" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/search.html" />
+<title>Setting parameters on search</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizersearch.1017005">
+<h1 class="title topictitle1">Setting parameters on search</h1>
+<div class="body"><p class="shortdesc">Parameters can be set on the search to limit the
+search as well as adjust the tolerance on optimality.</p>
+<p class="p">Search parameterization is an important feature of CP
+Optimizer. One use of parameters is to limit the search. The parameter <samp class="ph codeph">TimeLimit</samp> sets a time limit on the time spent in
+search. The parameter <samp class="ph codeph">BranchLimit</samp> limits
+the total number of branches (decisions) that are performed by the
+optimizer. </p>
+<p class="p">When a limit is set on the search process of an optimization
+problem, the call to the optimizer object member function <samp class="ph codeph">solve</samp> terminates when the limit is reached. The
+function returns true when a solution is available and false otherwise.
+Note that the number of branches and the time limit can go slightly
+beyond the specified limit because the best solution found gets "replayed"
+(regenerated), and this can produce some extra time or branches. </p>
+<p class="p">In general, to obtain information on the reason the search
+ended, you can query the engine using the <samp class="ph codeph">getInfo</samp> member
+function of the optimizer object (<samp class="ph codeph">IloCP::getInfo</samp> in
+the <strong class="ph b">C++ API</strong>,<samp class="ph codeph"> IloCP.getInfo</samp> in
+the <strong class="ph b">Java™ API</strong> and <samp class="ph codeph">CP.GetInfo</samp> in the <strong class="ph b">C# API</strong>). with
+the argument <samp class="ph codeph">FailStatus</samp> (<samp class="ph codeph">IloCP::FailStatus</samp> in
+the <strong class="ph b">C++ API</strong>,<samp class="ph codeph"> IloCP.IntInfo.FailStatus </samp>in
+the <strong class="ph b">Java API</strong>,
+and <samp class="ph codeph">CP.IntInfo.FailStatus </samp>in the <strong class="ph b">C#
+API</strong>). The meanings of the return values of this function are listed
+in the CP Optimizer reference manuals. </p>
+<p class="p">Another important search parameterization is the one that
+defines optimality. A solution is considered optimal if there does
+not exist a solution with a better objective function with respect
+to an <em class="ph i">optimality tolerance</em>. This tolerance can be
+absolute and is controlled with the search parameter <samp class="ph codeph">OptimalityTolerance</samp>.
+The relative optimality tolerance is controlled with the search parameter <samp class="ph codeph">RelativeOptimalityTolerance</samp>. </p>
+<p class="p">For instance, if you consider that an improvement of 10
+on your objective function is negligible, you can set this tolerance
+using the C++ API with the call: </p>
+<pre class="pre codeblock"><code>      cp.setParameter(IloCP::OptimalityTolerance, 10);
+</code></pre>
+<p class="p">With this tolerance set, if an optimal solution of a minimization
+problem is found with an objective value of 900, then there does not
+exists a solution with an objective value of 890. There may exist
+solutions with objective values of 891 and higher, but these have
+been missed due to the tolerance. The default value for this tolerance
+is 1e-9.</p>
+<p class="p">Another example: if you want to find a solution within
+3% of the optimal, you set the relative optimality tolerance using
+the C++ API with the call: </p>
+<pre class="pre codeblock"><code>      cp.setParameter(IloCP::RelativeOptimalityTolerance, 0.03);
+</code></pre>
+<p class="p">With this tolerance set, if an optimal solution of a minimization
+problem is found with an objective value of 900, then there does not
+exists a solution with an objective value of 873 (= 900 - 900 *0.03).
+There may exist solutions with objective values of 874 and higher.
+The default value for this tolerance is 0.0001. </p>
+<p class="p">It is important to note that when both a relative and
+an absolute optimality tolerance are set, they act similarly to constraints,
+that is only the strongest applies. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/search.html" title="CP Optimizer uses constructive search strategies to find a solution to a constraint programming problem.">Search in CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

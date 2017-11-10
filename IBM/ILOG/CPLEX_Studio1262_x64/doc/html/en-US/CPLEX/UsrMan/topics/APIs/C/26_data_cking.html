@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Checking and debugging problem data" />
+<meta name="abstract" content="Describes routines to verify problem data and diagnose bugs in an application of the C API." />
+<meta name="Description" content="Describes routines to verify problem data and diagnose bugs in an application of the C API." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callableLibrary.651916" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" />
+<title>Checking and debugging problem data</title>
+</head>
+<body role="main" id="User_manual.uss_callableLibrary.651916">
+<h1 class="title topictitle1">Checking and debugging problem data</h1>
+<div class="body"><p class="shortdesc">Describes routines to verify problem data and diagnose
+bugs in an application of the C API.</p>
+<p class="p">If you inadvertently make an error entering problem data, the problem
+object will not correspond to your intentions. One possible result
+may be a segmentation fault or other disruption of your application.
+In other cases, CPLEX may solve a different model from the one you
+intended, and that situation may or may not result in error messages
+from CPLEX.</p>
+<div class="section" id="User_manual.uss_callableLibrary.651916__User_manual.uss_callableLibrary.651822"><h2 class="title sectiontitle">Using
+the data checking parameter</h2>      <p class="p">To help you detect this
+kind of error, you can set the   <a class="xref" href="../../../../Parameters/topics/DataCheck.html" title="Decides whether data should be checked for consistency.">data consistency checking switch</a> parameter
+ <samp class="ph codeph">CPX_PARAM_DATACHECK(int)</samp> to the value <samp class="ph codeph">CPX_ON</samp> 
+to activate additional checking of array arguments for <samp class="ph codeph">CPXcopy</samp><em class="ph i">Data</em>,
+ <samp class="ph codeph">CPXread</samp><em class="ph i">Data</em>, and <samp class="ph codeph">CPXchg</samp><em class="ph i">Data</em> 
+routines (where <em class="ph i">Data</em> varies). The additional checks include:</p>
+ <ul class="ul"><li class="li"><p class="p">invalid <samp class="ph codeph">sense</samp> /<samp class="ph codeph">ctype</samp> /<samp class="ph codeph">sostype</samp> values</p>
+</li>
+<li class="li"><p class="p">indices out of range, for example, <samp class="ph codeph">rowind</samp> <samp class="ph codeph">≥</samp> <samp class="ph codeph">numrows</samp> </p>
+</li>
+<li class="li"><p class="p">duplicate entries</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">matbeg</samp> or <samp class="ph codeph">sosbeg</samp> array with
+decreasing values</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">NAN</samp>s in double arrays</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">NULL</samp>s in name arrays</p>
+</li>
+</ul>
+  <p class="p">This additional checking may entail overhead (time and memory).
+When the parameter is set to <samp class="ph codeph">CPX_OFF</samp>, only simple
+checks are performed, for example, checking for the existence of the
+environment.</p>
+ </div>
+<div class="section" id="User_manual.uss_callableLibrary.651916__User_manual.uss_callableLibrary.651832"><h2 class="title sectiontitle">Using
+diagnostic routines for debugging</h2>                            <p class="p">CPLEX
+also provides diagnostic routines to look for common errors in the
+definition of problem data. In the standard distribution of CPLEX,
+the file <samp class="ph codeph">check.c</samp> contains the source code for these
+routines:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkcopylp.html" title="Checks the data copied by CPXXcopylp/CPXcopylp.">CPXcheckcopylp</a></samp></p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkcopylpwnames.html" title="Checks data copied by CPXXcopylpwnames/CPXcopylpwnames.">CPXcheckcopylpwnames</a></samp> </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkcopyqpsep.html" title="Checks the data when the quadratic objective matrix Q for a separable QP problem is copied.">CPXcheckcopyqpsep</a></samp></p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkcopyquad.html" title="Checks data when a quadratic objective matrix Q is not diagonal.">CPXcheckcopyquad</a></samp></p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkaddrows.html" title="Checks data when rows are added to a model.">CPXcheckcopyaddrows</a></samp></p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkaddcols.html" title="Checks data when columns are added to a model.">CPXcheckaddcols</a></samp></p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkchgcoeflist.html" title="Checks data when the list of coefficients in a model changes.">CPXcheckchgcoeflist</a></samp></p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkvals.html" title="Checks data by comparing an array of indices and an array of values for errors.">CPXcheckvals</a></samp></p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkcopyctype.html" title="Checks the data about the type of variables copied in a model.">CPXcheckcopyctype</a></samp> </p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkcopysos.html" title="Checks data copied for a special ordered set (SOS) in a problem object of type MILP, MIQP, or MIQCP.">CPXcheckcopysos</a></samp> </p>
+ </li>
+<li class="li"><p class="p"> <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/datacheck/checkcopynet.html" title="Checks data copied to a network object.">CPXcheckcopynet</a></samp> </p>
+ </li>
+</ul>
+<p class="p">Each of those routines performs a series of diagnostic tests
+of the problem data and issues warnings or error messages whenever
+it detects a potential error. To use them, you must compile and link
+the file <samp class="ph codeph">check.c</samp>. After compiling and linking that
+file, you will be able to step through the source code of these routines
+with a debugger to help isolate problems.</p>
+<p class="p">If you have observed
+anomalies in your application, you can exploit this diagnostic capability
+by calling the appropriate routines just before a change or copy routine.
+The diagnostic routine can then detect errors in the problem data
+that could subsequently cause inexplicable behavior.</p>
+<p class="p">Those checking
+routines send all messages to one of the standard CPLEX message channels.
+You capture that output by setting a parameter (that is, the <a class="xref" href="../../../../Parameters/topics/SCRIND.html" title="Decides whether or not results are displayed on screen in an application of the C API.">messages to screen switch</a> <samp class="ph codeph">CPX_PARAM_SCRIND</samp>)
+if you want messages directed to your screen or by calling the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setlogfile.html" title="The routine CPXXsetlogfile/CPXsetlogfile modifies the log file to which messages from all four CPLEX-defined channels are written.">CPXsetlogfile</a></samp> if
+you want to direct messages to a log file.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/C/14_progprac_title_synopsis.html" title="Lists some of the programming practices the CPLEX team observes in developing and maintaining the Callable Library (C API).">CPLEX programming practices</a></div>
+</div>
+</div></body>
+</html>

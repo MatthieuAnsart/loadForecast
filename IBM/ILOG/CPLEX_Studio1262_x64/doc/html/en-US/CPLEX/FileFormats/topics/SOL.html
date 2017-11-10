@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="SOL file format: solution files" />
+<meta name="abstract" content="The SOL file format supports solution files." />
+<meta name="Description" content="The SOL file format supports solution files." />
+<meta name="DC.subject" content="file formats, SOL, SOL file format, solution file, creating" />
+<meta name="keywords" content="file formats, SOL, SOL file format, solution file, creating" />
+<meta name="DC.Relation" scheme="URI" content="../../../CPLEX/homepages/reffileformatscplex.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="File_formats_reference.uss_reffileformatscplex.161253" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CPLEX/homepages/reffileformatscplex.html" />
+<title>SOL file format: solution files</title>
+</head>
+<body role="main" id="File_formats_reference.uss_reffileformatscplex.161253">
+<h1 class="title topictitle1">SOL file format: solution files</h1>
+<div class="body"><p class="shortdesc">The SOL file format supports solution files.</p>
+<p class="p">CPLEX reads
+and writes solution files, formatted in XML, for all problem types,
+for all application programming interfaces (APIs). These solution
+files, known as SOL files, carry the file extension .<samp class="ph codeph">sol</samp>.
+The XML solution file format makes it possible for you to display
+and view these solution files in most browsers as well as to pass
+the solution to XML-aware applications. CPLEX also provides a stylesheet
+and schema in <em class="ph i">yourCplexinstallation</em><samp class="ph codeph">/include/ilcplex</samp> 
+to facilitate your use of this format in your applications.</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">solution.xsl</samp> 
+stylesheet</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">solution.xsd</samp> 
+schema</p>
+</li>
+</ul>
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">Browsers may have specific conventions regarding accessing
+remote style sheets and XML files with extensions other than .xml.
+For example, your browser may not read the header of an SOL file with
+the extension .<samp class="ph codeph">sol</samp> or may not consult the stylesheet designated there;
+consequently, your browser may display such a file as raw XML code,
+rather than the formatted display you expect. In such a situation,
+try copying your SOL file to a file with the extension .xml that your
+browser recognizes and processes correctly. </p>
+
+<p class="p">By default, the encoding of SOL file format is UTF-8.</p>
+</div>
+<p class="p">CPLEX can
+also read SOL files as an advanced start. SOL files contain basis
+statuses, if they are available, and solution values. The basis statuses
+can be used for advanced starts with simplex optimizers; the solution
+values can be used for a crossover from a barrier solution or as a
+MIP start from a mixed integer solution. A mixed integer solution
+may be from a conventional MIP optimization or from a member of the
+solution pool.</p>
+<p class="p">SOL files contain XML formatted information, as do MST
+files. Unlike MST files, at the default write level of detail, SOL
+files contain solution values for all variables rather than only the
+variables that define the integer feasible solution. SOL files are
+thus larger, take longer to input, and (in unusual cases of numerically
+difficult models) are less likely to provide a feasible starting point.
+Consequently, it is generally a good practice to use MST files to
+restart the optimization instead of SOL files. However, if you already
+use SOL files for other purposes, you can also use them to provide
+a feasible starting point.</p>
+<p class="p">SOL files also carry an optional name attribute, useful
+when the problem has names. SOL files also include an index, corresponding
+to the constraint index or variable index of the problem.</p>
+<p class="p">The SOL header gives information about the status of
+the solution. For example, the optimization status appears as a string
+and the numeric value of the CPLEX symbolic
+constant.</p>
+<p class="p">The SOL quality gives information about the quality of
+the solution. For example, the maximum primal infeasibility, the values
+of the tolerance parameters in effect during the optimization, and
+other quality information appears in this part.</p>
+<p class="p">There are, of course, methods and routines for reading
+and writing SOL files.</p>
+<ul class="ul"><li class="li"><p class="p">In Concert Technology, use these methods:</p>
+
+<ul class="ul"><li class="li"><p class="p">In the C++ API, see the methods <samp class="ph codeph">IloCplex::readSolution</samp> 
+and <samp class="ph codeph">IloCplex::writeSolution</samp>.</p>
+</li>
+<li class="li"><p class="p">In the Java API, see the methods <samp class="ph codeph">IloCplex.readSolution</samp> 
+and <samp class="ph codeph">IloCplex.writeSolution</samp>.</p>
+</li>
+<li class="li"><p class="p">In the .NET API, see the methods <samp class="ph codeph">Cplex.ReadSolution</samp> 
+and <samp class="ph codeph">Cplex.WriteSolution</samp>.</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">In the Callable Library, use the routine<samp class="ph codeph"> CPXreadcopysol</samp> to
+read a SOL file and the routine <samp class="ph codeph">CPXsolwrite</samp> to
+write SOL files.</p>
+</li>
+</ul>
+<p class="p">Here is an example of a SOL file.  </p>
+<pre class="pre codeblock"><code>&lt;?xml version = "1.0" standalone="yes"?&gt;
+&lt;?xml-stylesheet href="https://www.ilog.com/products/cplex/xmlv1.0/solution.xsl" type="text/xsl"?&gt;
+&lt;CPLEXSolution version="1.2"&gt;
+ &lt;header
+   problemName="../../../examples/data/mexample.mps"
+   solutionName="incumbent"
+   solutionIndex="-1"
+   objectiveValue="-122.5"
+   solutionTypeValue="3"
+   solutionTypeString="primal"
+   solutionStatusValue="101"
+   solutionStatusString="integer optimal solution"
+   solutionMethodString="mip"
+   primalFeasible="1"
+   dualFeasible="1"
+   MIPNodes="0"
+   MIPIterations="3"/&gt;
+ &lt;quality
+   epInt="1e-05"
+   epRHS="1e-06"
+   maxIntInfeas="0"
+   maxPrimalInfeas="0"
+   maxX="40"
+   maxSlack="2"/&gt;
+ &lt;linearConstraints&gt;
+  &lt;constraint name="c1" index="0" slack="0"/&gt;
+  &lt;constraint name="c2" index="1" slack="2"/&gt;
+  &lt;constraint name="c3" index="2" slack="0"/&gt;
+ &lt;/linearConstraints&gt;
+ &lt;variables&gt;
+  &lt;variable name="x1" index="0" value="40"/&gt;
+  &lt;variable name="x2" index="1" value="10.5"/&gt;
+  &lt;variable name="x3" index="2" value="19.5"/&gt;
+  &lt;variable name="x4" index="3" value="3"/&gt;
+ &lt;/variables&gt;
+&lt;/CPLEXSolution&gt;</code></pre>
+<div class="note tip"><span class="tiptitle">Tip:</span> When you create an SOL file, it is a good idea to validate your file with respect to 
+the stylesheet and schema in an XML-aware validator.  This safety practice verifies 
+that all required parts of such a file are present and syntactically correct.</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CPLEX/homepages/reffileformatscplex.html">File formats supported by CPLEX</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Specifying interval bounds" />
+<meta name="abstract" content="Though there are various methods for restricting bounds on interval variables, specifying the bounds in the declaration of the interval variable is recommended." />
+<meta name="Description" content="Though there are various methods for restricting bounds on interval variables, specifying the bounds in the declaration of the interval variable is recommended." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="DuvKST68" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Specifying interval bounds</title>
+</head>
+<body role="main" id="DuvKST68">
+<h1 class="title topictitle1">Specifying interval bounds</h1>
+<div class="body"><p class="shortdesc">Though there are various methods for restricting bounds
+on interval variables, specifying the bounds in the declaration of
+the interval variable is recommended.</p>
+<p class="p">If you have to specify a minimal start time, a maximal
+end time or a range of possible values for the size of an interval,
+it is recommended specify these values in the declaration of the interval
+itself rather than through expressions <samp class="ph codeph">IloStartOf</samp>, <samp class="ph codeph">IloEndOf</samp>,
+and <samp class="ph codeph">IloSizeOf</samp>.  </p>
+<p class="p">Specifying the values at the time of declaration avoids
+difficulties related to the optionality of intervals variables. For
+instance, the following code segments are not equivalent:</p>
+<pre class="pre codeblock"><code>IloIntervalVar a(env, 10, 20, IloTrue);</code></pre>
+<p class="p">and</p>
+<pre class="pre codeblock"><code>IloIntervalVar a(env);
+a.setOptional();
+m.add(IloSizeOf(a) &gt;= 10);
+m.add(IloSizeOf(a) &lt;= 20);</code></pre>
+<p class="p">The first sample specifies a range for the size of the
+interval variable if the interval is present. In particular, the model
+will be consistent even if <samp class="ph codeph">a</samp> is absent.
+The second sample will be inconsistent if <samp class="ph codeph">a</samp> is
+absent because the default value of <samp class="ph codeph">IloStartOf(a)</samp> will
+be 0 if <samp class="ph codeph">a</samp> is absent. An equivalent model
+would be something like:</p>
+<pre class="pre codeblock"><code>IloIntervalVar a(env);
+a.setOptional();
+m.add(IloSizeOf(a,10) &gt;= 10);
+m.add(IloSizeOf(a,0) &lt;= 20);</code></pre>
+<p class="p">Additionally, specifying the range at the declaration
+of the interval is more effective in the optimizer. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

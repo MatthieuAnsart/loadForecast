@@ -1,0 +1,244 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Cumul functions in CP Optimizer</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="cumul_functions.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="67"><div
+                class="section-title1">Cumul functions in CP Optimizer</div>
+</a><div
+                    align="right"><a
+                    href="interval_sequence.html">PREVIOUS</a> <a
+                href="state_functions.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%"><tr><td><a
+                            href="cumul_functions.html#68">Semantics</a></td></tr><tr><td><a
+                            href="cumul_functions.html#69">Cumul function expressions</a></td></tr><tr><td><a
+                            href="cumul_functions.html#70">Constraints on cumul function expressions</a></td></tr><tr><td><a
+                href="cumul_functions.html#71">Expressions on cumul function expressions</a></td></tr></table><div
+                    class="section-body"><div class="section"><a
+                            name="68"><div
+                        class="section-title2">Semantics</div>
+</a><div
+                                class="section-body"><p>In scheduling problems involving cumulative resources (also known as renewable resources),
+the cumulated usage of the resource by the activities is usually represented by a function of
+time. An activity usually increases the cumulated resource usage function at its start time
+and decreases it when it releases the resource at its end time (pulse function). For resources
+that can be produced and consumed by activities (for instance the content of an inventory or
+a tank), the resource level can also be described as a function of time, production activities
+will increase the resource level whereas consuming activities will decrease it. In these type of
+problems, the cumulated contribution of activities on the resource can be represented by a
+function of time and constraints can be posted on this function, such as a maximal or a
+safety level.</p><p>CP Optimizer introduces the notion of <em>cumul function expression</em> which is a function that
+represents the sum of individual contributions of intervals. A selection of elementary cumul
+function expressions is available to describe the individual contribution of an interval variable
+(or a fixed interval of time); these cover the main use-cases mentioned above: <em>pulse</em> for usage
+of a cumulative resource, <em>step</em> for resource production/consumption (see <a
+                                href="cumul_functions.html#69">Cumul function expressions</a>). When the
+elementary cumul function expressions that define a cumul function expression are fixed (and,
+thus, so are their related intervals), the expression is fixed. CP Optimizer provides several
+constraints over cumul function expressions. These constraints allow restriction of the possible
+values of the function over the complete horizon or over some fixed or variable interval (see <a
+                                href="cumul_functions.html#70">Constraints on cumul function expressions</a>). For applications where the actual quantity of resource 
+that is used, produced or consumed by intervals is an unknown of the problem, expressions are 
+available for constraining these quantities (see <a
+                                href="cumul_functions.html#71">Expressions on cumul function expressions</a>).</p><p>The constraints involving interval variables and cumul function expressions cannot be used in logical constraints of CP 
+Optimizer (see <a
+                                href="functions/operator_dif.html">operator!</a>, <a
+                    href="functions/operator_or_or.html">operator||</a>). The reason is that any logical 
+constraint involving interval variables
+must be represente via the presence Boolean value on the interval handled by the <em>presenceOf</em> constraint.
+The constraints having this limitation are <em>&le;</em>, <em>&ge;</em>, <em>alwaysIn</em> and <em>alwaysEqual</em>.</p></div></div><div
+                        class="section"><a name="69"><div
+                        class="section-title2">Cumul function expressions</div>
+</a><div
+                                class="section-body"><p>Let <img
+                                src="images/F_plus.png"
+                                alt="image" /> denote the set of all functions from <img
+                                src="images/double_struck_Z.png"
+                                alt="image" />
+to <img
+                                src="images/double_struck_Z_plus.png"
+                                alt="image" />. A cumul function expression <em>f</em> is an
+expression whose value is a function of <img
+                                src="images/F_plus.png"
+                                alt="image" /> and thus, whose domain 
+<em>dom(f)</em> is a subset of <img
+                                src="images/F_plus.png"
+                                alt="image" />.
+Let <em>u</em>, <em>v</em><img
+                                src="images/isin.png" alt="image" /><img
+                                src="images/double_struck_Z.png"
+                                alt="image" /> 
+and <img
+                                src="images/cumul_h.png"
+                                alt="image" /> and <em>a</em> be an interval variable, 
+we consider the following
+elementary cumul function expressions illustrated in Figure 5: <em>pulse(u, v, h)</em>, <em>step(u, h)</em>,
+<em>pulse(a, h)</em>, <em>pulse(a,</em><img
+                                src="images/hmin_hmax.png"
+                                alt="image" /><em>)</em>, 
+<em>stepAtStart(a, h)</em>, <em>stepAtStart(a</em>, <img
+                                src="images/hmin_hmax.png"
+                                alt="image" /><em>)</em>,
+<em>stepAtEnd(a, h)</em>, <em>stepAtEnd(a</em>, <img
+                                src="images/hmin_hmax.png"
+                            alt="image" /><em>)</em>.</p><img
+                            src="images/shapes.png"
+                                alt="image" /><p>More formally, let <em>u, v</em><img
+                                src="images/isin.png" alt="image" /><img
+                                src="images/double_struck_Z.png"
+                                alt="image" /> and 
+<em>h</em><img
+                                src="images/isin.png" alt="image" /><img
+                                src="images/double_struck_Z_plus.png"
+                                alt="image" />, we define the following particular 
+functions of <img
+                                src="images/F_plus.png"
+                            alt="image" />:</p><img
+                            src="images/cumul_func1.png"
+                                alt="image" /><p>The semantics of the elementary function expressions are listed in Table 4 together with
+the formal definitions of their domain. The function set <img
+                                src="images/zero_underscore_a.png"
+                                alt="image" />
+is equal to the singleton <img
+                                src="images/singleton.png"
+                                alt="image" /> if
+<img
+                                src="images/perp.png" alt="image" /><img
+                                src="images/isin.png"
+                            alt="image" /> dom(a); in other words, if interval variable <em>a</em> is possibly absent and equal to the empty set
+otherwise.</p><img
+                            src="images/cumul_func2.png"
+                                    alt="image" /><ul>
+<li>An elementary pulse function is represented by <a
+                                    href="functions/IloPulse.html">IloPulse</a></li><li>An elementary step function is represented by <a
+                                    href="functions/IloStep.html">IloStep</a></li><li>An elementary step at start function is represented by <a
+                                    href="functions/IloStepAtStart.html">IloStepAtStart</a></li><li>An elementary step at end function is represented by <a
+                    href="functions/IloStepAtEnd.html">IloStepAtEnd</a></li>
+</ul></div></div><div
+                        class="section"><a name="70"><div
+                        class="section-title2">Constraints on cumul function expressions</div>
+</a><div
+                                class="section-body"><p>The following constraints can be expressed on a cumul function expression <em>f</em>. Let <em>u, v</em><img
+                                src="images/isin.png" alt="image" /><img
+                                src="images/double_struck_Z.png"
+                                alt="image" /> and <img
+                                src="images/hmin_hmax.png"
+                                alt="image" /><img src="images/isin.png"
+                                alt="image" /><img
+                                src="images/double_struck_Z_plus.png"
+                                    alt="image" /> and <em>a</em> be an interval variable:</p><ul>
+<li><em>alwaysIn(f, u, v,</em><img
+                                    src="images/hmin_hmax.png"
+                                    alt="image" /><em>)</em> means that the values 
+       of function <em>f</em> must remain in the
+       range [<img
+                                    src="images/hmin_hmax.png"
+                                    alt="image" />] everywhere on the interval [<em>u, v</em>).</li><li><em>alwaysIn(f, a,</em><img
+                                    src="images/hmin_hmax.png"
+                                    alt="image" /><em>)</em> means that if interval
+       <em>a</em> is present, the values of function <em>f</em> must remain in the range 
+       [<img
+                                    src="images/hmin_hmax.png"
+                                    alt="image" />] between the start and the end of interval variable <em>a</em>. 
+       </li><li><em>f</em> &le; <img
+                                    src="images/hmax.png"
+                                    alt="image" /> means that the function <em>f</em> cannot take values
+       greater than <img
+                                    src="images/hmax.png"
+                                    alt="image" />. It is semantically equivalent to 
+       <em>alwaysIn(f,-&infin;, +&infin;, 0,</em><img
+                                    src="images/hmax.png"
+                                    alt="image" /><em>)</em>.
+   </li><li><em>f</em> &ge; <img
+                                    src="images/hmin.png"
+                                    alt="image" /> means that the function <em>f</em> cannot take values
+       lower than <img
+                                    src="images/hmin.png"
+                                    alt="image" />. It is semantically equivalent to 
+       <em>alwaysIn(f,-&infin;, +&infin;,</em><img
+                                    src="images/hmin.png"
+                                alt="image" /><em>, +&infin;)</em>.
+   </li>
+</ul><p>More formally:</p><p><img
+                                src="images/alwaysin.png"
+                                    alt="image" /></p><ul>
+<li>An <em>alwaysIn</em> constraint is represented by <a
+                    href="functions/IloAlwaysIn.html">IloAlwaysIn</a></li>
+</ul></div></div><div
+                        class="section"><a name="71"><div
+                        class="section-title2">Expressions on cumul function expressions</div>
+</a><div
+                                class="section-body"><p>The following elementary cumul function expressions are based on an interval variable <em>a</em>:
+<em>pulse(a, h)</em>, <em>pulse(a,</em><img
+                                src="images/hmin_hmax.png"
+                                alt="image" /><em>)</em>, 
+<em>stepAtStart(a, h)</em>, <em>stepAtStart(a,</em><img
+                                src="images/hmin_hmax.png"
+                                alt="image" /><em>)</em>, 
+<em>stepAtEnd(a, h)</em>, <em>stepAtEnd(a,</em><img
+                                src="images/hmin_hmax.png"
+                                alt="image" /><em>)</em>.</p><p>Some of these expressions define a range [<img
+                                src="images/hmin_hmax.png"
+                            alt="image" />] of possible 
+values for the actual height
+of the function when the interval variable <em>a</em> is present. The actual height is an unknown of
+the problem. CP Optimizer provides some integer expressions to control this height. These
+expressions are based on the notion of contribution of a given interval variable <em>a</em> to a (possibly
+composite) cumul function expression <em>f</em>. This contribution is defined as the sum of all the
+elementary cumul function expressions based on <em>a</em> in <em>f</em>. This contribution is a discrete function
+that can change value only at the start and at the end of interval <em>a</em> and is equal to 0 before
+the start of <em>a</em>.</p><p>For instance, let <em>a</em> and <em>b</em> be two interval variables and a cumul function expression <em>f</em> defined
+by: <em>f = pulse(a, 3)</em> + <em>pulse(a, 2)</em> - <em>stepAtEnd(a, 1)</em> + 
+<em>stepAtStart(b, 2)</em> - <em>stepAtEnd(b, 3)</em>.
+The contribution of <em>a</em> to <em>f</em> is the function <em>pulse(a, 3)</em> + <em>pulse(a, 2)</em>
+ - <em>stepAtEnd(a, 1)</em> and the
+contribution of <em>b</em> to <em>f</em> is the function <em>stepAtStart(b, 2)</em> - <em>stepAtEnd(b, 3)</em>.</p><p>If interval <em>a</em> is present, the expression <em>heightAtStart(a, f)</em> returns the value of the contribution
+of <em>a</em> to <em>f</em> evaluated at the start of <em>a</em> that is, it measures the contribution of interval <em>a</em>
+to cumul function expression <em>f</em> at its start point. Similarly, the expression <em>heightAtEnd(a, f)</em>
+returns the value of the contribution of <em>a</em> to <em>f</em> evaluated at the end of <em>a</em> that is, it measures
+the contribution of interval <em>a</em> to cumul function expression <em>f</em> at its end point. An additional
+integer value <em>absVal</em> can be specified at the construction of the expression in which case that
+will be the value returned by the expression when the interval is absent otherwise, if no value
+is specified, the expression will be equal to 0 when the interval is absent.</p><p>In the example above, assuming both interval <em>a</em> and <em>b</em> to be present we would get:
+<em>heightAtStart(a, f)</em> = 5, <em>heightAtEnd(a, f)</em> = -1, <em>heightAtStart(b, f)</em> = 2,
+ <em>heightAtEnd(b, f)</em> =
+-1. Of course, in general when using ranges for the height of elementary cumul function expressions,
+the <em>heightAtStart/End</em> expressions will not be fixed until all the heights have been
+fixed by the search.</p><img
+                            src="images/cumul_func3.png"
+                                    alt="image" /><ul>
+<li>An elementary pulse function is represented by <a
+                                    href="functions/IloPulse.html">IloPulse</a></li><li>An elementary step function is represented by <a
+                                    href="functions/IloStep.html">IloStep</a></li><li>An elementary step at start function is represented by <a
+                                    href="functions/IloStepAtStart.html">IloStepAtStart</a></li><li>An elementary step at end function is represented by <a
+                                    href="functions/IloStepAtEnd.html">IloStepAtEnd</a></li><li>A <em>heightAtStart</em> expression is represented by <a
+                                    href="functions/IloHeightAtStart.html">IloHeightAtStart</a></li><li>A <em>heightAtEnd</em> expression is represented by <a
+                href="functions/IloHeightAtEnd.html">IloHeightAtEnd</a></li>
+</ul></div></div></div><div
+                    align="right"><a
+                    href="interval_sequence.html">PREVIOUS</a> <a href="state_functions.html">NEXT</a></div></div></body>
+</html>

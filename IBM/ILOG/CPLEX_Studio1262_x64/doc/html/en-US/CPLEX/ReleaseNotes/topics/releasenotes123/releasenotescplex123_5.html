@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Simplified threading and parallel search" />
+<meta name="abstract" content="Describes improvements in user’s control of threads, parallel search, and callbacks." />
+<meta name="Description" content="Describes improvements in user’s control of threads, parallel search, and callbacks." />
+<meta name="DC.subject" content="parallel, threads, parallelism, threads and" />
+<meta name="keywords" content="parallel, threads, parallelism, threads and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1300266816163" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" />
+<title>Simplified threading and parallel search</title>
+</head>
+<body role="main" id="descriptiveTopic1300266816163">
+<h1 class="title topictitle1">Simplified threading and parallel search</h1>
+<div class="body"><p class="shortdesc">Describes improvements in user’s control of threads,
+parallel search, and callbacks.</p>
+<p class="p">In CPLEX V12.3, the <a class="xref" href="../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> (<samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>, <samp class="ph codeph">ParallelMode</samp>)
+is <strong class="ph b">independent</strong> of the <a class="xref" href="../../../Parameters/topics/Threads.html" title="Sets the default number of parallel threads that will be invoked by any CPLEX parallel optimizer.">global thread count</a> parameter
+(<samp class="ph codeph">CPX_PARAM_THREADS</samp>, <samp class="ph codeph">Threads</samp>).
+The default setting of the parallel mode switch (0 zero) is now equivalent
+to choosing deterministic (formerly, the value 1 one). Only if you
+set this parameter to opportunistic search mode (-1) will you get
+the opportunistic algorithm. </p>
+<p class="p">In particular,  if the <a class="xref" href="../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> (<samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>, <samp class="ph codeph">ParallelMode</samp>)
+is at its default value (0 zero), then setting the <a class="xref" href="../../../Parameters/topics/Threads.html" title="Sets the default number of parallel threads that will be invoked by any CPLEX parallel optimizer.">global thread count</a> parameter
+(<samp class="ph codeph">CPX_PARAM_THREADS</samp>, <samp class="ph codeph">Threads</samp>)
+to a nondefault value will no longer implicitly make CPLEX switch
+to opportunistic mode. </p>
+<p class="p">At its default value (0 zero), the <a class="xref" href="../../../Parameters/topics/Threads.html" title="Sets the default number of parallel threads that will be invoked by any CPLEX parallel optimizer.">global thread count</a> parameter
+(<samp class="ph codeph">CPX_PARAM_THREADS</samp>, <samp class="ph codeph">Threads</samp>)
+now behaves differently for mixed integer programming problems (MIPs),
+depending on whether <strong class="ph b">callbacks</strong> are
+registered in your application.</p>
+<ul class="ul"><li class="li"><p class="p">If <strong class="ph b">no callbacks</strong> are
+registered, CPLEX uses the maximum number of threads (that is, the
+number of cores on your machine) up to 32 threads.</p>
+</li>
+<li class="li"><p class="p">If <strong class="ph b">only a MIP information
+callback</strong> is registered,  CPLEX uses the maximum
+number of threads (that is, the number of cores on your machine) up
+to 32 threads.</p>
+<p class="p">For documentation about informational
+callbacks, see the topic <a class="xref" href="../../../UsrMan/topics/progr_adv/callbacks_basic/04_info_cb_defn.html" title="Defines an informational callback.">What is an informational callback?</a> in
+the <em class="ph i">CPLEX User’s Manual</em>.</p>
+</li>
+<li class="li"><p class="p">If  <strong class="ph b">other callbacks</strong> are
+registered, such as a MIP callback, an LP callback, a network simplex
+callback, or one of the MIP control callbacks, then CPLEX uses 1 (one)
+thread.</p>
+<p class="p">If you want parallel execution of
+your application in the presence of callbacks other than an information
+callback, you need to set the global thread count parameter  (<samp class="ph codeph">CPX_PARAM_THREADS</samp>, <samp class="ph codeph">Threads</samp>)
+explicitly to a positive value.</p>
+
+<p class="p">For documentation of control and query callbacks, see
+the topics <a class="xref" href="../../../UsrMan/topics/progr_adv/callbacks_adv/04_control_callbacks_defn.html" title="Describes MIP control callbacks.">What are MIP control callbacks?</a> and <a class="xref" href="../../../UsrMan/topics/progr_adv/callbacks_basic/09_query_diag_defn.html" title="Defines a query or diagnostic callback.">What are query or diagnostic callbacks?</a> in
+the <em class="ph i">CPLEX User’s Manual</em>.</p>
+</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes123/releasenotescplex123_3.html" title="Users of prior versions must first apply the conversion notes accompanying previous versions of this product before upgrading to this new version.">Conversion notes for all users</a></div>
+</div>
+</div></body>
+</html>

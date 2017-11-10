@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solve" />
+<meta name="abstract" content="Once the team building problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="Description" content="Once the team building problem has been described and modeled, you use CP Optimizer classes and functions to solve the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/dinner.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerdinner.144843" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/dinner.html" />
+<title>Solve</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerdinner.144843">
+<h1 class="title topictitle1">Solve</h1>
+<div class="body"><p class="shortdesc"> Once the team building problem has been described and
+modeled, you use CP Optimizer classes and functions to solve the constraint
+programming problem. </p>
+<p class="p">Solving a problem using constraint programming consists
+of assigning a value to each decision variable so that all constraints
+are satisfied. You may not always know beforehand whether there is
+a solution that satisfies all the constraints of the problem. In some
+cases, there may be no solution. In other cases, there may be many
+solutions to a problem. </p>
+<p class="p">You use an instance of the class <samp class="ph codeph">IloCP</samp> to
+solve a problem expressed in a model. The constructor for <samp class="ph codeph">IloCP</samp> takes
+an instance of <samp class="ph codeph">IloModel</samp> as an argument. </p>
+<div class="section" id="migration.uss_gscpoptimizerdinner.144843__migration.uss_gscpoptimizerdinner.152333"><h2 class="title sectiontitle">Step 20: Create an instance of IloCP</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create
+an instance of IloCP</samp> </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+</code></pre>
+<p class="p">In this problem, using the built-in search leads to a
+long search time. To modify the search to make it more efficient,
+you use a search tuning parameter to change the <em class="ph i">inference level</em> of the <samp class="ph codeph">IloAllDiff</samp> constraint.</p>
+<p class="p">Each constraint is associated with a domain reduction
+algorithm. This algorithm performs domain reductions based on the
+associated constraint; the algorithm will remove values from the current
+domains of variables that do not belong to a solution. Constraint
+propagation is the mechanism used to communicate the effects of these
+domain reductions. </p>
+<p class="p">For some types of constraints, you can set an inference
+level that specifies the type of domain reduction algorithm. For specialized
+constraints such as <samp class="ph codeph">IloAllDiff</samp>, the reduction
+algorithm varies depending on the inference level. This inference
+level can be changed by setting a parameter on <samp class="ph codeph">IloCP</samp>.</p>
+<p class="p">To understand the difference between the inference levels,
+consider the <samp class="ph codeph">IloAllDiff</samp> constraint. You
+can view this constraint in two ways. It can be seen as a set of inequality
+constraints or as one specialized constraint. For example, consider
+a graph coloring problem with three nodes: <em class="ph i">x</em>, <em class="ph i">y</em> and <em class="ph i">z</em>. All the nodes must be colored
+a different color. Node <em class="ph i">x</em> can
+be colored red or blue; node <em class="ph i">y</em> can
+be colored red or blue; and node <em class="ph i">z</em> can
+be colored red, blue, or yellow. If you set the inference level of <samp class="ph codeph">IloAllDiff</samp> to
+the basic level using the tuning parameter, the domain reduction algorithm
+treats this specialized constraint as a set of inequality constraints.
+Looking at each set of binary constraints individually, the domain
+reduction algorithm is not able to reduce the domains.</p>
+<p class="p">If you set the inference level of <samp class="ph codeph">IloAllDiff</samp> to
+the extended level, the domain reduction algorithm treats this constraint
+as a truly specialized constraint. The reduction algorithm is not
+able to reduce the domains of <em class="ph i">x</em> and <em class="ph i">y</em>. However, the reduction algorithm
+can “realize” that between them, variables <em class="ph i">x</em> and <em class="ph i">y</em> must
+use both of the values red and blue. This leaves only the value of
+yellow available for variable <em class="ph i">z</em>. </p>
+<p class="p">Given that the extended level is the most thorough inference
+level, why would you use any other inference level? There is a trade-off
+in using the extended level. In general, the extended level takes
+longer. The basic inference level is less thorough, but faster. The
+medium level is a compromise between the two levels--faster than the
+extended level and more thorough than the basic. However, these are
+general rules and are not true for every situation. Depending on your
+application, different inference levels may be appropriate. </p>
+<p class="p">You use the member function <samp class="ph codeph">IloCP::setParameter</samp> to
+set the inference levels for specialized constraints. This function
+takes two arguments: the first specifies the type of specialized constraint,
+the second specifies the inference level.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.144843__migration.uss_gscpoptimizerdinner.152324"><h2 class="title sectiontitle">Step 21: Modify the search</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Modify
+the search</samp>  </p>
+<pre class="pre codeblock"><code>    cp.setParameter(IloCP::AllDiffInferenceLevel, IloCP::Extended);
+</code></pre>
+<p class="p">You now use the member function <samp class="ph codeph">IloCP::solve</samp>,
+which searches for a single solution to the problem using constructive
+search and constraint propagation.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.144843__migration.uss_gscpoptimizerdinner.152315"><h2 class="title sectiontitle">Step 22: Search for a solution</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Search
+for a solution</samp>  </p>
+<pre class="pre codeblock"><code>    if (cp.solve()) {
+      cp.out() &lt;&lt; std::endl &lt;&lt; "SOLUTION" &lt;&lt; std::endl;
+      for (p=0; p &lt; nbTeams; ++p) {
+        cp.out() &lt;&lt; "team " &lt;&lt; p &lt;&lt; " : ";
+        for (w=0; w &lt; teamSize; ++w) {
+          cp.out() &lt;&lt; cp.getValue(groups[p][w]) &lt;&lt; " ";
+        }
+        cp.out() &lt;&lt; std::endl;
+      }
+    }
+    else
+      cp.out() &lt;&lt; "**** NO SOLUTION ****" &lt;&lt; std::endl;
+</code></pre>
+</div>
+<div class="section" id="migration.uss_gscpoptimizerdinner.144843__migration.uss_gscpoptimizerdinner.152306"><h2 class="title sectiontitle">Step 23: Compile and run the program</h2><p class="p">Compile and run the program. You should get the following
+results: </p>
+<pre class="pre codeblock"><code>SOLUTION
+team 0 : 0 1 2 3 55 56
+team 1 : 4 5 15 18 50 51
+team 2 : 6 7 16 19 45 46
+team 3 : 8 9 12 14 49 59
+team 4 : 10 11 13 17 44 54
+team 5 : 20 21 24 25 40 41
+team 6 : 22 23 32 33 57 58
+team 7 : 26 27 38 39 52 53
+team 8 : 28 29 34 35 42 43
+team 9 : 30 31 36 37 47 48
+</code></pre>
+<p class="p">The complete program can be viewed in the <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/teambuilding.cpp</samp> file. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/dinner.html" title="In this lesson, you will learn how to find a solution to a team building problem using CP Optimizer and the three-stage method.">Using search parameters: team building</a></div>
+</div>
+</div></body>
+</html>

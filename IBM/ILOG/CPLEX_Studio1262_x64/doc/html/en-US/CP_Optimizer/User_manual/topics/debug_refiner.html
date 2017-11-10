@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using the conflict refiner" />
+<meta name="abstract" content="The conflict refiner is used to find an explanation for the infeasibility of a model." />
+<meta name="Description" content="The conflict refiner is used to find an explanation for the infeasibility of a model." />
+<meta name="DC.subject" content="refiner, conflict, debugging" />
+<meta name="keywords" content="refiner, conflict, debugging" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/debug.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usingtheconflictrefiner" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/debug.html" />
+<title>Using the conflict refiner</title>
+</head>
+<body role="main" id="usingtheconflictrefiner">
+<h1 class="title topictitle1">Using the conflict refiner</h1>
+<div class="body"><p class="shortdesc">The conflict refiner is used to find an explanation for
+the infeasibility of a model. </p>
+<p class="p">In the process of developing a model it often happens that, by
+nature of the model or because some errors slipped in the model or
+in the data, the problem is infeasible. In this case, you can use
+the conflict refiner functionality to identify a minimal infeasible
+subset of constraints. </p>
+<p class="p">Consider for instance the following map-coloring problem in which
+there are two available colors (blue, white) and six contiguous countries
+(Belgium, Denmark, France, Germany, Luxembourg, Netherlands). </p>
+<pre class="pre codeblock"><code>#include &lt;ilcp/cp.h&gt;
+
+const char* Names[] = {"blue", "white"};
+
+int main(){
+  IloEnv env;
+  try {
+    IloModel model(env);
+    IloIntVar Belgium    (env, 0, 1, "Belgium    "), 
+              Denmark    (env, 0, 1, "Denmark    "),
+              France     (env, 0, 1, "France     "), 
+              Germany    (env, 0, 1, "Germany    "), 
+              Netherlands(env, 0, 1, "Netherlands"), 
+              Luxembourg (env, 0, 1, "Luxembourg ");
+    // Constraints
+    model.add(Belgium != France); 
+    model.add(Denmark != Germany ); 
+    model.add(France  != Germany); 
+    model.add(Belgium != Netherlands); 
+    model.add(Germany != Netherlands); 
+    model.add(France  != Luxembourg);  
+    model.add(Luxembourg != Germany);
+    model.add(Luxembourg != Belgium);
+    IloCP cp(model);
+    // Search for a solution
+    if (cp.solve()) {    
+      cp.out() &lt;&lt; cp.getStatus() &lt;&lt; " Solution" &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Belgium    :" &lt;&lt; Names[(IloInt)cp.getValue(Belgium)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Denmark    :" &lt;&lt; Names[(IloInt)cp.getValue(Denmark)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "France     :" &lt;&lt; Names[(IloInt)cp.getValue(France)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Germany    :" &lt;&lt; Names[(IloInt)cp.getValue(Germany)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Netherlands:" &lt;&lt; Names[(IloInt)cp.getValue(Netherlands)] &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "Luxembourg :" &lt;&lt; Names[(IloInt)cp.getValue(Luxembourg)]  &lt;&lt; std::endl;
+    } else {
+      // If the problem was shown to be infeasible, find a minimal explanation for infeasibility
+      if (cp.refineConflict()) {
+        cp.writeConflict(cp.out());
+      }
+    }
+  } catch (IloException&amp; ex) { 
+    env.error() &lt;&lt; "Error: " &lt;&lt; ex &lt;&lt; std::endl;
+  }
+  env.end();
+  return 0;
+}</code></pre>
+<p class="p">This problem is infeasible. Running the conflict refiner on this
+model provides the following explanation:</p>
+<pre class="pre codeblock"><code>	// ------ Conflict members: ---------------------------------------------------
+
+Belgium    [0..1]  != France     [0..1]
+France     [0..1]  != Luxembourg [0..1]
+Luxembourg [0..1]  != Belgium    [0..1]</code></pre>
+<p class="p">The explanation is that it is not possible to color Belgium, France
+and Luxembourg with only two colors. At least three different colors
+are required as these countries are contiguous. This explanation is
+minimal in the sense that if one removes any of these three constraints,
+the two remaining ones are feasible. </p>
+<p class="p">For more information on the conflict refiner, please refer to the
+concept “Conflict Refiner in CP Optimizer” in the CP Optimizer C++
+API Reference Manual.  </p>
+<p class="p">Another example of the use of the conflict refiner for a scheduling
+problem is available in the delivered example <span class="ph filepath">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/sched_conflict.cpp</span>.</p>
+<p class="p">In this example you will learn how to use constraint weights to
+select a preferred explanation and how the conflict refiner can be
+used to iterate over several explanations. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/debug.html" title="CP Optimizer offers debugging features including exception handling, logging and tracing.">Debugging applications</a></div>
+</div>
+</div></body>
+</html>

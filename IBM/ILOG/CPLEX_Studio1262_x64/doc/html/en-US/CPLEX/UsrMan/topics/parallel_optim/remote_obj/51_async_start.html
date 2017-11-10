@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Starting asynchronous execution" />
+<meta name="abstract" content="Documents starting asynchronous execution for the remote object." />
+<meta name="Description" content="Documents starting asynchronous execution for the remote object." />
+<meta name="DC.subject" content="remote object, starting asynchronous execution, asynchronous execution, starting, return values" />
+<meta name="keywords" content="remote object, starting asynchronous execution, asynchronous execution, starting, return values" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/51_async_C.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="async" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/51_async_C.html" />
+<title>Starting asynchronous execution</title>
+</head>
+<body role="main" id="async">
+<h1 class="title topictitle1">Starting asynchronous execution</h1>
+<div class="body"><p class="shortdesc">Documents starting asynchronous execution for the remote object.</p>
+<p class="p">If a conventional CPLEX routine, such as the imaginary <span class="keyword apiname">CPXXfoo</span>, 
+can be invoked asynchronously for the remote object, then there is a corresponding 
+routine <span class="keyword apiname">CPXXfoo_async</span>, which is part of the remote library. The 
+arguments of this asynchronous routine are the <strong class="ph b">input</strong> arguments of its conventional 
+analog, <span class="keyword apiname">CPXXfoo</span>. Additionally, the asynchronous routine has an
+output argument of type <samp class="ph codeph">CPXASYNCptr</samp>, where <samp class="ph codeph">CPXASYNCptr</samp> 
+is a handle to the initiated routine. You can use this handle to query the status 
+of the asynchronous routine, to kill it, or to wait for its completion.
+(The following topics elaborate those possibilities in greater detail.)</p>
+<p class="p">Consider, for example, the familiar CPLEX Callable Library routine, 
+<span class="keyword apiname">CPXXgetx</span>.</p>
+<pre class="pre codeblock"><code>int CPXXgetx (CPXCENVptr env, CPXCLPptr lp, double *x, CPXDIM begin, CPXDIM end);</code></pre>
+<p class="p">The input arguments to this routine are <samp class="ph codeph">env, lp, begin, end</samp>, so the routine
+that initiates an asynchronous call to <span class="keyword apiname">CPXXgetx</span> has the following signature:</p>
+<pre class="pre codeblock"><code>int CPXXgetx_async (CPXCENVptr env, CPXCLPptr lp, CPXDIM begin, CPXDIM end, CPXASYNCptr *handle_p);</code></pre>
+<p class="p">A call of <span class="keyword apiname">CPXXgetx_async</span> triggers a call to 
+<span class="keyword apiname">CPXXgetx</span> on the remote worker specified by the argument <samp class="ph codeph">env</samp> 
+and returns immediately.  In other words, the asynchronous routine does not wait for the 
+call of <span class="keyword apiname">CPXXgetx</span> to complete. If <span class="keyword apiname">CPXXgetx_async</span> returns a status
+of 0 (zero), then in <samp class="ph codeph">handle_p</samp>, it places  an opaque handle that describes the call to
+<span class="keyword apiname">CPXXgetx</span> that just started. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> A successful return of the routine <span class="keyword apiname">CPXXgetx_async</span> 
+does <strong class="ph b">not</strong> mean that <span class="keyword apiname">CPXXgetx</span> on the remote worker completed and returned
+successfully. That preliminary successful return of the asynchronous routine means 
+<strong class="ph b">only</strong> that <span class="keyword apiname">CPXXgetx</span> <strong class="ph b">started</strong> successfully.</div>
+<p class="p">Indeed, an unsuccessful return of the asynchronous routine 
+<span class="keyword apiname">CPXXgetx_async</span> does <strong class="ph b">not</strong> mean that 
+<span class="keyword apiname">CPXXgetx</span> failed on the remote worker. Instead, 
+that unsuccessful return value of the asynchronous routine means that the routine
+could not even be invoked on the remote worker (probably due to problems in
+the transport layer).</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/51_async_C.html" title="Introduces the idea of asynchronous execution for the remote object in the Callable Library (C API).">Asynchronous execution in the Callable Library (C API)</a></div>
+</div>
+</div></body>
+</html>

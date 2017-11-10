@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Arguments to goals" />
+<meta name="abstract" content="arguments to goals are computed immediately, even though goals are not executed immediately." />
+<meta name="Description" content="arguments to goals are computed immediately, even though goals are not executed immediately." />
+<meta name="DC.subject" content="goal, argument" />
+<meta name="keywords" content="goal, argument" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/goals_tips.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizergoals.1017021" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_tips.html" />
+<title>Arguments to goals</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizergoals.1017021">
+<h1 class="title topictitle1">Arguments to goals</h1>
+<div class="body"><p class="shortdesc">arguments to goals are computed immediately, even though
+goals are not executed immediately.</p>
+<p class="p">Goals are not executed immediately when they are created.
+However, their arguments are computed immediately, and these arguments
+are saved together with the goal on the goal stack. Those arguments
+and computations are used when the goal is executed. </p>
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">For that reason, arguments should not contain pointers
+to automatic objects, where automatic objects are objects allocated
+on the C++ stack, that is, without using the new operator.  </p>
+</div>
+<p class="p">Consider the following goals:  </p>
+<pre class="pre codeblock"><code>ILCGOAL1(PrintI, IlcInt*, i){
+  IloCP cp = getCP();
+  cp.out() &lt;&lt; *i &lt;&lt; std::endl;
+  return 0;
+}
+ILCGOAL1(CallPrintI, IlcInt*, i){
+  IlcInt i = 0;
+  return PrintI(getCP(), &amp;i); // error here: i is an automatic
+}
+</code></pre>
+<p class="p">If the goal <samp class="ph codeph">CallPrintI</samp> is
+executed, an instance of <samp class="ph codeph">PrintI</samp> is created.
+This (among other effects) stores the address of <samp class="ph codeph">i</samp>.
+Then the function executing the body of <samp class="ph codeph">CallPrintI</samp> returns.
+Thus the address of <samp class="ph codeph">i</samp> is no longer a valid
+address. Finally, the goal <samp class="ph codeph">PrintI</samp> may be
+executed, causing an error since the address of <samp class="ph codeph">i</samp> is
+no longer valid. </p>
+<p class="p">Another subtle point is that arguments are computed before
+goal execution actually takes place. That fact can lead to some problems.
+A simple example requires the use of a decision variable. </p>
+<p class="p">Consider the following incorrect code:  </p>
+<pre class="pre codeblock"><code>ILCGOAL1(WrongGoal, IlcIntVar, x){
+  return IlcAnd(IlcInstantiate(x),
+                PrintX(getCP(), x.getValue())); // error: x is not fixed
+}
+</code></pre>
+<p class="p">The goal was intended to be executed as: the decision
+variable should be fixed by the execution of the goal <samp class="ph codeph">IlcInstantiate</samp>;
+then the execution of the goal <samp class="ph codeph">PrintX</samp> should
+print its value. However, the argument of <samp class="ph codeph">PrintX</samp> is
+computed before <samp class="ph codeph">IlcInstantiate</samp> is executed.
+That order of events causes an error since <samp class="ph codeph">x</samp> is
+not yet fixed. Indeed, <samp class="ph codeph">IlcInstantiate</samp> is
+pushed onto the goal stack, but it is not executed immediately. </p>
+<p class="p">Here is the correct way to pass <samp class="ph codeph">x</samp> as
+an argument (instead of passing its value):</p>
+<pre class="pre codeblock"><code>ILCGOAL1(PrintVar, IlcIntVar, x){
+  IloCP cp = getCP();
+  cp.out() &lt;&lt; x.getValue() &lt;&lt; std::endl;
+  return 0;
+}
+ILCGOAL1(RightGoal, IlcIntVar, x){
+  return IlcAnd(IlcInstantiate(x),
+                PrintVar(getCP(), x));   // no error here
+}
+</code></pre>
+<p class="p">As indicated in this lesson the macros <samp class="ph codeph">ILCGOALn</samp> define
+subclasses of the class <samp class="ph codeph">IlcGoalI</samp>. Arguments
+to the macro are data members of the new class. The most significant
+consequence of that fact is that modifications of those arguments
+in the body of the macro are saved. Such modifications often have
+unfortunate results, and you are strongly advised not to make such
+modifications. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_tips.html" title="Programming tips are provided to help with writing efficient custom goals.">Programming tips</a></div>
+</div>
+</div></body>
+</html>

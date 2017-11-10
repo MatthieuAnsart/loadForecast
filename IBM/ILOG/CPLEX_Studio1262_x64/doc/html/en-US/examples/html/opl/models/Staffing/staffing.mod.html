@@ -1,0 +1,193 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/***********************************************************************</font></b>
+013: <b><font color="#007D00">* OPL Model for Staffing Example</font></b>
+014: <b><font color="#007D00">* </font></b>
+015: <b><font color="#007D00">* This model is described in the documentation. </font></b>
+016: <b><font color="#007D00">* See "IDE and OPL &gt; Language and Interfaces Examples &gt; OPL model library" </font></b>
+017: <b><font color="#007D00">*</font></b>
+018: <b><font color="#007D00">* This model is greater than the size allowed in trial mode. </font></b>
+019: <b><font color="#007D00">* You therefore need a commercial edition of CPLEX Studio to run this example. </font></b>
+020: <b><font color="#007D00">* If you are a student or teacher, you can also get a full version through</font></b>
+021: <b><font color="#007D00">* the IBM Academic Initiative.</font></b>
+022: <b><font color="#007D00">*************************************************************************/</font></b>
+023: 
+024: 
+025:   
+026: <b><font color="#007D00">//**************************** Data **************************************</font></b>
+027: <b><font color="#0000FF">int</font></b> Totalshifts = ...; <b><font color="#007D00">// Total # of shifts in a day</font></b>
+028: <b><font color="#0000FF">int</font></b> Nbshifts = ...;    <b><font color="#007D00">// Total # shifts a person should work in a day</font></b>
+029: <b><font color="#0000FF">range</font></b> Shifts = 1..Totalshifts; 
+030: 
+031: {<b><font color="#0000FF">string</font></b>} Skills = ...;     <b><font color="#007D00">// Type of skills required</font></b>
+032: {<b><font color="#0000FF">string</font></b>} Weekdays = ...;   <b><font color="#007D00">// Set of work days </font></b>
+033: {<b><font color="#0000FF">string</font></b>} People = ...;     <b><font color="#007D00">// Set of personnel</font></b>
+034: 
+035: <b><font color="#0000FF">int</font></b> Req[Weekdays][Shifts][Skills] = ...;  <b><font color="#007D00">// # of persons of a skill type required in each shifts</font></b>
+036:                   
+037: <b><font color="#007D00">// Data Structure</font></b>
+038: <b><font color="#0000FF">tuple</font></b> shift {
+039:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> p;
+040:   <b><font color="#0000FF">string</font></b> w;
+041: }
+042: 
+043: <b><font color="#0000FF">tuple</font></b> PSkill {
+044:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> p;
+045:   {<b><font color="#0000FF">string</font></b>} s;
+046: }
+047: 
+048: {PSkill} PeopleSkills = ...; <b><font color="#007D00">//  List of skills that a person has </font></b>
+049: {shift}  Unavailable = ...;  <b><font color="#007D00">// Unavailability of each person</font></b>
+050: 
+051: <b><font color="#0000FF">int</font></b> Penalty = <b><font color="#7D007D">card</font></b>(Weekdays)*Nbshifts+1; <b><font color="#007D00">// Penalty for an unfilled slot</font></b>
+052: 
+053: <b><font color="#007D00">//********************************* Variables **********************************</font></b>
+054:         
+055: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Assign[Weekdays][Shifts][People][Skills];   <b><font color="#007D00">// Indicates a shift assignment</font></b>
+056: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Unfilled[Weekdays][Shifts][Skills] <b><font color="#0000FF">in</font></b> 0..maxint;  <b><font color="#007D00">// # of skilled persons unfilled in a shift</font></b>
+057: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Pmin           <b><font color="#0000FF">in</font></b> 0..<b><font color="#7D007D">card</font></b>(Weekdays)*Nbshifts;     <b><font color="#007D00">// Minimal # of shifts assigned </font></b>
+058: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Pmax           <b><font color="#0000FF">in</font></b> 0..<b><font color="#7D007D">card</font></b>(Weekdays)*Nbshifts;     <b><font color="#007D00">// Maximal # of shifts assigned</font></b>
+059: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Start[Weekdays][Shifts][People];             <b><font color="#007D00">// People who start working in a shift</font></b>
+060: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Personnel[Weekdays][Shifts] <b><font color="#0000FF">in</font></b> 0..<b><font color="#7D007D">card</font></b>(People);     <b><font color="#007D00">// # of avail personnel in a shift</font></b>
+061: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Avail[Weekdays][Shifts][People];            <b><font color="#007D00">// Indicates the availability of a person in a shift</font></b>
+062: 
+063: 
+064: <b><font color="#007D00">// the total # of slots unfilled in a week</font></b>
+065: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">int</font></b> TotUnfilled  =
+066:   <b><font color="#7D007D">sum</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, j <b><font color="#0000FF">in</font></b> Skills) Unfilled[w][s][j];
+067: 
+068: <b><font color="#007D00">/************************************* Model *********************************/</font></b>
+069: 
+070: <b><font color="#0000FF">minimize</font></b> TotUnfilled*Penalty + (Pmax-Pmin);
+071: <b><font color="#007D00">// Note:  Since the penalty is higher than the maximal </font></b>
+072: <b><font color="#007D00">// possible difference in the # of shifts assigned to the workers,</font></b>
+073: <b><font color="#007D00">// the schedule always fills the demand first, and then balances the work load.</font></b>
+074: 
+075: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+076:    
+077:   <b><font color="#007D00">// The number of available personnel in a shift = </font></b>
+078:   <b><font color="#007D00">// the sum of the number of starting personnel in pervious "nbshifts" shifts.</font></b>
+079:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts)   
+080:     Personnel[w][s] == <b><font color="#7D007D">sum</font></b>(i <b><font color="#0000FF">in</font></b> Shifts: s-Nbshifts+1 &lt;= i &lt;= s, j <b><font color="#0000FF">in</font></b> People) Start[w][i][j];
+081:       
+082:   <b><font color="#007D00">// The number of personnel in a shift = total # of available persons. </font></b>
+083:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts)  
+084:     Personnel[w][s] == <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> People) Avail[w][s][j];
+085:    
+086:   <b><font color="#007D00">// the total # of person working in a shift &lt;= the # of personnel in the shift.</font></b>
+087: 
+088:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts)  
+089:     ctPersonnel:       
+090:       <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> People, j <b><font color="#0000FF">in</font></b> Skills) Assign[w][s][p][j] &lt;= Personnel[w][s];
+091:       
+092:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts,p <b><font color="#0000FF">in</font></b> People) {
+093:     <b><font color="#007D00">// If a person start in shift k, she will be available during next nbshifts shifts. </font></b>
+094:     <b><font color="#7D007D">forall</font></b>(k <b><font color="#0000FF">in</font></b> Shifts: s-Nbshifts+1 &lt;= k &lt;= s) 
+095:       Avail[w][s][p] &gt;= Start[w][k][p];
+096:     <b><font color="#007D00">// If a person has started, she can't "start" again in any of the next nbshifts shifts. </font></b>
+097:     <b><font color="#7D007D">forall</font></b>(k <b><font color="#0000FF">in</font></b> Shifts: s+1 &lt;= k &lt;= s+Nbshifts-1) 
+098:       1-Start[w][s][p] &gt;= Start[w][k][p];
+099:   }
+100:    
+101:   <b><font color="#007D00">// If a person is available, he must be assigned a job       </font></b>
+102:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, p <b><font color="#0000FF">in</font></b> People)
+103:     <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Skills) Assign[w][s][p][j] == Avail[w][s][p];       
+104:     
+105:   <b><font color="#007D00">// In each shift,  # of people assigned to a type of task +</font></b>
+106:   <b><font color="#007D00">//   unfilled slot &gt;= # of people of that type required</font></b>
+107:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, j <b><font color="#0000FF">in</font></b> Skills)
+108:     ctUnfilled:    
+109:       <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> People) 
+110:         Assign[w][s][p][j] + Unfilled[w][s][j] &gt;= Req[w][s][j];
+111:    
+112:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, t <b><font color="#0000FF">in</font></b> PeopleSkills, k <b><font color="#0000FF">in</font></b> Skills: k <b><font color="#0000FF">not</font></b> <b><font color="#0000FF">in</font></b> t.s)
+113:     Assign[w][s][t.p][k] == 0;
+114:         
+115:   <b><font color="#007D00">// Everyone has to work no longer than 8 hours (2 shifts in this case)</font></b>
+116:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, p <b><font color="#0000FF">in</font></b> People) 
+117:     ctShifts:      
+118:       <b><font color="#7D007D">sum</font></b>(s <b><font color="#0000FF">in</font></b> Shifts, j <b><font color="#0000FF">in</font></b> Skills) 
+119:         Assign[w][s][p][j] &lt;= Nbshifts;
+120:         
+121:   <b><font color="#007D00">// Unavailable person cannot be assigned on that day</font></b>
+122:   <b><font color="#7D007D">forall</font></b>(&lt;p,w&gt; <b><font color="#0000FF">in</font></b> Unavailable, s <b><font color="#0000FF">in</font></b> Shifts, j <b><font color="#0000FF">in</font></b> Skills)
+123:     Assign[w][s][p][j] == 0;
+124: 
+125:   <b><font color="#007D00">// Each person can take only one task in each shift     </font></b>
+126:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, p <b><font color="#0000FF">in</font></b> People) 
+127:     ctTasks:      
+128:       <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Skills) 
+129:         Assign[w][s][p][j] &lt;= 1;
+130:  
+131:   <b><font color="#007D00">// If a person is on night shift, he cannot be assigned to the morning</font></b>
+132:   <b><font color="#007D00">//  shift the next day</font></b>
+133:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> People, k <b><font color="#0000FF">in</font></b> Skills) {   
+134:     Assign[<b><font color="#8A2BE2">"Tue"</font></b>][1][p][k] &lt;= 1 - <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Skills) Assign[<b><font color="#8A2BE2">"Mon"</font></b>][Totalshifts][p][j];
+135:     Assign[<b><font color="#8A2BE2">"Wed"</font></b>][1][p][k] &lt;= 1 - <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Skills) Assign[<b><font color="#8A2BE2">"Tue"</font></b>][Totalshifts][p][j];
+136:     Assign[<b><font color="#8A2BE2">"Thu"</font></b>][1][p][k] &lt;= 1 - <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Skills) Assign[<b><font color="#8A2BE2">"Wed"</font></b>][Totalshifts][p][j];
+137:     Assign[<b><font color="#8A2BE2">"Fri"</font></b>][1][p][k] &lt;= 1 - <b><font color="#7D007D">sum</font></b>(j <b><font color="#0000FF">in</font></b> Skills) Assign[<b><font color="#8A2BE2">"Thu"</font></b>][Totalshifts][p][j];
+138:   }
+139:   
+140:   <b><font color="#007D00">//Each shift at least has a cooker, a cleaner and a cashier</font></b>
+141:   <b><font color="#7D007D">forall</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, j <b><font color="#0000FF">in</font></b> Skills) 
+142:     ctSkills:
+143:       <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> People) Assign[w][s][p][j] &gt;= 1;     
+144:    
+145:   <b><font color="#007D00">// The workload of a person is bounded by pmin and pmax </font></b>
+146:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> People)
+147:     Pmin &lt;= <b><font color="#7D007D">sum</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, j <b><font color="#0000FF">in</font></b> Skills) Assign[w][s][p][j];  
+148:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> People)
+149:     <b><font color="#7D007D">sum</font></b>(w <b><font color="#0000FF">in</font></b> Weekdays, s <b><font color="#0000FF">in</font></b> Shifts, j <b><font color="#0000FF">in</font></b> Skills) Assign[w][s][p][j] &lt;= Pmax;  
+150:        
+151: }
+152: 
+153: 
+154: <b><font color="#0000FF">tuple</font></b> UnfilledSolutionT{ 
+155:         <b><font color="#0000FF">string</font></b> Weekdays; 
+156:         <b><font color="#0000FF">int</font></b> Shifts; 
+157:         <b><font color="#0000FF">string</font></b> Skills; 
+158:         <b><font color="#0000FF">int</font></b> value; 
+159: };
+160: {UnfilledSolutionT} UnfilledSolution = {&lt;i0,i1,i2,Unfilled[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> Weekdays,i1 <b><font color="#0000FF">in</font></b> Shifts,i2 <b><font color="#0000FF">in</font></b> Skills};
+161: <b><font color="#0000FF">tuple</font></b> PersonnelSolutionT{ 
+162:         <b><font color="#0000FF">string</font></b> Weekdays; 
+163:         <b><font color="#0000FF">int</font></b> Shifts; 
+164:         <b><font color="#0000FF">int</font></b> value; 
+165: };
+166: {PersonnelSolutionT} PersonnelSolution = {&lt;i0,i1,Personnel[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Weekdays,i1 <b><font color="#0000FF">in</font></b> Shifts};
+167: <b><font color="#0000FF">tuple</font></b> StartSolutionT{ 
+168:         <b><font color="#0000FF">string</font></b> Weekdays; 
+169:         <b><font color="#0000FF">int</font></b> Shifts; 
+170:         <b><font color="#0000FF">string</font></b> People; 
+171:         <b><font color="#0000FF">int</font></b> value; 
+172: };
+173: {StartSolutionT} StartSolution = {&lt;i0,i1,i2,Start[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> Weekdays,i1 <b><font color="#0000FF">in</font></b> Shifts,i2 <b><font color="#0000FF">in</font></b> People};
+174: <b><font color="#0000FF">tuple</font></b> AvailSolutionT{ 
+175:         <b><font color="#0000FF">string</font></b> Weekdays; 
+176:         <b><font color="#0000FF">int</font></b> Shifts; 
+177:         <b><font color="#0000FF">string</font></b> People; 
+178:         <b><font color="#0000FF">int</font></b> value; 
+179: };
+180: {AvailSolutionT} AvailSolution = {&lt;i0,i1,i2,Avail[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> Weekdays,i1 <b><font color="#0000FF">in</font></b> Shifts,i2 <b><font color="#0000FF">in</font></b> People};
+181: <b><font color="#0000FF">tuple</font></b> AssignSolutionT{ 
+182:         <b><font color="#0000FF">string</font></b> Weekdays; 
+183:         <b><font color="#0000FF">int</font></b> Shifts; 
+184:         <b><font color="#0000FF">string</font></b> People; 
+185:         <b><font color="#0000FF">string</font></b> Skills; 
+186:         <b><font color="#0000FF">int</font></b> value; 
+187: };
+188: {AssignSolutionT} AssignSolution = {&lt;i0,i1,i2,i3,Assign[i0][i1][i2][i3]&gt; | i0 <b><font color="#0000FF">in</font></b> Weekdays,i1 <b><font color="#0000FF">in</font></b> Shifts,i2 <b><font color="#0000FF">in</font></b> People,i3 <b><font color="#0000FF">in</font></b> Skills};
+</tt></pre>

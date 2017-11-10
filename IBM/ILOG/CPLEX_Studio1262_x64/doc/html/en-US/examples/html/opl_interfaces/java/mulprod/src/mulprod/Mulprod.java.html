@@ -1,0 +1,74 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">/*</font></b>
+02: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+04: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+05: <b><font color="#007D00">*</font></b>
+06: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+07: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+08: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+09: <b><font color="#007D00">*/</font></b> 
+10: 
+11: <b><font color="#007D00">// -------------------------------------------------------------- -*- Java -*-</font></b>
+12: <b><font color="#007D00">//Java version of mulprod.cpp of OPL distrib</font></b>
+13: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+14: package mulprod;
+15: 
+16: import ilog.concert.*;
+17: import ilog.cplex.*;
+18: import ilog.opl.*;
+19: 
+20: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> Mulprod
+21: {
+22:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> String DATADIR = <b><font color="#8A2BE2">"."</font></b>;
+23: 
+24:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception
+25:     {
+26:       <b><font color="#0000FF">int</font></b> status = 127;    
+27:       <b><font color="EA7D00">try</font></b> {
+28:         IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+29:         IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+30:         IloOplErrorHandler errHandler = oplF.createOplErrorHandler();
+31:         IloOplModelSource modelSource = oplF.createOplModelSource(DATADIR
+32:                 + <b><font color="#8A2BE2">"/mulprod.mod"</font></b>);
+33:         IloOplSettings settings = oplF.createOplSettings(errHandler);
+34:         IloOplModelDefinition def = oplF.createOplModelDefinition(modelSource,settings);
+35:         IloCplex cplex = oplF.createCplex();
+36:         cplex.setOut(<b><font color="EA7D00">null</font></b>);
+37:         IloOplModel opl = oplF.createOplModel(def, cplex);
+38:         IloOplDataSource dataSource = oplF.createOplDataSource(DATADIR
+39:                 + <b><font color="#8A2BE2">"/mulprod.dat"</font></b>);
+40:         opl.addDataSource(dataSource);
+41:         opl.generate();
+42:         <b><font color="EA7D00">if</font></b> (cplex.solve())
+43:         {
+44:             System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.getCplex().getObjValue());
+45:             opl.postProcess();
+46:             opl.printSolution(System.out);
+47:         }
+48:         <b><font color="EA7D00">else</font></b>
+49:         {
+50:             System.out.println(<b><font color="#8A2BE2">"No solution!"</font></b>);
+51:         }
+52:         oplF.end();
+53:                 status = 0;
+54:       } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+55:         System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+56:         ex.printStackTrace();
+57:         status = 2;
+58:       } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+59:         System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+60:         ex.printStackTrace();
+61:         status = 3;
+62:       } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+63:         System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+64:         ex.printStackTrace();
+65:         status = 4;
+66:       }
+67:       System.exit(status);
+68:     }
+69: }
+</tt></pre>

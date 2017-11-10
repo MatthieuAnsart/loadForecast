@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Adding side constraints" />
+<meta name="abstract" content="How to add a set of constraints to control the search." />
+<meta name="Description" content="How to add a set of constraints to control the search." />
+<meta name="DC.subject" content="constraints, time tabling example" />
+<meta name="keywords" content="constraints, time tabling example" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_cp.1069632" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" />
+<title>Adding side constraints</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_cp.1069632">
+<h1 class="title topictitle1">Adding side constraints</h1>
+<div class="body taskbody"><p class="shortdesc">How to add a set of constraints to control the search.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div><p class="p">In order to produce a more realistic schedule, you can
+add a set of constraints that constrain the search to follow room
+preferences and teacher skills, and to produce more practical time
+tables. </p>
+</div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To add side constraints:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Make sure that the chosen room handles the discipline taught.</span> <pre class="pre codeblock"><code>  forall(r in InstanceSet)
+    room[r] in PossibleRoomIds[r.discipline];</code></pre>
+<p class="p">where <samp class="ph codeph">PossibleRoomIds</samp> is a
+table of integer sets defined as:</p>
+<pre class="pre codeblock"><code>{int} PossibleRoomIds[d in Discipline] = 
+  {i | i in RoomId, z in Room
+   :  (PossibleRoom[d,z] == 1) &amp;&amp; (i == ord(Room,z))};</code></pre>
+<p class="p">and <samp class="ph codeph">PossibleRoom</samp> is a bi-dimensional
+table of Boolean values specifying which room can support which discipline.</p>
+<pre class="pre codeblock"><code>int PossibleRoom[d in Discipline, x in Room] = 
+  &lt;x,d&gt; in DedicatedRoomSet 
+  || 0 == card({&lt;z,k&gt; | z in Room, k in Discipline
+               : (&lt;x,k&gt; in DedicatedRoomSet) 
+                 || (&lt;z,d&gt; in DedicatedRoomSet)});</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Ensure that a given teacher has the required skills to
+teach a course.</span> <pre class="pre codeblock"><code>  forall(r in InstanceSet) 
+    teacher[r] in PossibleTeacherIds[r.discipline];</code></pre>
+<p class="p">where <samp class="ph codeph">PossibleTeacherIds</samp> is
+defined as:</p>
+<pre class="pre codeblock"><code>{int} PossibleTeacherIds[d in Discipline] =
+{i | i in TeacherId, z in Teacher 
+   : i == ord(Teacher, z) 
+     &amp;&amp; d in PossibleTeacherDiscipline[z] };</code></pre>
+<p class="p">and maps discipline names to the set of the indices for
+teachers who are capable of teaching this discipline, and <samp class="ph codeph">PossibleTeacherDiscipline</samp> is
+defined as:</p>
+<pre class="pre codeblock"><code>{string} PossibleTeacherDiscipline[x in Teacher] = {d | &lt;x,d&gt; in TeacherDisciplineSet };</code></pre>
+<p class="p">and maps each teacher to the set of disciplines he can
+teach.</p>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Ensure that, for a given class and a given discipline,
+the teacher remains the same.</span> <pre class="pre codeblock"><code>  forall(c in Class, d in Discipline, r in InstanceSet 
+         : r.Class == c &amp;&amp; r.discipline == d) 
+    teacher[r] == classTeacher[c, d];</code></pre>
+<p class="p">where the additional <samp class="ph codeph">classTeacher</samp> array
+is modeled as:</p>
+<pre class="pre codeblock"><code>dvar int classTeacher[Class,Discipline] in TeacherId; // teacher working once per time point</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Ensure that, if a course spans more than one unit of
+time, it does not cross half-day boundaries.</span> <pre class="pre codeblock"><code>  forall(i in InstanceSet : i.Duration &gt; 1)
+    (Start[i] div HalfDayDuration) == ((End[i]-1) div HalfDayDuration);</code></pre>
+<p class="p">Because the model contains only classes that fit half
+days, it is not necessary to write a similar “same day”
+constraint.</p>
+<p class="p">To also avoid having one discipline taught immediately
+after another, the data file contains a set of <samp class="ph codeph">&lt;discipline,discipline</samp> &gt;
+tuples named <samp class="ph codeph">NeedBreak</samp>.</p>
+<pre class="pre codeblock"><code>NeedBreak =  { 
+   &lt;"Maths","Physics"&gt;,
+   &lt;"Biology","Physics"&gt;,
+   &lt;"Economy","Biology"&gt;,
+   &lt;"Geography","Economy"&gt;,
+   &lt;"History", "Geography"&gt; 
+};</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Using this set, state exclusion constraints.</span> <pre class="pre codeblock"><code>  forall(ordered i, j in InstanceSet, a,b in Discipline
+         : (&lt;b,a&gt; in NeedBreak || &lt;a,b&gt; in NeedBreak)
+         &amp;&amp; i != j
+         &amp;&amp; i.Class == j.Class
+         &amp;&amp; ((i.discipline == a &amp;&amp; j.discipline == b)
+             || (i.discipline == b &amp;&amp; j.discipline == a)))
+    // courses do not belong to the same day
+    ((Start[i] div DayDuration) != (Start[j] div DayDuration)) ||
+    // courses do not belong to the same halfday
+    ((Start[i] div HalfDayDuration) != (Start[j] div HalfDayDuration)) ||
+    // courses are separated by BreakDuration
+    ((Start[i] &gt; End[j])*(Start[i] - End[j]) + 
+     (Start[j] &gt; End[i])*(Start[j] - End[i])) &gt;= BreakDuration;</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Along the same line, make sure the same discipline is
+not taught more than once a day.</span> <pre class="pre codeblock"><code>  forall(ordered i,j in InstanceSet: i.discipline == j.discipline &amp;&amp; i.Class == j.Class) 
+    (Start[i] div DayDuration) != (Start[j] div DayDuration);</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">State that a discipline (such as Sport) is preferably
+taught in the morning.</span> <pre class="pre codeblock"><code>  forall(d in MorningDiscipline, i in InstanceSet
+         : i.discipline == d) 
+    (Start[i] % DayDuration) &lt; HalfDayDuration;</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">You can also add a symmetry-breaking constraint which
+ensures that course numbers, for a given requirement, appear in chronological
+order.</span> <pre class="pre codeblock"><code>  forall(i, j in InstanceSet 
+         : i.id &lt; j.id 
+           &amp;&amp; i.requirementId == j.requirementId) 
+    Start[i] &lt; Start[j];</code></pre>
+</li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_CP_time.html" title="Shows how to build a school timetable, given a set of room specifications, teacher skills, and educational requirements.">The time tabling example</a></div>
+</div>
+</div></body>
+</html>

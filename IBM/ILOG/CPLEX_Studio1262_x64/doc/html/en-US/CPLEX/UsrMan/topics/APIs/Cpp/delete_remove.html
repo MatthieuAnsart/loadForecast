@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Deleting and removing modeling objects" />
+<meta name="abstract" content="Describes the effects of deleting modeling objects in the C++ API." />
+<meta name="Description" content="Describes the effects of deleting modeling objects in the C++ API." />
+<meta name="DC.subject" content="deleting, model objects (C++ API), model, deleting objects (C++ API), constraint, removing from basis (C++ API), variable, removing from basis (C++ API), basis, removing objects from (C++ API), slack, pivoted in when constraint is removed (C++ API)" />
+<meta name="keywords" content="deleting, model objects (C++ API), model, deleting objects (C++ API), constraint, removing from basis (C++ API), variable, removing from basis (C++ API), basis, removing objects from (C++ API), slack, pivoted in when constraint is removed (C++ API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/modify_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cplusIloCplex.115027" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/modify_synopsis.html" />
+<title>Deleting and removing modeling objects</title>
+</head>
+<body role="main" id="User_manual.uss_cplusIloCplex.115027">
+<h1 class="title topictitle1">Deleting and removing modeling objects</h1>
+<div class="body"><p class="shortdesc">Describes the effects of deleting modeling objects
+in the C++ API.</p>
+<p class="p">A special type of modification is that of deleting a modeling
+object by calling its <samp class="ph codeph">end</samp>  method. Consider,
+for example, the deletion of a variable. What happens if the variable
+you delete has been used in constraints or in the objective function,
+or has been extracted to CPLEX? If you call its <samp class="ph codeph">end</samp> method,
+Concert Technology carefully removes the deleted variable from all
+other modeling objects and algorithms that may keep a reference to
+the variable in question. This convention applies to any modeling
+object to be removed. However, user-defined handles to the removed
+variable are not managed by Concert Technology. Instead, it is up
+to the user to make sure that these handles are not used after the
+deletion of the modeling object. The only operation allowed then is
+the assignment operator. </p>
+<p class="p">Concert Technology also provides a way to remove a modeling
+object from all other modeling objects and algorithms exactly the
+same way as when deleting it, yet without deleting the modeling object:
+call the method <samp class="ph codeph">IloExtractable::removeFromAll</samp>.
+This method may be helpful to temporarily remove a variable (or even
+an array of objects) from your model while keeping the option to add
+it back later. </p>
+<p class="p"><strong class="ph b">Tip</strong>: The method <span class="keyword apiname">removeFromAll</span> is inherited
+by classes derived from the class <span class="keyword apiname">IloExtractable</span>,
+such classes as <span class="keyword apiname">IloObjective</span>, <span class="keyword apiname">IloConstraint</span>,
+or <span class="keyword apiname">IloModel</span> and others.</p>
+<p class="p">It is important to understand the difference between calling <samp class="ph codeph">end</samp> and calling <samp class="ph codeph">model.remove(obj)</samp> for
+an object <samp class="ph codeph">obj</samp>. In the case of a call to <samp class="ph codeph">remove</samp>, <samp class="ph codeph">obj</samp> is not necessarily
+removed from the problem that CPLEX maintains. Whether or not anything
+appears to happen depends on whether the removed object is referenced
+by yet another extracted modeling object. For example, when you add
+a modeling object, such as a ranged constraint, to a model, all the
+variables used by that modeling object implicitly become part of the
+model as well. However, when you remove that modeling object (for
+example, that ranged constraint), those variables are not implicitly
+removed because they may be referenced by other elements (such as
+the objective function or a basis, for example). In other words, <samp class="ph codeph">model.add(rngct)</samp> followed
+later by <samp class="ph codeph">model.remove(rngct)</samp> does not leave the model
+unchanged: the model still contains the variables in <samp class="ph codeph">rngct</samp>,
+even if they do not actually appear in other constraints. CPLEX does
+not check whether they appear in other constraints or not when it
+applies <samp class="ph codeph">remove</samp>. For that reason, variables can be
+explicitly removed from a model only by a call to its <samp class="ph codeph">end</samp> 
+member function.</p>
+<p class="p">Usually when a constraint is removed from the extracted
+model, the constraint is also removed from CPLEX as well, unless it
+was added to the model more than once. </p>
+<p class="p">Consider the case where a variable is removed from CPLEX
+after one of the <samp class="ph codeph">end</samp> or <samp class="ph codeph">remove</samp> operations.
+If the <samp class="ph codeph">cplex</samp> object contains a simplex basis,
+by default the status for that variable is removed from the basis
+as well. If the variable happens to be basic, the operation corrupts
+the basis. If this is not what you want, CPLEX provides a delete mode
+that first pivots the variable out of the basis before removing it.
+The resulting basis is not guaranteed to be feasible or optimal, but
+it will still constitute a valid basis. To select this mode, call
+the method: </p>
+<p class="p">  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#setDeleteMode" title="(Opens in a new tab or window)">setDeleteMode</a>(IloCplex::FixBasis); </p>
+<p class="p">Similarly, when removing a constraint with the <samp class="ph codeph">FixBasis</samp> delete mode, CPLEX will pivot the corresponding
+slack or artificial variable into the basis before removing it, to
+make sure of maintaining a valid basis. In either case, if no valid
+basis was available in the first place, no pivot operation is performed.
+To set the delete mode back to its default setting, call: </p>
+<p class="p">  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#setDeleteMode" title="(Opens in a new tab or window)">setDeleteMode</a> <span class="keyword apiname">(IloCplex::LeaveBasis); </span> </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/modify_synopsis.html" title="Describes methods in the C++ API to modify a model.">Modifying a model</a></div>
+</div>
+</div></body>
+</html>

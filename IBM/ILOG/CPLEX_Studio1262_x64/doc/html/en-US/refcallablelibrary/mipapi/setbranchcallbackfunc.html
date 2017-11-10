@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="CPXXsetbranchcallbackfunc and CPXsetbranchcallbackfunc" />
+<meta name="abstract" content="The routine CPXXsetbranchcallbackfunc/CPXsetbranchcallbackfunc sets and modifies the user-written callback routine to be called after a branch has been selected but before the branch is carried out during MIP optimization." />
+<meta name="Description" content="The routine CPXXsetbranchcallbackfunc/CPXsetbranchcallbackfunc sets and modifies the user-written callback routine to be called after a branch has been selected but before the branch is carried out during MIP optimization." />
+<meta name="DC.subject" content="CPXsetbranchcallbackfunc, C API Reference Manual, CPXXsetbranchcallbackfunc" />
+<meta name="keywords" content="CPXsetbranchcallbackfunc, C API Reference Manual, CPXXsetbranchcallbackfunc" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/groups/homepageadvanced.html" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/groups/homepageadvanced.callbacks.html" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/mipapi/hpMIPcallbacks.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="setbranchcallbackfunc" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../refcallablelibrary/groups/homepageadvanced.html" />
+<link rel="Start" href="../../refcallablelibrary/groups/homepageadvanced.callbacks.html" />
+<link rel="Start" href="../../refcallablelibrary/mipapi/hpMIPcallbacks.html" />
+<title>CPXXsetbranchcallbackfunc and CPXsetbranchcallbackfunc</title>
+</head>
+<body role="main" id="setbranchcallbackfunc">
+<h1 class="title topictitle1"><span class="keyword apiname">CPXXsetbranchcallbackfunc</span> and <span class="keyword apiname">CPXsetbranchcallbackfunc</span></h1>
+<div class="body refbody"><p class="shortdesc"> 
+ The routine <samp class="ph codeph"><span class="keyword apiname">CPXXsetbranchcallbackfunc</span>/<span class="keyword apiname">CPXsetbranchcallbackfunc</span></samp> sets and modifies the
+ user-written callback routine to be called after a branch has been selected
+ but before the branch is carried out during MIP optimization.
+  </p>
+<div class="section refsyn">      <p class="p"><span class="ph synph">        <span class="keyword kwd">int</span>
+        <span class="ph sep"> </span><span class="keyword kwd">CPXXsetbranchcallbackfunc</span><span class="ph delim">(</span>
+          <span class="keyword kwd">CPXENVptr</span><span class="ph sep"> </span><span class="ph var">env</span><span class="ph delim">,</span>
+          <span class="keyword kwd">int</span>(<span class="keyword kwd">CPXPUBLIC</span> <span class="ph oper">*</span><span class="ph var">branchcallback</span>)(CPXX_CALLBACK_BRANCH_ARGS)<span class="ph delim">,</span>
+          <span class="keyword kwd">void *</span><span class="ph sep"> </span><span class="ph var">cbhandle</span>
+        <span class="ph delim">)</span>
+      </span></p>
+
+      <p class="p"><span class="ph synph">        <span class="keyword kwd">int</span>
+        <span class="ph sep"> </span><span class="keyword kwd">CPXsetbranchcallbackfunc</span><span class="ph delim">(</span>
+          <span class="keyword kwd">CPXENVptr</span><span class="ph sep"> </span><span class="ph var">env</span><span class="ph delim">,</span>
+          <span class="keyword kwd">int</span>(<span class="keyword kwd">CPXPUBLIC</span> <span class="ph oper">*</span><span class="ph var">branchcallback</span>)(CALLBACK_BRANCH_ARGS)<span class="ph delim">,</span>
+          <span class="keyword kwd">void *</span><span class="ph sep"> </span><span class="ph var">cbhandle</span>
+        <span class="ph delim">)</span>
+      </span></p>
+
+    </div>
+<div class="section"><h2 class="title sectiontitle">Description</h2>    
+ 
+ 
+
+ <div class="note warning"><span class="warningtitle">Warning:</span>  <p class="p">This is an advanced routine.
+ Advanced routines typically demand a thorough understanding
+ of the algorithms used by CPLEX. Thus they incur a higher risk of
+ incorrect behavior in your application, behavior that can be difficult
+ to debug. Therefore, the team encourages you to consider carefully whether
+ you can accomplish the same task by means of other Callable Library
+ routines instead.
+ </p>
+
+ </div>
+
+
+ <p class="p">The routine <samp class="ph codeph"><span class="keyword apiname">CPXXsetbranchcallbackfunc</span>/<span class="keyword apiname">CPXsetbranchcallbackfunc</span></samp> sets and modifies the
+ user-written callback routine to be called after a branch has been selected
+ but before the branch is carried out during MIP optimization. In the
+ callback routine, the CPLEX-selected branch can be changed to a
+ user-selected branch.</p>
+
+
+ <div class="note tip"><span class="tiptitle">Tip:</span>  <p class="p"><strong class="ph b">If you make all branching decisions yourself</strong> </p>
+
+ <p class="p"> By design, a CPLEX branch callback provides the branching decisions that 
+ CPLEX would make if you as a user create no branches in the callback. 
+ Depending on variable selection and other factors, computation of these
+ candidate branches can be time-consuming. If you know certainly that  
+ your callback never uses the branching candidates suggested by CPLEX,
+ then you can save time by disabling strong branching and similar features.
+ </p>
+
+ </div>
+
+    </div>
+<div class="section"><h2 class="title sectiontitle">Arguments</h2>      
+    </div>
+<table cellpadding="4" cellspacing="0" summary="Each row in this table describes a property; each property can have a type, value, and description." border="1" class="simpletable properties"><tr class="sthead prophead">
+<th valign="bottom" align="left" id="d1695303e177" class="stentry propvaluehd">Name</th>
+<th valign="bottom" align="left" id="d1695303e179" class="stentry propdeschd">Description</th>
+</tr><tr class="strow property">
+<td valign="top" headers="d1695303e177" class="stentry propvalue">env</td>
+<td valign="top" headers="d1695303e179" class="stentry propdesc">          
+
+          
+        </td>
+</tr>
+<tr class="strow property">
+<td valign="top" headers="d1695303e177" class="stentry propvalue">branchcallback</td>
+<td valign="top" headers="d1695303e179" class="stentry propdesc">          
+
+          
+        </td>
+</tr>
+<tr class="strow property">
+<td valign="top" headers="d1695303e177" class="stentry propvalue">cbhandle</td>
+<td valign="top" headers="d1695303e179" class="stentry propdesc">          
+
+          
+        </td>
+</tr>
+</table>
+<div class="section"><h2 class="title sectiontitle">Return</h2>      
+      The routine returns 0 (zero) if successful and nonzero if an error occurs.
+    </div>
+<div class="section"><h2 class="title sectiontitle">Example</h2>      
+      
+ <pre class="pre codeblock"><code> status = CPXsetbranchcallbackfunc (env, mybranchfunc, mydata);
+ </code></pre>
+
+
+ <p class="p">See also the example <samp class="ph codeph"><span class="keyword apiname">admipex1.c</span></samp>
+ in the standard distribution.</p>
+
+
+ <p class="p"><strong class="ph b">Parameters</strong></p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">env</span></samp></p>
+
+ <p class="p">A pointer to the CPLEX environment,
+ as returned by <samp class="ph codeph"><span class="keyword apiname">CPXXopenCPLEX</span>/<span class="keyword apiname">CPXopenCPLEX</span></samp>.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">branchcallback</span></samp></p>
+
+ <p class="p">A pointer to a user-written branch callback.
+ If the callback is set to <samp class="ph codeph"><span class="keyword apiname">NULL</span></samp>, no callback can be called during
+ optimization.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">cbhandle</span></samp></p>
+
+ <p class="p">A pointer to user private data.
+ This pointer is passed to the callback.</p>
+
+
+
+ <p class="p"><strong class="ph b">Callback description</strong></p>
+
+
+ <table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable presentation NoBorder" role="presentation"><tr class="sthead"><th valign="bottom" align="left" id="d1695303e276" class="stentry" width="50%">CPXX API</th>
+<th valign="bottom" align="left" id="d1695303e278" class="stentry" width="50%">CPX API</th>
+</tr>
+<tr class="strow"><td valign="top" headers="d1695303e276" class="stentry"> <pre class="pre codeblock"><code> int CPXPUBLIC
+ callback (CPXCENVptr env,
+           void *cbdata,
+           int wherefrom,
+           void *cbhandle,
+           int type,
+           CPXDIM sos,
+           int nodecnt,
+           CPXDIM bdcnt,
+           const CPXDIM *nodebeg,
+           const CPXDIM *indices,
+           const char *lu,
+           const double *bd,
+           const double *nodeest,
+           int *useraction_p);
+ </code></pre>
+
+     </td>
+<td valign="top" headers="d1695303e278" class="stentry"> <pre class="pre codeblock"><code> int CPXPUBLIC
+ callback (CPXCENVptr env,
+           void *cbdata,
+           int wherefrom,
+           void *cbhandle,
+           int type,
+           int sos,
+           int nodecnt,
+           int bdcnt,
+           const int *nodebeg,
+           const int *indices,
+           const char *lu,
+           const double *bd,
+           const double *nodeest,
+           int *useraction_p);
+ </code></pre>
+
+     </td>
+</tr>
+</table>
+
+
+ <p class="p">The call to the branch callback occurs after a branch has been selected
+ but before the branch is carried out. This function is written by the user.
+ On entry to the callback, the CPLEX-selected branch is defined in the
+ arguments. The arguments to the callback specify a list of changes to make
+ to the bounds of variables when child nodes are created. One, two, or zero
+ child nodes can be created, so one, two, or zero lists of changes are
+ specified in the arguments. The first branch specified is considered first.
+ The callback is called with zero lists of bound changes when the solution at
+ the node is integer feasible. CPLEX occasionally elects to
+ branch by changing a number of bounds on variables or by adding
+ constraints to the node subproblem; the branch type is then 
+<samp class="ph codeph"><span class="keyword apiname">CPX_TYPE_ANY</span></samp>.
+ The details of the constraints added for a 
+<samp class="ph codeph"><span class="keyword apiname">CPX_TYPE_ANY</span></samp> branch
+ are not available to the user.</p>
+
+
+ <p class="p">You can implement custom branching strategies by calling the CPLEX
+ routine
+ <samp class="ph codeph"><a class="xref" href="branchcallbackbranchbds.html" title="The routine CPXXbranchcallbackbranchbds/CPXbranchcallbackbranchbds specifies the branches to be taken from the current node."><span class="keyword apiname">CPXXbranchcallbackbranchbds</span>/<span class="keyword apiname">CPXbranchcallbackbranchbds</span></a></samp>,
+ <samp class="ph codeph"><a class="xref" href="branchcallbackbranchconstraints.html" title="The routine CPXXbranchcallbackbranchconstraints/CPXbranchcallbackbranchconstraints specifies the branches to be taken from the current node when the branch is specified by adding one or more constraints to the node problem."><span class="keyword apiname">CPXXbranchcallbackbranchconstraints</span>/<span class="keyword apiname">CPXbranchcallbackbranchconstraints</span></a></samp>, or
+ <samp class="ph codeph"><a class="xref" href="branchcallbackbranchgeneral.html" title="The routine CPXXbranchcallbackbranchgeneral/CPXbranchcallbackbranchgeneral specifies the branches to be taken from the current node when the branch includes variable bound changes and additional constraints."><span class="keyword apiname">CPXXbranchcallbackbranchgeneral</span>/<span class="keyword apiname">CPXbranchcallbackbranchgeneral</span></a></samp> and
+ setting the <samp class="ph codeph"><span class="keyword apiname">useraction</span></samp> argument to
+ <samp class="ph codeph"><span class="keyword apiname">CPX_CALLBACK_SET</span></samp>. Then CPLEX will carry out these branches
+ instead of the CPLEX-selected branches.</p>
+
+
+ <p class="p">Branch variables are expressed in terms of the original problem
+ if the parameter
+ <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_MIPCBREDLP</span></samp> is set to <samp class="ph codeph"><span class="keyword apiname">CPX_OFF</span></samp> before the
+ call to <samp class="ph codeph"><span class="keyword apiname">CPXXmipopt</span>/<span class="keyword apiname">CPXmipopt</span></samp> that calls the callback. Otherwise, branch
+ variables are in terms of the presolved problem.</p>
+
+
+ <p class="p">If you set the parameter <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_MIPCBREDLP</span></samp> to
+ <samp class="ph codeph"><span class="keyword apiname">CPX_OFF</span></samp>, you must also disable dual and nonlinear
+ presolve reductions. To do so, set the parameter
+ <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_REDUCE</span></samp> to 1 (one), and set the parameter
+ <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_PRELINEAR</span></samp> to 0 (zero). </p>
+
+
+ <p class="p"><strong class="ph b">Callback return value</strong></p>
+
+
+ <p class="p">The callback returns 0 (zero) if successful and nonzero if an error occurs.</p>
+
+
+ <p class="p"><strong class="ph b">Callback arguments</strong></p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">env</span></samp></p>
+
+
+ <p class="p">A pointer to the CPLEX environment,
+ as returned by <samp class="ph codeph"><span class="keyword apiname">CPXXopenCPLEX</span>/<span class="keyword apiname">CPXopenCPLEX</span></samp>.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">cbdata</span></samp></p>
+
+
+ <p class="p">A pointer to pass to functions that obtain 
+callback-specific information, such as 
+the number of integer-infeasible values at 
+the current node, or that take callback-specific 
+action, such as to add a cut in a user cut callback.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">wherefrom</span></samp></p>
+
+
+ <p class="p">An integer value reporting where in the optimization this function was
+ called. It will have the value <samp class="ph codeph"><span class="keyword apiname">CPX_CALLBACK_MIP_BRANCH</span></samp>.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">cbhandle</span></samp></p>
+
+
+ <p class="p">A pointer to user-private data.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">int type</span></samp></p>
+
+
+ <p class="p">An integer that specifies the type of branch. This table
+ summarizes possible values. </p>
+
+
+ <div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" class="table" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Branch Types</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" valign="top" id="d1695303e476">Symbolic Constant</th>
+<th class="entry" valign="top" id="d1695303e478">Value</th>
+<th class="entry" valign="top" id="d1695303e480">Branch</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" valign="top" headers="d1695303e476 "><samp class="ph codeph"><span class="keyword apiname">CPX_TYPE_VAR</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e478 "><samp class="ph codeph"><span class="keyword apiname">'0'</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e480 ">variable branch</td>
+</tr>
+<tr class="row"><td class="entry" valign="top" headers="d1695303e476 "><samp class="ph codeph"><span class="keyword apiname">CPX_TYPE_SOS1</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e478 "><samp class="ph codeph"><span class="keyword apiname">'1'</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e480 ">SOS1 branch</td>
+</tr>
+<tr class="row"><td class="entry" valign="top" headers="d1695303e476 "><samp class="ph codeph"><span class="keyword apiname">CPX_TYPE_SOS2</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e478 "><samp class="ph codeph"><span class="keyword apiname">'2'</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e480 ">SOS2 branch</td>
+</tr>
+<tr class="row"><td class="entry" valign="top" headers="d1695303e476 "><samp class="ph codeph"><span class="keyword apiname">CPX_TYPE_ANY</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e478 "><samp class="ph codeph"><span class="keyword apiname">'A'</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e480 ">multiple bound changes or constraints will be used for branching</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">sos</span></samp></p>
+
+
+ <p class="p">An integer that specifies the special ordered set (SOS) used for this
+ branch. A value of <samp class="ph codeph"><span class="keyword apiname">-1</span></samp> specifies that this branch is not an
+ SOS-type branch. </p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">nodecnt</span></samp></p>
+
+
+ <p class="p">An integer that specifies the number of nodes CPLEX will create from this
+ branch. Possible values are:</p>
+
+ <ul class="ul"><li class="li"><samp class="ph codeph"><span class="keyword apiname">0</span></samp> (zero), or </li>
+<li class="li"><samp class="ph codeph"><span class="keyword apiname">1</span></samp>, or </li>
+<li class="li"><samp class="ph codeph"><span class="keyword apiname">2</span></samp>. </li>
+</ul>
+
+ <p class="p">If the argument is <samp class="ph codeph"><span class="keyword apiname">0</span></samp>, the node will be fathomed
+ unless user-specified branches are made; that is, no child nodes are created
+ and the node itself is discarded.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">bdcnt</span></samp></p>
+
+
+ <p class="p">An integer that specifies the number of bound changes defined in the
+ arrays <samp class="ph codeph"><span class="keyword apiname">indices</span></samp>, <samp class="ph codeph"><span class="keyword apiname">lu</span></samp>, and <samp class="ph codeph"><span class="keyword apiname">bd</span></samp> that
+ define the CPLEX-selected branch.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">nodebeg</span></samp></p>
+
+
+ <p class="p">An array with <samp class="ph codeph"><span class="keyword apiname">nodecnt</span></samp> entries. The i-th entry is the index
+ into the arrays <samp class="ph codeph"><span class="keyword apiname">indices</span></samp>, <samp class="ph codeph"><span class="keyword apiname">lu</span></samp>, and <samp class="ph codeph"><span class="keyword apiname">bd</span></samp>
+ of the first bound changed for the ith node.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">indices</span></samp></p>
+
+
+ <p class="p">Together with <samp class="ph codeph"><span class="keyword apiname">lu</span></samp> and <samp class="ph codeph"><span class="keyword apiname">bd</span></samp>, this array defines the
+ bound changes for each of the created nodes. The entry
+ <samp class="ph codeph"><span class="keyword apiname">indices[i]</span></samp> is the index for the variable.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">lu</span></samp></p>
+
+
+ <p class="p">Together with <samp class="ph codeph"><span class="keyword apiname">indices</span></samp> and <samp class="ph codeph"><span class="keyword apiname">bd</span></samp>, this array
+ defines the bound changes for each of the created nodes. The entry
+ <samp class="ph codeph"><span class="keyword apiname">lu[i]</span></samp> is one of the three possible values specifying which
+ bound to change: </p>
+
+ <ul class="ul"><li class="li"><samp class="ph codeph"><span class="keyword apiname">'L'</span></samp> for lower bound, or </li>
+<li class="li"><samp class="ph codeph"><span class="keyword apiname">'U'</span></samp> for upper bound, or </li>
+<li class="li"><samp class="ph codeph"><span class="keyword apiname">'B'</span></samp> for both bounds. </li>
+</ul>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">bd</span></samp></p>
+
+
+ <p class="p">Together with <samp class="ph codeph"><span class="keyword apiname">indices</span></samp> and <samp class="ph codeph"><span class="keyword apiname">lu</span></samp>, this array
+ defines the bound changes for each of the created nodes. The entry
+ <samp class="ph codeph"><span class="keyword apiname">bd[i]</span></samp> specifies the new value of the bound.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">nodeest</span></samp></p>
+
+
+ <p class="p">An array with <samp class="ph codeph"><span class="keyword apiname">nodecnt</span></samp> entries that contains estimates of the
+ integer objective-function value that will be attained from the created
+ node.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">useraction_p</span></samp></p>
+
+
+ <p class="p">A pointer to an integer specifying the action for CPLEX to take at
+ the completion of the user callback. The table summarizes
+ the possible actions. </p>
+
+
+ <div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" class="table" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. Actions to be taken after a user-written branch callback</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" valign="top" id="d1695303e725">Value</th>
+<th class="entry" valign="top" id="d1695303e727">Symbolic Constant</th>
+<th class="entry" valign="top" id="d1695303e729">Action</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" valign="top" headers="d1695303e725 "><samp class="ph codeph"><span class="keyword apiname">0</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e727 "><samp class="ph codeph"><span class="keyword apiname">CPX_CALLBACK_DEFAULT</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e729 ">Use CPLEX-selected branch</td>
+</tr>
+<tr class="row"><td class="entry" valign="top" headers="d1695303e725 "><samp class="ph codeph"><span class="keyword apiname">1</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e727 "><samp class="ph codeph"><span class="keyword apiname">CPX_CALLBACK_FAIL</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e729 ">Exit optimization</td>
+</tr>
+<tr class="row"><td class="entry" valign="top" headers="d1695303e725 "><samp class="ph codeph"><span class="keyword apiname">2</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e727 "><samp class="ph codeph"><span class="keyword apiname">CPX_CALLBACK_SET</span></samp></td>
+<td class="entry" valign="top" headers="d1695303e729 ">Use user-selected branch, as defined by calls to
+ <samp class="ph codeph"><span class="keyword apiname">CPXXbranchcallbackbranchbds</span>/<span class="keyword apiname">CPXbranchcallbackbranchbds</span></samp></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+      
+    </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/groups/homepageadvanced.html">Advanced Routines in the CPLEX Callable Library (C API)</a></div>
+</div>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/groups/homepageadvanced.callbacks.html">Callback Routines (advanced) in the CPLEX Callable Library (C API)</a></div>
+</div>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/mipapi/hpMIPcallbacks.html">Using callbacks in a discrete model</a></div>
+</div>
+</div></body>
+</html>

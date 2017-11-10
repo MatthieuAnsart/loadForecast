@@ -1,0 +1,119 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2014. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// This problem is based on "prob038: Steel mill slab design problem" from</font></b>
+013: <b><font color="#007D00">// CSPLib (www.csplib.org). It is a simplification of an industrial problem</font></b>
+014: <b><font color="#007D00">// described in J. R. Kalagnanam, M. W. Dawande, M. Trumbo, H. S. Lee.</font></b>
+015: <b><font color="#007D00">// "Inventory Matching Problems in the Steel Industry," IBM Research</font></b>
+016: <b><font color="#007D00">// Report RC 21171, 1998.</font></b>
+017: <b><font color="#007D00">//</font></b>
+018: 
+019: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+020: 
+021: <b><font color="#007D00">// The number of coils to produce</font></b>
+022: <b><font color="#0000FF">tuple</font></b> TOrder {
+023:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> index;
+024:    <b><font color="#0000FF">int</font></b> weight;
+025:    <b><font color="#0000FF">int</font></b> color;
+026: }
+027: {TOrder} Orders = ...;
+028: 
+029: <b><font color="#0000FF">tuple</font></b> TParams {
+030:   <b><font color="#0000FF">int</font></b> maxNbSlabs;
+031:   <b><font color="#0000FF">int</font></b> maxColorsPerSlab; 
+032: }
+033: 
+034: <b><font color="#007D00">/// single-row table.</font></b>
+035: TParams Params = ...;
+036: 
+037: <b><font color="#007D00">// The total number of slabs available.  In theory this can be unlimited,</font></b>
+038: <b><font color="#007D00">// but we impose and reasonable upper bound in order to produce a practical</font></b>
+039: <b><font color="#007D00">// optimization model.</font></b>
+040: 
+041: <b><font color="#007D00">// The different slab weights available.</font></b>
+042: {<b><font color="#0000FF">int</font></b>} slabWeights = ...;
+043: 
+044: <b><font color="#0000FF">int</font></b> nbOrders = <b><font color="#7D007D">card</font></b>(Orders);
+045: <b><font color="#0000FF">range</font></b> orderIndexRange = 0..nbOrders-1;
+046: 
+047: <b><font color="#0000FF">int</font></b> nbSlabs = Params.maxNbSlabs;
+048: <b><font color="#0000FF">range</font></b> Slabs = 1..nbSlabs;
+049: 
+050: 
+051: {<b><font color="#0000FF">int</font></b>} allcolors = <b><font color="#7D007D">union</font></b>(o <b><font color="#0000FF">in</font></b> Orders) { o.color};
+052: 
+053: <b><font color="#007D00">// CP needs arrays</font></b>
+054: <b><font color="#0000FF">int</font></b> orderWeights[ i <b><font color="#0000FF">in</font></b> orderIndexRange ] = <b><font color="#7D007D">item</font></b>(Orders, i).weight;
+055: 
+056: 
+057: <b><font color="#007D00">// The heaviest slab</font></b>
+058: <b><font color="#0000FF">int</font></b> maxSlabWeight = <b><font color="#7D007D">max </font></b>(sw <b><font color="#0000FF">in</font></b> slabWeights) sw;
+059: 
+060: <b><font color="#007D00">// Which slab is used to produce each coil</font></b>
+061: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> productionSlab[Orders] <b><font color="#0000FF">in</font></b> Slabs;
+062: 
+063: <b><font color="#007D00">// How much of each slab is used</font></b>
+064: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> slabUse[Slabs] <b><font color="#0000FF">in</font></b> 0..maxSlabWeight;
+065: 
+066: <b><font color="#007D00">// The amount of loss incurred for different amounts of slab use</font></b>
+067: <b><font color="#007D00">// The loss will depend on how much less steel is used than the slab</font></b>
+068: <b><font color="#007D00">// just large enough to produce the coils.</font></b>
+069: <b><font color="#0000FF">int</font></b> loss[use <b><font color="#0000FF">in</font></b> 0..maxSlabWeight] =
+070:   <b><font color="#7D007D">min </font></b>(sw <b><font color="#0000FF">in</font></b> slabWeights : sw &gt;= use) (sw - use); 
+071: 
+072: <b><font color="#007D00">// The total loss is</font></b>
+073: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">int</font></b> totalLoss = <b><font color="#7D007D">sum</font></b>(s <b><font color="#0000FF">in</font></b> Slabs) loss[slabUse[s]];
+074: <b><font color="#007D00">//dexpr int totalUsed = sum(s in Slabs) slabUse[s];</font></b>
+075: 
+076: <b><font color="#0000FF">execute</font></b> {
+077:   <b><font color="EA7D00">var</font></b> f = cp.factory;
+078:   cp.setSearchPhases(f.searchPhase(productionSlab));
+079: }
+080: 
+081: minimize totalLoss ;
+082: 
+083: subject to {
+084:   packCt:
+085:     <b><font color="#007D00">// The orders are allocated to the slabs with capacity</font></b>
+086:     pack(slabUse, productionSlab, orderWeights);
+087: 
+088:   forall (s <b><font color="EA7D00">in</font></b> Slabs) {
+089:     colorCt:
+090:       <b><font color="#007D00">// At most 2 colors per slab</font></b>
+091:       sum (c <b><font color="EA7D00">in</font></b> allcolors) (
+092:         or (o <b><font color="EA7D00">in</font></b> Orders : o.color == c) (productionSlab[o] == s)
+093:       ) &lt;= Params.maxColorsPerSlab; 
+094:   }
+095: }
+096: 
+097: {<b><font color="#0000FF">int</font></b>} fromSlab[s in Slabs] = 
+098: { o.index | o <b><font color="EA7D00">in</font></b> Orders : productionSlab[o] == s };
+099: 
+100: 
+101: {<b><font color="#0000FF">int</font></b>} slabColors[s in Slabs] = { o.color | o <b><font color="EA7D00">in</font></b> Orders : o.index <b><font color="EA7D00">in</font></b> fromSlab[s] };
+102: 
+103: execute {
+104:   <b><font color="EA7D00">for</font></b> (s <b><font color="EA7D00">in</font></b> Slabs) {
+105:     <b><font color="EA7D00">if</font></b> (Opl.card(fromSlab[s]) &gt; 0) {
+106:       write(<b><font color="#8A2BE2">"Slab "</font></b> + s + <b><font color="#8A2BE2">", Loss = "</font></b> + loss[slabUse[s]]
+107:           + <b><font color="#8A2BE2">", colors ="</font></b> + slabColors[s] + <b><font color="#8A2BE2">", Orders ="</font></b>);
+108:       <b><font color="EA7D00">for</font></b> (o <b><font color="EA7D00">in</font></b> fromSlab[s]) {
+109:         write(<b><font color="#8A2BE2">" "</font></b> + o);
+110:       }
+111:       writeln();
+112:     }
+113:   }
+114: }
+</tt></pre>

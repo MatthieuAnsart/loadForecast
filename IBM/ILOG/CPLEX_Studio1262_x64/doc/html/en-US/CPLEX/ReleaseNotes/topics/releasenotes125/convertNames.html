@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Names and file formats" />
+<meta name="abstract" content="Change in internal naming conventions impacts file formats" />
+<meta name="Description" content="Change in internal naming conventions impacts file formats" />
+<meta name="DC.subject" content="release notes CPLEX V12.5, internal names, file formats, logs" />
+<meta name="keywords" content="release notes CPLEX V12.5, internal names, file formats, logs" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes125/convertIntro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="NamesAndFileFormats" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes125/convertIntro.html" />
+<title>Names and file formats</title>
+</head>
+<body role="main" id="NamesAndFileFormats">
+<h1 class="title topictitle1">Names and file formats</h1>
+<div class="body"><p class="shortdesc">Change in internal naming conventions impacts file formats</p>
+<p class="p">CPLEX V12.5 has unified the default internal naming conventions of models and modeling objects to 
+support localization and internationalization of the product. In previous versions, if the user 
+supplied no name for a model or modeling object (such as a variable, row, column, constraint), 
+Concert Technology (C++, Java, .NET APIs) supplied a 
+default internal name of the form <samp class="ph codeph">IloX</samp><em class="ph i">nnnn</em> (for unnamed variables) or 
+<samp class="ph codeph">IloC</samp><em class="ph i">nnnn</em> (for unnamed constraints), 
+where <em class="ph i">nnnn</em> was the internal identification number of the extractable object. 
+In contrast, the Callable Library (C API) supplied default internal names of the form 
+<samp class="ph codeph">x</samp><em class="ph i">nnnn</em> (for variables), 
+<samp class="ph codeph">c</samp><em class="ph i">nnnn</em> (for constraints), 
+<samp class="ph codeph">i</samp><em class="ph i">nnnn</em> (for indicator constraints), and so on. 
+Now all interfaces of CPLEX observe the same default 
+internal naming conventions about models and modeling objects for which the user supplies no name.</p>
+<p class="p">This change in internal naming conventions is generally not visible to users, except in 
+<strong class="ph b">logs</strong> and in the writing or reading of <strong class="ph b">formatted files</strong>. In this context, 
+formatted files means such files as model files (mps, sav, lp), solution files (mst, sol), basis files (bas).
+(See the reference manual <em class="ph i">Formats Supported by CPLEX</em> for a complete list of formatted files.)</p>
+<p class="p">Furthermore, CPLEX now issues a message on the <strong class="ph b">warning channel</strong> 
+(although the term 'Warning' is not in the message) each time these names are used.</p>
+<p class="p">As an example of this change, consider a log file of the formatted file 
+<span class="ph filepath">lpex3.lp</span> from CPLEX V12.4 (following the previous default internal naming convention) 
+and the same formatted file from CPLEX V12.5 (applying the new internal naming convention).</p>
+<p class="p"><strong class="ph b">CPLEX V12.4 previous naming conventions for lpex3.lp</strong></p>
+<pre class="pre codeblock"><code>\ENCODING=ISO-8859-1
+\Problem name: chvatal
+
+Minimize
+ obj: id1 + id2 + id3 + id4 + id5 + id6 + id7 + 2 id11 + 2 id12 + id29
+Subject To
+ id16: - id8 - id9 - id10  = -1
+ id18: id1 + id6 + id8  = 4
+ id20: id2 + id4 + id7 + id9  = 1
+ id22: id3 + id5 + id10  = 1
+ id24: - id6 - id7 - id11 + id12  = -2
+ id26: - id4 - id5 + id11  = -2
+ id28: - id1 - id2 - id3 - id12  = -1
+ id31: 2 id11 + 5 id12  = 2
+ id33: id1 + id3 + id6  = 3
+Bounds
+ 0 &lt;= id1 &lt;= 50
+ 0 &lt;= id2 &lt;= 50
+ 0 &lt;= id3 &lt;= 50
+ 0 &lt;= id4 &lt;= 50
+ 0 &lt;= id5 &lt;= 50
+ 0 &lt;= id6 &lt;= 50
+ 0 &lt;= id7 &lt;= 50
+ 0 &lt;= id11 &lt;= 50
+ 0 &lt;= id12 &lt;= 50
+      id29 = 0
+ 0 &lt;= id8 &lt;= 50
+ 0 &lt;= id9 &lt;= 50
+ 0 &lt;= id10 &lt;= 50
+End </code></pre>
+<p class="p"><strong class="ph b">CPLEX V12.5 new naming conventions for lpex3.lp</strong></p>
+<pre class="pre codeblock"><code>\ENCODING=ISO-8859-1
+\Problem name: IloCplex
+
+Minimize
+ obj: x1 + x2 + x3 + x4 + x5 + x6 + x7 + 2 x8 + 2 x9 + x10
+Subject To
+ c1: - x11 - x12 - x13  = -1
+ c2: x1 + x6 + x11  = 4
+ c3: x2 + x4 + x7 + x12  = 1
+ c4: x3 + x5 + x13  = 1
+ c5: - x6 - x7 - x8 + x9  = -2
+ c6: - x4 - x5 + x8  = -2
+ c7: - x1 - x2 - x3 - x9  = -1
+ c8: 2 x8 + 5 x9  = 2
+ c9: x1 + x3 + x6  = 3
+Bounds
+ 0 &lt;= x1 &lt;= 50
+ 0 &lt;= x2 &lt;= 50
+ 0 &lt;= x3 &lt;= 50
+ 0 &lt;= x4 &lt;= 50
+ 0 &lt;= x5 &lt;= 50
+ 0 &lt;= x6 &lt;= 50
+ 0 &lt;= x7 &lt;= 50
+ 0 &lt;= x8 &lt;= 50
+ 0 &lt;= x9 &lt;= 50
+      x10 = 0
+ 0 &lt;= x11 &lt;= 50
+ 0 &lt;= x12 &lt;= 50
+ 0 &lt;= x13 &lt;= 50
+End </code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes125/convertIntro.html" title="Users of prior versions must first apply the conversion notes accompanying previous versions of this product before upgrading to this new version.">Conversion notes for all users</a></div>
+</div>
+</div></body>
+</html>

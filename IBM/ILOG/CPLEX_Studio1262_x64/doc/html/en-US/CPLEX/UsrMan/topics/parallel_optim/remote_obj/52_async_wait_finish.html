@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Waiting for asynchronous execution and finishing" />
+<meta name="abstract" content="Documents waiting and finishing of asynchronous execution for the remote object." />
+<meta name="Description" content="Documents waiting and finishing of asynchronous execution for the remote object." />
+<meta name="DC.subject" content="remote object, asynchronous execution, remote object and, waiting for" />
+<meta name="keywords" content="remote object, asynchronous execution, remote object and, waiting for" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/51_async_C.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="asyncWaitFinish" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/51_async_C.html" />
+<title>Waiting for asynchronous execution and finishing</title>
+</head>
+<body role="main" id="asyncWaitFinish">
+<h1 class="title topictitle1">Waiting for asynchronous execution and finishing</h1>
+<div class="body"><p class="shortdesc">Documents waiting and finishing of asynchronous execution for the remote object.</p>
+<p class="p">Continuing with the discussion of asynchronous execution of the imaginary routine 
+<span class="keyword apiname">CPXXfoo</span>, you recall that after calling <span class="keyword apiname">CPXXfoo_async</span>, 
+applications on the master can use the handle returned by <span class="keyword apiname">CPXXfoo_async</span>. 
+In particular, applications on the master can use the handle returned by <span class="keyword apiname">CPXXfoo_async</span> 
+in cooperation with the routine <span class="keyword apiname">CPXXfoo_join</span> to <strong class="ph b">wait</strong> for completion of 
+execution of <span class="keyword apiname">CPXXfoo</span> on the remote worker.  The arguments of 
+<span class="keyword apiname">CPXXfoo_join</span> are the handle returned by <span class="keyword apiname">CPXXfoo_async</span> and all 
+<strong class="ph b">output</strong> arguments of the routine <span class="keyword apiname">CPXXfoo</span>. </p>
+<p class="p">Consider a specific example. For 
+the conventional routine <span class="keyword apiname">CPXXgetx</span>, the signature of the corresponding join routine 
+looks like this:</p>
+<pre class="pre codeblock"><code>int CPXXgetx_join (CPXHANDLEptr *handle_p, double *x);</code></pre>
+<p class="p"><span class="keyword apiname">CPXXgetx_join</span> waits for the completion of the call of 
+<span class="keyword apiname">CPXXgetx</span> on the remote worker. Then the join routine fetches the result of 
+that call (in this example, the solution vector) and stores the result in <samp class="ph codeph">x</samp>. 
+The return value of <span class="keyword apiname">CPXXgetx_join</span> is usually the return value of 
+<span class="keyword apiname">CPXXgetx</span> on the remote worker. If a transport or
+protocol error occurred while the join routine was waiting for the completion of 
+<span class="keyword apiname">CPXXgetx</span>, or if an invalid asynchronous pointer 
+<samp class="ph codeph">CPXASYNCptr</samp>  was used, then the join routine can also return an error code
+specifying this condition.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> The asynchronous join routine destroys the handle pointed to by <samp class="ph codeph">handle_p</samp> and also
+sets <samp class="ph codeph">*handle_p</samp> to <samp class="ph codeph">NULL</samp>. It is an error to use the handle pointed to by
+<samp class="ph codeph">handle_p</samp> after the asynchronous join routine returns.</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/51_async_C.html" title="Introduces the idea of asynchronous execution for the remote object in the Callable Library (C API).">Asynchronous execution in the Callable Library (C API)</a></div>
+</div>
+</div></body>
+</html>

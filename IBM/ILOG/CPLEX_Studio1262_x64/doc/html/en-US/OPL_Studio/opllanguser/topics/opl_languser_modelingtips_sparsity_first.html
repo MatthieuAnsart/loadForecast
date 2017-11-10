@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Exploiting sparsity - a first attempt" />
+<meta name="abstract" content="Presents transp2.mod." />
+<meta name="Description" content="Presents transp2.mod." />
+<meta name="DC.subject" content="code samples, transp2.mod" />
+<meta name="keywords" content="code samples, transp2.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips_sparsity.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_modelingtips.1009390" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips_sparsity.html" />
+<title>Exploiting sparsity - a first attempt</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_modelingtips.1009390">
+<h1 class="title topictitle1">Exploiting sparsity - a first attempt</h1>
+<div class="body"><p class="shortdesc">Presents <samp class="ph codeph">transp2.mod</samp>.</p>
+<p class="p">A first attempt at exploiting the sparsity available in
+a large-scale transportation problem consists of representing the
+data as a set <samp class="ph codeph">routes</samp> of tuples of type </p>
+<pre class="pre codeblock"><code>tuple Route { string p; string o; string d; } </code></pre>
+<p class="p">The array <samp class="ph codeph">cost</samp> and <samp class="ph codeph">trans</samp> can then be indexed with this set. A model
+based on this idea is shown in the example below, <samp class="ph codeph">transp2.mod</samp>. </p>
+<div class="example" id="usropllangtut.uss_langtut_modelingtips.1009390__usropllangtut.uss_langtut_modelingtips.1009427"><h2 class="title sectiontitle">A sparse transportation model: first attempt (<samp class="ph codeph">transp2.mod</samp>)</h2><pre class="pre codeblock"><code>{string} Cities = ...;
+{string} Products = ...;
+float Capacity = ...;
+
+tuple route { 
+  string p; 
+  string o; 
+  string d; 
+}
+{route} Routes = ...;
+tuple supply { 
+  string p; 
+  string o; 
+}
+{supply} Supplies = { &lt;p,o&gt; | &lt;p,o,d&gt; in Routes };
+float Supply[Supplies] = ...;
+tuple customer { 
+  string p; 
+  string d; 
+}
+{customer} Customers = { &lt;p,d&gt; | &lt;p,o,d&gt; in Routes };
+float Demand[Customers] = ...;
+float Cost[Routes] = ...;
+
+{string} Orig[p in Products] = { o | &lt;p,o,d&gt; in Routes };
+{string} Dest[p in Products] = { d | &lt;p,o,d&gt; in Routes };
+
+assert forall(p in Products) 
+  sum(o in Orig[p]) 
+    Supply[&lt;p,o&gt;] == sum( d in Dest[p] ) Demand[&lt;p,d&gt;];
+
+dvar float+ Trans[Routes];   
+constraint ctSupply[Products][Cities];
+constraint ctDemand[Products][Cities];
+
+minimize
+  sum(l in Routes) Cost[l] * Trans[l];
+   
+subject to {
+  forall( p in Products , o in Orig[p] ) 
+
+    ctSupply[p][o]: 
+      sum( d in Dest[p] ) 
+        Trans[&lt; p,o,d &gt;] == Supply[&lt;p,o&gt;];
+  forall( p in Products , d in Dest[p] )
+    ctDemand[p][d]:  
+      sum( o in Orig[p] ) 
+        Trans[&lt; p,o,d &gt;] == Demand[&lt;p,d&gt;];
+  ctCapacity:  forall( o , d in Cities )
+                 sum( &lt;p,o,d&gt; in Routes ) 
+                   Trans[&lt;p,o,d&gt;] &lt;= Capacity;
+}</code></pre>
+</div>
+<p class="p">The data for the supplies and demands are also represented
+in a sparse way by projecting the set <samp class="ph codeph">Routes</samp> to
+obtain their index sets. In addition to that, the model also precomputes,
+in a generic way, the cities <samp class="ph codeph">orig[p]</samp> that
+can ship product <samp class="ph codeph">p</samp> and the cities <samp class="ph codeph">dest[p]</samp> that can receive product <samp class="ph codeph">p</samp>.
+Most of the resulting model is elegant and efficient. </p>
+<p class="p">Unfortunately, the constraint </p>
+<pre class="pre codeblock"><code>  ctCapacity:  forall( o , d in Cities )
+                 sum( &lt;p,o,d&gt; in Routes ) 
+                   Trans[&lt;p,o,d&gt;] &lt;= Capacity;</code></pre>
+<p class="p">is not particularly efficient because it does not exploit
+the structure of the application. Indeed, the <samp class="ph codeph">forall</samp> statement
+iterates not over actual connections but rather over all pairs of
+cities. In addition, the aggregate operator on the second line </p>
+<pre class="pre codeblock"><code>sum(&lt;p,o,d&gt; in Routes) trans[&lt;p,o,d&gt;] &lt;= capacity; </code></pre>
+<p class="p">cannot exploit the “connection” structure to obtain all
+products of a connection, since <samp class="ph codeph">o</samp> and <samp class="ph codeph">d</samp> are separate entities. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips_sparsity.html" title="Discusses sparsity, tuples of parameters, and filtering in the context of model efficiency.">Sparsity</a></div>
+</div>
+</div></body>
+</html>

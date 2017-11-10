@@ -1,0 +1,243 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/*********************************************</font></b>
+013: <b><font color="#007D00"> * The model shows a Lagrangian relaxation for </font></b>
+014: <b><font color="#007D00"> * a location-transportation problem.</font></b>
+015: <b><font color="#007D00"> * The original MIP is decomposed into two problems </font></b>
+016: <b><font color="#007D00"> * in order to deduce a multiplier for a particular </font></b>
+017: <b><font color="#007D00"> * constraint based on Lagrange relaxation. </font></b>
+018: <b><font color="#007D00"> *</font></b>
+019: <b><font color="#007D00"> * The main purpose is to show multiple optimization </font></b>
+020: <b><font color="#007D00"> * through modifications of different models </font></b>
+021: <b><font color="#007D00"> * existing in a single environment. </font></b>
+022: <b><font color="#007D00"> *********************************************/</font></b>
+023: 
+024: <b><font color="#0000FF">int</font></b> nbCities = ...;
+025: <b><font color="#0000FF">range</font></b> cities = 1..nbCities;
+026: 
+027: <b><font color="#0000FF">int</font></b> build_limit = ...; 
+028: <b><font color="#0000FF">int</font></b> ship_cost[cities, cities]  = ...;
+029: <b><font color="#0000FF">int</font></b> send[cities] = ...;
+030: <b><font color="#0000FF">int</font></b> request[cities] = ...; 
+031: 
+032: 
+033: 
+034: <b><font color="#0000FF">main</font></b> {
+035:   <b><font color="EA7D00">function</font></b> maxArray(arr) {
+036:     <b><font color="EA7D00">var</font></b> max;
+037:     <b><font color="EA7D00">if</font></b> (arr.size &lt;= 0)
+038:       max = undefined;
+039:     <b><font color="EA7D00">else</font></b> {  
+040:       max = arr[1];
+041:       <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i=2;i&lt;=arr.size;i++)
+042:         <b><font color="EA7D00">if</font></b> (arr[i]&gt;max)
+043:           max = arr[i];
+044:     }
+045:     <b><font color="EA7D00">return</font></b> max;
+046:   }  
+047: 
+048:   <b><font color="#0000FF">thisOplModel</font></b>.settings.mainEndEnabled = <b><font color="EA7D00">true</font></b>;
+049:   <b><font color="#0000FF">thisOplModel</font></b>.generate();
+050:   <b><font color="EA7D00">var</font></b> data = <b><font color="#0000FF">thisOplModel</font></b>.dataElements;
+051: 
+052:   writeln(<b><font color="#8A2BE2">"--- LP Relaxation ---"</font></b>);
+053:   <b><font color="EA7D00">var</font></b> m1Source = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"relax.mod"</font></b>);
+054:   <b><font color="EA7D00">var</font></b> m1Cplex = <b><font color="EA7D00">new</font></b> IloCplex();
+055:   <b><font color="EA7D00">var</font></b> m1Def = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(m1Source);
+056:   <b><font color="EA7D00">var</font></b> m1Opl = <b><font color="EA7D00">new</font></b> IloOplModel(m1Def,m1Cplex);
+057:   m1Opl.addDataSource(data);
+058:   m1Opl.generate();
+059:   <b><font color="EA7D00">if</font></b> (m1Cplex.solve()) {
+060:     <b><font color="EA7D00">var</font></b> LB = m1Cplex.getObjValue();
+061:   }
+062:   m1Opl.end();
+063:   m1Def.end();
+064:   m1Cplex.end();
+065:   m1Source.end();
+066: 
+067:   <b><font color="EA7D00">var</font></b> m2Source = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"LowerBound.mod"</font></b>);
+068:   <b><font color="EA7D00">var</font></b> m2Cplex = <b><font color="EA7D00">new</font></b> IloCplex();
+069:   <b><font color="EA7D00">var</font></b> m2Def = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(m2Source);
+070:   <b><font color="#007D00">// model used to retrieve data common at each iteration</font></b>
+071:   <b><font color="EA7D00">var</font></b> m2_init = <b><font color="EA7D00">new</font></b> IloOplModel(m2Def,m2Cplex);
+072:   m2_init.addDataSource(data);
+073:   <b><font color="EA7D00">var</font></b> dataMult = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"mult.dat"</font></b>);
+074:   m2_init.addDataSource(dataMult);
+075:   m2_init.generate();
+076:   <b><font color="EA7D00">var</font></b> data2 = m2_init.dataElements;  
+077:   
+078:   <b><font color="EA7D00">var</font></b> m3Source = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"UpperBound.mod"</font></b>);
+079:   <b><font color="EA7D00">var</font></b> m3Cplex = <b><font color="EA7D00">new</font></b> IloCplex();
+080:   <b><font color="EA7D00">var</font></b> m3Def = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(m3Source);
+081:   <b><font color="#007D00">// model used to retrieve data common at each iteration</font></b>
+082:   <b><font color="EA7D00">var</font></b> m3_init = <b><font color="EA7D00">new</font></b> IloOplModel(m3Def,m3Cplex);
+083:   m3_init.addDataSource(data);
+084:   <b><font color="EA7D00">var</font></b> dataSBuild = <b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"SBuild.dat"</font></b>);
+085:   m3_init.addDataSource(dataSBuild);  
+086:   m3_init.generate();
+087:   <b><font color="EA7D00">var</font></b> data3 = m3_init.dataElements;
+088:   
+089:   <b><font color="#007D00">// begin the lagrangian calculation here   </font></b>
+090:   writeln();
+091:   writeln(<b><font color="#8A2BE2">" beginning the lagrangian calculation here... "</font></b>);
+092:   <b><font color="#007D00">// maximum number of iteration we want to run the loop  </font></b>
+093:   <b><font color="EA7D00">var</font></b> iter_limit = 20;
+094:   
+095:   <b><font color="#007D00">// initialize arrays and variables used in the loop that follows</font></b>
+096:   <b><font color="EA7D00">var</font></b> same = 0;
+097:   <b><font color="EA7D00">var</font></b> same_limit = 3;
+098:   <b><font color="EA7D00">var</font></b> slack = <b><font color="EA7D00">new</font></b> Array(<b><font color="#0000FF">thisOplModel</font></b>.nbCities);
+099:   <b><font color="EA7D00">var</font></b> temp = <b><font color="EA7D00">new</font></b> Array(<b><font color="#0000FF">thisOplModel</font></b>.nbCities);
+100:   <b><font color="EA7D00">var</font></b> mult = <b><font color="EA7D00">new</font></b> Array(<b><font color="#0000FF">thisOplModel</font></b>.nbCities);
+101:   <b><font color="EA7D00">var</font></b> UB = 0;
+102:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.cities) {
+103:     slack[i] = 0.0;
+104:     UB += maxArray(<b><font color="#0000FF">thisOplModel</font></b>.ship_cost[i]);
+105:     temp[i] = 0.0;
+106:     mult[i] = 0.0;
+107:   } 
+108:   <b><font color="EA7D00">var</font></b> scale = 1.0;
+109:   <b><font color="EA7D00">var</font></b> norm = 0.0;
+110:   <b><font color="EA7D00">var</font></b> step = 0.0;
+111:   
+112:   <b><font color="#007D00">//arrays to store the UB, LB, scale and step values at each iteration</font></b>
+113:   <b><font color="EA7D00">var</font></b> LBlog = <b><font color="EA7D00">new</font></b> Array(iter_limit);
+114:   <b><font color="EA7D00">var</font></b> UBlog = <b><font color="EA7D00">new</font></b> Array(iter_limit);
+115:   <b><font color="EA7D00">var</font></b> scalelog = <b><font color="EA7D00">new</font></b> Array(iter_limit);
+116:   <b><font color="EA7D00">var</font></b> steplog = <b><font color="EA7D00">new</font></b> Array(iter_limit);
+117: 
+118:   <b><font color="#007D00">// executes LowerBound and UpperBound model </font></b>
+119:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> k=1; k&lt;=iter_limit;k++) {
+120:     LBlog[k] = 0.0;
+121:     UBlog[k] = 0.0;
+122:     scalelog[k] = 0.0;
+123:     steplog[k] = 0.0;
+124:     writeln();
+125:     writeln(<b><font color="#8A2BE2">" ITERATION:  "</font></b> , k );  
+126:     <b><font color="EA7D00">var</font></b> m2 = <b><font color="EA7D00">new</font></b> IloOplModel(m2Def,m2Cplex);
+127:     <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.cities){
+128:       data2.mult[i] = mult[i];
+129:     }
+130:     m2.addDataSource(data2);  
+131:     m2.generate();
+132:     <b><font color="EA7D00">var</font></b> Lagrangian;
+133:     <b><font color="EA7D00">if</font></b> (m2Cplex.solve()) { 
+134:       Lagrangian = m2Cplex.getObjValue();
+135:     }
+136:     
+137:     norm = 0;
+138:     <b><font color="EA7D00">for</font></b>(i <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.cities) {
+139:       slack[i] = 0;
+140:       <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.cities) { 
+141:         slack[i]+= m2.Ship[j][i];        
+142:       }
+143:       slack[i] -= <b><font color="#0000FF">thisOplModel</font></b>.request[i];
+144:       norm += Opl.pow(slack[i],2);
+145:     }
+146:     
+147:  
+148:     writeln(<b><font color="#8A2BE2">"lower bound obj value: "</font></b>, Lagrangian); 
+149:     <b><font color="EA7D00">if</font></b> (Lagrangian &gt; LB + 0.000001) {
+150:       LB = Lagrangian();
+151:       same = 0;  
+152:     } <b><font color="EA7D00">else</font></b> {   
+153:       same ++; 
+154:     }
+155:     <b><font color="EA7D00">if</font></b> (same == same_limit) {
+156:      scale = scale/2;
+157:      same = 0;    
+158:     }
+159:     
+160:     step = scale * ((UB - Lagrangian) / norm);
+161:     
+162:         
+163:     <b><font color="EA7D00">var</font></b> sum1 = 0;
+164:     <b><font color="EA7D00">var</font></b> sum2 = 0;
+165:     <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.cities) {
+166:       sum1 += m2.send[i] * m2.Build[i];
+167:       sum2 += m2.request[i];
+168:     }
+169:     sum2 -= 1.0/Math.pow(10,8)
+170:     <b><font color="EA7D00">if</font></b> (sum1 &gt;= sum2) {
+171:       <b><font color="#007D00">// solve the model to get the Upper Bound</font></b>
+172:       <b><font color="EA7D00">var</font></b> m3 = <b><font color="EA7D00">new</font></b> IloOplModel(m3Def,m3Cplex);
+173:       <b><font color="#007D00">// get the dvar values of the model just solved</font></b>
+174:       <b><font color="#007D00">// to use in Upper Bound model</font></b>
+175:       <b><font color="EA7D00">for</font></b> (i <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.cities)
+176:         data3.SBuild[i] = m2.Build[i];
+177:       m3.addDataSource(data3);    
+178:       m3.generate();      
+179:       <b><font color="EA7D00">if</font></b> (m3Cplex.solve()) {
+180:         writeln(<b><font color="#8A2BE2">"upper bound model value: "</font></b>, m3Cplex.getObjValue());
+181:         <b><font color="EA7D00">if</font></b> (m3Cplex.getObjValue() &lt; UB)
+182:           UB = m3Cplex.getObjValue(); 
+183:       }
+184:       m3.end(); 
+185:       
+186:     }
+187:     
+188:     <b><font color="#007D00">// update mult to pass it as input data to LowerBound model in next iteration</font></b>
+189:     <b><font color="EA7D00">for</font></b>(j <b><font color="EA7D00">in</font></b> <b><font color="#0000FF">thisOplModel</font></b>.cities) {
+190:       temp[j] = mult[j]; 
+191:       <b><font color="EA7D00">if</font></b> (temp[j] - (step * slack[j]) &gt; 0 )
+192:         mult[j] = temp[j] - (step * slack[j]) ;
+193:       <b><font color="EA7D00">else</font></b> 
+194:         mult[j] = 0; 
+195:     }
+196:     LBlog[k] = LB;
+197:     UBlog[k] = UB; 
+198:     scalelog[k] = scale;
+199:     steplog[k] = step; 
+200:     
+201:     m2.end();
+202:     
+203:   } <b><font color="#007D00">//end of main "for loop"</font></b>
+204:   dataMult.end();
+205:   m2_init.end();
+206:   dataSBuild.end();
+207:   m3_init.end();
+208: 
+209:   writeln(<b><font color="#8A2BE2">"---------------------"</font></b>);
+210:   writeln();
+211:   write(<b><font color="#8A2BE2">"LBlog = "</font></b>);
+212:   <b><font color="EA7D00">for</font></b> (i=1;i&lt;=iter_limit;i++)  
+213:     writeln(LBlog[i]);
+214:   writeln();  
+215:   writeln(<b><font color="#8A2BE2">"UBlob = "</font></b>);
+216:   <b><font color="EA7D00">for</font></b> (i=1;i&lt;=iter_limit;i++)  
+217:     writeln(UBlog[i]);
+218:   writeln();  
+219:   writeln(<b><font color="#8A2BE2">"scalelog = "</font></b>);
+220:   <b><font color="EA7D00">for</font></b> (i=1;i&lt;=iter_limit;i++) 
+221:     writeln(scalelog[i]);
+222:   writeln();  
+223:   writeln(<b><font color="#8A2BE2">"steplog = "</font></b>);
+224:   <b><font color="EA7D00">for</font></b> (i=1;i&lt;=iter_limit;i++) 
+225:     writeln(steplog[i]);
+226:     
+227:   m3Def.end();
+228:   m3Cplex.end();
+229:   m3Source.end(); 
+230:       
+231:   m2Def.end();
+232:   m2Cplex.end();
+233:   m2Source.end();    
+234:       
+235:       
+236:     
+237:     
+238: }
+</tt></pre>

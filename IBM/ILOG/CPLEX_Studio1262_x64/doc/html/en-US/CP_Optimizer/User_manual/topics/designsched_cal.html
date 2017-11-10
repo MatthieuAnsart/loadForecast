@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling resource calendars" />
+<meta name="abstract" content="Resource calendars can be modeled using a stepwise function that describes the intensity of &#34;work&#34; over time." />
+<meta name="Description" content="Resource calendars can be modeled using a stepwise function that describes the intensity of &#34;work&#34; over time." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="FlJUHreu" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/designsched.html" />
+<title>Modeling resource calendars</title>
+</head>
+<body role="main" id="FlJUHreu">
+<h1 class="title topictitle1">Modeling resource calendars</h1>
+<div class="body"><p class="shortdesc">Resource calendars can be modeled using a stepwise function
+that describes the intensity of "work" over time.</p>
+<p class="p">Many scheduling problems, especially in project scheduling,
+involve calendars for resources. </p>
+<p class="p">These calendars specify periods of time such that:</p>
+<ol class="ol"><li class="li"><p class="p">the resource is not available and suspends
+a task it is working on,</p>
+</li>
+<li class="li"><p class="p">the resource works with a limited efficiency
+so that a task requiring this resource will take more time during
+these periods,</p>
+</li>
+<li class="li"><p class="p"> the resource cannot start or finish
+executing a task during such a period, </p>
+</li>
+<li class="li"><p class="p">a task requiring the resource cannot
+overlap such a period or</p>
+</li>
+<li class="li"><p class="p">a task can overlap these periods but
+the total overlap must be retrieved as an integer expression (typically
+to be minimized as part of the cost).</p>
+</li>
+</ol>
+<p class="p">In CP Optimizer, this notion of a resource calendar is
+represented by a stepwise function that describes the intensity of
+"work" over time. An interval variable can be associated with an integer
+stepwise intensity function with possible values expressed as a percentage
+in [0,100]. The intensity function represents an instantaneous ratio
+between the size and the length of an interval variable. Cases (1)
+and (2) can be represented by an intensity function. Case (1) is a
+special case with the intensity function being equal to 0 on the time
+periods the resource suspends the execution of tasks. Other constraints
+can be modeled using the constraints <samp class="ph codeph">IloForbidStart</samp> and <samp class="ph codeph">IloForbidEnd</samp> (for
+case 3) and <samp class="ph codeph">IloForbidExtent</samp> (for case 4).
+ </p>
+<p class="p">The sample below defines an intensity function equal
+to 100% except for the weekends (intervals <samp class="ph codeph">[5+7i,7+7i]</samp>)
+for which the intensity is 0%, that is, the resource suspends its
+tasks on weekends.  </p>
+<p class="p">Task <samp class="ph codeph">task1</samp> will be suspended
+during weekends.  </p>
+<p class="p">Task <samp class="ph codeph">task2</samp> will be suspended
+during weekends and cannot start during a weekend.  </p>
+<p class="p">Task <samp class="ph codeph">task3</samp> will be suspended
+during weekends and cannot start or end during a weekend.  </p>
+<p class="p">Task <samp class="ph codeph">task4</samp> must be completely
+executed during a week so that it cannot overlap a weekend.  </p>
+<p class="p">Task <samp class="ph codeph">task5</samp> of length 7 days
+can overlap weekends but the total duration of the task performed
+during weekends (<samp class="ph codeph">ov5</samp>) is to be minimized.</p>
+<pre class="pre codeblock"><code>IloNumToNumStepFunction we(env, 0, 364, 100);
+for (IloInt w=0; w&lt;52; ++w)
+  we.setValue(5+(7*w), 7+(7*w), 0);
+IloIntervalVar task1(env,10);
+task1.setIntensity(we);
+IloIntervalVar task2(env,10);
+task2.setIntensity(we);
+IloIntervalVar task3(env,10);
+task3.setIntensity(we);
+IloIntervalVar task4(env,4);
+IloIntervalVar task5(env);
+task5.setIntensity(we);
+task5.setEndMax(365);
+IloIntExpr ov5 = 7-IloSizeOf(task5);
+m.add(IloForbidStart(env, task2, we));
+m.add(IloForbidStart(env, task3, we));
+m.add(IloForbidEnd(env, task3, we));
+m.add(IloForbidExtent(env, task4, we));
+m.add(IloLengthOf(task5)==7);
+m.add(IloMinimize(env, ov5));</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/designsched.html" title="Although developing scheduling models for CP Optimizer can be straightforward, there are some principles that you should consider while working on a model.">Designing scheduling models</a></div>
+</div>
+</div></body>
+</html>

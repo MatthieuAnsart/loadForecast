@@ -1,0 +1,149 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00">* Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">* 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+004: <b><font color="#007D00">* Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00">*</font></b>
+006: <b><font color="#007D00">* Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00">* Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00">* Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00">*/</font></b>
+010: 
+011: <b><font color="#007D00">// -------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">//Java version of cutstock_change.cpp of OPL distrib</font></b>
+013: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+014: package cutstock_change;
+015: 
+016: import ilog.concert.*;
+017: import ilog.cplex.*;
+018: import ilog.opl.*;
+019: import java.util.*;
+020: 
+021: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> Cutstock_change {
+022:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> String DATADIR = <b><font color="#8A2BE2">"."</font></b>;
+023: 
+024:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">double</font></b> RC_EPS = 1.0e-6;
+025: 
+026:     <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) <b><font color="EA7D00">throws</font></b> Exception {
+027:         <b><font color="#0000FF">int</font></b> status = 127;
+028:         <b><font color="EA7D00">try</font></b> {
+029:             IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+030:             IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+031: 
+032:             <b><font color="#007D00">// make master model</font></b>
+033:             IloOplErrorHandler errHandler = oplF.createOplErrorHandler();
+034:             IloOplSettings settings = oplF.createOplSettings(errHandler);
+035: 
+036:             IloOplRunConfiguration masterRC = oplF.createOplRunConfiguration(
+037:                     DATADIR + <b><font color="#8A2BE2">"/cutstock_change.mod"</font></b>, DATADIR
+038:                             + <b><font color="#8A2BE2">"/cutstock_change.dat"</font></b>);
+039:             masterRC.setErrorHandler(errHandler);
+040:             IloCplex masterCplex = oplF.createCplex();
+041:             masterCplex.setOut(<b><font color="EA7D00">null</font></b>);
+042: 
+043:             masterRC.setCplex(masterCplex);
+044:             IloOplModel masterOpl = masterRC.getOplModel();
+045:             masterOpl.generate();
+046:             IloOplDataElements masterDataElements = masterOpl.makeDataElements();
+047: 
+048:             <b><font color="#0000FF">int</font></b> nWdth = masterDataElements.getElement(<b><font color="#8A2BE2">"Amount"</font></b>).asIntMap()
+049:                     .getSize();
+050:             ArrayList&lt;IloNumVar&gt; masterVars = <b><font color="EA7D00">new</font></b> ArrayList&lt;IloNumVar&gt;();
+051:             IloNumVarMap cuts = masterOpl.getElement(<b><font color="#8A2BE2">"Cut"</font></b>).asNumVarMap();
+052:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 1; i &lt;= nWdth; i++) {
+053:                 masterVars.add(cuts.get(i));
+054:             }
+055: 
+056:             <b><font color="#007D00">// prepare sub model source, definition and engine</font></b>
+057:             IloOplModelSource subSource = oplF.createOplModelSource(DATADIR + <b><font color="#8A2BE2">"/cutstock-sub.mod"</font></b>);
+058:             IloOplModelDefinition subDef = oplF.createOplModelDefinition(subSource, settings);
+059:             IloCplex subCplex = oplF.createCplex();
+060:             subCplex.setOut(<b><font color="EA7D00">null</font></b>);
+061: 
+062:             <b><font color="#0000FF">double</font></b> best;
+063:             <b><font color="#0000FF">double</font></b> curr = Double.MAX_VALUE;
+064:             <b><font color="EA7D00">do</font></b> {
+065:                 best = curr;
+066: 
+067:                 <b><font color="#007D00">// Make master model</font></b>
+068:                 System.out.println(<b><font color="#8A2BE2">"Solve master."</font></b>);
+069:                 <b><font color="EA7D00">if</font></b> (masterCplex.solve()) {
+070:                     curr = masterCplex.getObjValue();
+071:                     System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + curr);
+072:                     status = 0;
+073:                 } <b><font color="EA7D00">else</font></b> {
+074:                     System.out.println(<b><font color="#8A2BE2">"No solution!"</font></b>);
+075:                     status = 1;
+076:                 }
+077: 
+078:                 <b><font color="#007D00">// prepare data for sub model</font></b>
+079:                 IloOplDataElements subDataElements = oplF.createOplDataElements();
+080:                 subDataElements.addElement(masterDataElements.getElement(<b><font color="#8A2BE2">"RollWidth"</font></b>));
+081:                 subDataElements.addElement(masterDataElements.getElement(<b><font color="#8A2BE2">"Size"</font></b>));
+082:                 subDataElements.addElement(masterDataElements.getElement(<b><font color="#8A2BE2">"Duals"</font></b>));
+083:                 <b><font color="#007D00">// get reduced costs and set them in sub problem</font></b>
+084:                 IloNumMap duals = subDataElements.getElement(<b><font color="#8A2BE2">"Duals"</font></b>).asNumMap();
+085:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 1; i &lt; nWdth + 1; i++) {
+086:                     IloForAllRange forAll = (IloForAllRange) masterOpl.getElement(
+087:                             <b><font color="#8A2BE2">"ctFill"</font></b>).asConstraintMap().get(i);
+088:                     duals.set(i, masterCplex.getDual(forAll));
+089:                 }
+090:                 <b><font color="#007D00">// make sub model</font></b>
+091:                 IloOplModel subOpl = oplF.createOplModel(subDef, subCplex);
+092:                 subOpl.addDataSource(subDataElements);
+093:                 subOpl.generate();
+094: 
+095:                 System.out.println(<b><font color="#8A2BE2">"Solve sub."</font></b>);
+096:                 <b><font color="EA7D00">if</font></b> (subCplex.solve()) {
+097:                     System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + subCplex.getObjValue());
+098:                     status = 0;
+099:                 } <b><font color="EA7D00">else</font></b> {
+100:                     System.out.println(<b><font color="#8A2BE2">"No solution!"</font></b>);
+101:                     status = 1;
+102:                 }
+103:                 <b><font color="EA7D00">if</font></b> (subCplex.getObjValue() &gt; -RC_EPS)
+104:                     <b><font color="EA7D00">break</font></b>;
+105: 
+106:                 <b><font color="#007D00">// Add variable in master model</font></b>
+107:                 IloNumVar newVar = masterCplex.numVar(0, Double.MAX_VALUE);
+108:                 IloObjective masterObj = masterOpl.getObjective();
+109:                 masterCplex.setLinearCoef(masterObj, newVar, 1);
+110:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 1; i &lt; nWdth + 1; i++) {
+111:                     <b><font color="#0000FF">double</font></b> coef = subCplex.getValue(subOpl.getElement(<b><font color="#8A2BE2">"Use"</font></b>)
+112:                             .asIntVarMap().get(i));
+113:                     IloForAllRange forAll = (IloForAllRange) masterOpl.getElement(
+114:                             <b><font color="#8A2BE2">"ctFill"</font></b>).asConstraintMap().get(i);
+115:                     masterCplex.setLinearCoef(forAll, newVar, coef);
+116:                 }
+117:                 masterVars.add(newVar);
+118: 
+119:                 subOpl.end();
+120:             } <b><font color="EA7D00">while</font></b> (best != curr &amp;&amp; status == 0);
+121: 
+122:             IloNumVar[] masterVarsA = <b><font color="EA7D00">new</font></b> IloNumVar[masterVars.size()];
+123:             masterVars.toArray(masterVarsA);
+124:             masterCplex.add(masterCplex.conversion(masterVarsA, IloNumVarType.Int));
+125:             <b><font color="EA7D00">if</font></b> (masterCplex.solve()) {
+126:                 System.out.println(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + masterCplex.getObjValue());
+127:             }
+128:             oplF.end();
+129:         } <b><font color="EA7D00">catch</font></b> (IloOplException ex) {
+130:             System.err.println(<b><font color="#8A2BE2">"### OPL exception: "</font></b> + ex.getMessage());
+131:             ex.printStackTrace();
+132:             status = 2;
+133:         } <b><font color="EA7D00">catch</font></b> (IloException ex) {
+134:             System.err.println(<b><font color="#8A2BE2">"### CONCERT exception: "</font></b> + ex.getMessage());
+135:             ex.printStackTrace();
+136:             status = 3;
+137:         } <b><font color="EA7D00">catch</font></b> (Exception ex) {
+138:             System.err.println(<b><font color="#8A2BE2">"### UNEXPECTED UNKNOWN ERROR ..."</font></b>);
+139:             ex.printStackTrace();
+140:             status = 4;
+141:         }
+142:         System.exit(status);
+143:     }
+144: }
+</tt></pre>

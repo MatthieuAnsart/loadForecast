@@ -1,0 +1,92 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/******************************************************************************</font></b>
+13: <b><font color="#007D00"> * </font></b>
+14: <b><font color="#007D00"> * OPL Model for Investment Portfolio Problem</font></b>
+15: <b><font color="#007D00"> * </font></b>
+16: <b><font color="#007D00">******************************************************************************/</font></b>
+17: 
+18: {<b><font color="#0000FF">string</font></b>} Investments = ...;
+19: <b><font color="#0000FF">float</font></b> InvestReturn[Investments] = ...;
+20: <b><font color="#0000FF">float</font></b>  Covariance[Investments][Investments] = ...;
+21: <b><font color="#0000FF">float</font></b> Wealth = ...;
+22: <b><font color="#0000FF">float</font></b> EpsilonTolerance = ...;
+23: <b><font color="#0000FF">float</font></b> rho = ...;
+24: <b><font color="#0000FF">float</font></b> BigNumber = ...;
+25: 
+26: <b><font color="#0000FF">tuple</font></b> t_BendersReturn {
+27:   <b><font color="#0000FF">string</font></b> inv;
+28:   <b><font color="#0000FF">int</font></b> id;
+29:   <b><font color="#0000FF">float</font></b> br;
+30: }
+31: {t_BendersReturn} BendersReturns = ...;
+32: 
+33: 
+34:  
+35: <b><font color="#0000FF">tuple</font></b> t_RHS {
+36:   <b><font color="#0000FF">int</font></b> id;
+37:   <b><font color="#0000FF">float</font></b> rhs;
+38: }
+39: {t_RHS} RHSset = ...;
+40: 
+41: <b><font color="#0000FF">int</font></b> lowcut = 1;
+42: <b><font color="#0000FF">int</font></b> highcut = <b><font color="#7D007D">card</font></b>(RHSset);
+43: 
+44: <b><font color="#0000FF">range</font></b> CutRange = lowcut..highcut;
+45: <b><font color="#0000FF">float</font></b> RHS[CutRange];
+46: <b><font color="#0000FF">execute</font></b> {
+47:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> r <b><font color="EA7D00">in</font></b> RHSset)
+48:     RHS[r.id] = r.rhs;
+49: }
+50:    
+51: /******************************************************************************
+52:  * MODEL DECLARATIONS
+53:  ******************************************************************************/
+54: 
+55: range float FloatRange = 0.0..Wealth;
+56: 
+57: dvar float   alpha;
+58: dvar float  allocation[Investments] in FloatRange;  // Investment Level
+59: 
+60: constraint allocate;
+61: constraint cuts[CutRange];
+62: 
+63: /******************************************************************************
+64:  * MODEL
+65:  ******************************************************************************/
+66: 
+67: maximize
+68:     alpha;
+69: 
+70: subject to {
+71:     allocate =
+72:           (sum (i <b><font color="EA7D00">in</font></b> Investments) (allocation[i])) == Wealth ;
+73:    
+74:     forall(b <b><font color="EA7D00">in</font></b> CutRange)
+75:       cuts[b]=
+76:           alpha &lt;=  RHS[b] + sum (inv <b><font color="EA7D00">in</font></b> Investments) (sum(&lt;inv,b,br&gt; <b><font color="EA7D00">in</font></b> BendersReturns) br)*allocation[inv];
+77: 
+78: };
+79: 
+80: 
+81: float Objective = sum(i in Investments) (InvestReturn[i]*allocation[i]
+82:                           - (1 div 2)*rho*(allocation[i]*(sum (j in Investments) Covariance[i][j]*allocation[j])));
+83:                           
+84: execute {
+85:   Objective;
+86: }                          
+87:                           
+</tt></pre>

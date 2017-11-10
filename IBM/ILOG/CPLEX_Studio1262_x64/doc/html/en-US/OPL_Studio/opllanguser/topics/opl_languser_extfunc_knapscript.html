@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Using IBM ILOG Script classes to make clean and reusable code" />
+<meta name="abstract" content="Explains how to use IBM ILOG Script classes to wrap the calls to external functions." />
+<meta name="Description" content="Explains how to use IBM ILOG Script classes to wrap the calls to external functions." />
+<meta name="DC.subject" content="IBM ILOG Script, wrapping calls to external functions" />
+<meta name="keywords" content="IBM ILOG Script, wrapping calls to external functions" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_knap.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_externalfunctions.1020512" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_knap.html" />
+<title>Using IBM ILOG Script classes to make clean and reusable code</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_externalfunctions.1020512">
+<h1 class="title topictitle1">Using IBM ILOG Script classes to make clean and reusable
+code</h1>
+<div class="body taskbody"><p class="shortdesc">Explains how to use IBM ILOG Script classes to wrap the calls to external
+functions.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div><p class="p">As shown in this knapsack example, you can wrap the calls
+to external functions into user-defined IBM ILOG Script classes
+and methods. Then, it is easy to reuse this algorithm in different
+OPL models. Although this is standard JavaScript code, the example
+includes a few useful comments. The IBM ILOG Script wrapping
+functions are all located in a reusable <span class="ph filepath">javaknapsack.mod</span> file.</p>
+</div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To wrap the calls to external functions:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Use a function to declare the new algorithm class.</span> <pre class="pre codeblock"><code>function Knapsack() {
+  IloOplImportJava("../../java/javaknapsack/classes");
+ 
+  this.object = IloOplCallJava("javaknapsack.Knapsack","&lt;init&gt;","");
+
+  this.updateInputs = __Knapsack_updateInputs;
+  this.solve = __Knapsack_solve;
+};</code></pre>
+<p class="p">The content of the function is what the constructor will
+execute. Part of it is to register methods. Here is an example of
+implementing a method:</p>
+<pre class="pre codeblock"><code>function __Knapsack_updateInputs(weights,values) {
+   this.object.updateInputs(weights,values);
+  // The call above is a shortcut as there is no risk of ambiguity.
+  // In the general case, if several methods have the same name, you can use:
+  //IloOplCallJava(this.object,"updateInputs",
+"(Lilog.opl.IloOplElement;Lilog.opl.IloOplElement;)V", weights, values);
+};</code></pre>
+<p class="p">Then, these new IBM ILOG Script class and methods
+are used in the modified cutstock algorithm, the model of which is
+the <span class="ph filepath">cutstock_ext_main.mod</span> file.</p>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Include the <samp class="ph codeph">javaknapsack.mod</samp> file so that the IBM ILOG Script definition can be used.</span> <pre class="pre codeblock"><code>include "javaknapsack.mod";</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Create the knapsack algorithm.</span> <pre class="pre codeblock"><code>   // Create a subproblem instance:
+   var knapsack = new Knapsack();</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Write instructions so that at each iteration, the data
+is updated, the algorithm called, and the solution retrieved.</span> <pre class="pre codeblock"><code>      knapsack.updateInputs(masterOpl.Size, masterOpl.Duals);
+      var solutionValue = knapsack.solve(masterOpl.NewPattern, masterOpl.RollWidth);</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Run the example.</span></li>
+</ol>
+<div class="section result"><div class="tasklabel"><h2 class="sectiontitle tasklabel">Results</h2></div><p class="p">The rest of the model is the same as the cutstock model
+that uses a CPLEX algorithm to solve the submodel. See <a class="xref" href="opl_languser_script_fc_column_cutstock.html" title="Describes the example and tells you where to find the files.">The cutting stock problem</a>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_extfunc_knap.html" title="Presents the problem, the code sample, the location of the files, a summary of the procedure, and the detailed steps.">Using an external knapsack algorithm</a></div>
+</div>
+</div></body>
+</html>

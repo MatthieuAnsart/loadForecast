@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Differences with mathematical programming" />
+<meta name="abstract" content="Describes what is required by constraint programming, in contrast with math programming." />
+<meta name="Description" content="Describes what is required by constraint programming, in contrast with math programming." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_intro_cp_vs_mp.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_intro.1014975" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_intro_cp_vs_mp.html" />
+<title>Differences with mathematical programming</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_intro.1014975">
+<h1 class="title topictitle1">Differences with mathematical programming</h1>
+<div class="body"><p class="shortdesc">Describes what is required by constraint programming,
+in contrast with math programming.</p>
+<p class="p">In contrast with math programming, constraint programming
+requires:</p>
+<ul class="ul"><li class="li"><p class="p">Explicit modeling for max, min, abs</p>
+</li>
+<li class="li"><p class="p">More memory usage per decision variable</p>
+</li>
+</ul>
+<p class="p">and supports:</p>
+<ul class="ul"><li class="li"><p class="p">Only discrete decision variables</p>
+</li>
+<li class="li"><p class="p">No gap measure</p>
+</li>
+</ul>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014975__usropllangtut.uss_langtut_intro.1014977"><h2 class="title sectiontitle">Explicit modeling for max, min, abs</h2><p class="p">Since constraint programming does not have linear relaxation
+to optimize a relaxed problem after each decision on integer variables,
+the MP way of modeling constraints such as <samp class="ph codeph">max</samp>, <samp class="ph codeph">min</samp>, cannot be used directly for CP.
+For instance, the following MP linearization would put the maximum
+value of <samp class="ph codeph">x[i]</samp> in <samp class="ph codeph">m.</samp> </p>
+<pre class="pre codeblock"><code>minimize m + …;
+subject to {
+   forall(i in 1..10) m &gt;= x[i];
+   ….
+}</code></pre>
+<p class="p">In CP, it is safer and more efficient to write:</p>
+<pre class="pre codeblock"><code>minimize …;
+subject to {
+m == max(i in 1..10) x[i];
+…
+}</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014975__usropllangtut.uss_langtut_intro.1014995"><h2 class="title sectiontitle">More memory usage per decision variable</h2><p class="p">For an MP engine, a decision variable is stored as one
+more column in a matrix. For a CP engine, it may require much more
+memory, because the CP engine stores domain information in the variable.
+Therefore, a CP engine scales apparently less than an MP engine, in
+term of the number of variables and of constraints. However, since
+the set of constraints of a CP engine enables often a more compact
+formulation of a problem, there is no direct connection between this
+property and the size of problems that either engine can address.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014975__usropllangtut.uss_langtut_intro.1014999"><h2 class="title sectiontitle">Only discrete decision variables</h2><p class="p">IBM ILOG CP Optimizer engine handles only discrete decision
+variables. You can use continuous expressions to define costs or intermediate
+expressions, but these continuous expressions must be computed only
+from discrete decision variables.</p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014975__usropllangtut.uss_langtut_intro.1015003"><h2 class="title sectiontitle">No gap measure</h2><p class="p">Because the CP Optimizer engine addresses problems that
+are potentially non convex or too irregular for mathematical optimization,
+it cannot compute valuable relaxed solutions of a problem, and does
+not have gap information between the best found solution and a theoretical
+bound that an MP engine can provide for a linear problem.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_intro_cp_vs_mp.html" title="Explains why it makes sense to compare CP and MP, and provides details on the salient features of each approach.">Constraint programming versus mathematical programming</a></div>
+</div>
+</div></body>
+</html>

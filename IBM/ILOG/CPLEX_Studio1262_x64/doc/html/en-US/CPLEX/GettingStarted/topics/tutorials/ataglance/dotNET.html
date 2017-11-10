@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using Concert Technology in .NET" />
+<meta name="abstract" content="This C#.NET application solves the model in this way.." />
+<meta name="Description" content="This C#.NET application solves the model in this way.." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_ataglance.1013253" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<title>Using Concert Technology in .NET</title>
+</head>
+<body role="main" id="Getting_started.uss_ataglance.1013253">
+<h1 class="title topictitle1">Using Concert Technology in .NET</h1>
+<div class="body"><p class="shortdesc">This C#.NET application solves the model in this way..</p>
+<p class="p">Here is a C#NET application using Concert Technology
+with CPLEX to solve the example. A tutorial offering an expanded version
+of this application is available in <a class="xref" href="../Csharp/Csharp_synopsis.html" title="CPLEX applications written in C#.NET use Concert Technology in the .NET framework.">.NET tutorial</a>.</p>
+<pre class="pre codeblock"><code>using ILOG.Concert;
+using ILOG.CPLEX; 
+public class Example {
+   public static void Main(string[] args) {
+      try {
+         Cplex cplex = new Cplex(); 
+         double[]  lb = {0.0, 0.0, 0.0};
+         double[]  ub = {40.0, System.Double.MaxValue, System.Double.MaxValue};
+         INumVar[] x  = cplex.NumVarArray(3, lb, ub);
+         var[0] = x;
+         double[] objvals = {1.0, 2.0, 3.0};
+         cplex.Add(cplex.Maximize(cplex.ScalProd(x, objvals)));
+         rng[0] = new IRange[2];
+         rng[0][0] = cplex.AddRange(-System.Double.MaxValue, 20.0);
+         rng[0][1] = cplex.AddRange(-System.Double.MaxValue, 30.0);
+         rng[0][0].Expr = cplex.Sum(cplex.Prod(-1.0, x[0]),
+                                    cplex.Prod( 1.0, x[1]),
+                                    cplex.Prod( 1.0, x[2]));
+         rng[0][1].Expr = cplex.Sum(cplex.Prod( 1.0, x[0]),
+                                    cplex.Prod(-3.0, x[1]),
+                                    cplex.Prod( 1.0, x[2]));
+         x[0].Name = "x1";
+         x[1].Name = "x2";
+         x[2].Name = "x3";
+         rng[0][0].Name = "c1";
+         rng[0][0].Name = "c2"; 
+         cplex.ExportModel("example.lp");
+         if ( cplex.Solve() ) {
+            double[] x     = cplex.GetValues(var[0]);
+            double[] dj    = cplex.GetReducedCosts(var[0]);
+            double[] pi    = cplex.GetDuals(rng[0]);
+            double[] slack = cplex.GetSlacks(rng[0]);
+            cplex.Output().WriteLine("Solution status = " + cplex.GetStatus());
+            cplex.Output().WriteLine("Solution value  = " + cplex.ObjValue);
+            int nvars = x.Length;
+            for (int j = 0; j &lt; nvars; ++j) {
+               cplex.Output().WriteLine("Variable   " + j +
+                                        ": Value = " + x[j] +
+                                        " Reduced cost = " + dj[j]);
+            }
+            int ncons = slack.Length;
+            for (int i = 0; i &lt; ncons; ++i) {
+               cplex.Output().WriteLine("Constraint " + i +
+                                        ": Slack = " + slack[i] +
+                                        " Pi = " + pi[i]);
+            }
+         }
+         cplex.End();
+      }
+      catch (ILOG.Concert.Exception e) {
+         System.Console.WriteLine("Concert exception ‘" + e + "’ caught");
+      }
+   }
+}</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" title="This example solves an LP model to contrast CPLEX components.">Solving an LP with CPLEX</a></div>
+</div>
+</div></body>
+</html>

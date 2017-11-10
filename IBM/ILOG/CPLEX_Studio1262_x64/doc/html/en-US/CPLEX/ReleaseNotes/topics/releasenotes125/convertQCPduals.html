@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Accessing SOCP and QCP duals has changed" />
+<meta name="abstract" content="" />
+<meta name="Description" content="" />
+<meta name="DC.subject" content="release notes CPLEX V12.5, QCP dual values, SOCP dual values" />
+<meta name="keywords" content="release notes CPLEX V12.5, QCP dual values, SOCP dual values" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes125/convertIntro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ConversionNoteQCPduals" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes125/convertIntro.html" />
+<title>Accessing SOCP and QCP duals has changed</title>
+</head>
+<body role="main" id="ConversionNoteQCPduals">
+<h1 class="title topictitle1">Accessing SOCP and QCP duals has changed</h1>
+<div class="body"><p class="shortdesc"></p>
+<p class="p">CPLEX V12.5 introduces access to the dual value of a variable in a quadratically constrained program (QCP). 
+Likewise, CPLEX V12.5 changes access to the dual value of a variable in a second-order cone program (SOCP).</p>
+<p class="p">This new feature entails changes in the behavior of existing routines or methods that access dual values 
+of variables in other types of problems; the behavior remains the same for most problem types, such as 
+linear programs (LP) and quadratic programs (QP); the behavior 
+has changed only with respect to problems of type QCP and SOCP.  
+The behavior of these routines and methods has changed: </p>
+<ul class="ul"><li class="li">The behavior of <span class="keyword apiname">CPXXgetdj</span> (or <span class="keyword apiname">CPXgetdj</span>) 
+    in the Callable Library (C API) has changed. This routine no longer returns 
+    the full dual slack of a variable in a quadratically constrained program (QCP) 
+    or in a second order cone program (SOCP). It returns 
+    only the <strong class="ph b">dual multiplier</strong> for a variable in a <strong class="ph b">bound constraint</strong> 
+    in a QCP or in a SOCP now. 
+    To get the full dual slack in a problem of type QCP or SOCP, you have to sum up the results of both 
+    <span class="keyword apiname">CPXXgetdj</span> <strong class="ph b">and</strong> <span class="keyword apiname">CPXXgetqconstrdslack</span> 
+    (or <span class="keyword apiname">CPXgetdj</span> and <span class="keyword apiname">CPXgetqconstrdslack</span>).
+    </li>
+<li class="li">The behavior of <span class="keyword apiname">IloCplex::getReducedCosts</span> in the C++ API has changed 
+    with respect to problems of type QCP and SOCP. It returns 
+    only the <strong class="ph b">dual multiplier</strong> for a variable in a <strong class="ph b">bound constraint</strong> 
+    in a QCP or in a SOCP now. To get the full dual slack in a problem of 
+    type QCP or SOCP, you have to sum up the results of both 
+    <span class="keyword apiname">IloCplex::getReducedCosts</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">IloCplex::getQCDSlack</span>.</li>
+<li class="li">The behavior of <span class="keyword apiname">IloCplex.getReducedCosts</span> in the Java API has changed has changed 
+    with respect to problems of type QCP and SOCP.  It returns 
+    only the <strong class="ph b">dual multiplier</strong> for a variable in a <strong class="ph b">bound constraint</strong> 
+    in a QCP or in a SOCP now. To get the full dual slack in a problem of 
+    type QCP or SOCP, you have to sum up the results of both 
+    <span class="keyword apiname">IloCplex.getReducedCosts</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">IloCplex.getQCDSlack</span>.</li>
+<li class="li">The behavior of <span class="keyword apiname">Cplex.GetReducedCosts</span> in the .NET API has changed 
+    with respect to problems of type QCP and SOCP.  It returns 
+    only the <strong class="ph b">dual multiplier</strong> for a variable in a <strong class="ph b">bound constraint</strong> 
+    in a QCP or in a SOCP now. To get the full dual slack in a problem of 
+    type QCP or SOCP, you have to sum up the results of both 
+    <span class="keyword apiname">Cplex.GetReducedCosts</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">Cplex.GetQCDSlack</span>.</li>
+<li class="li">The behavior of <span class="keyword apiname">cplex.solution.get_reduced_costs</span> in the Python API behavior has changed 
+    with respect to problems of type QCP and SOCP.  It returns 
+    only the <strong class="ph b">dual multiplier</strong> for a variable in a <strong class="ph b">bound constraint</strong> 
+    in a QCP or in a SOCP now. To get the full dual slack in a problem of 
+    type QCP or SOCP, you have to sum up the results of both 
+    <span class="keyword apiname">cplex.solution.get_reduced_costs</span> 
+    <strong class="ph b">and</strong> 
+    <span class="keyword apiname">cplex.solution.get_quadratic_dualslack</span>.</li>
+</ul>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">The routine <span class="keyword apiname">CPXXgetqconstrdslack</span> 
+(or <span class="keyword apiname">CPXgetqconstrdslack</span>) returns the dual slack for 
+a single quadratic constraint. You can get the full dual slack vector 
+by summing up the results of <span class="keyword apiname">CPXgetdj</span> <strong class="ph b">and</strong>
+<span class="keyword apiname">CPXgetqconstrdslack</span>  (the latter for <strong class="ph b">all</strong> quadratic constraints).
+Likewise, for the methods in each API, you need the sum for all quadratic constraints.</p>
+</div>
+<p class="p"><strong class="ph b">Examples</strong></p>
+<p class="p">There is an example distributed with CPLEX V12.5 in each API of how to access dual slack values 
+in problems of type QCP or SOCP.</p>
+<ul class="ul"><li class="li">In the Callable Library (C API), see the examples <span class="ph filepath">xqcpdual.c</span> and <span class="ph filepath">qcpdual.c</span>.</li>
+<li class="li">In the C++ API, see the example <span class="ph filepath">iloqcpdual.cpp</span>.</li>
+<li class="li">In the Java API, see the example <span class="ph filepath">QCPDual.java</span>.</li>
+<li class="li">In the C#.NET API, see the example <span class="ph filepath">QCPDual.cs</span>.</li>
+<li class="li">In the Python API, see the example <span class="ph filepath">qcpdual.py</span>.</li>
+<li class="li">In the MATLAB connector, see the example <span class="ph filepath">qcpdual.m</span>.</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes125/convertIntro.html" title="Users of prior versions must first apply the conversion notes accompanying previous versions of this product before upgrading to this new version.">Conversion notes for all users</a></div>
+</div>
+</div></body>
+</html>

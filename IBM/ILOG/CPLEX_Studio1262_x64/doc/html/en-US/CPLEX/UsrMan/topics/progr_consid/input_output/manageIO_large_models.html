@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Representing very large models: 64-bit API" />
+<meta name="abstract" content="CPLEX supports 64-bit integers, a feature allowing you to enter models in which the number of nonzero coefficients is very large." />
+<meta name="Description" content="CPLEX supports 64-bit integers, a feature allowing you to enter models in which the number of nonzero coefficients is very large." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="manageIO_large_models" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_synopsis.html" />
+<title>Representing very large models: 64-bit API</title>
+</head>
+<body role="main" id="manageIO_large_models">
+<h1 class="title topictitle1">Representing very large models: 64-bit API</h1>
+<div class="body"><p class="shortdesc">CPLEX supports 64-bit integers, a feature allowing you to enter models in which the number of nonzero coefficients is very large.</p>
+<p class="p">In legacy applications of CPLEX, the practical number of nonzero coefficients in a model 
+was no more than 2,100,000,000, regardless of whether the operating system supported 32 or 64 bits. 
+With this 64-bit API, models with as many as 9e18 nonzero coefficients (approximately 9,223,372,036,800,000,000) 
+are limited only by the memory available on your computer. CPLEX also offers other, correspondingly 
+large 64-bit integer counters for the number of iterations, number of nodes processed, indices of nodes, 
+number of aggregations, and so forth.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> The number 9,223,372,036,800,000,000 represents 
+nine quintillion, two hundred twenty-three quadrillion, three hundred seventy-two trillion, thirty-six billion, eight hundred million in American English, 
+roughly the upper range of signed integers on a 64-bit operating system.</div>
+<p class="p">For clarity in this topic, “32-bit API” refers to the legacy interface of the 
+Callable Library (C API) of previous versions of CPLEX. Likewise, “64-bit API” refers to 
+the implementation of this feature supporting very large models in the C, C++, Java, .NET, and Python APIs.</p>
+<div class="section" id="manageIO_large_models__section1311757744117"><h2 class="title sectiontitle">Extended parameters for very large models in the 64-bit API</h2>
+<p class="p">Certain parameters of CPLEX control very large integers, 
+such as integers relating to the number of nodes explored during the search for a solution, 
+the number of nonzero coefficients in a model, 
+the number of iterations during optimization, and so forth. 
+These parameters are designated by their type <span class="keyword apiname">CPX_PARAMTYPE_LONG</span>. 
+Code that you write using this symbol takes advantage fully of the address space on your platform, 
+whether your platform is 32-bit or 64-bit.</p>
+
+<p class="p"><a class="xref" href="#manageIO_large_models__table1311757979023" title="A four-column table showing the name of a parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 1</a> lists 
+those parameters extended on all platforms. 
+<a class="xref" href="#manageIO_large_models__table1311767900055" title="A four-column table showing the name of a port-dependent parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 2</a> lists 
+the parameters that depend on your declaration as 32-bit or 64-bit of the symbol 
+<span class="keyword apiname">CPXNNZ</span> (the number of nonzeros); 
+the compile-time value of this symbol depends on your port, 
+that is, your combination of compiler and operating system.</p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four-column table showing the name of a parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter." id="manageIO_large_models__table1311757979023" class="table" width="100%" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1.  Parameters accepting CPX_PARAMTYPE_LONG on all platforms</span></caption><thead class="thead" align="left"><tr class="row" valign="bottom"><th class="entry" valign="bottom" width="14.285714285714285%" id="d485524e60">Concert APIs </th>
+<th class="entry" valign="bottom" width="28.57142857142857%" id="d485524e62">Callable Library </th>
+<th class="entry" valign="bottom" width="28.57142857142857%" id="d485524e64">Python API</th>
+<th class="entry" valign="bottom" width="28.57142857142857%" id="d485524e66">Link to manual</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">ItLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_ITLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">simplex.limits.iterations</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/ItLim.html" title="Sets the maximum number of simplex iterations to be performed before the algorithm terminates without reaching optimality.">simplex maximum iteration limit</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">SiftItLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_SIFTITLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">sifting.iterations</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/SiftItLim.html" title="Sets the maximum number of sifting iterations that may be performed if convergence to optimality has not been reached.">upper limit on sifting iterations</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">BarItLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_BARITLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">barrier.limits.iterations</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/BarItLim.html" title="Sets the number of barrier iterations before termination.">barrier iteration limit</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">BarMaxCor</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_BARMAXCOR</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">barrier.limits.corrections</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/BarMaxCor.html" title="Sets the maximum number of centering corrections done on each iteration.">barrier maximum correction limit</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">BBInterval</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_BBINTERVAL</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.strategy.bbinterval</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/BBInterval.html" title="Sets the best bound interval for MIP strategy.">MIP strategy best bound interval</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">CutPass</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_CUTPASS</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.limits.cutpasses</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/CutPass.html" title="Sets the upper limit on the number of cutting plane passes CPLEX performs when solving the root node of a MIP model.">number of cutting plane passes</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">FracPass</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_FRACPASS</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.limits.gomorypass</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/FracPass.html" title="Limits the number of passes for generating Gomory fractional cuts.">pass limit for generating Gomory fractional cuts</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">HeurFreq</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_HEURFREQ</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.strategy.heuristicfreq</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/HeurFreq.html" title="Decides how often to apply the periodic heuristic.">MIP heuristic frequency</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">MIPInterval</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_MIPINTERVAL</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.interval</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/MIPInterval.html" title="Controls the frequency of node logging when the MIP display parameter is set higher than 1 (one).">MIP node log interval</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">NodeLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_NODELIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.limits.nodes</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/NodeLim.html" title="Sets the maximum number of nodes solved before the algorithm terminates without reaching optimality.">MIP node limit</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">IntSolLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_INTSOLLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.limits.solutions</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/IntSolLim.html" title="Sets the number of MIP solutions to be found before stopping.">MIP integer solution limit</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">StrongItLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_STRONGITLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.limits.strongit</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/StrongItLim.html" title="Controls the number of simplex iterations performed on each variable in the candidate list when CPLEX uses variable selection as the setting for strong branching.">MIP strong branching iterations limit</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">RINSHeur</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_RINSHEUR</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.strategy.rinsheur</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/RINSHeur.html" title="Decides how often to apply the relaxation induced neighborhood search (RINS) heuristic.">RINS heuristic frequency</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">SubMIPNodeLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_SUBMIPNODELIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.limits.submipnodelim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/SubMIPNodeLim.html" title="Restricts the number of nodes explored when CPLEX is solving a subMIP.">limit on nodes explored when a subMIP is being solved</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">RepairTries</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_REPAIRTRIES</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.limits.repairtries</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/RepairTries.html" title="Limits the attempts to repair an infeasible MIP start.">number of attempts to repair infeasible MIP start</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">PolishAfterNode</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_POLISHAFTERNODE</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.polishing.nodes</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/PolishAfterNode.html" title="Sets the number of nodes to process after which CPLEX starts to polish a feasible solution">nodes to process before starting to polish a feasible solution</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">PolishAfterIntSol</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_POLISHAFTERINTSOL</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">mip.polishing.solutions</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/PolishAfterIntSol.html" title="Sets the number of integer solutions to find after which CPLEX starts to polish a feasible solution">MIP integer solutions to find before starting to polish a feasible solution</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e60 ">NetItLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e62 ">CPX_PARAM_NETITLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e64 ">(not available)</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e66 "><a class="xref" href="../../../../Parameters/topics/NetItLim.html" title="Sets the maximum number of iterations to be performed before the algorithm terminates without reaching optimality.">network simplex iteration limit</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four-column table showing the name of a port-dependent parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter." id="manageIO_large_models__table1311767900055" class="table" width="100%" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. Port-dependent parameters</span></caption><thead class="thead" align="left"><tr class="row" valign="bottom"><th class="entry" valign="bottom" width="14.285714285714285%" id="d485524e300">Concert APIs</th>
+<th class="entry" valign="bottom" width="28.57142857142857%" id="d485524e302">Callable Library</th>
+<th class="entry" valign="bottom" width="28.57142857142857%" id="d485524e304">Python API</th>
+<th class="entry" valign="bottom" width="28.57142857142857%" id="d485524e306">Links to manual</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e300 ">NzReadLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e302 ">CPX_PARAM_NZREADLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e304 ">read.nonzeros</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e306 "><a class="xref" href="../../../../Parameters/topics/NzReadLim.html" title="Specifies a limit for the number of nonzero elements to read for an allocation of memory.">nonzero element read limit</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e300 ">AggFill</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e302 ">CPX_PARAM_AGGFILL</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e304 ">preprocessing.fill</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e306 "><a class="xref" href="../../../../Parameters/topics/AggFill.html" title="Limits variable substitutions by the aggregator.">preprocessing aggregator fill</a></td>
+</tr>
+<tr class="row"><td class="entry" valign="top" width="14.285714285714285%" headers="d485524e300 ">QPNzReadLim</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e302 ">CPX_PARAM_QPNZREADLIM</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e304 ">read.qpnonzeros</td>
+<td class="entry" valign="top" width="28.57142857142857%" headers="d485524e306 "><a class="xref" href="../../../../Parameters/topics/QPNzReadLim.html" title="Specifies a limit for the number of nonzero elements to read for an allocation of memory in a model with a quadratic matrix.">QP Q-matrix nonzero read limit</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"><h2 class="title sectiontitle">Callable Library (C API) and very large models</h2>
+<p class="p">In the CPLEX Callable Library (C API), 
+the legacy 32-bit API is still available, as well as its familiar include file <span class="ph filepath">cplex.h</span>. 
+Each of the routines in the 32-bit API is duplicated by a corresponding routine, 
+prefixed by <samp class="ph codeph">CPXX</samp> (for CPLEX extended) and 
+declared in a separate header file, <span class="ph filepath">cplexx.h</span>.</p>
+
+<div class="note tip"><span class="tiptitle">Tip:</span> The header file <span class="ph filepath">cplex.h</span> 
+conforms to the standard C90 (the early ANSI specification of the C programming language), 
+whereas the header file <span class="ph filepath">cplexx.h</span> conforms to the standard C99, 
+a modern dialect of C, also known as ISO/IEC 9899:1999.</div>
+
+<p class="p" id="manageIO_large_models__p1311767848555">For example, the existing 32-bit routine 
+<span class="keyword apiname">CPXsolution</span> declared in <span class="ph filepath">cplex.h</span> 
+has a corresponding 64-bit routine <span class="keyword apiname">CPXXsolution</span> 
+declared in <span class="ph filepath">cplexx.h</span>. 
+Another include file, <span class="ph filepath">cpxconst.h</span>, 
+declares the common constants that routines declared in either 
+<span class="keyword apiname">cplex.h</span> or <span class="ph filepath">cplexx.h</span> 
+require; both <span class="ph filepath">cplex.h</span> and 
+<span class="ph filepath">cplexx.h</span> implicitly include 
+<span class="ph filepath">cpxconst.h</span>.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Example: querying number of nonzeros in a model</h2>
+<p class="p" id="manageIO_large_models__p1311767825571">When you query the number of nonzero coefficients 
+in a model by means of the 64-bit routine <span class="keyword apiname">CPXXgetnumnz</span>, 
+the routine returns a value of type <span class="keyword apiname">CPXNNZ</span>. This symbol, 
+defined in <span class="ph filepath">cplexx.h</span>, depends on the current setting of 
+<span class="keyword apiname">CPX_APIMODEL</span>. Code written with this interface takes best 
+advantage of the address space available on your platform, whether 32-bit or 64-bit. 
+In contrast, when you query the number of nonzero coefficients in a model 
+by means of the 32-bit routine <span class="keyword apiname">CPXgetnumnz</span>, the routine 
+returns a value of type <samp class="ph codeph">int</samp>. This query routine will not fail 
+with very large models, but <strong class="ph b">silent truncation</strong> can occur if the return 
+value is in fact of type <samp class="ph codeph">LONG</samp> and the result cannot be 
+represented by a 32-bit integer. </p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Using the 64-bit API in a Callable Library application</h2>
+<p class="p">To take advantage of the 64-bit API of CPLEX in your applications of the Callable Library (C API), you simply include the header file <span class="ph filepath">cplexx.h</span>, which implicitly includes <span class="ph filepath">cpxconst.h</span>; then use routines declared in these header files; that is, routines prefixed by <samp class="ph codeph">CPXX</samp> in your application.</p>
+<p class="p">The file <span class="ph filepath">cplexx.h</span> declares a variety of symbols (<samp class="ph codeph">typedef</samp>s and <samp class="ph codeph">macro</samp>s):</p>
+<ul class="ul"><li class="li"><span class="keyword apiname">CPXINT</span> is the signed 32-bit integer type.</li>
+<li class="li"><span class="keyword apiname">CPXLONG</span> is the signed 64-bit integer type.</li>
+<li class="li"><span class="keyword apiname">CPX_BIGINT</span> is the maximum value for <span class="keyword apiname">CPXINT</span>. 
+ In particular, it specifies the upper limit for CPLEX parameters of type <span class="keyword apiname">CPXINT</span>.</li>
+<li class="li"><span class="keyword apiname">CPX_BIGLONG</span> is the maximum value for <span class="keyword apiname">CPXLONG</span>. 
+ In particular, it specifies the upper limit for CPLEX parameters of type <span class="keyword apiname">CPX_PARAMTYPE_LONG</span>; 
+ that is, those parameters accepting <span class="keyword apiname">CPXLONG</span> as a value.</li>
+</ul>
+
+<p class="p">However, the API does not oblige you to use those types directly. 
+Instead, the API introduces types that are more descriptive of how 
+the corresponding typed data is applied.</p>
+<ul class="ul"><li class="li"><span class="keyword apiname">CPXSIZE</span> represent the size in bytes (not characters) 
+of names associated with the model, its variables, and its constraints. 
+Technically, <span class="keyword apiname">CPXSIZE</span> is a signed integer type of 
+the same width as <samp class="ph codeph">size_t</samp>. 
+It is defined in <span class="ph filepath">cpxconst.h</span>, 
+which in turn is included by <span class="ph filepath">cplex.h</span> 
+and <span class="ph filepath">cplexx.h</span> appropriately.</li>
+<li class="li"><span class="keyword apiname">CPXCNT</span> represents counters. 
+<span class="keyword apiname">CPXCNT</span> specifies the integer type 
+that <span class="ph filepath">cplexx.h</span> uses to pass potentially 
+large counters, such as number of nodes, number of iterations, 
+and so forth, to the CPLEX Callable Library (C API) or to 
+read such data from the library. The type of <span class="keyword apiname">CPXCNT</span> 
+is 64-bit integer by default.</li>
+<li class="li"><span class="keyword apiname">CPXDIM</span> represents dimensions. 
+<span class="keyword apiname">CPXDIM</span> specifies the integer type that <span class="ph filepath">cplexx.h</span> 
+uses to pass dimensions of a model, such as row indices, column counts, 
+and so forth, to the CPLEX Callable Library (C API) or to read such data from the library. 
+The type of <span class="keyword apiname">CPXDIM</span> is 32-bit integer by default.</li>
+<li class="li"><span class="keyword apiname">CPXNNZ</span> represents the number of nonzero coefficients. 
+<span class="keyword apiname">CPXNNZ</span> specifies the integer type that <span class="ph filepath">cplexx.h</span> 
+uses to pass the number of nonzero coefficients to the CPLEX Callable Library (C API) 
+or to read such data from it. By default, the type <span class="keyword apiname">CPXNNZ</span> 
+is <span class="keyword apiname">CPXINT</span> on 32-bit architecture and 
+<span class="keyword apiname">CPXLONG</span> on 64-bit architecture. 
+However, you can override the default definition of <span class="keyword apiname">CPXNNZ</span> 
+by defining <span class="keyword apiname">CPX_APIMODEL</span>. In other words, the actual type 
+of <span class="keyword apiname">CPXNNZ</span> depends on the current setting of <span class="keyword apiname">CPX_APIMODEL</span>.</li>
+<li class="li"><span class="keyword apiname">CPX_APIMODEL</span> specifies to the CPLEX Callable Library (C API) 
+whether to anticipate a small (fewer than two billion nonzero coefficients) or a large model. 
+CPLEX then chooses the types of counters for dimensions, number of rows, 
+number of columns, number of nonzero coefficients, buffer sizes, 
+lengths of names, and other counters appropriately. 
+Normally, by default, CPLEX discerns these types from your operating system and 
+automatically chooses appropriately. However, if you need to control bit-length 
+of integers explicitly, use values of this symbol in your application to specify a large or small model.</li>
+</ul>
+
+<div class="note tip" id="manageIO_large_models__note1311769604899"><span class="tiptitle">Tip:</span> <span class="keyword apiname">CPX_APIMODEL</span> affects only the API, not the library. 
+Internally, the library always uses 32-bit nonzero counters on 32-bit ports 
+and 64-bit nonzero counters on 64-bit ports. <span class="keyword apiname">CPX_APIMODEL</span> 
+allows you to specify which types to use when your application interacts with the library. 
+If the data types requested by <span class="keyword apiname">CPX_APIMODEL</span> are different 
+from the types used internally, then the library will perform appropriate transformations.</div>
+</div>
+<div class="section"><h2 class="title sectiontitle">Adapting legacy applications in the Callable Library (C API)</h2>
+<p class="p">If you want to adapt your existing Callable Library (C API) 
+applications to take advantage of 64-bit counters, for example, to solve 
+models with more than two billion nonzero coefficients, and you want to 
+do so in a way that is portable in future applications, use those symbols 
+(<samp class="ph codeph">typedef</samp>s and <samp class="ph codeph">macro</samp>s) in your application 
+to support such portability.</p>
+
+<p class="p">Parameters of this 64-bit type can still be controlled 
+through the 32-bit API as long as the values do not exceed <span class="keyword apiname">INT_MAX</span>. 
+If you set a <samp class="ph codeph">LONG</samp> parameter by means of the 32-bit API 
+to a value greater than or equal to <span class="keyword apiname">CPX_BIGINT</span> as 
+a representation of infinity, then CPLEX will quietly transform this 
+symbol into <span class="keyword apiname">CPX_BIGLONG</span>, the value that denotes infinity (approximately 9e+18).</p>
+
+<p class="p">To use parameters that accept values greater 
+than <span class="keyword apiname">INT_MAX</span> in your legacy application 
+of the 32-bit API, use these corresponding routines from the 64-bit API instead:</p>
+
+<ul class="ul"><li class="li"><span class="keyword apiname">CPXXsetlongparam</span></li>
+<li class="li"><span class="keyword apiname">CPXXgetlongparam</span></li>
+<li class="li"><span class="keyword apiname">CPXXinfolongparam</span></li>
+</ul>
+
+<p class="p">In the Callable Library (C API), you can still invoke these 
+existing 32-bit routines on all parameter types.</p>
+
+<ul class="ul"><li class="li"><span class="keyword apiname">CPXsetintparam</span></li>
+<li class="li"><span class="keyword apiname">CPXgetintparam</span></li>
+<li class="li"><span class="keyword apiname">CPXinfointparam</span></li>
+</ul>
+
+<p class="p">That invocation of the existing 32-bit routines 
+(<span class="keyword apiname">CPXsetintparam</span>, <span class="keyword apiname">CPXgetintparam</span>, 
+<span class="keyword apiname">CPXinfointparam</span>) will not fail, but 
+<strong class="ph b">silent truncation</strong> can occur if the parameter is in fact of 
+type <samp class="ph codeph">LONG</samp> and the result cannot be represented by a 32-bit number.</p>
+
+<p class="p">In contrast, these 32-bit routines treat parameters of 
+type <span class="keyword apiname">CPX_PARAMTYPE_LONG</span> correctly:</p>
+
+<ul class="ul"><li class="li"><span class="keyword apiname">CPXsetlongparam</span></li>
+<li class="li"><span class="keyword apiname">CPXgetlongparam</span></li>
+<li class="li"><span class="keyword apiname">CPXinfolongparam</span></li>
+</ul>
+
+<p class="p">You can, if necessary, (in legacy applications, for example) 
+also invoke these routines for long parameters on parameters of 
+type <span class="keyword apiname">CPX_PARAMTYPE_INT</span>. 
+These long parameter routines work correctly there. 
+This practice of invoking the long routines for long parameters 
+on parameters of type <span class="keyword apiname">CPX_PARAMTYPE_INT</span> is not recommended, 
+but the practice is allowed for convenience with respect to parameters 
+in <a class="xref" href="#manageIO_large_models__table1311767900055" title="A four-column table showing the name of a port-dependent parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 2</a>. 
+For parameters in that table, this practice (allowed but not recommended) 
+treats each parameter in a way that does not depend on the actual port 
+(combination of compiler and operating system) in use.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">C++ API and large integer parameters</h2>
+<p class="p">In the C++ API of CPLEX, the parameters listed in 
+ <a class="xref" href="#manageIO_large_models__table1311757979023" title="A four-column table showing the name of a parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 1</a> 
+ and <a class="xref" href="#manageIO_large_models__table1311767900055" title="A four-column table showing the name of a port-dependent parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 2</a> 
+ have migrated from the legacy enumeration <span class="keyword apiname">IloCplex::IntParam</span> 
+ to the recommended enumeration <span class="keyword apiname">IloCplex::LongParam</span>. 
+ The parameters listed in the table of port-dependent parameters are managed correctly 
+ and transparently by the C++ API. That is, the user does not need to worry about 
+ the actual type of the parameter. Existing code still compiles without change. 
+ However, CPLEX <strong class="ph b">silently truncates</strong> a <samp class="ph codeph">long</samp> parameter value 
+ when it is obliged to assign the value to a variable of type <samp class="ph codeph">int</samp>. 
+ Consequently, you should carefully check your code in this respect and migrate legacy applications 
+ as appropriate to the 64-bit API.</p>
+
+ </div>
+<div class="section"><h2 class="title sectiontitle">Java API and large integer parameters</h2>
+<p class="p">In the Java API of CPLEX, the parameters listed in 
+ <a class="xref" href="#manageIO_large_models__table1311757979023" title="A four-column table showing the name of a parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 1</a> 
+ and <a class="xref" href="#manageIO_large_models__table1311767900055" title="A four-column table showing the name of a port-dependent parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 2</a> 
+ have migrated from the legacy class <span class="keyword apiname">IloCplex.IntParam</span> 
+ to the recommended class <span class="keyword apiname">IloCplex.LongParam</span>. 
+ Existing code still compiles without change. 
+ However, CPLEX <strong class="ph b">silently truncates</strong> a <samp class="ph codeph">long</samp> parameter 
+ value when it is obliged to assign the value to a variable of type <samp class="ph codeph">int</samp>. 
+ Consequently, it is a good idea to migrate from those legacy members to new members 
+ as appropriate in your legacy applications. 
+ For example, if your legacy application uses a very large value for any of the parameters 
+ listed in those two tables, then you should migrate to the longer type of value for that parameter.</p>
+
+ </div>
+<div class="section"><h2 class="title sectiontitle">.NET API and large integer parameters</h2>
+<p class="p">In the .NET API of CPLEX, the parameters listed in 
+ <a class="xref" href="#manageIO_large_models__table1311757979023" title="A four-column table showing the name of a parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 1</a> 
+ and <a class="xref" href="#manageIO_large_models__table1311767900055" title="A four-column table showing the name of a port-dependent parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 2</a> 
+ have migrated from the legacy class <span class="keyword apiname">Cplex.IntParam</span> to 
+ the recommended class <span class="keyword apiname">Cplex.LongParam</span>. 
+ Existing code still compiles without change. However, CPLEX 
+ <strong class="ph b">silently truncates</strong> 
+ a <samp class="ph codeph">long</samp> parameter value when it is 
+ obliged to assign the value to a variable of type <samp class="ph codeph">int</samp>. 
+ Consequently, it is a good idea to migrate from those legacy members to 
+ new members as appropriate in your legacy applications. For example, 
+ if your legacy application uses a very large value for any of 
+ the parameters listed in those two tables, then you should migrate to the 
+ longer type of value for that parameter.</p>
+
+ </div>
+<div class="section"><h2 class="title sectiontitle">Python API and large integer parameters</h2>
+<p class="p">In the Python API of CPLEX, the parameters listed in 
+ <a class="xref" href="#manageIO_large_models__table1311757979023" title="A four-column table showing the name of a parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 1</a> 
+ and <a class="xref" href="#manageIO_large_models__table1311767900055" title="A four-column table showing the name of a port-dependent parameter in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), its name in the Python API, and a link to the documentation of the parameter.">Table 2</a> are 
+ managed appropriately and transparently without change in your legacy applications. 
+ For new applications of the Python API, use the 64-bit API for future portability and 
+ correct treatment of large integers.</p>
+
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_synopsis.html" title="Describes input to and output from CPLEX.">Managing input and output</a></div>
+</div>
+</div></body>
+</html>

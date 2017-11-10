@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Coping with an ill-conditioned problem or handling unscaled infeasibilities" />
+<meta name="abstract" content="Describes the effect of scaling on infeasible LP models." />
+<meta name="Description" content="Describes the effect of scaling on infeasible LP models." />
+<meta name="DC.subject" content="scaling, infeasibility and, infeasibility, scaling and, feasibility and, unscaled, problem formulation, ill-conditioned, problem, identifying, ill conditioning, coping with, displaying, solution quality, optimality, tolerance, optimality tolerance, reducing, optimality, reducing, feasibility tolerance, feasibility, reducing, basis, unstable optimal, condition number, when reducing does not help" />
+<meta name="keywords" content="scaling, infeasibility and, infeasibility, scaling and, feasibility and, unscaled, problem formulation, ill-conditioned, problem, identifying, ill conditioning, coping with, displaying, solution quality, optimality, tolerance, optimality tolerance, reducing, optimality, reducing, feasibility tolerance, feasibility, reducing, basis, unstable optimal, condition number, when reducing does not help" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/21_infeas_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveLP.650881" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/21_infeas_title_synopsis.html" />
+<title>Coping with an ill-conditioned problem or handling unscaled infeasibilities</title>
+</head>
+<body role="main" id="User_manual.uss_solveLP.650881">
+<h1 class="title topictitle1">Coping with an ill-conditioned problem or handling unscaled infeasibilities</h1>
+<div class="body"><p class="shortdesc">Describes the effect of scaling on infeasible LP models.</p>
+<p class="p">By default, CPLEX scales a problem before attempting
+to solve it. After it finds an optimal solution, it then checks for
+any violations of optimality or feasibility in the original, unscaled
+problem. If there is a violation of reduced cost (indicating nonoptimality)
+or of a bound (indicating infeasibility), CPLEX reports both the maximum
+scaled and unscaled feasibility violations.</p>
+<p class="p">Unscaled infeasibilities are rare, but they may occur
+when a problem is ill-conditioned. For example, a problem containing
+a row in which the coefficients have vastly different magnitude is
+ill-conditioned in this sense and may result in unscaled infeasibilities.</p>
+<p class="p">It may be possible to produce a better solution anyway
+in spite of unscaled infeasibilities, or it may be necessary for you
+to revise the coefficients. To decide which way to go, consider these
+steps in such a case:</p>
+<ol class="ol"><li class="li"><p class="p">Use the command <samp class="ph codeph">display solution quality</samp> in
+the Interactive Optimizer to locate the infeasibilities.</p>
+
+<p class="p">This command will provide the magnitude of the unscaled
+infeasibilities.  If the unscaled infeasibilities just barely exceed
+the CPLEX feasibility tolerance, the solution may be acceptable. 
+Or, by reducing the feasibility tolerance and continuing the optimization,
+you may be able to reduce the unscaled infeasibilities to an acceptable
+level.  To examine solution quality from an application, use the routine <span class="keyword apiname">CPXgetdblquality</span> or
+the methods <span class="keyword apiname">IloCplex::getQuality</span>, <span class="keyword apiname">IloCplex.getQuality</span>, <span class="keyword apiname">Cplex.GetQuality</span>.</p>
+</li>
+<li class="li"><p class="p">Examine the coefficient matrix for poorly
+scaled rows and columns.</p>
+</li>
+<li class="li"><p class="p">Evaluate whether you can change unnecessarily
+large or small coefficients.</p>
+</li>
+<li class="li"><p class="p">Consider alternate scalings.</p>
+</li>
+<li class="li"><p class="p">Consider the parameter settings.</p>
+
+<p class="p">Consider setting the <a class="xref" href="../../../../Parameters/topics/ScaInd.html" title="Decides how to scale the problem matrix.">scale parameter</a> (<samp class="ph codeph">CPX_PARAM_SCAIND</samp>, <samp class="ph codeph">ScaInd</samp>)
+to 1 (one), or consider setting the <a class="xref" href="../../../../Parameters/topics/EpMrk.html" title="Influences pivot selection during basis factoring.">Markowitz tolerance</a> (<samp class="ph codeph">CPX_PARAM_EPMRK</samp>, <samp class="ph codeph">EpMrk</samp>)
+to .90.</p>
+
+<p class="p">Alternatively, consider turning on the <a class="xref" href="../../../../Parameters/topics/NumericalEmphasis.html" title="Emphasizes precision in numerically unstable or difficult problems.">numerical precision emphasis</a>(<samp class="ph codeph">CPX_PARAM_NUMERICALEMPHASIS</samp>, <samp class="ph codeph">NumericalEmphasis</samp>).</p>
+
+<p class="p">Any of these nondefault parameter settings can improve
+the accuracy of computed solutions on poorly scaled or ill-conditioned
+models. While these settings may increase the time per iteration and
+thus slow down performance, in many cases a corresponding reduction
+in iteration count due to the more precise calculations compensates
+for any potential increase in runtime.</p>
+</li>
+</ol>
+<p class="p">You may also be able to re-optimize the problem successfully
+after you reduce optimality tolerance, as explained in <a class="xref" href="24_soln_quality.html#User_manual.uss_solveLP.640018__User_manual.uss_solveLP.639306">Maximum reduced-cost infeasibility</a>,
+or after you reduce feasibility tolerance, as explained in <a class="xref" href="24_soln_quality.html#User_manual.uss_solveLP.640018__User_manual.uss_solveLP.639289">Maximum bound infeasibility: identifying largest bound violation</a>.
+When you change these tolerances, CPLEX may produce a better solution
+to your problem, but lowering these tolerances sometimes produces
+erratic behavior or an unstable optimal basis.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">If you restart CPLEX from a previously optimal or infeasible
+solution and use reduced tolerance without making any other change
+to the problem, the previous solution status remains valid. Consequently,
+no iterations will occur because parameter settings (such as this
+reduced tolerance) are part of the environment in which CPLEX operates,
+rather than part of a solution to one of possibly multiple models
+in that environment. In other words, changing parameters does not
+alter the solution status, but changing the model does. You can make
+CPLEX restart the optimization using new tolerances by making a superfluous
+change in the model, for example, by resetting the bound on a variable
+to its existing value.</p>
+</div>
+<p class="p">Check the basis condition number, as explained in <a class="xref" href="20_num_difficulty.html#User_manual.uss_solveLP.638490__User_manual.uss_solveLP.638613">Measuring problem sensitivity with basis condition number kappa</a>.
+If the condition number is fairly low (for example, as little as <samp class="ph codeph">1e5</samp> or
+less), then you can be confident about the solution. If the condition
+number is high, or if reducing tolerance does not help, then you must
+revise the model because the current model may be too ill-conditioned
+to produce a numerically reliable result.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/21_infeas_title_synopsis.html" title="Documents ways to diagnose sources of infeasibility in LP models.">Diagnosing LP infeasibility</a></div>
+</div>
+</div></body>
+</html>

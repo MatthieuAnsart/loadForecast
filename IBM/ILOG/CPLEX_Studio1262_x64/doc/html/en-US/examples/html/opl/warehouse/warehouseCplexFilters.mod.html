@@ -1,0 +1,59 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">// The scalable warehouse example has been artificially increased in size </font></b>
+13: <b><font color="#007D00">// so that the search is long enough for you to have time to interrupt it and look at feasible solutions. </font></b>
+14: <b><font color="#007D00">// The resulting size is greater than the size allowed in trial mode. </font></b>
+15: <b><font color="#007D00">// If you want to run this example, you need a commercial edition of CPLEX Studio to run this example. </font></b>
+16: <b><font color="#007D00">// If you are a student or teacher, you can also get a full version through the IBM Academic Initiative.</font></b>
+17: <b><font color="#0000FF">int</font></b> Fixed        = 30;
+18: <b><font color="#0000FF">int</font></b> NbWarehouses = 50;
+19: <b><font color="#0000FF">int</font></b> NbStores     = 100;
+20: <b><font color="#7D007D">assert</font></b>( NbStores &gt; NbWarehouses );
+21: 
+22: <b><font color="#0000FF">range</font></b> Warehouses = 1..NbWarehouses;
+23: <b><font color="#0000FF">range</font></b> Stores     = 1..NbStores;
+24: <b><font color="#0000FF">int</font></b> Capacity[w <b><font color="#0000FF">in</font></b> Warehouses] = 
+25:   NbStores <b><font color="#0000FF">div</font></b> NbWarehouses + 
+26:   w % ( NbStores <b><font color="#0000FF">div</font></b> NbWarehouses );
+27: <b><font color="#0000FF">int</font></b> SupplyCost[s <b><font color="#0000FF">in</font></b> Stores][w <b><font color="#0000FF">in</font></b> Warehouses] = 
+28:   1 + ( ( s + 10 * w ) % 100 );
+29: 
+30: <b><font color="#0000FF">float</font></b> Coefs[Warehouses];  
+31:   
+32: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Open[Warehouses];
+33: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b> Supply[Stores][Warehouses] <b><font color="#0000FF">in</font></b> 0..1;
+34: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">int</font></b> TotalFixedCost = <b><font color="#7D007D">sum</font></b>( w <b><font color="#0000FF">in</font></b> Warehouses ) Fixed * Open[w];
+35: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> TotalSupplyCost = <b><font color="#7D007D">sum</font></b>( w <b><font color="#0000FF">in</font></b> Warehouses, s <b><font color="#0000FF">in</font></b> Stores )  SupplyCost[s][w] * Supply[s][w];
+36: <b><font color="#007D00">// define a range filter applied to solution pools</font></b>
+37: <b><font color="#0000FF">execute</font></b> {
+38:     <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> w <b><font color="EA7D00">in</font></b> Warehouses) {
+39:         Coefs[w] = 1;
+40:     }
+41:     <b><font color="#0000FF">cplex</font></b>.addRangeFilter(30, 43, Open, Coefs);
+42: }
+43: minimize TotalFixedCost + TotalSupplyCost;
+44: subject to {
+45:   forall( s <b><font color="EA7D00">in</font></b> Stores )
+46:     ctStoreHasOneWarehouse: 
+47:       sum( w <b><font color="EA7D00">in</font></b> Warehouses ) 
+48:         Supply[s][w] == 1;
+49:   forall( w <b><font color="EA7D00">in</font></b> Warehouses )
+50:     ctOpen:
+51:       sum( s <b><font color="EA7D00">in</font></b> Stores ) 
+52:         Supply[s][w] &lt;= Open[w] * Capacity[w];
+53: }
+54: 
+</tt></pre>

@@ -1,0 +1,53 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2014. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">main</font></b> {
+13: 
+14:    IloOplImportJava(<b><font color="#8A2BE2">"./classes"</font></b>);
+15:   
+16:    <b><font color="#007D00">// Create a new model using this model definition and cplex.</font></b>
+17:    <b><font color="EA7D00">var</font></b> src=<b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"externaldataread.mod"</font></b>);
+18:    <b><font color="EA7D00">var</font></b> def=<b><font color="EA7D00">new</font></b> IloOplModelDefinition(src);
+19:    <b><font color="EA7D00">var</font></b> opl = <b><font color="EA7D00">new</font></b> IloOplModel(def);
+20:    opl.addDataSource(<b><font color="EA7D00">new</font></b> IloOplDataSource(<b><font color="#8A2BE2">"externaldataread.dat"</font></b>));
+21:   
+22:    <b><font color="#007D00">// Create the custom data source.</font></b>
+23:    <b><font color="EA7D00">var</font></b> customDataSource = IloOplCallJava(<b><font color="#8A2BE2">"externaldataread.ExternalDataRead"</font></b>,
+24:       <b><font color="#8A2BE2">"&lt;init&gt;"</font></b>, <b><font color="#8A2BE2">"(Lilog.opl.IloOplModel;)V"</font></b>, opl);
+25:         
+26:    <b><font color="#007D00">// Pass it to the model (notice that you can do this from a script because the custom data source</font></b>
+27:    <b><font color="#007D00">// was converted to a script data source upon return of the Java call).</font></b>
+28:    opl.addDataSource(customDataSource);
+29:    opl.generate();
+30:   
+31:    <b><font color="#007D00">// Some output to show that data has been correctly initialized.</font></b>
+32:    writeln(opl.a);
+33:    writeln(opl.strings);
+34: 
+35:    <b><font color="#007D00">// Check that everything went fine and the results are correct.</font></b>
+36:    <b><font color="EA7D00">var</font></b> Ok=1;
+37:    <b><font color="EA7D00">if</font></b> (opl.a!=1) Ok=0;
+38:    <b><font color="EA7D00">var</font></b> n=0;
+39:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> s <b><font color="EA7D00">in</font></b> opl.strings)
+40:    {
+41:       n++;
+42:       <b><font color="EA7D00">if</font></b> ((n==1) &amp;&amp; (s!=<b><font color="#8A2BE2">"val1"</font></b>)) Ok=0;
+43:       <b><font color="EA7D00">if</font></b> ((n==2) &amp;&amp; (s!=<b><font color="#8A2BE2">"val2"</font></b>)) Ok=0;
+44:       <b><font color="EA7D00">if</font></b> ((n==3) &amp;&amp; (s!=<b><font color="#8A2BE2">"val3"</font></b>)) Ok=0;
+45:    }
+46:    <b><font color="EA7D00">if</font></b> (n!=3) Ok=0;
+47:    <b><font color="EA7D00">if</font></b> (Ok==0) -1;
+48: }
+</tt></pre>

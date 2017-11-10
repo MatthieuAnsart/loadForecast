@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Performing sensitivity analysis" />
+<meta name="abstract" content="This application demonstrates sensitivity analysis in the C API." />
+<meta name="Description" content="This application demonstrates sensitivity analysis in the C API." />
+<meta name="DC.subject" content="solution, sensitivity analysis (C API), displaying, sensitivity analysis, performing (C API)" />
+<meta name="keywords" content="solution, sensitivity analysis (C API), displaying, sensitivity analysis, performing (C API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_callableLibraryStart.152312" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" />
+<title>Performing sensitivity analysis</title>
+</head>
+<body role="main" id="Getting_started.uss_callableLibraryStart.152312">
+<h1 class="title topictitle1">Performing sensitivity analysis</h1>
+<div class="body"><p class="shortdesc">This application demonstrates sensitivity analysis in the
+C API.</p>
+<p class="p">In <a class="xref" href="../InteractiveOptimizer/sensitivityAnalysis.html" title="To perform sensitivity analysis, the Interactive Optimizer supports these options.">Performing sensitivity analysis</a>, there
+is a discussion of how to perform sensitivity analysis in the Interactive
+Optimizer. As with most interactive features of CPLEX, there is a
+direct approach to this task from the Callable Library. This section
+modifies the example <samp class="ph codeph">lpex1.c</samp> in <a class="xref" href="smallLP.html" title="This application in the C API introduces basic features of the Callable Library.">Building and solving a small LP model in C</a> to show how to perform sensitivity analysis
+with routines from the Callable Library.</p>
+<p class="p">To begin, make a copy of <samp class="ph codeph">lpex1.c</samp> , and edit this
+new source file. Among the declarations (for example, immediately
+after the declaration for <samp class="ph codeph">dj</samp> ) insert these additional
+declarations: </p>
+<pre class="pre codeblock"><code>double *lowerc = NULL, *upperc = NULL;
+double *lowerr = NULL, *upperr = NULL;</code></pre>
+<p class="p">At some point after the call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/lpopt.html" title="At any time after a linear program has been created via a call to CPXXcreateprob/CPXcreateprob, the routine CPXXlpopt/CPXlpopt finds a solution to that problem using one of the CPLEX linear optimizers.">CPXlpopt</a></samp>,
+(for example, just before the call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/writeprob.html" title="The routine CPXXwriteprob/CPXwriteprob writes a CPLEX problem object to a file in one of the formats in the table.">CPXwriteprob</a></samp>),
+perform sensitivity analysis on the objective function and on the
+righthand side coefficients by inserting this fragment of code: </p>
+<pre class="pre codeblock"><code>upperc = (double *) malloc (cur_numcols * sizeof(double));
+lowerc = (double *) malloc (cur_numcols * sizeof(double));
+status = CPXobjsa (env, lp, 0, cur_numcols-1, lowerc, upperc);
+if ( status ) {
+     fprintf (stderr, "Failed to obtain objective sensitivity.\n");
+     goto TERMINATE;
+}
+printf ("\nObjective coefficient sensitivity:\n");
+for (j = 0; j &lt; cur_numcols; j++) {
+  printf ("Column %d:  Lower = %10g  Upper = %10g\n",
+          j, lowerc[j], upperc[j]);
+}
+
+upperr = (double *) malloc (cur_numrows * sizeof(double));
+lowerr = (double *) malloc (cur_numrows * sizeof(double));
+status = CPXrhssa (env, lp, 0, cur_numrows-1, lowerr, upperr);
+if ( status ) {
+  fprintf (stderr, "Failed to obtain RHS sensitivity.\n");
+  goto TERMINATE;
+}
+printf ("\nRight-hand side coefficient sensitivity:\n");
+for (i = 0; i &lt; cur_numrows; i++) {
+  printf ("Row %d:  Lower = %10g  Upper = %10g\n",
+          i, lowerr[i], upperr[i]);
+}</code></pre>
+<p class="p">This sample is familiarly known as “throw away” code. For production
+purposes, you probably want to observe good programming practices
+such as freeing these allocated arrays at the <samp class="ph codeph">TERMINATE</samp> label
+in the application. </p>
+<p class="p">A bound value of 1e+20 (<samp class="ph codeph">CPX_INFBOUND</samp>) is treated
+as infinity within CPLEX, so this is the value printed by our sample
+code in cases where the upper or lower sensitivity range on a row
+or column is infinite; a more sophisticated program might print a
+string, such as <samp class="ph codeph">-inf</samp> or <samp class="ph codeph">+inf</samp>, when
+negative or positive <samp class="ph codeph">CPX_INFBOUND</samp> is encountered
+as a value.</p>
+<p class="p">Similar code could be added to perform sensitivity analysis with
+respect to bounds via <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/boundsa.html" title="The routine CPXXboundsa/CPXboundsa accesses upper and lower sensitivity ranges for lower and upper variable bounds for a specified range of variable indices.">CPXboundsa</a></samp>. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" title="Applications written in C use the CPLEX Callable Library (C API).">Callable Library tutorial</a></div>
+</div>
+</div></body>
+</html>

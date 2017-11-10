@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving the master model" />
+<meta name="abstract" content="Provides the syntax." />
+<meta name="Description" content="Provides the syntax." />
+<meta name="DC.subject" content="flow control, thisOplModel variable, variables, thisOplModel, classes, IloOplModel, IloOplModel class" />
+<meta name="keywords" content="flow control, thisOplModel variable, variables, thisOplModel, classes, IloOplModel, IloOplModel class" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_column_steps.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_modeldecomp.1014765" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_column_steps.html" />
+<title>Solving the master model</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_modeldecomp.1014765">
+<h1 class="title topictitle1">Solving the master model</h1>
+<div class="body"><p class="shortdesc">Provides the syntax.</p>
+<p class="p">The master model is contained in the following variables:</p>
+<pre class="pre codeblock"><code>   var masterDef = thisOplModel.modelDefinition;
+   var masterCplex = cplex;
+   var masterData = thisOplModel.dataElements;   
+   
+   // Creating the master-model
+   var masterOpl = new IloOplModel(masterDef, masterCplex);
+   masterOpl.addDataSource(masterData);</code></pre>
+<p class="p">We reuse the <samp class="ph codeph">thisOplModel</samp> variable
+because the master model corresponds to the definition contained in
+the same file as the flow control script. At each iteration, a new <span class="keyword apiname">IloOplModel</span> instance
+is created from the newly modified data elements.</p>
+<p class="p">Before you can solve, you need to generate the optimization
+model by calling:</p>
+<pre class="pre codeblock"><code>thisOplModel.generate()</code></pre>
+<p class="p">To solve the master model, call:</p>
+<pre class="pre codeblock"><code>      if ( masterCplex.solve() ) {
+        masterOpl.postProcess();
+        curr = masterCplex.getObjValue();
+        writeln();
+        writeln("MASTER OBJECTIVE: ",curr);
+      } else {
+         writeln("No solution to master problem!");
+         masterOpl.end();
+         break;
+      }</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_column_steps.html" title="Goes into more detail on each step of the procedure summary.">Detailed steps</a></div>
+</div>
+</div></body>
+</html>

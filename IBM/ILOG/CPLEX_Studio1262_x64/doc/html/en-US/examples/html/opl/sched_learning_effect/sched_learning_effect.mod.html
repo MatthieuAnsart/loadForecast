@@ -1,0 +1,98 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+13: 
+14: <b><font color="#007D00">Problem Description</font></b>
+15: <b><font color="#007D00">-------------------</font></b>
+16: 
+17: <b><font color="#007D00">This problem is an extension of the classical Job-Shop Scheduling</font></b>
+18: <b><font color="#007D00">problem (see sched_jobshop.mod) with a learning effect on machines: </font></b>
+19: <b><font color="#007D00">because of experience acquired by the machine, executing an</font></b>
+20: <b><font color="#007D00">operation at a position i on the machine will require less time than </font></b>
+21: <b><font color="#007D00">if it would be executed earlier at a position k&lt;i. </font></b>
+22: 
+23: <b><font color="#007D00">More formally, each machine M_j has a learning factor alpha_j in [0,1] </font></b>
+24: <b><font color="#007D00">such that the actual processing time of the operation executed at the </font></b>
+25: <b><font color="#007D00">ith position on machine M_j is the decreasing function d(i)=d*pow(alpha_j,i) </font></b>
+26: <b><font color="#007D00">where d is the nominal processing time of operation.</font></b>
+27: 
+28: <b><font color="#007D00">The model for a resource, except for the classical no-overlap constraint, </font></b>
+29: <b><font color="#007D00">consists of a chain of intervals of unknown size that maps the actual </font></b>
+30: <b><font color="#007D00">operations. The mapping (using an instance of isomorphism constraint) </font></b>
+31: <b><font color="#007D00">associates an integer variable (the position) with each operation of the resource. </font></b>
+32: <b><font color="#007D00">The position variable allows defining the processing time of an operation </font></b>
+33: <b><font color="#007D00">taking the learning effect into account. </font></b>
+34: 
+35: <b><font color="#007D00">This example illustrates the usage of a chain of intervals as a generic </font></b>
+36: <b><font color="#007D00">tool to express constraints on sophisticated topology of a resource and </font></b>
+37: <b><font color="#007D00">the typical usage of the isomorphism constraint to get the position of </font></b>
+38: <b><font color="#007D00">interval variables in a sequence.</font></b>
+39: 
+40: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+41: 
+42: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+43: 
+44: <b><font color="#0000FF">int</font></b> nbJobs = ...;
+45: <b><font color="#0000FF">int</font></b> nbMachines = ...;
+46: 
+47: <b><font color="#0000FF">range</font></b> Jobs = 1..nbJobs;
+48: <b><font color="#0000FF">range</font></b> Machines = 1..nbMachines;
+49: 
+50: <b><font color="#0000FF">tuple</font></b> Operation {
+51:   <b><font color="#0000FF">int</font></b> job; <b><font color="#007D00">// Job</font></b>
+52:   <b><font color="#0000FF">int</font></b> pos; <b><font color="#007D00">// position into the job</font></b>
+53:   <b><font color="#0000FF">int</font></b> mch; <b><font color="#007D00">// Machine</font></b>
+54:   <b><font color="#0000FF">int</font></b> pt;  <b><font color="#007D00">// Processing time</font></b>
+55: };
+56: {Operation} Ops = ...;
+57: <b><font color="#0000FF">float</font></b> alpha[Machines] = ...;
+58: 
+59: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> machines[Ops];
+60: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> indices[Ops] <b><font color="#0000FF">in</font></b> Jobs;
+61: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> chains[Machines][Jobs];
+62: 
+63: <b><font color="#0000FF">execute</font></b> {
+64:         cp.param.FailLimit = 10000;
+65: }
+66: 
+67: minimize max (o in Ops) endOf(machines[o]);
+68: subject to {
+69:   forall(o1, o2 <b><font color="EA7D00">in</font></b> Ops: o1.job == o2.job &amp;&amp; o1.pos + 1 == o2.pos) 
+70:     endBeforeStart(machines[o1], machines[o2]);
+71: 
+72:   <b><font color="#007D00">// Building of the chain of intervals for the machine.</font></b>
+73:   forall(m <b><font color="EA7D00">in</font></b> Machines, j <b><font color="EA7D00">in</font></b> 2..nbJobs)
+74:     endBeforeStart(chains[m][j-1], chains[m][j]);
+75: 
+76:   <b><font color="#007D00">// Learning effect captured by the decreasing function</font></b>
+77:   <b><font color="#007D00">// of the position (0 &lt;= alpha &lt;= 1).</font></b>
+78:   <b><font color="#007D00">// The first operation in the sequence has no learning effect</font></b>
+79:   <b><font color="#007D00">// so the alpha's exponent is 0 which is equal to index-1.</font></b>
+80:   forall(o <b><font color="EA7D00">in</font></b> Ops) 
+81:     sizeOf(machines[o]) == floor((o.pt)*pow(alpha[o.mch], indices[o]-1));
+82: 
+83:   forall(m <b><font color="EA7D00">in</font></b> Machines)
+84:     isomorphism(all[Jobs](j <b><font color="EA7D00">in</font></b> Jobs) chains[m][j],
+85:                 all(o <b><font color="EA7D00">in</font></b> Ops : o.mch == m) machines[o],
+86:                 all(o <b><font color="EA7D00">in</font></b> Ops : o.mch == m) indices[o],
+87:                 nbJobs);
+88:   <b><font color="#007D00">// The no-overlap is in a redundant constraint in this quite simple model, but </font></b>
+89:   <b><font color="#007D00">// it is used to provide stronger inference. In a practical model, there were</font></b>
+90:   <b><font color="#007D00">// exist constraints on the sequence that would require the no-overlap constraint.</font></b>
+91:   forall(m <b><font color="EA7D00">in</font></b> Machines)
+92:     noOverlap(all(o <b><font color="EA7D00">in</font></b> Ops : o.mch == m) machines[o]);
+93: }
+</tt></pre>

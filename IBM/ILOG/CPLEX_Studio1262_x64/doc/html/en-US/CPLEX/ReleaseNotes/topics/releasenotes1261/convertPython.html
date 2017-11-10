@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Conversion notes for users of the Python API" />
+<meta name="abstract" content="Explains changes introduced in the Python API by CPLEX V12.6.1." />
+<meta name="Description" content="Explains changes introduced in the Python API by CPLEX V12.6.1." />
+<meta name="DC.subject" content="release notes CPLEX V12.6.1, conversion notes (Python API)" />
+<meta name="keywords" content="release notes CPLEX V12.6.1, conversion notes (Python API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/convertIntro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ConvertPython1261" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/convertIntro.html" />
+<title>Conversion notes for users of the Python API</title>
+</head>
+<body role="main" id="ConvertPython1261">
+<h1 class="title topictitle1">Conversion notes for users of the Python API</h1>
+<div class="body"><p class="shortdesc">Explains changes introduced in the Python API 
+by CPLEX V12.6.1.</p>
+<p class="p">These notes explain changes introduced in CPLEX V12.6.1 for users of the
+Python API.</p>
+<div class="section"><h2 class="title sectiontitle">Multiple versions of Python</h2>
+<p class="p">Formerly, a given installation of CPLEX offered only one version of 
+Python modules, set-up scripts, and sample files, all located in the 
+directory <span class="ph filepath">yourCPLEXhome/python/PLATFORM</span>,
+(or in the folder <span class="ph filepath">yourCPLEXhome\python\PLATFORM</span>)
+where <span class="ph filepath">yourCPLEXhome</span> specified the
+location where CPLEX was installed as part of IBM ILOG CPLEX Optimization
+Studio, and <span class="ph filepath">PLATFORM</span> stood for
+your combination of operating system and compiler. </p>
+
+<div class="p">Now, in CPLEX V12.6.1, however, the path in the CPLEX installation to 
+the files of interest to Python users includes a designation of the 
+Python version, like this: 
+<span class="ph filepath">yourCPLEXhome/python/VERSION/PLATFORM</span>
+where <span class="ph filepath">VERSION</span> designates a version of Python 
+compatible with CPLEX. For example, the relative path to CPLEX-Python modules 
+on a Linux platform where Python 3 is available looks similar to this:
+<pre class="pre codeblock"><code>yourCPLEXhome/python/3.4/x86-64_linux/</code></pre>
+</div>
+
+<p class="p">As a consequence of this change in the path to CPLEX files of 
+special interest to Python users, you can now use CPLEX V12.6.1 with 
+more than one version of Python installed on your local platform. 
+In particular, each such directory (or folder) contains set up files 
+specific to that designated version of Python.</p>
+
+<p class="p">On Linux and AIX operating systems, the CPLEX-Python module for 
+Python V2.6 also works with Python V2.7. In other words, even though 
+the directory (or folder) is named 2.6, the modules and examples 
+also work with Python V2.7 on Linux and AIX operating systems.</p>
+
+<p class="p">See also the 
+<a class="xref" href="newPythonapi.html" title="Introduces new features of the Python API in CPLEX V12.6.1.">announcement</a> 
+in these release notes about support in 
+CPLEX V12.6.1 for multiple versions of Python.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Node ID query</h2> 
+ 
+<p class="p">Previously, the method <samp class="ph codeph">get_node_ID</samp> was defined only for the class 
+<samp class="ph codeph">BranchCallback</samp>. That is, unfortunately, the method was not 
+available in a user cut callback nor in a lazy constraint callback, rendering it 
+difficult to write such instructions to CPLEX as "Create no more than N cuts 
+at the current node."</p>
+ 
+<p class="p">Now, however, in CPLEX V12.6.1, the method <samp class="ph codeph">get_node_ID</samp> 
+is defined in the class <samp class="ph codeph">ControlCallback</samp>, thus 
+making the method available in all derived subclasses for greater ease of use.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Methods return boolean now (not int)</h2> 
+ 
+<p class="p">Some methods in the class <span class="keyword apiname">cplex.callbacks.HSCallback</span> 
+(the parent class of both <span class="keyword apiname">HeuristicCallback</span> and 
+<span class="keyword apiname">SolveCallback</span>) now return a <span class="keyword apiname">boolean</span> 
+value, rather than the integer values formerly returned. The methods are:</p>
+ 
+<ul class="ul"><li class="li"><span class="keyword apiname">is_primal_feasible</span></li>
+<li class="li"><span class="keyword apiname">is_dual_feasible</span></li>
+</ul>
+</div>
+<div class="section"><h2 class="title sectiontitle">Writing files in Python</h2>
+<p class="p">Formerly, the method <span class="keyword apiname">Cplex.write</span> assumed 
+the MPS file format by default. This defect has been corrected, so that 
+<span class="keyword apiname">Cplex.write</span> correctly interprets the file format as 
+you designate it in CPLEX V12.6.1. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1261/convertIntro.html" title="Explains changes introduced by CPLEX V12.6.1.">Conversion notes</a></div>
+</div>
+</div></body>
+</html>

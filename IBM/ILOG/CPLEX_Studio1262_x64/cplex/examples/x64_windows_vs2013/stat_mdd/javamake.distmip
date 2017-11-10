@@ -1,0 +1,78 @@
+#-------------------------------------------------------------------
+#  Add directory with CPLEX libs to PATH so that runtime linker
+#  can find them
+#-------------------------------------------------------------------
+PATH=$(CPLEX_STUDIO_DIR1262)\cplex\bin\x64_win64;$(PATH)
+
+TCPIPPID = tcpippid
+
+#-------------------------------------------------------------------
+#  Compilers and runtime environment
+#-------------------------------------------------------------------
+ 
+JAVA  = java  -Djava.library.path="$(CPLEX_STUDIO_DIR1262)\cplex\bin\x64_win64" \
+              -classpath "$(CPLEX_STUDIO_DIR1262)\cplex\lib\cplex.jar;."
+JAVAC = javac -classpath "$(CPLEX_STUDIO_DIR1262)\cplex\lib\cplex.jar"
+
+EXDATA = ..\..\data
+EXSRC  = ..\..\src\distmipjava
+ 
+#-------------------------------------------------------------------
+#  nmake -f javamake.distmip all      : to compile the examples. 
+#  nmake -f javamake.distmip execute  : to compile and execute the examples.
+#-------------------------------------------------------------------
+
+
+JAVA_EX = DistMIPEx1.class DistMIPEx2.class
+
+all: $(JAVA_EX)
+
+execute: all 
+	nmake -f javamake.distmip execute_java
+
+# Execute an example.
+# Per default we run examples with the process transport since for that
+# deployment is most simple.
+# For the TCP/IP transport things are more complicated. We have to
+# - start the worker (cplex.exe -worker=tcpip ...)
+# - wait a little to give the worker time to start up (timeout 5)
+# - make sure the worker did start up properly (tasklist)
+# - run the example (java ...), note that we use the same worker for each
+#   example
+# - shut down the worker (taskkill)
+# We stored the task id of the worker process in file $(TCPIPPID) so
+# that we can easily tasklist and taskkill that process.
+execute_java_process: $(JAVA_EX)
+	 $(JAVA) DistMIPEx1 process.vmc $(EXDATA)\p0033.mps
+	 $(JAVA) DistMIPEx2 process.vmc $(EXDATA)\p0033.mps
+execute_java_tcpip: $(JAVA_EX)
+	DEL /Q $(TCPIPPID) 2>/NUL
+	START "TCP/IP worker on localhost:12345" /MIN "$(CPLEX_STUDIO_DIR1262)\cplex\bin\x64_win64\cplex.exe" -worker=tcpip -address=localhost:12345 -pidfile=$(TCPIPPID)
+	START /MIN /WAIT TIMEOUT 5
+	FOR /f %%P IN ($(TCPIPPID)) DO (TASKLIST /fo LIST /fi "PID eq %%P")
+	$(JAVA) DistMIPEx1 tcpip.vmc $(EXDATA)\p0033.mps
+	$(JAVA) DistMIPEx2 tcpip.vmc $(EXDATA)\p0033.mps
+	FOR /f %%P IN ($(TCPIPPID)) DO (TASKKILL /t /f /pid %%P)
+	DEL /Q $(TCPIPPID)
+
+execute_java: execute_java_process
+
+# ------------------------------------------------------------
+
+clean :
+	-del *.class 
+	-del *.mps
+	-del *.ord
+	-del *.lp
+	-del *.sav
+
+# ------------------------------------------------------------
+#
+# The examples
+#
+
+DistMIPEx1.class: $(EXSRC)\DistMIPEx1.java
+	$(JAVAC) $(JCFLAGS) -d . $(EXSRC)\DistMIPEx1.java
+
+DistMIPEx2.class: $(EXSRC)\DistMIPEx2.java
+	$(JAVAC) $(JCFLAGS) -d . $(EXSRC)\DistMIPEx2.java

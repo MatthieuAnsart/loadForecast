@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Integer variables in MPS files" />
+<meta name="abstract" content="The CPLEX extensions of MPS file format support integer variables." />
+<meta name="Description" content="The CPLEX extensions of MPS file format support integer variables." />
+<meta name="DC.subject" content="integer variable, variable, integer, in MPS file format, MPS file format, integer variables in" />
+<meta name="keywords" content="integer variable, variable, integer, in MPS file format, MPS file format, integer variables in" />
+<meta name="DC.Relation" scheme="URI" content="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="File_formats_reference.uss_reffileformatscplex.156533" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" />
+<title>Integer variables in MPS files</title>
+</head>
+<body role="main" id="File_formats_reference.uss_reffileformatscplex.156533">
+<h1 class="title topictitle1">Integer variables in MPS files</h1>
+<div class="body"><p class="shortdesc">The CPLEX extensions of MPS file format support integer
+variables.</p>
+<p class="p">If you use the CPLEX mixed
+integer optimizer, then you may restrict any or all variables to integer
+values. CPLEX accepts
+two commonly used ways of extending the MPS file format to include
+integer variables: in the <samp class="ph codeph">COLUMNS</samp> section
+or in the <samp class="ph codeph">BOUNDS</samp> section.</p>
+<p class="p">In the first way, integer variables are identified within
+the <samp class="ph codeph">COLUMNS</samp> section of the MPS file by
+marker lines. A marker line is placed at the beginning and end of
+a range of integer variables. Multiple sets of marker lines are allowed.
+Integer marker lines have a field format consisting of Fields 2
+through 4.</p>
+<p class="p">Field 2: Marker name</p>
+<p class="p">Field 3: <samp class="ph codeph">'MARKER'</samp> (including
+the single quotation marks)</p>
+<p class="p">Field 4: Keyword <samp class="ph codeph">'INTORG'</samp> and <samp class="ph codeph">'INTEND'</samp> to
+mark beginning and end respectively (including the single quotation
+marks)</p>
+<p class="p">Fields 5 and 6 are ignored.</p>
+<p class="p">The marker name must differ from the preceding and succeeding
+column names. </p>
+<p class="p">If no bounds are specified for the variables within markers,
+bounds of 0 (zero) and 1 (one) are assumed.</p>
+<p class="p">In the following example, column <samp class="ph codeph">x4</samp> is
+an integer variable and looks like this in the <samp class="ph codeph">COLUMNS</samp> 
+section of an MPS file, according to this first way of treating integer
+variables:  </p>
+<pre class="pre codeblock"><code>NAME
+ROWS
+ N  obj     
+ L  c1      
+ L  c2      
+ E  c3      
+COLUMNS
+    x1        obj                 -1   c1                  -1
+    x1        c2                   1
+    x2        obj                 -2   c1                   1
+    x2        c2                  -3   c3                   1
+    x3        obj                 -3   c1                   1
+    x3        c2                   1
+    MARK0000  ‘MARKER’                 ‘INTORG’
+    x4        obj                 -1   c1                  10
+    x4        c3                -3.5
+    MARK0001  ‘MARKER’                 ‘INTEND’
+RHS
+    rhs       c1                  20   c2                  30
+BOUNDS
+ UP BOUND     x1                  40
+ LO BOUND     x4                   2
+ UP BOUND     x4                   3
+ENDATA</code></pre>
+<p class="p">In the second way of treating integer variables, integer
+variables are declared in the <samp class="ph codeph">BOUNDS</samp>  section
+with special bound types in Field 1. The acceptable special bound
+types appear in <a class="xref" href="MPS_ext_intvar.html#File_formats_reference.uss_reffileformatscplex.156533__File_formats_reference.uss_reffileformatscplex.156717" title="A three-column table listing types of special bounds on integer variables, their purpose, and special considerations about each type of bound.">Table 1</a>.
+ </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three-column table listing types of special bounds on integer variables, their purpose, and special considerations about each type of bound." id="File_formats_reference.uss_reffileformatscplex.156533__File_formats_reference.uss_reffileformatscplex.156717" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Special bound types for handling integer variables in MPS files</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="33.33333333333333%" id="d26002e94"> Type </th>
+<th class="entry" align="left" valign="top" width="33.33333333333333%" id="d26002e96"> Purpose </th>
+<th class="entry" align="left" valign="top" width="33.33333333333333%" id="d26002e98"> Special Considerations </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d26002e94 ">  <samp class="ph codeph">BV</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e96 "> Binary variable </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e98 "> Field 4 must be 1.0 or blank </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d26002e94 ">  <samp class="ph codeph">LI</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e96 "> Integer lower bound </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e98 "> Field 4 is the lower bound value and must
+be an integer </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d26002e94 ">  <samp class="ph codeph">SC</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e96 "> Semi-continuous variable </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e98 "> Field 4 is the upper bound and must be specified </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="33.33333333333333%" headers="d26002e94 ">  <samp class="ph codeph">UI</samp>  </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e96 "> Integer upper bound </td>
+<td class="entry" valign="top" width="33.33333333333333%" headers="d26002e98 "> Field 4 is the upper bound value and must
+be an integer </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">To specify general integers with no upper bounds, use <samp class="ph codeph">LI</samp> 
+with the value 0.0.</p>
+<p class="p">For example, column <samp class="ph codeph">x4</samp> is
+an integer variable declared in the <samp class="ph codeph">BOUNDS</samp> 
+section of an MPS file, according to this second way of treating integer
+variables:  </p>
+<pre class="pre codeblock"><code>NAME
+ROWS
+ N  obj     
+ L  c1      
+ L  c2      
+ E  c3      
+COLUMNS
+    x1        obj                 -1   c1                  -1
+    x1        c2                   1
+    x2        obj                 -2   c1                   1
+    x2        c2                  -3   c3                   1
+    x3        obj                 -3   c1                   1
+    x3        c2                   1
+    x4        obj                 -1   c1                  10
+    x4        c3                 -3.5
+RHS
+    rhs       c1                  20   c2                  30
+BOUNDS
+ UP BOUND     x1                  40
+ LI BOUND     x4                   2
+ UI BOUND     x4                   3
+ENDATA</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CPLEX/FileFormats/topics/MPS_ext_synopsis.html" title="CPLEX extends the MPS standard in several ways.">Special records in MPS files: CPLEX extensions</a></div>
+</div>
+</div></body>
+</html>

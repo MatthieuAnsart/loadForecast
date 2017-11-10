@@ -1,0 +1,197 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: REM ------------------------------------------------ -*- Visual Basic .Net -*-
+002: REM File: CustomDataSource.vb
+003: REM --------------------------------------------------------------------------
+004: REM Licensed Materials - Property of IBM
+005: REM 
+006: REM 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 
+007: REM Copyright IBM Corporation 1998, 2013. All Rights Reserved.
+008: REM
+009: REM Note to U.S. Government Users Restricted Rights:
+010: REM Use, duplication or disclosure restricted by GSA ADP Schedule
+011: REM Contract with IBM Corp.
+012: REM --------------------------------------------------------------------------
+013: 
+014: 
+015: REM --------------------------------------------------------------------------
+016: REM Visual Basic version of customdatasource.cpp of OPL distrib
+017: REM --------------------------------------------------------------------------
+018: 
+019: Imports System
+020: Imports ILOG.Concert
+021: Imports ILOG.OPL
+022: Imports ILOG.CPLEX
+023: 
+024: Module CustomDataSource
+025:   Const DATADIR As String = <b><font color="#8A2BE2">"../.."</font></b>
+026:   Sub Main()
+027:     Dim status As Integer = 127
+028:     Try
+029:       OplFactory.DebugMode = True
+030:       Dim oplF As OplFactory = New OplFactory()
+031:       Dim errHandler As OplErrorHandler = oplF.CreateOplErrorHandler(Console.Out)
+032:       Dim modelSource As OplModelSource = oplF.CreateOplModelSource(DATADIR + <b><font color="#8A2BE2">"/customDataSource.mod"</font></b>)
+033:       Dim settings As OplSettings = oplF.CreateOplSettings(errHandler)
+034:       Dim def As OplModelDefinition = oplF.CreateOplModelDefinition(modelSource, settings)
+035:       Dim cplex As Cplex = oplF.CreateCplex()
+036:       Dim opl As OplModel = oplF.CreateOplModel(def, cplex)
+037:       Dim dataSource As OplDataSource = New MyCustomDataSource(oplF)
+038:       opl.AddDataSource(dataSource)
+039:       opl.Generate()
+040:       oplF.End()
+041:       status = 0
+042:      Catch ex As ILOG.OPL.OplException
+043:         Console.Out.WriteLine(ex.Message)
+044:         Status = 2
+045:     Catch ex As ILOG.Concert.Exception
+046:         Console.Out.WriteLine(ex.Message)
+047:         Status = 3
+048:     Catch ex As System.Exception
+049:         Console.Out.WriteLine(ex.Message)
+050:         Status = 4
+051:     End Try
+052: 
+053:     Environment.ExitCode = status
+054: 
+055:     Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>)
+056:     Console.ReadLine()
+057:   End Sub
+058: 
+059: 
+060:   Friend Class MyCustomDataSource
+061:     Inherits CustomOplDataSource
+062:     Friend Sub New(ByVal oplF As OplFactory)
+063:       MyBase.New(oplF)
+064:     End Sub
+065:     Public Overrides Sub CustomRead()
+066:       Dim handler As OplDataHandler = DataHandler
+067: 
+068:       <b><font color="#8A2BE2">' initialize the int "simpleInt"</font></b>
+069: <b><font color="#8A2BE2">      handler.StartElement("anInt")</font></b>
+070: <b><font color="#8A2BE2">      handler.AddIntItem(3)</font></b>
+071: <b><font color="#8A2BE2">      handler.EndElement()</font></b>
+072: 
+073: <b><font color="#8A2BE2">      '</font></b> initialize the <b><font color="#0000FF">int</font></b> array <b><font color="#8A2BE2">"simpleIntArray"</font></b>
+074:       handler.StartElement(<b><font color="#8A2BE2">"anIntArray"</font></b>)
+075:       handler.StartArray()
+076:       handler.AddIntItem(1)
+077:       handler.AddIntItem(2)
+078:       handler.AddIntItem(3)
+079:       handler.EndArray()
+080:       handler.EndElement()
+081: 
+082:       <b><font color="#8A2BE2">' initialize int array indexed by float "anArrayIndexedByFloat"</font></b>
+083: <b><font color="#8A2BE2">      handler.StartElement("anArrayIndexedByFloat")</font></b>
+084: <b><font color="#8A2BE2">      handler.StartIndexedArray()</font></b>
+085: <b><font color="#8A2BE2">      handler.SetItemNumIndex(2.0)</font></b>
+086: <b><font color="#8A2BE2">      handler.AddIntItem(1)</font></b>
+087: <b><font color="#8A2BE2">      handler.SetItemNumIndex(2.5)</font></b>
+088: <b><font color="#8A2BE2">      handler.AddIntItem(2)</font></b>
+089: <b><font color="#8A2BE2">      handler.SetItemNumIndex(1.0)</font></b>
+090: <b><font color="#8A2BE2">      handler.AddIntItem(3)</font></b>
+091: <b><font color="#8A2BE2">      handler.SetItemNumIndex(1.5)</font></b>
+092: <b><font color="#8A2BE2">      handler.AddIntItem(4)</font></b>
+093: <b><font color="#8A2BE2">      handler.EndIndexedArray()</font></b>
+094: <b><font color="#8A2BE2">      handler.EndElement()</font></b>
+095: 
+096: <b><font color="#8A2BE2">      '</font></b> initialize <b><font color="#0000FF">int</font></b> array indexed by string <b><font color="#8A2BE2">"anArrayIndexedByString"</font></b>
+097:       handler.StartElement(<b><font color="#8A2BE2">"anArrayIndexedByString"</font></b>)
+098:       handler.StartIndexedArray()
+099:       handler.SetItemStringIndex(<b><font color="#8A2BE2">"idx1"</font></b>)
+100:       handler.AddIntItem(1)
+101:       handler.SetItemStringIndex(<b><font color="#8A2BE2">"idx2"</font></b>)
+102:       handler.AddIntItem(2)
+103:       handler.EndIndexedArray()
+104:       handler.EndElement()
+105: 
+106:       <b><font color="#8A2BE2">' initialize a tuple in the order the components are declared</font></b>
+107: <b><font color="#8A2BE2">      handler.StartElement("aTuple")</font></b>
+108: <b><font color="#8A2BE2">      handler.StartTuple()</font></b>
+109: <b><font color="#8A2BE2">      handler.AddIntItem(1)</font></b>
+110: <b><font color="#8A2BE2">      handler.AddNumItem(2.3)</font></b>
+111: <b><font color="#8A2BE2">      handler.AddStringItem("not named tuple")</font></b>
+112: <b><font color="#8A2BE2">      handler.EndTuple()</font></b>
+113: <b><font color="#8A2BE2">      handler.EndElement()</font></b>
+114: 
+115: <b><font color="#8A2BE2">      '</font></b> initialize a tuple using tuple component names.
+116:       handler.StartElement(<b><font color="#8A2BE2">"aNamedTuple"</font></b>)
+117:       handler.StartNamedTuple()
+118:       handler.SetItemName(<b><font color="#8A2BE2">"f"</font></b>)
+119:       handler.AddNumItem(3.45)
+120:       handler.SetItemName(<b><font color="#8A2BE2">"s"</font></b>)
+121:       handler.AddStringItem(<b><font color="#8A2BE2">"named tuple"</font></b>)
+122:       handler.SetItemName(<b><font color="#8A2BE2">"i"</font></b>)
+123:       handler.AddIntItem(99)
+124:       handler.EndNamedTuple()
+125:       handler.EndElement()
+126: 
+127:       <b><font color="#8A2BE2">' initialize the tuple set "simpleTupleSet"</font></b>
+128: <b><font color="#8A2BE2">      handler.StartElement("aTupleSet")</font></b>
+129: <b><font color="#8A2BE2">      handler.StartSet()</font></b>
+130: <b><font color="#8A2BE2">      '</font></b> first tuple
+131:       handler.StartTuple()
+132:       handler.AddIntItem(1)
+133:       handler.AddNumItem(2.5)
+134:       handler.AddStringItem(<b><font color="#8A2BE2">"a"</font></b>)
+135:       handler.EndTuple()
+136:       <b><font color="#8A2BE2">' second element</font></b>
+137: <b><font color="#8A2BE2">      handler.StartTuple()</font></b>
+138: <b><font color="#8A2BE2">      handler.AddIntItem(3)</font></b>
+139: <b><font color="#8A2BE2">      handler.AddNumItem(4.1)</font></b>
+140: <b><font color="#8A2BE2">      handler.AddStringItem("b")</font></b>
+141: <b><font color="#8A2BE2">      handler.EndTuple()</font></b>
+142: <b><font color="#8A2BE2">      handler.EndSet()</font></b>
+143: <b><font color="#8A2BE2">      handler.EndElement()</font></b>
+144: 
+145: <b><font color="#8A2BE2">      '</font></b> initialize element 3 and 2 of the tuple array <b><font color="#8A2BE2">"simpleTupleArray"</font></b> in that particular order
+146:       handler.StartElement(<b><font color="#8A2BE2">"aTupleArray"</font></b>)
+147:       handler.StartIndexedArray()
+148:       <b><font color="#8A2BE2">' initialize 3rd cell</font></b>
+149: <b><font color="#8A2BE2">      handler.SetItemIntIndex(3)</font></b>
+150: <b><font color="#8A2BE2">      handler.StartTuple()</font></b>
+151: <b><font color="#8A2BE2">      handler.AddIntItem(1)</font></b>
+152: <b><font color="#8A2BE2">      handler.AddNumItem(2.5)</font></b>
+153: <b><font color="#8A2BE2">      handler.AddStringItem("a")</font></b>
+154: <b><font color="#8A2BE2">      handler.EndTuple()</font></b>
+155: <b><font color="#8A2BE2">      '</font></b> initialize second cell
+156:       handler.SetItemIntIndex(2)
+157:       handler.StartTuple()
+158:       handler.AddIntItem(3)
+159:       handler.AddNumItem(4.1)
+160:       handler.AddStringItem(<b><font color="#8A2BE2">"b"</font></b>)
+161:       handler.EndTuple()
+162:       handler.EndIndexedArray()
+163:       handler.EndElement()
+164: 
+165:       <b><font color="#8A2BE2">' initialize int array indexed by tuple set "anArrayIndexedByTuple"</font></b>
+166: <b><font color="#8A2BE2">      handler.StartElement("anArrayIndexedByTuple")</font></b>
+167: <b><font color="#8A2BE2">      handler.StartIndexedArray()</font></b>
+168: <b><font color="#8A2BE2">      handler.StartItemTupleIndex()</font></b>
+169: <b><font color="#8A2BE2">      handler.AddIntItem(3)</font></b>
+170: <b><font color="#8A2BE2">      handler.AddNumItem(4.1)</font></b>
+171: <b><font color="#8A2BE2">      handler.AddStringItem("b")</font></b>
+172: <b><font color="#8A2BE2">      handler.EndItemTupleIndex()</font></b>
+173: <b><font color="#8A2BE2">      handler.AddIntItem(1)</font></b>
+174: <b><font color="#8A2BE2">      handler.EndIndexedArray()</font></b>
+175: <b><font color="#8A2BE2">      handler.EndElement()</font></b>
+176: 
+177: <b><font color="#8A2BE2">      '</font></b> initialize a 2-dimension <b><font color="#0000FF">int</font></b> array <b><font color="#8A2BE2">'a2DIntArray'</font></b>
+178:       handler.StartElement(<b><font color="#8A2BE2">"a2DIntArray"</font></b>)
+179:       handler.StartArray()
+180:       For i As Integer = 1 To 2
+181:         handler.StartArray()
+182:         For j As Integer = 1 To 3
+183:           handler.AddIntItem(i * 10 + j)
+184:         Next
+185:         handler.EndArray()
+186:       Next
+187:       handler.EndArray()
+188:       handler.EndElement()
+189: 
+190:     End Sub
+191:   End Class
+192: End Module
+</tt></pre>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Changes in MPI for the remote object worker" />
+<meta name="abstract" content="MPI semantics changed for remote object worker in CPLEX V12.5.1." />
+<meta name="Description" content="MPI semantics changed for remote object worker in CPLEX V12.5.1." />
+<meta name="DC.subject" content="release notes CPLEX V12.5.1, MPI worker, MPI semantics, MPI multi-threading" />
+<meta name="keywords" content="release notes CPLEX V12.5.1, MPI worker, MPI semantics, MPI multi-threading" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/convertCapi.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="ConversionNoteMPIworker12510" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/convertCapi.html" />
+<title>Changes in MPI for the remote object worker</title>
+</head>
+<body role="main" id="ConversionNoteMPIworker12510">
+<h1 class="title topictitle1">Changes in MPI for the remote object worker</h1>
+<div class="body"><p class="shortdesc">MPI semantics changed for remote object worker in CPLEX V12.5.1.</p>
+<p class="p">The semantics of 
+the message passing interface (MPI) transport type supporting the remote object worker 
+have changed in CPLEX V12.5.1. </p>
+<p class="p"> 
+Formerly, by default, CPLEX assumed a multi-threaded worker even if the MPI library chosen 
+did not support the use of multiple threads. CPLEX used a single-threaded worker only in the 
+presence of the configuration option <samp class="ph codeph">-nothreads</samp>.</p>
+<p class="p">Now, CPLEX checks whether the library of the MPI transport type 
+supports the level of multi-threading required by a multi-threaded MPI worker 
+and acts accordingly.
+If the MPI library supports multiple threads, then the MPI worker runs 
+in multi-threaded mode; if the MPI library does not support multiple threads,
+CPLEX runs the MPI worker in single-threaded mode. </p>
+<p class="p">Furthermore, if the option <samp class="ph codeph">-nothreads</samp> is specified in the 
+configuration, then CPLEX uses a single-threaded worker.</p>
+<p class="p"><strong class="ph b">To reproduce previous behavior</strong></p>
+<div class="p">In order for you to control the behavior of CPLEX explicitly in this respect, 
+CPLEX now accepts an additional argument to force the use of <strong class="ph b">multiple threads</strong> 
+in MPI transport type for the remote object worker. 
+To enforce the use of multiple threads in your application, 
+(that is, to reproduce previous behavior, regardless of the level of
+support for multiple threads in your MPI library) 
+specify this argument in your configuration 
+of the master for the remote worker:
+<pre class="pre codeblock"><code>-forcemt</code></pre>
+</div>
+<p class="p">Summary: current behavior</p>
+<p class="p">In summary, if the MPI library does not support the use of multiple threads, or if 
+the option <samp class="ph codeph">-nothreads</samp> is specified in the 
+configuration, then CPLEX uses a single-threaded worker with the remote object.
+If the MPI library supports the use of multiple threads, and 
+the configuration specifies no option about threads, then by default, 
+CPLEX uses a multi-threaded worker with the remote object.
+If <samp class="ph codeph">-forcemt</samp> is specified in the configuration, 
+then unconditionally CPLEX uses a multi-threaded worker for the remote object, 
+regardless of the MPI library support with respect to multiple threads. 
+(That is, the new option reproduces the previous behavior.)</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes1251/convertCapi.html" title="Changes in the Callable Library (C API) can impact existing applications.">Conversion notes for users of the Callable Library (C API)</a></div>
+</div>
+</div></body>
+</html>

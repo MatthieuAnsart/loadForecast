@@ -1,0 +1,147 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00"> * Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00"> * 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+004: <b><font color="#007D00"> * Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00"> *</font></b>
+006: <b><font color="#007D00"> * Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00"> * Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00"> * Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00"> */</font></b>
+010: 
+011: <b><font color="#007D00">//-------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">// Java version of concurrent processing with OPL</font></b>
+013: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+014: 
+015: package ConcurrentProcessing;
+016: 
+017: import ilog.concert.IloException;
+018: import ilog.cplex.IloCplex;
+019: import ilog.cplex.IloCplex.IntParam;
+020: import ilog.opl.IloOplDataElements;
+021: import ilog.opl.IloOplDataSource;
+022: import ilog.opl.IloOplErrorHandler;
+023: import ilog.opl.IloOplFactory;
+024: import ilog.opl.IloOplModel;
+025: import ilog.opl.IloOplModelDefinition;
+026: import ilog.opl.IloOplModelSource;
+027: import ilog.opl.IloOplSettings;
+028: 
+029: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> PortfolioProblem {
+030: 
+031:   <b><font color="#007D00">// class to stock the request data</font></b>
+032:   <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">class</font></b> Request {
+033:     <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">double</font></b> _rho;
+034: 
+035:     <b><font color="EA7D00">public</font></b> Request(<b><font color="#0000FF">double</font></b> rho) {
+036:       _rho = rho;
+037:     }
+038: 
+039:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">double</font></b> getRho() {
+040:       <b><font color="EA7D00">return</font></b> _rho;
+041:     }
+042:   }
+043: 
+044:   <b><font color="#007D00">// class to stock the result of the OPL thread execution</font></b>
+045:   <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">class</font></b> Result {
+046:     <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">double</font></b> _totalReturn;
+047:     <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">double</font></b> _totalVariance;
+048:     <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">double</font></b> _rho;
+049: 
+050:     <b><font color="EA7D00">public</font></b> Result(<b><font color="#0000FF">double</font></b> r, <b><font color="#0000FF">double</font></b> v, <b><font color="#0000FF">double</font></b> rho) {
+051:       _totalReturn = r;
+052:       _totalVariance = v;
+053:       _rho = rho;
+054:     }
+055: 
+056:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">double</font></b> getTotalReturn() {
+057:       <b><font color="EA7D00">return</font></b> _totalReturn;
+058:     }
+059: 
+060:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">double</font></b> getTotalVariance() {
+061:       <b><font color="EA7D00">return</font></b> _totalVariance;
+062:     }
+063: 
+064:     <b><font color="EA7D00">public</font></b> <b><font color="#0000FF">double</font></b> getRho() {
+065:       <b><font color="EA7D00">return</font></b> _rho;
+066:     }
+067:   }
+068: 
+069:   <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> String DATADIR = <b><font color="#8A2BE2">"."</font></b>;
+070: 
+071:   <b><font color="EA7D00">public</font></b> PortfolioProblem() {
+072:   }
+073: 
+074:   <b><font color="EA7D00">public</font></b> Result solve(Request request) <b><font color="EA7D00">throws</font></b> IloException {
+075:     <b><font color="#0000FF">double</font></b> rho = request.getRho();
+076: 
+077:     IloOplFactory.setDebugMode(<b><font color="EA7D00">true</font></b>);
+078:     <b><font color="#007D00">// Create one OPL factory by thread.</font></b>
+079:     <b><font color="#007D00">// The OPL factory will create and handle all the needed OPL objects.</font></b>
+080:     IloOplFactory oplF = <b><font color="EA7D00">new</font></b> IloOplFactory();
+081:     <b><font color="EA7D00">try</font></b> {
+082:       <b><font color="#007D00">// Create the OPL model source based on the .mod file.</font></b>
+083:       IloOplModelSource source = oplF.createOplModelSource(DATADIR + <b><font color="#8A2BE2">"/portfolio.mod"</font></b>);
+084:       <b><font color="#007D00">// Create the OPL data source based on the .dat file.</font></b>
+085:       IloOplDataSource dataSource = oplF.createOplDataSource(DATADIR + <b><font color="#8A2BE2">"/portfolio.dat"</font></b>);
+086: 
+087:       <b><font color="#007D00">// Create an error handler.</font></b>
+088:       IloOplErrorHandler handler = oplF.createOplErrorHandler();
+089:       <b><font color="#007D00">// Create the default settings.</font></b>
+090:       IloOplSettings settings = oplF.createOplSettings(handler);
+091:       <b><font color="#007D00">// Create the OPL model definition by linking the source and the settings.</font></b>
+092:       IloOplModelDefinition def = oplF.createOplModelDefinition(source, settings);
+093:       <b><font color="#007D00">// Gets the algorithm.</font></b>
+094:       IloCplex cplex = oplF.createCplex();
+095:       <b><font color="#007D00">// Create the OPL model from the OPL defition and the algorithm.</font></b>
+096:       IloOplModel opl = oplF.createOplModel(def, cplex);
+097: 
+098:       <b><font color="#007D00">// Create the OPL data elements.</font></b>
+099:       <b><font color="#007D00">// we will use them to update the missing data from the .dat file</font></b>
+100:       <b><font color="#007D00">// in this sample, we will update rho.</font></b>
+101:       IloOplDataElements dataElements = oplF.createOplDataElements();
+102:       dataElements.addElement(dataElements.makeElement(<b><font color="#8A2BE2">"Rho"</font></b>, rho));
+103: 
+104:       <b><font color="#007D00">// Add the the different data sources to the OPL model.</font></b>
+105:       <b><font color="#007D00">// In this sample, we have a .dat file giving all values except rho</font></b>
+106:       <b><font color="#007D00">// and an OPL element giving the value of rho.</font></b>
+107:       opl.addDataSource(dataElements);
+108:       opl.addDataSource(dataSource);
+109: 
+110:       <b><font color="#007D00">// Generate the model.</font></b>
+111:       opl.generate();
+112: 
+113:       cplex.setOut(<b><font color="EA7D00">null</font></b>);
+114:       <b><font color="#007D00">// Here we force CPLEX to use only 1 thread to get only the OPL multithreading efficiency</font></b>
+115:       <b><font color="#007D00">// without interference from CPLEX.</font></b>
+116:       cplex.setParam(IntParam.Threads, 1);
+117:       <b><font color="EA7D00">if</font></b> (!cplex.solve()) {
+118:         <b><font color="EA7D00">throw</font></b> <b><font color="EA7D00">new</font></b> IloException(<b><font color="#8A2BE2">"solve failed"</font></b>);
+119:       }
+120: 
+121:       <b><font color="#0000FF">double</font></b> totalReturn = opl.getElement(<b><font color="#8A2BE2">"TotalReturn"</font></b>).asNum();
+122:       <b><font color="#0000FF">double</font></b> totalVariance = opl.getElement(<b><font color="#8A2BE2">"TotalVariance"</font></b>).asNum();
+123:       <b><font color="#007D00">// Create the result handler to return.</font></b>
+124: 
+125: 
+126:       Result result = <b><font color="EA7D00">new</font></b> Result(totalReturn, totalVariance, rho);
+127: 
+128:           dataElements.end();
+129:           opl.end();
+130:           cplex.end();
+131:           def.end();
+132:           settings.end();
+133:           handler.end();
+134:           dataSource.end();
+135:           source.end();
+136: 
+137:       <b><font color="EA7D00">return</font></b> result;
+138:     } <b><font color="EA7D00">finally</font></b> {
+139:       oplF.end();
+140:     }
+141:   }
+142: }
+</tt></pre>

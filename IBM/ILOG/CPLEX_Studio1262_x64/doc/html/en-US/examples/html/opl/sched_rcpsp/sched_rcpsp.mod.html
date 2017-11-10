@@ -1,0 +1,56 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+13: 
+14: <b><font color="#0000FF">int</font></b> NbTasks = ...;
+15: <b><font color="#0000FF">int</font></b> NbRsrcs = ...;
+16: 
+17: <b><font color="#0000FF">range</font></b> RsrcIds = 0..NbRsrcs-1; 
+18: 
+19: <b><font color="#0000FF">int</font></b> Capacity[r <b><font color="#0000FF">in</font></b> RsrcIds] = ...;
+20: 
+21: <b><font color="#0000FF">tuple</font></b> Task {
+22:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+23:   <b><font color="#0000FF">int</font></b>     pt;
+24:   <b><font color="#0000FF">int</font></b>     dmds[RsrcIds];
+25:   {<b><font color="#0000FF">int</font></b>}   succs; 
+26: }
+27: 
+28: {Task} Tasks = ...;
+29: 
+30: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> itvs[t <b><font color="#0000FF">in</font></b> Tasks]  <b><font color="#0000FF">size</font></b> t.pt;
+31: 
+32: <b><font color="#0000FF">cumulFunction</font></b> rsrcUsage[r <b><font color="#0000FF">in</font></b> RsrcIds] = 
+33:   <b><font color="#7D007D">sum </font></b>(t <b><font color="#0000FF">in</font></b> Tasks: t.dmds[r]&gt;0) <b><font color="#7D007D">pulse</font></b>(itvs[t], t.dmds[r]);
+34: 
+35: <b><font color="#0000FF">execute</font></b> {
+36:                 cp.param.FailLimit = 10000;
+37: }
+38: 
+39: minimize max(t in Tasks) endOf(itvs[t]);
+40: subject to {
+41:   forall (r <b><font color="EA7D00">in</font></b> RsrcIds)
+42:     rsrcUsage[r] &lt;= Capacity[r];
+43:   forall (t1 <b><font color="EA7D00">in</font></b> Tasks, t2id <b><font color="EA7D00">in</font></b> t1.succs)
+44:     endBeforeStart(itvs[t1], itvs[&lt;t2id&gt;]);
+45: }
+46: 
+47: execute {
+48:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> t <b><font color="EA7D00">in</font></b> Tasks) {
+49:     writeln(<b><font color="#8A2BE2">"Task "</font></b> + t.id + <b><font color="#8A2BE2">" starts at "</font></b> + itvs[t].start);
+50:   }
+51: }
+</tt></pre>

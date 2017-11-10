@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>SearchLimitI</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cplex.cpp/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloCplex_SearchLimitI.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloCplex::SearchLimitI</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilcplex/ilocplexi.h</span></div><div><img
+                src="IloCplex_SearchLimitI.png" border="0"
+                usemap="#svg_map_IloCplex::SearchLimitI"
+                    alt="Map of IloCplex::SearchLimitI"><map
+                        name="svg_map_IloCplex::SearchLimitI"><area
+                        href="../classes/IloCplex_SearchLimitI.html"
+                        shape="rect" alt="IloCplex::SearchLimitI"
+                        coords="10.0,37.6357421875,121.0,55.271484375" /><area
+                        href="../classes/IloCplex_SearchLimitI.html"
+                        shape="rect" alt="IloCplex::SearchLimitI"
+            coords="10.0,37.6357421875,121.0,55.271484375" /></map></img></div><div
+                class="description"><p><code>IloCplex::SearchLimitI</code> is the base class for implementing
+ user-defined search limits. To do so, you must subclass
+ <code>IloCplex::SearchLimitI</code> and implement methods
+ <code>check</code> and <code>duplicateLimit</code>. You may optionally
+ implement method <code>init</code>. The method <code>check</code> must
+ return <code>IloTrue</code> when the limit is reached and
+ <code>IloFalse</code> otherwise. The method <code>duplicateLimit</code> 
+ must return a copy of the invoking object to be used in parallel search.</p><p>Whenever method <code>check</code> is called by <code>IloCplex</code>,
+ the search limit object is first initialized to a node, referred to as the
+ current node. Information about the current node can be queried by calling
+ the <code>get</code> methods of class
+ <code>IloCplex::SearchLimitI</code>.</p><p>Search limits are applied to subtrees defined by goals with the method
+ <code>IloCplex::LimitSearch</code>. For example:</p><pre
+                class="sample">
+
+   IloGoal limitGoal = IloCplex::LimitSearch(cplex, goal1, limit);</pre><p>creates a goal <code>limitGoal</code> which branches as specified by
+ <code>goal1</code> until the limit specified by <code>limit</code> is
+ reached. Only the nodes created by <code>goal1</code> (or any of the goals
+ created by it later) are subjected to the search limit. For example, if you
+ created two branches with the goal</p><pre
+            class="sample">
+
+   OrGoal(limitGoal, goal2);</pre><p>only the subtree defined by <code>goal1</code> is subject to the search
+ limit <code>limit</code>; the subtree defined by <code>goal2</code> is
+ not.</p><p>The ability to specify search limits for subtrees means that it is
+ possible for certain branches to be subject to more than one search limit.
+ Nodes with multiple search limits attached to them are processed only if
+ none of the search limits has been reached, or, in other words, if all the
+ search limits return <code>IloFalse</code> when method <code>check</code>
+ is called by <code>IloCplex</code>.</p><p>Each time CPLEX uses a search limit, it is duplicated first. If you use
+ the same instance of your limit in different branches, it will be duplicated
+ first, the copy will be passed to the corresponding node, and
+ <code>init</code> method will be called on the copy.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloCplex.html">IloCplex</a>, <a
+            href="../classes/IloCplex_SearchLimit.html">IloCplex::SearchLimit</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public virtual <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_SearchLimitI.html#method_check">check</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public virtual SearchLimitI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_SearchLimitI.html#method_duplicateLimit">duplicateLimit</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public virtual void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_SearchLimitI.html#method_init">init</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_SearchLimitI.html#method_SearchLimitI">SearchLimitI</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+            href="../classes/IloCplex_SearchLimitI.html#method_~SearchLimitI">~SearchLimitI</a>()</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_SearchLimitI">SearchLimitI</a></h3><div
+                class="prototype">public  <span
+            class="function-name">SearchLimitI</span>()</div><div
+                class="description"><p>The default constructor creates a new instance of
+ <code>SearchLimitI</code>.</p></div><hr /><h3><a
+            name="method_~SearchLimitI">~SearchLimitI</a></h3><div
+                class="prototype">public  <span
+            class="function-name">~SearchLimitI</span>()</div><div
+                class="description"><p>The virtual destructor allows you to manage
+ you own data inside a search limit object and
+ to delete the data when the limit is deleted.
+ </p></div><hr /><h3><a
+            name="method_check">check</a></h3><div
+                class="prototype">public virtual <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+            class="function-name">check</span>()</div><div
+                class="description"><p>This method is called for every node subjected to the invoking
+ search limit before evaluating the node. If it returns
+ <code>IloTrue</code>,
+ the node is pruned, or, equivalently, the search below that node is
+ discontinued. Thus, users implementing search limits must implement this
+ method to return <code>IloTrue</code> 
+ if the search limit has been reached
+ and <code>IloFalse</code> otherwise. </p></div><hr /><h3><a
+            name="method_duplicateLimit">duplicateLimit</a></h3><div
+                class="prototype">public virtual SearchLimitI * <span
+            class="function-name">duplicateLimit</span>()</div><div
+                class="description"><p>This method is called internally to duplicate the current search
+ limit. Users must implement it in a subclass to return a copy of the
+ invoking object. </p></div><hr /><h3><a
+            name="method_init">init</a></h3><div
+                class="prototype">public virtual void <span
+            class="function-name">init</span>()</div><div class="description"><p>This method is called by <code>IloCplex</code> right before the first
+ time <code>check</code> is called for a node and allows you to initialize
+ the limit based on that node.</p></div><hr /></body>
+</html>

@@ -1,0 +1,77 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: {<b><font color="#0000FF">string</font></b>} Products = ...;
+13: {<b><font color="#0000FF">string</font></b>} Resources = ...;
+14: {<b><font color="#0000FF">string</font></b>} Machines = ...;
+15: <b><font color="#0000FF">float</font></b> MaxProduction = ...;
+16: 
+17: <b><font color="#0000FF">tuple</font></b> typeProductData {
+18:   <b><font color="#0000FF">float</font></b> demand;
+19:   <b><font color="#0000FF">float</font></b> incost;
+20:   <b><font color="#0000FF">float</font></b> outcost;
+21:   <b><font color="#0000FF">float</font></b> use[Resources];
+22:   <b><font color="#0000FF">string</font></b> machine;
+23: }
+24: 
+25: typeProductData Product[Products] = ...;
+26: <b><font color="#0000FF">float</font></b> Capacity[Resources] = ...;
+27: <b><font color="#0000FF">float</font></b> RentCost[Machines] = ...;
+28: 
+29: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Rent[Machines];
+30: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Inside[Products];
+31: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Outside[Products];
+32: 
+33: 
+34: <b><font color="#0000FF">minimize</font></b>
+35:   <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) 
+36:     ( Product[p].incost * Inside[p] + 
+37:       Product[p].outcost * Outside[p] ) +
+38:   <b><font color="#7D007D">sum</font></b>( m <b><font color="#0000FF">in</font></b> Machines ) 
+39:     RentCost[m] * Rent[m];
+40:    
+41: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+42:   <b><font color="#7D007D">forall</font></b>( r <b><font color="#0000FF">in</font></b> Resources )
+43:     ctCapacity:
+44:       <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) 
+45:         Product[p].use[r] * Inside[p] &lt;= Capacity[r];
+46: 
+47:   <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products )
+48:     ctDemand: 
+49:       Inside[p] + Outside[p] &gt;= Product[p].demand;
+50: 
+51:   <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products )
+52:     ctMaxProd:
+53:       Inside[p] &lt;= MaxProduction * Rent[Product[p].machine];
+54: }
+55: 
+56: <b><font color="#0000FF">tuple</font></b> InsideSolutionT{ 
+57:         <b><font color="#0000FF">string</font></b> Products; 
+58:         <b><font color="#0000FF">float</font></b> value; 
+59: };
+60: {InsideSolutionT} InsideSolution = {&lt;i0,Inside[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Products};
+61: <b><font color="#0000FF">tuple</font></b> OutsideSolutionT{ 
+62:         <b><font color="#0000FF">string</font></b> Products; 
+63:         <b><font color="#0000FF">float</font></b> value; 
+64: };
+65: {OutsideSolutionT} OutsideSolution = {&lt;i0,Outside[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Products};
+66: <b><font color="#0000FF">tuple</font></b> RentSolutionT{ 
+67:         <b><font color="#0000FF">string</font></b> Machines; 
+68:         <b><font color="#0000FF">int</font></b> value; 
+69: };
+70: {RentSolutionT} RentSolution = {&lt;i0,Rent[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Machines};
+71: 
+72: 
+</tt></pre>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: C++ API" />
+<meta name="abstract" content="Demonstrates an example of distributed parallel MIP in the C++ API of CPLEX." />
+<meta name="Description" content="Demonstrates an example of distributed parallel MIP in the C++ API of CPLEX." />
+<meta name="DC.subject" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, C++ API example, example C++ API, example, distributed MIP C++" />
+<meta name="keywords" content="MIP, distributed computing and, Mixed Integer Programming (MIP), distributed MIP, C++ API example, example C++ API, example, distributed MIP C++" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="distribMIPcppeg" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<title>Example: C++ API</title>
+</head>
+<body role="main" id="distribMIPcppeg">
+<h1 class="title topictitle1">Example: C++ API</h1>
+<div class="body"><p class="shortdesc">Demonstrates an example of distributed parallel MIP in the C++ API of CPLEX.</p>
+<p class="p">You write a distributed parallel MIP application in C++ in much the same way that you 
+write a conventional (shared memory) application of CPLEX in C++. In that application, you 
+include an additional step: before you invoke the method 
+<span class="keyword apiname">IloCplex::solve</span>, you must load a Virtual Machine Configuration (a 
+<samp class="ph codeph">configuration.vmc</samp> file, as explained in 
+<a class="xref" href="05_interactive.html" title="Shows how to run distributed parallel MIP in the Interactive Optimizer.">Distributed parallel MIP in the Interactive Optimizer</a>.) The presence of the configuration file 
+tells <span class="keyword apiname">IloCplex::solve</span> to run distributed parallel MIP instead of 
+conventional (shared memory) MIP optimization. </p>
+<div class="section"><h2 class="title sectiontitle">Source code</h2>
+<p class="p">CPLEX offers sample code <samp class="ph codeph">ilodistmipex1.cpp</samp> that 
+shows how to use distributed parallel MIP. The important statements in that code 
+are these statements:</p>
+
+<pre class="pre codeblock"><code>
+ IloEnv env;
+
+IloModel model(env);
+
+IloCplex cplex(model);
+
+cplex.importModel(model, argv[i]);
+
+<strong class="ph b">cplex.readCopyVMConfig(vmconfig);</strong>
+
+cplex.solve(); 
+</code></pre>
+
+<p class="p">Those first four statements create an instance of the CPLEX solver and 
+load the model of a problem into it.</p>
+
+<p class="p">The call to <span class="keyword apiname">IloCplex::readCopyVMConfig</span> loads a 
+Virtual Machine Configuration from a file. This configuration 
+specifies which machines the distributed parallel MIP optimization will use. </p>
+
+<p class="p">Finally, the call to <span class="keyword apiname">IloCplex::solve</span> checks 
+whether the problem is a MIP and whether a Virtual Machine Configuration has 
+been loaded. If so, CPLEX runs distributed parallel MIP optimization. 
+Otherwise, it uses one of the conventional algorithms to solve the loaded model.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Compiling and linking</h2>
+<p class="p">The conventions to compile applications that use distributed parallel MIP optimization 
+are precisely the same as the conventions of other CPLEX C++ applications.</p>
+
+<p class="p">On platforms other than Windows, however, the linking is slightly different for an 
+application of distributed parallel MIP optimization.
+When your application uses distributed parallel MIP, you must link with 
+<samp class="ph codeph">libcplexdistmip.a</samp>, a part of the CPLEX distribution, located in 
+the same place as <samp class="ph codeph">libcplex.a</samp>. You must also link with 
+<samp class="ph codeph">libdl.so</samp> to enable your application to load shared objects. 
+To link with <samp class="ph codeph">libdl.so</samp>, you can add the option <var class="keyword varname">-ldl</var> to 
+your linker command.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Running your application</h2>
+<p class="p">Execution of an application using distributed parallel MIP optimization is slightly more 
+complicated than running a conventional (shared memory) C++ application of CPLEX. Your 
+application acts as master in distributed parallel MIP while the other machines 
+specified in the Virtual Machine Configuration act as workers. In order to run your 
+application, you follow these steps:</p>
+
+<ol class="ol"><li class="li">Deploy the workers. That is, copy the binaries and shared libraries as explained in 
+<a class="xref" href="05_interactive.html" title="Shows how to run distributed parallel MIP in the Interactive Optimizer.">Distributed parallel MIP in the Interactive Optimizer</a>.</li>
+<li class="li"><p class="p">Set up your environment so that your application can find the CPLEX shared libraries. 
+One way to do so is to set an environment variable to specify the folder or directory 
+where the CPLEX shared library is located.</p>
+
+    <ul class="ul"><li class="li">On AIX, set the environment variable <var class="keyword varname">LIBPATH</var>.</li>
+<li class="li">On GNU/Linux, set the environment variable <var class="keyword varname">LD_LIBRARY_PATH</var>.</li>
+<li class="li">On MacOS, set the environment variable <var class="keyword varname">DYLD_LIBRARY_PATH</var>.</li>
+<li class="li">On Windows, set the environment variable <var class="keyword varname">PATH</var>.</li>
+</ul>
+</li>
+<li class="li"><p class="p">Run your application.</p>
+
+    <ul class="ul"><li class="li">On Windows, CPLEX offers a Visual Studio project, that is, a file with the extension 
+    <samp class="ph codeph">.vcxproj</samp> and containing options and values 
+    to compile, link, and run the example <samp class="ph codeph">ilodistmipex1.cpp</samp>. Simply load 
+    <samp class="ph codeph">ilodistmipex1.vcxproj</samp> and run the project to execute the code.
+    </li>
+<li class="li">On other platforms, CPLEX offers a Makefile that compiles, links, and runs the 
+    example <samp class="ph codeph">ilodistmipex1.cpp</samp>. In the following sample commands, 
+    replace these values by appropriate values from your installation.
+    <ul class="ul"><li class="li"><span class="ph filepath">COS_INSTALL_DIR</span> is the folder or directory where you installed 
+    IBM ILOG CPLEX Optimization Studio.</li>
+<li class="li"><span class="ph filepath">system</span> is the type of your computer platform.</li>
+<li class="li"><span class="ph filepath">libformat</span> is the library format.</li>
+</ul>
+
+    <p class="p">Then execute the equivalent commands:</p>
+
+    <pre class="pre codeblock"><code>    cd COS_INSTALL_DIR/cplex/examples/system/libformat
+    make -f Makefile.distmip dm_execute_cpp
+    </code></pre>
+
+    </li>
+</ul>
+</li>
+</ol>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

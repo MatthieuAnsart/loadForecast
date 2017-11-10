@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Basic flow control script" />
+<meta name="abstract" content="Presents two templates to help you write flow control scripts." />
+<meta name="Description" content="Presents two templates to help you write flow control scripts." />
+<meta name="DC.subject" content="flow control, basic script, scripting, code samples, basic flow control script" />
+<meta name="keywords" content="flow control, basic script, scripting, code samples, basic flow control script" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_mulmod.1015757" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple.html" />
+<title>Basic flow control script</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_mulmod.1015757">
+<h1 class="title topictitle1">Basic flow control script</h1>
+<div class="body"><p class="shortdesc">Presents two templates to help you write flow control
+scripts.</p>
+<p class="p">To help you write flow control scripts, here are two
+templates you can start from. </p>
+<p class="p"> <a class="xref" href="opl_languser_script_fc_multiple_basic.html#usropllangtut.uss_langtut_mulmod.1015757__usropllangtut.uss_langtut_mulmod.1017018">Flow control script template calling a project</a> calls a project
+file while <a class="xref" href="opl_languser_script_fc_multiple_basic.html#usropllangtut.uss_langtut_mulmod.1015757__usropllangtut.uss_langtut_mulmod.1015593">Flow control script template calling a model and data</a> calls model
+and data files. </p>
+<div class="example" id="usropllangtut.uss_langtut_mulmod.1015757__usropllangtut.uss_langtut_mulmod.1017018"><h2 class="title sectiontitle">Flow control script template calling a project</h2><pre class="pre codeblock"><code>main { 
+
+var proj = new IloOplProject("../../../../../opl/mulprod");
+
+var rc=proj.makeRunConfiguration();
+
+rc.oplModel.generate();
+
+if (rc.cplex.solve()) {
+
+writeln("OBJ = " + rc.cplex.getObjValue());
+
+}
+
+else {
+
+writeln("No solution");
+
+}
+
+rc.end();
+
+proj.end(); 
+
+}</code></pre>
+</div>
+<div class="example" id="usropllangtut.uss_langtut_mulmod.1015757__usropllangtut.uss_langtut_mulmod.1015593"><h2 class="title sectiontitle">Flow control script template calling a model and data</h2><pre class="pre codeblock"><code>main { 
+
+var source = new IloOplModelSource("../../../../../opl/mulprod/mulprod.mod");
+
+var cplex = new IloCplex();
+
+var def = new IloOplModelDefinition(source);
+
+var opl = new IloOplModel(def,cplex);
+
+var data = new IloOplDataSource("../../../../../opl/mulprod/mulprod.dat");
+
+opl.addDataSource(data);
+
+opl.generate();
+
+if (cplex.solve()) {
+
+writeln("OBJ = " + cplex.getObjValue());
+
+}
+
+else {
+
+writeln("No solution");
+
+}
+
+opl.end();
+
+data.end(); 
+
+def.end(); 
+
+cplex.end(); 
+
+source.end(); 
+
+}</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple.html" title="Shows how to use IBM ILOG Script flow control statements to solve a production planning model iteratively, modifying the data after each iteration.">Tutorial: Flow control and multiple searches</a></div>
+</div>
+</div></body>
+</html>

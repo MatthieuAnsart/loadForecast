@@ -1,0 +1,71 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/******</font></b>
+13: <b><font color="#007D00"> * This model is described in the documentation. </font></b>
+14: <b><font color="#007D00"> * See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+15: <b><font color="#007D00"> *</font></b>
+16: <b><font color="#007D00"> */</font></b>
+17: 
+18: 
+19: <b><font color="#0000FF">int</font></b> NumNodes = ...;   <b><font color="#007D00">// Number of nodes</font></b>
+20: <b><font color="#0000FF">range</font></b> Nodes = 1..NumNodes;
+21: 
+22: <b><font color="#007D00">// Get the supply (positive) and demand (negative)</font></b>
+23: <b><font color="#007D00">// at each node</font></b>
+24: 
+25: <b><font color="#0000FF">int</font></b> SupDem[Nodes] = ...;
+26: 
+27: <b><font color="#007D00">// Create a record to hold information about each arc</font></b>
+28: <b><font color="#0000FF">tuple</font></b> arc {
+29:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> fromnode;
+30:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> tonode;
+31:    <b><font color="#0000FF">float</font></b> cost;
+32:    <b><font color="#0000FF">float</font></b> ub;
+33: }
+34: 
+35: <b><font color="#007D00">// Get the set of arcs</font></b>
+36: 
+37: {arc} Arcs = ...;
+38: 
+39: <b><font color="#007D00">// The network flow model has decision variables indexed on </font></b>
+40: <b><font color="#007D00">// the arcs.</font></b>
+41: 
+42: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Flow[a <b><font color="#0000FF">in</font></b> Arcs] <b><font color="#0000FF">in</font></b> 0 .. a.ub;
+43: 
+44: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> TotalFlow = <b><font color="#7D007D">sum </font></b>(a <b><font color="#0000FF">in</font></b> Arcs) a.cost * Flow[a];
+45: <b><font color="#0000FF">minimize</font></b> TotalFlow;
+46: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+47:    <b><font color="#007D00">// Preserve flows at each node.  Note the use of slicing</font></b>
+48:    <b><font color="#7D007D">forall </font></b>(i <b><font color="#0000FF">in</font></b> Nodes)
+49:      ctNodeFlow:
+50:       <b><font color="#7D007D">sum </font></b>(&lt;i,j,c,ub&gt; <b><font color="#0000FF">in</font></b> Arcs) Flow[&lt;i,j,c,ub&gt;]
+51:     - <b><font color="#7D007D">sum </font></b>(&lt;j,i,c,ub&gt; <b><font color="#0000FF">in</font></b> Arcs) Flow[&lt;j,i,c,ub&gt;] == SupDem[i];
+52: }
+53: 
+54: <b><font color="#0000FF">tuple</font></b> FlowSolutionT{ 
+55:         arc Arcs;       
+56:         <b><font color="#0000FF">float</font></b> value; 
+57: };
+58: {FlowSolutionT} FlowSolution = {&lt;i0,Flow[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Arcs};
+59: 
+60: 
+61: <b><font color="#0000FF">execute</font></b> DISPLAY {
+62:    writeln(<b><font color="#8A2BE2">"</font></b>\n<b><font color="#8A2BE2">&lt;from node,to node,Flow[a]&gt;</font></b>\n<b><font color="#8A2BE2">"</font></b>);
+63:    <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> a <b><font color="EA7D00">in</font></b> Arcs)
+64:       <b><font color="EA7D00">if</font></b>(Flow[a] &gt; 0)
+65:          writeln(<b><font color="#8A2BE2">"&lt;"</font></b>,a.fromnode,<b><font color="#8A2BE2">","</font></b>,a.tonode,<b><font color="#8A2BE2">","</font></b>,Flow[a],<b><font color="#8A2BE2">"&gt;"</font></b>);
+66: }
+</tt></pre>

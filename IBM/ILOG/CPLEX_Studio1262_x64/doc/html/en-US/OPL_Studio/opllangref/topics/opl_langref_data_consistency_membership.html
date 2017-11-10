@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Data membership consistency" />
+<meta name="abstract" content="Explains the use of the with keyword to ensure data consistency." />
+<meta name="Description" content="Explains the use of the with keyword to ensure data consistency." />
+<meta name="DC.subject" content="sets, and data consistency, tuples, keywords, with, with, OPL keyword" />
+<meta name="keywords" content="sets, and data consistency, tuples, keywords, with, with, OPL keyword" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_data_consistency.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datasources.1061069" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_data_consistency.html" />
+<title>Data membership consistency</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datasources.1061069">
+<h1 class="title topictitle1">Data membership consistency</h1>
+<div class="body"><p class="shortdesc">Explains the use of the <samp class="ph codeph">with</samp> keyword
+to ensure data consistency.</p>
+<p class="p">The keyword <samp class="ph codeph">with</samp> enables you
+to indicate that a given element of a tuple must be contained in a
+given set. If you use it, OPL checks the consistency of the tuple
+set at run time when initializing the set. The syntax is: </p>
+<pre class="pre codeblock"><code>{tupletype} tupleset with cell1 in set1, cell2 in set = ...; </code></pre>
+<p class="p">Let's take an example. You have a set of arcs between
+nodes. Nodes are defined by a tuple set of tuples consisting of an
+origin node and a destination node. The <samp class="ph codeph">with</samp> syntax
+enables you to ensure that the origin and destination nodes do belong
+to a given set of nodes. Compare <a class="xref" href="opl_langref_data_consistency_membership.html#usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061182">Data found inconsistent (keyword with)</a> and <a class="xref" href="opl_langref_data_consistency_membership.html#usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061349">Data found consistent (keyword with)</a>: </p>
+<div class="example" id="usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061182"><h2 class="title sectiontitle">Data found inconsistent (keyword <samp class="ph codeph">with</samp>)</h2><pre class="pre codeblock"><code>{int} nodes = {1, 5, 7};
+ 
+tuple arc  {
+  int origin;
+  int destination;
+}
+ 
+{arc} arcs2 with origin in nodes, destination in nodes = 
+  {&lt;1,4&gt;, &lt;5,7&gt;};
+ 
+execute {
+  writeln(arcs2);
+};</code></pre>
+</div>
+<div class="example" id="usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061349"><h2 class="title sectiontitle">Data found consistent (keyword <samp class="ph codeph">with</samp>)</h2><pre class="pre codeblock"><code>{int} nodes = {1, 5, 7};
+ 
+tuple arc  {
+  int origin;
+  int destination;
+}
+ 
+{arc} arcs1 with origin in nodes, destination in nodes = 
+  {&lt;1,5&gt;, &lt;5,7&gt;};
+ 
+execute {
+  writeln(arcs1);
+};</code></pre>
+</div>
+<p class="p">If you write <a class="xref" href="opl_langref_data_consistency_membership.html#usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061182">Data found inconsistent (keyword with)</a>, an error
+will be raised when the set <samp class="ph codeph">arcs2</samp> is initialized
+because the <samp class="ph codeph">with</samp> syntax will detect that
+the statement</p>
+<pre class="pre codeblock"><code>(int) nodes = (1, 5, 7);</code></pre>
+<p class="p">is not consistent with the statement </p>
+<pre class="pre codeblock"><code>with origin in nodes, destination in nodes = 
+  {&lt;1,4&gt;, &lt;5,7&gt;}</code></pre>
+<p class="p">If you write <a class="xref" href="opl_langref_data_consistency_membership.html#usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061349">Data found consistent (keyword with)</a>, the initialization
+of the set <samp class="ph codeph">arcs1</samp> will work properly because
+the <samp class="ph codeph">with</samp> syntax will find that the statement</p>
+<pre class="pre codeblock"><code>(int) nodes = (1, 5, 7);</code></pre>
+<p class="p">is consistent with the statement </p>
+<pre class="pre codeblock"><code>with origin in nodes, destination in nodes = 
+  {&lt;1,5&gt;, &lt;5,7&gt;}</code></pre>
+<div class="section" id="usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061762"><h2 class="title sectiontitle">Initializing tuple sets referring to other sets</h2><p class="p">To initialize tuple sets that refer to other sets <strong class="ph b">with keys</strong> for data consistency, you
+must use initialization expressions that provide only those key values,
+as shown in <a class="xref" href="opl_langref_data_consistency_membership.html#usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061762">Initializing tuple sets referring to other sets</a>. This is
+true if you initialize those tuple sets as internal data or as external
+data in <span class="ph filepath">.dat</span> files, databases,
+or spreadsheets.</p>
+<p class="p exampletitle" id="usropllangref.uss_langref_datasources.1061069__usropllangref.uss_langref_datasources.1061765">Initializing tuple sets referring to other sets</p>
+<pre class="pre codeblock"><code>tuple node
+{
+  key int node_id;
+  string city;
+  string country;  
+}
+
+{node} nodes = {&lt;1,"Paris","France"&gt;,&lt;5,"Madrid","Spain"&gt;, &lt;7,"New York","USA"&gt;};
+ 
+tuple arc  {
+  node origin;
+  node destination;
+}
+ 
+{arc} arcs1 with origin in nodes, destination in nodes=...;
+
+execute {
+  writeln(arcs1);
+};</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_data_consistency.html" title="Defines the purpose of data consistency and describes data membership and assertions as ways to ensure consistency.">Data consistency</a></div>
+</div>
+</div></body>
+</html>

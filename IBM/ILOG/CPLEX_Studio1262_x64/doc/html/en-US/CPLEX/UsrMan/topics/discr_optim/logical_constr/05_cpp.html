@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Logical constraints in the C++ API" />
+<meta name="abstract" content="Describes logical constraints in the C++ API." />
+<meta name="Description" content="Describes logical constraints in the C++ API." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/logical_constr/03_extract_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingLogical.1009314" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/logical_constr/03_extract_title_synopsis.html" />
+<title>Logical constraints in the C++ API</title>
+</head>
+<body role="main" id="User_manual.uss_usingLogical.1009314">
+<h1 class="title topictitle1">Logical constraints in the C++ API</h1>
+<div class="body"><p class="shortdesc">Describes logical constraints in the C++ API.</p>
+<p class="p">In C++ applications, the class <samp class="ph codeph">IloCplex</samp> 
+can extract modeling objects to solve a wide variety of MIPs, as you
+see in <a class="xref" href="../../APIs/Cpp/solving_synopsis.html" title="Describes facilities for solving a model in the C++ API.">Solving the model</a>,
+summarized in the table in <a class="xref" href="../../APIs/Cpp/solving_overview.html" title="Introduces the C++ class IloCplex.">Overview</a>.
+In fact, the C++ class <samp class="ph codeph">IloCplex</samp>  can extract
+logical constraints as well as some logical expressions. The logical
+constraints that <samp class="ph codeph">IloCplex</samp>  can extract
+are these: </p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">IloAnd</samp> </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloOr</samp> </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloNot</samp> </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">IloIfThen</samp> </p>
+</li>
+<li class="li"><p class="p">IloDiff</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">==</samp>  that
+is, the equivalence relation</p>
+</li>
+</ul>
+<p class="p">Among those extractable objects, <samp class="ph codeph">IloAnd</samp>  <samp class="ph codeph">IloOr</samp> , <samp class="ph codeph">IloNot</samp> ,
+and <samp class="ph codeph">IloDiff</samp>  can also be represented in
+your application by means of the overloaded C++ operators:</p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">||</samp>  (for <samp class="ph codeph">IloOr</samp> )</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">&amp;&amp;</samp> 
+(for <samp class="ph codeph">IloAnd</samp> )</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">!</samp>   (for <samp class="ph codeph">IloNot</samp> )</p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">!=</samp>  that
+is, the exclusive-or relation (for <samp class="ph codeph">IloDiff</samp> )</p>
+</li>
+</ul>
+<p class="p">All those extractable objects accept as their arguments
+other linear constraints or logical constraints, so you can combine
+linear constraints with logical constraints in complicated expressions
+in your application.</p>
+<p class="p">For example, to express the idea that two jobs with starting
+times <samp class="ph codeph">x1</samp>  and <samp class="ph codeph">x2</samp> 
+and with duration <samp class="ph codeph">d1</samp>  and <samp class="ph codeph">d2</samp> 
+must not overlap, you can either use overloaded C++ operators, like
+this:  </p>
+<pre class="pre codeblock"><code>model.add((x1 &gt;= x2 + d2) || (x2 &gt;= x1 + d1));</code></pre>
+<p class="p">or you can express the same idea, like this:  </p>
+<pre class="pre codeblock"><code>IloOr or(env)
+or.add(x1 &gt;= x2 + d2);
+or.add(x2 &gt;= x1 + d1);
+model.add(or);</code></pre>
+<p class="p">Since <samp class="ph codeph">IloCplex</samp>  can also extract
+logical constraints embedded in other logical constraints, you can
+also write logical constraints like this:  </p>
+<pre class="pre codeblock"><code>IloIfThen(env, (x &gt;= y &amp;&amp; x &gt;= z), IloNot(x &lt;= 300 || y &gt;= 700))</code></pre>
+<p class="p">where <samp class="ph codeph">x</samp> , <samp class="ph codeph">y</samp> ,
+and <samp class="ph codeph">z</samp>  are variables in your application. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/logical_constr/03_extract_title_synopsis.html" title="Documents the logical constraints available in each API.">What can be extracted from a model with logical constraints?</a></div>
+</div>
+</div></body>
+</html>

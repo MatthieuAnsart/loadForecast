@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Selectors and evaluators" />
+<meta name="abstract" content="A search phase can specify not only a group of variables to fix but also in what order they should be fixed. Additionally, a search phase can specify what values should be tried first for those variables. The fixing order can be specified using selectors and evaluators." />
+<meta name="Description" content="A search phase can specify not only a group of variables to fix but also in what order they should be fixed. Additionally, a search phase can specify what values should be tried first for those variables. The fixing order can be specified using selectors and evaluators." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/search.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Selectors_and_evaluators" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/search.html" />
+<title>Selectors and evaluators</title>
+</head>
+<body role="main" id="Selectors_and_evaluators">
+<h1 class="title topictitle1">Selectors and evaluators</h1>
+<div class="body conbody"><p class="shortdesc">A search phase can specify not only a group of variables to fix but also in what
+order they should be fixed. Additionally, a search phase can specify what values should be tried first for
+those variables. The fixing order can be specified using <em class="ph i">selectors</em> and <em class="ph i">evaluators</em>.</p>
+<div class="section" id="Selectors_and_evaluators__Variable_selectors_and_evaluators"><h2 class="title sectiontitle">Variable selectors and evaluators</h2>
+<p class="p">The following picture illustrates the process of choosing the next variable
+to fix using three variable selectors:</p>
+
+
+
+<div class="imageleft"><img class="image syntaxdiagram" src="../diagrams/diagram30.png" /></div>
+
+<p class="p">On the input (left) there is a set of all variables specified
+in the search phase that still remain unfixed. The first selector
+(gray funnel) is:</p>
+
+
+<pre class="pre codeblock"><code><a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectSmallest</a>(<a class="xref" href="050_intVarEval.html" title="The list of integer variable evaluators.">domainSize</a>(), 5)</code></pre>
+
+<p class="p">It evaluates input variables using the <samp class="ph codeph"><a class="xref" href="050_intVarEval.html" title="The list of integer variable evaluators.">domainSize</a>()</samp> evaluator and keeps
+for further consideration only variables whose current domain size is in the
+range <samp class="ph codeph">min..min+5</samp> where <samp class="ph codeph">min</samp> is the minimum current domain size among all
+the input variables.</p>
+
+
+<p class="p">Note that the ordering of variables by <samp class="ph codeph"><a class="xref" href="050_intVarEval.html" title="The list of integer variable evaluators.">domainSize</a>()</samp> evaluator is not
+static. Domains of variables change during the search, so the
+selector always uses the current domain size.</p>
+
+
+<p class="p">The subset of variables selected by the first selector is the input for
+the second selector which is:</p>
+
+
+<pre class="pre codeblock"><code><a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectLargest</a>(3, <a class="xref" href="050_intVarEval.html" title="The list of integer variable evaluators.">varImpact</a>())</code></pre>
+
+<p class="p">This time the selector evaluates the input variables by using <samp class="ph codeph"><a class="xref" href="050_intVarEval.html" title="The list of integer variable evaluators.">varImpact</a>()</samp>
+evaluator and selects at least 3 variables with the biggest evaluation.
+More than 3 variables can be selected only if there is a tie for third place.
+In this instance, all variables which come equal third according to the largest
+variable impact are selected (as well as those coming first and second).
+If there are less than 3 variables on the input then the selector selects all of them.</p>
+
+
+<p class="p">Finally the selected variables are passed to the third selector which
+selects one of the preselected variables randomly:</p>
+
+
+<pre class="pre codeblock"><code><a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectRandomVar</a>()</code></pre>
+
+<p class="p">In the case above, the last selector always selects only one variable.
+However if there is still more than one variable to choose from after
+the last selector, then the variable which is mentioned first in the
+search phase is chosen.</p>
+
+</div>
+<div class="section" id="Selectors_and_evaluators__Value_selectors_and_evaluators"><h2 class="title sectiontitle">Value selectors and evaluators</h2>
+<p class="p">Once a variable is chosen for fixing, it is necessary to chose a
+value from its domain. This is also done using selectors and evaluators. For
+example, the following selector selects from the current domain 3 values with
+the largest impact.</p>
+
+
+<pre class="pre codeblock"><code><a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectLargest</a>(3, <a class="xref" href="060_intValueEval.html" title="The list of integer value evaluators.">valueImpact</a>())</code></pre>
+
+<p class="p">Again the selectors can be chained until a single value is chosen. If
+there is more than one possible value after the last selector then the
+minimum value is chosen.</p>
+
+</div>
+<div class="section" id="Selectors_and_evaluators__Search_phase_with_selectors_and_evaluators"><h2 class="title sectiontitle">Search phase with selectors and evaluators</h2>
+<p class="p">To finish the example, here is how the selectors and evaluators can be
+used in a search phase:</p>
+
+
+<pre class="pre codeblock"><code><a class="xref" href="../search.html" title="A CPO file may contain an optional search section which specifies a variable fixing strategy that CP Optimizer should use while searching for solutions. The strategy is described by search phases.">search</a> {
+  <a class="xref" href="080_searchPhase.html" title="The function searchPhase defines an variable fixing strategy.">searchPhase</a>([<a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectSmallest</a>(<a class="xref" href="050_intVarEval.html" title="The list of integer variable evaluators.">domainSize</a>(), 5), <a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectLargest</a>(3, <a class="xref" href="050_intVarEval.html" title="The list of integer variable evaluators.">varImpact</a>()), <a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectRandomVar</a>()],
+               <a class="xref" href="070_Selectors.html" title="The list of integer variable selectors and integer value selectors.">selectSmallest</a>(3, <a class="xref" href="060_intValueEval.html" title="The list of integer value evaluators.">value</a>()));
+}</code></pre>
+
+<p class="p">The search phase above does not specify a set of variables.  When no variable
+set is specified, it is assumed that the phase takes as input all integer variables
+in the model.</p>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/search.html" title="A CPO file may contain an optional searchA CPO file may contain an optional search section which specifies a variable fixing strategy that CP Optimizer should use while searching for solutions. The strategy is described by search phases. section which specifies a variable fixing strategy that CP Optimizer should use while searching for solutions. The strategy is described by search phases.">The search section</a></div>
+</div>
+</div></body>
+</html>

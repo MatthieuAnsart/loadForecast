@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Analyzing MIP solution quality" />
+<meta name="abstract" content="Describes analysis of the quality of a solution of a MIP optimization." />
+<meta name="Description" content="Describes analysis of the quality of a solution of a MIP optimization." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/para/51_soln.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="solnqualityMIP" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/para/51_soln.html" />
+<title>Analyzing MIP solution quality</title>
+</head>
+<body role="main" id="solnqualityMIP">
+<h1 class="title topictitle1">Analyzing MIP solution quality</h1>
+<div class="body"><p class="shortdesc">Describes analysis of the quality of a solution of a MIP
+optimization.</p>
+<p class="p">CPLEX can also display information about the quality of a MIP solution.
+ Here is a sample, typical of such quality information.</p>
+<pre class="pre codeblock"><code>MILP objective                                -2.1989035553e+06
+MILP solution norm |x| (Total, Max)            1.95445e+10  1.68134e+08
+MILP solution error (Ax=b) (Total, Max)        3.90105e+05  8.14760e+03
+MILP x bound error (Total, Max)                0.00000e+00  0.00000e+00
+MILP x integrality error (Total, Max)          1.96296e-06  9.81482e-07
+MILP slack bound error (Total, Max)            8.27493e-08  2.95847e-09</code></pre>
+<p class="p">Because a MIP solution lacks an associated unique basis matrix,
+no  measures of dual variable solution quality or reduced cost solution
+quality are  available for a MIP solution.  However, as you see in
+that sample,  CPLEX provides norms of primal variable values, bound
+violations,  and associated residuals in much the same way as for
+LP solutions.  For more detail about those qualities, see the topic
+ <a class="xref" href="../../../cont_optim/simplex/24_soln_quality.html" title="Documents facilities for evaluating solution quality in LP models.">Interpreting solution quality</a> </p>
+<p class="p"> Furthermore, the integrality error declares the maximum amount
+by  which the solution value of a variable restricted to be integral
+has violated its integrality restriction. By default, CPLEX uses a
+default  value of integrality tolerance of 1e-05. (You can adjust
+this value by  means of the  <a class="xref" href="../../../../../Parameters/topics/EpInt.html" title="Specifies the amount by which an integer variable can be different from an integer and still be considered feasible.">integrality tolerance</a>  parameter.) </p>
+<p class="p"> The MILP slack bound error recomputes the slack or artificial
+variable values based on the structural variable values in the solution.
+ The MILP slack bound error  corresponds to the slack values that
+would be obtained from all the slack values in the basis of the  fixed
+LP associated with the MILP solution.   Any resulting violation of
+the bounds of these slack variables that exceeds the feasibility tolerance
+indicates potential for better solution quality if you address ill-conditioning
+in the model.   </p>
+<p class="p">The slack bound error differs from the primal residual solution
+error <samp class="ph codeph">Ax - b</samp>. Specifically, 
+the <strong class="ph b">slack bound error</strong> involves recomputing the slacks; 
+in contrast, the <strong class="ph b">primal residual solution error</strong> 
+computes residuals based on the structural 
+and slack values obtained from the node relaxation or heuristic 
+from which the final integer solution was computed.
+ These two metrics (slack bound error and primal residual solution
+error), along with the integrality error, are the most important measures
+of MIP solution quality.  </p>
+<p class="p">As an example of analyzing the quality of a solution, consider
+this model:</p>
+<pre class="pre codeblock"><code>10000x + y &gt;= 10000
+x &gt;= 1
+y &gt;= 0 
+x,y integer</code></pre>
+<p class="p">For the solution <samp class="ph codeph">x = 1 - 1e-10, y = 0</samp>,   the integrality
+error is <samp class="ph codeph">1e-10</samp>. The MIP slack bound violation is
+obtained by comparing the lefthand side of the solution value,<samp class="ph codeph"> 10000*(1-1e-10)</samp>,
+ to the righthand side of <samp class="ph codeph">10000</samp>.  The difference
+ implies a value of <samp class="ph codeph">-1e-6</samp> for the surplus variable
+on the constraint, a slack bound violation of  <samp class="ph codeph">1e-6</samp>.
+In other words, constraint coefficients larger than one can magnify
+a bound  violation for a structural variable into a larger slack bound
+violation.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/para/51_soln.html" title="Describes access to the solution of a MIP optimization.">Using the MIP solution</a></div>
+</div>
+</div></body>
+</html>

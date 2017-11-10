@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the sports scheduling problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the sports scheduling problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/sports.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizersports.131017" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/sports.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizersports.131017">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the sports scheduling problem has been described using
+natural language, you then use Concert Technology classes to model
+the constraint programming problem. </p>
+<p class="p">After you have written a description of your problem, you can use IBM® ILOG® Concert
+Technology classes to model it.</p>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157690"><h2 class="title sectiontitle">Step
+2: Open the example file</h2><p class="p">Open the example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/sports_partial.cpp</samp> in
+your development environment. </p>
+<p class="p">In this lesson, you include the
+header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>. To catch exceptions
+that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block. The
+code for declaring an environment and a model, calculating the unique
+game identifiers and for printing out the solution found by the CP
+Optimizer engine is provided for you.</p>
+<p class="p">First, you represent the
+data of the program. The number of teams, <samp class="ph codeph">n</samp>, is set
+to a default of 10 in this example, but can be changed with an input
+argument. (For this problem, the number of teams must always be even.
+If the number of teams is not even, it is increased by 1.) The code
+for processing the input argument is provided for you: </p>
+<pre class="pre codeblock"><code>    IloInt n = 10;
+    if (argc &gt; 1)
+      n = atoi(argv[1]);
+    if ((n % 2) == 1)
+      n++;
+    env.out() &lt;&lt; "Finding schedule for " &lt;&lt; n &lt;&lt; " teams" &lt;&lt; std::endl;
+</code></pre>
+<p class="p">The number of weeks, <samp class="ph codeph">nbWeeks</samp>, is <samp class="ph codeph">2*(n-1)</samp>,
+or 18 in this example. The number of game slots per week, <samp class="ph codeph">nbGamesPerWeek</samp>,
+is <samp class="ph codeph">nbTeams/2</samp>, or 5 in this example. The number of
+game slots, <samp class="ph codeph">nbGames</samp>, is equal to the number of weeks
+times the number of game slots per week, or 90 in this example. The
+number of games to be scheduled is equal to the number of game slots
+available.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157703"><h2 class="title sectiontitle">Step
+3: Calculate the data</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Calculate the data</samp> </p>
+<pre class="pre codeblock"><code>    IloInt nbWeeks = 2 * (n - 1);
+    IloInt nbGamesPerWeek = n / 2;
+    IloInt nbGames = n * (n - 1);
+</code></pre>
+<p class="p">Each week has five slots; each slot must have a game
+assigned to it. The unknowns in this problem are which game is assigned
+to which slot. To represent these unknowns, you declare a matrix of
+decision variables, <samp class="ph codeph">games</samp>, which is indexed on week
+and slot.   To create the matrix of variables, you create an array
+in which each element is an array of constrained integer variables.
+The domain of values for each variable in <samp class="ph codeph">games</samp> is
+the set of unique game identifiers; in this example the domain of
+each variable is [0..89]. The matrix of variables <samp class="ph codeph">games</samp> will
+represent the solution to the problem after a solution has been found
+by the CP Optimizer engine.</p>
+<p class="p">To help you model the constraints
+that involve the home and away teams, it will be useful to be able
+to easily determine which team is the home team and which team is
+the away team for each slot. You declare auxiliary variables that
+are not directly a part of the solution, but make it easier to model
+the breaks and other constraints. You declare matrices of decision
+variables which represent the teams that will play at home and away
+in each slot, called <samp class="ph codeph">home</samp> and <samp class="ph codeph">away</samp>,
+respectively. These matrices are indexed on week and slot in the same
+manner as the matrix <samp class="ph codeph">games</samp>. The domain of the variables
+in each of these matrices are the teams, represented by integers in
+the range [0..9].</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157714"><h2 class="title sectiontitle">Step
+4: Declare the game, home team and away team variables</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Declare the game, home team and away
+team variables</samp> </p>
+<pre class="pre codeblock"><code>    IloIntVarArray2 games(env, nbWeeks);
+    IloIntVarArray2 home(env, nbWeeks);
+    IloIntVarArray2 away(env, nbWeeks);
+    for (IloInt i = 0; i &lt; nbWeeks; i++) {
+      home[i]  = IloIntVarArray(env, nbGamesPerWeek, 0, n - 1);
+      away[i]  = IloIntVarArray(env, nbGamesPerWeek, 0, n - 1);
+      games[i] = IloIntVarArray(env, nbGamesPerWeek, 0, nbGames - 1);
+    }
+</code></pre>
+<p class="p">For each slot, you need to link the variables in the
+arrays <samp class="ph codeph">game</samp>, <samp class="ph codeph">home</samp> and <samp class="ph codeph">away</samp>.
+In other words, you constrain that only certain configurations of
+home team, away team and game identifiers are allowed. These allowed
+configurations can be modeled as a set of integer tuples.  </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Set
+of tuples </strong> </p>
+ <p class="p">An <em class="ph i">integer tuple</em> is an ordered set of
+values represented by an array. A set of integer tuples in a model
+is represented by an instance of <samp class="ph codeph">IloIntTupleSet</samp> in
+the C++ and Java™ APIs and by
+an instance of <samp class="ph codeph">IIntTupleSet</samp> in the C# API. </p>
+ <p class="p">The
+number of values in a tuple is known as the arity of the tuple. </p>
+ </div>
+<p class="p">The
+constructor of <samp class="ph codeph">IloIntTupleSet</samp> takes the environment
+as its first argument, and the arity as its second argument. Here
+is a constructor for <samp class="ph codeph">IloIntTupleSet</samp>:  </p>
+<pre class="pre codeblock"><code>  IloIntTupleSet(IloEnv env, const int arity);
+</code></pre>
+<p class="p">You use the member function <samp class="ph codeph">IloIntTupleSet::add</samp> to
+add tuples to the set. </p>
+<p class="p">In this example, the game identifier
+indicates a particular pairing of home team and away team. Using the <samp class="ph codeph">Game</samp> function,
+you see that the game in which Team 1 plays at home against Team 2
+is Game 10. This combination is a tuple. You would write it as (1,
+2, 10). The number of values in a tuple is known as the arity of the
+tuple. The tuple (1, 2, 10) has an arity of 3. You calculate all allowed
+combinations of home team, away team and game identifier using the <samp class="ph codeph">Game</samp> function.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157728"><h2 class="title sectiontitle">Step
+5: Calculate the allowed tuples</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Calculate the allowed tuples</samp> </p>
+<pre class="pre codeblock"><code>    IloIntTupleSet gha(env, 3);
+    IloIntArray tuple(env, 3);
+    for (IloInt i = 0; i &lt; n; i++) {
+      tuple[0] = i;
+      for (IloInt j = 0; j &lt; n; j++) {
+        if (i != j) {
+          tuple[1] = j;
+          tuple[2] = Game(i, j, n);
+          gha.add(tuple);
+        }
+      }
+    }
+</code></pre>
+<p class="p">The complete set of possible combinations of home team,
+away team and game identifier are enumerated in the set of tuples, <samp class="ph codeph">gha</samp>.
+To constrain the values assigned to a given slot of the matrices of <samp class="ph codeph">home</samp>, <samp class="ph codeph">away</samp> and <samp class="ph codeph">games</samp> variables
+to be allowed combinations, you use the IBM ILOG Concert Technology constraint <samp class="ph codeph">IloAllowedAssignments</samp>.
+ </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Compatibility constraint </strong> </p>
+ <p class="p">The function <samp class="ph codeph">IloAllowedAssignments</samp> takes
+an array of decision variables and a set of tuples. It returns a constraint
+that specifies that the only possible combinations of allowed values
+for the variables are the tuples in the tupleset.  </p>
+ </div>
+<p class="p">The
+function <samp class="ph codeph">IloAllowedAssignments</samp> returns an instance
+of an <samp class="ph codeph">IloConstraint</samp>. The first argument passed to
+this function is the environment. The second argument is the array
+of decision variables. The third argument is the tupleset which enumerates
+the allowed combinations of values for the array of variables. The
+arity of the tuples must be the same as the length of the array of
+the decision variables. Here is the function signature you will use:
+ </p>
+<pre class="pre codeblock"><code>  IloConstraint IloAllowedAssignments(const IloEnv env,
+                                      const IloIntVarArray vars,
+                                      const IloIntTupleSet set);
+</code></pre>
+<p class="p">For each slot, you build a small temporary array of
+decision variables from variables you have already created. This new
+array has the <samp class="ph codeph">home</samp>, <samp class="ph codeph">away</samp> and <samp class="ph codeph">games</samp> variables
+associated with the given slot. Note that you are not creating new
+decision variables but creating an alternate manner of referencing
+the previously created variables. Adding the compatibility constraint
+that the allowed assignments for these variables must be in the set
+of tuples, <samp class="ph codeph">gha</samp>, ensures that these three matrices
+of variables are properly linked.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157741"><h2 class="title sectiontitle">Step
+6: Add the constraint on allowed combinations</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the constraint on allowed combinations</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; nbWeeks; i++) {
+      for (IloInt j = 0; j &lt; nbGamesPerWeek; j++) {
+        IloIntVarArray vars(env);
+        vars.add(home[i][j]);
+        vars.add(away[i][j]);
+        vars.add(games[i][j]);
+        model.add(IloAllowedAssignments(env, vars, gha));
+      }
+    }
+</code></pre>
+<p class="p">Now that the auxiliary variables are properly linked
+to the <samp class="ph codeph">games</samp> variables, you begin to model the constraints
+as outlined in the description of the problem. The first set of constraints
+state that each team can play in exactly one slot a week. For each
+week, no team can appear twice in the set of variables representing
+the teams playing at home and away for that week. In other words,
+the home and away variables associated with a given week must all
+be assigned different values in any solution. For each week, you create
+an array with all of the home and away variables for that week. To
+state that the value assigned to each decision variable in an array
+must be different from that of every other variable in that array,
+you use the IBM ILOG Concert Technology predefined constraint <samp class="ph codeph">IloAllDiff</samp>.
+   </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">All different constraint </strong> </p>
+ <p class="p">Using specialized
+constraints, such as <samp class="ph codeph">IloAllDiff</samp>, makes modeling simpler
+and the solving more efficient. </p>
+ <p class="p">The single constraint <samp class="ph codeph">IloAllDiff</samp> on <samp class="ph codeph">n</samp> variables
+is logically equivalent to <samp class="ph codeph">n(n-1)/2</samp> instances of
+the “not equal” constraint, <samp class="ph codeph">!=</samp>, between each pair
+of decision variables in the array.  </p>
+ </div>
+<p class="p">The class <samp class="ph codeph">IloAllDiff</samp> is
+a subclass of the class <samp class="ph codeph">IloConstraint</samp>. The constructor
+of <samp class="ph codeph">IloAllDiff</samp> takes the environment as its first
+argument. The second argument is the array of variables. The third
+argument is an optional name used for debug and trace purposes. Here
+is the function signature you will use:  </p>
+<pre class="pre codeblock"><code>  IloAllDiff(const IloEnv env, 
+             const IloIntVarArray vars = 0, 
+             const char* name = 0);
+ </code></pre>
+<p class="p">To simplify creating the single array containing the
+home and away variables for a given week, you use the <samp class="ph codeph">add</samp> method
+of <samp class="ph codeph">IloIntVarArray</samp> whose single argument is an <samp class="ph codeph">IloIntVarArray</samp>.
+This method appends the argument array to the invoking array.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157754"><h2 class="title sectiontitle">Step
+7: Add the alldiff constraint</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Add the alldiff constraint</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; nbWeeks; i++) {
+      IloIntVarArray teamsThisWeek(env);
+      teamsThisWeek.add(home[i]);
+      teamsThisWeek.add(away[i]);
+      model.add(IloAllDiff(env, teamsThisWeek));
+    }
+</code></pre>
+<p class="p">Next, you add the constraints that the two games between
+a pair of teams must be in different halves of the season and also
+must be at least six weeks apart (if there are fewer than 6 teams,
+this minimum distance is reduced). To simplify modeling this constraint,
+you create auxiliary variables to represent the week of the season
+in which each game will be played.</p>
+<p class="p">You create the array <samp class="ph codeph">weekOfGame</samp> which
+is indexed on game identifiers. Each element of this array is a decision
+variable with a domain of the possible weeks, [0..17]. The value of
+each variable in this array represents the week in which that game
+will be played. </p>
+<p class="p">To ensure that the <samp class="ph codeph">weekOfGame</samp> variables
+are assigned the appropriate values, you need to be able to determine
+the week of each game. Assuming that each game is played exactly once,
+the week that game <samp class="ph codeph">g</samp> is played is <samp class="ph codeph">w</samp>,
+where there is an <samp class="ph codeph">i</samp> such that <samp class="ph codeph">game[w][i]</samp> is
+assigned the value <samp class="ph codeph">g</samp>. To model this relationship,
+you use two steps. First, you determine which slot a game has been
+assigned to, then you determine the week of that slot.</p>
+<p class="p">To determine
+to which slot a game has been assigned, you create two arrays of decision
+variables, each of length <samp class="ph codeph">nbGames</samp>. One is a “flattened”
+version of the matrix <samp class="ph codeph">games</samp>, called <samp class="ph codeph">allGames</samp>.
+The variables in <samp class="ph codeph">allGames</samp> are not new variables,
+but provide an alternate view on the original variables in <samp class="ph codeph">games</samp>.
+The other array,<samp class="ph codeph"> allSlots</samp>, is indexed by the games.
+The domain of each variable in <samp class="ph codeph">allSlots</samp> is the set
+of values of the indices of <samp class="ph codeph">allGames</samp>, [0..89]. Since <samp class="ph codeph">allSlots[i]
+== j</samp> if and only if <samp class="ph codeph">allGames[j] == i</samp>, the
+arrays have an inverse relationship. This relationship can be modeled
+using the IBM ILOG Concert Technology constraint <samp class="ph codeph">IloInverse</samp>.
+    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Inverse constraint </strong> </p>
+ <p class="p"> Using specialized
+constraints, such as <samp class="ph codeph">IloInverse</samp>, makes modeling simpler
+and the solving more efficient. </p>
+ <p class="p">The single constraint <samp class="ph codeph">IloInverse</samp> ensures
+that for two arrays of decision variables <samp class="ph codeph">x</samp> and <samp class="ph codeph">y</samp> of
+equal size </p>
+ <ul class="ul"><li class="li"><p class="p">for all <samp class="ph codeph">i</samp> in the interval [0..<samp class="ph codeph">n</samp>-1], <samp class="ph codeph">y[x[i]]
+== i</samp>; </p>
+</li>
+<li class="li"><p class="p">for all <samp class="ph codeph">j</samp> in the interval [0..<samp class="ph codeph">n</samp>-1], <samp class="ph codeph">x[y[j]]
+== j</samp>.</p>
+</li>
+</ul>
+ </div>
+<p class="p">The class <samp class="ph codeph">IloInverse</samp> is a subclass
+of <samp class="ph codeph">IloConstraint</samp>. The constructor of <samp class="ph codeph">IloInverse</samp> takes
+the environment as its first argument. The second argument is one
+array of decision variables. The third argument is the other array
+of variables. Here is the function signature you will use:  </p>
+<pre class="pre codeblock"><code>  IloInverse(const IloEnv env, 
+             const IloIntVarArray f, 
+             const IloIntVarArray invf);
+</code></pre>
+<p class="p">As the arrays are of the same length, this constraint
+also has the virtue of ensuring that in any solution, the values assigned
+to all the variables within each array will be unique.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157767"><h2 class="title sectiontitle">Step
+8: Add the inverse constraint</h2><p class="p">Add the following code after
+the comment <samp class="ph codeph">//Add the inverse constraint</samp> </p>
+<pre class="pre codeblock"><code>    IloIntVarArray weekOfGame(env, nbGames, 0, nbWeeks - 1);
+    IloIntVarArray allGames(env);
+    IloIntVarArray allSlots(env, nbGames, 0, nbGames - 1);
+    for (IloInt i = 0; i &lt; nbWeeks; i++)
+      allGames.add(games[i]);
+    model.add(IloInverse(env, allGames, allSlots));
+</code></pre>
+<p class="p">After you have established the connection between the
+arrays <samp class="ph codeph">allSlots</samp> and <samp class="ph codeph">allGames</samp>, you
+write a constraint to represent to which week a game will be assigned.
+Using the array <samp class="ph codeph">allSlots</samp>, you can represent to which
+slot a game will be assigned. To determine to which week a slot belongs,
+you can use integer division. For instance, slot <samp class="ph codeph">i</samp> is
+in the week <samp class="ph codeph">i div  nGamesPerWeek</samp> where <samp class="ph codeph">div</samp> represents
+the integer division operator. IBM ILOG Concert Technology provides
+a function <samp class="ph codeph">IloDiv</samp> for use in integer expressions.
+    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Integer division expression </strong> </p>
+ <p class="p">Using
+the function <samp class="ph codeph">IloDiv</samp>, you can create an expression
+that represents integer division.  </p>
+ </div>
+<p class="p">The function <samp class="ph codeph">IloDiv</samp> takes
+two arguments, an integer expression (or variable) and an integer
+value, and returns an instance of <samp class="ph codeph">IloIntExprArg.</samp> The
+class <samp class="ph codeph">IloIntExprArg</samp> is used internally by IBM ILOG Concert
+Technology to build expressions. You should not use <samp class="ph codeph">IloIntExprArg</samp> directly.
+Here is the version of <samp class="ph codeph">IloDiv</samp> that you will use: </p>
+<pre class="pre codeblock"><code>  IloIntExprArg IloDiv(const IloIntExprArg x, IloInt y);
+</code></pre>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157779"><h2 class="title sectiontitle">Step
+9: Add the week of game</h2><p class="p">Add the following code after the
+comment <samp class="ph codeph">//Add the week of game constraint</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; nbGames; i++)
+      model.add(weekOfGame[i] == IloDiv(allSlots[i], nbGamesPerWeek));
+</code></pre>
+<p class="p">Now that you have a representation of the week in which
+each game will be played, you can complete the second step in writing
+constraints to model the limitations on season half and minimum length
+of time between the games. You determine the identifiers of the two
+games played between each pair of teams and then constrain that if
+one game is scheduled in the last half of the season, then the other
+game must be scheduled in the first half of the season and that if
+one game is not scheduled in the last half of the season, then the
+other game must not be scheduled in the first half of the season.
+This type of conditional constraint is called a <em class="ph i">logical constraint</em>.
+   </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Logical constraint </strong> </p>
+ <p class="p">A logical constraint
+is created by combining constraints or placing constraints on other
+constraints. Logical constraints are based on the idea that constraints
+have value. CP Optimizer handles constraints not only as if they have
+a Boolean value, such as true or false, but effectively as if the
+value is 0 or 1. This allows you to combine constraints into expressions
+or impose constraints on constraints. </p>
+ <p class="p">Constraints can be combined
+using arithmetic operators. With the C++ API, you can also use the
+following logical operators and classes to combine constraints:</p>
+ <ul class="ul"><li class="li"><p class="p">not (<samp class="ph codeph">!</samp>), </p>
+ </li>
+<li class="li"><p class="p">and (<samp class="ph codeph">&amp;&amp;</samp>), </p>
+ </li>
+<li class="li"><p class="p">or (<samp class="ph codeph">||</samp>), 		</p>
+</li>
+<li class="li"><p class="p">equivalence (<samp class="ph codeph">==</samp>),</p>
+ </li>
+<li class="li"><p class="p">exclusive or (<samp class="ph codeph">!=</samp>) (This overloaded C++ operator
+constrains its two arguments to be unequal--different from each other.)
+and</p>
+</li>
+<li class="li"><p class="p">implication (<samp class="ph codeph">IloIfThen</samp>) (An instance of <samp class="ph codeph">IloIfThen</samp> represents
+a condition constraint.).</p>
+</li>
+</ul>
+ </div>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157786"><h2 class="title sectiontitle">Step
+10: Create the different halves constraint</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Create the different halves constraint</samp>  </p>
+<pre class="pre codeblock"><code>    IloInt mid = nbWeeks / 2;
+    IloInt overlap = 0;
+    if (n &gt;= 6)
+      overlap = IloMin(n / 2, 6);
+    for (IloInt i = 0; i &lt; n; i++) {
+      for (IloInt j = i + 1; j &lt; n; j++) {
+        IloInt g1 = Game(i, j, n);
+        IloInt g2 = Game(j, i, n); 
+        model.add((weekOfGame[g1] &gt;= mid) == (weekOfGame[g2] &lt; mid));
+</code></pre>
+<p class="p">To constrain that six weeks is the minimum length of
+time between the two games played between a given pair of teams, you
+could write a logical constraint using a disjunction. However, IBM ILOG Concert
+Technology provides a function <samp class="ph codeph">IloAbs</samp>, which not
+only eases modeling but may also improve performance in the search,
+since it provides more information.    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Absolute value
+expression </strong> </p>
+ <p class="p">Using the function <samp class="ph codeph">IloAbs</samp>,
+you can create an expression that represents the absolute value of
+an expression. </p>
+ </div>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157797"><h2 class="title sectiontitle">Step
+11: Create the distance constraint</h2><p class="p">Add the following code
+after the comment <samp class="ph codeph">//Create the distance constraint</samp>  </p>
+<pre class="pre codeblock"><code>        if (overlap != 0)
+          model.add(IloAbs(weekOfGame[g1] - weekOfGame[g2]) &gt;= overlap);
+      }
+    }
+</code></pre>
+<p class="p">You next write the constraint on the maximum size of
+breaks. No team can have a break of length three or greater. In other
+words, in any sequence of three weeks, a team must play at least one
+game at home and no more than two games at home. In order to count
+the number of games at home in a sequence of three weeks, you create
+a matrix of auxiliary variables indexed on team and week called <samp class="ph codeph">playHome</samp>.
+The domain of each variable in this matrix is [0..1]. A value of 0
+indicates the team plays away that week and a value of 1 indicates
+that the team plays at home that week.</p>
+<p class="p">To constrain each variable
+in <samp class="ph codeph">playHome</samp> to be assigned the appropriate value,
+you use the function <samp class="ph codeph">IloCount</samp>. You constrain the
+value of the element of <samp class="ph codeph">playHome</samp> for that week and
+team by counting the number of times that a particular team plays
+at home during a particular week (it must be 0 or 1).</p>
+<p class="p">For each
+team, you represent each sequence of three games with a subarray of
+the array <samp class="ph codeph">playHome</samp>. Using this subarray and the predefined IBM ILOG Concert
+Technology function <samp class="ph codeph">IloSum</samp>, you can represent the
+number of time the team plays at home during the three weeks.     </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Addition
+expression </strong> </p>
+ <p class="p">Using the function <samp class="ph codeph">IloSum</samp>,
+you can create an expression that represents the sum of the decision
+variables in the array passed as an argument to the function. </p>
+ </div>
+<p class="p">For
+each team, you constrain the sum of each sequence of three <samp class="ph codeph">playHome</samp> variables
+for each team to take the value 1 or 2. To do this, you use a <em class="ph i">range
+constraint</em>.     </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Range constraint </strong> </p>
+ <p class="p">A <em class="ph i">range
+constraint</em> is useful when the value of a decision variable or
+expression must fall between to values. In the C++ API, instead of
+writing two separate constraints, one can be written in the form </p>
+ <p class="p"><samp class="ph codeph">lb &lt;=
+exp &lt;= ub</samp>, where <samp class="ph codeph">lb</samp> and <samp class="ph codeph">ub</samp> are
+the bounds and <samp class="ph codeph">exp</samp> is the expression. </p>
+ </div>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157808"><h2 class="title sectiontitle">Step
+12: Add the max break length constraint</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add max break length constraints</samp> </p>
+<pre class="pre codeblock"><code>    IloIntVarArray2 playHome(env, n);
+    for (IloInt i = 0; i &lt; n; i++) {
+      playHome[i] = IloIntVarArray(env, nbWeeks, 0, 1);
+      for (IloInt j = 0; j &lt; nbWeeks; j++)
+        model.add(playHome[i][j] == IloCount(home[j], i));
+      for (IloInt j = 0; j &lt; nbWeeks -3; j++) {
+        IloIntVarArray window(env);
+        for (IloInt k = j; k &lt; j + 3; k++)
+          window.add(playHome[i][k]);
+        model.add(1 &lt;= IloSum(window) &lt;= 2);
+      }
+    }
+</code></pre>
+<p class="p">The final modeling constraint you add states that the
+team must play either its first game or last game at home, but not
+both. For each team, you state that the value of its <samp class="ph codeph">playHome</samp> decision
+variable for the first week must not equal the value of its <samp class="ph codeph">playHome</samp> variable
+for the last week.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157819"><h2 class="title sectiontitle">Step
+13: Add the constraint on first and last weeks</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the constraint on first and last
+weeks</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; n; i++)
+      model.add(playHome[i][0] != playHome[i][nbWeeks-1]);
+</code></pre>
+<p class="p">To complete the model, you add the objective. The objective
+is constructed similarly to the constraint on break length. Since
+each break has a length of at most two, you know that there are at
+most <samp class="ph codeph">nbWeeks/2</samp> breaks for each team. For each team,
+you count the number of breaks, which is now easily represented as
+two consecutive weeks for which the <samp class="ph codeph">playHome</samp> variables
+are assigned the same value, using an expression comprised of constraints
+using a self-assigned addition operator. The variable <samp class="ph codeph">breaks</samp> is
+set to be the total sum of all of the breaks for all the teams. The
+objective is to minimize the value of <samp class="ph codeph">breaks</samp>.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157832"><h2 class="title sectiontitle">Step
+14: Add the objective</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the objective</samp> </p>
+<pre class="pre codeblock"><code>    IloIntVarArray teamBreaks(env, n, 0, nbWeeks / 2);
+    for (IloInt i = 0; i &lt; n; i++) {
+      IloIntExpr nbreaks(env);
+      for (IloInt j = 1; j &lt; nbWeeks; j++)
+        nbreaks += (playHome[i][j-1] == playHome[i][j]);
+      model.add(teamBreaks[i] == nbreaks);
+    }
+    IloIntVar breaks(env, n - 2, n * (nbWeeks / 2));
+    model.add(breaks == IloSum(teamBreaks));
+    model.add(IloMinimize(env, breaks));
+</code></pre>
+<p class="p">While the model has now been fully expressed, there
+are additional constraints that can be introduced to help improve
+the search. The first set of additional constraints are called <em class="ph i">surrogate
+constraints</em>. The second type of additional constraints are constraints
+used to <em class="ph i">reduce symmetry</em>.      </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Surrogate constraint </strong> </p>
+ <p class="p">A <em class="ph i">surrogate
+constraint</em> makes explicit a property that satisfies a solution
+implicitly. In fact, in some disciplines, surrogate constraints are
+known as implicit constraints for that reason. Such a constraint should
+not change the nature of the solution, but its propagation should
+delimit the general shape of the solution more quickly. </p>
+ <p class="p"> In
+any case where an implicit property makes good sense, or derives from
+experience, or satisfies formal computations, its explicit implementation
+as a surrogate constraint can be beneficial. </p>
+ <p class="p"> Since constraint
+propagation decreases the search space by reducing the domains of
+variables, it is obviously important to express all necessary constraints.
+In some cases, it is even a good idea to introduce surrogate constraints
+to reduce the size of the search space by supplementary propagation.
+ </p>
+ <p class="p">Processing supplementary constraints inevitably slows down
+execution. However, this slowing down may be negligible in certain
+problems when it is compared with the efficiency gained from reducing
+the size of the search space. </p>
+ </div>
+<p class="p"> It is known that a team
+must play half of its games at home. This is already implicitly expressed
+in the model within the set of tuples, so you are certain every solution
+will satisfy this. However, adding an additional constraint on the <samp class="ph codeph">playHome</samp> variables
+will improve the constraint propagation.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157843"><h2 class="title sectiontitle">Step
+15: Add the surrogate constraints</h2><p class="p">Add the following code
+after the comment <samp class="ph codeph">//Add surrogate constraints</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; n; i++)
+      model.add(IloSum(playHome[i]) == nbWeeks / 2);
+</code></pre>
+<p class="p">Since only breaks of size two are allowed, each team
+must have an even number of breaks. This can be constrained using
+the IBM ILOG Concert Technology modulus operator, <samp class="ph codeph">operator%</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157854"><h2 class="title sectiontitle">Step
+16: Add more surrogate constraints</h2><p class="p">Add the following code
+after the comment <samp class="ph codeph">//Add more surrogate constraints</samp> </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; n; i++)
+      model.add((teamBreaks[i] % 2) == 0);
+</code></pre>
+<p class="p">To help the search perform efficiently, it is also
+important to reduce symmetry.      </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Reduce symmetry </strong> </p>
+ <p class="p">he
+apparent complexity of a problem can often be reduced to a much smaller
+practical complexity by detecting intrinsic symmetries. One way to <em class="ph i">reduce
+symmetry</em> in a problem is to introduce order.</p>
+ <p class="p">There is no
+need to examine all the possible solutions when two or more constrained
+variables satisfy all of the following conditions:  </p>
+ <ul class="ul"><li class="li"><p class="p">the initial domains of these constrained variables are identical;</p>
+</li>
+<li class="li"><p class="p">these variables are subject to the same constraints;</p>
+</li>
+<li class="li"><p class="p">the variables can be permuted without changing the statement
+of the problem.</p>
+</li>
+</ul>
+ <p class="p"> By introducing order among these variables so that only
+one of these permutations is found, you minimize the size of the search
+space. </p>
+ </div>
+<p class="p">Since the teams are interchangeable, you can
+fix the games scheduled for the first week. This constraint removes
+only symmetric solutions; it does not eliminate any “real” solutions. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157867"><h2 class="title sectiontitle">Step
+17: Add constraints to reduce symmetry</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add constraints to fix first week</samp>  </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; nbGamesPerWeek; i++) {
+      model.add(home[0][i] == i * 2);
+      model.add(away[0][i] == i * 2 + 1);
+    }
+</code></pre>
+<p class="p">Since the slots for a given week are identical with
+no distinguishing characteristics, you reduce symmetry by forcing
+an order on which games are assigned to which slots within a week.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersports.131017__migration.uss_gscpoptimizersports.157880"><h2 class="title sectiontitle">Step
+18: Add more constraints to reduce symmetry</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the slot order constraint</samp>  </p>
+<pre class="pre codeblock"><code>    for (IloInt i = 0; i &lt; nbWeeks; i++)
+      for (IloInt j = 1; j &lt; nbGamesPerWeek; j++)
+        model.add(games[i][j] &gt; games[i][j-1]);
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/sports.html" title="In this lesson, you will learn how to use CP Optimizer to find a solution to a sports scheduling problem.">Using specialized constraints and tuples: scheduling teams</a></div>
+</div>
+</div></body>
+</html>

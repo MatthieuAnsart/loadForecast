@@ -1,0 +1,226 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// Problem 5 from Model Building in Mathematical Programming, 3rd ed.</font></b>
+013: <b><font color="#007D00">//   by HP Williams</font></b>
+014: <b><font color="#007D00">// Manpower Planning </font></b>
+015: <b><font color="#007D00">//</font></b>
+016: <b><font color="#007D00">//This model is described in the documentation. </font></b>
+017: <b><font color="#007D00">//See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+018: 
+019: {<b><font color="#0000FF">string</font></b>} Class = ...;
+020: 
+021: <b><font color="#0000FF">int</font></b> NbYears = ...;
+022: <b><font color="#0000FF">range</font></b> Year = 1..NbYears;
+023: 
+024: <b><font color="#0000FF">float</font></b> InitialStaff[Class] = ...;
+025: <b><font color="#0000FF">float</font></b> RequiredStaff[Year][Class] = ...;
+026: <b><font color="#0000FF">float</font></b> LimRecruit[Class] = ...;
+027: 
+028: <b><font color="#0000FF">float</font></b> Retain[Class][Class] = ...;
+029: <b><font color="#0000FF">float</font></b> RetainRecruit[Class] = ...;
+030: 
+031: <b><font color="#0000FF">float</font></b> CostRetrain[Class][Class] = ...;
+032: <b><font color="#0000FF">float</font></b> LimRetrain[Class][Class] = ...;
+033: <b><font color="#0000FF">float</font></b> OnjobRetrain[Class][Class] = ...;
+034: 
+035: <b><font color="#0000FF">float</font></b> CostRedundant[Class] = ...;
+036: 
+037: <b><font color="#0000FF">float</font></b> LimOver = ...;
+038: <b><font color="#0000FF">float</font></b> CostOver[Class] = ...;
+039: 
+040: <b><font color="#0000FF">float</font></b> LimShort = ...;
+041: <b><font color="#0000FF">float</font></b> TimeShort = ...;
+042: <b><font color="#0000FF">float</font></b> CostShort[Class] = ...;
+043: 
+044: <b><font color="#0000FF">float</font></b> LimRedundancy = ...;
+045: <b><font color="#0000FF">float</font></b> WeightRedundancy = ...;
+046: <b><font color="#0000FF">float</font></b> LimCost = ...;
+047: <b><font color="#0000FF">float</font></b> WeightCost = ...;
+048: 
+049: <b><font color="#0000FF">range</font></b> R0 = 0..NbYears;
+050: 
+051: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Staff[Class][R0];
+052: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Recruit[c <b><font color="#0000FF">in</font></b> Class][y <b><font color="#0000FF">in</font></b> Year] <b><font color="#0000FF">in</font></b> 0..LimRecruit[c];
+053: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Retrain[i <b><font color="#0000FF">in</font></b> Class][c <b><font color="#0000FF">in</font></b> Class][y <b><font color="#0000FF">in</font></b> Year];
+054: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Redundant[Class][Year];
+055: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ StaffShort[Class][Year] <b><font color="#0000FF">in</font></b> 0..LimShort;
+056: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ StaffOver[Class][Year];
+057: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Cost;
+058: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Redundancy;
+059: 
+060: <b><font color="#007D00">// Composite objective</font></b>
+061: <b><font color="#0000FF">minimize</font></b>
+062:   WeightRedundancy * Redundancy + WeightCost * Cost;
+063: 
+064: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+065: 
+066:   <b><font color="#007D00">// Continuity</font></b>
+067:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> Class, y <b><font color="#0000FF">in</font></b> Year)
+068:     ctContinuity: Staff[c][y] == Retain[c][c] * Staff[c][y-1] 
+069:                  + RetainRecruit[c] * Recruit[c][y]
+070:                  + <b><font color="#7D007D">sum </font></b>(i <b><font color="#0000FF">in</font></b> Class: i!=c) Retain[i][c] * Retrain[i][c][y]
+071:                  - <b><font color="#7D007D">sum </font></b>(i <b><font color="#0000FF">in</font></b> Class: i!=c) Retrain[c][i][y]
+072:                  - Redundant[c][y]; 
+073: 
+074:   <b><font color="#007D00">// Retraining &amp; downgrading</font></b>
+075:   <b><font color="#007D00">// Some retraining has absolute limits</font></b>
+076:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Class, c <b><font color="#0000FF">in</font></b> Class, y <b><font color="#0000FF">in</font></b> Year: LimRetrain[i][c] &gt;= 0)
+077:     ctRetrn: Retrain[i][c][y] &lt;= LimRetrain[i][c];
+078: 
+079:   <b><font color="#007D00">// Some retraining has variable limits</font></b>
+080:   <b><font color="#7D007D">forall</font></b>(i <b><font color="#0000FF">in</font></b> Class, c <b><font color="#0000FF">in</font></b> Class, y <b><font color="#0000FF">in</font></b> Year: OnjobRetrain[i][c] &gt;= 0)
+081:     ctRetvar: Retrain[i][c][y] &lt;= OnjobRetrain[i][c] * Staff[c][y];
+082:       
+083:   <b><font color="#007D00">// Overmanning</font></b>
+084:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Year)
+085:     ctOverman: <b><font color="#7D007D">sum</font></b>(c <b><font color="#0000FF">in</font></b> Class) StaffOver[c][y] &lt;= LimOver;
+086: 
+087:   <b><font color="#007D00">// Required staffing</font></b>
+088:   <b><font color="#7D007D">forall</font></b>(y <b><font color="#0000FF">in</font></b> Year, c <b><font color="#0000FF">in</font></b> Class)
+089:     ctStaffing: Staff[c][y] - StaffOver[c][y] - TimeShort * StaffShort[c][y] == 
+090:        RequiredStaff[y][c];
+091:    
+092:   <b><font color="#007D00">// Initial conditions</font></b>
+093:   <b><font color="#7D007D">forall</font></b>(c <b><font color="#0000FF">in</font></b> Class)
+094:     ctInitCond: Staff[c][0] == InitialStaff[c]; 
+095: 
+096:   <b><font color="#007D00">// Redundancy</font></b>
+097:   ctRedund1: Redundancy == <b><font color="#7D007D">sum</font></b>(c <b><font color="#0000FF">in</font></b> Class, y <b><font color="#0000FF">in</font></b> Year) Redundant[c,y];
+098:   ctRedund2: Redundancy &lt;= LimRedundancy;
+099: 
+100:   <b><font color="#007D00">// Cost</font></b>
+101:   ctCost1: Cost == <b><font color="#7D007D">sum</font></b>(c <b><font color="#0000FF">in</font></b> Class, y <b><font color="#0000FF">in</font></b> Year) (
+102:             CostRedundant[c] * Redundant[c,y]
+103:           + CostShort[c] * StaffShort[c,y]
+104:           + CostOver[c] * StaffOver[c,y]
+105:           + <b><font color="#7D007D">sum </font></b>(i <b><font color="#0000FF">in</font></b> Class) CostRetrain[i,c] * Retrain[i,c,y]); 
+106:   ctCost2: Cost &lt;= LimCost;
+107: }
+108: 
+109: 
+110: <b><font color="#0000FF">tuple</font></b> StaffSolutionT{ 
+111:         <b><font color="#0000FF">string</font></b> Class; 
+112:         <b><font color="#0000FF">int</font></b> R; 
+113:         <b><font color="#0000FF">float</font></b> value; 
+114: };
+115: {StaffSolutionT} StaffSolution = {&lt;i0,i1,Staff[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Class,i1 <b><font color="#0000FF">in</font></b> R0};
+116: <b><font color="#0000FF">tuple</font></b> RecruitSolutionT{ 
+117:         <b><font color="#0000FF">string</font></b> Class; 
+118:         <b><font color="#0000FF">int</font></b> Year; 
+119:         <b><font color="#0000FF">float</font></b> value; 
+120: };
+121: {RecruitSolutionT} RecruitSolution = {&lt;i0,i1,Recruit[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Class,i1 <b><font color="#0000FF">in</font></b> Year};
+122: <b><font color="#0000FF">tuple</font></b> RetrainSolutionT{ 
+123:         <b><font color="#0000FF">string</font></b> Class1; 
+124:         <b><font color="#0000FF">string</font></b> Class2; 
+125:         <b><font color="#0000FF">int</font></b> Year; 
+126:         <b><font color="#0000FF">float</font></b> value; 
+127: };
+128: {RetrainSolutionT} RetrainSolution = {&lt;i0,i1,i2,Retrain[i0][i1][i2]&gt; | i0 <b><font color="#0000FF">in</font></b> Class,i1 <b><font color="#0000FF">in</font></b> Class,i2 <b><font color="#0000FF">in</font></b> Year};
+129: <b><font color="#0000FF">tuple</font></b> RedundantSolutionT{ 
+130:         <b><font color="#0000FF">string</font></b> Class; 
+131:         <b><font color="#0000FF">int</font></b> Year; 
+132:         <b><font color="#0000FF">float</font></b> value; 
+133: };
+134: {RedundantSolutionT} RedundantSolution = {&lt;i0,i1,Redundant[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Class,i1 <b><font color="#0000FF">in</font></b> Year};
+135: <b><font color="#0000FF">tuple</font></b> StaffOverSolutionT{ 
+136:         <b><font color="#0000FF">string</font></b> Class; 
+137:         <b><font color="#0000FF">int</font></b> Year; 
+138:         <b><font color="#0000FF">float</font></b> value; 
+139: };
+140: {StaffOverSolutionT} StaffOverSolution = {&lt;i0,i1,StaffOver[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Class,i1 <b><font color="#0000FF">in</font></b> Year};
+141: <b><font color="#0000FF">tuple</font></b> StaffShortSolutionT{ 
+142:         <b><font color="#0000FF">string</font></b> Class; 
+143:         <b><font color="#0000FF">int</font></b> Year; 
+144:         <b><font color="#0000FF">float</font></b> value; 
+145: };
+146: {StaffShortSolutionT} StaffShortSolution = {&lt;i0,i1,StaffShort[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Class,i1 <b><font color="#0000FF">in</font></b> Year};
+147: 
+148: 
+149: <b><font color="#0000FF">main</font></b> {
+150:   <b><font color="#0000FF">thisOplModel</font></b>.generate();
+151:       
+152:   <b><font color="EA7D00">var</font></b> model = <b><font color="#0000FF">thisOplModel</font></b>;
+153:    
+154:   <b><font color="#007D00">// Solve for minimal redundancy</font></b>
+155:   <b><font color="EA7D00">if</font></b>(<b><font color="#0000FF">cplex</font></b>.solve()) {
+156:     writeln(<b><font color="#8A2BE2">"Minimal redundancy: "</font></b>, model.Redundancy.solutionValue, <b><font color="#8A2BE2">" for unrestricted cost: "</font></b>, model.Cost.solutionValue)
+157:   } <b><font color="EA7D00">else</font></b> {
+158:     writeln(<b><font color="#8A2BE2">"No Solution!"</font></b>)
+159:   }
+160:   <b><font color="EA7D00">var</font></b> minRedundancy = Math.ceil(model.Redundancy.solutionValue);
+161: 
+162:   <b><font color="#007D00">//prepare for next solution</font></b>
+163:   <b><font color="EA7D00">var</font></b> def = <b><font color="#0000FF">thisOplModel</font></b>.modelDefinition;
+164:   <b><font color="EA7D00">var</font></b> data = <b><font color="#0000FF">thisOplModel</font></b>.dataElements;
+165:   <b><font color="EA7D00">var</font></b> newCplex = <b><font color="EA7D00">new</font></b> IloCplex();
+166:   model = <b><font color="EA7D00">new</font></b> IloOplModel(def,newCplex);
+167:    
+168:   <b><font color="#007D00">// Solve for minimal cost given minimal redundancy</font></b>
+169:   data.WeightRedundancy = 0.0;
+170:   data.WeightCost  = 1.0;
+171:   data.LimRedundancy = minRedundancy;
+172:   data.LimCost  = Infinity;
+173:   model.addDataSource(data);
+174:   model.generate();
+175:   <b><font color="EA7D00">if</font></b>(newCplex.solve()) {
+176:     writeln(<b><font color="#8A2BE2">"Minimal cost: "</font></b>, model.Cost.solutionValue, <b><font color="#8A2BE2">" for minimal redundancy: "</font></b>, model.Redundancy.solutionValue)
+177:   } <b><font color="EA7D00">else</font></b> {
+178:     writeln(<b><font color="#8A2BE2">"No Solution!"</font></b>)
+179:   }
+180:    
+181:   <b><font color="#007D00">//prepare for next solution</font></b>
+182:   model.end();
+183:   newCplex.end();
+184:   <b><font color="EA7D00">var</font></b> newCplex2 = <b><font color="EA7D00">new</font></b> IloCplex();
+185:   model = <b><font color="EA7D00">new</font></b> IloOplModel(def,newCplex2);
+186: 
+187:   <b><font color="#007D00">// Solve for minimal cost</font></b>
+188:   data.WeightRedundancy = 0.0;
+189:   data.WeightCost  = 1.0;
+190:   data.LimRedundancy = Infinity;
+191:   data.LimCost  = Infinity;
+192:   model.addDataSource(data);
+193:   model.generate();
+194:   <b><font color="EA7D00">if</font></b>(newCplex2.solve()) {
+195:     writeln(<b><font color="#8A2BE2">"Minimal cost: "</font></b>, model.Cost.solutionValue, <b><font color="#8A2BE2">" for unrestricted redundancy: "</font></b>, model.Redundancy.solutionValue)
+196:   } <b><font color="EA7D00">else</font></b> {
+197:     writeln(<b><font color="#8A2BE2">"No Solution!"</font></b>)
+198:   }
+199:   <b><font color="EA7D00">var</font></b> minCost = Math.ceil(model.Cost.solutionValue);
+200:    
+201:   <b><font color="#007D00">//prepare for next solution</font></b>
+202:   model.end();
+203:   newCplex2.end();
+204:   <b><font color="EA7D00">var</font></b> newCplex3 = <b><font color="EA7D00">new</font></b> IloCplex();
+205:   model = <b><font color="EA7D00">new</font></b> IloOplModel(def,newCplex3);
+206: 
+207:   <b><font color="#007D00">// Solve for minimal redundancy given minimal cost</font></b>
+208:   data.WeightRedundancy = 1.0;
+209:   data.WeightCost  = 0.0;
+210:   data.LimRedundancy = Infinity;
+211:   data.LimCost  = minCost;
+212:   model.addDataSource(data);
+213:   model.generate();
+214:   <b><font color="EA7D00">if</font></b>(newCplex3.solve()) {
+215:         model.postProcess();
+216:     writeln(<b><font color="#8A2BE2">"Minimal redundancy: "</font></b>, model.Redundancy.solutionValue, <b><font color="#8A2BE2">" for minimal cost: "</font></b>, model.Cost.solutionValue)
+217:   } <b><font color="EA7D00">else</font></b> {
+218:     writeln(<b><font color="#8A2BE2">"No Solution!"</font></b>)
+219:   }  
+220:   model.end();
+221: }
+</tt></pre>

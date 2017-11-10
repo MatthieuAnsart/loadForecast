@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Programming tips" />
+<meta name="abstract" content="Tips for writing efficient constraint propagators are provided." />
+<meta name="Description" content="Tips for writing efficient constraint propagators are provided." />
+<meta name="DC.subject" content="modifier, buffered" />
+<meta name="keywords" content="modifier, buffered" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerprop.1026342" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" />
+<title>Programming tips</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerprop.1026342">
+<h1 class="title topictitle1">Programming tips</h1>
+<div class="body"><p class="shortdesc">Tips for writing efficient constraint propagators are
+provided.</p>
+<p class="p">All modifications made to decision variables inside a
+propagator are buffered. This means that the changes you make to variable
+domains are not visible inside the propagator, but are recorded and
+applied when the propagator exits. Your code needs be aware of this
+if it examines the domain of a variable after modifying it. For example,
+the following code will not cause the assertion to fail, but the lower
+bound of the decision variable will be set to one greater than its
+current value when the <samp class="ph codeph">execute</samp> function
+of the propagator exits.  </p>
+<pre class="pre codeblock"><code>void BufferConstraintI::execute () {
+    IloInt min = getMin(_x);
+    setMin(_x, min + 1);
+    assert(getMin(_x) == min);
+}</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/propagator.html" title="A constraint propagator is a simple way to define a custom constraint, that is, one where you define the domain reduction rules.">Using constraint propagators</a></div>
+</div>
+</div></body>
+</html>

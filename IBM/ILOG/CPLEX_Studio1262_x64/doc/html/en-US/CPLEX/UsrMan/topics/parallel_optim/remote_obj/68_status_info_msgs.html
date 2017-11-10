@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Processing status updates and receiving informational messages" />
+<meta name="abstract" content="Master side of messaging in an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="Description" content="Master side of messaging in an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="DC.subject" content="messaging, distributed concurrent MIP, mixed integer program (MIP), remote messaging, concurrent optimization, remote status" />
+<meta name="keywords" content="messaging, distributed concurrent MIP, mixed integer program (MIP), remote messaging, concurrent optimization, remote status" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="statusInfoMsgsRemoteObj" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<title>Processing status updates and receiving informational messages</title>
+</head>
+<body role="main" id="statusInfoMsgsRemoteObj">
+<h1 class="title topictitle1">Processing status updates and receiving informational messages</h1>
+<div class="body"><p class="shortdesc">Master side of messaging in an example of distributed concurrent optimization of a mixed integer program.</p>
+<p class="p">In the example <span class="ph filepath">parmipopt.c</span>, the remote worker machines 
+regularly send status updates to the master machine. To handle status messages 
+(also known as informational messages or informally, known as info messages) 
+from a remote object, the example needs to install an information handler 
+(also known informally as an info handler) 
+in the environment that references the respective remote object. The following 
+lines of code install such an information handler to manage status messages.</p>
+<pre class="pre codeblock"><code>if ( (status = CPXXsetinfohandler (env[i], infohandler, &amp;remotestats[i])) != 0 ) {
+      fprintf (stderr, "CPXXsetinfohandler: %d\n", status);
+      abort ();
+   }</code></pre>
+<p class="p">The argument <samp class="ph codeph">infohandler</samp> is a function with the following signature:</p>
+<pre class="pre codeblock"><code>void CPXPUBLIC
+infohandler (CPXENVptr xenv, CPXINFOTYPE type, int tag, CPXLONG length,
+             void const *data, void *handle)</code></pre>
+<p class="p">That function is invoked whenever an informational message from a remote object arrives
+on the master. The argument <samp class="ph codeph">xenv</samp> is a reference to 
+the remote object from which the message came. The argument <samp class="ph codeph">type</samp> 
+is the data type of the message. The argument <samp class="ph codeph">tag</samp> is a user-defined
+number that identifies the kind of information that is provided. 
+The arguments <samp class="ph codeph">length</samp> and <samp class="ph codeph">data</samp>
+ are the payload of the message (the content of which depends on the tag
+and type arguments). The argument <samp class="ph codeph">handle</samp>  is 
+the third argument that was passed to
+<span class="keyword apiname">CPXXsetinfohandler</span>.</p>
+<p class="p">The example implements three different kinds of informational messages.</p>
+<ul class="ul"><li class="li"><p class="p"><strong class="ph b">new lower bound</strong></p>
+<p class="p">This message is sent when a remote object 
+improves on the lower bound. Note that this is the object-local lower bound, 
+not the overall best lower bound (which is known only on the master machine).</p>
+</li>
+<li class="li"><p class="p"><strong class="ph b">new upper bound</strong></p>
+<p class="p">This message is sent when a remote object 
+improves on the upper bound. Note that this is the object-local upper bound, 
+not the overall best upper bound (which is known only on the master machine).</p>
+</li>
+<li class="li"><p class="p"><strong class="ph b">deterministic time</strong></p>
+<p class="p">This message is sent with a high frequency. 
+It gives the current deterministic time stamp of a remote object.</p>
+</li>
+</ul>
+<p class="p">In the example, these types of messages are managed in a simple switch statement 
+in the function <samp class="ph codeph">infohandler</samp> by means of updates of global data structures.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" title="Introduces an example of distributed concurrent optimization of a mixed integer program.">Example: distributed concurrent MIP</a></div>
+</div>
+</div></body>
+</html>

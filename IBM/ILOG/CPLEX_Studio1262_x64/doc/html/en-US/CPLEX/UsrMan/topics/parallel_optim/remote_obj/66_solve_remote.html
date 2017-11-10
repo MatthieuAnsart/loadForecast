@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving a problem with remote objects" />
+<meta name="abstract" content="Solves an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="Description" content="Solves an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="DC.subject" content="remote object, distributed concurrent MIP, solving remote object, concurrent optimization" />
+<meta name="keywords" content="remote object, distributed concurrent MIP, solving remote object, concurrent optimization" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="solveRemoteObj" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<title>Solving a problem with remote objects</title>
+</head>
+<body role="main" id="solveRemoteObj">
+<h1 class="title topictitle1">Solving a problem with remote objects</h1>
+<div class="body"><p class="shortdesc">Solves an example of distributed concurrent optimization of a mixed integer program.</p>
+<p class="p">From the perspective of the master, the algorithm that the 
+example <span class="ph filepath">parmipopt.c</span> implements looks like this:</p>
+<pre class="pre codeblock"><code>
+  Start the solve on all remote machines
+  while ( all machines are solving )
+     display progress message
+     if ( best known lower and upper bounds are close enough )
+        stop all machines
+  stop all machines that are still running
+  report the results
+  </code></pre>
+<p class="p">One way of implementing that algorithm is to use 
+<strong class="ph b">asynchronous</strong> function calls on the remote objects. 
+In contrast to a synchronous function call, an asynchronous function
+call does not block until the call completes.  Instead, 
+an asynchronous function returns immediately after triggering the call on the
+remote object. It returns a reference to a handle that can be used to check
+progress of the operation or to wait for completion of the operation.</p>
+<p class="p">To start the solves on all remote objects, the example invokes the 
+asynchronous version of MIP optimization, like this:</p>
+<img class="image" src="../../../images/egRemoteObj_MIPoptAsync.jpg" /><p class="p">After that call, each machine will have started solving the problem with the
+defined parameter settings. The argument <samp class="ph codeph">handle[i]</samp> is a handle 
+to the remote function call being executed on machine i. To check whether this 
+function is still running (that is, to verify that the machine is still solving 
+and has not yet found the optimal solution), the example uses the following line, 
+an asynchronous test:</p>
+<pre class="pre codeblock"><code> CPXXasynctest (handle[i], &amp;running);</code></pre>
+<p class="p">If the function is still running, that test puts a true value 
+in the argument <samp class="ph codeph">running</samp>; 
+otherwise, the function puts a false value there. If the value of 
+<samp class="ph codeph">running</samp> is false, then the function call being tested 
+has solved the problem to optimality. In that case, the example stops 
+all other machines and reads the optimal solution from the machine that 
+found it. </p>
+<p class="p">In order to stop an ongoing solve on a remote object that has 
+not yet finished, the example uses an asynchronous kill, like this:</p>
+<pre class="pre codeblock"><code> CPXXasynckill (handle[j]);</code></pre>
+<p class="p">That line stops the function call defined by <samp class="ph codeph">handle[j]</samp>.</p>
+<p class="p">Here is the entire loop on the master:</p>
+<img class="image" src="../../../images/egRemoteObj_master_loop.jpg" /><p class="p">In the first part of the loop, this example checks whether the best known lower and upper
+bounds are close enough. Interestingly, the bounds may come from different 
+machines. If the bounds are close enough, then the optimal solution has been found and
+optimality has been proven. In that case, the example can abort the solve on all remote objects.</p>
+<p class="p">In the second part of the loop, the example checks whether any remote solve has already
+finished. If so, then the example stops the solve on all other machines and exits from the
+loop.</p>
+<p class="p">Since the loop implements a polling mechanism, the example implements a small delay
+(usleep(200)) so as to not poll frantically.</p>
+<p class="p">In order to clean up resources properly, the example must join all the asynchronous
+solves that were triggered, regardless of whether they completed or were killed
+prematurely. After the example has successfully joined the asynchronous call of 
+<span class="keyword apiname">CPXXmipopt</span>, 
+the results of this function call are available, and the example can query the
+objective function value and algorithm status for each remote object, like this:</p>
+<img class="image" src="../../../images/egRemoteObj_joins.jpg" /></div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" title="Introduces an example of distributed concurrent optimization of a mixed integer program.">Example: distributed concurrent MIP</a></div>
+</div>
+</div></body>
+</html>

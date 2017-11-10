@@ -1,0 +1,148 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+002: <b><font color="#007D00">// File: cutstock.cpp</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">/////////////////////////////////////////////////////////////////////////////// </font></b>
+013: 
+014: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+015: 
+016: #define RC_EPS 1.0e-6
+017: 
+018: #ifdef ILO_WINDOWS
+019: #define DIRSEP <b><font color="#8A2BE2">"</font></b>\\<b><font color="#8A2BE2">"</font></b>
+020: #else
+021: #define DIRSEP <b><font color="#8A2BE2">"/"</font></b>
+022: #endif
+023: #ifndef DATADIR
+024: #define DATADIR <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b>  DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">"opl"</font></b> DIRSEP
+025: #endif
+026: 
+027: ILOSTLBEGIN
+028: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+029:     IloEnv env;
+030: 
+031:     IloInt nbItems = 5;
+032:     IloIntRange items(env, 1, 5);
+033: 
+034:     <b><font color="#0000FF">int</font></b> status = 127;
+035:     <b><font color="EA7D00">try</font></b> {
+036:         IloNum best;
+037:         IloNum curr = IloInfinity;
+038: 
+039: 
+040:         IloOplErrorHandler errHandler(env,cout);
+041:         IloOplSettings settings(env,errHandler);
+042:         IloOplModelSource masterSource(env, DATADIR <b><font color="#8A2BE2">"cutstock"</font></b> DIRSEP <b><font color="#8A2BE2">"cutstock.mod"</font></b>);
+043:         IloOplModelDefinition masterDef(masterSource,settings);
+044:         IloOplDataSource masterDataSource(env, DATADIR <b><font color="#8A2BE2">"cutstock"</font></b> DIRSEP <b><font color="#8A2BE2">"cutstock.dat"</font></b>);
+045:         IloOplDataElements masterDataElements(masterDef,masterDataSource);
+046:         IloCplex masterCplex(env);
+047:         masterCplex.setOut(env.getNullStream());
+048: 
+049:         IloOplModelSource subSource(env, DATADIR <b><font color="#8A2BE2">"cutstock"</font></b> DIRSEP <b><font color="#8A2BE2">"cutstock-sub.mod"</font></b>);
+050:         IloOplModelDefinition subDef(subSource,settings);
+051:         IloCplex subCplex(env);
+052: 
+053:         IloOplModel oldSubOpl;
+054:         <b><font color="EA7D00">do</font></b> {
+055:             best = curr;
+056: 
+057:             masterCplex.clearModel();
+058: 
+059:             IloOplRunConfiguration masterRC(masterDef,masterDataElements);
+060:             masterRC.setCplex(masterCplex);
+061:             masterRC.getOplModel().generate();
+062: 
+063:             cout &lt;&lt; <b><font color="#8A2BE2">"Solve master."</font></b> &lt;&lt; endl;
+064:             <b><font color="EA7D00">if</font></b> ( masterCplex.solve() ) {
+065:                 curr = masterCplex.getObjValue() ;
+066:                 cout &lt;&lt; endl
+067:                     &lt;&lt; <b><font color="#8A2BE2">"MASTER OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; curr
+068:                     &lt;&lt; endl;
+069:                 status = 0;
+070:             } <b><font color="EA7D00">else</font></b> {
+071:                 cout &lt;&lt; <b><font color="#8A2BE2">"No solution!"</font></b> &lt;&lt; endl;
+072:                 status = 1;
+073:             }
+074: 
+075:             <b><font color="#007D00">// get reduced costs and set them in sub problem</font></b>
+076: 
+077:             <b><font color="#007D00">// make sub model</font></b>
+078:             <b><font color="EA7D00">if</font></b> ( oldSubOpl.getImpl()!=0 ) {
+079:                 oldSubOpl.end();
+080:             }
+081: 
+082:                         subCplex.clearModel();
+083:                         subCplex.setOut(env.getNullStream());
+084:                         IloOplModel subOpl(subDef,subCplex);
+085:                         IloOplDataElements subDataElements(env);
+086:                         subDataElements.addElement(masterRC.getOplModel().getElement(<b><font color="#8A2BE2">"RollWidth"</font></b>));
+087:                         subDataElements.addElement(masterRC.getOplModel().getElement(<b><font color="#8A2BE2">"Size"</font></b>));
+088:                         subDataElements.addElement(masterRC.getOplModel().getElement(<b><font color="#8A2BE2">"Duals"</font></b>));
+089: 
+090:             IloNumMap duals = subDataElements.getElement(<b><font color="#8A2BE2">"Duals"</font></b>).asNumMap();
+091:             IloConstraintMap FillCt = masterRC.getOplModel().getElement(<b><font color="#8A2BE2">"ctFill"</font></b>).asConstraintMap();
+092:             <b><font color="EA7D00">for</font></b> (IloInt i=1; i&lt;nbItems+1; i++) {
+093:                 IloForAllRange far = FillCt.get(i);
+094:                 duals.set(i, masterCplex.getDual(far));
+095:             }
+096:             subOpl.addDataSource(subDataElements);
+097:             subOpl.generate();
+098: 
+099:             cout &lt;&lt; <b><font color="#8A2BE2">"Solve sub."</font></b> &lt;&lt; endl;
+100:             <b><font color="EA7D00">if</font></b> ( subCplex.solve() ) {
+101:                 cout &lt;&lt; endl
+102:                     &lt;&lt; <b><font color="#8A2BE2">"SUB OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2)
+103:                     &lt;&lt; subCplex.getObjValue()
+104:                     &lt;&lt; endl;
+105:                 status = 0;
+106:             } <b><font color="EA7D00">else</font></b> {
+107:                 cout &lt;&lt; <b><font color="#8A2BE2">"No solution!"</font></b> &lt;&lt; endl;
+108:                 status = 1;
+109:             }
+110: 
+111:             <b><font color="EA7D00">if</font></b> (subCplex.getObjValue() &gt; -RC_EPS) <b><font color="EA7D00">break</font></b>;
+112: 
+113:             <b><font color="#007D00">// Add variable in master model by simply adding a new tuple in Patterns</font></b>
+114:             IloIntMap newFill = subOpl.getElement(<b><font color="#8A2BE2">"Use"</font></b>).asIntMap().copy();
+115: 
+116:             IloTupleBuffer buf = masterDataElements.getElement(<b><font color="#8A2BE2">"Patterns"</font></b>).asTupleSet().makeTupleBuffer();
+117:             buf.setIntValue(<b><font color="#8A2BE2">"id"</font></b>, masterDataElements.getElement(<b><font color="#8A2BE2">"Patterns"</font></b>).asTupleSet().getSize());
+118:             buf.setIntValue(<b><font color="#8A2BE2">"cost"</font></b>, 1);
+119:             buf.setIntMapValue(<b><font color="#8A2BE2">"fill"</font></b>, newFill);
+120:             buf.commit();
+121: 
+122:             masterRC.end();
+123:                         oldSubOpl = subOpl;
+124:         } <b><font color="EA7D00">while</font></b> ( best != curr &amp;&amp; status == 0);
+125: 
+126:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+127:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+128:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+129:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+130:         e.print(cout);
+131:         status = 2;
+132:     } <b><font color="EA7D00">catch</font></b> (...) {
+133:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+134:         status = 3;
+135:     }
+136: 
+137:     env.end();
+138: 
+139:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+140:     getchar();
+141:     
+142:     <b><font color="EA7D00">return</font></b> status;
+143: }
+</tt></pre>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Creating a connection to a spreadsheets" />
+<meta name="abstract" content="Discusses how to connect to a spreadsheet and modify its data by writing in the data files." />
+<meta name="Description" content="Discusses how to connect to a spreadsheet and modify its data by writing in the data files." />
+<meta name="DC.subject" content="spreadsheets" />
+<meta name="keywords" content="spreadsheets" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_sep.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplrelnotes.uss_reln_from37to40.1031720" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_sep.html" />
+<title>Creating a connection to a spreadsheets</title>
+</head>
+<body role="main" id="oplrelnotes.uss_reln_from37to40.1031720">
+<h1 class="title topictitle1">Creating a connection to a spreadsheets</h1>
+<div class="body taskbody"><p class="shortdesc">Discusses how to connect to a spreadsheet and modify
+its data by writing in the data files.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div><p class="p">To connect to a spreadsheet and modify its data, you
+now write in the data files. </p>
+
+<p class="p">In OPL 3, you wrote in the model file:</p>
+
+<pre class="pre codeblock"><code>SheetConnection 
+sheetData("C:\ILOG\OPLSt37\examples\opl\excel\xsteelData.xls",1);</code></pre>
+
+<p class="p">to declare the connection to the spreadsheet, </p>
+
+<pre class="pre codeblock"><code>{string} Products from SheetRead(sheetData,"A2:A3");</code></pre>
+
+<p class="p">to copy the contains of the range A2:A3 to a set of strings, </p>
+
+<pre class="pre codeblock"><code>float+ rate[Products] from SheetRead(sheetData,"B2:B3");</code></pre>
+
+<p class="p">and to copy the contains of the range B2:B3 to an array
+of floating point values.</p>
+
+<pre class="pre codeblock"><code>SheetWrite(sheetResult,"A2:D3")(Make);</code></pre>
+
+<p class="p">to write an array of results into the spreadsheet in
+the range denoted by A2:D3.</p>
+
+<p class="p">In OPL 4, you write your model in the <span class="ph filepath">.mod</span> file exactly as if the data were in a data
+file. The following code lines are extracted from the code samples <span class="ph filepath">xsteel.mod</span> and <span class="ph filepath">xsteelSheet.dat</span> in the current distribution: </p>
+
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;/examples/opl</span></p>
+
+<p class="p">where <span class="ph filepath">&lt;Install_dir&gt;</span> is your installation directory.</p>
+
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">Note the differences with OPL 3: </p>
+<ol class="ol"><li class="li"><p class="p">You do not need to specify the full
+path name. Path names are resolved relatively to the directory of
+the current .dat file.</p>
+</li>
+<li class="li"><p class="p">You specify only the name of the spreadsheet,
+there is no second parameter to specify either read/only or read/write
+mode.</p>
+</li>
+<li class="li"><p class="p">OPL 4 can now read sets of tuples from
+an Excel spreadsheet.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To connect to a spreadsheet in OPL 4:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">In the model file, declare the data.</span> <pre class="pre codeblock"><code>{string} Products =...;
+{int} TimePeriods =...;
+float rate[Products] =...;
+float inv0[Products] =...;
+float avail[TimePeriods] =...;
+float market[Products][TimePeriods] =...;
+float prodcost[Products] =...;
+float invcost[Products] =...;
+float revenue[Products][TimePeriods] =...;</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">In the model file, declare the variables. </span> <pre class="pre codeblock"><code>dvar float+ Make[Products][TimePeriods];
+dvar float+ Inv[Products][ZTime];
+dvar float+ Sell[Products][TimePeriods];</code></pre>
+<p class="p">Then, you put the links to the spreadsheet data inside
+the data file.</p>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">In the data file, declare the connection to the spreadsheet.</span> <pre class="pre codeblock"><code>SheetConnection sheet("xsteel.xls");</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">In the data file, write how to read the data values in
+the spreadsheet.</span> <pre class="pre codeblock"><code>Products from SheetRead(sheet,"data!A2:A3");
+TimePeriods from SheetRead(sheet,"data!A17:A20");
+rate from SheetRead(sheet,"data!B2:B3");
+inv0 from SheetRead(sheet,"data!C2:C3");
+avail from SheetRead(sheet,"data!B17:B20");
+market from SheetRead(sheet,"data!B11:E12");
+prodcost from SheetRead(sheet,"data!D2:D3");
+invcost from SheetRead(sheet,"data!E2:E3");
+revenue from SheetRead(sheet,"data!B7:E8");</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Also in the data file, add the statements that write
+the result into the spreadsheet.</span> <pre class="pre codeblock"><code>Make to SheetWrite(sheet,"RESULT!A2:D3");
+Inv to SheetWrite(sheet,"RESULT!A5:E6");
+Sell to SheetWrite(sheet,"RESULT!A8:D9");</code></pre>
+</li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_sep.html" title="Describes how data/model separation in OPL expresses itself in databases, spreadsheets, flat files, and data blocks in model files.">Separation between data and model</a></div>
+</div>
+</div></body>
+</html>

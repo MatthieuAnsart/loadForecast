@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the map coloring problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the map coloring problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/color.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizercolor.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/color.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizercolor.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the map coloring problem has been described
+using natural language, you then use Concert Technology classes to
+model the constraint programming problem.</p>
+<p class="p">After you have written a description of your problem,
+you can use IBM® ILOG® Concert Technology
+classes to model it. After you create a model of your problem, you
+can use CP Optimizer classes and functions to search for a solution.</p>
+<div class="section" id="migration.uss_gscpoptimizercolor.114936__migration.uss_gscpoptimizercolor.145220"><h2 class="title sectiontitle">Step 2: Open the example file</h2><p class="p">Open the
+example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/color_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You will enter the missing code in each step
+in this lesson. At the end, you will have completed the program code,
+and you can compile and run the program.</p>
+<p class="p">In this lesson,
+you include the header file <samp class="ph codeph">&lt;ilcp/cp.h&gt;</samp>.
+To catch exceptions that may be thrown, you use a <samp class="ph codeph">try/catch</samp> block.
+The code for creating the array of names for the color values and
+for printing out the solution found by the CP Optimizer engine is
+provided.</p>
+<p class="p">The first step in converting your natural
+language description of the problem into code using Concert Technology
+classes is to create an <em class="ph i">environment</em> and a <em class="ph i">model</em>.
+ </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Environment</strong> </p>
+ <p class="p">An instance of the class <samp class="ph codeph">IloEnv</samp> manages
+the internal modeling issues, which include handling output, memory
+management for modeling objects and termination of search algorithms.</p>
+ <p class="p">This instance is typically referred to as the <em class="ph i">environment</em>.
+Normally an application needs only one environment, but you can create
+as many environments as you want. </p>
+ <p class="p">In
+the C# and Java™ APIs,
+the environment object is not public. To free memory used by a model
+in C# API, you use the method <samp class="ph codeph">CP.End</samp>. To
+free memory used by a model in the Java API, you use the method <samp class="ph codeph">IloCP.end</samp>. </p>
+ </div>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.114936__migration.uss_gscpoptimizercolor.145228"><h2 class="title sectiontitle">Step 3: Create the environment</h2><p class="p">Add the
+following code after the comment <samp class="ph codeph">//Create the environment</samp>  </p>
+<pre class="pre codeblock"><code>  IloEnv env;
+</code></pre>
+<p class="p">The initialization of the environment creates
+internal data structures to be used in the rest of the code. After
+this initialization is performed, you can create a <em class="ph i">model. </em> </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Model </strong> </p>
+ <p class="p">A model
+is a container for modeling objects such as decision variables, objectives
+and constraints. </p>
+ </div>
+<p class="p">The first argument passed
+to the constructor of the class <samp class="ph codeph">IloModel</samp> is
+the environment. The second argument is an optional name used for
+debug and trace purposes. Here is a constructor: </p>
+<pre class="pre codeblock"><code>  IloModel(const IloEnv env, const char * name=0);
+</code></pre>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.114936__migration.uss_gscpoptimizercolor.145268"><h2 class="title sectiontitle">Step 4: Create the model</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Create
+the model</samp>  </p>
+<pre class="pre codeblock"><code>    IloModel model(env);
+</code></pre>
+<p class="p">After solving your problem, you can reclaim
+memory for all modeling objects and clean up internal data structures
+by calling <samp class="ph codeph">IloEnv::end</samp> for every environment
+you have created. This clean-up should always be done before you exit
+your application. The call to end the environment is already included
+in the lesson code.</p>
+<p class="p">In the Microsoft .NET Framework languages
+and Java APIs, all
+memory associated with the solving of the problem is reclaimed automatically
+when the optimizer object is garbaged.</p>
+<p class="p">IBM ILOG Concert Technology gives you the means to represent
+the unknowns in this problem, the color of each country on the map,
+as constrained integer, or decision, variables.  </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Decision Variable </strong> </p>
+ <p class="p"> Integer
+decision variables are represented by <samp class="ph codeph">IloIntVar</samp> in
+the C++ and Java APIs
+and by <samp class="ph codeph">IIntVar</samp> in the C# API of Concert
+Technology. </p>
+ <p class="p">A constrained integer variable is a decision
+variable that has integers as possible values. Typically, the possible
+values are represented as a domain of integers with an upper bound
+and a lower bound. These variables are said to be constrained because
+constraints can be placed on them. </p>
+ </div>
+<p class="p">The first
+argument passed to the constructor of the class <samp class="ph codeph">IloIntVar</samp> is
+always the environment. The second argument is the lower bound of
+the domain of possible values, which defaults to 0. The third argument
+is the upper bound of the domain of possible values. The upper bound
+defaults to <samp class="ph codeph">IloIntMax</samp>, which represents
+the largest possible positive integer on a given platform. The fourth
+argument is an optional name used for debug and trace purposes. Here
+is a constructor: </p>
+<pre class="pre codeblock"><code>  IloIntVar(const IloEnv env, 
+            IloInt lb = 0, 
+            IloInt ub = IloIntMax
+            const char* name = 0);
+</code></pre>
+<p class="p">After you create an environment and a model,
+you declare the decision variables, one for each country. Each variable
+represents the unknown information, the color of the country. The
+domain of each decision variable is [0..3] or 0 to 3 inclusive. </p>
+<p class="p">These values represent the possible colors:</p>
+<ul class="ul"><li class="li"><p class="p">the value 0 represents the color blue;</p>
+ </li>
+<li class="li"><p class="p">the value 1 represents the color white;</p>
+ </li>
+<li class="li"><p class="p">the value 2 represents the color yellow;</p>
+ </li>
+<li class="li"><p class="p">the value 3 represents the color green. </p>
+ </li>
+</ul>
+<p class="p">After the problem is solved, the values assigned
+to these decision variables will represent the solution to the problem.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.114936__migration.uss_gscpoptimizercolor.129897"><h2 class="title sectiontitle">Step 5: Declare the decision variables</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Declare
+the decision variables</samp>  </p>
+<pre class="pre codeblock"><code>    IloIntVar Belgium(env, 0, 3), Denmark(env, 0, 3), 
+      France(env, 0, 3), Germany(env, 0, 3), 
+      Luxembourg(env, 0, 3), Netherlands(env, 0, 3);
+</code></pre>
+<p class="p">IBM ILOG Concert Technology
+allows you to express constraints involving decision variables using
+the following operators:</p>
+<ul class="ul"><li class="li"><p class="p">equality (<samp class="ph codeph">==</samp>),</p>
+ </li>
+<li class="li"><p class="p">less than or equal to (<samp class="ph codeph">&lt;=</samp>),</p>
+ </li>
+<li class="li"><p class="p">less than (<samp class="ph codeph">&lt;</samp>),</p>
+ </li>
+<li class="li"><p class="p">greater than or equal to (<samp class="ph codeph">&gt;=</samp>),</p>
+ </li>
+<li class="li"><p class="p">greater than (<samp class="ph codeph">&gt;</samp>)
+and</p>
+</li>
+<li class="li"><p class="p">not equal to (<samp class="ph codeph">!=</samp>).</p>
+ </li>
+</ul>
+<p class="p">In this example, you use a constraint to require
+that if two countries are neighbors, they cannot be the same color.
+For example, the statement <samp class="ph codeph">Belgium != France</samp> indicates
+that the neighbors France and Belgium should not share the same color.
+Explicitly, it means that the value the CP Optimizer engine assigns
+to the decision variable <samp class="ph codeph">Belgium</samp> cannot
+equal the value the optimizer assigns to the variable <samp class="ph codeph">France</samp>.
+    </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Constraint </strong> </p>
+ <p class="p">Constraints specify the restrictions on the values that may
+be assigned to decision variables. To create a constraint for a model,
+you can: </p>
+ <ul class="ul"><li class="li"><p class="p">use an arithmetic operator between decision
+variables and expressions to return a constraint,</p>
+ </li>
+<li class="li"><p class="p">use a function that returns a constraint,</p>
+ </li>
+<li class="li"><p class="p">use a specialized constraint or</p>
+ </li>
+<li class="li"><p class="p">use a logical operator between constraints
+which returns a constraint.</p>
+</li>
+</ul>
+ <p class="p">Expressions, logical constraints and specialized
+constraints will all be introduced in later lessons.</p>
+ <p class="p">After
+you create a constraint, you must explicitly add it to the model in
+order for it to be taken into account by the CP Optimizer engine. </p>
+ </div>
+<p class="p">You use the member function <samp class="ph codeph">IloModel::add</samp> to
+add constraints to the model. You must explicitly add a constraint
+to the model object or the CP Optimizer engine will not use it in
+the search for a solution.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.114936__migration.uss_gscpoptimizercolor.129914"><h2 class="title sectiontitle">Step 6: Add the constraints</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the constraints</samp> </p>
+<pre class="pre codeblock"><code>    model.add(Belgium != France); 
+    model.add(Belgium != Germany); 
+    model.add(Belgium != Netherlands);
+    model.add(Belgium != Luxembourg);
+    model.add(Denmark != Germany ); 
+    model.add(France != Germany); 
+    model.add(France != Luxembourg); 
+    model.add(Germany != Luxembourg);
+    model.add(Germany != Netherlands); 
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/color.html" title="In this lesson, you will learn how to use CP Optimizer and a three-stage method to find a solution to a map coloring problem.">Modeling and solving a simple problem with integer variables: map coloring</a></div>
+</div>
+</div></body>
+</html>

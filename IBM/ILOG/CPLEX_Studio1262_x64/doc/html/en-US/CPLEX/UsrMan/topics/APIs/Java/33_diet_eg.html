@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: optimizing the diet problem in Java" />
+<meta name="abstract" content="Describes an application to solve the diet problem in the Java API." />
+<meta name="Description" content="Describes an application to solve the diet problem in the Java API." />
+<meta name="DC.subject" content="IloColumn class, and example (Java API)" />
+<meta name="keywords" content="IloColumn class, and example (Java API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_javaIloCplex.1006307" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" />
+<title>Example: optimizing the diet problem in Java</title>
+</head>
+<body role="main" id="User_manual.uss_javaIloCplex.1006307">
+<h1 class="title topictitle1">Example: optimizing the diet problem in Java</h1>
+<div class="body"><p class="shortdesc">Describes an application to solve the diet problem in
+the Java API.</p>
+<p class="p">The problem solved in this example is to minimize the
+cost of a diet that satisfies certain nutritional constraints. You
+might also want to compare this approach through the Java API of CPLEX
+with similar applications in other programming languages:</p>
+<ul class="ul"><li class="li"><p class="p"> <a class="xref" href="../Cpp/eg_diet_synopsis.html" title="Shows an example of the C++ API.">Example: optimizing the diet problem in C++</a> </p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../dotNET/27_diet_eg_location.html" title="Tells where to find complete application, project, lessons for the tutorial.">Example: optimizing the diet problem in C#.NET</a> </p>
+</li>
+<li class="li"><p class="p"> <a class="xref" href="../C/32_diet_eg_title_synopsis.html" title="Walks through an example applying the C API.">Example: optimizing the diet problem in the Callable Library</a> </p>
+</li>
+</ul>
+<p class="p">This example was chosen because it is simple enough to
+be viewed from a row as well as from a column perspective. Both ways
+are shown in the example. In this example, either perspective can
+be viewed as natural. Only one approach will seem natural for many
+models, but there is no general way of deciding which is more appropriate
+(rows or columns) in a particular case.</p>
+<p class="p">The example accepts a filename and two options <samp class="ph codeph">-c</samp> and <samp class="ph codeph">-i</samp> as
+command line arguments. Option <samp class="ph codeph">-i</samp> allows
+you to create a MIP model where the quantities of foods to purchase
+must be integers. Option <samp class="ph codeph">-c</samp> can be used
+to build the model by columns.</p>
+<p class="p">The example starts by evaluating the command line arguments
+and reading the input data file. The input data of the diet problem
+is read from a file using an object of the embedded class <samp class="ph codeph">Diet.Data</samp>.
+Its constructor requires a file name as an argument. Using the class <samp class="ph codeph">InputDataReader</samp>,
+it reads the data from that file. This class is distributed with the
+examples, but will not be considered here as it does not use CPLEX
+or Concert Technology in any special way.</p>
+<p class="p">After the data has been read, the <samp class="ph codeph">IloCplex</samp> modeler/optimizer
+is created. </p>
+<pre class="pre codeblock"><code>IloCplex     cplex = new IloCplex();
+IloNumVar[]  Buy   = new IloNumVar[nFoods];
+
+if ( byColumn ) buildModelByColumn(cplex, data, Buy, varType);
+   else buildModelByRow (cplex, data, Buy, varType);
+</code></pre>
+<p class="p">The array <samp class="ph codeph">IloNumVar[] Buy</samp> is
+also created where the modeling variables will be stored by <samp class="ph codeph">buildModelByRow</samp> or <samp class="ph codeph">buildModelByColumn</samp> .</p>
+<p class="p">You have already seen a method very similar to <samp class="ph codeph">buildModelByRow</samp>.
+This function is called when <samp class="ph codeph">byColumn</samp> is
+false, which is the case when the example is executed without the <samp class="ph codeph">-c</samp> command
+line option; otherwise, <samp class="ph codeph">buildModelByColumn</samp> is
+called. Note that unlike <samp class="ph codeph">buildModelByRow</samp>,
+this method requires <samp class="ph codeph">IloMPModeler</samp> rather
+than <samp class="ph codeph">IloModeler</samp> as an argument since modeling
+by column is not available with <samp class="ph codeph">IloModeler</samp> .</p>
+<p class="p">First, the function creates an empty minimization objective
+and empty ranged constraints, and adds them to the active model. </p>
+<pre class="pre codeblock"><code> IloObjective cost       = model.addMinimize();
+    IloRange[]   constraint = new IloRange[nNutrs];
+  
+    for (int i = 0; i &lt; nNutrs; i++) {
+       constraint[i] = model.addRange(data.nutrMin[i], data.nutrMax[i]);
+    }
+</code></pre>
+<p class="p">Empty means that they use a <samp class="ph codeph">0</samp> expression.
+After that the variables are created one by one, and installed in
+the objective and constraints modeling by column. For each variable,
+a column object must be created. Start by creating a column object
+for the objective by calling: </p>
+<pre class="pre codeblock"><code> IloColumn col = model.column(cost, data.foodCost[j]);
+</code></pre>
+<p class="p">The column is then expanded to include the coefficients
+for all the constraints using <samp class="ph codeph">col.and</samp> with
+the column objects that are created for each constraint, as in the
+following loop: </p>
+<pre class="pre codeblock"><code> for (int i = 0; i &lt; nNutrs; i++) {
+        col = col.and(model.column(constraint[i], data.nutrPerFood[i][j]));
+      }
+</code></pre>
+<p class="p">When the full column object has been constructed it is
+finally used to create and install the new variable like this: </p>
+<pre class="pre codeblock"><code>Buy[j] = model.numVar(col, data.foodMin[j], data.foodMax[j], type);</code></pre>
+<p class="p">After the model has been created, solving it and querying
+the solution is straightforward. What remains to be pointed out is
+the exception handling. In case of an error, CPLEX throws an exception
+of type <samp class="ph codeph">IloException</samp> or one of its subclasses.
+Thus the entire CPLEX program is enclosed in <samp class="ph codeph">try/catch</samp> statements.
+The <samp class="ph codeph">InputDataReader</samp> can throw exceptions
+of type <samp class="ph codeph">java.io.IOException</samp> or <samp class="ph codeph">InputDataReader.InputDataReaderException</samp>. </p>
+<p class="p">Since none of these three possible exceptions is handled
+elsewhere, the <samp class="ph codeph">main</samp> function ends by catching
+them and issuing appropriate error messages.</p>
+<p class="p">The call to the method <samp class="ph codeph">cplex.end</samp> frees
+the memory that CPLEX uses.</p>
+<p class="p">The entire source code listing for the example is available
+as <samp class="ph codeph">Diet.java</samp> in the standard distribution
+at <em class="ph i">yourCPLEXinstallation</em> <samp class="ph codeph">/examples/src.</samp> </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/01_title_synopsis.html" title="Explores the features CPLEX offers to Java users to solve mathematical programming problems.">Concert Technology for Java users</a></div>
+</div>
+</div></body>
+</html>

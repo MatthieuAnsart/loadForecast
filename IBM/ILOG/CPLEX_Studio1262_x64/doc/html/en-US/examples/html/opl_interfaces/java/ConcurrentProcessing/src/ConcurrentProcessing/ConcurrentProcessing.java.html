@@ -1,0 +1,199 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">/*</font></b>
+002: <b><font color="#007D00"> * Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00"> * 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+004: <b><font color="#007D00"> * Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+005: <b><font color="#007D00"> *</font></b>
+006: <b><font color="#007D00"> * Note to U.S. Government Users Restricted Rights:</font></b>
+007: <b><font color="#007D00"> * Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+008: <b><font color="#007D00"> * Contract with IBM Corp.</font></b>
+009: <b><font color="#007D00"> */</font></b>
+010: 
+011: <b><font color="#007D00">//-------------------------------------------------------------- -*- Java -*-</font></b>
+012: <b><font color="#007D00">//Java version of concurrent processing with OPL</font></b>
+013: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+014: 
+015: package ConcurrentProcessing;
+016: 
+017: import ilog.concert.IloException;
+018: 
+019: import java.util.ArrayList;
+020: import java.util.Collection;
+021: import java.util.Iterator;
+022: import java.util.List;
+023: import java.util.concurrent.Callable;
+024: import java.util.concurrent.ExecutionException;
+025: import java.util.concurrent.ExecutorService;
+026: import java.util.concurrent.Executors;
+027: import java.util.concurrent.Future;
+028: 
+029: import ConcurrentProcessing.PortfolioProblem.Request;
+030: import ConcurrentProcessing.PortfolioProblem.Result;
+031: 
+032: <b><font color="#007D00">// This example aims at showing OPL multithreading capabilities in a real application.</font></b>
+033: <b><font color="#007D00">// In this financial sample, we need to solve the same model N times, </font></b>
+034: <b><font color="#007D00">// only the data are changing from one instance to the other.</font></b>
+035: <b><font color="#007D00">// From the results of the N OPL runs, we will calculate the tangental portfolio.</font></b>
+036: <b><font color="#007D00">//</font></b>
+037: <b><font color="#007D00">// To improve the OPL solving time, we will generate and solve multiple OPL instances at the same time  </font></b>
+038: <b><font color="#007D00">// by using m threads, each of them will contain one and only one instance of IloOplFactory.</font></b>
+039: <b><font color="#007D00">// The IloOplFactory is the OPL object that certify the multithreading integrity of OPL.</font></b>
+040: <b><font color="#007D00">//</font></b>
+041: <b><font color="#007D00">// This example simulates a client/server architecture: for each of the OPL run, </font></b>
+042: <b><font color="#007D00">// we will ask a pseudo server to create and solve an OPL model.</font></b>
+043: 
+044: <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">class</font></b> ConcurrentProcessing {
+045:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> DEFAULT_THREADS = 4;
+046:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">int</font></b> DEFAULT_SAMPLES = 150;
+047:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">double</font></b> DEFAULT_RFR = 0.02;
+048: 
+049:   <b><font color="EA7D00">public</font></b> <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">void</font></b> main(String[] args) {
+050:     <b><font color="#0000FF">int</font></b> threads = DEFAULT_THREADS;
+051:     <b><font color="#0000FF">int</font></b> samples = DEFAULT_SAMPLES;
+052:     <b><font color="#0000FF">double</font></b> rfr = DEFAULT_RFR;
+053: 
+054:     <b><font color="EA7D00">if</font></b> (args.length &gt;= 1) {
+055:       threads = Integer.parseInt(args[0]);
+056:     }
+057:     <b><font color="EA7D00">if</font></b> (args.length &gt;= 2) {
+058:       samples = Integer.parseInt(args[1]);
+059:     }
+060:     <b><font color="EA7D00">if</font></b> (args.length &gt;= 3) {
+061:       rfr = Double.parseDouble(args[2]);
+062:     }
+063: 
+064:     System.out.println(<b><font color="#8A2BE2">"Using "</font></b> + threads + <b><font color="#8A2BE2">" threads for "</font></b> + samples + <b><font color="#8A2BE2">" samples."</font></b>);
+065: 
+066:     <b><font color="#007D00">// warming for accurate efficiencies</font></b>
+067:     calculate(1, samples, rfr);
+068: 
+069: 
+070:     <b><font color="#007D00">// solve using 1 thread to get a reference value</font></b>
+071:     <b><font color="#0000FF">long</font></b> t1 = calculate(1, samples, rfr);
+072:     <b><font color="#0000FF">double</font></b> throughput1 = 1000.0 * samples / t1;
+073:     System.out.println(<b><font color="#8A2BE2">"Reference duration for 1 thread = "</font></b> + t1);
+074:     System.out.println(<b><font color="#8A2BE2">"Reference thoughput was "</font></b> + throughput1 + <b><font color="#8A2BE2">" problems per second."</font></b>);
+075:     System.out.println();
+076: 
+077:     <b><font color="#007D00">// solve using several threads (as specified in the arguments, 4 by default)</font></b>
+078:     <b><font color="#0000FF">long</font></b> tn = calculate(threads, samples, rfr);
+079:     <b><font color="#0000FF">double</font></b> parallelEfficiency = 100.0 * t1 / (threads * tn);
+080:     System.out.println(<b><font color="#8A2BE2">"Efficiency for "</font></b> + threads + <b><font color="#8A2BE2">" threads = "</font></b> + parallelEfficiency
+081:         + <b><font color="#8A2BE2">"%, duration = "</font></b> + tn);
+082:     <b><font color="#0000FF">double</font></b> throughput = 1000.0 * samples / tn;
+083:     System.out.println(<b><font color="#8A2BE2">"Thoughput was "</font></b> + throughput + <b><font color="#8A2BE2">" problems per second."</font></b>);
+084:     System.out.println();
+085: 
+086:     <b><font color="#007D00">// solve using maximum number of threads available and suggesting best number of threads</font></b>
+087:     <b><font color="#0000FF">int</font></b> availableProcessors = Runtime.getRuntime().availableProcessors();
+088:     <b><font color="EA7D00">if</font></b> (threads != availableProcessors) {
+089:       System.out.println(<b><font color="#8A2BE2">"Recommended number of threads is "</font></b> + availableProcessors);
+090:       tn = calculate(availableProcessors, samples, rfr);
+091:       parallelEfficiency = 100.0 * t1 / (availableProcessors * tn);
+092:       System.out.println(<b><font color="#8A2BE2">"Efficiency for recommended "</font></b> + availableProcessors + <b><font color="#8A2BE2">" threads = "</font></b>
+093:           + parallelEfficiency + <b><font color="#8A2BE2">"%, duration = "</font></b> + tn);
+094:       throughput = 1000.0 * samples / tn;
+095:       System.out.println(<b><font color="#8A2BE2">"Thoughput was "</font></b> + throughput + <b><font color="#8A2BE2">" problems per second."</font></b>);
+096:     }
+097:   }
+098: 
+099:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">long</font></b> calculate(<b><font color="#0000FF">int</font></b> threads, <b><font color="#0000FF">int</font></b> samples, <b><font color="#0000FF">double</font></b> rfr) {
+100:     <b><font color="EA7D00">try</font></b> {
+101:       <b><font color="#007D00">// Create the request to sumbit to the pseudo OPL server.</font></b>
+102:       List&lt;Request&gt; requests = makeRequests(samples);
+103:       <b><font color="#0000FF">long</font></b> t1 = System.currentTimeMillis();
+104:       List&lt;Result&gt; results = submitRequests(requests, threads);
+105:       <b><font color="#0000FF">long</font></b> t2 = System.currentTimeMillis();
+106:       processResults(results, rfr);
+107:       <b><font color="EA7D00">return</font></b> t2 - t1;
+108:     } <b><font color="EA7D00">catch</font></b> (InterruptedException e) {
+109:       e.printStackTrace();
+110:     } <b><font color="EA7D00">catch</font></b> (ExecutionException e) {
+111:       e.printStackTrace();
+112:     } <b><font color="EA7D00">catch</font></b> (IloException e) {
+113:       e.printStackTrace();
+114:     }
+115:     <b><font color="EA7D00">return</font></b> -1;
+116:   }
+117: 
+118:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> List&lt;Request&gt; makeRequests(<b><font color="#0000FF">int</font></b> samples) {
+119:     <b><font color="#007D00">// We solve the same model N times, only the data is changing from 1 instance to the other.</font></b>
+120:     <b><font color="#007D00">// Here only rho is changing, the rest of the data is fixed and stored in an OPL .dat file</font></b>
+121:     List&lt;Request&gt; tasks = <b><font color="EA7D00">new</font></b> ArrayList&lt;Request&gt;();
+122:     <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0; i &lt; samples; i++) {
+123:       <b><font color="EA7D00">final</font></b> <b><font color="#0000FF">double</font></b> rho = i / (samples - 1.0);
+124:       <b><font color="#007D00">// Create a request criteria.</font></b>
+125:       tasks.add(<b><font color="EA7D00">new</font></b> Request(rho));
+126:     }
+127:     <b><font color="EA7D00">return</font></b> tasks;
+128:   }
+129: 
+130:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> List&lt;Result&gt; submitRequests(List&lt;Request&gt; requests, <b><font color="#0000FF">int</font></b> threads)
+131:       <b><font color="EA7D00">throws</font></b> InterruptedException, ExecutionException, IloException {
+132:     <b><font color="#007D00">// Transformation of the request criteria (rho values) into real requests.</font></b>
+133:     List&lt;Callable&lt;Result&gt;&gt; tasks = getCallables(requests);
+134: 
+135:     ExecutorService service = Executors.newFixedThreadPool(threads);
+136:     List&lt;Future&lt;Result&gt;&gt; result = service.invokeAll(tasks);
+137:     service.shutdownNow();
+138:     List&lt;Result&gt; ret = getResults(result);
+139:     <b><font color="EA7D00">return</font></b> ret;
+140:   }
+141: 
+142:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> List&lt;Callable&lt;Result&gt;&gt; getCallables(Collection&lt;Request&gt; reqs) {
+143:     List&lt;Callable&lt;Result&gt;&gt; tasks = <b><font color="EA7D00">new</font></b> ArrayList&lt;Callable&lt;Result&gt;&gt;();
+144:     <b><font color="EA7D00">final</font></b> Iterator&lt;Request&gt; it = reqs.iterator();
+145:     <b><font color="EA7D00">while</font></b> (it.hasNext()) {
+146:       <b><font color="EA7D00">final</font></b> Request m = it.next();
+147:       tasks.add(<b><font color="EA7D00">new</font></b> Callable&lt;Result&gt;() {
+148:         <b><font color="EA7D00">public</font></b> Result call() <b><font color="EA7D00">throws</font></b> Exception {
+149:           <b><font color="EA7D00">return</font></b> (<b><font color="EA7D00">new</font></b> PortfolioProblem()).solve(m);
+150:         }
+151:       });
+152:     }
+153:     <b><font color="EA7D00">return</font></b> tasks;
+154:   }
+155: 
+156:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> List&lt;Result&gt; getResults(List&lt;Future&lt;Result&gt;&gt; result) <b><font color="EA7D00">throws</font></b> InterruptedException,
+157:       ExecutionException, IloException {
+158:     List&lt;Result&gt; ret = <b><font color="EA7D00">new</font></b> ArrayList&lt;Result&gt;();
+159:     Iterator&lt;Future&lt;Result&gt;&gt; it = result.iterator();
+160:     <b><font color="EA7D00">while</font></b> (it.hasNext()) {
+161:       Future&lt;Result&gt; future = it.next();
+162:       <b><font color="EA7D00">if</font></b> (future.isDone())
+163:         ret.add(future.get());
+164:       <b><font color="EA7D00">else</font></b>
+165:         <b><font color="EA7D00">throw</font></b> <b><font color="EA7D00">new</font></b> IloException(<b><font color="#8A2BE2">"Some request returned empty result"</font></b>);
+166:     }
+167:     <b><font color="EA7D00">return</font></b> ret;
+168:   }
+169: 
+170:   <b><font color="EA7D00">private</font></b> <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">void</font></b> processResults(List&lt;Result&gt; results, <b><font color="#0000FF">double</font></b> rfr) <b><font color="EA7D00">throws</font></b> InterruptedException,
+171:       ExecutionException {
+172: 
+173:     <b><font color="#0000FF">double</font></b> optimum = Double.MIN_VALUE;
+174:     <b><font color="#0000FF">double</font></b> optimumR = 0.0;
+175:     <b><font color="#0000FF">double</font></b> optimumV = 0.0;
+176:     <b><font color="#0000FF">double</font></b> optimumRho = 0.0;
+177:     Iterator&lt;Result&gt; it = results.iterator();
+178:     <b><font color="EA7D00">while</font></b> (it.hasNext()) {
+179:       Result curr = it.next();
+180:       <b><font color="#0000FF">double</font></b> totalR = curr.getTotalReturn();
+181:       <b><font color="#0000FF">double</font></b> totalV = curr.getTotalVariance();
+182:       <b><font color="#0000FF">double</font></b> rho = curr.getRho();
+183:       <b><font color="#0000FF">double</font></b> tmp = (totalR - rfr) / totalV;
+184:       <b><font color="EA7D00">if</font></b> (tmp &gt; optimum) {
+185:         optimum = tmp;
+186:         optimumR = totalR;
+187:         optimumV = totalV;
+188:         optimumRho = rho;
+189:       }
+190:     }
+191:     System.out.println(<b><font color="#8A2BE2">"Tangental portfolio for rfr "</font></b> + rfr + <b><font color="#8A2BE2">" is at rho="</font></b> + optimumRho
+192:         + <b><font color="#8A2BE2">" with total return of "</font></b> + optimumR + <b><font color="#8A2BE2">", variance is "</font></b> + optimumV);
+193:   }
+194: }
+</tt></pre>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Initial constraint propagation" />
+<meta name="abstract" content="Constraint propagation is a powerful technique used by CP Optimizer in the search for solutions to constraint programming problems. The initial constraint propagation removes values from domains that will not take part in any solution." />
+<meta name="Description" content="Constraint propagation is a powerful technique used by CP Optimizer in the search for solutions to constraint programming problems. The initial constraint propagation removes values from domains that will not take part in any solution." />
+<meta name="DC.subject" content="constraint propagation, initial, domain reduction, example, introduction" />
+<meta name="keywords" content="constraint propagation, initial, domain reduction, example, introduction" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/intro_solve.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerintro.122584" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/intro_solve.html" />
+<title>Initial constraint propagation</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerintro.122584">
+<h1 class="title topictitle1">Initial constraint propagation</h1>
+<div class="body"><p class="shortdesc">Constraint propagation is a powerful technique used by
+CP Optimizer in the search for solutions to constraint programming
+problems. The initial constraint propagation removes values from domains
+that will not take part in any solution. </p>
+<p class="p">First, the CP Optimizer engine performs an initial constraint
+propagation. The initial constraint propagation removes values from
+domains that will not take part in <em class="ph i">any</em> solution.
+Before propagation, the domains are: </p>
+<pre class="pre codeblock"><code>  D(x) = [5 6 7 8 9 10 11 12]
+  D(y) = [2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17]
+</code></pre>
+<p class="p">To get an idea of how initial constraint propagation
+works, consider the constraint <em class="ph i">x + y = 17</em>.
+If you take the smallest number in the domain of <em class="ph i">x</em>, which is 5, and add it to the
+largest number in the domain of <em class="ph i">y</em>,
+which is 17, the answer is 22. This combination of values (<em class="ph i">x = 5</em>, <em class="ph i">y = 17</em>) violates the constraint <em class="ph i">x + y = 17</em>. The
+only value of <em class="ph i">x</em> that
+would work with <em class="ph i">y = 17</em> is <em class="ph i">x = 0</em>. However, there is
+no value of 0 in the domain of <em class="ph i">x</em>,
+so <em class="ph i">y</em> cannot be equal
+to 17. The value <em class="ph i">y = 17</em> cannot
+take part in any solution. The domain reduction algorithm employed
+by the constraint propagation engine removes the value <em class="ph i">y = 17</em> from the domain
+of <em class="ph i">y</em>. Similarly,
+the propagation engine removes the following values from the domain
+of <em class="ph i">y</em>: 13, 14, 15
+and 16. </p>
+<p class="p">Likewise, if you take the largest number in the domain
+of <em class="ph i">x</em>, which is 12,
+and add it to the smallest number in the domain of <em class="ph i">y</em>, which is 2, the answer is 14.
+This combination of values (<em class="ph i">x = 12</em>, <em class="ph i">y = 2</em>) violates the constraint <em class="ph i">x + y = 17</em>. The
+only value of <em class="ph i">x</em> that
+would work with <em class="ph i">y = 2</em> is <em class="ph i">x = 15</em>. However, there
+is no value of 15 in the domain of <em class="ph i">x</em>,
+so <em class="ph i">y</em> cannot be equal
+to 2. The value of <em class="ph i">y = 2</em> cannot
+take part in any solution. the propagation engine removes the value <em class="ph i">y = 2</em> from the domain of <em class="ph i">y</em>. For the same reason, the domain
+reduction algorithm employed by the propagation engine removes the
+following values from the domain of <em class="ph i">y</em>:
+2, 3 and 4.</p>
+<p class="p">After initial propagation for the constraint <em class="ph i">x + y = 17</em>, the
+domains are: </p>
+<pre class="pre codeblock"><code>  D(x) = [5 6 7 8 9 10 11 12]
+  D(y) = [5 6 7 8 9 10 11 12]
+</code></pre>
+<p class="p">Now, examine the constraint <em class="ph i">x - y = 5</em>.
+If you take the value 5 in the domain of <em class="ph i">x</em>,
+you can see that the only value of <em class="ph i">y</em> that
+would work with <em class="ph i">x = 5</em> is <em class="ph i">y = 0</em>. However, there is
+no value of 0 in the domain of <em class="ph i">y</em>,
+so <em class="ph i">x</em> cannot equal
+5. The value <em class="ph i">x = 5</em> cannot
+take part in any solution. The propagation engine removes the value <em class="ph i">x = 5</em> from the domain of <em class="ph i">x</em>. Using similar logic, the propagation
+engine removes the following values from the domain of <em class="ph i">x</em>: 6, 7, 8 and 9. Likewise, the domain
+reduction algorithm employed by the propagation engine removes the
+following values from the domain of <em class="ph i">y</em>:
+8, 9, 10, 11 and 12.</p>
+<p class="p">Returning to the other constraint, there are no further
+values that can be removed from the variables. After initial propagation,
+the search space has been reduced in size. The domains are now:   </p>
+<pre class="pre codeblock"><code>  D(x) = [10 11 12]
+  D(y) = [5 6 7]
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/intro_solve.html" title="The third stage in solving a constraint programming problem with CP Optimizer is to search for a solution and solve the problem.">Solve the problem</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Distributed parallel MIP optimization" />
+<meta name="abstract" content="Announces distributed parallel MIP optimization" />
+<meta name="Description" content="Announces distributed parallel MIP optimization" />
+<meta name="DC.subject" content="release notes CPLEX V12.6.0, new features" />
+<meta name="keywords" content="release notes CPLEX V12.6.0, new features" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newIntro.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newValuesForRampup.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newFileFormatVMC.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newInfoCallbacksAndDistribMIP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="NewDistribMIP126" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newIntro.html" />
+<title>Distributed parallel MIP optimization</title>
+</head>
+<body role="main" id="NewDistribMIP126">
+<h1 class="title topictitle1">Distributed parallel MIP optimization</h1>
+<div class="body"><p class="shortdesc">Announces distributed parallel MIP optimization</p>
+<p class="p">As the most recent CPLEX offering for solving certain difficult mixed integer programs,
+distributed parallel MIP optimization operates in two phases: first, a ramp-up phase, in which  
+each worker applies different parameter settings to the same problem as the other workers; 
+then, in the remainder of the solve (the second phase), each worker works in one part of a 
+common MIP tree. 
+Each worker communicates what it finds to the (unique) master node, 
+which acts as the conductor or coordinator for the whole process.  </p>
+<p class="p">Distributed MIP is based on the 
+<a class="xref" href="../../../UsrMan/topics/parallel_optim/remote_obj/01_remote_obj_defn.html" title="Defines the remote object available in CPLEX for distributed parallel optimization.">CPLEX remote object for distributed parallel optimization</a>
+ introduced in CPLEX V12.5.0 for users of the Callable Library (C API) and 
+ extended to other application programming interfaces (APIs) in CPLEX V12.5.1.  
+Like the remote object, distributed MIP 
+can potentially use any of the transport protocols available in your 
+computing environment. In order to specify to CPLEX which machines to use 
+in addition to the master, you provide a file, written in XML and known as 
+a Virtual Machine Configuration (VMC), to 
+declare the transport protocol to use, the addresses of the target machines, 
+and other configuration settings. You inform CPLEX of this VMC file 
+ and load  it into your CPLEX environment. </p>
+<p class="p">As explained in the topic about distributed parallel MIP optimization in the 
+<em class="ph i">CPLEX User's Manual</em>,
+there is a ramp-up phase when you apply this new feature to solve a problem. The following new 
+parameters enable you to customize this ramp-up phase for your model.</p>
+<ul class="ul"><li class="li">To manage the duration and character of the ramp-up phase, use <span class="keyword apiname">CPXPARAM_DistMIP_Rampup_Duration</span>.</li>
+<li class="li">To set a deterministic time limit on the ramp-up phase, use <span class="keyword apiname">CPXPARAM_DistMIP_Rampup_DetTimeLimit</span>.</li>
+<li class="li">To set a wall-clock time limit in seconds on the ramp-up phase, use <span class="keyword apiname">CPXPARAM_DistMIP_Rampup_TimeLimit</span>.</li>
+</ul>
+<p class="p">These basic samples of distributed parallel MIP optimization are among the examples 
+in your installation of CPLEX:</p>
+<ul class="ul"><li class="li">For Callable Library (C API) users: see <span class="ph filepath">xdistmipex1.c</span>.</li>
+<li class="li">For C++ users: see <span class="ph filepath">ilodistmipex1.cpp</span>.</li>
+<li class="li">For Java users: see <span class="ph filepath">DistMIPEx1.java</span>.</li>
+<li class="li">For Python users: see <span class="ph filepath">distmipex1.py</span>.</li>
+<li class="li">For MATLAB (Cplex class API) users: see <span class="ph filepath">distmipex1.m</span>.</li>
+<li class="li">For C#.NET users: see <span class="ph filepath">DistMIPEx1.cs</span>. (available only on Windows platforms)</li>
+</ul>
+<div class="p">Likewise, there are new examples showing how to use an <strong class="ph b">informational callback</strong> 
+with distributed parallel MIP optimization. 
+<ul class="ul"><li class="li">For Callable Library (C API) users, see <span class="ph filepath">xdistmipex2.c</span>.</li>
+<li class="li">For C++ API users, see <span class="ph filepath">ilodistmipex2.cpp</span>.</li>
+<li class="li">For Java API users, see <span class="ph filepath">DistMIPEx2.java</span>.</li>
+<li class="li">For Python API users, see <span class="ph filepath">distmipex2.py</span>.</li>
+<li class="li">For MATLAB (Cplex class API) users, see <span class="ph filepath">distmipex2.m</span>.</li>
+<li class="li">For C#.NET API users, see <span class="ph filepath">DistMIPEx2.cs</span>. (available only on Windows platforms)</li>
+</ul>
+
+
+See the announcement  
+<a class="xref" href="newInfoCallbacksAndDistribMIP.html" title="Documents informational callbacks in CPLEX V12.6.0 to support distributed parallel optimization of mixed integer programs (MIP).">Informational callbacks and distributed MIP</a> 
+in these release notes for more detail, especially for new values 
+supporting informational callbacks in distributed parallel optimization.</div>
+<div class="p">For more documentation of this new feature, see the topic 
+<a class="xref" href="../../../UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a>
+in the <em class="ph i">CPLEX User's Manual</em>.
+
+For samples and details about the Virtual Machine Configuration, see these topics: 
+    <ul class="ul"><li class="li"><a class="xref" href="../../../UsrMan/topics/parallel_optim/distribMIP/06_openMPI.html" title="Shows how to run distributed parallel MIP with Open MPI transport protocol.">Using Open MPI with distributed parallel MIP</a></li>
+<li class="li"><a class="xref" href="../../../UsrMan/topics/parallel_optim/distribMIP/07_MPICH.html" title="Shows how to run distributed parallel MIP with MPICH transport protocol.">Using MPICH with distributed parallel MIP</a></li>
+<li class="li"><a class="xref" href="../../../UsrMan/topics/parallel_optim/distribMIP/08_process_transport.html" title="Shows how to run distributed parallel MIP with a process transport protocol.">Using a process transport protocol with distributed parallel MIP</a></li>
+<li class="li"><a class="xref" href="../../../UsrMan/topics/parallel_optim/distribMIP/09_tcp_ip.html" title="Shows how to run distributed parallel MIP with TCP/IP transport protocol.">Using TCP/IP as the transport protocol with distributed parallel MIP</a></li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<ul class="ullinks">
+<li class="link ulchildlink"><span class="ulchildlinktext"><a href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newValuesForRampup.html">New values for ramp up duration in distributed parallel optimization</a></span><br />
+Documents new values in CPLEX V12.6.0 for ramp up duration.</li>
+<li class="link ulchildlink"><span class="ulchildlinktext"><a href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newFileFormatVMC.html">New file format: VMC</a></span><br />
+Documents a new file format in CPLEX V12.6.0 to support 
+virtual machine configuration for distributed parallel optimization.</li>
+<li class="link ulchildlink"><span class="ulchildlinktext"><a href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newInfoCallbacksAndDistribMIP.html">Informational callbacks and distributed MIP</a></span><br />
+Documents informational callbacks in CPLEX V12.6.0 to support 
+distributed parallel optimization of mixed integer programs (MIP).</li>
+</ul>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes126/newIntro.html" title="Documents new features of CPLEX V12.6.0">New features for all users</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: copying a model" />
+<meta name="abstract" content="Shows how to copy a model, emphasizing special considerations about copying elements of the model explicitly." />
+<meta name="Description" content="Shows how to copy a model, emphasizing special considerations about copying elements of the model explicitly." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/dotNET/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="topic1318593035431" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/dotNET/01_title_synopsis.html" />
+<title>Example: copying a model</title>
+</head>
+<body role="main" id="topic1318593035431">
+<h1 class="title topictitle1">Example: copying a model</h1>
+<div class="body"><p class="shortdesc">Shows how to copy a model, emphasizing special
+considerations about copying elements of the model explicitly.</p>
+<p class="p">If you want to copy an existing model in a .NET application
+of CPLEX, you might consider using the method <span class="keyword apiname">MakeClone</span> of
+the interface <span class="keyword apiname">IModel</span>. However, that interface
+method must be implemented to copy any elements (such as an objective
+function, rows (constraints), or columns (variables)) that you have
+added to the original model as you built up the original model and
+populated it. </p>
+<p class="p">The following example is a variation of the example <span class="ph filepath">LPex2.cs</span>,
+showing how to copy the original model and add the elements explicitly
+to clone the entire model.</p>
+<pre class="pre codeblock"><code>using ILOG.Concert; 
+using ILOG.CPLEX; 
+using System.Collections; 
+public class LPex2 
+{ 
+public static void Main(string[] args) 
+{ 
+try 
+{ 
+Cplex cplex_orig = new Cplex(); 
+cplex_orig.ImportModel("C:\\test\\bip2.lp"); 
+IEnumerator matrixEnum = cplex_orig.GetLPMatrixEnumerator(); 
+matrixEnum.MoveNext(); 
+ILPMatrix lp = (ILPMatrix)matrixEnum.Current; 
+CloneManager cm = new SimpleCloneManager(cplex_orig); 
+
+Cplex cplex = new Cplex(); 
+IObjective obj = (IObjective)cplex_orig.GetObjective().MakeClone(cm); 
+cplex.Add(obj); 
+for(int r=0;r &amp;lt; lp.Ranges.Length;r++){
+System.Console.WriteLine(lp.Ranges[r].ToString()); 
+IRange temp = (IRange)lp.Ranges[r].MakeClone(cm); 
+cplex.Add(temp); 
+} 
+if (cplex.Solve()) 
+{ 
+ System.Console.WriteLine("Model Feasible"); 
+ System.Console.WriteLine("Solution status = " + cplex.GetStatus());
+ System.Console.WriteLine("Solution value  = " + cplex.ObjValue); 
+ double[] x = cplex.GetValues(lp); 
+ for (int j = 0; j &amp;lt; x.Length; ++j) 
+   System.Console.WriteLine("Variable Name:" + lp.GetNumVar(j).Name + "; 
+   Value = " + x[j]+";
+   LB="+lp.GetNumVar(j).LB+";
+   UB="+lp.GetNumVar(j).UB+";
+   Type="+lp.GetNumVar(j).Type.ToString()); 
+ } 
+else 
+ { 
+ System.Console.WriteLine("Solution status = " + cplex.GetStatus()); 
+ } 
+} 
+catch (ILOG.Concert.Exception e) 
+{ 
+System.Console.WriteLine("Concert exception caught: " + e); 
+} 
+} 
+} </code></pre>
+<p class="p">That example imports a model into a <span class="keyword apiname">CPLEX</span> object.
+In your application, you need to change the class and location of
+the LP file to fit your actual situation.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/dotNET/01_title_synopsis.html" title="Explores the features that CPLEX offers to users of C#.NET through Concert Technology.">Concert Technology for .NET users</a></div>
+</div>
+</div></body>
+</html>

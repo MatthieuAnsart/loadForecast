@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Goals in CPLEX</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="goal.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="28"><div
+                class="section-title1">Goals in CPLEX</div>
+</a><div
+                    align="right"><a href="goalcpo.html">PREVIOUS</a> <a
+                href="handle-class.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%" /><div
+                    class="section-body"><p>
+
+
+Goals can be used to control the branch and cut search in <code>
+IloCplex</code>
+. Goals are implemented in the class <code>
+IloCplex::GoalI</code>
+. The class <code>
+IloCplex::Goal</code>
+ is the handle class. That is, it contains a pointer to an instance of <code>
+IloCplex::GoalI</code>
+along with accessors of objects in the implmenetation class.</p><p>
+
+
+To implement your own goal, you need to subclass <code>
+IloCplex::GoalI</code>
+ and implement its virtual member functions <code>execute</code>
+ and <code>duplicateGoal</code>. The method <code>execute</code>
+ controls the branch &amp; cut search. The method <code>duplicateGoal</code>
+ creates a copy of the invoking goal object to be used for 
+parallel branch &amp; cut search. Implementing your goal can be greatly 
+simplified if you use one  of the macros <code>
+ILOCPLEXGOALn</code>.</p><p>
+
+Every branch &amp; cut node maintains a goal stack, possibly containing <code>
+IloCplex::GoalI</code>
+ objects. After <code>
+IloCplex</code>
+ solves the relaxation of a node, it pops the top goal 
+from the goal stack and calls its method <code>execute</code>. 
+There are several types of goals:</p><ul>
+<li>
+
+
+If <code>OrGoal</code> is executed, 
+<code>IloCplex</code>
+ will create child nodes. Each of the child nodes will be 
+initialized with a copy of the goal stack of the current node. 
+Then, for each child node, the specified goal in the <code>OrGoal</code>
+ is pushed onto the corresponding goal stack of the child node. 
+Finally, the current node is deleted. (See <code>
+IloCplex#GoalI::OrGoal</code>
+ for a more detailed discussion.)</li><li>
+
+
+If a cut goal is executed, the constraint will be added to the current node 
+relaxation. Constraint goals are provided to represent both 
+local and global cuts. Local cut goals are conventionally used 
+to express branching.</li><li>
+
+
+If <code>AndGoal</code>
+ is executed, its subgoals are simply pushed onto the stack. (See <code>
+IloCplex::GoalI::AndGoal</code>
+ for a more detailed discussion.)</li><li>
+
+
+If <code>
+IloCplex::GoalI::FailGoal</code>
+ is executed, <code>
+IloCplex</code>
+ will prune the current node; that is,  
+it will discontinue the search at the current node. <code>
+IloCplex</code>
+ will continue with another node 
+if there is one still available in the tree.</li><li>
+
+
+If <code>
+IloCplex::GoalI::SolutionGoal</code>
+ is executed, <code>
+IloCplex</code>
+ will attempt to inject a user-provided solution as a new incumbent. 
+Before CPLEX accepts the injected solution, 
+it first tests whether the injected solution is feasible with respect to 
+the model and goals.</li><li>
+
+When CPLEX executes any other goal, the returned goal is simply pushed 
+onto the stack.</li>
+</ul><p><code>IloCplex</code>
+ continues popping goals from the goal stack until <code>OrGoal</code>
+ or <code>FailGoal</code> is executed, 
+or until the stack becomes empty; in the case of an empty stack, 
+it will continue with a built-in search strategy.</p><p>
+
+
+The predefined goals <code>OrGoal</code>
+ and <code>AndGoal</code>
+ allow you to combine goals. <code>AndGoal</code>
+ allows you to execute different goals at one node, 
+while <code>OrGoal</code>
+ allows you to execute different goals on different, newly created nodes. 
+A conventional use of these two goals in a return statement of a 
+user-written goal looks like this:</p><pre
+                class="sample"> 
+return AndGoal ( OrGoal (branch1, branch2), this);</pre><p>
+
+This <code>AndGoal</code>
+ first pushes <code>this</code>
+ (the goal currently being executed) onto the goal stack, 
+ and then it pushes the <code>OrGoal</code>. 
+Thus the <code>OrGoal</code>
+ is on top of the stack and will be executed next. 
+When the <code>OrGoal</code> executes, 
+it creates two new nodes and copies the remaining goal stack to both of them. 
+Thus both new nodes will have <code>this</code>
+ goal on top of the goal stack at this point. Then the <code>OrGoal</code>
+ proceeds to push <code>branch1</code>
+ onto the goal stack of the first child node and <code>branch2</code>
+ onto the goal stack of the second goal child node. 
+Conventionally, <code>branch1</code> and <code>branch2</code>
+ contain cut goals, so by executing <code>branch1</code>
+ and <code>branch2</code>
+ at the respective child nodes, 
+the child nodes will be restricted to represent smaller subproblems 
+than their parent. After <code>branch1</code>
+ and <code>branch2</code> have been executed, <code>this</code>
+ is on top of the node stack of both child nodes; 
+that is, both child nodes will continue branching according to the same rule. 
+In summary, this example creates the branches <code>branch1</code>
+ and <code>branch2</code>
+ and continues in both branches to control the same search strategy 
+<code>this</code>.</p><p> 
+To perform a search using a goal, you need to solve the extracted model 
+by calling the method <code>IloCplex::solve(goal)</code>
+ with the goal to use as an argument instead of the standard 
+<code>IloCplex::solve</code>. The method <code>solve(goal)</code>
+ simply pushes the <code>goal</code>
+ onto the goal stack of the root node before calling the standard  
+<code>solve</code>.</p><p><strong>See Also</strong></p><p><code>IloCplex::Goal</code> and <code>IloCplex::GoalI</code></p></div><div
+                    align="right"><a href="goalcpo.html">PREVIOUS</a> <a href="handle-class.html">NEXT</a></div></div></body>
+</html>

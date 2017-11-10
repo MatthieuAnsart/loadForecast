@@ -1,0 +1,135 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: {<b><font color="#0000FF">string</font></b>} Products = ...;
+013: {<b><font color="#0000FF">string</font></b>} Resources = ...;
+014: <b><font color="#0000FF">int</font></b> NbPeriods = ...;
+015: <b><font color="#0000FF">range</font></b> Periods = 1..NbPeriods;
+016: 
+017: <b><font color="#0000FF">float</font></b> Consumption[Resources][Products] = ...;
+018: <b><font color="#0000FF">float</font></b> Capacity[Resources] = ...;
+019: <b><font color="#0000FF">float</font></b> Demand[Products][Periods] = ...;
+020: <b><font color="#0000FF">float</font></b> InsideCost[Products] = ...;
+021: <b><font color="#0000FF">float</font></b> OutsideCost[Products]  = ...;
+022: <b><font color="#0000FF">float</font></b> Inventory[Products]  = ...;
+023: <b><font color="#0000FF">float</font></b> InvCost[Products]  = ...;
+024: 
+025: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Inside[Products][Periods];
+026: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Outside[Products][Periods];
+027: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Inv[Products][0..NbPeriods];
+028: 
+029: 
+030: <b><font color="#0000FF">execute</font></b> {
+031:   writeln(<b><font color="#8A2BE2">"* Note: This OPL model is not compliant with cloud execution"</font></b>);
+032: }
+033: 
+034: 
+035: minimize
+036:   sum( p in Products , t in Periods ) 
+037:     (InsideCost[p]*Inside[p][t] + 
+038:      OutsideCost[p]*Outside[p][t] +
+039:      InvCost[p]*Inv[p][t]);
+040: 
+041: subject to {
+042:   forall( r <b><font color="EA7D00">in</font></b> Resources , t <b><font color="EA7D00">in</font></b> Periods )
+043:     ctCapacity:
+044:       sum( p <b><font color="EA7D00">in</font></b> Products ) 
+045:         Consumption[r][p] * Inside[p][t] &lt;= Capacity[r];
+046: 
+047:   forall( p <b><font color="EA7D00">in</font></b> Products , t <b><font color="EA7D00">in</font></b> Periods )
+048:     ctDemand:
+049:       Inv[p][t-1] + Inside[p][t] + Outside[p][t] == 
+050:       Demand[p][t] + Inv[p][t];
+051: 
+052:   forall( p <b><font color="EA7D00">in</font></b> Products )
+053:     ctInventory:
+054:       Inv[p][0] == Inventory[p]; 
+055: }
+056: 
+057: tuple plan {
+058:   <b><font color="#0000FF">float</font></b> inside;
+059:   <b><font color="#0000FF">float</font></b> outside;
+060:   <b><font color="#0000FF">float</font></b> inv;
+061: }
+062: 
+063: plan Plan[p in Products][t in Periods] = 
+064:   &lt;Inside[p,t],Outside[p,t],Inv[p,t]&gt;;
+065: 
+066: main {
+067:   <b><font color="EA7D00">var</font></b> status = 0;
+068:   <b><font color="#0000FF">thisOplModel</font></b>.generate();
+069: 
+070:   <b><font color="EA7D00">var</font></b> produce = <b><font color="#0000FF">thisOplModel</font></b>;
+071:   <b><font color="EA7D00">var</font></b> capFlour = produce.Capacity[<b><font color="#8A2BE2">"flour"</font></b>];
+072: 
+073:   <b><font color="EA7D00">var</font></b> best;
+074:   <b><font color="EA7D00">var</font></b> curr = Infinity;
+075:   <b><font color="EA7D00">var</font></b> basis = <b><font color="EA7D00">new</font></b> IloOplCplexBasis();
+076:   <b><font color="EA7D00">var</font></b> ofile = <b><font color="EA7D00">new</font></b> IloOplOutputFile(<b><font color="#8A2BE2">"mulprod_main.txt"</font></b>);
+077:   <b><font color="EA7D00">while</font></b> ( 1 ) {
+078:     best = curr;
+079:     writeln(<b><font color="#8A2BE2">"Solve with capFlour = "</font></b>,capFlour);
+080:     <b><font color="EA7D00">if</font></b> ( <b><font color="#0000FF">cplex</font></b>.solve() ) {
+081:       curr = <b><font color="#0000FF">cplex</font></b>.getObjValue();
+082:       writeln();
+083:       writeln(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b>,curr);
+084:       ofile.writeln(<b><font color="#8A2BE2">"Objective with capFlour = "</font></b>, capFlour, <b><font color="#8A2BE2">" is "</font></b>, curr);        
+085:     } 
+086:     <b><font color="EA7D00">else</font></b> {
+087:       writeln(<b><font color="#8A2BE2">"No solution!"</font></b>);
+088:       <b><font color="EA7D00">break</font></b>;
+089:     }
+090:     <b><font color="EA7D00">if</font></b> ( best==curr ) <b><font color="EA7D00">break</font></b>;
+091: 
+092:     <b><font color="EA7D00">if</font></b> ( !basis.getBasis(<b><font color="#0000FF">cplex</font></b>) ) {
+093:       writeln(<b><font color="#8A2BE2">"warm start preparation failed: "</font></b>,basis.status);
+094:       <b><font color="EA7D00">break</font></b>;
+095:     }
+096: 
+097:     <b><font color="#007D00">// prepare next iteration</font></b>
+098:     <b><font color="EA7D00">var</font></b> def = produce.modelDefinition;
+099:     <b><font color="EA7D00">var</font></b> data = produce.dataElements;
+100:       
+101:     <b><font color="EA7D00">if</font></b> ( produce!=<b><font color="#0000FF">thisOplModel</font></b> ) {
+102:       produce.end();
+103:     }
+104: 
+105:     produce = <b><font color="EA7D00">new</font></b> IloOplModel(def,<b><font color="#0000FF">cplex</font></b>);
+106:     capFlour++;
+107:     data.Capacity[<b><font color="#8A2BE2">"flour"</font></b>] = capFlour;
+108:     produce.addDataSource(data);
+109:     produce.generate();
+110: 
+111:     <b><font color="EA7D00">if</font></b> ( !basis.setBasis(<b><font color="#0000FF">cplex</font></b>) ) {
+112:       writeln(<b><font color="#8A2BE2">"warm start "</font></b>,basis.Nrows,<b><font color="#8A2BE2">"x"</font></b>,basis.Ncols,<b><font color="#8A2BE2">" failed: "</font></b>,basis.status);
+113:       <b><font color="EA7D00">break</font></b>;
+114:     }
+115:   }
+116:   basis.end();
+117:   ofile.close();
+118:   <b><font color="EA7D00">if</font></b> (Math.abs(<b><font color="#0000FF">cplex</font></b>.getObjValue() - 393.5)&gt;=0.01) {
+119:       status = -1;
+120:   }
+121:   <b><font color="EA7D00">if</font></b> (best != Infinity) {
+122:     writeln(<b><font color="#8A2BE2">"plan = "</font></b>,produce.Plan);
+123:   }
+124:   
+125:   <b><font color="EA7D00">if</font></b> ( produce!=<b><font color="#0000FF">thisOplModel</font></b> ) {
+126:     produce.end();
+127:   }
+128: 
+129:   status;
+130: }
+</tt></pre>

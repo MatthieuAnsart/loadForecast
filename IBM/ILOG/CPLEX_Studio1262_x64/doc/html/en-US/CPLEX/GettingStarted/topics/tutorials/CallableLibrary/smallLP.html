@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Building and solving a small LP model in C" />
+<meta name="abstract" content="This application in the C API introduces basic features of the Callable Library." />
+<meta name="Description" content="This application in the C API introduces basic features of the Callable Library." />
+<meta name="DC.subject" content="example, entering and optimizing a problem (C API), lpex1.c (C API), lpex1.c, example (C API), problem formulation, CPXopenCPLEX routine, LP example in C API, CPXgeterrorstring routine, closing LP example in C API, CPXsetintparam routine, CPXaddrows routine, LP example in C API, CPXnewrows routine, example in C API, CPXaddcols routine, CPXnewcols routine, LP example in C API, CPXchgcoeflist routine, example in C API, problem, solving (C API), solving, problem (C API), CPXlpopt routine, dual simplex optimizer, finding a solution (C API), CPXsolution routine, CPXwriteprob, CPXfreeprob routine, CPXcloseCPLEX routine, opening LP example in C API" />
+<meta name="keywords" content="example, entering and optimizing a problem (C API), lpex1.c (C API), lpex1.c, example (C API), problem formulation, CPXopenCPLEX routine, LP example in C API, CPXgeterrorstring routine, closing LP example in C API, CPXsetintparam routine, CPXaddrows routine, LP example in C API, CPXnewrows routine, example in C API, CPXaddcols routine, CPXnewcols routine, LP example in C API, CPXchgcoeflist routine, example in C API, problem, solving (C API), solving, problem (C API), CPXlpopt routine, dual simplex optimizer, finding a solution (C API), CPXsolution routine, CPXwriteprob, CPXfreeprob routine, CPXcloseCPLEX routine, opening LP example in C API" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_callableLibraryStart.153836" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" />
+<title>Building and solving a small LP model in C</title>
+</head>
+<body role="main" id="Getting_started.uss_callableLibraryStart.153836">
+<h1 class="title topictitle1">Building and solving a small LP model in C</h1>
+<div class="body"><p class="shortdesc">This application in the C API introduces basic features
+of the Callable Library.</p>
+<p class="p">The example <samp class="ph codeph">lpex1.c</samp> shows you how to use problem
+modification routines from the CPLEX Callable Library in three different
+ways to build a model. The application in the example takes a single
+command line argument that indicates whether to build the constraint
+matrix by rows, columns, or nonzeros. After building the problem,
+the application optimizes it and displays the solution. Here is the
+problem that the example optimizes: </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" role="presentation" class="table presentation NoBorder" rules="none" frame="void" border="0"><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> Maximize </td>
+<td class="entry" valign="top">   <em class="ph i">x</em><sub class="ph sub">1</sub>  +  <em class="ph i">2x</em><sub class="ph sub">2</sub> + <em class="ph i">3x</em><sub class="ph sub">3</sub></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> subject to </td>
+<td class="entry" valign="top"> <p class="p"> <em class="ph i">–x</em><sub class="ph sub">1</sub>  +   <em class="ph i">x</em><sub class="ph sub">2</sub>  +  <em class="ph i">x</em><sub class="ph sub">3</sub> 
+ <samp class="ph codeph">≤</samp> <em class="ph i">20</em></p>
+ <p class="p"> <em class="ph i"> x</em><sub class="ph sub">1</sub>  –  <em class="ph i">3x</em><sub class="ph sub">2</sub> 
++  <em class="ph i">x</em> <sub class="ph sub">3</sub>   <samp class="ph codeph">≤</samp> <em class="ph i">30</em></p>
+ </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> with these bounds </td>
+<td class="entry" valign="top"> <p class="p"> <em class="ph i">0</em> <samp class="ph codeph">≤</samp> <em class="ph i">x</em><sub class="ph sub">1</sub> <samp class="ph codeph">≤</samp> <em class="ph i">40</em> </p>
+ <p class="p"> <em class="ph i">0</em> <samp class="ph codeph">≤</samp> <em class="ph i">x</em><sub class="ph sub">2</sub> <samp class="ph codeph">≤</samp> <em class="ph i">infinity</em></p>
+ <p class="p"> <em class="ph i">0</em> <samp class="ph codeph">≤</samp> <em class="ph i">x</em><sub class="ph sub">3</sub> <samp class="ph codeph">≤</samp> <em class="ph i">infinity</em></p>
+ </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Before any CPLEX Callable Library routine can be called, your application
+must call the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/openCPLEX.html" title="The routine CPXXopenCPLEX/CPXopenCPLEX initializes a CPLEX environment.">CPXopenCPLEX</a></samp> to
+get a pointer (called <samp class="ph codeph">env</samp>) to the CPLEX environment.
+Your application will then pass this pointer to every Callable Library
+routine. If this routine fails, it returns an error code. This error
+code can be translated to a string by the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/geterrorstring.html" title="The routine CPXXgeterrorstring/CPXgeterrorstring returns an error message string corresponding to an error code.">CPXgeterrorstring</a></samp>.</p>
+<p class="p">After the CPLEX environment is initialized, the CPLEX screen switch
+parameter (<samp class="ph codeph">CPX_PARAM_SCRIND</samp>) is turned on by the
+routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setintparam.html" title="The routine CPXXsetintparam/CPXsetintparam sets the value of a CPLEX parameter of type CPXINT.">CPXsetintparam</a></samp> .
+This causes all default CPLEX output to appear on the screen. If this
+parameter is not set, then CPLEX will generate no viewable output
+on the screen or in a file.</p>
+<p class="p">At this point, the routine <samp class="ph codeph">CPXcreateprob</samp> is called
+to create an empty problem object. Based on the problem-building method
+selected by the command-line argument, the application then calls
+a routine to build the matrix by rows, by columns, or by nonzeros.
+The routine <samp class="ph codeph">populatebyrow</samp> first calls <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/newcols.html" title="The routine CPXXnewcols/CPXnewcols adds empty columns to a specified CPLEX problem object.">CPXnewcols</a></samp> to
+specify the column-based problem data, such as the objective, bounds,
+and variables names. The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addrows.html" title="The routine CPXXaddrows/CPXaddrows adds constraints to a specified CPLEX problem object.">CPXaddrows</a></samp> is
+then called to supply the constraints. The routine <samp class="ph codeph">populatebycolumn</samp> first
+calls <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/newrows.html" title="The routine CPXXnewrows/CPXnewrows adds empty constraints to a specified CPLEX problem object.">CPXnewrows</a></samp> to
+specify the row-based problem data, such as the righthand side values
+and sense of constraints. The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addcols.html" title="The routine CPXXaddcols/CPXaddcols adds columns to a specified CPLEX problem object.">CPXaddcols</a></samp> is
+then called to supply the columns of the matrix and the associated
+column bounds, names, and objective coefficients. The routine <samp class="ph codeph">populatebynonzero</samp> calls
+both <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/newrows.html" title="The routine CPXXnewrows/CPXnewrows adds empty constraints to a specified CPLEX problem object.">CPXnewrows</a></samp> and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/newcols.html" title="The routine CPXXnewcols/CPXnewcols adds empty columns to a specified CPLEX problem object.">CPXnewcols</a></samp> to
+supply all the problem data except the actual constraint matrix. At
+this point, the rows and columns are well defined, but the constraint
+matrix remains empty. The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/chgcoeflist.html" title="The routine CPXXchgcoeflist/CPXchgcoeflist changes a list of matrix coefficients of a CPLEX problem object.">CPXchgcoeflist</a></samp> is
+then called to fill in the nonzero entries in the matrix.</p>
+<p class="p">After the problem has been specified, the application optimizes
+it by calling the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/lpopt.html" title="At any time after a linear program has been created via a call to CPXXcreateprob/CPXcreateprob, the routine CPXXlpopt/CPXlpopt finds a solution to that problem using one of the CPLEX linear optimizers.">CPXlpopt</a></samp>.
+Its default behavior is to use the CPLEX dual simplex optimizer. If
+this routine returns a nonzero result, then an error occurred. If
+no error occurred, the application allocates arrays for solution values
+of the primal variables, dual variables, slack variables, and reduced
+costs; then it obtains the solution information by calling the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/solution.html" title="The routine CPXXsolution/CPXsolution accesses the solution values produced by all the optimization routines except the routine CPXXNETprimopt/CPXNETprimopt.">CPXsolution</a></samp>.
+This routine returns the status of the problem (whether optimal, infeasible,
+or unbounded, and whether a time limit or iteration limit was reached),
+the objective value and the solution vectors. The application then
+displays this information on the screen.</p>
+<p class="p">As a debugging aid, the application writes the problem to a CPLEX
+LP file (named <samp class="ph codeph">lpex1.lp</samp>) by calling the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/writeprob.html" title="The routine CPXXwriteprob/CPXwriteprob writes a CPLEX problem object to a file in one of the formats in the table.">CPXwriteprob</a></samp>.
+This file can be examined to detect whether any errors occurred in
+the routines creating the problem. <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/writeprob.html" title="The routine CPXXwriteprob/CPXwriteprob writes a CPLEX problem object to a file in one of the formats in the table.">CPXwriteprob</a></samp> can
+be called at any time after <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/createprob.html" title="The routine CPXXcreateprob/CPXcreateprob creates a CPLEX problem object in the CPLEX environment.">CPXcreateprob</a></samp> has
+created the <samp class="ph codeph">lp</samp> pointer.</p>
+<p class="p">The label <samp class="ph codeph">TERMINATE</samp> : is used as a place for the
+program to exit if any type of failure occurs, or if everything succeeds.
+In either case, the problem object represented by <samp class="ph codeph">lp</samp> is
+released by the call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/freeprob.html" title="The routine CPXXfreeprob/CPXfreeprob removes the specified CPLEX problem object from the CPLEX environment and frees the associated memory used internally by CPLEX.">CPXfreeprob</a></samp>,
+and any memory allocated for solution arrays is freed. The application
+then calls <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/closeCPLEX.html" title="This routine frees all of the data structures associated with CPLEX.">CPXcloseCPLEX</a></samp>;
+it tells CPLEX that all calls to the Callable Library are complete.
+If an error occurs when this routine is called, then a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/geterrorstring.html" title="The routine CPXXgeterrorstring/CPXgeterrorstring returns an error message string corresponding to an error code.">CPXgeterrorstring</a></samp> is
+needed to retrieve the error message, since <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/closeCPLEX.html" title="This routine frees all of the data structures associated with CPLEX.">CPXcloseCPLEX</a></samp> causes
+no screen output. </p>
+<p class="p">You can view the complete program online in the standard distribution
+of the product at <em class="ph i">yourCPLEXinstallation</em><samp class="ph codeph">/examples/src/lpex1.c</samp> .</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" title="Applications written in C use the CPLEX Callable Library (C API).">Callable Library tutorial</a></div>
+</div>
+</div></body>
+</html>

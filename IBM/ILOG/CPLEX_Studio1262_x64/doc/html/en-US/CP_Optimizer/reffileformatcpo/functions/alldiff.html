@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="alldiff" />
+<meta name="abstract" content="Ensure a number of expressions contain no duplicate values." />
+<meta name="Description" content="Ensure a number of expressions contain no duplicate values." />
+<meta name="DC.subject" content="alldiff" />
+<meta name="keywords" content="alldiff" />
+<meta name="DC.Relation" scheme="URI" content="allMinDistance.html" />
+<meta name="DC.Relation" scheme="URI" content="../syntax/070_Types.html#Variable_types/intVar" />
+<meta name="DC.Relation" scheme="URI" content="distribute.html" />
+<meta name="DC.Relation" scheme="URI" content="count.html" />
+<meta name="DC.Relation" scheme="URI" content="../syntax/110_Arrays.html#Arrays_and_array_types/intExprArray" />
+<meta name="DC.Relation" scheme="URI" content="../syntax/100_Expressions.html#Operator_expressions" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="alldiff" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<title>alldiff</title>
+</head>
+<body role="main" id="alldiff">
+<h1 class="title topictitle1">alldiff</h1>
+<div class="body refbody"><p class="shortdesc">Ensure a number of expressions contain no duplicate values.</p>
+<div class="section" id="alldiff__Syntax"><h2 class="title sectiontitle">Syntax</h2>
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/070_Types.html#Type_constraint">constraint</a> <strong class="ph b">alldiff</strong>(<a class="xref" href="../syntax/110_Arrays.html#Arrays_and_array_types__intExprArray">intExprArray</a> x)</code></pre>
+</div>
+<div class="section" id="alldiff__Parameters"><h2 class="title sectiontitle">Parameters</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">x</samp>: an array of integer expressions.
+  </li>
+</ul>
+
+</div>
+<div class="section" id="alldiff__Description"><h2 class="title sectiontitle">Description</h2>
+<p class="p">The <samp class="ph codeph"><a class="xref" href="alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a></samp> function returns a constraint which ensures that no
+two expressions in the array <samp class="ph codeph">x</samp> can have equivalent values.</p>
+
+</div>
+<div class="section" id="alldiff__Example"><h2 class="title sectiontitle">Example</h2>
+<p class="p">Let's assume we wish to allow sport clubs fair access to a particular
+piece of equipment.  Below, we schedule 5 clubs over a 5 week period.
+Assume an array of variables <samp class="ph codeph">week</samp>, with <samp class="ph codeph">week[i]</samp> indicating which week
+team <samp class="ph codeph">i</samp> has access.  Non-concurrent access can be modeled using an <samp class="ph codeph"><a class="xref" href="alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a></samp>
+constraint since in this way, no two teams can have access in the same week:</p>
+
+
+<pre class="pre codeblock"><code>week = [<a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>(0..4), <a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>(0..4), <a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>(0..4), <a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>(0..4), <a class="xref" href="intVar.html" title="Creates a new integer variable.">intVar</a>(0..4)];
+<strong class="ph b">alldiff</strong>(week);</code></pre>
+</div>
+<div class="section" id="alldiff__Notes"><h2 class="title sectiontitle">Notes</h2>
+<ul class="ul"><li class="li">    CP Optimizer is able automatically aggregate and build <samp class="ph codeph"><a class="xref" href="alldiff.html" title="Ensure a number of expressions contain no duplicate values.">alldiff</a></samp>
+    constraints by detecting subset of expressions which are fully
+    pairwise connected via <samp class="ph codeph">!=</samp> constraints.
+  </li>
+</ul>
+
+
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/070_Types.html#Variable_types__intVar">intVar</a> a = (0..3);
+<a class="xref" href="../syntax/070_Types.html#Variable_types__intVar">intVar</a> b = (0..3);
+<a class="xref" href="../syntax/070_Types.html#Variable_types__intVar">intVar</a> c = (0..3);
+<a class="xref" href="../syntax/070_Types.html#Variable_types__intVar">intVar</a> d = (0..3);
+a != b;
+a != c;
+a != d;
+b != c;
+b != d;
+c != d;</code></pre>
+
+<p class="p">For the above model, during presolve, CP Optimizer will generate the constraint
+<samp class="ph codeph"><strong class="ph b">alldiff</strong>([a,b,c,d]);</samp> while removing the individual <samp class="ph codeph">!=</samp> constraints.</p>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a></div>
+</div>
+<div class="relinfo relconcepts"><strong>Related concepts</strong>:<br />
+<div><a class="link" href="../syntax/100_Expressions.html#Operator_expressions">operators</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="allMinDistance.html" title="Constraint on the minimum absolute distance between a pair of integer expressions in an array.">allMinDistance</a></div>
+<div><a class="link" href="distribute.html" title="Calculate and/or constrain the distribution of values taken by an array of integer expressions.">distribute</a></div>
+<div><a class="link" href="count.html" title="Returns the number of occurrences of a given value found in a given integer expression array.">count</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../syntax/070_Types.html#Variable_types__intVar">intVar</a></div>
+<div><a class="link" href="../syntax/110_Arrays.html#Arrays_and_array_types__intExprArray">intExprArray</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: using the network optimizer with the Callable Library netex1.c" />
+<meta name="abstract" content="Demonstrates an example of the network optimizer in the C API." />
+<meta name="Description" content="Demonstrates an example of the network optimizer in the C API." />
+<meta name="DC.subject" content="displaying, network solution information, CPXopenCPLEX routine, example netex1.c, creating, CPLEX environment, initializing, instantiating, converting, error code to string, CPXgeterrorstring routine, CPXsetintparam routine, parameter, screen indicator, CPX_PARAM_SCRIND, network flow, CPXNETcreateprob routine, network flow problem object, problem object, populating problem object (network optimizer), populating, CPXNETaddnodes routine, CPXNETaddarcs routine, entering, network nodes, network arcs, network data, naming, nodes in network flow, arcs in network flow, destroying, nodes, CPXNETdelnodes routine, changing, maximization to minimization, objective function, changing sense, CPXNETchgobjsen routine, CPXNETprimopt routine, CPXNETsolution routine, network solution on screen, CPXNETfreeprob routine, closing, environment (network), application (network), CPXcloseCPLEX routine, network flow problems" />
+<meta name="keywords" content="displaying, network solution information, CPXopenCPLEX routine, example netex1.c, creating, CPLEX environment, initializing, instantiating, converting, error code to string, CPXgeterrorstring routine, CPXsetintparam routine, parameter, screen indicator, CPX_PARAM_SCRIND, network flow, CPXNETcreateprob routine, network flow problem object, problem object, populating problem object (network optimizer), populating, CPXNETaddnodes routine, CPXNETaddarcs routine, entering, network nodes, network arcs, network data, naming, nodes in network flow, arcs in network flow, destroying, nodes, CPXNETdelnodes routine, changing, maximization to minimization, objective function, changing sense, CPXNETchgobjsen routine, CPXNETprimopt routine, CPXNETsolution routine, network solution on screen, CPXNETfreeprob routine, closing, environment (network), application (network), CPXcloseCPLEX routine, network flow problems" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveNet.646747" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" />
+<title>Example: using the network optimizer with the Callable Library netex1.c</title>
+</head>
+<body role="main" id="User_manual.uss_solveNet.646747">
+<h1 class="title topictitle1">Example: using the network optimizer with the Callable Library
+netex1.c</h1>
+<div class="body"><p class="shortdesc">Demonstrates an example of the network optimizer in the
+C API.</p>
+<p class="p">In the standard distribution of CPLEX, the file <samp class="ph codeph">netex1.c</samp> contains
+code that creates, solves, and displays the solution of the network-flow
+problem illustrated in <a class="xref" href="05_eg_Interactive_prob_descrip.html#User_manual.uss_solveNet.653116__User_manual.uss_solveNet.657919">Figure 1</a>. </p>
+<p class="p">Briefly, the <samp class="ph codeph">main</samp> function initializes the CPLEX
+environment and creates the problem object; it also calls the optimizer
+to solve the problem and retrieves the solution. </p>
+<p class="p">In detail, <samp class="ph codeph">main</samp> first calls the Callable Library
+routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/openCPLEX.html" title="The routine CPXXopenCPLEX/CPXopenCPLEX initializes a CPLEX environment.">CPXopenCPLEX</a></samp>.
+As explained in <a class="xref" href="../../APIs/C/07_init_env.html" title="Tells how to initialize the environment in the C API.">Initialize the CPLEX environment</a>, <samp class="ph codeph">CPXopenCPLEX</samp> must
+always be the first CPLEX routine called in a Callable Library application.
+Those routines create the CPLEX environment and return a pointer (called <samp class="ph codeph">env</samp>)
+to it. This pointer will be passed to every Callable Library routine.
+If this initialization routine fails, <samp class="ph codeph">env</samp>  will be <samp class="ph codeph">NULL</samp> and
+the error code indicating the reason for the failure will be written
+to <samp class="ph codeph">status</samp>. That error code can be transformed into
+a string by the Callable Library routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/geterrorstring.html" title="The routine CPXXgeterrorstring/CPXgeterrorstring returns an error message string corresponding to an error code.">CPXgeterrorstring</a></samp>.</p>
+<p class="p">After <samp class="ph codeph">main</samp> initializes the CPLEX environment,
+it uses the Callable Library routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/setintparam.html" title="The routine CPXXsetintparam/CPXsetintparam sets the value of a CPLEX parameter of type CPXINT.">CPXsetintparam</a></samp> to
+turn on the CPLEX <a class="xref" href="../../../../Parameters/topics/SCRIND.html" title="Decides whether or not results are displayed on screen in an application of the C API.">messages to screen switch</a> parameter <samp class="ph codeph">CPX_PARAM_SCRIND</samp> so
+that CPLEX output appears on screen. If this parameter is turned off,
+CPLEX does not produce viewable output, neither on screen, nor in
+a log file. It is a good idea to turn this parameter on when you are
+debugging your application.</p>
+<p class="p">The Callable Library routine <a class="xref" href="../../../../../refcallablelibrary/netapi/NETcreateprob.html" title="The routine CPXXNETcreateprob/CPXNETcreateprob constructs a new network problem object.">CPXNETcreateprob</a> creates
+an empty problem object, that is, a minimum-cost network-flow problem
+with no arcs and no nodes.</p>
+<p class="p">The function <samp class="ph codeph">buildNetwork</samp> populates the problem
+object; that is, it loads the problem data into the problem object.
+Pointer variables in the example are initialized as <samp class="ph codeph">NULL</samp> 
+so that you can check whether they point to valid data (a good programming
+practice). The most important calls in this function are to the Callable
+Library routines, <a class="xref" href="../../../../../refcallablelibrary/netapi/NETaddnodes.html" title="The routine CPXXNETaddnodes/CPXNETaddnodes adds new nodes to the network stored in a network problem object.">CPXNETaddnodes</a>,
+which adds nodes with the specified supply values to the network problem,
+and <a class="xref" href="../../../../../refcallablelibrary/netapi/NETaddarcs.html" title="The routine CPXXNETaddarcs/CPXNETaddarcs adds new arcs to the network stored in a network problem object.">CPXNETaddarcs</a>,
+which adds the arcs connecting the nodes with the specified objective
+values and bounds. In this example, both routines are called with
+their last argument <samp class="ph codeph">NULL</samp> indicating that no names
+are assigned to the network nodes and arcs. If you want to name arcs
+and nodes in your problem, pass an array of strings instead.</p>
+<p class="p">The function <samp class="ph codeph">buildNetwork</samp> also includes a few
+routines that are not strictly necessary to this example, but illustrate
+concepts you may find useful in other applications. To delete a node
+and all arcs dependent on that node, it uses the Callable Library
+routine <a class="xref" href="../../../../../refcallablelibrary/netapi/NETdelnodes.html" title="The routine CPXXNETdelnodes/CPXNETdelnodes is used to remove a range of nodes from the network stored in a network problem object.">CPXNETdelnodes</a>.
+To change the objective sense to minimization, it uses the Callable
+Library routine <a class="xref" href="../../../../../refcallablelibrary/netapi/NETchgobjsen.html" title="The routine CPXXNETchgobjsen/CPXNETchgobjsen is used to change the sense of the network problem to a minimization or maximization problem.">CPXNETchgobjsen</a>.</p>
+<p class="p">Look again at <samp class="ph codeph">main</samp> , where it actually calls the
+network optimizer with the Callable Library routine, <a class="xref" href="../../../../../refcallablelibrary/netapi/NETprimopt.html" title="The routine CPXXNETprimopt/CPXNETprimopt can be called after a network problem has been copied to a network problem object, to find a solution to that problem using the primal network simplex method.">CPXNETprimopt</a>.
+If <samp class="ph codeph">CPXNETprimopt</samp>  returns a nonzero value, then an
+error has occurred; otherwise, the optimization was successful. Before
+retrieving that solution, it is necessary to allocate arrays to hold
+it. Then use <a class="xref" href="../../../../../refcallablelibrary/netapi/NETsolution.html" title="The routine CPXXNETsolution/CPXNETsolution accesses solution values for a network problem object computed by the most recent call to CPXXNETprimopt/CPXNETprimopt for that object.">CPXNETsolution</a> to
+copy the solution into those arrays. After displaying the solution
+on screen, write the network problem into a file, <samp class="ph codeph">netex1.net</samp> in
+the NET file format.</p>
+<p class="p">The <samp class="ph codeph">TERMINATE</samp>: label is used as a place for the
+program to exit if any type of error occurs. Therefore, code following
+this label cleans up: it frees the memory that has been allocated
+for the solution data; it frees the network object by calling <a class="xref" href="../../../../../refcallablelibrary/netapi/NETfreeprob.html" title="The routine CPXXNETfreeprob/CPXNETfreeprob deletes the network problem object pointed to by net_p.">CPXNETfreeprob</a>;
+and it frees the CPLEX environment by calling <a class="xref" href="../../../../../refcallablelibrary/cpxapi/closeCPLEX.html" title="This routine frees all of the data structures associated with CPLEX.">CPXcloseCPLEX</a>.
+All freeing should be done only if the data is actually available.
+The Callable Library routine <samp class="ph codeph">CPXcloseCPLEX</samp> should
+always be the last CPLEX routine called in a Callable Library application.
+In other words, all CPLEX objects that have been allocated should
+be freed before the call to <samp class="ph codeph">CPXcloseCPLEX</samp> .</p>
+<p class="p">The complete program <samp class="ph codeph">netex1.c</samp> appears online in
+the standard distribution at <em class="ph i">yourCPLEXinstallation</em> <samp class="ph codeph">/examples/src</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" title="Documents the CPLEX network optimizer.">Solving network-flow problems</a></div>
+</div>
+</div></body>
+</html>

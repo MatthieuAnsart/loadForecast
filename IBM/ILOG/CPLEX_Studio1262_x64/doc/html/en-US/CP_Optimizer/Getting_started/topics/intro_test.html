@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Testing your installation with a simple application" />
+<meta name="abstract" content="Before proceeding with the other tutorials in the Getting Started with CP Optimizer manual, you should test your environment by compiling and running a simple application. The log produced by the application provides useful information about the model and the solution search." />
+<meta name="Description" content="Before proceeding with the other tutorials in the Getting Started with CP Optimizer manual, you should test your environment by compiling and running a simple application. The log produced by the application provides useful information about the model and the solution search." />
+<meta name="DC.subject" content="branch, branch decision, choice point, extraction, log, memory usage, solution status, time, elapsed" />
+<meta name="keywords" content="branch, branch decision, choice point, extraction, log, memory usage, solution status, time, elapsed" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/intro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizerintro.136736" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/intro.html" />
+<title>Testing your installation with a simple application</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizerintro.136736">
+<h1 class="title topictitle1">Testing your installation with a simple application</h1>
+<div class="body"><p class="shortdesc">Before proceeding with the other tutorials in
+the <em class="ph i">Getting Started with CP Optimizer</em> manual, you
+should test your environment by compiling and running a simple application.
+The log produced by the application provides useful information about
+the model and the solution search.</p>
+<p class="p">This first lesson is designed to help you understand the
+basic concepts in constraint programming. In future lessons, you will
+work through problems by describing, modeling and solving problems
+using Concert Technology and CP Optimizer classes. In this lesson,
+you are provided with the completed example code so that you can test
+your installation of CP Optimizer.</p>
+<p class="p">In <a class="xref" href="color.html" title="In this lesson, you will learn how to use CP Optimizer and a three-stage method to find a solution to a map coloring problem.">Modeling and solving a simple problem with integer variables: map coloring</a>,
+you will learn about the classes and member functions used in this
+program. </p>
+<p class="p">The following code using the C++ API models and solves
+the problem introduced in this lesson: </p>
+<pre class="pre codeblock"><code>#include &lt;ilcp/cp.h&gt;
+
+int main(int argc, const char * argv[]){
+  IloEnv env;
+  try {
+    IloModel model(env);
+    IloIntVar x(env, 5, 12, "x");
+    IloIntVar y(env, 2, 17, "y");
+    model.add(x + y == 17);
+    model.add(x - y == 5);
+    IloCP cp(model);
+    cp.propagate();
+    cp.out() &lt;&lt; std::endl &lt;&lt; "Propagate:" &lt;&lt; std::endl;
+    cp.out() &lt;&lt; "x in " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+    cp.out() &lt;&lt; "y in " &lt;&lt; cp.domain(y) &lt;&lt; std::endl &lt;&lt; std::endl;
+    if (cp.solve()){
+      cp.out() &lt;&lt; std::endl &lt;&lt; "Solution:" &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "x = " &lt;&lt; cp.getValue(x) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; "y = " &lt;&lt; cp.getValue(y) &lt;&lt; std::endl;
+    }
+  }
+  catch (IloException&amp; ex) {
+    env.out() &lt;&lt; "Error: " &lt;&lt; ex &lt;&lt; std::endl;
+  }
+  env.end();
+  return 0;
+}
+</code></pre>
+<p class="p">Open the example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/intro.cpp</samp> in
+your development environment. To test your installation of CP Optimizer,
+build and run the program. When you run the program, you should get
+results similar to this output: </p>
+<pre class="pre codeblock"><code> Propagate:
+x in x[10..12]
+y in y[5..7]
+
+ ! ----------------------------------------------------------------------------
+ ! Satisfiability problem - 2 variables, 2 constraints
+ ! Initial process time : 0.01s (0.00s extraction + 0.01s propagation)
+ !  . Log search space  : 7.0 (before), 3.2 (after)
+ !  . Memory usage      : 299.4 kB (before), 299.4 kB (after)
+ ! Using parallel search with 2 workers.
+ ! ----------------------------------------------------------------------------
+ !               Branches  Non-fixed    W       Branch decision
+ *                      2 0.01s         1            -
+ ! ----------------------------------------------------------------------------
+ ! Search terminated normally, 1 solution found.
+ ! Number of branches     : 4
+ ! Number of fails        : 6
+ ! Total memory usage     : 982.8 kB (978.2 kB CP Optimizer + 4.6 kB Concert)
+ ! Time spent in solve    : 0.01s (0.01s engine + 0.00s extraction)
+ ! Search speed (br. / s) : 256.0
+ ! ----------------------------------------------------------------------------
+
+Solution:
+x = 11
+y = 6</code></pre>
+<p class="p">The solution found by the CP Optimizer engine is <em class="ph i">x = 11</em> and <em class="ph i">y = 6</em>. In addition to the solution, information regarding
+the progress of the optimizer is displayed; this information is called
+the search log, or the log. </p>
+<p class="p">The first line of the log indicates the type of problem,
+along with the number of decision variables and constraints in the
+model. In this case, there is no objective included in the model,
+so the problem is reported to be a “Satisfiability problem”. When
+the model includes an objective, the problem type is reported as a
+“Minimization problem” or a “Maximization problem” depending on the
+type of objective. The next three lines of the log provide information
+regarding the initial constraint propagation. The “Initial process
+time” is the time in seconds spent at the root node of the search
+tree where the initial propagation occurs. This time encompasses the
+time used by the optimizer to load the model, called <em class="ph i">extraction</em>,
+and the time spent in initial propagation. The value for “Log search
+space” provides an estimate on the size of the depth-first search
+tree; this value is the log (base 2) of the products of the domains
+sizes of all the decision variables of the problem. Typically, the
+estimate of the size of the search tree should be smaller after the
+initial propagation, as choices will have been eliminated. However,
+this value is always an overestimate of the log of the number of remaining
+leaf nodes of the tree because it does not take into account the action
+of propagation of constraints at each node. The memory used by the
+optimizer during the initial propagation is reported. </p>
+<p class="p">In order to interpret the remainder of the log file, you
+may want to think about the search as a binary tree. The root of the
+tree is the starting point in the search for a solution; each branch
+descending from the root represents an alternative choice or decision
+in the search. Each of these branches leads to a node where constraint
+propagation during search will occur. If the branch does not lead
+to a failure and a solution is not found at a node, the node is called
+a <em class="ph i">choice point</em>. The optimizer can make an additional
+decision and create two new alternative branches from the current
+node, or it can jump in the tree and search from another node.</p>
+<p class="p">The lines in the next section of the progress log, are
+displayed periodically during the search and describe the state of
+the search. The display frequency of the progress log can be controlled
+with parameters of the optimizer. Since the problem in the lesson
+is a simple one, only one update is displayed. </p>
+<p class="p">The progress information given in a progress log update
+includes:</p>
+<ul class="ul"><li class="li"><p class="p">Branches: the number of branches explored
+in the binary search tree;</p>
+</li>
+<li class="li"><p class="p">Non-fixed: the number of uninstantiated (not
+fixed) model variables;</p>
+</li>
+<li class="li"><p class="p">Branch decision: the decision made at the
+branch currently under consideration by the optimizer.</p>
+ </li>
+</ul>
+<p class="p">The final lines of the log provide information about the
+entire search, after the search has terminated. This information about
+the search includes:</p>
+<ul class="ul"><li class="li"><p class="p">Solution status: the conditions under which
+the search terminated;</p>
+</li>
+<li class="li"><p class="p">Number of branches: the number of branches
+explored in the binary search tree;</p>
+</li>
+<li class="li"><p class="p">Number of fails: the number of branches that
+did not lead to a solution;</p>
+</li>
+<li class="li"><p class="p">Total memory usage: the memory used by Concert
+Technology and the CP Optimizer engine;</p>
+ </li>
+<li class="li"><p class="p">Time spent in solve: the elapsed time from
+start to the end of the search displayed in hh:mm:ss.ff format;</p>
+ </li>
+<li class="li"><p class="p">Search speed: average time spent per branch.</p>
+</li>
+</ul>
+<p class="p">In subsequent lessons in this manual, the log output is
+not included in the sections which report the results. You can view
+the log information when you build and run the completed programs. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">   The CP Optimizer search log is meant
+for visual inspection only, not for mechanized parsing. In particular,
+the log may change from version to version of CP Optimizer in order
+to improve the quality of information displayed in the log. Any code
+based on the log output may have to be updated when a new version
+of CP Optimizer is released.  </p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/intro.html" title="Solving constraint programming problems with CP Optimizer can be broken into three steps: describing the problem, modeling the problem and finding solutions to the model of the problem. A basic constraint programming problem model consists of decision variables and constraints on those variables. Finding a solution to a model involves constraint propagation and search.">Constraint programming with CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

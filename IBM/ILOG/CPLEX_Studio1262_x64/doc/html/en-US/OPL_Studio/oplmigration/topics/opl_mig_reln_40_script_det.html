@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Details of the mulprod scripting example" />
+<meta name="abstract" content="Gives the detailed procedure." />
+<meta name="Description" content="Gives the detailed procedure." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplrelnotes.uss_reln_from37to40.1028841" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" />
+<title>Details of the mulprod scripting example</title>
+</head>
+<body role="main" id="oplrelnotes.uss_reln_from37to40.1028841">
+<h1 class="title topictitle1">Details of the mulprod scripting example</h1>
+<div class="body taskbody"><p class="shortdesc">Gives the detailed procedure.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div> <p class="p">Let’s look into this example step by
+step.</p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" title="In OPL 4.0, the OPL Script language is replaced by an implementation of ECMA-262 (also known as ECMAScript or JavaScript) named “ILOG Script”, with extensions for OPL. This section explains how the replacement of OPL Script by ILOG Script affects your way of writing script statements: abstract models, preprocessing, postprocessing, migration, setting CPLEX parameters, open arrays...">Scripting</a></div>
+</div>
+</div><div class="topic task nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1037872"><h2 class="title topictitle2">Declaring the model</h2>
+<div class="body taskbody"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Procedure</h3></div><div class="li step"><span class="ph cmd">Declare the model.</span></div>
+<div class="section result"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Results</h3></div> <p class="p">In OPL 3, you had to declare the model
+which came from an external model file, like this:</p>
+ <pre class="pre codeblock"><code>Model produce("mulprod.mod","mulprod.dat") editMode;</code></pre>
+ <p class="p">In OPL 4, you can declare the model definition
+in one of two ways:</p>
+<ul class="ul"><li class="li"><p class="p">either in the same model file as the script:
+in this case, the model is implicitly known as <samp class="ph codeph">thisOplModel</samp>.
+To construct the internal structure of this model, just write</p>
+ <pre class="pre codeblock"><code>thisOplModel.generate();</code></pre>
+ </li>
+<li class="li"><p class="p">or in a separate external model file: in
+this case, you need to instantiate the classes <span class="keyword apiname">IloOplModelDefinition</span> and <span class="keyword apiname">IloOplModel</span>. See the code sample <a class="xref" href="opl_mig_reln_40_script_recap.html#oplrelnotes.uss_reln_from37to40.1037909__oplrelnotes.uss_reln_from37to40.1037967">Declaring several models in sequence</a>.</p>
+ </li>
+</ul>
+ <p class="p">Let us rename the model for an easier comparison
+of the OPL 4 version of this example with the OPL 3 version:</p>
+ <pre class="pre codeblock"><code>var produce = thisOplModel;</code></pre>
+ </div>
+</div>
+</div>
+<div class="topic task nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1028969"><h2 class="title topictitle2">Accessing the data</h2>
+<div class="body taskbody"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Procedure</h3></div><div class="li step"><span class="ph cmd">Retrieve the value of the model data.</span></div>
+<div class="section result"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Results</h3></div> <p class="p">In OPL 3, you wrote:</p>
+ <pre class="pre codeblock"><code>int+ capFlour := produce.capacity[flour];</code></pre>
+ <p class="p">In OPL 4, you write:</p>
+ <pre class="pre codeblock"><code>var capFlour = produce.capacity["flour"];</code></pre>
+ </div>
+</div>
+</div>
+<div class="topic task nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1028479"><h2 class="title topictitle2">Writing the loop</h2>
+<div class="body taskbody"><div class="section context"><div class="tasklabel"><h3 class="sectiontitle tasklabel">About this task</h3></div> <p class="p">The <samp class="ph codeph">repeat</samp> instruction
+does not exist in OPL 4. So you have to rewrite it using ILOG Script
+notation.</p>
+ </div>
+<div class="tasklabel"><h3 class="sectiontitle tasklabel">Procedure</h3></div><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Write the loop.</span> <p class="p">In OPL 3, you wrote:</p>
+<pre class="pre codeblock"><code>repeat {
+  ...}
+until condition;</code></pre>
+<p class="p">In OPL 4, you write:</p>
+<pre class="pre codeblock"><code>while (!condition) {
+    ...
+}</code></pre>
+<p class="p">In other words, for the <samp class="ph codeph">mulprod</samp> example,
+you rewrite:</p>
+<pre class="pre codeblock"><code>repeat {
+   ...
+} until curr = best;</code></pre>
+<p class="p">to:</p>
+<pre class="pre codeblock"><code>while ( best != curr ) {
+}</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Adapt the code because with the <samp class="ph codeph">repeat</samp> keyword, the block before the <samp class="ph codeph">until</samp> keyword
+is executed at least once whereas if you use the keyword <samp class="ph codeph">while</samp>, it is not.</span></li>
+</ol>
+</div>
+</div>
+<div class="topic task nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1028501"><h2 class="title topictitle2">Solving the model</h2>
+<div class="body taskbody"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Procedure</h3></div><div class="li step"><span class="ph cmd">Solve the model.</span></div>
+<div class="section result"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Results</h3></div> <p class="p">In OPL 3, you wrote:</p>
+ <pre class="pre codeblock"><code>produce.solve();</code></pre>
+ <p class="p">In OPL 4, you write:</p>
+ <pre class="pre codeblock"><code>cplex.solve(); </code></pre>
+ </div>
+</div>
+</div>
+<div class="topic task nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1028508"><h2 class="title topictitle2">Accessing the objective</h2>
+<div class="body taskbody"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Procedure</h3></div><div class="li step"><span class="ph cmd">Access the objective.</span></div>
+<div class="section result"><div class="tasklabel"><h3 class="sectiontitle tasklabel">Results</h3></div> <p class="p">In OPL 3, you wrote:</p>
+ <pre class="pre codeblock"><code>curr := produce.objectiveValue();</code></pre>
+ <p class="p">In OPL 4, you write:</p>
+ <pre class="pre codeblock"><code>curr = cplex.getObjValue();</code></pre>
+ </div>
+</div>
+</div>
+<div class="topic task nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1028515"><h2 class="title topictitle2">Preparing the next iteration</h2>
+<div class="body taskbody"><div class="section context"><div class="tasklabel"><h3 class="sectiontitle tasklabel">About this task</h3></div> <p class="p">In OPL 3, you just had to reset the
+model, change the data as necessary, then go to the beginning of the
+loop.</p>
+ <pre class="pre codeblock"><code>produce.reset();
+capFlour := capFlour + 1;</code></pre>
+ <p class="p">In OPL 4, you cannot reuse a model. Instead,
+you must build a new model from the previous one, change what is necessary,
+then load it to CPLEX. </p>
+ </div>
+<div class="tasklabel"><h3 class="sectiontitle tasklabel">Procedure</h3></div><p class="li stepsection"><p class="p">To prepare the next iteration:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Retrieve the model definition and the
+data</span> <pre class="pre codeblock"><code>var def = produce.modelDefinition;
+var data = produce.dataElements;</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Make a new cplex model.</span> <pre class="pre codeblock"><code>cplex.clearModel();
+produce = new IloOplModel(def,cplex);</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Change the value of some data.</span> <pre class="pre codeblock"><code>capFlour++;
+data.capacity["flour"] = capFlour;</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Pass the data to the model.</span> <pre class="pre codeblock"><code>produce.addDataSource(data);</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Construct the internal structure of the
+new model.</span> <pre class="pre codeblock"><code>produce.generate();</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Go back to the beginning of the loop.</span></li>
+</ol>
+</div>
+</div>
+</body>
+</html>

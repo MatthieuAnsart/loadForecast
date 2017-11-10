@@ -1,0 +1,127 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/*******************************************************************</font></b>
+013: <b><font color="#007D00"> OPL Model for CONTRACT BIDDING </font></b>
+014: 
+015: <b><font color="#007D00">This model is described in the documentation. </font></b>
+016: <b><font color="#007D00">See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+017: <b><font color="#007D00"> </font></b>
+018: <b><font color="#007D00"> *******************************************************************/</font></b>
+019: 
+020: 
+021: <b><font color="#007D00">// DATA</font></b>
+022: <b><font color="#007D00">// Custom data structures</font></b>
+023: <b><font color="#0000FF">tuple</font></b> task {
+024:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>  bid;
+025:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b>  task;
+026:   <b><font color="#0000FF">float</font></b>   price;
+027:   <b><font color="#0000FF">int</font></b>     option;
+028: }
+029: 
+030: <b><font color="#0000FF">tuple</font></b> bid {
+031:   <b><font color="#0000FF">string</font></b>  bid;
+032:   <b><font color="#0000FF">string</font></b>  task;
+033: }
+034: 
+035: 
+036: <b><font color="#0000FF">tuple</font></b> penalty {
+037:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">string</font></b> task;
+038:    <b><font color="#0000FF">float</font></b>  cost;
+039: }
+040: 
+041: <b><font color="#007D00">// Basic data</font></b>
+042: {task}   TaskSet = ...;    <b><font color="#007D00">// Bids for tasks</font></b>
+043: {<b><font color="#0000FF">string</font></b>}    Tasks=... ;       <b><font color="#007D00">// All tasks</font></b>
+044: {penalty}   TaskPenalty=...;  <b><font color="#007D00">// Penalty for unassigned tasks. </font></b>
+045:                               <b><font color="#007D00">//If cost is -1, it means it must be assigned.</font></b>
+046: 
+047: <b><font color="#007D00">// Inferred sets</font></b>
+048: 
+049:   <b><font color="#007D00">// Set of &lt;bids, task&gt; pairs; </font></b>
+050:   <b><font color="#007D00">// If task ="REQD", it means that all tasks are mandatory for the bid; </font></b>
+051:   <b><font color="#007D00">// if task=a task name, it means the task is optional.</font></b>
+052: {bid}    Bids = {&lt;t.bid, <b><font color="#8A2BE2">"REQD"</font></b>&gt; | t <b><font color="#0000FF">in</font></b> TaskSet : t.option == 0} <b><font color="#0000FF">union</font></b> 
+053:                    {&lt;t.bid, t.task&gt; | t <b><font color="#0000FF">in</font></b> TaskSet : t.option == 1};
+054: 
+055:                      
+056:   <b><font color="#007D00">// Set of all bids including task u; "REQD" indicates u is mandatory for the bid</font></b>
+057: {bid}    BidTasks[u <b><font color="#0000FF">in</font></b> Tasks] = {&lt;t.bid, <b><font color="#8A2BE2">"REQD"</font></b>&gt; | t <b><font color="#0000FF">in</font></b> TaskSet : t.option == 0 &amp;&amp; t.task == u} <b><font color="#0000FF">union</font></b> 
+058:                                    {&lt;t.bid, t.task&gt; | t <b><font color="#0000FF">in</font></b> TaskSet : t.option == 1 &amp;&amp; t.task == u};
+059: 
+060: <b><font color="#007D00">// Inferred data</font></b>
+061: 
+062: <b><font color="#0000FF">float</font></b> BidCost[&lt;b,t&gt; <b><font color="#0000FF">in</font></b> Bids] =
+063:    <b><font color="#7D007D">sum </font></b>(&lt;b,t,price,opt&gt; <b><font color="#0000FF">in</font></b> TaskSet) price +
+064:    <b><font color="#7D007D">sum </font></b>(&lt;b,t2,price,opt&gt; <b><font color="#0000FF">in</font></b> TaskSet : t == <b><font color="#8A2BE2">"REQD"</font></b> &amp;&amp; opt == 0) price;
+065: 
+066: 
+067: <b><font color="#0000FF">assert</font></b> <b><font color="#7D007D">sum </font></b>(b <b><font color="#0000FF">in</font></b> Bids) BidCost[b] &gt;= 0;
+068: 
+069: 
+070: <b><font color="#0000FF">float</font></b> MaxBidCost = <b><font color="#7D007D">max </font></b>(b <b><font color="#0000FF">in</font></b> Bids) BidCost[b];
+071: <b><font color="#0000FF">float</font></b> Penalty[Tasks] = 
+072:   [ t.task: (t.cost==-1) ? 1+MaxBidCost : t.cost | t <b><font color="#0000FF">in</font></b> TaskPenalty];
+073: 
+074: 
+075: <b><font color="#007D00">// Decision variables</font></b>
+076: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Award[Bids]; <b><font color="#007D00">// 1 if the bid is awarded; 0 otherwise</font></b>
+077: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Avoid[Tasks]; <b><font color="#007D00">// 1 if the task is not assigned; 0 otherwise</font></b>
+078: 
+079: <b><font color="#007D00">// Objective value = cost of accepted bids + penalty for unassigned tasks</font></b>
+080: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> AcceptedBidsCost =
+081:   <b><font color="#7D007D">sum </font></b>(b <b><font color="#0000FF">in</font></b> Bids) BidCost[b]*Award[b];
+082: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> UnassignedTaskPenaltyCost = 
+083:   <b><font color="#7D007D">sum </font></b>(t <b><font color="#0000FF">in</font></b> Tasks) Penalty[t]*Avoid[t];
+084: 
+085: 
+086: <b><font color="#007D00">// MODEL</font></b>
+087: <b><font color="#0000FF">minimize</font></b> AcceptedBidsCost +UnassignedTaskPenaltyCost;
+088: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {    
+089:   <b><font color="#007D00">// Assignment constraint: each task must be assigned to a bid</font></b>
+090:   <b><font color="#7D007D">forall </font></b>(t <b><font color="#0000FF">in</font></b> Tasks)
+091:     ctAssign: <b><font color="#7D007D">sum </font></b>(b <b><font color="#0000FF">in</font></b> BidTasks[t]) Award[b] == 1 - Avoid[t];
+092:        
+093:   
+094: }
+095: 
+096: <b><font color="#0000FF">tuple</font></b> AwardSolutionT{ 
+097: bid Bids;       <b><font color="#0000FF">int</font></b> value; 
+098: };
+099: {AwardSolutionT} AwardSolution = {&lt;i0,Award[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Bids};
+100: <b><font color="#0000FF">tuple</font></b> AvoidSolutionT{ 
+101:         <b><font color="#0000FF">string</font></b> Tasks; 
+102:         <b><font color="#0000FF">int</font></b> value; 
+103: };
+104: {AvoidSolutionT} AvoidSolution = {&lt;i0,Avoid[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Tasks};
+105: 
+106: 
+107: <b><font color="#007D00">// POST-PROCESSING</font></b>
+108: {bid} Awarded = {&lt;t.bid, t.task&gt; | t <b><font color="#0000FF">in</font></b> TaskSet :
+109:   (t.option == 0 &amp;&amp; Award[&lt;t.bid, <b><font color="#8A2BE2">"REQD"</font></b>&gt;] == 1) ||
+110:   (t.option == 1 &amp;&amp; Award[&lt;t.bid, t.task&gt;] == 1)};
+111: {<b><font color="#0000FF">string</font></b>} Avoided = {t | t <b><font color="#0000FF">in</font></b> Tasks : Avoid[t] == 1};
+112: <b><font color="#0000FF">int</font></b> TotalAvoided = <b><font color="#7D007D">sum </font></b>(t <b><font color="#0000FF">in</font></b> Tasks) Avoid[t];
+113: 
+114: <b><font color="#0000FF">execute</font></b> DISPLAY {
+115:    writeln(<b><font color="#8A2BE2">"Award = "</font></b>, Award);
+116:    writeln(<b><font color="#8A2BE2">"Awarded = "</font></b>, Awarded);
+117:    writeln(<b><font color="#8A2BE2">"Avoided = "</font></b>, Avoided);
+118:    writeln(<b><font color="#8A2BE2">"TotalAvoided = "</font></b>, TotalAvoided);
+119:    <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> b <b><font color="EA7D00">in</font></b> Bids) {
+120:       writeln(b,  <b><font color="#8A2BE2">" "</font></b>, BidCost[b]);
+121:    }
+122: }
+</tt></pre>

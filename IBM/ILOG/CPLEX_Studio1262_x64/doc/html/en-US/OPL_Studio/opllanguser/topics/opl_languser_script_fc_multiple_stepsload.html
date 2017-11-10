@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Loading the necessary structures" />
+<meta name="abstract" content="Lists the structures needed to manipulate models and data." />
+<meta name="Description" content="Lists the structures needed to manipulate models and data." />
+<meta name="DC.subject" content="variables, thisOplModel, thisOplModel variable, cplex variable" />
+<meta name="keywords" content="variables, thisOplModel, thisOplModel variable, cplex variable" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_mulmod.1013040" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" />
+<title>Loading the necessary structures</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_mulmod.1013040">
+<h1 class="title topictitle1">Loading the necessary structures</h1>
+<div class="body"><p class="shortdesc">Lists the structures needed to manipulate models and data.</p>
+<p class="p">The structures you will use to manipulate models and data are listed
+in the table below. </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two column table that lists the structures used to manipulate models and gives a short description of each." id="usropllangtut.uss_langtut_mulmod.1013040__usropllangtut.uss_langtut_mulmod.1013050" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Scripting: structures to
+manipulate models and data</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="50%" id="d773009e31">Name</th>
+<th class="entry" align="left" valign="top" width="50%" id="d773009e33">Role</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d773009e31 "><span class="keyword apiname">IloOplModelDefinition</span></td>
+<td class="entry" valign="top" width="50%" headers="d773009e33 ">Links to the<samp class="ph codeph">.mod</samp> file representation of the
+model</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d773009e31 "><span class="keyword apiname">IloOplDataSource</span></td>
+<td class="entry" valign="top" width="50%" headers="d773009e33 ">Links to a <samp class="ph codeph">.dat</samp> file representation of the
+data</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d773009e31 "><span class="keyword apiname">IloCplex</span></td>
+<td class="entry" valign="top" width="50%" headers="d773009e33 ">An instance of the CPLEX algorithm</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d773009e31 "><span class="keyword apiname">IloOplModel</span></td>
+<td class="entry" valign="top" width="50%" headers="d773009e33 ">A structure linking one model definition to (possibly) one
+or several data sources</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">See the <em class="ph i">Reference Manual of IBM ILOG Script Extensions for OPL</em> for
+more information on these classes.</p>
+<p class="p">When a <samp class="ph codeph">main</samp> block is executed, a variable called <samp class="ph codeph">thisOplModel</samp> representing
+the <span class="keyword apiname">IloOplModel</span> instance is available by default.
+This variable links to the model definition that contains the <samp class="ph codeph">main</samp> block
+currently executed and to the associated <span class="ph filepath">.dat</span> files
+(if they exist) to run the model. The model definition uses <span class="keyword apiname">IloOplModelSource</span> instance
+that is initialized with the model name. There is also a variable
+called <samp class="ph codeph">cplex</samp> which corresponds to an already created
+instance of the CPLEX algorithm.</p>
+<p class="p">If you want to run another model and/or use other data, you may
+create your own <span class="keyword apiname">IloOplModel</span> instance, like this:</p>
+<pre class="pre codeblock"><code>var src = new IloOplModelSource("cutstock_sub.mod");
+var def = new IloOplModelDefinition(src);
+var opl2 = new IloOplModel(def,cplex);</code></pre>
+<p class="p">To create a new data source using a different <samp class="ph codeph">.dat</samp> file,
+you can write:</p>
+<pre class="pre codeblock"><code>var data = new IloOplDataSource("mulprod.dat") </code></pre>
+<p class="p">Then, to link the <span class="keyword apiname">IloOplModel</span> instance to a
+new data source, write:</p>
+<pre class="pre codeblock"><code>opl2.addDataSource(data);</code></pre>
+<p class="p">In the <samp class="ph codeph">mulprod_main</samp> example, you don't need to
+create all these structures since you want to use the already defined <samp class="ph codeph">thisOplModel</samp> instance
+which corresponds to the model included in the <span class="ph filepath">mulprod_main.mod</span> file.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_fc_multiple_steps.html" title="Provides more detail on each step of the procedure summary.">Detailed steps</a></div>
+</div>
+</div></body>
+</html>

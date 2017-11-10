@@ -1,0 +1,1639 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloSolution</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloSolution.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloSolution</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/ilosolution.h</span></div><div><img
+                src="IloSolution.png" border="0"
+                usemap="#svg_map_IloSolution"
+                    alt="Map of IloSolution"><map
+                        name="svg_map_IloSolution"><area
+                        href="../classes/IloSolution.html" shape="rect"
+                        alt="IloSolution"
+                        coords="10.0,10.0,84.0,27.6357421875" /><area
+                        href="../classes/IloOplSolution.html"
+                        shape="rect" alt="IloOplSolution"
+                        coords="57.0,37.6357421875,131.0,55.271484375" /><area
+                        href="../classes/IloSolution.html" shape="rect"
+                        alt="IloSolution"
+            coords="10.0,10.0,84.0,27.6357421875" /></map></img></div>
+Instances of this class store solutions to problems.
+    <div
+                        class="description"><p>Instances of this class store solutions to problems. The fundamental property of
+ <code>IloSolution</code> is its ability to transfer stored values from or to the
+ active objects associated with it. In particular, the member function
+ <code><a
+                        href="../classes/IloSolution.html#method_store">IloSolution::store</a></code> stores the values from algorithm variables while
+ the member function <code><a
+                    href="../classes/IloSolution.html#method_restore">IloSolution::restore</a></code> instantiates the actual
+ variables with stored values. Variables in the solution may be selectively restored.
+ This class also offers member functions to copy and to compare solutions.</p><p>Information about these classes of variables can be stored in an instance of
+ <code>IloSolution</code>:</p><ul>
+<li><code>IloAnySet:</code> the required and possible sets are stored; when the
+ variable is bound, the required and possible sets are equivalent.</li><li><code>IloAnyVar</code>: the value of the variable is stored.</li><li><code>IloBoolVar</code>: the value (true or false) of the variable is stored. Some
+ of the member functions for <code>IloBoolVar</code> are covered by the member function
+ for <code>IloNumVar</code>, as <code>IloBoolVar</code> is a subclass of
+ <code>IloNumVar</code>. For example, there is no explicit member function to add
+ objects of type <code>IloBoolVar</code>.</li><li><code>IloIntSetVar</code>: the required and possible sets are stored; when the
+ variable is bound, the required and possible sets are equivalent.</li><li><code>IloNumVar</code>: the lower and upper bounds are stored; when the variable
+ is bound, the current lower and upper bound are equivalent.</li><li><code>IloIntVar</code>: the lower and upper bounds are stored; when the variable
+ is bound, the current lower and upper bound are equivalent.</li><li><code>IloIntervalVar</code>: the lower and upper bounds of the start, end, length and
+ size are stored as well as the presence status.</li><li><code>IloObjective</code>: the value of the objective is stored. Objectives are
+ never restored; operations such as <code>setRestorable</code> cannot change this. More
+ than one instance of <code>IloObjective</code> can be added to a solution,. In such
+ cases, there is the idea of an active objective, which is returned by
+ <code>IloSolution::getObjective</code>. The active objective typically specifies the
+ optimization criterion for the problem to which the solution object is a solution. For
+ example, the IBM ILOG Solver class <code>IloImprove</code> uses the idea of an active
+ objective.</li>
+</ul><p>Most member functions in this class contain <code>assert</code> statements. For an
+ explanation of the macro <code>NDEBUG</code> (a way to turn on or turn off these
+ <code>assert</code> statements), see the concept
+ <a
+                href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p><p>Objects of type <code>IloSolution</code> have a scope, comprising the set of
+ variables that have their values stored in the solution. The scope is given
+ <em>before</em> the basic operations of storing and restoring are performed, via
+ <code>add</code> and <code>remove</code> methods. For example,</p><pre
+                class="sample">
+ IloNumVar var(env);
+ IloSolution soln(env);
+ solution.add(var);
+ </pre><p>creates a numeric variable and a solution
+ and adds the variable to the solution.
+ Arrays of variables can also be added to the solution. For example,</p><pre
+                class="sample">
+ IloNumVarArray arr(env, 10, 0, 1);
+ soln.add(arr);
+ </pre><p>adds 10 variables with range [0...1].
+ When an array of variables is added to the
+ solution, the array object itself is not present in the scope of the solution; only
+ the elements are present. If the solution is then stored by means of
+ <code>soln.store(algorithm)</code>, the values of variable <code>var</code> and
+ <code>arr[0]</code> to <code>arr[9]</code> are saved. Any attempt to add a variable
+ that is already present in a solution throws an exception, an instance of
+ <code>IloException</code>.</p><p>Accessors allow access to the stored values of the variables, regardless of the
+ state (or existence) of the algorithm they were stored from. For example,</p><pre
+                class="sample">
+ cout &lt;&lt; &quot;arr[3] = &quot; &lt;&lt; soln.getValue(arr[3]) &lt;&lt; endl;
+ </pre><p>Any attempt to access a variable that is not present in the solution throws an
+ instance of <code>IloException</code>.</p><p>A variable or an array of variables can be removed from a solution. For example,</p><pre
+                class="sample">
+ soln.remove(var);
+ </pre><p>removes <code>var</code> from the scope of the solution; and</p><pre
+            class="sample">
+ soln.remove(arr);
+ </pre><p>removes <code>arr[0]</code> to <code>arr[9]</code> from the solution.</p><p>Any attempt to remove a variable that is not present in the solution throws an
+ instance of <code>IloException</code>.</p><p><strong>See Also</strong> these classes in the <em>IBM ILOG Solver Reference
+ Manual</em>:
+ <code>IloAnySetVar</code>,
+ <code>IloAnyVar</code>,
+ <code>IloIntSetVar</code>,
+ <code>IloStoreSolution</code>,
+ <code>IloFRestoreSolution</code>. </p><p><strong>See Also</strong> this class in the <em>CP Optimizer Reference
+ Manual</em>:
+ <code>IloIntervalVar</code>. </p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloNumVar.html">IloNumVar</a>, <a
+                href="../classes/IloIntVar.html">IloIntVar</a>, <a
+            href="../classes/IloObjective.html">IloObjective</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add">add</a>(const <a
+                    href="../typedefs/IloIntervalVarArray.html">IloIntervalVarArray</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add">add</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_add">add</a>(IloAnySetVarArray a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_add">add</a>(IloAnySetVar var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_add">add</a>(IloAnyVarArray a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_add">add</a>(IloAnyVar var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add">add</a>(<a
+                    href="../classes/IloIntVarArray.html">IloIntVarArray</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add">add</a>(<a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add">add</a>(<a
+                    href="../classes/IloNumVarArray.html">IloNumVarArray</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add">add</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_add">add</a>(<a
+                    href="../classes/IloObjective.html">IloObjective</a> objective) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_contains">contains</a>(<a
+                    href="../classes/IloExtractable.html">IloExtractable</a> extr) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_copy">copy</a>(<a
+                    href="../classes/IloExtractable.html">IloExtractable</a> extr, IloSolution solution) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_copy">copy</a>(IloSolution solution) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_end">end</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getEnd">getEnd</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getEndMax">getEndMax</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getEndMin">getEndMin</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloEnv.html">IloEnv</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getEnv">getEnv</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloSolutionI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getImpl">getImpl</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getLength">getLength</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getLengthMax">getLengthMax</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getLengthMin">getLengthMin</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getMax">getMax</a>(<a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getMax">getMax</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getMin">getMin</a>(<a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getMin">getMin</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public const char *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getName">getName</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloAny.html">IloAny</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getObject">getObject</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloObjective.html">IloObjective</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getObjective">getObjective</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getObjectiveValue">getObjectiveValue</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloNumVar.html">IloNumVar</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getObjectiveVar">getObjectiveVar</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloAnySet.html">IloAnySet</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getPossibleSet">getPossibleSet</a>(IloAnySetVar var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloAnySet.html">IloAnySet</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getRequiredSet">getRequiredSet</a>(IloAnySetVar var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getSize">getSize</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getSizeMax">getSizeMax</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getSizeMin">getSizeMin</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getStart">getStart</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getStartMax">getStartMax</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getStartMin">getStartMin</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloAny.html">IloAny</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_getValue">getValue</a>(IloAnyVar var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getValue">getValue</a>(<a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getValue">getValue</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_getValue">getValue</a>(<a
+                    href="../classes/IloObjective.html">IloObjective</a> obj) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>(IloSolutionI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>(const IloSolution &amp; solution)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_IloSolution">IloSolution</a>(<a
+                    href="../classes/IloEnv.html">IloEnv</a> mem, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_isAbsent">isAbsent</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_isBetterThan">isBetterThan</a>(IloSolution solution) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_isBound">isBound</a>(IloAnySetVar var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_isBound">isBound</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_isEquivalent">isEquivalent</a>(<a
+                    href="../classes/IloExtractable.html">IloExtractable</a> extr, IloSolution solution) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_isEquivalent">isEquivalent</a>(IloSolution solution) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_isFixed">isFixed</a>(<a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_isInDomain">isInDomain</a>(<a
+                            href="../classes/IloIntVar.html">IloIntVar</a> var, <a
+                    href="../typedefs/IloInt.html">IloInt</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_isObjectiveSet">isObjectiveSet</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_isPresent">isPresent</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_isRestorable">isRestorable</a>(<a
+                    href="../classes/IloExtractable.html">IloExtractable</a> extr) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_isWorseThan">isWorseThan</a>(IloSolution solution) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloSolution</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_makeClone">makeClone</a>(<a
+                    href="../classes/IloEnv.html">IloEnv</a> env) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_operator=">operator=</a>(const IloSolution &amp; solution)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_remove">remove</a>(<a
+                    href="../classes/IloExtractableArray.html">IloExtractableArray</a> extr) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_remove">remove</a>(<a
+                    href="../classes/IloExtractable.html">IloExtractable</a> extr) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_restore">restore</a>(<a
+                            href="../classes/IloExtractable.html">IloExtractable</a> extr, <a
+                    href="../classes/IloAlgorithm.html">IloAlgorithm</a> algorithm) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_restore">restore</a>(<a
+                    href="../classes/IloAlgorithm.html">IloAlgorithm</a> algorithm) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setAbsent">setAbsent</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setDomain">setDomain</a>(<a
+                            href="../classes/IloIntVar.html">IloIntVar</a> var, <a
+                            href="../typedefs/IloInt.html">IloInt</a> min, <a
+                    href="../typedefs/IloInt.html">IloInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setEnd">setEnd</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> v) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setEndMax">setEndMax</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setEndMin">setEndMin</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setFalse">setFalse</a>(<a
+                    href="../classes/IloBoolVar.html">IloBoolVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setLength">setLength</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> v) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setLengthMax">setLengthMax</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setLengthMin">setLengthMin</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_setLocation">setLocation</a>(const char * fileName, int lineNumber) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setMax">setMax</a>(<a
+                            href="../classes/IloIntVar.html">IloIntVar</a> var, <a
+                    href="../typedefs/IloInt.html">IloInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setMin">setMin</a>(<a
+                            href="../classes/IloIntVar.html">IloIntVar</a> var, <a
+                    href="../typedefs/IloInt.html">IloInt</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSolution.html#method_setName">setName</a>(const char * name) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setNonRestorable">setNonRestorable</a>(<a
+                    href="../classes/IloExtractableArray.html">IloExtractableArray</a> array) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setNonRestorable">setNonRestorable</a>(<a
+                    href="../classes/IloExtractable.html">IloExtractable</a> extr) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setObject">setObject</a>(<a
+                    href="../typedefs/IloAny.html">IloAny</a> obj) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setObjective">setObjective</a>(<a
+                    href="../classes/IloObjective.html">IloObjective</a> objective) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setOptional">setOptional</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setPossibleSet">setPossibleSet</a>(IloAnySetVar var, <a
+                    href="../classes/IloAnySet.html">IloAnySet</a> possible) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setPresent">setPresent</a>(const <a
+                    href="../classes/IloIntervalVar.html">IloIntervalVar</a> a) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setRequiredSet">setRequiredSet</a>(IloAnySetVar var, <a
+                    href="../classes/IloAnySet.html">IloAnySet</a> required) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setRestorable">setRestorable</a>(<a
+                    href="../classes/IloExtractableArray.html">IloExtractableArray</a> array) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setRestorable">setRestorable</a>(<a
+                    href="../classes/IloExtractable.html">IloExtractable</a> ex) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setSize">setSize</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> v) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setSizeMax">setSizeMax</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setSizeMin">setSizeMin</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setStart">setStart</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> v) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setStartMax">setStartMax</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> max) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setStartMin">setStartMin</a>(const <a
+                            href="../classes/IloIntervalVar.html">IloIntervalVar</a> a, <a
+                    href="../typedefs/IloInt.html">IloInt</a> min) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setTrue">setTrue</a>(<a
+                    href="../classes/IloBoolVar.html">IloBoolVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setValue">setValue</a>(IloAnyVar var, <a
+                    href="../typedefs/IloAny.html">IloAny</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setValue">setValue</a>(<a
+                            href="../classes/IloIntVar.html">IloIntVar</a> var, <a
+                    href="../typedefs/IloInt.html">IloInt</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_setValue">setValue</a>(<a
+                            href="../classes/IloObjective.html">IloObjective</a> objective, <a
+                    href="../typedefs/IloNum.html">IloNum</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_store">store</a>(<a
+                            href="../classes/IloExtractable.html">IloExtractable</a> extr, <a
+                    href="../classes/IloAlgorithm.html">IloAlgorithm</a> algorithm) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSolution.html#method_store">store</a>(<a
+                    href="../classes/IloAlgorithm.html">IloAlgorithm</a> algorithm) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+            href="../classes/IloSolution.html#method_unsetObjective">unsetObjective</a>() const</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                        colspan="2">Inner Class</th></tr><tr><td><a
+            href="../classes/IloSolution_Iterator.html">IloSolution::Iterator</a></td><td>
+It allows you to traverse the variables
+ in a solution.
+        </td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloSolution">IloSolution</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloSolution</span>()</div><div
+                class="description"><p>This constructor creates a solution whose implementation pointer is 0 (zero). The
+ handle must be assigned before its methods can be used.</p></div><hr /><h3><a
+            name="method_IloSolution">IloSolution</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSolution</span>(IloSolutionI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description"><p>This constructor creates a handle object (an instance of the class
+ <code>IloSolution</code>) from a pointer to an implementation object (an instance of
+ the class <code>IloSolutionI</code>).</p></div><hr /><h3><a
+            name="method_IloSolution">IloSolution</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSolution</span>(const IloSolution &amp; <span
+            class="parameter-name">solution</span>)</div><div
+                class="description"><p>This constructor creates a handle object from a reference to a solution. After
+ execution, both the newly constructed handle and <code>solution</code> point to the
+ same implementation object.</p></div><hr /><h3><a
+            name="method_IloSolution">IloSolution</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSolution</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">mem</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an instance of the <code>IloSolution</code> class. The
+ optional argument <code>name</code>, if supplied, becomes the name of the created
+ object.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(const <a
+                href="../typedefs/IloIntervalVarArray.html">IloIntervalVarArray</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function adds each element of array <code>a</code>
+ to the invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function adds the interval variable <code>a</code>
+ to the invoking solution. </p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(IloAnySetVarArray <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function adds each element of <code>array</code> to
+ the invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(IloAnySetVar <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function adds the set variable <code>var</code> to
+ the invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(IloAnyVarArray <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function adds each element of <code>array</code> to
+ the invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(IloAnyVar <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function adds the variable <code>var</code> to the invoking
+ solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(<a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function adds each element of array <code>a</code>
+ to the invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function adds the variable <code>var</code> to the
+ invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(<a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function adds each element of <code>array</code> to
+ the invoking solution.</p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function adds the variable <code>var</code> to the
+ invoking solution.  </p></div><hr /><h3><a
+            name="method_add">add</a></h3><div
+                class="prototype">public void <span
+                class="function-name">add</span>(<a
+                href="../classes/IloObjective.html">IloObjective</a> <span
+            class="parameter-name">objective</span>) const</div><div
+                class="description"><p>This member function adds <code>objective</code> to the invoking solution. If the
+ solution has no active objective, then <code>objective</code> becomes the active
+ objective. Otherwise, the active objective remains unchanged.</p></div><hr /><h3><a
+            name="method_contains">contains</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">contains</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+            class="parameter-name">extr</span>) const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if <code>extr</code> is present
+ in the invoking object. Otherwise, it returns <code>IloFalse</code>.</p></div><hr /><h3><a
+            name="method_copy">copy</a></h3><div
+                class="prototype">public void <span
+                class="function-name">copy</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+                class="parameter-name">extr</span>, IloSolution <span
+            class="parameter-name">solution</span>) const</div><div
+                class="description"><p>This member function copies the saved value of <code>extr</code> from
+ <code>solution</code> to the invoking solution. If <code>extr</code> does not exist in
+ either <code>solution</code> or the invoking object, this member function throws an
+ instance of <code>IloException</code>. The restorable status of <code>extr</code> is
+ not copied.</p></div><hr /><h3><a
+            name="method_copy">copy</a></h3><div
+                class="prototype">public void <span
+                class="function-name">copy</span>(IloSolution <span
+            class="parameter-name">solution</span>) const</div><div
+                class="description"><p>For each variable that has been added to <code>solution</code>, this member
+ function copies its saved data to the invoking solution. If a particular extractable
+ does not already exist in the invoking solution, it is automatically added first. If
+ variables were added to the invoking solution, their restorable status is the same as
+ in <code>solution</code>. Otherwise, their status remains unchanged in the invoking
+ solution.</p></div><hr /><h3><a
+            name="method_end">end</a></h3><div
+                class="prototype">public void <span
+            class="function-name">end</span>()</div><div
+                class="description"><p>This member function deallocates the memory used to store the solution. If you no
+ longer need a solution, calling this member function can reduce memory consumption.</p></div><hr /><h3><a
+            name="method_getEnd">getEnd</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getEnd</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the end value of interval
+ variable <code>a</code> in the invoking solution. If the invoking
+ solution does not contain the interval variable or if the saved
+ minimum and maximum end of the interval variable are not equal,
+ this member function throws an instance of
+ <code>IloException</code>. </p></div><hr /><h3><a
+            name="method_getEndMax">getEndMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getEndMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the maximal end value of interval
+ variable <code>a</code> in the invoking solution. If the invoking
+ solution does not contain the interval variable, this function
+ throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getEndMin">getEndMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getEndMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the minimal end value of interval
+ variable <code>a</code> in the invoking solution. If the invoking
+ solution does not contain the interval variable, this function
+ throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getEnv">getEnv</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+            class="function-name">getEnv</span>() const</div><div
+                class="description"><p>This member function returns the environment specified when the invoking object was
+ constructed.</p></div><hr /><h3><a
+            name="method_getImpl">getImpl</a></h3><div
+                class="prototype">public IloSolutionI * <span
+            class="function-name">getImpl</span>() const</div><div
+                class="description"><p>This member function returns a pointer to the implementation object corresponding
+ to the invoking solution.</p></div><hr /><h3><a
+            name="method_getLength">getLength</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getLength</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the length value of interval
+ variable <code>a</code> in the invoking solution. If the invoking
+ solution does not contain the interval variable or if the saved
+ minimum and maximum length of the interval variable are not
+ equal, this member function throws an instance of
+ <code>IloException</code>. </p></div><hr /><h3><a
+            name="method_getLengthMax">getLengthMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getLengthMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the maximal length value of
+ interval variable <code>a</code> in the invoking solution. If the
+ invoking solution does not contain the interval variable, this
+ function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getLengthMin">getLengthMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getLengthMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the minimal length value of
+ interval variable <code>a</code> in the invoking solution. If the
+ invoking solution does not contain the interval variable, this
+ function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getMax">getMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getMax</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function returns the maximal value of the variable
+ <code>var</code> in the invoking solution.</p></div><hr /><h3><a
+            name="method_getMax">getMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getMax</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns the maximal value of the variable
+ <code>var</code> in the invoking solution.</p></div><hr /><h3><a
+            name="method_getMin">getMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getMin</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function returns the minimal value of the variable
+ <code>var</code> in the invoking solution.</p></div><hr /><h3><a
+            name="method_getMin">getMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getMin</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns the minimal value of the variable
+ <code>var</code> in the invoking solution.</p></div><hr /><h3><a
+            name="method_getName">getName</a></h3><div
+                class="prototype">public const char * <span
+            class="function-name">getName</span>() const</div><div
+                class="description"><p>This member function returns a character string specifying 
+ the name of the invoking object (if there is one).</p></div><hr /><h3><a
+            name="method_getObject">getObject</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloAny.html">IloAny</a> <span
+            class="function-name">getObject</span>() const</div><div
+                class="description"><p>This member function returns the object associated with 
+ the invoking object (if there is one). Normally, an associated 
+ object contains user data pertinent to the invoking object.</p></div><hr /><h3><a
+            name="method_getObjective">getObjective</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloObjective.html">IloObjective</a> <span
+            class="function-name">getObjective</span>() const</div><div
+                        class="description"><p>This member function returns the <em>active</em> objective as set via a previous
+ call to <code><a
+                href="../classes/IloSolution.html#method_add">IloSolution::add</a></code> or
+ <code>setObjective(IloObjective)</code>. If there is no active objective, an empty
+ handle is returned.</p></div><hr /><h3><a
+            name="method_getObjectiveValue">getObjectiveValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getObjectiveValue</span>() const</div><div
+                class="description"><p>This member function returns the saved value of the current active objective. It
+ can be seen as performing the action <code>getValue(getObjective())</code>.</p></div><hr /><h3><a
+            name="method_getObjectiveVar">getObjectiveVar</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="function-name">getObjectiveVar</span>() const</div><div
+                class="description"><p>If the active objective corresponds to a simple <code>IloNumVar</code>, this member
+ function returns that variable. If there is no active objective or if the objective is
+ not a simple variable, an empty handle is returned.</p></div><hr /><h3><a
+            name="method_getPossibleSet">getPossibleSet</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloAnySet.html">IloAnySet</a> <span
+                class="function-name">getPossibleSet</span>(IloAnySetVar <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns the set of possible values for the variable
+ <code>var</code>, as stored in the invoking solution.</p></div><hr /><h3><a
+            name="method_getRequiredSet">getRequiredSet</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloAnySet.html">IloAnySet</a> <span
+                class="function-name">getRequiredSet</span>(IloAnySetVar <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns the set of required values for the variable
+ <code>var</code>, as stored in the invoking solution.</p></div><hr /><h3><a
+            name="method_getSize">getSize</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getSize</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the size value of interval
+ variable <code>a</code> in the invoking solution. If the invoking
+ solution does not contain the interval variable or if the saved
+ minimum and maximum size of the interval variable are not equal,
+ this member function throws an instance of
+ <code>IloException</code>. </p></div><hr /><h3><a
+            name="method_getSizeMax">getSizeMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getSizeMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the maximal size value of
+ interval variable <code>a</code> in the invoking solution. If the
+ invoking solution does not contain the interval variable, this
+ function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getSizeMin">getSizeMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getSizeMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the minimal size value of
+ interval variable <code>a</code> in the invoking solution. If the
+ invoking solution does not contain the interval variable, this
+ function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getStart">getStart</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getStart</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the start value of interval
+ variable <code>a</code> in the invoking solution. If the invoking
+ solution does not contain the interval variable or if the saved
+ minimum and maximum start of the interval variable are not equal,
+ this member function throws an instance of
+ <code>IloException</code>. </p></div><hr /><h3><a
+            name="method_getStartMax">getStartMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getStartMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the maximal start value of
+ interval variable <code>a</code> in the invoking solution. If the
+ invoking solution does not contain the interval variable, this
+ function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getStartMin">getStartMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getStartMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns the minimal start value of
+ interval variable <code>a</code> in the invoking solution. If the
+ invoking solution does not contain the interval variable, this
+ function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloAny.html">IloAny</a> <span
+                class="function-name">getValue</span>(IloAnyVar <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns the value of the variable <code>var</code> in the
+ invoking solution.</p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getValue</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                    class="description"><p>This member function returns the value of the variable
+ <code>var</code> in the invoking solution. If the saved minimum and
+ maximum of the variable are not equal, this member function throws
+ an instance of <code>IloException</code>.</p><p>For special considerations with respect to CPLEX about integrality, 
+ truncation, and rounding applicable to this method, see the concept
+ <a
+                href="../integer_values.html">Integer values, integrality tolerance, and round-off in CPLEX Optimizers</a>.</p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getValue</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns the value of the variable
+ <code>var</code> in the invoking solution. If the saved minimum and
+ maximum of the variable are not equal, this member function throws
+ an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getValue</span>(<a
+                href="../classes/IloObjective.html">IloObjective</a> <span
+            class="parameter-name">obj</span>) const</div><div
+                class="description"><p>This member function returns the saved value of objective <code>objective</code> in
+ the invoking solution.</p></div><hr /><h3><a
+            name="method_isAbsent">isAbsent</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isAbsent</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns true if the absence status of
+ interval variable <code>a</code> is true in the invoking
+ solution. If the absence status of the saved interval variable is
+ not fixed or fixed to false (present interval), this member
+ function returns false. If the invoking solution does not contain
+ the interval variable, this function throws an instance of
+ <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_isBetterThan">isBetterThan</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isBetterThan</span>(IloSolution <span
+            class="parameter-name">solution</span>) const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if the invoking solution and
+ <code>solution</code> have the same objective and if the invoking solution has a
+ strictly higher quality objective value (according to the sense of the objective). In
+ all other situations, it returns <code>IloFalse</code>.</p></div><hr /><h3><a
+            name="method_isBound">isBound</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isBound</span>(IloAnySetVar <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns <code>IloTrue</code> if the stored required and
+ possible sets for the set variable <code>var</code> are equal in the invoking solution.
+ Otherwise, it returns <code>IloFalse</code>.</p></div><hr /><h3><a
+            name="method_isBound">isBound</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isBound</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function returns <code>IloTrue</code> if
+ <code>var</code> takes a single value in the invoking
+ solution. Otherwise, it returns <code>IloFalse</code>.  </p></div><hr /><h3><a
+            name="method_isEquivalent">isEquivalent</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isEquivalent</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+                class="parameter-name">extr</span>, IloSolution <span
+            class="parameter-name">solution</span>) const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if the saved value of
+ <code>extr</code> is the same in the invoking solution and <code>solution</code>.
+ Otherwise, it returns <code>IloFalse</code>. If <code>extr</code> does not exist in
+ either <code>solution</code> or the invoking object, the member function throws an
+ instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_isEquivalent">isEquivalent</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isEquivalent</span>(IloSolution <span
+            class="parameter-name">solution</span>) const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if the invoking object and
+ <code>solution</code> contain the same variables with the same saved values. Otherwise,
+ it returns <code>IloFalse</code>.</p></div><hr /><h3><a
+            name="method_isFixed">isFixed</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isFixed</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if
+ <code>var</code> takes a single value in the invoking
+ solution. Otherwise, it returns <code>IloFalse</code>. </p></div><hr /><h3><a
+            name="method_isInDomain">isInDomain</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isInDomain</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if
+ <code>value</code> belongs to the domain of integer variable
+ <code>var</code> in the invoking solution. Otherwise, it returns
+ <code>IloFalse</code>. </p></div><hr /><h3><a
+            name="method_isObjectiveSet">isObjectiveSet</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+            class="function-name">isObjectiveSet</span>() const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if the invoking solution has an
+ active objective. Otherwise, it returns <code>IloFalse</code>.</p></div><hr /><h3><a
+            name="method_isPresent">isPresent</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isPresent</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function returns true if the presence status of
+ interval variable <code>a</code> is true in the invoking
+ solution. If the presence status of the saved interval variable
+ is not fixed or fixed to false (absent interval), this member
+ function returns false. If the invoking solution does not contain
+ the interval variable, this function throws an instance of
+ <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_isRestorable">isRestorable</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isRestorable</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+            class="parameter-name">extr</span>) const</div><div
+                class="description"><p>This member function returns <code>IloFalse</code> if
+ <code>setNonRestorable(extr)</code> was called more recently than
+ <code>setRestorable(extr)</code>. Otherwise, it returns <code>IloTrue</code>. This
+ member function always returns <code>IloFalse</code> when it is passed an
+ <code>IloObjective</code> object.</p></div><hr /><h3><a
+            name="method_isWorseThan">isWorseThan</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isWorseThan</span>(IloSolution <span
+            class="parameter-name">solution</span>) const</div><div
+                class="description"><p>This member function returns <code>IloTrue</code> if the invoking solution and
+ <code>solution</code> have the same objective and if the invoking solution has a
+ strictly lower quality objective value (according to the sense of the objective). In
+ all other situations, it returns <code>IloFalse</code>.</p></div><hr /><h3><a
+            name="method_makeClone">makeClone</a></h3><div
+                class="prototype">public IloSolution <span
+                class="function-name">makeClone</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+            class="parameter-name">env</span>) const</div><div
+                class="description"><p>This member function allocates a new solution on <code>env</code> and adds to it
+ all variables that were added to the invoking object. The &ldquo;restorable&rdquo;
+ status of all variables in the clone is the same as that in the invoking solution.
+ Likewise, the active objective in the clone is the same as that in the invoking
+ solution. The newly created solution is returned.</p></div><hr /><h3><a
+            name="method_operator=">operator=</a></h3><div
+                class="prototype">public void <span
+                class="function-name">operator=</span>(const IloSolution &amp; <span
+            class="parameter-name">solution</span>)</div><div
+                class="description"><p>This operator assigns an address to the handle pointer of the invoking solution.
+ That address is the location of the implementation object of <code>solution</code>.
+ After the execution of this operator, the invoking solution and <code>solution</code>
+ both point to the same implementation object.</p></div><hr /><h3><a
+            name="method_remove">remove</a></h3><div
+                class="prototype">public void <span
+                class="function-name">remove</span>(<a
+                href="../classes/IloExtractableArray.html">IloExtractableArray</a> <span
+            class="parameter-name">extr</span>) const</div><div
+                class="description"><p>This member function removes each element of <code>array</code> from the invoking
+ solution. If the invoking solution does not contain all elements of <code>array</code>,
+ the member function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_remove">remove</a></h3><div
+                class="prototype">public void <span
+                class="function-name">remove</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+            class="parameter-name">extr</span>) const</div><div
+                class="description"><p>This member function removes extractable <code>extr</code> from the invoking
+ solution. If the invoking solution does not contain <code>extr</code>, the member
+ function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_restore">restore</a></h3><div
+                class="prototype">public void <span
+                class="function-name">restore</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+                class="parameter-name">extr</span>, <a
+                href="../classes/IloAlgorithm.html">IloAlgorithm</a> <span
+            class="parameter-name">algorithm</span>) const</div><div
+                class="description"><p>This member function restores the value of the extractable corresponding to
+ <code>extr</code> by reference to <code>algorithm</code>. The use of this member
+ function depends on the state of <code>algorithm</code>. If <code>algorithm</code> is
+ an instance of the IBM ILOG Solver class <code>IloSolver</code>, this member function can
+ only be used during search. If <code>extr</code> does not exist in the invoking
+ solution, the member function throws an instance of <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_restore">restore</a></h3><div
+                class="prototype">public void <span
+                class="function-name">restore</span>(<a
+                href="../classes/IloAlgorithm.html">IloAlgorithm</a> <span
+            class="parameter-name">algorithm</span>) const</div><div
+                class="description"><p>This member function uses <code>algorithm</code> to instantiate the variables in
+ the invoking solution with their saved values. The value of any objective added to the
+ solution is not restored. The use of this member function depends on the state of
+ <code>algorithm</code>. If <code>algorithm</code> is an instance of the IBM ILOG Solver
+ class <code>IloSolver</code>, this member function can only be used during search.</p></div><hr /><h3><a
+            name="method_setAbsent">setAbsent</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setAbsent</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function sets the absence status of interval
+ variable <code>a</code> to be true in the invoking solution. If
+ the invoking solution does not contain the interval variable,
+ this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setDomain">setDomain</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setDomain</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="parameter-name">min</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets range <code>[min,max]</code> as the
+ new domain of integer variable <code>var</code> in the invoking
+ solution. </p></div><hr /><h3><a
+            name="method_setEnd">setEnd</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEnd</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">v</span>) const</div><div
+                class="description"><p>This member function sets the end value (both minimum and
+ maximum) of interval variable <code>a</code> to <code>v</code> in
+ the invoking solution. If the invoking solution does not contain
+ the interval variable, this function will automatically add
+ it.</p></div><hr /><h3><a
+            name="method_setEndMax">setEndMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal end value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>max</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setEndMin">setEndMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setEndMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal end value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>min</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setFalse">setFalse</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setFalse</span>(<a
+                href="../classes/IloBoolVar.html">IloBoolVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function sets the stored value of <code>var</code> to
+ <code>IloFalse</code> in the invoking solution.</p></div><hr /><h3><a
+            name="method_setLength">setLength</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLength</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">v</span>) const</div><div
+                class="description"><p>This member function sets the length value (both minimum and
+ maximum) of interval variable <code>a</code> to <code>v</code> in
+ the invoking solution. If the invoking solution does not contain
+ the interval variable, this function will automatically add
+ it.</p></div><hr /><h3><a
+            name="method_setLengthMax">setLengthMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLengthMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal length value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>max</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setLengthMin">setLengthMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLengthMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal length value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>min</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setLocation">setLocation</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLocation</span>(const char * <span
+                class="parameter-name">fileName</span>, int <span
+            class="parameter-name">lineNumber</span>) const</div><div
+                        class="description"><p>This member function stores the source code location (as a file name and line 
+ number) in the invoking object. Recommended arguments are the macros __FILE__ and 
+ __LINE__. The supplied location can be used for debugging. In particular CP  
+ Optimizer may include the location in error messages and in model dumps.</p><p>Note that the string pointed to by fileName argument is not copied.
+ Therefore the pointer must be valid during the whole lifespan of the object.</p><p>Instead of using this function directly, it may be simpler to use macros 
+ <code><a
+                        href="../macros/ILOSETLOCATION.html">ILOSETLOCATION</a></code> and 
+ <code><a
+                href="../macros/ILOADD.html">ILOADD</a></code>.</p></div><hr /><h3><a
+            name="method_setMax">setMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMax</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal value of the variable
+ <code>var</code> in the invoking solution to <code>max</code>.</p></div><hr /><h3><a
+            name="method_setMin">setMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMin</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal value of the variable
+ <code>var</code> in the invoking solution to <code>min</code>.</p></div><hr /><h3><a
+            name="method_setName">setName</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setName</span>(const char * <span
+            class="parameter-name">name</span>) const</div><div
+                class="description"><p>This member function assigns <code>name</code> 
+ to the invoking object.</p><p> When called on an already extracted extractable, notifications will be sent to the engine. When possible, this method should be called before the model is extracted. </p></div><hr /><h3><a
+            name="method_setNonRestorable">setNonRestorable</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setNonRestorable</span>(<a
+                href="../classes/IloExtractableArray.html">IloExtractableArray</a> <span
+            class="parameter-name">array</span>) const</div><div
+                class="description"><p>This member function specifies to the invoking solution
+ that when the solution is
+ restored by means of <code>restore(IloAlgorithm)</code> or
+ <code>restore(IloExtractable, IloAlgorithm)</code>,
+ no elements of <code>array</code> will be restored.
+ When an array of variables is added to a solution, each variable is
+ added in a &ldquo;restorable&rdquo; state.</p></div><hr /><h3><a
+            name="method_setNonRestorable">setNonRestorable</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setNonRestorable</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+            class="parameter-name">extr</span>) const</div><div
+                class="description"><p>This member function specifies to the invoking solution
+ that when the solution is
+ restored by means of <code>restore(IloAlgorithm)</code> or
+ <code>restore(IloExtractable, IloAlgorithm)</code>,
+ <code>extr</code> will not be
+ restored. When a variable is added to a solution, it is added in a
+ &ldquo;restorable&rdquo; state.</p></div><hr /><h3><a
+            name="method_setObject">setObject</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setObject</span>(<a
+                href="../typedefs/IloAny.html">IloAny</a> <span
+            class="parameter-name">obj</span>) const</div><div
+                class="description"><p>This member function associates <code>obj</code> with the 
+ invoking object.  The member function <code>getObject</code> accesses 
+ this associated object afterward. Normally, <code>obj</code> contains 
+ user data pertinent to the invoking object.</p></div><hr /><h3><a
+            name="method_setObjective">setObjective</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setObjective</span>(<a
+                href="../classes/IloObjective.html">IloObjective</a> <span
+            class="parameter-name">objective</span>) const</div><div
+                class="description"><p>This member function adds <code>objective</code> to the invoking solution, if it is
+ not already present, and sets the active objective to <code>objective</code>.</p></div><hr /><h3><a
+            name="method_setOptional">setOptional</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setOptional</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function states that interval variable
+ <code>a</code> is optional in the invoking solution, that is, its
+ presence/absence status is unbound. If the invoking solution does
+ not contain the interval variable, this function will
+ automatically add it.</p></div><hr /><h3><a
+            name="method_setPossibleSet">setPossibleSet</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setPossibleSet</span>(IloAnySetVar <span
+                class="parameter-name">var</span>, <a
+                href="../classes/IloAnySet.html">IloAnySet</a> <span
+            class="parameter-name">possible</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function sets the stored possible values for
+ <code>var</code> as <code>possible</code> in the invoking
+ solution.</p></div><hr /><h3><a
+            name="method_setPresent">setPresent</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setPresent</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+            class="parameter-name">a</span>) const</div><div
+                class="description"><p>This member function sets the presence status of interval
+ variable <code>a</code> to be true in the invoking solution. If
+ the invoking solution does not contain the interval variable,
+ this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setRequiredSet">setRequiredSet</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setRequiredSet</span>(IloAnySetVar <span
+                class="parameter-name">var</span>, <a
+                href="../classes/IloAnySet.html">IloAnySet</a> <span
+            class="parameter-name">required</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function sets the stored required values for
+ <code>var</code> as <code>required</code> in the invoking
+ solution.</p></div><hr /><h3><a
+            name="method_setRestorable">setRestorable</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setRestorable</span>(<a
+                href="../classes/IloExtractableArray.html">IloExtractableArray</a> <span
+            class="parameter-name">array</span>) const</div><div
+                class="description"><p>This member function specifies to the invoking solution
+ that when the solution is
+ restored by means of <code>restore(IloAlgorithm)</code> or
+ <code>restore(IloExtractable, IloAlgorithm)</code>,
+ the appropriate element(s) of
+ <code>array</code> will be restored.
+ When an array of variables is added to a solution,
+ each variable is added in a &ldquo;restorable&rdquo; state.
+ This call has no effect on objects of type
+ <code>IloObjective</code>; objects of this type are never restored.</p></div><hr /><h3><a
+            name="method_setRestorable">setRestorable</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setRestorable</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+            class="parameter-name">ex</span>) const</div><div
+                class="description"><p>This member function specifies to the invoking solution
+ that when the solution is
+ restored by means of <code>restore(IloAlgorithm)</code> or
+ <code>restore(IloExtractable, IloAlgorithm)</code>,
+ <code>extr</code> will be restored.
+ When a variable is added to a solution,
+ it is added in a &ldquo;restorable&rdquo; state.
+ This call has no effect on objects of type <code>IloObjective</code>;
+ objects of that type are never restored.</p></div><hr /><h3><a
+            name="method_setSize">setSize</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setSize</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">v</span>) const</div><div
+                class="description"><p>This member function sets the size value (both minimum and
+ maximum) of interval variable <code>a</code> to <code>v</code> in
+ the invoking solution. If the invoking solution does not contain
+ the interval variable, this function will automatically add
+ it.</p></div><hr /><h3><a
+            name="method_setSizeMax">setSizeMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setSizeMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal size value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>max</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setSizeMin">setSizeMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setSizeMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal size value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>min</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setStart">setStart</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStart</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">v</span>) const</div><div
+                class="description"><p>This member function sets the start value (both minimum and
+ maximum) of interval variable <code>a</code> to <code>v</code> in
+ the invoking solution. If the invoking solution does not contain
+ the interval variable, this function will automatically add
+ it.</p></div><hr /><h3><a
+            name="method_setStartMax">setStartMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMax</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">max</span>) const</div><div
+                class="description"><p>This member function sets the maximal start value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>max</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setStartMin">setStartMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setStartMin</span>(const <a
+                href="../classes/IloIntervalVar.html">IloIntervalVar</a> <span
+                class="parameter-name">a</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">min</span>) const</div><div
+                class="description"><p>This member function sets the minimal start value of interval
+ variable <code>a</code> in the invoking solution to
+ <code>min</code>. If the invoking solution does not contain the
+ interval variable, this function will automatically add it.</p></div><hr /><h3><a
+            name="method_setTrue">setTrue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setTrue</span>(<a
+                href="../classes/IloBoolVar.html">IloBoolVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p>This member function sets the stored value of <code>var</code> to
+ <code>IloTrue</code> in the invoking solution.</p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(IloAnyVar <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloAny.html">IloAny</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2 as this
+ type of decision variable is not supported by CP Optimizer.</p><p>This member function sets the value of the variable <code>var</code> to
+ <code>value</code> in the invoking solution.</p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the value (both minimum and maximum)
+ of the variable <code>var</code> to <code>value</code> in the
+ invoking solution.</p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(<a
+                href="../classes/IloObjective.html">IloObjective</a> <span
+                class="parameter-name">objective</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function sets the value of <code>objective</code> as stored in the
+ invoking solution to <code>value</code>. This member function should be used with care
+ and only when the objective value of the solution is known exactly.</p></div><hr /><h3><a
+            name="method_store">store</a></h3><div
+                class="prototype">public void <span
+                class="function-name">store</span>(<a
+                href="../classes/IloExtractable.html">IloExtractable</a> <span
+                class="parameter-name">extr</span>, <a
+                href="../classes/IloAlgorithm.html">IloAlgorithm</a> <span
+            class="parameter-name">algorithm</span>) const</div><div
+                class="description"><p>This member function stores the value of the extractable corresponding to
+ <code>extr</code> by reference to <code>algorithm</code>. If <code>extr</code> does
+ not exist in the invoking solution, the member function throws an instance of
+ <code>IloException</code>.</p></div><hr /><h3><a
+            name="method_store">store</a></h3><div
+                class="prototype">public void <span
+                class="function-name">store</span>(<a
+                href="../classes/IloAlgorithm.html">IloAlgorithm</a> <span
+            class="parameter-name">algorithm</span>) const</div><div
+                class="description"><p>This member function stores the values of the objects added to the solution by
+ reference to <code>algorithm</code>.</p></div><hr /><h3><a
+            name="method_unsetObjective">unsetObjective</a></h3><div
+                class="prototype">public void <span
+            class="function-name">unsetObjective</span>() const</div><div
+                        class="description"><p>This member function asserts that there should be no active objective in the
+ invoking solution, although the previous active object is still present. A new active
+ objective can be set via <code><a
+                        href="../classes/IloSolution.html#method_add">IloSolution::add</a></code> or
+ <code><a href="../classes/IloSolution.html#method_setObjective">IloSolution::setObjective</a></code>.</p></div><hr /></body>
+</html>

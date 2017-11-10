@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Recap: mulprod1.osc vs. mulprod_main.mod" />
+<meta name="abstract" content="Summarizes the difference between the .osc file in OPL 3 and the main function in OPL 4." />
+<meta name="Description" content="Summarizes the difference between the .osc file in OPL 3 and the main function in OPL 4." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplrelnotes.uss_reln_from37to40.1028537" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" />
+<title>Recap: mulprod1.osc vs. mulprod_main.mod</title>
+</head>
+<body role="main" id="oplrelnotes.uss_reln_from37to40.1028537">
+<h1 class="title topictitle1">Recap: mulprod1.osc vs. mulprod_main.mod</h1>
+<div class="body"><p class="shortdesc">Summarizes the difference between the <span class="ph filepath">.osc</span> file in OPL 3 and the <samp class="ph codeph">main</samp> function
+in OPL 4.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_script.html" title="In OPL 4.0, the OPL Script language is replaced by an implementation of ECMA-262 (also known as ECMAScript or JavaScript) named “ILOG Script”, with extensions for OPL. This section explains how the replacement of OPL Script by ILOG Script affects your way of writing script statements: abstract models, preprocessing, postprocessing, migration, setting CPLEX parameters, open arrays...">Scripting</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1037909"><h2 class="title topictitle2">OPL 3</h2>
+<div class="body"><p class="p">The <span class="ph filepath">mulprod1.osc</span> file (slightly
+different from the one you may have in your OPL 3 distribution):</p>
+<p class="p exampletitle" id="oplrelnotes.uss_reln_from37to40.1037909__oplrelnotes.uss_reln_from37to40.1037927">An .osc file in OPL 3</p>
+<pre class="pre codeblock"><code>Model produce("mulprod.mod","mulprod.dat") editMode;
+import enum Resources produce.Resources;
+float+ capFlour := produce.capacity[flour];
+float+ best;
+float+ curr := infinity;
+repeat {
+   best := curr;   
+   produce.capacity[flour] := capFlour;   
+   produce.solve();
+   curr := produce.objectiveValue();
+   cout &lt;&lt; "Objective Function: " &lt;&lt; curr &lt;&lt; endl;
+   produce.reset();
+   capFlour := capFlour + 1;
+} until curr = best;</code></pre>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1037909__oplrelnotes.uss_reln_from37to40.1037929"><h3 class="title sectiontitle">OPL 4</h3><p class="p">The following code sample shows the <samp class="ph codeph">main</samp> function
+in the <span class="ph filepath">mulprod_main.mod</span> file: </p>
+<p class="p exampletitle" id="oplrelnotes.uss_reln_from37to40.1037909__oplrelnotes.uss_reln_from37to40.1037935">The main function in mulprod_main.mod</p>
+<pre class="pre codeblock"><code>main {
+  var status = 0;
+  thisOplModel.generate();
+
+  var produce = thisOplModel;
+  var capFlour = produce.Capacity["flour"];
+
+  var best;
+  var curr = Infinity;
+  var basis = new IloOplCplexBasis();
+  var ofile = new IloOplOutputFile("mulprod_main.txt");
+  while ( 1 ) {
+    best = curr;</code></pre>
+<p class="p">You may need to declare more
+than one model, for example if you want to sequence several models,
+as shown in the code sample <a class="xref" href="opl_mig_reln_40_script_recap.html#oplrelnotes.uss_reln_from37to40.1037909__oplrelnotes.uss_reln_from37to40.1037967">Declaring several models in sequence</a>. In this case,
+you have to declare external models as there can be only one model
+in a given <span class="ph filepath">.mod</span> file.</p>
+<p class="p exampletitle" id="oplrelnotes.uss_reln_from37to40.1037909__oplrelnotes.uss_reln_from37to40.1037967">Declaring several models in sequence</p>
+<pre class="pre codeblock"><code>var source = new IloOplModelSource("modelFile.mod");
+var data = new IloOplDataSource("dataFile.dat");
+var def = new IloOplModelDefinition(source);
+var theModel = new IloOplModel(def,cplex);
+theModel.addDataSource(data);
+theModel.generate();</code></pre>
+<p class="p">But remember to always have a <samp class="ph codeph">main</samp> model
+in which you write the <samp class="ph codeph">main</samp> function. </p>
+<p class="p">In summary:</p>
+<ul class="ul"><li class="li"><p class="p">The recommended migration path consists in
+having a main model in which you write the main function as explained
+at the beginning of this section and as illustrated in <a class="xref" href="opl_mig_reln_40_script_recap.html#oplrelnotes.uss_reln_from37to40.1037909__oplrelnotes.uss_reln_from37to40.1037935">Declaring several models in sequence</a>.</p>
+</li>
+<li class="li"><p class="p">As an alternative, you may also declare your
+model as external. In this case, there is an implicit model, known
+as <samp class="ph codeph">thisOplModel</samp>, which is there anyway,
+even if it is empty.</p>
+</li>
+<li class="li"><p class="p">If you want to sequence several models, you
+must declare them as external.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</body>
+</html>

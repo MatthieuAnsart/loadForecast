@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Changes in behavior of LP concurrent optimizer" />
+<meta name="abstract" content="Describes changes in default behavior with respect to concurrent optimization of linear programming models." />
+<meta name="Description" content="Describes changes in default behavior with respect to concurrent optimization of linear programming models." />
+<meta name="DC.subject" content="concurrent optimizer (release notes), thread (release notes), memory emphasis (release notes), deterministic search (release notes), CPXlpopt (release notes), CPX_PARAM_LPMETHOD (release notes), CPX_PARAM_QPMETHOD (release notes), CPX_PARAM_STARTALG (release notes), RootAlg (release notes)" />
+<meta name="keywords" content="concurrent optimizer (release notes), thread (release notes), memory emphasis (release notes), deterministic search (release notes), CPXlpopt (release notes), CPX_PARAM_LPMETHOD (release notes), CPX_PARAM_QPMETHOD (release notes), CPX_PARAM_STARTALG (release notes), RootAlg (release notes)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../CPLEX/ReleaseNotes/topics/releasenotes122/releasenotescplex122_3.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1272530118718" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes122/releasenotescplex122_3.html" />
+<title>Changes in behavior of LP concurrent optimizer</title>
+</head>
+<body role="main" id="descriptiveTopic1272530118718">
+<h1 class="title topictitle1">Changes in behavior of LP concurrent optimizer</h1>
+<div class="body"><p class="shortdesc">Describes changes in default behavior with respect to concurrent
+optimization of linear programming models.</p>
+<p class="p">The concurrent optimizer launches distinct optimizers on multiple
+threads. By default, CPLEX  now offers <strong class="ph b">concurrent</strong>, <strong class="ph b">deterministic</strong> optimization
+of linear programming models (LPs) when <strong class="ph b">more than one thread</strong> is
+available. This improved default behavior means better performance
+in most cases when you simply load and solve a linear programming
+model from scratch.</p>
+<p class="p">This change in default behavior may affect your existing application
+under these conditions:</p>
+<ul class="ul"><li class="li"><p class="p">Running concurrent optimizers simultaneously on multiple threads
+may consume more memory. If that increase use of memory prevents CPLEX
+from solving your model effectively, you may need to revert to your
+previous choice of optimizer, rather than adopt this new default behavior
+of the concurrent optimizer.</p>
+ </li>
+<li class="li"><p class="p">If the <a class="xref" href="../../../Parameters/topics/MemoryEmphasis.html" title="Directs CPLEX that it should conserve memory where possible.">memory reduction switch</a> (<samp class="ph codeph">CPX_PARAM_MEMORYEMPHASIS</samp>, <samp class="ph codeph">MemoryEmphasis</samp>)
+is turned on, then you have instructed CPLEX to conserve memory. In
+that case, CPLEX does <strong class="ph b">not</strong> offer concurrent, deterministic optimization
+of linear programming models by default even if there is more than
+one thread available. In other words, if there is more than one thread
+available, and if you want CPLEX to invoke concurrent, deterministic
+optimization, then <strong class="ph b">either</strong> you must be sure that the memory
+reduction switch is turned off (its default setting) <strong class="ph b">or</strong> you
+must explicitly set the <a class="xref" href="../../../Parameters/topics/LPMETHOD.html" title="Controls which algorithm is used to solve continuous models or to solve the root relaxation of a MIP.">algorithm for continuous problems</a> (also known
+as the LP method parameter, <samp class="ph codeph">CPX_PARAM_LPMETHOD</samp>, <samp class="ph codeph">RootAlg</samp>)
+to the value 6, <samp class="ph codeph">CPX_ALG_CONCURRENT</samp>.</p>
+ </li>
+<li class="li"><p class="p">If your existing application offers more than one thread to
+CPLEX, you may want to consider whether the concurrent optimizer solves
+your model more efficiently now than your previous choice of optimizer.</p>
+</li>
+<li class="li"><p class="p">If your existing application currently invokes an optimizer
+(such as the Callable Library routine <span class="keyword apiname">CPXlpopt</span>)
+at <strong class="ph b">default </strong>settings, you may observe a change in behavior because
+of this change in default behavior of concurrent optimization. In
+such a case, you may need to evaluate whether to adopt this new behavior
+or to revert to the previous choice of optimizer. See the topic <a class="xref" href="releasenotescplex122_8.html#descriptiveTopic1272530118718__section1272619306122">Special considerations and remedies</a> for
+more guidance about this point.</p>
+ </li>
+<li class="li"><p class="p">If your existing application currently invokes optimization
+at <strong class="ph b">nondefault</strong> settings, you may need to reconsider those nondefault
+settings in light of the new behavior. See the topic <a class="xref" href="releasenotescplex122_8.html#descriptiveTopic1272530118718__section1272619306122">Special considerations and remedies</a> for
+more guidance about this point.</p>
+ </li>
+<li class="li"><p class="p">If your application invokes concurrent optimization in a <strong class="ph b">callback</strong>,
+it must do so in the <strong class="ph b">first thread</strong> (not in other threads).</p>
+</li>
+<li class="li"><p class="p">During concurrent optimization, only the dual simplex optimizer
+invokes user-written <strong class="ph b">callbacks</strong>. Other optimizers running concurrently
+do <strong class="ph b">not</strong> invoke user-written callbacks.</p>
+</li>
+</ul>
+<div class="section" id="descriptiveTopic1272530118718__RrDTI6LN"><h2 class="title sectiontitle">Previous behavior</h2><p class="p">In previous
+versions of CPLEX, when you invoked optimization for a linear programming
+model (LP), the dual simplex optimizer solved the model by default.
+This behavior has changed: if more than one thread is available to
+solve your model, CPLEX launches competing optimizers concurrently
+on the available threads.</p>
+<p class="p">Moreover, the default behavior of
+concurrent optimization in previous releases was opportunistic, that
+is, not deterministic. (For more detail about the differences between
+opportunistic and deterministic optimization, see the topics 
+<a class="xref" href="../../../UsrMan/topics/parallel_optim/multi_threaded_parallel/07_determinism.html" title="Defines determinism and describes its effect in parallel optimization.">Determinism of results</a> and 
+<a class="xref" href="../../../UsrMan/topics/parallel_optim/multi_threaded_parallel/11_concurrent.html" title="Describes the concurrent optimizer.">Concurrent optimizer in parallel</a> in 
+the <em class="ph i">CPLEX User’s Manual</em>.) This behavior has changed: concurrent
+optimization of LPs is now <strong class="ph b">deterministic</strong> by default, and opportunistic
+mode is still available through the <a class="xref" href="../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> documented
+in the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+<p class="p">Furthermore,
+in previous versions of CPLEX, when you invoked concurrent optimization,
+it was not able to take advantage of starting information, such as
+a start vector, warm start, or partial solution. This limitation no
+longer exists: if you supply <strong class="ph b">starting information</strong>, concurrent
+optimization makes use of it now.</p>
+</div>
+<div class="section" id="descriptiveTopic1272530118718__section1272619306122"><h2 class="title sectiontitle">Special considerations and
+remedies</h2><p class="p">With the new default behavior, you may observe
+changes in the log that reports CPLEX activity during concurrent optimization.
+Specifically, you may observe a point in the log when CPLEX reports
+a solution of the LP model by an optimizer, but no other report of
+activity appears in the log for a considerable time afterward. During
+this apparently inactive period, concurrent optimization deterministically
+manages potential race conditions among competing optimizers in order
+to resolve deterministically from which of those optimizers to accept
+the final solution.</p>
+<p class="p">If
+this apparent wait during the race between concurrent optimizers poses
+a problem for your application, there are two alternative remedies
+available to you:</p>
+<ul class="ul"><li class="li"><p class="p">Use opportunistic mode, rather than the default deterministic
+mode. To do so, change the setting of the  <a class="xref" href="../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> (<samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>, <samp class="ph codeph">ParallelMode</samp>)
+documented in the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+</li>
+<li class="li"><p class="p">Set the optimizer that consistently solves your model first
+as the starting algorithm in your application. </p>
+ <p class="p">To
+do so, set the parameter appropriate for your type of model:</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="../../../Parameters/topics/LPMETHOD.html" title="Controls which algorithm is used to solve continuous models or to solve the root relaxation of a MIP.">algorithm for continuous problems</a> (<samp class="ph codeph">CPX_PARAM_LPMETHOD</samp>, <samp class="ph codeph">RootAlg</samp>)
+documented in the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../Parameters/topics/QPMETHOD.html" title="Sets which algorithm to use when the C routine CPXqpopt (or the command optimize in the Interactive Optimizer) is invoked.">algorithm for continuous quadratic optimization</a> (<samp class="ph codeph">CPX_PARAM_QPMETHOD</samp>, <samp class="ph codeph">RootAlg</samp>)
+documented in the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="../../../Parameters/topics/STARTALG.html" title="Sets which continuous optimizer will be used to solve the initial relaxation of a MIP.">algorithm for initial MIP relaxation</a> (<samp class="ph codeph">CPX_PARAM_STARTALG</samp>, <samp class="ph codeph">RootAlg</samp>)
+documented in the <em class="ph i">CPLEX Parameters Reference Manual</em>.</p>
+</li>
+</ul>
+ </li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../CPLEX/ReleaseNotes/topics/releasenotes122/releasenotescplex122_3.html" title="Describes changes important to all customers.">Conversion notes for all users</a></div>
+</div>
+</div></body>
+</html>

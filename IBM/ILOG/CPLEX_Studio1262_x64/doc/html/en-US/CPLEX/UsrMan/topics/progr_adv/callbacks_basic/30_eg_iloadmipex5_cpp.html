@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: controlling cuts iloadmipex5.cpp" />
+<meta name="abstract" content="Illustrates callbacks to control cuts in the C++ API." />
+<meta name="Description" content="Illustrates callbacks to control cuts in the C++ API." />
+<meta name="DC.subject" content="tolerance, cut callbacks and, cut callbacks and (example)" />
+<meta name="keywords" content="tolerance, cut callbacks and, cut callbacks and (example)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callbacks.1008943" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" />
+<title>Example: controlling cuts iloadmipex5.cpp</title>
+</head>
+<body role="main" id="User_manual.uss_callbacks.1008943">
+<h1 class="title topictitle1">Example: controlling cuts iloadmipex5.cpp</h1>
+<div class="body"><p class="shortdesc">Illustrates callbacks to control cuts in the C++ API.</p>
+<p class="p">This example shows how to use the cut callback in the
+context of solving the <samp class="ph msgph">noswot </samp>model.
+This is a relatively small model from the MIPLIB 3.0 and MIPLIB 2003
+test-sets, consisting only of 128 variables. This model is very hard
+to solve by itself. In fact, until the release of CPLEX version 6.5,
+it appeared to be unsolvable even after days of computation. </p>
+<p class="p">While it is now solvable directly, the computation time
+is still substantial. However, cuts can be derived, the addition of
+which make the problem solvable in a matter of minutes or seconds.
+These cuts, expressed as pseudo C++, look like this: </p>
+<pre class="pre codeblock"><code>x21 - x22 &lt;= 0
+x22 - x23 &lt;= 0
+x23 - x24 &lt;= 0
+2.08*x11 + 2.98*x21 + 3.47*x31 + 2.24*x41 + 2.08*x51 +
+0.25*w11 + 0.25*w21 + 0.25*w31 + 0.25*w41 + 0.25*w51 &lt;= 20.25
+2.08*x12 + 2.98*x22 + 3.47*x32 + 2.24*x42 + 2.08*x52 +
+0.25*w12 + 0.25*w22 + 0.25*w32 + 0.25*w42 + 0.25*w52 &lt;= 20.25
+2.08*x13 + 2.98*x23 + 3.47*x33 + 2.24*x43 + 2.08*x53 +
+0.25*w13 + 0.25*w23 + 0.25*w33 + 0.25*w43 + 0.25*w53 &lt;= 20.25
+2.08*x14 + 2.98*x24 + 3.47*x34 + 2.24*x44 + 2.08*x54 +
+0.25*w14 + 0.25*w24 + 0.25*w34 + 0.25*w44 + 0.25*w54 &lt;= 20.25
+2.08*x15 + 2.98*x25 + 3.47*x35 + 2.24*x45 + 2.08*x55 +
+0.25*w15 + 0.25*w25 + 0.25*w35 + 0.25*w45 + 0.25*w55 &lt;= 16.25
+</code></pre>
+<p class="p">These cuts derive from an interpretation of the model
+as a resource allocation problem on five machines with scheduling,
+horizon constraints and transaction times. The first three cuts break
+symmetries among the machines, while the others capture minimum bounds
+on transaction costs. For more information about how these cuts were
+found, see the technical research report <em class="ph i">MIP
+Theory and Practice: Closing the Gap</em>.</p>
+<p class="p">Of course the best way to solve the <samp class="ph msgph">noswot</samp> model
+with these cuts is to simply add the cuts to the model before calling
+the optimizer. In case you want to copy and paste those cuts into
+a model in the <strong class="ph b">Interactive Optimizer</strong>,
+for example, here are the same cuts expressed in the conventions of
+the Interactive Optimizer with uppercase variable names, as in the
+MPS data file:  </p>
+<pre class="pre codeblock"><code>X21 - X22 &lt;= 0
+X22 - X23 &lt;= 0
+X23 - X24 &lt;= 0
+2.08 X11 + 2.98 X21 + 3.47 X31 + 2.24 X41 + 2.08 X51 +
+0.25 W11 + 0.25 W21 + 0.25 W31 + 0.25 W41 + 0.25 W51 &lt;= 20.25
+2.08 X12 + 2.98 X22 + 3.47 X32 + 2.24 X42 + 2.08 X52 +
+0.25 W12 + 0.25 W22 + 0.25 W32 + 0.25 W42 + 0.25 W52 &lt;= 20.25
+2.08 X13 + 2.98 X23 + 3.47 X33 + 2.24 X43 + 2.08 X53 +
+0.25 W13 + 0.25 W23 + 0.25 W33 + 0.25 W43 + 0.25 W53 &lt;= 20.25
+2.08 X14 + 2.98 X24 + 3.47 X34 + 2.24 X44 + 2.08 X54 +
+0.25 W14 + 0.25 W24 + 0.25 W34 + 0.25 W44 + 0.25 W54 &lt;= 20.25
+2.08 X15 + 2.98 X25 + 3.47 X35 + 2.24 X45 + 2.08 X55 +
+0.25 W15 + 0.25 W25 + 0.25 W35 + 0.25 W45 + 0.25 W55 &lt;= 16.25
+</code></pre>
+<p class="p">However, for demonstration purposes, this example adds
+the cuts, using a cut callback, only when they are violated at a node.
+This cut callback takes a list of cuts as an argument and adds individual
+cuts whenever they are violated by the current LP solution. Notice
+that adding cuts does not change the extracted model, but affects
+only the internal problem representation of the CPLEX object. </p>
+<p class="p">First consider the C++ implementation of the callback.
+In C++, the callback is implemented with these lines: </p>
+<pre class="pre codeblock"><code>ILOUSERCUTCALLBACK3(CtCallback, IloExprArray, lhs, IloNumArray, rhs, IloNum, eps) {
+   IloInt n = lhs.getSize();
+   for (IloInt i = 0; i &lt; n; i++) {
+      IloNum xrhs = rhs[i];
+      if ( xrhs &lt; IloInfinity  &amp;&amp;  getValue(lhs[i]) &gt; xrhs + eps ) {
+         IloRange cut;
+         try {
+            cut = (lhs[i] &lt;= xrhs);
+            add(cut).end();
+            rhs[i] = IloInfinity;
+         }
+         catch (...) {
+            cut.end();
+            throw;
+         }
+      }
+   }
+}</code></pre>
+<p class="p">This defines the class <samp class="ph codeph">CtCallbackI</samp> as
+a derived class of <samp class="ph codeph">IloCplex::UserCutCallbackI</samp> and
+provides the implementation for its virtual methods <samp class="ph codeph">main</samp> and <samp class="ph codeph">duplicateCallback</samp> .
+It also implements a function <samp class="ph codeph">CtCallback</samp> that
+creates an instance of <samp class="ph codeph">CtCallbackI</samp> and
+returns a handle for it, an instance of<samp class="ph codeph">IloCplex::UserCutCallback</samp>.</p>
+<p class="p">As specified by the <samp class="ph codeph">3 </samp>in the
+macro name, the constructor of <samp class="ph codeph">CtCallbackI</samp> 
+takes three arguments: <samp class="ph codeph">lhs</samp>, <samp class="ph codeph">rhs</samp>,
+and <samp class="ph codeph">eps</samp> (lefthand side, righthand side,
+and tolerance). The constructor stores them as private members to
+have direct access to them in the callback function, implemented as
+the method <samp class="ph codeph">main</samp>. Notice the comma (,) between
+the type and the argument object in the macro invocation. Here is
+how the macro expands with ellipsis (...) representing the actual
+implementation </p>
+<pre class="pre codeblock"><code>class CtCallbackI : public IloCplex::LazyConstraintCallbackI {
+    IloExprArray lhs;
+    IloNumArray rhs;
+    IloNum eps;
+public:
+    IloCplex::CallbackI* duplicateCallback() const {
+        return (new(getEnv()) CtCallbackI(*this));
+    }
+     CtCallbackI(IloEnv env, IloExprArray xx1, IloNumArray xx2, IloNum xx3) :
+         IloCplex::LazyConstraintCallbackI(env), lhs(xx1), rhs(xx2), eps(xx3) {
+    }
+    void main();
+};
+IloCplex::Callback
+CtCallback(IloEnv env, IloExprArray lhs, IloNumArray rhs, IloNum eps) {
+    return (IloCplex::Callback(new(env) CtCallbackI(env, lhs, rhs, eps)));
+}
+void CtCallbackI::main() {
+    ...
+}</code></pre>
+<p class="p"> : </p>
+<p class="p">Similar macros are provided for other numbers of arguments
+ranging from 0 through 7 for all callback classes. </p>
+<p class="p">The first argument <samp class="ph codeph">lhs</samp>  is
+an array of expressions, and the argument <samp class="ph codeph">rhs</samp> 
+is an array of values. These arguments are the lefthand side and righthand
+side values of cuts of the form <samp class="ph codeph">lhs </samp> ≤<samp class="ph codeph"> rhs</samp> 
+to be tested for violation and potentially added. The third argument <samp class="ph codeph">eps</samp> 
+gives a tolerance by which a cut must at least be violated in order
+to be added to the problem being solved.</p>
+<p class="p">The implementation of this example cut-callback looks
+for cuts that are violated by the current LP solution of the node
+where the callback is invoked. It loops over the potential cuts, checking
+each for violation by querying the value of the <samp class="ph codeph">lhs</samp> 
+expression with respect to the current solution. This query calls <samp class="ph codeph">getValue</samp> with
+this expression as an argument. This value is tested for violation
+of more than the tolerance argument <samp class="ph codeph">eps</samp> 
+with the corresponding righthand side value. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">A numeric tolerance is always a wise thing to consider
+when dealing with any nontrivial model, to avoid certain logical inconsistencies
+that could otherwise occur due to numeric round-off. Here the standard
+simplex feasibility tolerance serves this purpose, to make sure there
+is consistency with the way CPLEX is treating the rest of the model. </p>
+</div>
+<p class="p">If a violation is detected, the callback creates an <samp class="ph codeph">IloRange</samp> 
+object to represent the cut:<samp class="ph codeph"> lhs[i] </samp> ≤<samp class="ph codeph"> rhs[i]</samp>.
+It is added to the LP by the method <samp class="ph codeph">add</samp>.
+Adding a cut to CPLEX, unlike extracting a model, only copies the
+cut into the CPLEX data structures, without maintaining a notification
+link between the two. Thus, after a cut has been added, it can be
+deleted by calling its method <samp class="ph codeph">end</samp>. In fact,
+it should be deleted, as otherwise the memory used for the cut could
+not be reclaimed. For convenience, the method <samp class="ph codeph">add</samp> returns
+the cut that has been added, and thus the application can call <samp class="ph codeph">end</samp> directly
+on the returned <samp class="ph codeph">IloRange</samp> object.</p>
+<p class="p">It is important that all resources that have been allocated
+during a callback are freed again before leaving the callback, even
+in the case of an exception. Here exceptions could be thrown when
+the cut itself is created or when the application tries to add it,
+for example, due to memory exhaustion. Thus, these operations are
+enclosed in a <samp class="ph codeph">try</samp> block to catch all exceptions
+that may occur. In the case of an exception, the cut is deleted by
+a call to <samp class="ph codeph">cut.end</samp> and whatever exception
+was caught is then re-thrown. Re-throwing the exception can be omitted
+if you want to continue the optimization without the cut.</p>
+<p class="p">After the cut has been added, the application sets the <samp class="ph codeph">rhs</samp> 
+value at <samp class="ph codeph">IloInfinity</samp>  to avoid checking
+this cut for violation at the next invocation of the callback. Note
+that it did not simply remove the <em class="ph i">i</em> <sup class="ph sup">th</sup> element
+of arrays <samp class="ph codeph">rhs</samp> and <samp class="ph codeph">lhs</samp>,
+because doing so is not supported if the cut callback is invoked from
+a parallel optimizer. However, changing array elements is allowed.</p>
+<p class="p">Also, for the potential use of the callback in parallel,
+the variable <samp class="ph codeph">xrhs</samp>  makes sure that the
+same value is used when checking for violation of the cut as when
+adding the cut. Otherwise, another thread may have set the <samp class="ph codeph">rhs</samp> 
+value to <samp class="ph codeph">IloInfinity</samp> just between the two
+actions, and a useless cut would be added. CPLEX would actually handle
+this correctly, as it handles adding the same cut from different threads.</p>
+<p class="p">The function <samp class="ph codeph">makeCuts</samp> generates
+the arrays <samp class="ph codeph">rhs</samp> and <samp class="ph codeph">lhs</samp> to
+be passed to the cut callback. It first declares the array of variables
+to be used for defining the cuts. Since the environment is not passed
+to the constructor of that array, an array of 0-variable handles is
+created. In the following loop, these variable handles are initialized
+to the correct variables in the <samp class="ph msgph">noswot</samp> 
+model which are passed to this function as the argument <samp class="ph codeph">vars</samp>.
+Variables are identified by querying their names. After all the variables
+have been assigned, they are used to create the <samp class="ph codeph">lhs</samp> expressions
+and <samp class="ph codeph">rhs</samp> values of the cuts.</p>
+<p class="p">The cut callback is created and passed to CPLEX in this
+line:</p>
+<pre class="pre codeblock"><code>cplex.use(CtCallback(env, lhs, rhs, cplex.getParam(IloCplex::EpRHS)));</code></pre>
+<p class="p">The function <samp class="ph codeph">CtCallback</samp> constructs
+an instance of our callback class <samp class="ph codeph">CtCallbackI</samp> and
+returns a handle (an instance of <samp class="ph codeph">IloCplex::Callback</samp>)
+for it. This handle is directly passed to the function <samp class="ph codeph">cplex.use</samp>.</p>
+<p class="p">The <strong class="ph b">Java</strong> implementation
+of the callback is quite similar: </p>
+<pre class="pre codeblock"><code>   public static class Callback extends IloCplex.UserCutCallback {
+      double     eps = 1.0e-6;
+      IloRange[] cut;
+      Callback(IloRange[] cuts) { cut = cuts; }
+
+      public void main() throws IloException {
+         int num = cut.length;
+         for (int i = 0; i &lt; num; ++i) {
+            IloRange thecut = cut[i];
+            if ( thecut != null ) {
+               double val = getValue(thecut.getExpr());
+               if ( thecut.getLB() &gt; val+eps || val-eps &gt; thecut.getUB() ) {
+                  add(thecut);
+                  cut[i] = null;
+               }
+            }
+         }
+      }
+   }</code></pre>
+<p class="p">Instead of receiving expressions and righthand side values,
+the application directly passes an array of <samp class="ph codeph">IloRange</samp> 
+constraints to the callback; the constraints are stored in <samp class="ph codeph">cut</samp> .
+The <samp class="ph codeph">main</samp>  loops over all cuts and evaluates
+the constraint expressions at the current solution by calling <samp class="ph codeph">getValue(cut[i].getExpr)</samp>.
+If this value exceeds the constraint bounds by more than the tolerance
+of <samp class="ph codeph">eps</samp>, the cut is added during the search
+by a call to <samp class="ph codeph">add(cut[i])</samp>, and <samp class="ph codeph">cut[i]</samp> is
+set to <samp class="ph codeph">null</samp> in order to avoid unnecessarily
+evaluating it again.</p>
+<p class="p">As for the C++ implementation, the array of cuts passed
+to the callback is initialized in a separate function <samp class="ph codeph">makeCuts</samp> .
+The callback is then created and used to with the <samp class="ph codeph">noswot</samp> 
+cuts by calling. </p>
+<p class="p"> <samp class="ph codeph">IloCplex</samp> provides an easier
+way to manage such cuts in a case like this, where all cuts can be
+easily enumerated before starting the optimization. Calling the methods <samp class="ph codeph">cplex.addCut</samp> and <samp class="ph codeph">cplex.addCuts</samp> allows
+you to copy the cuts to <samp class="ph codeph">IloCplex</samp> before
+the optimization. Thus, instead of creating and using the callback,
+a user could have written:</p>
+<pre class="pre codeblock"><code>makeCuts(cuts, vars);
+cplex.addUserCuts(cuts);</code></pre>
+<p class="p">as shown in the example <samp class="ph codeph">iloadmipex4.cpp</samp> in
+the distribution. During branch &amp; cut, CPLEX considers
+adding individual cuts to its representation of the model only if
+they are violated by a node LP solution in about the same way this
+example handles them. Whether this approach or adding the cuts directly
+to the model gives better performance during the solution of the model
+depends on the individual problem.</p>
+<p class="p">The complete program <samp class="ph codeph">iloadmipex5.cpp</samp> appears
+online in the standard distribution at <em class="ph i">yourCPLEXinstallation</em><samp class="ph codeph">/examples/src</samp>.
+The <strong class="ph b">Java</strong> version is found in file <samp class="ph codeph">AdMIPex5.java</samp> 
+at the same location. The <strong class="ph b">C#.NET</strong> implementation
+is in <samp class="ph codeph">AdMIPex5.cs</samp>, and the <strong class="ph b">VB.NET</strong> implementation
+is in <samp class="ph codeph">AdMIPex5.vb</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/01_cb_title_synopsis.html" title="Introduces optimization callbacks.">Using optimization callbacks</a></div>
+</div>
+</div></body>
+</html>

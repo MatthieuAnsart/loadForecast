@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The counting expression" />
+<meta name="abstract" content="Inference levels can be used to adjust the propagation of the counting expression." />
+<meta name="Description" content="Inference levels can be used to adjust the propagation of the counting expression." />
+<meta name="DC.subject" content="domain reduction, counting expression, expression, counting" />
+<meta name="keywords" content="domain reduction, counting expression, expression, counting" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerpropagate.1018852" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<title>The counting expression</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerpropagate.1018852">
+<h1 class="title topictitle1">The counting expression</h1>
+<div class="body"><p class="shortdesc">Inference levels can be used to adjust the propagation
+of the counting expression.</p>
+<p class="p">The specialized counting expression counts the number
+of times a value appears in the domain of a set of variables. This
+is useful to count or to constrain the number of times an object or
+a feature is selected or used. </p>
+<p class="p">For instance, assume there are 5 customers, and for each
+customer, a supplier needs to be chosen. For each customer, there
+is a list of compatible suppliers. Supplier 1 must not supply more
+than 2 customers, and the expensive Supplier 2 must not supply more
+than one customer.</p>
+<p class="p">To model the compatibility between suppliers and customers,
+a decision variable is introduced for each customer that will be fixed
+to the value of the supplier that supplies it: </p>
+<pre class="pre codeblock"><code>    IloIntVarArray cust(env);
+    cust.add(IloIntVar(env,  1, 2));
+    cust.add(IloIntVar(env,  1, 2));
+    cust.add(IloIntVar(env,  1, 2));
+    cust.add(IloIntVar(env,  0, 5));
+    cust.add(IloIntVar(env,  1, 3));
+</code></pre>
+<p class="p">The constraints can then be expressed the following way: </p>
+<pre class="pre codeblock"><code>    IloModel model(env);
+    model.add(IloCount(cust, 1) &lt;= 2);
+    model.add(IloCount(cust, 2) &lt;= 1);
+</code></pre>
+<p class="p">To propagate the constraints of the model add: </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    if (cp.propagate())
+      cp.out() &lt;&lt; " Domains of cust are " &lt;&lt; cp.domain(cust) &lt;&lt; std::endl;
+    else
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+</code></pre>
+<p class="p">Running this program produces the output: </p>
+<pre class="pre codeblock"><code> Domains of cust are [[1..2] [1..2] [1..2] [0..5] [1..3]]
+</code></pre>
+<p class="p">Using the default inference level of the constraint does
+not result in any domain reduction. To get the highest level of domain
+reduction on this example, the inference level can be set to the extended
+level by adding:  </p>
+<pre class="pre codeblock"><code>    cp.setParameter(IloCP::CountInferenceLevel, IloCP::Extended);
+</code></pre>
+<p class="p">The output becomes: </p>
+<pre class="pre codeblock"><code> Domains of cust are [[1..2] [1..2] [1..2] [0 3..5] [3]]
+</code></pre>
+<p class="p">Since values 1 and 2 are the only values in the domain
+of <samp class="ph codeph">cust[0]</samp>, <samp class="ph codeph">cust[1]</samp> and <samp class="ph codeph">cust[3]</samp>,
+the counting constraints impose that one of these variables will have
+the value 2 and two of them will have the value 1. Therefore these
+values are removed from the domains of <samp class="ph codeph">cust[3]</samp> and <samp class="ph codeph">cust[4]</samp>.</p>
+<p class="p">Setting the inference level of the counting expression
+to the basic or the low level provides basic but efficient domain
+reduction. Setting the inference level to the medium level provides
+a stronger reduction but on bounds only. Finally, setting the inference
+level to the extended level provides full domain reduction.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" title="CP Optimizer provides tailored constraint propagation algorithms for specialized constraints and expressions.">Propagation of specialized constraints and expressions</a></div>
+</div>
+</div></body>
+</html>

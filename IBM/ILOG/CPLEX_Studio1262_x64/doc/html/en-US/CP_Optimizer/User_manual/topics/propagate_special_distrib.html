@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The distribution constraint" />
+<meta name="abstract" content="Inference levels can be used to adjust the propagation of the distribution constraint." />
+<meta name="Description" content="Inference levels can be used to adjust the propagation of the distribution constraint." />
+<meta name="DC.subject" content="constraint, aggregation, distribution" />
+<meta name="keywords" content="constraint, aggregation, distribution" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerpropagate.1018915" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" />
+<title>The distribution constraint</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerpropagate.1018915">
+<h1 class="title topictitle1">The distribution constraint</h1>
+<div class="body"><p class="shortdesc">Inference levels can be used to adjust the propagation
+of the distribution constraint.</p>
+<p class="p">The specialized distribution constraint is an aggregation
+of counting expressions. </p>
+<p class="p">This constraint operates on an array of decision variables <samp class="ph codeph">varArray</samp>,
+an array of values <samp class="ph codeph">valueArray</samp> and an array
+of cardinality variables <samp class="ph codeph">cardArray</samp>.</p>
+<p class="p">In the <strong class="ph b">C++ API</strong>,
+the constraint is written: </p>
+<pre class="pre codeblock"><code>  IloDistribute(env, cardArray, valueArray, varArray);
+</code></pre>
+<p class="p">It constrains the number of occurrences of a value <samp class="ph codeph">valueArray[i]</samp> in
+the array <samp class="ph codeph">varArray</samp> to be equal to<samp class="ph codeph"> cardArray[i]</samp>. </p>
+<p class="p">For instance, reconsidering the example for the counting
+expression, the model: </p>
+<pre class="pre codeblock"><code>    IloModel model(env);
+    model.add(IloCount(cust, 1) &gt;= 3);
+    model.add(IloCount(cust, 2) &gt;= 1);
+</code></pre>
+<p class="p">is equivalent to the model:    </p>
+<pre class="pre codeblock"><code>  IloIntVarArray cardArray(env);
+  cardArray.add(IloIntVar(env, 3, IloIntMax));
+  cardArray.add(IloIntVar(env, 1, IloIntMax));
+  IloIntArray valueArray(env, 2, 1, 2);
+  IloModel model(env);
+  model.add(IloDistribute(env, cardArray, valueArray, cust));
+</code></pre>
+<p class="p">Then, setting the inference level to the default level
+gives the same domain reduction as counting expressions:     </p>
+<pre class="pre codeblock"><code> Domains of cust are [[1..2] [1..2] [1..2] [0..5] [1..3]]
+</code></pre>
+<p class="p">Constraints using the counting expression are aggregated
+to distribution constraints and thus provide a more global view than
+otherwise.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate_special.html" title="CP Optimizer provides tailored constraint propagation algorithms for specialized constraints and expressions.">Propagation of specialized constraints and expressions</a></div>
+</div>
+</div></body>
+</html>

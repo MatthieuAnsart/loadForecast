@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Exploiting sparsity" />
+<meta name="abstract" content="Discusses how to exploit the sparsity of large-scale problems, beyond the classical transportation problem exposed in the transp1.mod sample." />
+<meta name="Description" content="Discusses how to exploit the sparsity of large-scale problems, beyond the classical transportation problem exposed in the transp1.mod sample." />
+<meta name="DC.subject" content="linear programming, and sparsity, models, transportation, transportation problem, sparsity, flow problem, multicommodity, multicommodity flow, code samples, transp3.mod, preprocessing" />
+<meta name="keywords" content="linear programming, and sparsity, models, transportation, transportation problem, sparsity, flow problem, multicommodity, multicommodity flow, code samples, transp3.mod, preprocessing" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_LP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1024090" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_LP.html" />
+<title>Exploiting sparsity</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1024090">
+<h1 class="title topictitle1">Exploiting sparsity</h1>
+<div class="body"><p class="shortdesc">Discusses how to exploit the sparsity of large-scale
+problems, beyond the classical transportation problem exposed in the <span class="ph filepath">transp1.mod</span> sample.</p>
+<p class="p">The example below, <samp class="ph codeph">transp3.mod</samp>, depicts
+the model of the transportation problem, known as a multicommodity
+flow problem on a bipartite graph. The instance data is available
+in this file:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\opl\examples\opl\transp\transp3.dat</span> </p>
+<p class="p">which is too long to be shown here.</p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1024090__usropllangtut.uss_langtut_linearInteger.1064993"><h2 class="title sectiontitle">A sparse multi-product transportation model (<samp class="ph codeph">transp3.mod</samp>)</h2><pre class="pre codeblock"><code>{string} Cities =...;
+{string} Products = ...;
+float Capacity = ...;
+tuple connection { string o; string d; }
+tuple route { 
+  string p; 
+  connection e; 
+}
+{route} Routes = ...;
+{connection} Connections = { c | &lt;p,c&gt; in Routes };
+tuple supply { 
+  string p; 
+  string o; 
+}
+{supply} Supplies = { &lt;p,c.o&gt; | &lt;p,c&gt; in Routes };
+float Supply[Supplies] = ...;
+tuple customer { 
+  string p; 
+  string d; 
+}
+{customer} Customers = { &lt;p,c.d&gt; | &lt;p,c&gt; in Routes };
+float Demand[Customers] = ...;
+float Cost[Routes] = ...;
+{string} Orig[p in Products] = { c.o | &lt;p,c&gt; in Routes };
+{string} Dest[p in Products] = { c.d | &lt;p,c&gt; in Routes };
+
+{connection} CPs[p in Products] = { c | &lt;p,c&gt; in Routes };
+assert forall(p in Products) 
+   sum(o in Orig[p]) Supply[&lt;p,o&gt;] == sum(d in Dest[p]) Demand[&lt;p,d&gt;];
+
+dvar float+ Trans[Routes];   
+
+constraint ctSupply[Products][Cities];
+constraint ctDemand[Products][Cities];
+
+minimize
+  sum(l in Routes) 
+    Cost[l] * Trans[l];
+subject to {
+  forall( p in Products , o in Orig[p] ) 
+    ctSupply[p][o]: 
+      sum( &lt;o,d&gt; in CPs[p] ) 
+        Trans[&lt; p,&lt;o,d&gt; &gt;] == Supply[&lt;p,o&gt;];
+  forall( p in Products , d in Dest[p] ) 
+    ctDemand[p][d]:  
+      sum( &lt;o,d&gt; in CPs[p] ) 
+        Trans[&lt; p,&lt;o,d&gt; &gt;] == Demand[&lt;p,d&gt;];
+  forall(c in Connections)
+    ctCapacity:             
+      sum( &lt;p,c&gt; in Routes ) 
+        Trans[&lt;p,c&gt;] &lt;= Capacity;
+} </code></pre>
+</div>
+<p class="p">This is a classic transportation problem with the addition
+of a capacity constraint on the inter-cities connections. The model
+is, of course, not appropriate for large-scale transportation problems,
+where only a fraction of the cities are connected and a fraction of
+the products are sent along the connections. This section discusses
+how to exploit the sparsity of large-scale problems. OPL offers more
+support than other modeling languages in this respect, because it
+can use tuples and arrays indexed by arbitrary finite sets. The methodology
+for exploiting sparsity in OPL consists of mirroring, in the model,
+the structure of the application. This structure can be inferred from
+the objective function and the constraints of the application. For
+instance, the capacity constraint for the transportation application
+can be phrased as</p>
+<p class="p">“The products sent along any given connection may not
+exceed the given capacity.”</p>
+<p class="p">This constraint helps identify two main concepts in the
+application. The first is the connection between two cities, which
+can be represented explicitly by a data type </p>
+<pre class="pre codeblock"><code>tuple connection { string o; string d; }</code></pre>
+<p class="p">to manipulate connections as first-class objects. The
+second fundamental concept is the transportation of a product along
+a connection, called a <em class="ph i">route</em> in this section. Once
+again, this concept can be represented explicitly by a data type </p>
+<pre class="pre codeblock"><code>tuple route { 
+  string p; 
+  connection e; 
+}</code></pre>
+<p class="p">to manipulate routes directly. The supply and demand constraints
+exhibit two other fundamental concepts: product suppliers (i.e., the
+association of a product and a city supplying it) and product consumers
+(i.e., the association of a product and a city consuming it). The
+data types </p>
+<pre class="pre codeblock"><code>tuple Supply { string p; string o; }; 
+tuple Customer { string p; string d; }; </code></pre>
+<p class="p">may be used to represent them. </p>
+<p class="p">Once the concepts are identified, an appropriate data
+representation can be chosen so that the model can generate constraints
+efficiently. Of course, the user data is not necessarily expressed
+in this representation, but it is usually easy in OPL to transform
+the user data into an appropriate representation.</p>
+<p class="p">A good representation for this application consists of
+a set of connections, a set of routes, the cost of the routes, and
+the demand and supply information. For example:</p>
+<pre class="pre codeblock"><code>{route} Routes = ...;
+{connection} Connections = { c | &lt;p,c&gt; in Routes };
+tuple supply { 
+  string p; 
+  string o; 
+}
+{supply} Supplies = { &lt;p,c.o&gt; | &lt;p,c&gt; in Routes };
+float Supply[Supplies] = ...;
+tuple customer { 
+  string p; 
+  string d; 
+}
+{customer} Customers = { &lt;p,c.d&gt; | &lt;p,c&gt; in Routes };
+float Demand[Customers] = ...;
+float Cost[Routes] = ...;</code></pre>
+<p class="p">Note that the connections, suppliers, and customers are
+derived automatically from the routes. It is also useful to derive
+the following data to simplify the constraint statement: </p>
+<pre class="pre codeblock"><code>{string} Orig[p in Products] = { c.o | &lt;p,c&gt; in Routes };
+{string} Dest[p in Products] = { c.d | &lt;p,c&gt; in Routes };
+
+{connection} CPs[p in Products] = { c | &lt;p,c&gt; in Routes };</code></pre>
+<p class="p">The objective function and the constraints can now be
+stated naturally. The objective function </p>
+<p class="p">“minimize the transportation costs along all routes”</p>
+<p class="p">is expressed elegantly as </p>
+<pre class="pre codeblock"><code>minimize
+  sum(l in Routes) 
+    Cost[l] * Trans[l];</code></pre>
+<p class="p">The supply constraint, which can be phrased as </p>
+<p class="p">“for every product and every city shipping the product,
+the summation of all transportations from that city to a city where
+the product is in demand is equal to the supply of the product at
+the supplying city”</p>
+<p class="p">is formalized by </p>
+<pre class="pre codeblock"><code>  forall( p in Products , o in Orig[p] ) 
+    ctSupply[p][o]: 
+      sum( &lt;o,d&gt; in CP[p] ) 
+        Trans[&lt; p,&lt;o,d&gt; &gt;] == Supply[&lt;p,o&gt;];</code></pre>
+<p class="p">The demand constraints are stated in a similar way. The
+capacity constraints are stated elegantly as </p>
+<pre class="pre codeblock"><code>  forall(c in Connections)
+    ctCapacity:             
+      sum( &lt;p,c&gt; in Routes ) 
+        Trans[&lt;p,c&gt;] &lt;= Capacity;</code></pre>
+<p class="p">This statement is efficient, since OPL retrieves the product
+from the routes in an efficient way when the connection is known.
+The complete model is shown in <a class="xref" href="opl_languser_app_areas_LP_sparsity.html#usropllangtut.uss_langtut_linearInteger.1024090__usropllangtut.uss_langtut_linearInteger.1064993">A sparse multi-product transportation model (transp3.mod)</a>. </p>
+<p class="p">Assume now that part of the user data is given by a relational
+table that contains tuples of the form <samp class="ph codeph">&lt;o,d,p,c&gt;</samp> indicating
+that a connection between cities <samp class="ph codeph">o</samp> and <samp class="ph codeph">d</samp> transports product <samp class="ph codeph">p</samp> at
+cost <samp class="ph codeph">c</samp>. This data can be transformed into
+the representation used in <a class="xref" href="opl_languser_app_areas_LP_sparsity.html#usropllangtut.uss_langtut_linearInteger.1024090__usropllangtut.uss_langtut_linearInteger.1064993">A sparse multi-product transportation model (transp3.mod)</a>. The routes can be obtained as </p>
+<pre class="pre codeblock"><code>{Route} Routes = { &lt; &lt;o,d&gt;,p&gt; | &lt;p,o,d,c&gt; in TableRoutes }; </code></pre>
+<p class="p">and the costs as </p>
+<pre class="pre codeblock"><code>float Cost[Routes] = [ &lt;t.p,&lt;t.o,t.d&gt;&gt;:t.cost | t in TableRoutes ];</code></pre>
+<p class="p">Both preprocessing instructions are linear in the size
+of the table. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_LP.html" title="Defines linear programming and describes a simple production planning problem, a multiperiod production planning problem, a blending problem, and sensitivity analysis.">Linear programming</a></div>
+</div>
+</div></body>
+</html>

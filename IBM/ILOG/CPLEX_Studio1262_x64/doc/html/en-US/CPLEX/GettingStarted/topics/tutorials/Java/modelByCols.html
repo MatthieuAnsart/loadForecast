@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modeling by columns" />
+<meta name="abstract" content="Java methods support modeling by columns in this example of a Java application of CPLEX." />
+<meta name="Description" content="Java methods support modeling by columns in this example of a Java application of CPLEX." />
+<meta name="DC.subject" content="modeling, by columns (Java API), IloColumn.and method (Java API), IloModel class (Java API), column method, and method (Java API), numVar method" />
+<meta name="keywords" content="modeling, by columns (Java API), IloColumn.and method (Java API), IloModel class (Java API), column method, and method (Java API), numVar method" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/Java/eg_LPex1_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_javaStart.1011685" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Java/eg_LPex1_synopsis.html" />
+<title>Modeling by columns</title>
+</head>
+<body role="main" id="Getting_started.uss_javaStart.1011685">
+<h1 class="title topictitle1">Modeling by columns</h1>
+<div class="body"><p class="shortdesc">Java methods support modeling by columns in this example
+of a Java application of CPLEX.</p>
+<p class="p">While for many examples population by rows may seem most
+straightforward and natural, there are some models where population
+by columns is a more natural or more efficient approach to implement.
+For example, problems with network structure typically lend themselves
+well to modeling by column. Readers familiar with matrix algebra may
+view the method <samp class="ph codeph">populateByColumn</samp> as producing
+the transpose of what is produced by the method <samp class="ph codeph">populateByRow</samp> .
+In contrast to modeling by rows, modeling by columns means that the
+coefficients of the constraint matrix are given in a column-wise way.
+As each column represents the constraint coefficients for a given
+variable in the linear program, this modeling approach is most natural
+where it is easy to access the matrix coefficients by iterating through
+all the variables, such as in network flow problems.</p>
+<p class="p">Range objects are created for modeling by column with
+only their lower and upper bound. No expressions are given; building
+them at this point would be impossible since the variables have not
+been created yet. Similarly, the objective function is created only
+with its intended optimization sense, and without any expression. </p>
+<p class="p">Next the variables are created and installed in the existing
+ranges and objective. These newly created variables are introduced
+into the ranges and the objective by means of column objects, which
+are implemented in the class  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html" title="(Opens in a new tab or window)">IloColumn</a>. Objects of
+this class are created with the methods IloCplex. <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplex.html#column(ilog.concert.IloLPMatrix%20lp)" title="(Opens in a new tab or window)">column</a>, and can be linked together with the method IloColumn. <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html#and(ilog.concert.IloColumn%20column)" title="(Opens in a new tab or window)">and</a> to form aggregate  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html" title="(Opens in a new tab or window)">IloColumn</a> objects.</p>
+<p class="p">An instance of   <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html" title="(Opens in a new tab or window)">IloColumn</a> created with
+the method IloCplex. <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/cplex/IloCplex.html#column(ilog.concert.IloLPMatrix%20lp)" title="(Opens in a new tab or window)">column</a> contains information about how to use this column
+to introduce a new variable into an existing modeling object. For
+example, if <samp class="ph codeph">obj</samp> is an instance of a class
+that implements the interface  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloObjective.html" title="(Opens in a new tab or window)">IloObjective</a>, then <samp class="ph codeph">cplex.column(obj,
+2.0)</samp> creates an instance of  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html" title="(Opens in a new tab or window)">IloColumn</a> containing the
+information to install a new variable in the expression of the  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloObjective.html" title="(Opens in a new tab or window)">IloObjective</a> object <samp class="ph codeph">obj</samp> with
+a linear coefficient of <samp class="ph codeph">2.0</samp>. Similarly,
+for <samp class="ph codeph">rng</samp>, a constraint that is an instance
+of a class that implements the interface  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloRange.html" title="(Opens in a new tab or window)">IloRange</a>, the invocation of the method <samp class="ph codeph">cplex.column(rng, -1.0)</samp> creates
+an  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html" title="(Opens in a new tab or window)">IloColumn</a> object containing
+the information to install a new variable into the expression of <samp class="ph codeph">rng</samp> ,
+as a linear term with coefficient <samp class="ph codeph">-1.0</samp>.</p>
+<p class="p">When you use the approach of modeling by column, new
+columns are created and installed as variables in all existing modeling
+objects where they are needed. To do this with Concert Technology,
+you create an  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html" title="(Opens in a new tab or window)">IloColumn</a> object for every
+modeling object in which you want to install a new variable, and link
+them together with the method <samp class="ph codeph">IloColumn</samp>. <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html#and(ilog.concert.IloColumn%20column)" title="(Opens in a new tab or window)">and</a> . For example, the first variable in <samp class="ph codeph">populateByColumn</samp> is
+created like this:</p>
+<p class="p">The three methods <samp class="ph codeph">model.column</samp> create  <a class="xref hardcodedApiLink" href="../../../../../refjavacplex/html/ilog/concert/IloColumn.html" title="(Opens in a new tab or window)">IloColumn</a> objects for
+installing a new variable in the objective <samp class="ph codeph">obj</samp> and
+in the constraints <samp class="ph codeph">r0</samp> and <samp class="ph codeph">r1</samp>,
+with linear coefficients <samp class="ph codeph">1.0</samp> , <samp class="ph codeph">-1.0</samp>,
+and <samp class="ph codeph">1.0</samp>, respectively. They are all linked
+to an aggregate column object by the method <samp class="ph codeph">and</samp>.
+This aggregate column object is passed as the first argument to the
+method <samp class="ph codeph">numVar</samp>, along with the bounds <samp class="ph codeph">0.0</samp> and <samp class="ph codeph">40.0</samp> as
+the other two arguments. The method <samp class="ph codeph">numVar</samp> now
+creates a new variable and immediately installs it in the modeling
+objects <samp class="ph codeph">obj</samp>, <samp class="ph codeph">r0</samp>,
+and <samp class="ph codeph">r1</samp> as defined by the aggregate column
+object. After it has been installed, the new variable is returned
+and stored in <samp class="ph codeph">var[0][0]</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/Java/eg_LPex1_synopsis.html" title="An example shows how to solve a model in a Java application of CPLEX.">Building and solving a small LP model in Java</a></div>
+</div>
+</div></body>
+</html>

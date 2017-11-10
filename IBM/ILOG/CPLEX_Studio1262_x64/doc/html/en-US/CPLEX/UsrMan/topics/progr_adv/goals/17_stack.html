@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The goal stack" />
+<meta name="abstract" content="Describes the goal stack." />
+<meta name="Description" content="Describes the goal stack." />
+<meta name="DC.subject" content="goal stack, OrGoal, empty goal" />
+<meta name="keywords" content="goal stack, OrGoal, empty goal" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_goals.1018404" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<title>The goal stack</title>
+</head>
+<body role="main" id="User_manual.uss_goals.1018404">
+<h1 class="title topictitle1">The goal stack</h1>
+<div class="body"><p class="shortdesc">Describes the goal stack.</p>
+<p class="p">To understand how goals are executed, consider the concept
+of the <em class="ph i">goal stack</em>.
+Every node has its own goal stack. When  <samp class="ph codeph">cplex.solve(goal)</samp> 
+is called, the goal stack of the root node is simply initialized with <samp class="ph codeph">goal</samp> 
+and then the regular <samp class="ph codeph">cplex.solve</samp>  method
+is called.</p>
+<p class="p">When CPLEX processes a node, it pops the first goal from
+the node's goal stack and calls method <samp class="ph codeph">execute</samp>.
+If a nonempty goal is returned, it is simply pushed back on the stack.
+CPLEX keeps doing this until the node becomes inactive or the node's
+goal stack becomes empty. When the node stack is empty, CPLEX continues
+with its built-in search strategy for the subtree rooted at this node.</p>
+<p class="p">In light of the goal stack, here are the different types
+of goals:</p>
+<ul class="ul"><li class="li"><p class="p">As explained in <a class="xref" href="08_or_goal.html" title="Describes the Or goal to create subnodes of the current node.">Or goal</a>,
+the Or goal creates child nodes. CPLEX first initializes the goal
+stack of every child node with a copy of the remaining goal stack
+of the current node. Then it pushes the goal passed as the argument
+to the Or goal on the goal stack of the corresponding node. Finally,
+the current node is deactivated, and CPLEX continues search by picking
+a new active node from the tree to process.</p>
+</li>
+<li class="li"><p class="p">The And goal simply pushes the goals
+passed as arguments onto the goal stack in reverse order. Thus, when
+the goals are popped from the stack for execution, they will be executed
+in the same order as they were passed as arguments to the And goal.</p>
+</li>
+<li class="li"><p class="p">When a Fail goal executes, the current
+node is simply deactivated, and CPLEX continues on another active
+node from the tree. In other words, CPLEX discontinues its search
+below the current node.</p>
+</li>
+<li class="li"><p class="p">When a local cut goal is executed, its
+constraints are added to the node problem as local cuts and the relaxation
+is re-solved.</p>
+</li>
+<li class="li"><p class="p">An empty goal cannot be executed. Thus,
+empty goals are not pushed onto the goal stack. If the goal stack
+is empty, CPLEX continues with the built-in branching strategy.</p>
+</li>
+</ul>
+<p class="p">With this understanding, consider further what really
+goes on when a goal returns: </p>
+<pre class="pre codeblock"><code>return AndGoal(OrGoal(var &lt;= IloFloor(val), var &gt;= IloFloor(val)+1), this);</code></pre>
+<p class="p">The <samp class="ph codeph">And</samp>  goal is pushed onto
+the current node's goal stack, only to be immediately popped back
+off of it. When it is executed, it will push <samp class="ph codeph">this</samp> on
+the goal stack and then push the Or goal. Thus, the Or goal is the
+next goal that CPLEX pops and executes. The Or goal creates two subnodes,
+and initializes their goal stacks with copies of the goal stack of
+the current node. At this point both subnodes will have <samp class="ph codeph">this</samp> on
+top of their goal stacks. Next, the Or goal will push a local cut
+goal for </p>
+<p class="p"><img class="image" src="../../../images/goals7.gif" alt="goals7.gif" /> </p>
+<p class="p">(where</p>
+<p class="p"><img class="image" src="../../../images/goals8.gif" alt="goals8.gif" /> </p>
+<p class="p">denotes the floor of <samp class="ph codeph">val)</samp> on
+the goal stack of the first subnode. Similarly, it pushes a local
+cut goal for</p>
+<p class="p"><samp class="ph codeph">var</samp>  ≥<img class="image" src="../../../images/goals9.gif" alt="goals9.gif" /> </p>
+<p class="p">on the goal stack of the second subnode. Finally, the
+current node is deactivated and CPLEX continues its search with a
+new active node from the tree.</p>
+<p class="p">When CPLEX processes one of the subnodes that have been
+created by the Or goal, it will pop and execute the first goal from
+the node's goal stack. As you just saw, this will be a local cut goal.
+Thus CPLEX adds the constraint to the node problem and re-solves the
+relaxation. Next, <samp class="ph codeph">this</samp> will be popped from
+the goal stack and executed. That fact means that the same search
+strategy as implemented in the original goal is applied at that node.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" title="Documents goals and their role in a branch &amp; cut search.">Using goals</a></div>
+</div>
+</div></body>
+</html>

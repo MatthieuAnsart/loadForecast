@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Representing the data" />
+<meta name="abstract" content="Raises questions pertinent to a sound representation of the data of the problem." />
+<meta name="Description" content="Raises questions pertinent to a sound representation of the data of the problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_logical_constr/01_food_mfg_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1208105458679" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_logical_constr/01_food_mfg_title_synopsis.html" />
+<title>Representing the data</title>
+</head>
+<body role="main" id="descriptiveTopic1208105458679">
+<h1 class="title topictitle1">Representing the data</h1>
+<div class="body"><p class="shortdesc">Raises questions pertinent to a sound representation
+of the data of the problem.</p>
+<p class="p">To represent the problem accurately, there are several
+questions to consider:</p>
+<ul class="ul"><li class="li"><p class="p">What is known about the problem?</p>
+</li>
+<li class="li"><p class="p">What are the unknowns of the problem?</p>
+</li>
+<li class="li"><p class="p">What are the constraints of the problem?</p>
+</li>
+<li class="li"><p class="p">What is the objective of the problem?</p>
+</li>
+</ul>
+<div class="section" id="descriptiveTopic1208105458679__bwi9mTEp"><h2 class="title sectiontitle">What is known?</h2><p class="p">In this particular example, the planning period is six
+months, and there are five kinds of oil to be blended. Those details
+are represented as constants, like this:  </p>
+<pre class="pre codeblock"><code>const IloInt nbMonths   = 6;
+const IloInt nbProducts = 5;</code></pre>
+<p class="p">The five kinds of oil (vegetable and non vegetable) are
+represented by an enumeration, like this:  </p>
+<pre class="pre codeblock"><code>typedef enum { v1, v2, o1, o2, o3 } Product;</code></pre>
+<p class="p">The varying price of the five kinds of oil over the six-month
+planning period is represented in a numeric matrix, like this:  </p>
+<pre class="pre codeblock"><code>NumMatrix cost(env, nbMonths);
+cost[0]=IloNumArray(env, nbProducts, 110.0, 120.0, 130.0, 110.0, 115.0);
+cost[1]=IloNumArray(env, nbProducts, 130.0, 130.0, 110.0,  90.0, 115.0);
+cost[2]=IloNumArray(env, nbProducts, 110.0, 140.0, 130.0, 100.0,  95.0);
+cost[3]=IloNumArray(env, nbProducts, 120.0, 110.0, 120.0, 120.0, 125.0);
+cost[4]=IloNumArray(env, nbProducts, 100.0, 120.0, 150.0, 110.0, 105.0);
+cost[5]=IloNumArray(env, nbProducts,  90.0, 100.0, 140.0,  80.0, 135.0);</code></pre>
+<p class="p">That matrix could equally well be filled by data read
+from a file in a large-scale application.</p>
+</div>
+<div class="section" id="descriptiveTopic1208105458679__bOMFQeub"><h2 class="title sectiontitle">What is unknown?</h2><p class="p">The variables of the problem can be represented in arrays:</p>
+<ul class="ul"><li class="li"><p class="p">How much blended, refined oil to produce
+per month?</p>
+</li>
+<li class="li"><p class="p">How much raw oil to use per month?</p>
+</li>
+<li class="li"><p class="p">How much raw oil to buy per month?</p>
+</li>
+<li class="li"><p class="p">How much raw oil to store per month?</p>
+</li>
+</ul>
+<p class="p">like this:  </p>
+<pre class="pre codeblock"><code>      IloNumVarArray produce(env, nbMonths, 0, IloInfinity);
+      NumVarMatrix   use(env, nbMonths);
+      NumVarMatrix   buy(env, nbMonths);
+      NumVarMatrix   store(env, nbMonths);
+      IloInt i, p;
+      for (i = 0; i &lt; nbMonths; i++) {
+         use[i]   = IloNumVarArray(env, nbProducts, 0, IloInfinity);
+         buy[i]   = IloNumVarArray(env, nbProducts, 0, IloInfinity);
+         store[i] = IloNumVarArray(env, nbProducts, 0, 1000);
+      }</code></pre>
+<p class="p">In those lines, the type <samp class="ph codeph">NumVarMatrix</samp>  is defined as:</p>
+<p class="p"> <samp class="ph codeph">typedef IloArray&lt;IloNumVarArray&gt; NumVarMatrix</samp> ;</p>
+<p class="p">Notice that how much to use and buy is initially unknown,
+and thus has an infinite upper bound, whereas the amount of oil that
+can be stored is limited, as you know from the description of the
+problem. Consequently, one of the constraints is expressed here as
+the upper bound of 1000 on the amount of oil by type that can be stored
+per month.</p>
+</div>
+<div class="section" id="descriptiveTopic1208105458679__D5CXggXE"><h2 class="title sectiontitle">What are the constraints?</h2><p class="p">As you know from <a class="xref" href="03_describe_prob.html" title="Describes the problem verbally.">Describing the problem</a>, there are various  constraints in this problem. </p>
+<p class="p">For each type of oil, there must be 500 tons in storage
+at the end of the plan. That idea can be expressed like this:  </p>
+<pre class="pre codeblock"><code>      for (p = 0; p &lt; nbProducts; p++) {
+        store[nbMonths-1][p].setBounds(500, 500);
+      }</code></pre>
+<p class="p">The constraints on production in each month can all be
+expressed as statements in a for-loop:</p>
+<ul class="ul"><li class="li"><p class="p">Not more than 200 tons of vegetable
+oil can be refined.  </p>
+
+<pre class="pre codeblock"><code>model.add(use[i][v1] + use[i][v2] &lt;= 200);</code></pre>
+</li>
+<li class="li"><p class="p">Not more than 250 tons of non-vegetable
+oil can be refined.  </p>
+
+<pre class="pre codeblock"><code>model.add(use[i][o1] + use[i][o2] + use[i][o3] &lt;= 250);</code></pre>
+</li>
+<li class="li"><p class="p">A blend cannot use more than three oils;
+or equivalently, of the five oils, two cannot be used in a given blend.
+ </p>
+
+<pre class="pre codeblock"><code>model.add((use[i][v1] == 0) + 
+          (use[i][v2] == 0) + 
+          (use[i][o1] == 0) +
+          (use[i][o2] == 0) + 
+          (use[i][o3] == 0) &gt;= 2);</code></pre>
+</li>
+<li class="li"><p class="p">Blends composed of vegetable oil 1 (v1)
+or vegetable oil 2 (v2) must also include non vegetable oil 3 (o3).
+ </p>
+
+<pre class="pre codeblock"><code>model.add(IloIfThen(env, (use[i][v1] &gt;= 20) || (use[i][v2] &gt;= 20),
+                          use[i][o3] &gt;= 20));</code></pre>
+</li>
+<li class="li"><p class="p">The constraint that if an oil is used
+at all in a blend, at least 20 tons of it must be used is expressed
+like this:  </p>
+
+<pre class="pre codeblock"><code>for (p = 0; p &lt; nbProducts; p++)
+            model.add((use[i][p] == 0) || (use[i][p] &gt;= 20));</code></pre>
+
+<div class="note note"><span class="notetitle">Note:</span> <p class="p">Alternatively, you could use semi-continuous variables. </p>
+</div>
+</li>
+<li class="li"><p class="p">The fact that a limited amount of raw
+oil can be stored for later use is expressed like this:  </p>
+
+<pre class="pre codeblock"><code>         if (i == 0) {
+            for (IloInt p = 0; p &lt; nbProducts; p++)
+               model.add(500 + buy[i][p] == use[i][p] + store[i][p]);
+         }
+         else {
+            for (IloInt p = 0; p &lt; nbProducts; p++)
+              model.add(store[i-1][p] + buy[i][p] == 
+                            use[i][p] + store[i][p]);
+         }</code></pre>
+</li>
+</ul>
+</div>
+<div class="section" id="descriptiveTopic1208105458679__zJcXsapO"><h2 class="title sectiontitle">What is the objective?</h2><p class="p">On a monthly basis, the profit can be represented as
+the sale price per ton (150) multiplied by the amount produced minus
+the cost of production and storage, like this, where <samp class="ph codeph">profit</samp>  is defined as<samp class="ph codeph"> IloExpr profit(env);</samp>:  </p>
+<pre class="pre codeblock"><code>profit += 150 * produce[i] - IloScalProd(cost[i], 
+                                         buy[i]) - 5 * IloSum(store[i]);</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_logical_constr/01_food_mfg_title_synopsis.html" title="Demonstrates logical constraints in a sample application.">Using logical constraints: Food Manufacture 2</a></div>
+</div>
+</div></body>
+</html>

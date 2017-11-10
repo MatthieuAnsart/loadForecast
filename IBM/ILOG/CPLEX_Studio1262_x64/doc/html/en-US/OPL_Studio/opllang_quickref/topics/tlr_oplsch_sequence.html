@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="sequence" />
+<meta name="abstract" content="OPL keyword (CP, scheduling) to define a sequence of interval variables." />
+<meta name="Description" content="OPL keyword (CP, scheduling) to define a sequence of interval variables." />
+<meta name="DC.subject" content="sequence variable, OPL keyword (CP, scheduling)" />
+<meta name="keywords" content="sequence variable, OPL keyword (CP, scheduling)" />
+<meta name="DC.Relation" scheme="URI" content="tlr_opl_all.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_interval.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_before.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_first.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_last.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_noOverlap.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_prev.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_sameSequence.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_sameCommonSubsequence.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="iSZF9fD6" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<title>sequence</title>
+</head>
+<body role="main" id="iSZF9fD6">
+<h1 class="title topictitle1">sequence</h1>
+<div class="body refbody"><p class="shortdesc">OPL keyword (CP, scheduling) to define a sequence of interval
+variables.</p>
+<div class="section"><h2 class="title sectiontitle">Purpose</h2><p class="p">OPL keyword (CP, scheduling) to
+define a sequence of interval variables.</p>
+</div>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>dvar sequence p in A [types T];
+
+Where:
+
+dvar interval A[];
+int T[];</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">A sequence variable represents
+a total order over a set of interval variables. If a sequence <em class="ph i">seq</em> is
+defined over a set of interval variables <em class="ph i">{ a1, a2, a3, a4 }</em>,
+a value for this sequence at a solution can be: <em class="ph i">(a1, a4, a2, a3)</em>.
+A non-negative integer (the type) can be associated with each interval
+variable in the sequence.  This integer is used by some constraints
+on the sequence (see <a class="xref" href="tlr_oplsch_noOverlap.html" title="OPL constraint (scheduling) used to prevent intervals in a sequence from overlapping and (optionally) to enforce a minimal distance between consecutive intervals.">noOverlap</a>).
+Basically, from the perspective of the constraints on the sequence
+variable, intervals with the same type share some common features.
+Note that absent interval variables are not considered in the ordering.</p>
+<p class="p">Constraints
+available to restrict the ordering of the intervals in a possible
+sequence include <a class="xref" href="tlr_oplsch_before.html" title="OPL function (scheduling) to sequence interval variables">before</a>, <a class="xref" href="tlr_oplsch_first.html" title="OPL function (scheduling) to sequence interval variables">first (scheduling)</a>, <a class="xref" href="tlr_oplsch_last.html" title="OPL function (scheduling) to sequence interval variables">last (scheduling)</a>, and <a class="xref" href="tlr_oplsch_prev.html" title="OPL function (scheduling) to sequence interval variables">prev (scheduling)</a>.</p>
+<p class="p">Note that the sequence
+variable alone does not completely define the temporal relations that
+may exist between two intervals in a sequence. For example, <a class="xref" href="tlr_oplsch_noOverlap.html" title="OPL constraint (scheduling) used to prevent intervals in a sequence from overlapping and (optionally) to enforce a minimal distance between consecutive intervals.">noOverlap</a> can be used
+to state that within a sequence, one interval must end before the
+next may begin.</p>
+<p class="p"><em class="ph i">sequence</em> is a CP keyword and is still
+accepted as a CPLEX identifier.</p>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">A set of <em class="ph i">2*n</em> activities to
+be sequenced on a unary resource such that <em class="ph i">A[2*i-1]</em> is constrained
+to be executed immediately prior to <em class="ph i">A[2*i]</em>.</p>
+<pre class="pre msgblock"><code>dvar interval A[i in 1..2*n] size d[i];
+dvar sequence p in A;
+
+subject to {
+  noOverlap(p);
+  forall (i in 1..n)
+    prev(p, A[2*i-1], A[2*i]);
+};</code></pre>
+<p class="p">A set of <em class="ph i">n</em> activities <em class="ph i">A[i]</em> of integer
+type <em class="ph i">T[i]</em> to be sequenced on a machine with a sequence dependent
+set up time <em class="ph i">abs(ti-tj)</em> to switch from activity type <em class="ph i">ti</em> to
+activity type<em class="ph i"> tj</em> with no activity overlap.</p>
+<pre class="pre msgblock"><code>{int} Types = {T[i] | i in 1..n};
+tuple triplet {int id1; int id2; int value;};
+{triplet} M = {&lt;i,j,ftoi(abs(i-j))&gt; | i in Types, j in Types};
+
+dvar interval A[i in 1..n] size d[i];
+dvar sequence p in A types T; 
+
+subject to {
+  noOverlap(p, M);
+};</code></pre>
+<p class="p">A sample model that illustrates the use of sequence
+arrays can be found in your installation directory:</p>
+<p class="p"><samp class="ph codeph">&lt;Install_dir&gt;\opl\examples\opl\sched_sequence\sched_sequence.mod</samp>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" title="Description, syntax, and example for each individual OPL keyword..">OPL keywords</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_opl_all.html" title="OPL keyword that allows you to use only part of an array with functions that take array parameters.">all</a></div>
+<div><a class="link" href="tlr_oplsch_interval.html" title="OPL keyword (CP, scheduling) for interval variables.">interval</a></div>
+<div><a class="link" href="tlr_oplsch_before.html" title="OPL function (scheduling) to sequence interval variables">before</a></div>
+<div><a class="link" href="tlr_oplsch_first.html" title="OPL function (scheduling) to sequence interval variables">first (scheduling)</a></div>
+<div><a class="link" href="tlr_oplsch_last.html" title="OPL function (scheduling) to sequence interval variables">last (scheduling)</a></div>
+<div><a class="link" href="tlr_oplsch_noOverlap.html" title="OPL constraint (scheduling) used to prevent intervals in a sequence from overlapping and (optionally) to enforce a minimal distance between consecutive intervals.">noOverlap</a></div>
+<div><a class="link" href="tlr_oplsch_prev.html" title="OPL function (scheduling) to sequence interval variables">prev (scheduling)</a></div>
+<div><a class="link" href="tlr_oplsch_sameSequence.html" title="A binary constraint on a pair of sequence variables. The constraint states that the relative position of related interval variables is the same in both sequences, seq1 and seq2.">sameSequence</a></div>
+<div><a class="link" href="tlr_oplsch_sameCommonSubsequence.html" title="A binary constraint on a pair of sequence variables. The constraint states that the relative position of some related subsets of interval variables is the same in both sequences, seq1 and seq2.">sameCommonSubsequence</a></div>
+</div>
+</div></body>
+</html>

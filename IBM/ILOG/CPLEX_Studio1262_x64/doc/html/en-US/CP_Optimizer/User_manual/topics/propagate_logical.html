@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Propagation of logical constraints" />
+<meta name="abstract" content="Domain reduction of decision variables incident on logical constraints are propagated using the truth values of the subconstraints." />
+<meta name="Description" content="Domain reduction of decision variables incident on logical constraints are propagated using the truth values of the subconstraints." />
+<meta name="DC.subject" content="constraint, cardinality, logical, constructive disjunction, logical constraint, search log, variable, additional" />
+<meta name="keywords" content="constraint, cardinality, logical, constructive disjunction, logical constraint, search log, variable, additional" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/propagate.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizerpropagate.1018533" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/propagate.html" />
+<title>Propagation of logical constraints</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizerpropagate.1018533">
+<h1 class="title topictitle1">Propagation of logical constraints</h1>
+<div class="body"><p class="shortdesc">Domain reduction of decision variables incident
+on logical constraints are propagated using the truth values of the
+subconstraints.</p>
+<p class="p">CP Optimizer can process logical constraints. Logical
+constraints are stated over arithmetic constraints and also over some
+specialized constraints. </p>
+<p class="p">The connectors for creating logical constraints are described
+in detail in <a class="xref" href="constraints_logical.html" title="Logical constraints make it possible to model complicated logical relations.">Logical constraints</a>.</p>
+<ul class="ul"><li class="li"><p class="p"> negation (<samp class="ph codeph">!</samp>), </p>
+ </li>
+<li class="li"><p class="p">conjunction (<samp class="ph codeph">&amp;&amp;</samp>), </p>
+ </li>
+<li class="li"><p class="p">disjunction (<samp class="ph codeph">||</samp>), </p>
+ </li>
+<li class="li"><p class="p">implication (<samp class="ph codeph">IloIfThen</samp>),</p>
+ </li>
+<li class="li"><p class="p">equivalence (<samp class="ph codeph">==</samp>)
+and </p>
+</li>
+<li class="li"><p class="p">exclusive or (<samp class="ph codeph">!=</samp>). </p>
+ </li>
+</ul>
+<p class="p">The semantics of these connectors are the usual logical
+semantics. The arguments of these connectors are constraints that,
+in turn, possibly could be logical constraints. For instance, consider
+two tasks whose durations are represented by the integer values <em class="ph i">dx</em> and <em class="ph i">dy</em> and whose starting dates are
+represented by the decision variables <em class="ph i">x</em> and <em class="ph i">y</em>.
+To model the constraint that the two tasks do not overlap, you can
+state the disjunction: </p>
+<p class="p">  <em class="ph i">(x &gt;= y + dy) || (y &gt;= x + dx)</em></p>
+<p class="p">To impose this constraint only when another condition
+is true (for example when <em class="ph i">z == 3</em>), you can write the
+logical constraint (shown here using the C++ API):  </p>
+<pre class="pre codeblock"><code>    IloIfThen(env, z == 3, (x &gt;= y + dy) || (y &gt;= x + dx))
+</code></pre>
+<p class="p">To understand the domain reduction achieved by these constraints,
+it is important to observe that a constraint has a truth value. Depending
+on the domains of the variables, the truth value of a constraint is
+true when the constraint is definitely satisfied. The truth value
+is false when the constraint is definitely violated. Otherwise, both
+values are possible. </p>
+<p class="p">Consider, for instance, the constraint <em class="ph i">z ==
+3</em>. It has a truth value of false when the domain of <em class="ph i">z</em> is
+[0..2], that is, when it does not contain 3. It has a truth value
+of true when <em class="ph i">z</em> is fixed to 3. The truth value of this
+constraint is not yet determined when the domain of <em class="ph i">z</em> contains
+the value 3 and at least one other value. The truth value is undetermined
+if the domain of <em class="ph i">z</em> is [2..3]; it is not yet known
+if the constraint <em class="ph i">z == 3</em> will be satisfied (<em class="ph i">z
+= 3</em>) or violated (<em class="ph i">z = 2</em>). </p>
+<p class="p">In practice, each constraint appearing in a logical expression
+is associated with a Boolean decision variable whose value is the
+truth value of the constraint. These Boolean variables are mentioned
+in the search log as additional variables. </p>
+<p class="p">Here is an example of a logical model using the C++ API:
+ </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 5);
+    IloIntVar y(env, 7, 20);
+    IloIntVar z(env, -10, 20);
+    IloModel model(env);
+    model.add(x &gt;= y || z &lt; 7);
+    model.add(IloIfThen(env, z != 10, y == 10));
+    IloCP cp(model);
+	 if (cp.propagate()) {
+      cp.out() &lt;&lt; " Domains reduced: " &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of x = " &lt;&lt; cp.domain(x) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of y = " &lt;&lt; cp.domain(y) &lt;&lt; std::endl;
+      cp.out() &lt;&lt; " Domain of z = " &lt;&lt; cp.domain(z) &lt;&lt; std::endl;
+    }else{
+      cp.out() &lt;&lt; " Model has no solution." &lt;&lt; std::endl;
+    }
+</code></pre>
+<p class="p">In the first disjunction, the constraint <em class="ph i">x &gt;=
+y</em> is obviously violated. To satisfy this disjunction, the constraint <em class="ph i">z &lt; 7</em> is imposed. This forces the maximum of the domain
+of <em class="ph i">z</em> to be 6. The domain reduction of the implication
+(<samp class="ph codeph">IloIfThen</samp>) constraint is invoked since
+the domain of <em class="ph i">z</em> has changed. The left member of the
+implication (<em class="ph i">z != 10</em>) is now satisfied and the constraint
+imposes the constraint <em class="ph i">y == 10</em> which reduces the domain
+of <em class="ph i">y</em>. No more domain reduction can be done at this
+point and this code produces the output:  </p>
+<pre class="pre codeblock"><code> Domains reduced:
+ Domain of y = [10]
+ Domain of z = [-10..6]
+</code></pre>
+<p class="p">This manner of reducing domains by imposing constraints
+is very efficient, but it has some limitations. It reacts only to
+violation or satisfaction of constraints. For instance, the domain
+reduction of the constraint </p>
+<p class="p">   <em class="ph i">(x == 2) || (x == 3)</em> </p>
+<p class="p">will not reduce the domain of <em class="ph i">x</em> to [2..3].
+It waits for one of the constraints to be violated before imposing
+the other one. </p>
+<p class="p">Since any arithmetic or logical constraint can have a
+truth value, these constraints can appear where any other expression
+can appear. In particular, such a constraint can be combined in an
+arithmetic expression. An expression such as</p>
+<p class="p">   <em class="ph i">1 + (x &lt; 7)</em></p>
+<p class="p">is a valid expression and can be handled by CP Optimizer.
+Constraints can be created over these expressions. For instance, recall
+the disjunction</p>
+<p class="p">   <em class="ph i">(x &gt;= y + dy) || (y &gt;= x + dx)</em></p>
+<p class="p">It can be expressed by the constraint</p>
+<p class="p">   <em class="ph i">(x &gt;= y + dy) + (y &gt;= x + dx) &gt;=
+1</em></p>
+<p class="p">Since only one of the disjunction members can be true,
+it can also be stated as</p>
+<p class="p">   <em class="ph i">(x &gt;= y + dy) + (y &gt;= x + dx) ==
+1</em></p>
+<p class="p">Similarly, the implication (here in the C++ API)</p>
+<p class="p"> <samp class="ph codeph"> IloIfThen(env, z == 3, (x &gt;= y +
+dy) || (y &gt;= x + dx))</samp></p>
+<p class="p">can be expressed by </p>
+<p class="p">   <em class="ph i">(z == 3) &lt;= ((x &gt;= y + dy) || (y &gt;=
+x + dx))</em></p>
+<p class="p">or by</p>
+<p class="p">   <em class="ph i">(z == 3) &lt;= (x &gt;= y + dy) + (y &gt;=
+x + dx)</em></p>
+<p class="p">A typical application of such constraints are cardinality
+constraints. When among a set of constraints at least two of them
+must be true, one can state a constraint like</p>
+<p class="p">   <em class="ph i">(x &gt;= y[0]) + (x &gt;= y[1]) + (x &gt;=
+y[2]) + (x &gt;= y[3]) + (x &gt;= y[4]) &gt;= 2</em></p>
+<p class="p">The statement of this constraint with only logical connectors
+is possible but would need a large number of disjunctions.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/propagate.html" title="CP Optimizer solves a model using constraint propagation and constructive search with search strategies.">Constraint propagation in CP Optimizer</a></div>
+</div>
+</div></body>
+</html>

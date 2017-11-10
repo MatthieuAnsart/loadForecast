@@ -1,0 +1,1100 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>cplex._internal._subinterfaces.AdvancedSolutionInterface</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+ <!-- CC Accessibility - Skip to main content link -->
+ <th bgcolor="#70b0f0" class="navbar-select">
+ <a href="#ibm-content">
+ <img class="ibm-access" src="whitepixel.png" alt="Skip&nbsp;to&nbsp;main&nbsp;content"/>
+ </a></th>
+ <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >CPLEX Python API Reference Manual</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="cplex-module.html">Package&nbsp;cplex</a> ::
+        <a href="cplex._internal-module.html" onclick="show_private();">Package&nbsp;_internal</a> ::
+        <a href="cplex._internal._subinterfaces-module.html">Module&nbsp;_subinterfaces</a> ::
+        Class&nbsp;AdvancedSolutionInterface
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<a name="ibm-content">&nbsp;</a>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class AdvancedSolutionInterface</h1><p class="nomargin-top"></p>
+<center>
+<center>  <map id="class_hierarchy_for_advancedso" name="class_hierarchy_for_advancedso">
+<area shape="rect" id="node1" href="javascript:void(0);" title="AdvancedInterface" alt="" coords="28,5,160,32"/>
+<area shape="rect" id="node2" href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html" title="AdvancedSolutionInterface" alt="" coords="4,61,184,88"/>
+</map>
+  <img src="class_hierarchy_for_advancedso.gif" alt='' usemap="#class_hierarchy_for_advancedso" ismap="ismap" class="graph-without-title" />
+</center>
+</center>
+<hr />
+<p>Advanced methods for accessing solution information.</p>
+<p>Example usage:</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvcol = c.solution.advanced.binvcol()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvrow = c.solution.advanced.binvrow()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvacol = c.solution.advanced.binvacol()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvarow = c.solution.advanced.binvarow()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvcol[0][24], binvcol[1][6]
+<span class="py-output">(-0.215, 1.0)</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>binvrow[24][0], binvrow[6][1]
+<span class="py-output">(-0.215, 1.0)</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>binvacol[0][0:3], binvacol[1][0:3]
+<span class="py-output">([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>binvarow[0][0:2], binvarow[1][0:2], binvarow[2][0:2]
+<span class="py-output">([1.0, 0.0], [0.0, 1.0], [0.0, 0.0])</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>btran = c.solution.advanced.btran([1.0] * c.linear_constraints.get_num())
+<span class="py-prompt">&gt;&gt;&gt; </span>[x <span class="py-keyword">if</span> x <span class="py-keyword">else</span> 0.0 <span class="py-keyword">for</span> x <span class="py-keyword">in</span> btran[14:17]]
+<span class="py-output">[0.0, 2.0, 1.0]</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>ftran = c.solution.advanced.ftran([1.0] * c.linear_constraints.get_num())
+<span class="py-prompt">&gt;&gt;&gt; </span>ftran[0]
+<span class="py-output">2.891</span></pre>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Instance Methods</span></td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#binvcol" class="summary-sig-name">binvcol</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*args</span>)</span><br />
+      Returns a set of columns of the inverted basis matrix.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#binvrow" class="summary-sig-name">binvrow</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*args</span>)</span><br />
+      Returns a set of rows of the inverted basis matrix.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#binvacol" class="summary-sig-name">binvacol</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*args</span>)</span><br />
+      Returns a set of columns of the tableau.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#binvarow" class="summary-sig-name">binvarow</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*args</span>)</span><br />
+      Returns a set of rows of the tableau.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#btran" class="summary-sig-name">btran</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">y</span>)</span><br />
+      Performs a backward linear solve using the basis matrix.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#ftran" class="summary-sig-name">ftran</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">x</span>)</span><br />
+      Performs a linear solve using the basis matrix.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_gradients" class="summary-sig-name">get_gradients</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">*args</span>)</span><br />
+      Returns information useful in post-solution analysis after an LP has been solved and a basis is available.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_linear_slacks_from_x" class="summary-sig-name">get_linear_slacks_from_x</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">x</span>)</span><br />
+      Computes the slack values from the given solution x</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_quadratic_slacks_from_x" class="summary-sig-name">get_quadratic_slacks_from_x</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">x</span>)</span><br />
+      Computes the slack values for quadratic constraints from the given solution x</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_linear_reduced_costs_from_pi" class="summary-sig-name">get_linear_reduced_costs_from_pi</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">pi</span>)</span><br />
+      Computes the reduced costs from the given dual solution pi</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_quadratic_reduced_costs_from_pi" class="summary-sig-name">get_quadratic_reduced_costs_from_pi</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">pi</span>,
+        <span class="summary-sig-arg">x</span>)</span><br />
+      Computes the reduced costs for QP from the given solution (pi, x)</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_Driebeek_penalties" class="summary-sig-name">get_Driebeek_penalties</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">basic_variables</span>)</span><br />
+      Returns values known as Driebeek penalties for a sequence of basic variables.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_quadratic_indefinite_certificate" class="summary-sig-name">get_quadratic_indefinite_certificate</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Compute a vector x that satifies x'Qx &lt; 0</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#dual_farkas" class="summary-sig-name">dual_farkas</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns Farkas proof of infeasibility for the active LP model after proven infeasibility.</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_diverging_index" class="summary-sig-name">get_diverging_index</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns the index of the diverging row or column</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="cplex._internal._subinterfaces.AdvancedSolutionInterface-class.html#get_ray" class="summary-sig-name">get_ray</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns an unbounded direction, i.e., ray, if a LP model is unbounded</td>
+          <td align="right" valign="top">
+            
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__init__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Properties</span></td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td align="left" colspan="2" class="table-header">
+    <span class="table-header">Method Details</span></td>
+</tr>
+</table>
+<a name="binvcol"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">binvcol</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*args</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns a set of columns of the inverted basis matrix.</p>
+<p>Can be called by four forms.</p>
+<dl class="rst-docutils">
+<dt>solution.advanced.binvcol()</dt>
+<dd>returns the inverted basis matrix as a list of columns.</dd>
+<dt>solution.advanced.binvcol(i)</dt>
+<dd>i must be a linear constraint name or index.  Returns the
+column of the inverted basis matrix associated with i.</dd>
+<dt>solution.advanced.binvcol(s)</dt>
+<dd>s must be a sequence of linear constraint names or indices.
+Returns the columns of the inverted basis matrix associated
+with the members of s.  Equivalent to
+[solution.advanced.binvcol(i) for i in s]</dd>
+<dt>solution.advanced.binvcol(begin, end)</dt>
+<dd>begin and end must be linear constraint indices with begin
+&lt;= end or linear constraint names whose indices respect
+this order.  Returns the columns of the inverted basis
+matrix associated with the linear constraints between begin
+and end, inclusive of end.  Equivalent to
+solution.advanced.binvcol(range(begin, end + 1)).</dd>
+</dl>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvcol = c.solution.advanced.binvcol()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvcol[0][24], binvcol[1][6]
+<span class="py-output">(-0.215, 1.0)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="binvrow"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">binvrow</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*args</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns a set of rows of the inverted basis matrix.</p>
+<p>Can be called by four forms.</p>
+<dl class="rst-docutils">
+<dt>solution.advanced.binvrow()</dt>
+<dd>returns the inverted basis matrix as a list of rows.</dd>
+<dt>solution.advanced.binvrow(i)</dt>
+<dd>i must be a linear constraint name or index.  Returns the
+row of the inverted basis matrix associated with i.</dd>
+<dt>solution.advanced.binvrow(s)</dt>
+<dd>s must be a sequence of linear constraint names or indices.
+Returns the rows of the inverted basis matrix associated
+with the members of s.  Equivalent to
+[solution.advanced.binvrow(i) for i in s]</dd>
+<dt>solution.advanced.binvrow(begin, end)</dt>
+<dd>begin and end must be linear constraint indices with begin
+&lt;= end or linear constraint names whose indices respect
+this order.  Returns the rows of the inverted basis matrix
+associated with the linear constraints between begin and
+end, inclusive of end.  Equivalent to
+solution.advanced.binvrow(range(begin, end + 1)).</dd>
+</dl>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvrow = c.solution.advanced.binvrow()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvrow[24][0], binvrow[6][1]
+<span class="py-output">(-0.215, 1.0)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="binvacol"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">binvacol</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*args</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns a set of columns of the tableau.</p>
+<p>Can be called by four forms.</p>
+<dl class="rst-docutils">
+<dt>solution.advanced.binvacol()</dt>
+<dd>returns the tableau as a list of columns.</dd>
+<dt>solution.advanced.binvacol(i)</dt>
+<dd>i must be a variable name or index.  Returns the column of
+the tableau associated with i.</dd>
+<dt>solution.advanced.binvacol(s)</dt>
+<dd>s must be a sequence of variable names or indices.  Returns
+the columns of the tableau associated with the members of s.
+Equivalent to [solution.advanced.binvacol(i) for i in s]</dd>
+<dt>solution.advanced.binvacol(begin, end)</dt>
+<dd>begin and end must be variable indices with begin &lt;= end or
+variable names whose indices respect this order.  Returns
+the columns of the tableau associated with the variables
+between begin and end, inclusive of end.  Equivalent to
+solution.advanced.binvacol(range(begin, end + 1)).</dd>
+</dl>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvacol = c.solution.advanced.binvacol()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvacol[0][0:3], binvacol[1][0:3]
+<span class="py-output">([1.0, 0.0, 0.0], [0.0, 1.0, 0.0])</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="binvarow"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">binvarow</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*args</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns a set of rows of the tableau.</p>
+<p>Can be called by four forms.</p>
+<dl class="rst-docutils">
+<dt>solution.advanced.binvacol()</dt>
+<dd>returns the tableau as a list of rows.</dd>
+<dt>solution.advanced.binvacol(i)</dt>
+<dd>i must be a linear constraint name or index.  Returns the
+row of the tableau associated with i.</dd>
+<dt>solution.advanced.binvacol(s)</dt>
+<dd>s must be a sequence of linear constraint names or indices.
+Returns the rows of the tableau associated with the members
+of s.  Equivalent to [solution.advanced.binvacol(i)
+for i in s]</dd>
+<dt>solution.advanced.binvacol(begin, end)</dt>
+<dd>begin and end must be linear constraint indices with begin
+&lt;= end or variable names whose indices respect this order.
+Returns the rows of the tableau associated with the
+variables between begin and end, inclusive of end.
+Equivalent to solution.advanced.binvacol(range(begin,
+end + 1)).</dd>
+</dl>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvarow = c.solution.advanced.binvarow()
+<span class="py-prompt">&gt;&gt;&gt; </span>binvarow[0][0:2], binvarow[1][0:2], binvarow[2][0:2]
+<span class="py-output">([1.0, 0.0], [0.0, 1.0], [0.0, 0.0])</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="btran"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">btran</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">y</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Performs a backward linear solve using the basis matrix.</p>
+<p>Returns the solution to the linear system</p>
+<p>x^T B = y^T</p>
+<p>y must be a list of floats with length equal to the number of
+linear constraints.</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>btran = c.solution.advanced.btran([1.0] * c.linear_constraints.get_num())
+<span class="py-prompt">&gt;&gt;&gt; </span>[x <span class="py-keyword">if</span> x <span class="py-keyword">else</span> 0.0 <span class="py-keyword">for</span> x <span class="py-keyword">in</span> btran[14:17]]
+<span class="py-output">[0.0, 2.0, 1.0]</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="ftran"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">ftran</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">x</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Performs a linear solve using the basis matrix.</p>
+<p>Returns the solution to the linear system</p>
+<p>B x = y</p>
+<p>y must be a list of floats with length equal to the number of
+linear constraints.</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>ftran = c.solution.advanced.ftran([1.0] * c.linear_constraints.get_num())
+<span class="py-prompt">&gt;&gt;&gt; </span>ftran[0]
+<span class="py-output">2.891</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_gradients"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_gradients</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">*args</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns information useful in post-solution analysis after an LP has been solved and a basis is available.</p>
+<p>See CPXgetgrad in the Callable Library Reference Manual
+for more detail.</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>grad = c.solution.advanced.get_gradients(1)
+<span class="py-prompt">&gt;&gt;&gt; </span>grad.ind[1]
+<span class="py-output">1</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>grad.val[1]
+<span class="py-output">1.0</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_linear_slacks_from_x"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_linear_slacks_from_x</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">x</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Computes the slack values from the given solution x</p>
+<p>Example usage:</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>slack = c.solution.advanced.get_linear_slacks_from_x(c.solution.get_values())
+<span class="py-prompt">&gt;&gt;&gt; </span>abs(slack[3]) &lt; 1e-6
+<span class="py-output">True</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_quadratic_slacks_from_x"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_quadratic_slacks_from_x</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">x</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Computes the slack values for quadratic constraints from the given solution x</p>
+<p>Example usage:</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;qcp.lp&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>qslack = c.solution.advanced.get_quadratic_slacks_from_x(c.solution.get_values())
+<span class="py-prompt">&gt;&gt;&gt; </span>abs(qslack[0]) &lt; 1e-6
+<span class="py-output">True</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_linear_reduced_costs_from_pi"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_linear_reduced_costs_from_pi</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pi</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Computes the reduced costs from the given dual solution pi</p>
+<p>Example usage:</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>reducedcost = c.solution.advanced.get_linear_reduced_costs_from_pi(
+<span class="py-output">                                                            c.solution.get_dual_values())</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>abs(reducedcost[0]) &lt; 1e-6
+<span class="py-output">True</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_quadratic_reduced_costs_from_pi"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_quadratic_reduced_costs_from_pi</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pi</span>,
+        <span class="sig-arg">x</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Computes the reduced costs for QP from the given solution (pi, x)</p>
+<p>Example usage:</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;qp.lp&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>qreducedcost = c.solution.advanced.get_quadratic_reduced_costs_from_pi(
+<span class="py-output">                                                            c.solution.get_dual_values(),</span>
+<span class="py-output">                                                            c.solution.get_values())</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>abs(qreducedcost[0]) &lt; 1e-6
+<span class="py-output">True</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_Driebeek_penalties"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_Driebeek_penalties</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">basic_variables</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns values known as Driebeek penalties for a sequence of basic variables.</p>
+<p>Example usage:</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;lpex.mps&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>c_stat = c.solution.basis.get_col_basis()
+<span class="py-prompt">&gt;&gt;&gt; </span>b = [i <span class="py-keyword">for</span> i, v <span class="py-keyword">in</span> enumerate(c_stat) <span class="py-keyword">if</span> v == c.solution.basis.status.basic]
+<span class="py-prompt">&gt;&gt;&gt; </span>penalties = c.solution.advanced.get_Driebeek_penalties(b)
+<span class="py-prompt">&gt;&gt;&gt; </span>penalties[0]
+<span class="py-output">(0.34477142857142856, 8.021494102228047)</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_quadratic_indefinite_certificate"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_quadratic_indefinite_certificate</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Compute a vector x that satifies x'Qx &lt; 0</p>
+<p>Such a vector demonstrates that the matrix Q violates the
+assumption of positive semi-definiteness, and can be an aid in
+debugging a user's program if indefiniteness is an unexpected
+outcome.</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;qpindef.lp&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>x = c.solution.advanced.get_quadratic_indefinite_certificate()
+<span class="py-prompt">&gt;&gt;&gt; </span>abs(-0.5547001 - x[1]) &lt; 1e-6
+<span class="py-output">True</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="dual_farkas"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">dual_farkas</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns Farkas proof of infeasibility for the active LP model after proven infeasibility.</p>
+<p>See CPXdualfarkas in the Callable Library Reference Manual for
+more detail.</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.linear_constraints.add(senses=<span class="py-string">&quot;L&quot;</span>, rhs=[-1])
+<span class="py-prompt">&gt;&gt;&gt; </span>c.variables.add(lb=[1], ub=[2],columns=[[[0],[1]]])
+<span class="py-prompt">&gt;&gt;&gt; </span>c.parameters.lpmethod.set(c.parameters.lpmethod.values.dual)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.parameters.preprocessing.presolve.set(c.parameters.preprocessing.presolve.values.off)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>y = c.solution.advanced.dual_farkas()
+<span class="py-prompt">&gt;&gt;&gt; </span>y[1]
+<span class="py-output">2.0</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_diverging_index"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_diverging_index</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns the index of the diverging row or column</p>
+<p>if the problem is not unbounded, get_diverging_index returns -1.</p>
+<p>If the problem is unbounded, get_diverging_index returns the
+index of the diverging variable in the augmented form of the
+constraint matrix.  In other words, if the diverging variable
+is a structural variable, get_diverging_index returns its
+index; if the diverging variable is a slack or ranged
+variable, get_diverging_index returns the sum of the number of
+structural variables and the index of the corresponding
+constraint.</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.variables.add(obj=[1,1],lb=[1,-cplex.infinity],ub=[2,cplex.infinity])
+<span class="py-prompt">&gt;&gt;&gt; </span>c.parameters.lpmethod.set(c.parameters.lpmethod.values.primal)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.parameters.preprocessing.presolve.set(c.parameters.preprocessing.presolve.values.off)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>idx = c.solution.advanced.get_diverging_index()
+<span class="py-prompt">&gt;&gt;&gt; </span>idx
+<span class="py-output">1</span>
+<span class="py-output"></span><span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.variables.add(obj=[-1,-1],lb=[1,1],ub=[2,2])
+<span class="py-prompt">&gt;&gt;&gt; </span>c.linear_constraints.add(lin_expr = [[[0,1],[-1,-1]]], rhs=[-10], senses=<span class="py-string">&quot;L&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.parameters.lpmethod.set(c.parameters.lpmethod.values.dual)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.parameters.preprocessing.presolve.set(c.parameters.preprocessing.presolve.values.off)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>idx = c.solution.advanced.get_diverging_index()
+<span class="py-prompt">&gt;&gt;&gt; </span>idx
+<span class="py-output">2</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_ray"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_ray</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    >&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns an unbounded direction, i.e., ray, if a LP model is unbounded</p>
+<p>Example usage:</p>
+<pre class="py-doctest">
+<span class="py-prompt">&gt;&gt;&gt; </span><span class="py-keyword">import</span> cplex
+<span class="py-prompt">&gt;&gt;&gt; </span>c = cplex.Cplex()
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_results_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>out = c.set_log_stream(None)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.read(<span class="py-string">&quot;unblp.lp&quot;</span>)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.parameters.preprocessing.presolve.set(c.parameters.preprocessing.presolve.values.off)
+<span class="py-prompt">&gt;&gt;&gt; </span>c.solve()
+<span class="py-prompt">&gt;&gt;&gt; </span>ray = c.solution.advanced.get_ray()
+<span class="py-prompt">&gt;&gt;&gt; </span>ray[0]
+<span class="py-output">-1.0</span></pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+ <!-- CC Accessibility - Skip to main content link -->
+ <th bgcolor="#70b0f0" class="navbar-select">
+ <a href="#ibm-content">
+ <img class="ibm-access" src="whitepixel.png" alt="Skip&nbsp;to&nbsp;main&nbsp;content"/>
+ </a></th>
+ <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >CPLEX Python API Reference Manual</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+     &nbsp;
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

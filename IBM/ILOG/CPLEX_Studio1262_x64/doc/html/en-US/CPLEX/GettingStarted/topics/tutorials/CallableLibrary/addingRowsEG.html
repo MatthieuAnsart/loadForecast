@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Adding rows to a problem: example lpex3.c" />
+<meta name="abstract" content="This application adds rows to a model." />
+<meta name="Description" content="This application adds rows to a model." />
+<meta name="DC.subject" content="example, adding rows to a problem (C API), adding, rows to a problem (C API), lpex3.c (C API), CPXopenCPLEX routine, network example in C API, creating, environment (C API), problem object (C API), CPXcreateprob routine, CPXcopylp routine, example in C API, CPXgetobjval routine, CPXaddrows routine, network example in C API, CPXlpopt routine, CPXsolution routine, SAV file format (C API), CPXwriteprob, CPXfreeprob routine, CPXcloseCPLEX routine" />
+<meta name="keywords" content="example, adding rows to a problem (C API), adding, rows to a problem (C API), lpex3.c (C API), CPXopenCPLEX routine, network example in C API, creating, environment (C API), problem object (C API), CPXcreateprob routine, CPXcopylp routine, example in C API, CPXgetobjval routine, CPXaddrows routine, network example in C API, CPXlpopt routine, CPXsolution routine, SAV file format (C API), CPXwriteprob, CPXfreeprob routine, CPXcloseCPLEX routine" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_callableLibraryStart.155691" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" />
+<title>Adding rows to a problem: example lpex3.c</title>
+</head>
+<body role="main" id="Getting_started.uss_callableLibraryStart.155691">
+<h1 class="title topictitle1">Adding rows to a problem: example lpex3.c</h1>
+<div class="body"><p class="shortdesc">This application adds rows to a model.</p>
+<p class="p">This example illustrates how to develop your own solution algorithms
+with routines from the Callable Library. It also shows you how to
+add rows to a problem object. Here is the problem that <samp class="ph codeph">lpex3</samp> solves: </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" role="presentation" class="table presentation NoBorder" rules="none" frame="void" border="0"><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> Minimize </td>
+<td class="entry" valign="top">  <em class="ph i">c^Tx</em>  </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> subject to </td>
+<td class="entry" valign="top"> <p class="p"> <em class="ph i">Hx = d</em> <em class="ph i"> </em> </p>
+ <p class="p"> <em class="ph i">Ax = b</em> <em class="ph i"> </em> </p>
+ <p class="p"> <em class="ph i">l </em> <em class="ph i">≤</em> <em class="ph i"> x </em> <em class="ph i">≤</em> <em class="ph i"> u</em> </p>
+ </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> where </td>
+<td class="entry" valign="top">  <em class="ph i">H = </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( -1 0  1  0  1  0  0  0 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">d =</em> <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( -3 ) </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( 1 -1  0  1  0  0  0  0 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">(  1 ) </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( 0  1 -1  0  0  1 -1  0 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">(  4 ) </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( 0  0  0 -1  0 -1  0  1 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">(  3 ) </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( 0  0  0  0 -1  0  1 -1 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( -5 ) </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i">A =</em> <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( 2  1 -2 -1  2 -1 -2 -3 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">b =</em> <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">(  4 ) </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( 1 -3  2  3 -1  2  1  1 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( -2 ) </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i">c =</em> <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">(-9  1  4  2 -8  2  8 12 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i">l =</em> <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">( 0  0  0  0  0  0  0  0 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top">  <em class="ph i">u =</em> <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i">(50 50 50 50 50 50 50 50 ) </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+<td class="entry" valign="top">  <em class="ph i"> </em>  </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">The constraints Hx=d represent the flow conservation constraints
+of a pure network flow problem. The example solves this problem in
+two steps:</p>
+<ol class="ol"><li class="li"><p class="p">The CPLEX network optimizer is used to solve </p>
+ 
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" role="presentation" class="table presentation NoBorder" rules="none" frame="void" border="0"><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> Minimize </td>
+<td class="entry" valign="top">  <em class="ph i">c^Tx</em>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" rowspan="2" valign="top"> subject to </td>
+<td class="entry" rowspan="2" valign="top"> <p class="p"> <em class="ph i">Hx = d</em> </p>
+ <p class="p"> <em class="ph i">l </em>≤ <em class="ph i">x</em> ≤ <em class="ph i">u</em> </p>
+ </td>
+</tr>
+<tr class="row"><td class="entry" valign="top"> </td>
+</tr>
+</tbody>
+</table>
+</div>
+ </li>
+<li class="li"><p class="p">The constraints Ax=b are added to the problem, and the dual
+simplex optimizer is used to solve the new problem, starting at the
+optimal basis of the simpler network problem.</p>
+ </li>
+</ol>
+<p class="p">The data for this problem consists of the network portion (using
+variable names beginning with the letter H) and the complicating constraints
+(using variable names beginning with the letter A). </p>
+<p class="p">The example first calls <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/openCPLEX.html" title="The routine CPXXopenCPLEX/CPXopenCPLEX initializes a CPLEX environment.">CPXopenCPLEX</a></samp> to
+create the environment and then turns on the CPLEX screen switch (<samp class="ph codeph">CPX_PARAM_SCRIND</samp> ).
+Next it sets the simplex display level (<samp class="ph codeph">CPX_PARAM_SIMDISPLAY</samp> )
+to 2 to indicate iteration-by-iteration output, so that the progress
+of each iteration of the optimizer can be observed. Setting this parameter
+to 2 is not generally recommended; the example does so only for illustrative
+purposes.</p>
+<p class="p">The example creates a problem object by a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/createprob.html" title="The routine CPXXcreateprob/CPXcreateprob creates a CPLEX problem object in the CPLEX environment.">CPXcreateprob</a></samp>.
+Then the network data is copied via a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/copylp.html" title="The routine CPXXcopylp/CPXcopylp copies data that define an LP problem to a CPLEX problem object.">CPXcopylp</a></samp>.
+ After the network data is copied, the parameter <samp class="ph codeph">CPX_PARAM_LPMETHOD</samp> is
+set to <samp class="ph codeph">CPX_ALG_NET</samp> and the routine <samp class="ph codeph">CPXlpopt</samp> is
+called to solve the network part of the optimization problem using
+the network optimizer. The objective value of this problem is retrieved
+by <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getobjval.html" title="The routine CPXXgetobjval/CPXgetobjval accesses the solution objective value.">CPXgetobjval</a></samp>. </p>
+<p class="p">Then the extra rows are added by <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addrows.html" title="The routine CPXXaddrows/CPXaddrows adds constraints to a specified CPLEX problem object.">CPXaddrows</a></samp>.
+For convenience, the total number of nonzeros in the rows being added
+is stored in an extra element of the array <samp class="ph codeph">rmatbeg</samp> ,
+and this element is passed for the parameter <samp class="ph codeph">nzcnt</samp> .
+The name arguments to <samp class="ph codeph">CPXaddrows</samp> are <samp class="ph codeph">NULL</samp> ,
+since no variable or constraint names were defined for this problem. </p>
+<p class="p">After the <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/addrows.html" title="The routine CPXXaddrows/CPXaddrows adds constraints to a specified CPLEX problem object.">CPXaddrows</a></samp> call,
+the parameter <samp class="ph codeph">CPX_PARAM_LPMETHOD</samp> is set to <samp class="ph codeph">CPX_ALG_DUAL</samp> and
+the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/lpopt.html" title="At any time after a linear program has been created via a call to CPXXcreateprob/CPXcreateprob, the routine CPXXlpopt/CPXlpopt finds a solution to that problem using one of the CPLEX linear optimizers.">CPXlpopt</a></samp> is
+called to re-optimize the problem using the dual simplex optimizer.
+After re-optimization, <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/solution.html" title="The routine CPXXsolution/CPXsolution accesses the solution values produced by all the optimization routines except the routine CPXXNETprimopt/CPXNETprimopt.">CPXsolution</a></samp> accesses
+the solution status, the objective value, and the primal solution. <samp class="ph codeph">NULL</samp> is
+passed for the other solution values, since the information they provide
+is not needed in this example.</p>
+<p class="p">At the end, the problem is written as a SAV file by <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/writeprob.html" title="The routine CPXXwriteprob/CPXwriteprob writes a CPLEX problem object to a file in one of the formats in the table.">CPXwriteprob</a></samp>.
+This file can then be read into the Interactive Optimizer to analyze
+whether the problem was correctly generated. Using a SAV file is recommended
+over MPS and LP files, as SAV files preserve the full numeric precision
+of the problem.</p>
+<p class="p">After the <samp class="ph codeph">TERMINATE:</samp> label, <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/freeprob.html" title="The routine CPXXfreeprob/CPXfreeprob removes the specified CPLEX problem object from the CPLEX environment and frees the associated memory used internally by CPLEX.">CPXfreeprob</a></samp> releases
+the problem object, and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/closeCPLEX.html" title="This routine frees all of the data structures associated with CPLEX.">CPXcloseCPLEX</a></samp> releases
+the CPLEX environment.</p>
+<p class="p">You can view the complete program online in the standard distribution
+of the product at <em class="ph i">yourCPLEXinstallation</em><samp class="ph codeph">/examples/src/lpex3.c</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/CallableLibrary/synopsis.html" title="Applications written in C use the CPLEX Callable Library (C API).">Callable Library tutorial</a></div>
+</div>
+</div></body>
+</html>

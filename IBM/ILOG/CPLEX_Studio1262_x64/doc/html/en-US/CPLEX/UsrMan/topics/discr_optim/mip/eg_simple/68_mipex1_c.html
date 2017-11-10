@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="mipex1.c" />
+<meta name="abstract" content="Shows how to optimize a MIP model in the C API." />
+<meta name="Description" content="Shows how to optimize a MIP model in the C API." />
+<meta name="DC.subject" content="CPXcopyctype routine, example mipex1.c, CPXcreateprob routine, CPXmipopt routine, slack, example CPXgetslack, CPXgetstat routine, CPXgetobjval routine, CPXgetx routine, CPXgetslack routine, CPXchgprobtype routine, CPXPROB_FIXEDMILP symbolic constant, CPXprimopt routine, CPXsolution routine" />
+<meta name="keywords" content="CPXcopyctype routine, example mipex1.c, CPXcreateprob routine, CPXmipopt routine, slack, example CPXgetslack, CPXgetstat routine, CPXgetobjval routine, CPXgetx routine, CPXgetslack routine, CPXchgprobtype routine, CPXPROB_FIXEDMILP symbolic constant, CPXprimopt routine, CPXsolution routine" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/eg_simple/64_eg_simple_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.689289" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/eg_simple/64_eg_simple_title_synopsis.html" />
+<title>mipex1.c</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.689289">
+<h1 class="title topictitle1">mipex1.c</h1>
+<div class="body"><p class="shortdesc">Shows how to optimize a MIP model in the C API.</p>
+<p class="p">The example derives from <samp class="ph codeph">lpex8.c</samp>. Here are the
+differences between that linear program and this mixed integer program:</p>
+<ul class="ul"><li class="li"><p class="p">The problem to solve is slightly different. It appears in <a class="xref" href="../02_prob_statement.html" title="Defines the kind of problems that the mixed integer optimizer solves.">Stating a MIP problem</a>.</p>
+ </li>
+<li class="li"><p class="p">The routine <samp class="ph codeph">setproblemdata</samp>  has an argument, <samp class="ph codeph">ctype</samp>,
+to set the types of the variables to indicate which ones must assume
+integer values. The routine <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/mipapi/copyctype.html" title="The routine CPXXcopyctype/CPXcopyctype can be used to copy variable type information into a given problem.">CPXcopyctype</a></samp> associates
+this data with the problem that <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/createprob.html" title="The routine CPXXcreateprob/CPXcreateprob creates a CPLEX problem object in the CPLEX environment.">CPXcreateprob</a></samp> creates.</p>
+ </li>
+<li class="li"><p class="p">The example calls <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/mipapi/mipopt.html" title="At any time after a mixed integer program has been created by a call to CPXXcreateprob/CPXcreateprob, the routine CPXXmipopt/CPXmipopt may be used to find a solution to that problem.">CPXmipopt</a></samp> to
+optimize the problem, rather than <samp class="ph codeph">CPXlpopt</samp>.</p>
+ </li>
+<li class="li"><p class="p">The example calls the routines <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/getstat.html" title="The routine CPXXgetstat/CPXgetstat accesses the solution status of the problem after an LP, QP, QCP, or MIP optimization, after CPXXfeasopt/CPXfeasopt and its extensions, after CPXXrefineconflict/CPXrefineconflict and its extensions.">CPXgetstat</a></samp>, <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/getobjval.html" title="The routine CPXXgetobjval/CPXgetobjval accesses the solution objective value.">CPXgetobjval</a></samp>, <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/getx.html" title="The routine CPXXgetx/CPXgetx accesses the solution values for a range of problem variables.">CPXgetx</a></samp>,
+and <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/getslack.html" title="The routine CPXXgetslack/CPXgetslack accesses the slack values for a range of linear constraints.">CPXgetslack</a></samp> (instead
+of <samp class="ph codeph">CPXsolution</samp> ) to get a solution. </p>
+<p class="p">You do <strong class="ph b">not</strong> get
+dual variables this way. If you want dual variables, you must do the
+following:</p>
+ <ul class="ul"><li class="li"><p class="p">Use <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/chgprobtype.html" title="The routine CPXXchgprobtype/CPXchgprobtype changes the current problem to a related problem.">CPXchgprobtype</a></samp> to
+change the problem type to a fixed problem (<samp class="ph codeph">CPXPROB_FIXEDMILP</samp>).</p>
+ </li>
+<li class="li"><p class="p">Then call <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/primopt.html" title="The routine CPXXprimopt/CPXprimopt may be used after a linear program has been created via a call to CPXXcreateprob/CPXcreateprob, to find a solution to that problem using the primal simplex method.">CPXprimopt</a></samp> to
+optimize that problem.</p>
+ </li>
+<li class="li"><p class="p">Then use <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/cpxapi/solution.html" title="The routine CPXXsolution/CPXsolution accesses the solution values produced by all the optimization routines except the routine CPXXNETprimopt/CPXNETprimopt.">CPXsolution</a></samp> to
+get a solution to the fixed problem.</p>
+ </li>
+</ul>
+ </li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/eg_simple/64_eg_simple_title_synopsis.html" title="Introduces samples that demonstrate how to optimize a MIP with the CPLEX Component Libraries.">Examples: optimizing a simple MIP problem</a></div>
+</div>
+</div></body>
+</html>

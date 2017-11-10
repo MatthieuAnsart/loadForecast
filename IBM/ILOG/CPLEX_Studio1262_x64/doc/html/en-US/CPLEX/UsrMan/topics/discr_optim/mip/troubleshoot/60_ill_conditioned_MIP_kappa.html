@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="MIP kappa: detecting and coping with ill-conditioned MIP models" />
+<meta name="abstract" content="Recommends techniques to detect ill conditioning in your MIP model." />
+<meta name="Description" content="Recommends techniques to detect ill conditioning in your MIP model." />
+<meta name="DC.subject" content="ill conditioning, kappa statistics (MIP), kappa report (MIP), MIP, ill conditioning in MIP, condition number, kappa statistics, solution quality, large residuals, residual, large (MIP)" />
+<meta name="keywords" content="ill conditioning, kappa statistics (MIP), kappa report (MIP), MIP, ill conditioning in MIP, condition number, kappa statistics, solution quality, large residuals, residual, large (MIP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="MIPKappaDetectingAndCopingWithIll-c" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" />
+<title>MIP kappa: detecting and coping with ill-conditioned MIP models</title>
+</head>
+<body role="main" id="MIPKappaDetectingAndCopingWithIll-c">
+<h1 class="title topictitle1">MIP kappa: detecting and coping with ill-conditioned MIP models</h1>
+<div class="body"><p class="shortdesc">Recommends techniques to detect ill conditioning in your MIP model.</p>
+<p class="p"> To help you evaluate ill-conditioning and numerical difficulties
+in your model, CPLEX offers an optional report of the condition number, that is, MIP kappa statistics
+based on the simplex solutions of node relaxations during MIP optimization. To generate such
+a report, set the <a class="xref" href="../../../../../Parameters/topics/MIPKappaStats.html#languageRefTopic1266237349678" title="Sets the strategy for computing statistics about MIP kappa">MIP kappa computation</a><samp class="ph codeph">(CPX_PARAM_MIPKAPPASTATS,
+MIPKappaStats)</samp> documented in the <em class="ph i">Parameter Reference Manual</em>. </p>
+<p class="p"> When you set that parameter to report kappa statistics
+about your model, CPLEX tells you whether it encountered suspicious,
+unstable, or ill-posed bases while solving your model. For a definition
+of the range of condition numbers for suspicious, unstable, and ill-posed
+bases, see the documentation of these symbols in the reference manuals
+of the APIs: </p>
+<ul class="ul"><li class="li"><samp class="ph codeph">CPX_KAPPA_SUSPICIOUS</samp> or  <samp class="ph codeph">KappaSuspicious</samp> 
+reports the percentage of numerically suspicious simplex bases  (condition
+number kappa between 1e+7 and 1e+10)  among simplex bases encountered
+during a MIP solve.</li>
+<li class="li"><samp class="ph codeph">CPX_KAPPA_UNSTABLE</samp> or <samp class="ph codeph">KappaUnstable</samp> 
+reports the percentage of numerically unstable simplex bases  (condition
+number kappa between 1e+10 and 1e+14)  among simplex bases encountered
+during a MIP solve.</li>
+<li class="li"><samp class="ph codeph">CPX_KAPPA_ILLPOSED</samp> or <samp class="ph codeph">KappaIllposed</samp> 
+reports the percentage of numerically ill-posed simplex bases  (condition
+number greater than 1e+14)  among simplex bases encountered during
+a MIP solve.</li>
+</ul>
+<p class="p">Here is a sample from a log file showing results when the parameter <samp class="ph codeph">CPX_PARAM_MIPKAPPASTATS=2</samp> tells
+CPLEX to compute MIP kappa for all LP subproblems:</p>
+<pre class="pre codeblock"><code>MILP objective                                -2.1989035553e+06
+MILP solution norm |x| (Total, Max)            1.95445e+10  1.68134e+08
+MILP solution error (Ax=b) (Total, Max)        3.90105e+05  8.14760e+03
+MILP x bound error (Total, Max)                0.00000e+00  0.00000e+00
+MILP x integrality error (Total, Max)          1.96296e-06  9.81482e-07
+MILP slack bound error (Total, Max)            8.27493e-08  2.95847e-09
+
+Branch-and-cut subproblem optimization:
+Max condition number:                    1.9347e+12
+Percentage (number) of stable bases:      0.00%   (0)
+Percentage (number) of suspicious bases: 99.97%   (16518157)
+Percentage (number) of unstable bases:    0.03%   (5044)
+Percentage (number) of ill-posed bases:   0.00%   (0)
+Attention level:                         0.010089</code></pre>
+<p class="p"> In such a report, the <strong class="ph b">attention level</strong> estimates the probability
+of numerical difficulties for the given sample of condition numbers.
+When the attention level is 0 (zero), CPLEX encountered only stable
+bases while solving the model.  When the attention level is strictly
+greater than 0 (zero), CPLEX encountered at least one basis that is
+not stable. The maximum value of attention level is 1 (one), reporting
+that all the bases are ill-posed. </p>
+<p class="p"> You should reconsider your model if CPLEX reports any ill-posed
+bases or more than 5% unstable bases. </p>
+<p class="p"> In a report like that sample, consider the solution norm values.
+If the report shows large solution norm values, check the lower order
+decimal places for round off error. If the round off error exceeds
+the tolerances set for this optimization, you can encounter inconsistent
+results and other numerical difficulties. </p>
+<p class="p"> For example, that sample report of solution quality shows that
+the maximum individual x value is on the order of 1e+8. Conventional
+machine precision is 1e-16; that is, there are 16 digits of accuracy;
+that is, values beyond the eighth decimal place are likely to arise
+from round-off error. CPLEX uses default tolerances for feasibility
+and optimality of 1e-6 implying that the solution in the sample report
+is sound. However, for the particular model in that sample report,
+it would not be a good idea to reduce the CPLEX feasibility and optimality
+tolerances to 1e-8 or less. </p>
+<p class="p"> Also consider the solution error in the report. The solution error
+is a vector of residuals on the constraints; that is: </p>
+<pre class="pre codeblock"><code>b - Ax</code></pre>
+<p class="p"> The <strong class="ph b">Max solution error</strong> is the maximum individual absolute
+residual element in that vector. The <strong class="ph b">Total solution error</strong> is
+the sum of the absolute values of all elements in that vector. 
+In that sample report, both the maximum and total solution error are quite significant.</p>
+<p class="p"> 
+Acceptable <strong class="ph b">residual levels</strong> depend on the magnitude of the numerical values in the problem.
+In other words, whether residuals are too great or not depends on your model and data. 
+For most models, one would expect residuals no larger than the feasibility tolerance used to solve the model. 
+In this case (as reported in that sample), the residuals are much larger. In fact, the
+residuals are so much larger that they warrant investigation. </p>
+<p class="p">To detect the source of the large residuals and to assess their 
+importance, start by looking for constraints with large right hand side values 
+where a modest relative violation in the constraint results in a large absolute violation.  
+Then, examine the nonzero matrix and associated variable values for such constraints.  
+This procedure suggests the cause of the large residuals.  Possible remedies include 
+rescaling constraints with extremely large coefficients or 
+reformulating parts of the model to reduce large solution values.</p>
+<p class="p"> Even a small percentage of ill-posed bases in the MIP kappa statistics
+is cause for concern about the model.  Likewise, a significant percentage
+of unstable bases raises concern about the model. For practical suggestions
+about how to address such concerns, see the popular CPLEX Tech Note <em class="ph i">Diagnosing
+ill conditioning</em> at your IBM Support Portal: http://www-304.ibm.com/support/docview.wss?uid=swg21399993 </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/troubleshoot/53_trouble_title_synopsis.html" title="Describes symptoms of performance problems in MIP optimization and recommends remedies.">Troubleshooting MIP performance problems</a></div>
+</div>
+</div></body>
+</html>

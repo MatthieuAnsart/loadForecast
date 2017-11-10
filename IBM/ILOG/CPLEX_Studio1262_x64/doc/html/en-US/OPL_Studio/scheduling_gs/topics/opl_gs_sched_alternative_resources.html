@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using alternative resources in the house building problem" />
+<meta name="abstract" content="Describes how to use alternative resources in the house building problem." />
+<meta name="Description" content="Describes how to use alternative resources in the house building problem." />
+<meta name="DC.subject" content="limit, fail, fail limit" />
+<meta name="keywords" content="limit, fail, fail limit" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="YACuiawj" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Using alternative resources in the house building problem</title>
+</head>
+<body role="main" id="YACuiawj">
+<h1 class="title topictitle1">Using alternative resources in the house building problem</h1>
+<div class="body"><p class="shortdesc">Describes how to use alternative resources in the house building problem.</p>
+<p class="p">In this section, you will learn how to:</p>
+<ul class="ul"><li class="li"><p class="p">use the constraints <span class="keyword apiname">alternative</span> and <span class="keyword apiname">presenceOf</span>;</p>
+</li>
+<li class="li"><p class="p">use the keyword <span class="keyword apiname">optional</span>.</p>
+</li>
+</ul>
+<p class="p">You will learn how to model and solve a house building problem, a problem of scheduling the tasks involved in building multiple houses. Some tasks must necessarily take place before other tasks, and each task has a predefined duration. Each house has a maximal completion date. Moreover, there are three workers, and one of the three is required for each task. The three workers have varying levels of skills with regard to the various tasks; if a worker has no skill for a particular task, he may not be assigned to the task. For some pairs of tasks, if a particular worker performs one of the pair on a house, then the same worker must be assigned to the other of the pair for that house. The objective is to find a solution that maximizes the task associated skill levels of the workers assigned to the tasks. To find a solution to this problem using IBM ILOG OPL, you will use the three-stage method: describe, model, and solve.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="HpW3U8xU"><h2 class="title topictitle2">Describe</h2>
+<div class="body"><p class="p">The problem consists of assigning start dates to a set of tasks in such a way that the schedule satisfies temporal constraints and maximizes a criterion. The criterion for this problem is to maximize the task associated skill levels of the workers assigned to the tasks.</p>
+<p class="p">For each task type in the house building project, the following table shows the duration of the task in days along with the tasks that must be finished before the task can start. A worker can only work on one task at a time; each task, once started, may not be interrupted.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three column table that lists the tasks in the house building problem, the duration of each task, and the preceding tasks." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. House construction tasks</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d867236e49">Task</th>
+<th class="entry" align="left" valign="top" id="d867236e51">Duration</th>
+<th class="entry" align="left" valign="top" id="d867236e53">Preceding tasks</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">35</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 "> </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">15</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">plumbing</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">40</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">15</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">roofing</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">carpentry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">painting</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">10</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">ceiling</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">windows</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">roofing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">facade</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">10</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">garden</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e49 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d867236e51 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e53 ">windows, facade, garden, painting </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Every house must be completed within 300 days. There are three workers with varying skill levels in regard to the ten tasks. If a worker has a skill level of zero for a task, he may not be assigned to the task.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four column table that lists the ten tasks in the house building problem, and three workers with their skill levels with regard to each task." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. Worker-task skill levels</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d867236e141">Task</th>
+<th class="entry" align="left" valign="top" id="d867236e143">Joe</th>
+<th class="entry" align="left" valign="top" id="d867236e145">Jack</th>
+<th class="entry" align="left" valign="top" id="d867236e147">Jim</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">9</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">7</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">0</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">5</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">plumbing</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">0</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">7</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">8</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">roofing</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">6</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">7</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">painting</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">0</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">9</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">6</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">windows</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">8</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">0</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">5</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">façade</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">0</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">garden</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">5</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">9</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d867236e141 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d867236e143 ">6</td>
+<td class="entry" align="left" valign="top" headers="d867236e145 ">0</td>
+<td class="entry" align="left" valign="top" headers="d867236e147 ">8</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">For Jack, if he performs the roofing task or facade task on a house, then he must perform the other task on that house. For Jim, if he performs the garden task or moving task on a house, then he must perform the other task on that house. For Joe, if he performs the masonry task or carpentry task on a house, then he must perform the other task on that house. Also, if Joe performs the carpentry task or roofing task on a house, then he must perform the other task on that house.</p>
+<div class="section" id="HpW3U8xU__tmwGf1YI"><h3 class="title sectiontitle">Step 1: Describe the problem</h3><p class="p">The first step in modeling and solving the problem is to write a natural language description of the problem, identifying the decision variables and the constraints on these variables.</p>
+<p class="p">Write a natural language description of this problem. Answer these questions:</p>
+<ul class="ul"><li class="li"><p class="p">What is the known information in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the decision variables or unknowns in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the constraints on these variables?</p>
+ </li>
+<li class="li"><p class="p">What is the objective?</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="HpW3U8xU__LzSeUcgD"><h3 class="title sectiontitle">Discussion</h3><p class="p">What is the known information in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">There are five houses to be built by three workers. For each house, there are ten house building tasks, each with a given size. For each task, there is a list of tasks that must be completed before the task can start. Each worker has a skill level associated with each task. There is an overall deadline for the work to be completed on the five houses.</p>
+ </li>
+</ul>
+<p class="p">What are the decision variables or unknowns in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">The unknown is the point in time that each task will start. Also, unknown is which worker will be assigned to each task.</p>
+</li>
+</ul>
+<p class="p">What are the constraints on these variables?</p>
+<ul class="ul"><li class="li"><p class="p">There are constraints that specify that a particular task may not begin until one or more given tasks have been completed. In addition, there are constraints that specify that each task must have one worker assigned to it, that a worker can be assigned to only one task at a time and that a worker can be assigned only to tasks for which he has some level of skill. There are pairs of tasks that if one task for a house is done by a particular worker, then the other task for that house must be done by the same worker.</p>
+ </li>
+</ul>
+<p class="p">What is the objective?</p>
+<ul class="ul"><li class="li"><p class="p">The objective is to maximize the skill levels used.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="FMiHGlKO"><h2 class="title topictitle2">Model</h2>
+<div class="body"><p class="p">After you have written a description of your problem, you can use IBM ILOG OPL to model and solve it.</p>
+<div class="section" id="FMiHGlKO__MHWjqBX2"><h3 class="title sectiontitle">Step 2: Open the example file</h3><ul class="ul"><li class="li"><p class="p">Still working with the <span class="ph uicontrol">scheduling_tutorial</span> project, open the <span class="ph uicontrol">sched_optional.mod</span> file in the CPLEX Studio IDE.</p>
+ </li>
+</ul>
+<p class="p">This file is an OPL model that is only partially completed. You will add the missing code in each step of this lesson. At the end, you will have completed the OPL model.</p>
+<p class="p">The code for reading the data into the data structures from the data file is provided.</p>
+<p class="p">In the related data file, the data provided includes the number of houses (<samp class="ph codeph">NbHouses</samp>), the names of the workers (<samp class="ph codeph">Workers</samp>), the names of the tasks (<samp class="ph codeph">Tasks</samp>), the sizes of the tasks (<samp class="ph codeph">Duration</samp>s), the precedence relations (<samp class="ph codeph">Precedences</samp>), and the overall deadline for the construction of the houses (<samp class="ph codeph">Deadline</samp>).</p>
+<p class="p">The data also includes a tupleset, <samp class="ph codeph">Skills</samp>. Each tuple in the set consists of a worker, a task, and the skill level that the worker has for the task. In addition, there is a tupleset, <samp class="ph codeph">Continuities</samp>, which is a set of triples (a pair of tasks and a worker). If one of the two tasks in a pair is performed by the worker for a given house, then the other task in the pair must be performed by the same worker for that house.</p>
+<p class="p">You create two matrices of interval variables in this model. The first, <samp class="ph codeph">tasks</samp>, is indexed on the houses and tasks and must be scheduled in the interval <samp class="ph codeph">[0..Deadline]</samp>. The other matrix of interval variables is indexed on the houses and the <samp class="ph codeph">Skills</samp> tupleset. These interval variables are optional and may or may not be present in the solution. The intervals that are performed will represent which worker performs which task. </p>
+</div>
+<div class="section" id="FMiHGlKO__Q8QAREj6"><h3 class="title sectiontitle">Step 3: Create the interval variables</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the interval variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar interval tasks [h in Houses][t in Tasks] in 0..Deadline size Durations[t];
+dvar interval wtasks[h in Houses][s in Skills] optional;
+</code></pre>
+<p class="p">The tasks in the model have precedence constraints that are added to the model.</p>
+</div>
+<div class="section" id="FMiHGlKO__mXUI2xT8"><h3 class="title sectiontitle">Step 4: Add the temporal constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the temporal constraints</samp>:</p>
+<pre class="pre codeblock"><code>    forall(p in Precedences)
+      endBeforeStart(tasks[h][p.pre], tasks[h][p.post]);  
+</code></pre>
+<p class="p">To constrain the solution so that exactly one of the interval variables <samp class="ph codeph">wtasks</samp> associated with a given task of a given house is to be present in the solution, you use the specialized constraint <span class="keyword apiname">alternative</span>.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Alternative constraint</strong></p>
+ <p class="p">With the specialized constraint <span class="keyword apiname">alternative</span>, you can create a constraint between an interval and a set of intervals that specifies that if the given interval is present in the solution, then exactly one interval variable of the set is present in the solution.</p>
+ <p class="p">In other words, consider an alternative constraint created with an interval variable <samp class="ph codeph">a</samp> and an array of interval variables <samp class="ph codeph">bs</samp>. If <samp class="ph codeph">a</samp> is present in the solution, then exactly one of the interval variables in <samp class="ph codeph">bs</samp> will be present, and <samp class="ph codeph">a</samp> starts and ends together with this chosen interval.</p>
+ </div>
+</div>
+<div class="section" id="FMiHGlKO__BRgU4dmF"><h3 class="title sectiontitle">Step 5: Add the alternative constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the alternative constraints</samp>:</p>
+<pre class="pre codeblock"><code>    forall(t in Tasks)
+      alternative(tasks[h][t], all(s in Skills: s.task==t) wtasks[h][s]);
+</code></pre>
+<p class="p">You add the constraints that certain tasks must be performed by the same worker. To represent whether a task is performed by a worker, you use the expression <span class="keyword apiname">presenceOf</span>. The constraint <span class="keyword apiname">presenceOf</span> is true if the interval variable is present in and is false if the interval variable is absent from the solution.</p>
+<p class="p">For each house and each given pair of tasks and worker that must have continuity, you constrain that if the interval variable for one of the two tasks for the worker is present, the interval variable associated with that worker and the other task must also be present.</p>
+</div>
+<div class="section" id="FMiHGlKO__HxsmbbH1"><h3 class="title sectiontitle">Step 6: Add the same worker constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the same worker constraints</samp>:</p>
+<pre class="pre codeblock"><code>    forall(c in Continuities,
+           &lt;c.worker, c.task1, l1&gt; in Skills, 
+           &lt;c.worker, c.task2, l2&gt; in Skills)
+      presenceOf(wtasks[h,&lt;c.worker, c.task1, l1&gt;]) == 
+      presenceOf(wtasks[h,&lt;c.worker, c.task2, l2&gt;]);
+</code></pre>
+<p class="p">To add the constraints that a given worker can be assigned only one task at a given moment in time, you use the constraint <span class="keyword apiname">noOverlap</span>.</p>
+</div>
+<div class="section" id="FMiHGlKO__Hft2blLL"><h3 class="title sectiontitle">Step 7: Add the no overlap constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the no overlap constraints</samp>:</p>
+<pre class="pre codeblock"><code>  forall(w in Workers)
+    noOverlap(all(h in Houses, s in Skills: s.worker==w) wtasks[h][s]);
+</code></pre>
+<p class="p">The presence of an interval variable in <samp class="ph codeph">wtasks</samp> in the solution must be accounted for in the objective. Thus for each of these possible tasks, you increment the cost by the product of the skill level and the expression representing the presence of the interval variable in the solution.</p>
+<p class="p">The objective of this problem is to maximize the skill levels used for all the tasks, so you maximize the expression.</p>
+</div>
+<div class="section" id="FMiHGlKO__uriBgQUl"><h3 class="title sectiontitle">Step 8: Add the objective</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the objective</samp>:</p>
+<pre class="pre codeblock"><code>maximize sum(h in Houses, s in Skills) s.level * presenceOf(wtasks[h][s]);</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="z1D5DOUG"><h2 class="title topictitle2">Solve</h2>
+<div class="body"><p class="p">The search for an optimal solution in this problem could potentiality take a long time, so a fail limit has been placed on the solve process. The search will stop when the fail limit is reached, even if optimality of the current best solution is not guaranteed. The code for limiting the solve process has been provided for you: </p>
+<pre class="pre codeblock"><code>execute {
+  cp.param.FailLimit = 10000;
+}</code></pre>
+<div class="section" id="z1D5DOUG__uAdZO31E"><h3 class="title sectiontitle">Step 9: Execute the model</h3><ul class="ul"><li class="li"><p class="p">Execute the model in the CPLEX Studio IDE or using <samp class="ph codeph">oplrun</samp>; you will need to pass as arguments not only the model file but also the data file, <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/tutorial/sched_optional.dat</span>.</p>
+</li>
+</ul>
+<p class="p">You can also view the complete model online in the <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_optional/sched_optional.mod</span> file. </p>
+</div>
+</div>
+</div>
+</body>
+</html>

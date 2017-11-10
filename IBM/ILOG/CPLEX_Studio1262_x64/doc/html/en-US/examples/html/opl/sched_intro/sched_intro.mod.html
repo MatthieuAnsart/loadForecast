@@ -1,0 +1,134 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+013: 
+014: <b><font color="#007D00">Problem Description</font></b>
+015: <b><font color="#007D00">-------------------</font></b>
+016: 
+017: <b><font color="#007D00">This is a basic problem that involves building a house. The masonry,</font></b>
+018: <b><font color="#007D00">roofing, painting, etc.  must be scheduled. Some tasks must</font></b>
+019: <b><font color="#007D00">necessarily take place before others, and these requirements are</font></b>
+020: <b><font color="#007D00">expressed through precedence constraints.</font></b>
+021: 
+022: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+023: 
+024: 
+025: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+026: 
+027: 
+028: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> masonry    <b><font color="#0000FF">size</font></b> 35;
+029: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> carpentry  <b><font color="#0000FF">size</font></b> 15;
+030: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> plumbing   <b><font color="#0000FF">size</font></b> 40;
+031: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> ceiling    <b><font color="#0000FF">size</font></b> 15;
+032: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> roofing    <b><font color="#0000FF">size</font></b> 5;
+033: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> painting   <b><font color="#0000FF">size</font></b> 10;
+034: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> windows    <b><font color="#0000FF">size</font></b> 5;
+035: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> facade     <b><font color="#0000FF">size</font></b> 10;
+036: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> garden     <b><font color="#0000FF">size</font></b> 5;
+037: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> moving     <b><font color="#0000FF">size</font></b> 5;
+038: 
+039: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+040:   <b><font color="#7D007D">endBeforeStart</font></b>(masonry,   carpentry);
+041:   <b><font color="#7D007D">endBeforeStart</font></b>(masonry,   plumbing);
+042:   <b><font color="#7D007D">endBeforeStart</font></b>(masonry,   ceiling);
+043:   <b><font color="#7D007D">endBeforeStart</font></b>(carpentry, roofing);
+044:   <b><font color="#7D007D">endBeforeStart</font></b>(ceiling,   painting);
+045:   <b><font color="#7D007D">endBeforeStart</font></b>(roofing,   windows);
+046:   <b><font color="#7D007D">endBeforeStart</font></b>(roofing,   facade);
+047:   <b><font color="#7D007D">endBeforeStart</font></b>(plumbing,  facade);
+048:   <b><font color="#7D007D">endBeforeStart</font></b>(roofing,   garden);
+049:   <b><font color="#7D007D">endBeforeStart</font></b>(plumbing,  garden);
+050:   <b><font color="#7D007D">endBeforeStart</font></b>(windows,   moving);
+051:   <b><font color="#7D007D">endBeforeStart</font></b>(facade,    moving);
+052:   <b><font color="#7D007D">endBeforeStart</font></b>(garden,    moving);
+053:   <b><font color="#7D007D">endBeforeStart</font></b>(painting,  moving);
+054: }
+055: 
+056: 
+057: <b><font color="#0000FF">tuple</font></b> solutionT{
+058:         <b><font color="#0000FF">string</font></b> name;
+059:         <b><font color="#0000FF">int</font></b> start;
+060:         <b><font color="#0000FF">int</font></b> end;        
+061: };
+062: {solutionT} solution = {};
+063: <b><font color="#0000FF">execute</font></b> {
+064:   writeln(<b><font color="#8A2BE2">"Masonry  : "</font></b> + masonry.start   + <b><font color="#8A2BE2">".."</font></b> + masonry.end);
+065:   writeln(<b><font color="#8A2BE2">"Carpentry: "</font></b> + carpentry.start + <b><font color="#8A2BE2">".."</font></b> + carpentry.end);
+066:   writeln(<b><font color="#8A2BE2">"Plumbing : "</font></b> + plumbing.start  + <b><font color="#8A2BE2">".."</font></b> + plumbing.end);
+067:   writeln(<b><font color="#8A2BE2">"Ceiling  : "</font></b> + ceiling.start   + <b><font color="#8A2BE2">".."</font></b> + ceiling.end);
+068:   writeln(<b><font color="#8A2BE2">"Roofing  : "</font></b> + roofing.start   + <b><font color="#8A2BE2">".."</font></b> + roofing.end);
+069:   writeln(<b><font color="#8A2BE2">"Painting : "</font></b> + painting.start  + <b><font color="#8A2BE2">".."</font></b> + painting.end);
+070:   writeln(<b><font color="#8A2BE2">"Windows  : "</font></b> + windows.start   + <b><font color="#8A2BE2">".."</font></b> + windows.end);
+071:   writeln(<b><font color="#8A2BE2">"Facade   : "</font></b> + facade.start    + <b><font color="#8A2BE2">".."</font></b> + facade.end);
+072:   writeln(<b><font color="#8A2BE2">"Garden   : "</font></b> + garden.start    + <b><font color="#8A2BE2">".."</font></b> + garden.end);
+073:   writeln(<b><font color="#8A2BE2">"Moving   : "</font></b> + moving.start    + <b><font color="#8A2BE2">".."</font></b> + moving.end);
+074:   
+075:   solution.addOnly(<b><font color="#8A2BE2">"Masonry"</font></b> , masonry.start, masonry.end);
+076:   solution.addOnly(<b><font color="#8A2BE2">"Carpentry"</font></b> , carpentry.start , carpentry.end);
+077:   solution.addOnly(<b><font color="#8A2BE2">"Plumbing"</font></b> , plumbing.start  , plumbing.end);
+078:   solution.addOnly(<b><font color="#8A2BE2">"Ceiling"</font></b> , ceiling.start   , ceiling.end);
+079:   solution.addOnly(<b><font color="#8A2BE2">"Roofing"</font></b> , roofing.start   , roofing.end);
+080:   solution.addOnly(<b><font color="#8A2BE2">"Painting"</font></b> , painting.start  , painting.end);
+081:   solution.addOnly(<b><font color="#8A2BE2">"Windows"</font></b> , windows.start   , windows.end);
+082:   solution.addOnly(<b><font color="#8A2BE2">"Facade"</font></b> , facade.start    , facade.end);
+083:   solution.addOnly(<b><font color="#8A2BE2">"Garden"</font></b> , garden.start    , garden.end);
+084:   solution.addOnly(<b><font color="#8A2BE2">"Moving"</font></b> , moving.start    , moving.end);
+085:   
+086:   writeln(solution);
+087:   }
+088: 
+089: /*
+090: &lt;&lt;&lt; setup
+091: 
+092: 
+093: &lt;&lt;&lt; generate
+094: 
+095:  ! ----------------------------------------------------------------------------
+096:  ! Satisfiability problem - 10 variables, 14 constraints
+097:  ! Initial process time : 0.00s (0.00s extraction + 0.00s propagation)
+098:  !  . Log search space  : 300.0 (before), 300.0 (after)
+099:  !  . Memory usage      : 283.0 Kb (before), 283.0 Kb (after)
+100:  ! ----------------------------------------------------------------------------
+101:  !   Branches  Non-fixed                Branch decision
+102:  *         13      0.00s                         -
+103:  ! ----------------------------------------------------------------------------
+104:  ! Solution status        : Terminated normally, solution found
+105:  ! Number of branches     : 13
+106:  ! Number of fails        : 0
+107:  ! Total memory usage     : 432.3 Kb (315.0 Kb CP Optimizer + 117.3 Kb Concert)
+108:  ! Time spent in solve    : 0.00s (0.00s engine + 0.00s extraction)
+109:  ! Search speed (br. / s) : 1300.0
+110:  ! ----------------------------------------------------------------------------
+111: 
+112: &lt;&lt;&lt; solve
+113: 
+114: 
+115: 
+116: OBJECTIVE: no objective
+117: Masonry  : 0..35
+118: Carpentry: 35..50
+119: Plumbing : 35..75
+120: Ceiling  : 35..50
+121: Roofing  : 50..55
+122: Painting : 50..60
+123: Windows  : 55..60
+124: Facade   : 75..85
+125: Garden   : 75..80
+126: Moving   : 85..90
+127: 
+128: &lt;&lt;&lt; post process
+129: */
+</tt></pre>

@@ -1,0 +1,92 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/***************************************************</font></b>
+13: <b><font color="#007D00">OPL Model for Car Sequencing</font></b>
+14: 
+15: <b><font color="#007D00">Cars in production are placed on an</font></b>
+16: <b><font color="#007D00">assembly line moving through various</font></b>
+17: <b><font color="#007D00">units that install options such as air</font></b>
+18: <b><font color="#007D00">conditioning and radios.  The</font></b>
+19: <b><font color="#007D00">assembly line can thus be viewed as</font></b>
+20: <b><font color="#007D00">composed of slots and each car must</font></b>
+21: <b><font color="#007D00">be allocated to a single slot.    The</font></b>
+22: <b><font color="#007D00">cars cannot be allocated arbitrarily,</font></b>
+23: <b><font color="#007D00">since the production units have</font></b>
+24: <b><font color="#007D00">limited capacity and the options must</font></b>
+25: <b><font color="#007D00">be added to the cars as the assembly</font></b>
+26: <b><font color="#007D00">line is moving in front of the unit.</font></b>
+27: 
+28: <b><font color="#007D00">Two projects are given, with two different</font></b>
+29: <b><font color="#007D00">data sets.  The "Small" run configuration has the data</font></b>
+30: <b><font color="#007D00">file smallcar.dat that will run with the</font></b>
+31: <b><font color="#007D00">OPL Studio trial version.</font></b>
+32: <b><font color="#007D00">***************************************************/</font></b>
+33: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+34: 
+35: 
+36: <b><font color="#0000FF">execute</font></b>{
+37:         }
+38: 
+39: int  nbCars    = ...; // # of cars
+40: int   nbOptions = ...;// # of options
+41: int   nbSlots   = ...;// # of slots
+42: 
+43: range   Cars    = 1..nbCars; 
+44: range   Options = 1..nbOptions;
+45: range   Slots   = 1..nbSlots;
+46: 
+47: int demand[Cars] = ...;
+48: int option[Options,Cars] = ...; 
+49: 
+50: tuple Tcapacity {
+51:    <b><font color="#0000FF">int</font></b> l;
+52:    <b><font color="#0000FF">int</font></b> u;
+53: };
+54: Tcapacity capacity[Options] = ...; 
+55: int optionDemand[i in Options] = sum(j in Cars) demand[j] * option[i,j];
+56: 
+57: dvar int slot[Slots] in Cars;
+58: dvar int setup[Options,Slots] in 0..1;
+59: 
+60: subject to {
+61:    <b><font color="#007D00">// # of cars = demand</font></b>
+62:    forall(c <b><font color="EA7D00">in</font></b> Cars )
+63:       sum(s <b><font color="EA7D00">in</font></b> Slots ) (slot[s] == c) == demand[c];
+64:    
+65:    forall(o <b><font color="EA7D00">in</font></b> Options, s <b><font color="EA7D00">in</font></b> 1..(nbSlots - capacity[o].u + 1) )
+66:       sum(j <b><font color="EA7D00">in</font></b> s..(s + capacity[o].u - 1)) setup[o,j] &lt;= capacity[o].l;
+67: 
+68:    forall(o <b><font color="EA7D00">in</font></b> Options, s <b><font color="EA7D00">in</font></b> Slots )
+69:      setup[o,s] == option[o][slot[s]];
+70:    
+71:    forall(o <b><font color="EA7D00">in</font></b> Options, i <b><font color="EA7D00">in</font></b> 1..optionDemand[o])
+72:      sum(s <b><font color="EA7D00">in</font></b> 1 .. (nbSlots - i * capacity[o].u)) setup[o,s] &gt;=
+73:      optionDemand[o] - i * capacity[o].l;
+74: };
+75: 
+76: tuple slotSolutionT{ 
+77:         <b><font color="#0000FF">int</font></b> Slots; 
+78:         <b><font color="#0000FF">int</font></b> value; 
+79: };
+80: {slotSolutionT} slotSolution = {&lt;i0,slot[i0]&gt; | i0 <b><font color="EA7D00">in</font></b> Slots};
+81: tuple setupSolutionT{ 
+82:         <b><font color="#0000FF">int</font></b> Options; 
+83:         <b><font color="#0000FF">int</font></b> Slots; 
+84:         <b><font color="#0000FF">int</font></b> value; 
+85: };
+86: {setupSolutionT} setupSolution = {&lt;i0,i1,setup[i0][i1]&gt; | i0 <b><font color="EA7D00">in</font></b> Options,i1 <b><font color="EA7D00">in</font></b> Slots};
+87: 
+</tt></pre>

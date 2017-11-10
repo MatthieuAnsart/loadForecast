@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloSearchPhase</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloSearchPhase.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloSearchPhase</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilcp/cp.h</span></div><div><img
+                src="IloSearchPhase.png" border="0"
+                usemap="#svg_map_IloSearchPhase"
+                    alt="Map of IloSearchPhase"><map
+                        name="svg_map_IloSearchPhase"><area
+                        href="../classes/IloSearchPhase.html"
+                        shape="rect" alt="IloSearchPhase"
+                        coords="10.0,10.0,89.0,27.6357421875" /><area
+                        href="../classes/IloSearchPhase.html"
+                        shape="rect" alt="IloSearchPhase"
+            coords="10.0,10.0,89.0,27.6357421875" /></map></img></div>
+The class for defining search strategies in CP Optimizer.
+    <div
+                class="description"><p>The class <code>IloSearchPhase</code> is an object that is used
+ to define instantiation strategies to help the embedded CP Optimizer search.
+ A search phase is composed of:</p><ul>
+<li>an array of decision variables (<code>IloIntVarArray</code>,
+     <code>IloIntervalVarArray</code> or
+     <code>IloIntervalSequenceVarArray</code>) to instantiate,</li><li>a variable chooser (<code>IloIntVarChooser</code>) that defines how the next
+    variable to instantiate is chosen,</li><li>a value chooser (<code>IloIntValueChooser</code>) that defines how values
+    are chosen when instantiating variables.</li>
+</ul><p>A search phase is given to an <code>IloCP</code> instance by invoking one
+ of the methods:</p><pre
+                class="sample">
+  IloBool IloCP::solve(const IloSearchPhase phase) const;
+  void IloCP::startNewSearch(const IloSearchPhase phase) const;
+ </pre><p>The embedded search strategy - that is determined by the value of
+ the parameter <code>IloCP::SearchType</code> - will use the search phases to
+ instantiate the variables for which a search phase is specified.</p><p>Several search phases can be given to an <code>IloCP</code> instance by way of
+ an <code>IloSearchPhaseArray</code>. The methods that need to be invoked for that
+ purpose are:</p><pre
+                class="sample">
+   IloBool IloCP::solve(const IloSearchPhaseArray phaseArray) const;
+   void IloCP::startNewSearch(const IloSearchPhaseArray phaseArray) const;
+ </pre><p>The order of the search phases in the array is important. In the
+ CP Optimizer search strategy, the variables will be instantiated phase by phase
+ starting by the first phase of the array.
+ It is not necessary that the variables in the search phases cover all
+ the variables of the problem. It can be assumed that a search
+ phase containing all the problem variables is implicitly added to the
+ end of the given array of search phases.</p><p>For instance, assume we have a model over three arrays of variables
+ <code>x</code>, <code>y</code> and <code>z</code>. In the following search 
+ phase array:</p><pre
+                class="sample">
+   IloSearchPhaseArray phaseArray(env);
+   phaseArray.add(IloSearchPhase(env, x, ..., ...));
+   phaseArray.add(IloSearchPhase(env, y, ..., ...));
+ </pre><p>the variables <code>x</code> will be instantiated before the variables
+ <code>y</code> and
+ once <code>x</code> and <code>y</code> are instantiated, variables
+ in <code>z</code> will be instantiated.
+ There are some models which have particularly well-understood structure
+ where giving such an order can have a dramatic impact on the solving time.</p><p>It is important to note that for constructing a search phase,
+ not all the three parameters above are required. A search phase
+ can be created with an array of variables only. The embedded search
+ will then choose an instantiation strategy automatically.
+ For instance, assuming that <code>x</code> and <code>y</code>
+ are arrays of integer variables, the following code:</p><pre
+            class="sample">
+   IloCP cp(env);
+   IloSearchPhaseArray phaseArray(env);
+   phaseArray.add(IloSearchPhase(env, x));
+   phaseArray.add(IloSearchPhase(env, y));
+   cp.solve(phaseArray);
+ </pre><p>indicates to CP Optimizer search that variables from the array <code>x</code>
+ must be instantiated before those from the array <code>y</code>. The way to
+ instantiate them will be chosen by the CP Optimizer search.</p><p>Similarly, it is not necessary to specify an array of variables to
+ a search phase. A search phase defined this way will be applied to
+ every decision variable of the appropriate type extracted from the model.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloCP.html#method_solve">IloCP::solve</a>, <a
+                href="../classes/IloCP.html#method_startNewSearch">IloCP::startNewSearch</a>, <a
+                href="../classes/IloIntVarChooser.html">IloIntVarChooser</a>, <a
+            href="../classes/IloIntValueChooser.html">IloIntValueChooser</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloSearchPhase.html#method_end">end</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSearchPhase.html#method_IloSearchPhase">IloSearchPhase</a>(<a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                            href="../classes/IloIntVarArray.html">IloIntVarArray</a> vars, <a
+                            href="../classes/IloIntVarChooser.html">IloIntVarChooser</a> varChooser, <a
+                    href="../classes/IloIntValueChooser.html">IloIntValueChooser</a> valueChooser)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSearchPhase.html#method_IloSearchPhase">IloSearchPhase</a>(<a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                    href="../classes/IloIntVarArray.html">IloIntVarArray</a> vars)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSearchPhase.html#method_IloSearchPhase">IloSearchPhase</a>(<a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                            href="../classes/IloIntVarChooser.html">IloIntVarChooser</a> varChooser, <a
+                    href="../classes/IloIntValueChooser.html">IloIntValueChooser</a> valueChooser)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSearchPhase.html#method_IloSearchPhase">IloSearchPhase</a>(<a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                    href="../typedefs/IloIntervalVarArray.html">IloIntervalVarArray</a> intervalVars)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloSearchPhase.html#method_IloSearchPhase">IloSearchPhase</a>(<a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+            href="../typedefs/IloIntervalSequenceVarArray.html">IloIntervalSequenceVarArray</a> sequenceVars)</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloSearchPhase">IloSearchPhase</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSearchPhase</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+                class="parameter-name">vars</span>, <a
+                href="../classes/IloIntVarChooser.html">IloIntVarChooser</a> <span
+                class="parameter-name">varChooser</span>, <a
+                href="../classes/IloIntValueChooser.html">IloIntValueChooser</a> <span
+            class="parameter-name">valueChooser</span>)</div><div
+                class="description"><p>This constructor creates a search phase with an array of variables and
+ value choosers.  The phase will use <code>varChooser</code>
+ and <code>valueChooser</code> to determine how to instantiate variables
+ in <code>vars</code>.</p></div><hr /><h3><a
+            name="method_IloSearchPhase">IloSearchPhase</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSearchPhase</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../classes/IloIntVarArray.html">IloIntVarArray</a> <span
+            class="parameter-name">vars</span>)</div><div
+                class="description"><p>This constructor creates a search phase with an array of variables only.
+ The variable and value choosers for these variables will be chosen by
+ CP Optimizer search automatically.</p></div><hr /><h3><a
+            name="method_IloSearchPhase">IloSearchPhase</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSearchPhase</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../classes/IloIntVarChooser.html">IloIntVarChooser</a> <span
+                class="parameter-name">varChooser</span>, <a
+                href="../classes/IloIntValueChooser.html">IloIntValueChooser</a> <span
+            class="parameter-name">valueChooser</span>)</div><div
+                class="description"><p>This constructor creates a search phase with a variable and a value
+ chooser. The variables instantiated by this phase are those extracted
+ to the <code>IloCP</code> instance.</p></div><hr /><h3><a
+            name="method_IloSearchPhase">IloSearchPhase</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSearchPhase</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../typedefs/IloIntervalVarArray.html">IloIntervalVarArray</a> <span
+            class="parameter-name">intervalVars</span>)</div><div
+                class="description"><p>This constructor creates a search phase with an array of
+ interval variables. During this phase CP Optimizer fixes the
+ value of interval variables specified in the array
+ <code>intervalVars</code>: each interval variable in the array
+ will be assigned a presence status and for each present interval,
+ a start and an end value.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                    class="noteText">This search phase fixes the start and end values of
+ interval variables in an unidirectional manner, fixing
+ first the intervals that will be assigned a small start or end
+ value.</div></div><p>For more information on interval variables, see the concept
+ <a
+                href="../interval_variables.html">Interval variables in CP Optimizer</a>.</p></div><hr /><h3><a
+            name="method_IloSearchPhase">IloSearchPhase</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloSearchPhase</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../typedefs/IloIntervalSequenceVarArray.html">IloIntervalSequenceVarArray</a> <span
+            class="parameter-name">sequenceVars</span>)</div><div
+                class="description"><p>This constructor creates a search phase with an array of
+ interval sequence variables. During this phase CP Optimizer fixes
+ the value of interval sequence variables specified in the array
+ <code>sequenceVars</code>: each sequence variable in the array
+ will be assigned a totally ordered sequence of present interval
+ variables. Note that this search phase also fixes the presence
+ statuses of the intervals involved in the sequence
+ variables. This phase does not fix the start and end values of
+ interval variables.</p><div
+                    class="note"><div class="noteTitle">Note</div><div
+                    class="noteText">It is recommended to use this search phase only if the
+ possible range for start and end values of all interval variables
+ is limited (for example by some known horizon that limits their
+ maximal values).</div></div><p>For more information on interval sequence variables see the
+ concept
+ <a
+                href="../interval_sequence.html">Interval variable sequencing in CP Optimizer</a>.</p></div><hr /><h3><a
+            name="method_end">end</a></h3><div
+                class="prototype">public void <span
+            class="function-name">end</span>()</div><div class="description"><p>This function releases all the memory allocated internally to create an
+ instance.</p></div><hr /></body>
+</html>

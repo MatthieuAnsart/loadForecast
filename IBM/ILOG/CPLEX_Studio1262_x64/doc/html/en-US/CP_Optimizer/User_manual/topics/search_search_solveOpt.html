@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving an optimization problem" />
+<meta name="abstract" content="The basic search strategy in CP Optimizer can be used to solve optimization problems." />
+<meta name="Description" content="The basic search strategy in CP Optimizer can be used to solve optimization problems." />
+<meta name="DC.subject" content="IloCP class, getObjValule method, IloCP class, getValule method, solve method" />
+<meta name="keywords" content="IloCP class, getObjValule method, IloCP class, getValule method, solve method" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/search_search.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizersearch.1014841" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/search_search.html" />
+<title>Solving an optimization problem</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizersearch.1014841">
+<h1 class="title topictitle1">Solving an optimization problem</h1>
+<div class="body"><p class="shortdesc">The basic search strategy in CP Optimizer can
+be used to solve optimization problems.</p>
+<p class="p">The basic algorithm for solving a model is invoked by
+calling the method <samp class="ph codeph">solve</samp>, a member function
+of the optimizer object. (For example, in the <strong class="ph b">C++ API</strong>,
+this is <samp class="ph codeph">IloCP::solve</samp>. In the <strong class="ph b">Java™ API</strong>, this method is <samp class="ph codeph">IloCP.solve</samp>. In the <strong class="ph b">C# API</strong>, this
+method is <samp class="ph codeph">CP.Solve</samp>.) This function returns
+true (<samp class="ph codeph">IloTrue</samp> in the C++ API) when the engine
+has found an optimal solution. If the model has no objective function,
+then this call returns true when a solution is found. The function
+returns false (<samp class="ph codeph">IloFalse</samp> in the C++ API)
+when the problem has no solution.</p>
+<p class="p">Consider the following model with 3 integer variables,
+written in the C++ API: </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 7, "x");
+    IloIntVar y(env, 0, 7, "y");
+    IloIntVar z(env, 0, 7, "z");
+    IloIntVarArray all(env, 3, x, y, z);
+    model.add(IloMinimize(env, IloSum(all)));
+    model.add(IloAllDiff(env, all));
+    model.add(y == IloElement(IloIntArray(env, 7, 3, 7, 8, 8, 0, 1, 4), x));
+</code></pre>
+<p class="p">To solve the problem represented by this model, you can
+call the method <samp class="ph codeph">IloCP::solve</samp>, like this:
+ </p>
+<pre class="pre codeblock"><code>    IloCP cp(model);
+    cp.setParameter(IloCP::LogVerbosity, IloCP::Quiet);
+    if (cp.solve()){
+      cp.out() &lt;&lt; " An optimal solution has been found" 
+               &lt;&lt; ", objective value = " &lt;&lt; cp.getObjValue()
+               &lt;&lt; ", x = " &lt;&lt; cp.getValue(x)
+               &lt;&lt; ", y = " &lt;&lt; cp.getValue(y)
+               &lt;&lt; ", z = " &lt;&lt; cp.getValue(z) &lt;&lt; std::endl;
+    } else {
+      cp.out() &lt;&lt; " The problem has no solution " &lt;&lt; std::endl;
+    }
+</code></pre>
+<p class="p">In this example, the search log output is deactivated
+for the sake of brevity. Information regarding the search log is presented
+in the section <a class="xref" href="search_log.html" title="During search, information regarding the progress of the optimizer is displayed to the output channel of the optimizer; this information is called the search log or simply the log.">The search log</a>. The method <samp class="ph codeph">getValue</samp>, a member function of the optimizer object,
+takes a decision variable as an argument and returns the value of
+that variable in the solution that was found. The method <samp class="ph codeph">getObjValue</samp>, a member function of the optimizer
+object, returns the value of the objective for this solution. </p>
+<p class="p">Running this code produces the output:  </p>
+<pre class="pre codeblock"><code>An optimal solution has been found, objective value = 4, x = 0, y = 3, z = 1
+</code></pre>
+<p class="p">In the <strong class="ph b">C++ API</strong> of CP Optimizer, you use
+the class <samp class="ph codeph">IloCP</samp> and the methods <samp class="ph codeph">IloCP::solve</samp>, <samp class="ph codeph">IloCP::getValue</samp> and <samp class="ph codeph">IloCP::getObjValue</samp>.</p>
+<p class="p">In the <strong class="ph b">Java API</strong> of
+CP Optimizer, you use the class <samp class="ph codeph">IloCP</samp> and
+the methods <samp class="ph codeph">IloCP.solve</samp>, <samp class="ph codeph">IloCP.getValue</samp> and <samp class="ph codeph">IloCP.getObjValue</samp>.</p>
+<p class="p">In the <strong class="ph b">C# API</strong> of CP Optimizer, you use
+the class <samp class="ph codeph">CP</samp> and the methods <samp class="ph codeph">CP.Solve</samp> and <samp class="ph codeph">CP.GetValue</samp> and the member <samp class="ph codeph">CP.ObjValue</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/search_search.html" title="CP Optimizer uses constructive search strategies to find a solution to a constraint programming problem.">Searching for solutions</a></div>
+</div>
+</div></body>
+</html>

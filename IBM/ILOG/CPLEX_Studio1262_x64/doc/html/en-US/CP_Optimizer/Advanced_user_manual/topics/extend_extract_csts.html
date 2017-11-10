@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Engine representation of constraints" />
+<meta name="abstract" content="Constraints in the engine are built using the decision variables in the engine." />
+<meta name="Description" content="Constraints in the engine are built using the decision variables in the engine." />
+<meta name="DC.subject" content="extraction, constraint" />
+<meta name="keywords" content="extraction, constraint" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerextend.1015029" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" />
+<title>Engine representation of constraints</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerextend.1015029">
+<h1 class="title topictitle1">Engine representation of constraints</h1>
+<div class="body"><p class="shortdesc">Constraints in the engine are built using the decision
+variables in the engine.</p>
+<p class="p">The engine object for a constraint is an instance of <samp class="ph codeph">IlcConstraint</samp>.
+Basically, a model constraint or group of constraints is extracted
+to an instance of <samp class="ph codeph">IlcConstraint</samp>. To illustrate
+constraint extraction, consider the following model: </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 3); 
+    IloIntVar y(env, 0, 3); 
+    IloModel model(env); 
+    model.add(x &lt; y); 
+</code></pre>
+<p class="p">The code:  </p>
+<pre class="pre codeblock"><code>    IloCP cp(env); 
+    cp.extract(model); 
+</code></pre>
+<p class="p">extracts the model to the <samp class="ph codeph">IloCP</samp> instance.
+First, it takes the constraint <em class="ph i">x &lt;
+y</em> and starts extracting it. In order to extract
+this constraint, it extracts the two variables <em class="ph i">x</em> and <em class="ph i">y</em>.
+The extraction of these variables creates two <samp class="ph codeph">IlcIntVar</samp> objects: <em class="ph i">ix</em> and <em class="ph i">iy</em>.
+Then, the extraction of the constraint continues. The instance of <samp class="ph codeph">IloCP</samp> takes
+the two <samp class="ph codeph">IlcIntVar</samp> objects and creates the
+equivalent <samp class="ph codeph">IlcConstraint</samp>: <em class="ph i">ix &lt; iy</em>. This inequality constraint
+is then added to the instance of <samp class="ph codeph">IloCP</samp>. </p>
+<p class="p">The extraction creates an equivalent of the following
+code:  </p>
+<pre class="pre codeblock"><code>    IlcIntVar ix(cp, 0, 3); 
+    IlcIntVar iy(cp, 0, 3); 
+    cp.add(ix &lt; iy);
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" title="A model is extracted to the to the optimizer before search begins.">Model extraction</a></div>
+</div>
+</div></body>
+</html>

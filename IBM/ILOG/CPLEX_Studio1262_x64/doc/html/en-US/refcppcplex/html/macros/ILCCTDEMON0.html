@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>ILCCTDEMON0</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../macros/ILCCTDEMON0.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Macro ILCCTDEMON0</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+            class="prototype">ILCCTDEMON0(name, IlcCtClass, IlcFnName)</div><div
+            class="prototype">ILCCTDEMON1(name, IlcCtClass, IlcFnName, t1, nA1)</div><div
+            class="prototype">ILCCTDEMON2(name, IlcCtClass, IlcFnName, t1, nA1, t2, nA2)</div><div
+            class="prototype">ILCCTDEMON3(name, IlcCtClass, IlcFnName, t1, nA1, t2, nA2, t3, nA3)</div><div
+            class="prototype">ILCCTDEMON4(name, IlcCtClass, IlcFnName, t1, nA1, t2, nA2, t3, nA3, t4, nA4)</div><div
+            class="prototype">ILCCTDEMON5(name, IlcCtClass, IlcFnName, t1, nA1, t2, nA2, t3, nA3, t4, nA4, t5, nA5)</div><div
+            class="prototype">ILCCTDEMON6(name, IlcCtClass, IlcFnName, t1, nA1, t2, nA2, t3, nA3, t4, nA4, t5, nA5, t6, nA6)</div>
+Macro for creating a new demon class.
+      <div
+                        class="description"><p>This macro defines a demon class named <code>nameI</code> with <em>n</em>
+ data members. When <em>n</em> is greater than 0, the types and names of the
+ data members must be supplied as arguments to the macro. Each data member is
+ defined by its type <code>T</code><em>i</em> and a name
+ <code>data</code><em>i</em>. Besides the definition of the class
+ <code>nameI</code>, this macro also defines a function named
+ <code>name</code> that creates an instance of the class <code>nameI</code>
+ and that returns an instance of the class <code><a
+                href="../classes/IlcDemon.html">IlcDemon</a></code> that points to it.</p><p>You are not obliged to use this macro to define demons. When the macro
+ seems too restrictive for your purposes, we recommend that you define a
+ demon class directly.</p><p>Since the argument <code>name</code> is used to name the demon class, it
+ is not possible to use the same name for several demon definitions.</p><p><strong>Example</strong></p><p>Here's how to define a demon that calls the function
+ <code>MyConstraintI::reduceDomain(IlcIntVar var);</code> of the constraint
+ <code>ct</code>:</p><pre
+                class="sample">
+ ILCCTDEMON1 (CallReduceDomain, MyConstraintI,
+           reduceDomain, IlcIntVar, var);</pre><p>This macro then generates code similar to the following lines:</p><pre
+                class="sample">
+ class CallReduceDomainI: public IlcDemonI {
+      IlcIntVar var;
+ public:
+      CallReduceDomainI(IloCP cp,
+                        MyConstraintI* ct,
+                        IlcIntVar avar):
+      IlcDemonI(cp, ct), var(avar) {}
+      ~CallReduceRomainI(){}
+      void propagate();
+ };
+ IlcDemon CallReduceDomain(IloCP cp,
+                        MyConstraintI* ct,
+                        IlcIntVar var){
+      return new (cp.getHeap())
+                  CallReduceDomainI(s,ct,var);
+ }
+ void CallReduceDomainI::propagate(){
+      ((MyConstraintI*)getConstraint())-&gt;reduceDomain(var);
+ }</pre><p>The following statement creates an instance of the class
+ <code>CallReduceDomainI</code> and returns a handle that points to it.</p><pre
+                    class="sample">
+ CallReduceDomain(cp,ct,var);</pre><p>For more information, see the concepts 
+ <a
+                    href="../propagation.html">Propagation in CP Optimizer</a>
+ and <a
+            href="../propagationevents.html">Propagation events in CP Optimizer</a>.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IlcConstraintI.html">IlcConstraintI</a>, <a
+                href="../classes/IlcDemonI.html">IlcDemonI</a>, <a href="../classes/IlcGoalI.html">IlcGoalI</a></p></body>
+</html>

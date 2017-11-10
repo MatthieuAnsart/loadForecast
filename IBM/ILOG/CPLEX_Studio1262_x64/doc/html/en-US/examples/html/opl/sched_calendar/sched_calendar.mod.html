@@ -1,0 +1,91 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/* ------------------------------------------------------------</font></b>
+13: 
+14: <b><font color="#007D00">Problem Description</font></b>
+15: <b><font color="#007D00">-------------------</font></b>
+16: 
+17: <b><font color="#007D00">This is a problem of building five houses. The masonry, roofing,</font></b>
+18: <b><font color="#007D00">painting, etc. must be scheduled.  Some tasks must necessarily take</font></b>
+19: <b><font color="#007D00">place before others and these requirements are expressed through</font></b>
+20: <b><font color="#007D00">precedence constraints.</font></b>
+21: 
+22: <b><font color="#007D00">There are two workers and each task requires a specific worker.  The</font></b>
+23: <b><font color="#007D00">worker has a calendar of days off that must be taken into account. The</font></b>
+24: <b><font color="#007D00">objective is to minimize the overall completion date.</font></b>
+25: 
+26: <b><font color="#007D00">------------------------------------------------------------ */</font></b>
+27:  
+28: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+29: 
+30: <b><font color="#0000FF">int</font></b> NbHouses = ...; 
+31: <b><font color="#0000FF">range</font></b> Houses = 1..NbHouses;
+32: 
+33: {<b><font color="#0000FF">string</font></b>} WorkerNames = ...;  
+34: {<b><font color="#0000FF">string</font></b>} TaskNames   = ...;
+35: 
+36: <b><font color="#0000FF">int</font></b>    Duration [t <b><font color="#0000FF">in</font></b> TaskNames] = ...;
+37: <b><font color="#0000FF">string</font></b> Worker   [t <b><font color="#0000FF">in</font></b> TaskNames] = ...;
+38: 
+39: <b><font color="#0000FF">tuple</font></b> Precedence {
+40:   <b><font color="#0000FF">string</font></b> pre;
+41:   <b><font color="#0000FF">string</font></b> post;
+42: };
+43: 
+44: {Precedence} Precedences = ...;
+45: 
+46: <b><font color="#0000FF">tuple</font></b> Break {
+47:   <b><font color="#0000FF">int</font></b> s;
+48:   <b><font color="#0000FF">int</font></b> e;
+49: };
+50: 
+51: {Break} Breaks[WorkerNames] = ...; 
+52: 
+53: <b><font color="#007D00">// Set of break steps</font></b>
+54: <b><font color="#0000FF">tuple</font></b> Step {
+55:   <b><font color="#0000FF">int</font></b> v;
+56:   <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> x;
+57: };
+58: <b><font color="#0000FF">sorted</font></b> {Step} Steps[w <b><font color="#0000FF">in</font></b> WorkerNames] = 
+59:    { &lt;100, b.s&gt; | b <b><font color="#0000FF">in</font></b> Breaks[w] } <b><font color="#0000FF">union</font></b> 
+60:    { &lt;0, b.e&gt;   | b <b><font color="#0000FF">in</font></b> Breaks[w] };
+61:    
+62: <b><font color="#0000FF">stepFunction</font></b> Calendar[w <b><font color="#0000FF">in</font></b> WorkerNames] = 
+63:   <b><font color="#7D007D">stepwise </font></b>(s <b><font color="#0000FF">in</font></b> Steps[w]) { s.v -&gt; s.x; 100 };
+64: 
+65: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> itvs[h <b><font color="#0000FF">in</font></b> Houses, t <b><font color="#0000FF">in</font></b> TaskNames] 
+66:   <b><font color="#0000FF">size</font></b>      Duration[t]
+67:   <b><font color="#0000FF">intensity</font></b> Calendar[Worker[t]];
+68: 
+69: <b><font color="#0000FF">execute</font></b> {
+70:                 cp.param.FailLimit = 10000;
+71: }
+72: 
+73: minimize max(h in Houses) endOf(itvs[h]["moving"]);
+74: 
+75: subject to {
+76:   forall(h <b><font color="EA7D00">in</font></b> Houses) {
+77:     forall(p <b><font color="EA7D00">in</font></b> Precedences)
+78:       endBeforeStart(itvs[h][p.pre], itvs[h][p.post]);
+79:     forall(t <b><font color="EA7D00">in</font></b> TaskNames) {
+80:       forbidStart(itvs[h][t], Calendar[Worker[t]]);
+81:       forbidEnd  (itvs[h][t], Calendar[Worker[t]]);
+82:     }
+83:   }
+84:   forall(w <b><font color="EA7D00">in</font></b> WorkerNames)
+85:     noOverlap( all(h <b><font color="EA7D00">in</font></b> Houses, t <b><font color="EA7D00">in</font></b> TaskNames: Worker[t]==w) itvs[h][t]);
+86: }
+</tt></pre>

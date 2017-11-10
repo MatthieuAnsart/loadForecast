@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloCondition</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloCondition.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloCondition</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/ilothread.h</span></div><div><img
+                src="IloCondition.png" border="0"
+                usemap="#svg_map_IloCondition"
+                    alt="Map of IloCondition"><map
+                        name="svg_map_IloCondition"><area
+                        href="../classes/IloCondition.html" shape="rect"
+                        alt="IloCondition"
+                        coords="10.0,10.0,75.0,27.6357421875" /><area
+                        href="../classes/IloCondition.html" shape="rect"
+                        alt="IloCondition"
+            coords="10.0,10.0,75.0,27.6357421875" /></map></img></div>
+Provides synchronization primitives adapted to
+ Concert Technology for use in a parallel application.
+    <div
+                class="description"><p>The class <code>IloCondition</code> provides synchronization primitives adapted to
+ Concert Technology for use in a parallel application. </p><p>An instance of the class <code>IloCondition</code> allows several threads to
+ synchronize on a specific event. In this context, inter-thread communication takes
+ place through signals. A thread expecting a condition of the computation state (say,
+ <code>conditionC</code>) to be true before it executes a <code>treatmentT</code> can
+ wait until the condition is true. When computation reaches a state where
+ <code>conditionC</code> holds, then another thread can signal this fact by notifying
+ a single waiting thread or by broadcasting to all the waiting threads that
+ <code>conditionC</code> has now been met.</p><p>The conventional template for waiting on <code>conditionC</code> looks like this:
+ </p><pre
+                            class="sample">
+ mutex.lock();
+ while (conditionC does not hold)
+        condition.wait(&amp;mutex);
+ doTreatmentT();
+ mutex.unlock();
+ </pre><p>That template has the following properties:</p><ul>
+<li>The whole fragment is a critical section so that the evaluation of
+ <code>conditionC</code> is protected. (Indeed, it would be unsafe to evaluate <code>
+ conditionC</code> while at the same time another thread modifies the computation state
+ and affects the truth value of <code>conditionC</code>.) The pair of member functions
+ <code><a
+                            href="../classes/IloFastMutex.html#method_lock">IloFastMutex::lock</a></code> and
+ <code><a
+                        href="../classes/IloFastMutex.html#method_unlock">IloFastMutex::unlock</a></code> delimit the critical section.</li><li>When a thread enters the <code>wait</code> call, the mutex is automatically
+ unlocked by the system.</li><li>The loop that repeatedly checks <code>conditionC</code> is essential to the
+ correctness of the code fragment. It protects against the following possibility:
+ between the time that a thread modifies the computation state (so that
+ <code>conditionC</code> holds) and notifies a waiting thread and the moment the
+ waiting thread wakes up, the computation state might have been changed by another
+ thread, and <code>conditionC</code> might very well be false. </li><li>Upon returning from the <code>wait</code> call, the mutex is locked. The operation
+ of waking up and locking the mutex is atomic. In other words, nothing can happen
+ between the waking and the locking.</li>
+</ul><p><strong>System Class</strong></p><p><code>IloCondition</code> is a system class.</p><p>Most Concert Technology classes are actually handle classes whose instances point
+ to objects of a corresponding implementation class. For example, instances of the
+ Concert Technology class <code>IloNumVar</code> are handles pointing to instances of
+ the implementation class <code>IloNumVarI</code>. Their allocation and de-allocation
+ on the Concert Technology heap are managed by an instance of <code>IloEnv</code>.</p><p>However, system classes, such as <code>IloCondition</code>, differ from that
+ Concert Technology pattern. <code>IloCondition</code> is an ordinary C++ class. Its
+ instances are allocated on the C++ heap. </p><p>Instances of <code>IloCondition</code> are not automatically de-allocated by a call
+ to <code><a
+                        href="../classes/IloEnv.html#method_end">IloEnv::end</a></code>. You must explicitly destroy instances
+ of <code>IloCondition</code> by means of a call to the delete operator (which calls
+ the appropriate destructor) when your application no longer needs instances of this
+ class.</p><p>Furthermore, you should not allocate&mdash;neither directly nor indirectly&mdash;any
+ instance of <code>IloCondition</code> on the Concert Technology heap because the
+ destructor for that instance of <code>IloCondition</code> will never be called
+ automatically by <code><a
+                        href="../classes/IloEnv.html#method_end">IloEnv::end</a></code> when it cleans up other
+ Concert Technology objects on the Concert Technology heap. </p><p>For example, it is not a good idea to make an instance of <code>IloCondition</code>
+ part of a conventional Concert Technology model allocated on the Concert Technology
+ heap because that instance will not automatically be de-allocated from the Concert
+ Technology heap along with the other Concert Technology objects.</p><p><strong>De-allocating Instances of IloCondition</strong></p><p>Instances of <code>IloCondition</code> differ from the usual Concert Technology
+ objects because they are not allocated on the Concert Technology heap, and their
+ de-allocation is not managed automatically for you by
+ <code><a
+            href="../classes/IloEnv.html#method_end">IloEnv::end</a></code>. Instead, you must explicitly destroy
+ instances of <code>IloCondition</code> by calling the delete operator when your
+ application no longer needs those objects.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+            href="../classes/IloFastMutex.html">IloFastMutex</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCondition.html#method_broadcast">broadcast</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCondition.html#method_IloCondition">IloCondition</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCondition.html#method_notify">notify</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloCondition.html#method_wait">wait</a>(<a
+                    href="../classes/IloFastMutex.html">IloFastMutex</a> * m)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+            href="../classes/IloCondition.html#method_~IloCondition">~IloCondition</a>()</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloCondition">IloCondition</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloCondition</span>()</div><div
+                class="description"><p>This constructor creates an instance of <code>IloCondition</code> and allocates
+ it on the C++ heap (not in a Concert Technology environment). The instance contains
+ data structures specific to an operating system.</p></div><hr /><h3><a
+            name="method_~IloCondition">~IloCondition</a></h3><div
+                class="prototype">public  <span
+            class="function-name">~IloCondition</span>()</div><div
+                class="description"><p>The delete operator calls this destructor to de-allocate an instance of
+ <code>IloCondition</code>. This destructor is called automatically by the runtime
+ system. The destructor de-allocates data structures (specific to an operating system)
+ of the invoking condition.</p></div><hr /><h3><a
+            name="method_broadcast">broadcast</a></h3><div
+                class="prototype">public void <span
+            class="function-name">broadcast</span>()</div><div
+                class="description"><p>This member function wakes all threads currently waiting on the invoking condition.
+ If there are no threads waiting, this member function does nothing.</p></div><hr /><h3><a
+            name="method_notify">notify</a></h3><div
+                class="prototype">public void <span
+            class="function-name">notify</span>()</div><div
+                class="description"><p>This member function wakes one of the threads currently waiting on the invoking
+ condition.</p></div><hr /><h3><a
+            name="method_wait">wait</a></h3><div
+                class="prototype">public void <span
+                class="function-name">wait</span>(<a
+                href="../classes/IloFastMutex.html">IloFastMutex</a> * <span
+            class="parameter-name">m</span>)</div><div class="description"><p>This member function first puts the calling thread to sleep while it unlocks the
+ mutex <code>m</code>. Then, when either of the member functions <code>broadcast</code> or
+ <code>notify</code> wakes up that thread, this member function acquires the lock on
+ <code>m</code> and returns.</p></div><hr /></body>
+</html>

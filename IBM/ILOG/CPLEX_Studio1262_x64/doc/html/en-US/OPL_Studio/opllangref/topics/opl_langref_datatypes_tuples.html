@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Tuples" />
+<meta name="abstract" content="Data structures in OPL can be constructed using tuples that cluster together closely related data. This topic describes how to declare tuples, use keys on tuples, and initialize tuples." />
+<meta name="Description" content="Data structures in OPL can be constructed using tuples that cluster together closely related data. This topic describes how to declare tuples, use keys on tuples, and initialize tuples." />
+<meta name="DC.subject" content="structs in C, tuples in OPL, tuples, keywords, tuple, tuple, OPL keyword" />
+<meta name="keywords" content="structs in C, tuples in OPL, tuples, keywords, tuple, tuple, OPL keyword" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_datastructures.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangref.uss_langref_datatypes.1055644" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_datastructures.html" />
+<title>Tuples</title>
+</head>
+<body role="main" id="usropllangref.uss_langref_datatypes.1055644">
+<h1 class="title topictitle1">Tuples</h1>
+<div class="body"><p class="shortdesc">Data structures in OPL can be constructed using
+tuples that cluster together closely related data. This topic describes
+how to declare tuples, use keys on tuples, and initialize tuples.</p>
+<div class="section" id="usropllangref.uss_langref_datatypes.1055644__usropllangref.uss_langref_datatypes.1059515"><h2 class="title sectiontitle">Declaring tuples</h2><p class="p">For example, the declaration:</p>
+<pre class="pre codeblock"><code>tuple Point {
+       int x;
+       int y;
+    }; 
+Point point[i in 1..3] = &lt;i, i+1&gt;;</code></pre>
+<p class="p">declares a tuple <samp class="ph codeph">Point</samp> consisting
+of two fields <samp class="ph codeph">x</samp> and <samp class="ph codeph">y</samp> of
+type integer. Once a tuple type <samp class="ph codeph">T</samp> has been
+declared, tuples, arrays of tuples, sets of tuples of type <samp class="ph codeph">T</samp>, tuples of tuples can be declared, as in:</p>
+<pre class="pre codeblock"><code>Point p = &lt;2,3&gt;; 
+Point point[i in 1..3] = &lt;i, i+1&gt;;
+{Point} points = {&lt;1,2&gt;, &lt;2,3&gt;}; 
+tuple Rectangle {
+    Point ll; 
+    Point ur; 
+}</code></pre>
+<p class="p">These declarations respectively declare a
+point, an array of three points, a set of two points, and a tuple
+type where the fields are points. The various fields of a tuple can
+be accessed in the traditional way by suffixing the tuple name with
+a dot and the field name, as in </p>
+<pre class="pre codeblock"><code>Point p = &lt;2,3&gt;; 
+int x = p.x; </code></pre>
+<p class="p">which initializes <samp class="ph codeph">x</samp> to
+the field <samp class="ph codeph">x</samp> of tuple <samp class="ph codeph">p</samp>.
+Note that the field names are local to the scope of the tuples. </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">Multidimensional arrays are not supported in
+tuples. </p>
+ </div>
+</div>
+<div class="section" id="usropllangref.uss_langref_datatypes.1055644__usropllangref.uss_langref_datatypes.1057626"><h2 class="title sectiontitle">Keys in tuple declarations</h2><p class="p">As in database systems, tuple structures can be associated
+with <em class="ph i">keys</em>. Tuple keys enable you to access data organized
+in tuples using a set of unique identifiers. In the following example, the <samp class="ph codeph">nurse</samp> tuple is declared with the key <samp class="ph codeph">name</samp> of
+type <samp class="ph codeph">string</samp>.</p>
+<p class="p exampletitle" id="usropllangref.uss_langref_datatypes.1055644__usropllangref.uss_langref_datatypes.1057630">Declaring a tuple using a single
+key (<samp class="ph codeph">nurses.mod</samp>)</p>
+<pre class="pre codeblock"><code>tuple nurse {
+  key string name;
+  int seniority;
+  int qualification;
+  int payRate;
+}</code></pre>
+<p class="p">Then, supposing Isabelle must not work more than 20 hours
+a week, just write:</p>
+<pre class="pre codeblock"><code>NurseWorkTime[&lt;"Isabelle"&gt;]&lt;=20;</code></pre>
+<p class="p">leaving out the fields with no keys. This
+is equivalent to:</p>
+<pre class="pre codeblock"><code>NurseWorkTime[&lt;"Isabelle",3,1,16&gt;]&lt;=20;</code></pre>
+<p class="p">Using keys in tuple declarations has practical
+consequences, in particular:</p>
+<ul class="ul"><li class="li"><p class="p">The key field can be used as a unique identifier
+for the tuple, for example the field <samp class="ph codeph">name</samp> in <a class="xref" href="opl_langref_datatypes_tuples.html#usropllangref.uss_langref_datatypes.1055644__usropllangref.uss_langref_datatypes.1057630">Declaring a tuple using a single key (nurses.mod)</a>.
+In this example, it means that there will be no two tuples with the
+same name in a set of tuples of the type <samp class="ph codeph">nurse</samp>.
+If a user inadvertently attempts to add two different tuples with
+the same name, OPL raises an error.</p>
+</li>
+<li class="li"><p class="p">Defining keys enables you to access elements
+of the tuple set by using only the value of the key field (<samp class="ph codeph">name</samp> in the nurses example). Slicing is one of the
+features that benefit from it: you can slice on the tuple set using
+only key fields.</p>
+</li>
+</ul>
+<p class="p">You can also declare a tuple using a non singleton
+set of keys, such as the <samp class="ph codeph">shift</samp> tuple of
+the nurses example below.</p>
+<p class="p exampletitle" id="usropllangref.uss_langref_datatypes.1055644__usropllangref.uss_langref_datatypes.1057648">Declaring a tuple using a set
+of keys (<samp class="ph codeph">nurses.mod</samp>)</p>
+<pre class="pre codeblock"><code>tuple shift {
+   key string departmentName;
+   key string day;
+   key int startTime;
+   key int endTime;
+   int minRequirement;
+   int maxRequirement;   
+}</code></pre>
+<p class="p">In this example, a
+shift is uniquely identified by the department name, the date, and
+start and end times, all defined as key fields.</p>
+</div>
+<div class="section" id="usropllangref.uss_langref_datatypes.1055644__usropllangref.uss_langref_datatypes.1055741"><h2 class="title sectiontitle">Initializing tuples</h2><p class="p">You initialize tuples
+by giving the list of the values of the various fields, as in:</p>
+<pre class="pre codeblock"><code>Point p = &lt;2,3&gt;; </code></pre>
+<p class="p">which initializes <samp class="ph codeph">p.x</samp> to <samp class="ph codeph">2</samp> and <samp class="ph codeph">p.y</samp> to <samp class="ph codeph">3</samp>. See <a class="xref" href="opl_langref_data_init_tuples.html" title="Describes the two ways of initializing tuples.">Initializing tuples</a> for details. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_datastructures.html" title="Describes how the basic data types can be combined using arrays, tuples, and sets to obtain complex data structures.">Data structures</a></div>
+</div>
+</div></body>
+</html>

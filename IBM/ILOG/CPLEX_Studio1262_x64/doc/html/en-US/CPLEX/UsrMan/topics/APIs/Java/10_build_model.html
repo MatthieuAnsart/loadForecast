@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Building the model" />
+<meta name="abstract" content="Uses the diet example to demonstrate building a model for CPLEX in Java." />
+<meta name="Description" content="Uses the diet example to demonstrate building a model for CPLEX in Java." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Java/06_modeling_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1197453081920" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/06_modeling_title_synopsis.html" />
+<title>Building the model</title>
+</head>
+<body role="main" id="descriptiveTopic1197453081920">
+<h1 class="title topictitle1">Building the model</h1>
+<div class="body"><p class="shortdesc">Uses the diet example to demonstrate building a model
+for CPLEX in Java.</p>
+<p class="p">All the building blocks are now in place to implement
+a method that creates a model. The diet problem consists of finding
+the least expensive diet using a set of foods such that all nutritional
+requirements are satisfied. The example in this chapter builds the
+specific diet model, chooses an optimizing algorithm, and shows how
+to access more detailed information about the solution.</p>
+<p class="p">The example includes a set of foods, where food <samp class="ph codeph">j</samp> has
+a unit cost of <samp class="ph codeph">foodCost[j].</samp> The minimum
+and maximum amount of food <samp class="ph codeph">j</samp> which can
+be used in the diet is designated <samp class="ph codeph">foodMin[j]</samp> and <samp class="ph codeph">foodMax[j]</samp>,
+respectively. Each food <samp class="ph codeph">j</samp> also has a nutritional
+value <samp class="ph codeph">nutrPerFood[i][j]</samp> for all possible
+nutrients <samp class="ph codeph">i</samp>. The nutritional requirement
+states that in the diet the amount of every nutrient <samp class="ph codeph">i</samp> consumed
+must be within the bounds <samp class="ph codeph">nutrMin[i]</samp> and <samp class="ph codeph">nutrMax[i]</samp>.</p>
+<p class="p">Mathematically, this problem can be modeled using a variable <samp class="ph codeph">Buy[j]</samp> for
+each food <samp class="ph codeph">j</samp> indicating the amount of food <samp class="ph codeph">j</samp> to
+buy for the diet. Then the objective is: </p>
+<pre class="pre codeblock"><code>minimize ∑j (Buy[j] * foodCost[j])</code></pre>
+<p class="p">The nutritional requirements mean that the following
+conditions must be observed; that is, for all <samp class="ph codeph">i</samp> : </p>
+<pre class="pre codeblock"><code>nutriMin[i] ≤ ∑i nutrPerFood[i][j] * Buy[j] ≤ nutriMax[i]</code></pre>
+<p class="p">Finally, every food must be within its bounds; that is,
+for all <samp class="ph codeph">j</samp> : </p>
+<pre class="pre codeblock"><code>foodMin[j] ≤ Buy[j] ≤ foodMax[j]
+</code></pre>
+<p class="p">With what you have learned so far, you can implement
+a method that creates such a model. </p>
+<pre class="pre codeblock"><code> static void buildModelByRow(IloModeler     model,
+                              Data          data,
+                              IloNumVar[]   Buy,
+                              IloNumVarType type) 
+    throws IloException {
+    int nFoods = data.nFoods;
+    int nNutrs = data.nNutrs;
+
+    for (int j = 0; j &lt; nFoods; j++) {
+      Buy[j] = model.numVar(data.foodMin[j], data.foodMax[j], type);
+    }
+    model.addMinimize(model.scalProd(data.foodCost, Buy));
+
+    for (int i = 0; i &lt; nNutrs; i++) {
+      model.addRange(data.nutrMin[i],
+                     model.scalProd(data.nutrPerFood[i], Buy),
+                     data.nutrMax[i]);
+    }
+  }
+</code></pre>
+<p class="p">The function accepts several arguments. The argument <samp class="ph codeph">model</samp> is
+used for two purposes: </p>
+<ul class="ul"><li class="li"><p class="p">creating other modeling objects, and</p>
+</li>
+<li class="li"><p class="p">representing the model being created. </p>
+</li>
+</ul>
+<p class="p">The argument <samp class="ph codeph">data</samp> contains
+the data for the model to be built. The argument <samp class="ph codeph">Buy</samp> is
+an array, initialized to length <samp class="ph codeph">data.nFoods</samp>,
+containing the model's variables. Finally, the argument <samp class="ph codeph">type</samp> is
+used to specify the type of the variables being created.</p>
+<p class="p"> The function starts by creating the modeling variables,
+one by one, and storing them in the array <samp class="ph codeph">Buy</samp>.
+Each variable <samp class="ph codeph">j</samp> is initialized to have
+bounds <samp class="ph codeph">data.foodMin[j]</samp> and <samp class="ph codeph">data.foodMax[j]</samp> and
+to be of type <samp class="ph codeph">type</samp>.</p>
+<p class="p">The variables are first used to construct the objective
+function expression with the method <samp class="ph codeph">model.scalProd(foodCost,
+Buy)</samp>. This expression is immediately used to create
+the minimization objective which is directly added to the active model
+by <samp class="ph codeph">addMinimize</samp>.</p>
+<p class="p">In the loop that follows, the nutritional constraints
+are added. For each nutrient <samp class="ph codeph">i</samp> the expression
+representing the amount of nutrient in a diet with food levels <samp class="ph codeph">Buy</samp> is
+computed using <samp class="ph codeph">model.scalProd(nutrPerFood[i], Buy)</samp>.
+This amount of nutrient must be within the ranged constraint bounds <samp class="ph codeph">nutrMin[i]</samp> and <samp class="ph codeph">nutrMax[i]</samp>.
+This constraint is created and added to the active model with <samp class="ph codeph">addRange</samp>.</p>
+<p class="p">Note that function <samp class="ph codeph">buildModelByRow</samp> uses
+the interface <samp class="ph codeph">IloModeler</samp> rather than <samp class="ph codeph">IloCplex</samp>.
+This convention allows the function to be called without change in
+another implementation of <samp class="ph codeph">IloModeler</samp>, such
+as <samp class="ph codeph">IloCP</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Java/06_modeling_title_synopsis.html" title="Describes classes in the Java API to model an optimization problem.">Modeling an optimization problem with Concert Technology in the Java API</a></div>
+</div>
+</div></body>
+</html>

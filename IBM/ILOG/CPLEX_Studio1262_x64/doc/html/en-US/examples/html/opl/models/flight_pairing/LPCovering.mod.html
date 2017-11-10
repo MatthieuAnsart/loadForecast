@@ -1,0 +1,75 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2015. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">///</font></b>
+13: include <b><font color="#8A2BE2">"FlightPairing_data.mod"</font></b>;
+14: include <b><font color="#8A2BE2">"FlightCoverDual_data.mod"</font></b>;
+15: include <b><font color="#8A2BE2">"PairingGeneration_data.mod"</font></b>;
+16: 
+17: <b><font color="#007D00">/// externals specific to this LP model...</font></b>
+18: {TPairingCost} pairingCosts = ...;
+19: {TPairingLeg}  pairingLegs  = ...;
+20: 
+21: 
+22: <b><font color="#007D00">/// internal</font></b>
+23: <b><font color="#0000FF">int</font></b> NbFlights = <b><font color="#7D007D">card</font></b>(flights);
+24: <b><font color="#0000FF">range</font></b> FlightIndexRange = 1..NbFlights;
+25: 
+26: <b><font color="#007D00">/// locals</font></b>
+27: {<b><font color="#0000FF">int</font></b>} covered[ p <b><font color="#0000FF">in</font></b> pairingCosts ] = { fr | &lt;p.id, l, fr&gt; <b><font color="#0000FF">in</font></b> pairingLegs };
+28: 
+29: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b> usageVars[ pairingCosts] <b><font color="#0000FF">in</font></b> 0..1;
+30: 
+31: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> totalUsageCost = <b><font color="#7D007D">sum</font></b>(pc <b><font color="#0000FF">in</font></b> pairingCosts) (usageVars[pc] * pc.cost);
+32: <b><font color="#007D00">// symmetry breaking?? minimize nb of pairings, costs being equal.</font></b>
+33: <b><font color="#007D00">//dexpr float totalUsed =  sum(pc in pairingCosts) (usageVars[pc] );</font></b>
+34: 
+35: <b><font color="#0000FF">constraint</font></b> flight_cover_cts[ 1..NbFlights ];
+36: 
+37: <b><font color="#0000FF">minimize</font></b> totalUsageCost;
+38: 
+39: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> { 
+40:   <b><font color="#7D007D">forall </font></b>(f <b><font color="#0000FF">in</font></b> 1..NbFlights) {
+41:    flight_cover_cts[f]:
+42:     <b><font color="#7D007D">sum</font></b>(pc <b><font color="#0000FF">in</font></b> pairingCosts: f <b><font color="#0000FF">in</font></b> covered[pc] ) usageVars[pc] &gt;= 1;  
+43:   }
+44: }
+45: 
+46: <b><font color="#007D00">/// ---</font></b>
+47: <b><font color="#007D00">///  post-processing: save dual values per flight</font></b>
+48: <b><font color="#007D00">/// ---</font></b>
+49: 
+50: {TFlightCoverDual} coverCtDuals;
+51: <b><font color="#0000FF">float</font></b> dualHash;
+52: 
+53: <b><font color="#0000FF">execute</font></b> DUMP_DUALS{
+54: 
+55:   includeScript(<b><font color="#8A2BE2">"helpers.js"</font></b>);
+56:   
+57:   <b><font color="EA7D00">var</font></b> DUAL_EPS = 1e-5;
+58:   <b><font color="#0000FF">thisOplModel</font></b>.settings.displayPrecision = 8;
+59:   
+60:   <b><font color="#0000FF">thisOplModel</font></b>.dualHash = 0;
+61:   <b><font color="EA7D00">for</font></b> ( <b><font color="EA7D00">var</font></b> f <b><font color="EA7D00">in</font></b> FlightIndexRange) {
+62:     coverCtDuals.add(f, flight_cover_cts[f].dual &lt;= DUAL_EPS ? 0 : flight_cover_cts[f].dual);
+63:     <b><font color="#0000FF">thisOplModel</font></b>.dualHash += flight_cover_cts[f].dual &lt;= DUAL_EPS ? 0 : flight_cover_cts[f].dual;
+64:   }<b><font color="#007D00">//for</font></b>
+65:   
+66:   <b><font color="#007D00">/// debug: write duals as a DAT structure</font></b>
+67:   <b><font color="EA7D00">if</font></b> ( <b><font color="#0000FF">thisOplModel</font></b>.PairingGenerationData.PrintFiles) {
+68:      print_dual_values(<b><font color="#8A2BE2">"sample_cover_duals.dat"</font></b>, coverCtDuals);
+69:    }     
+70: }
+</tt></pre>

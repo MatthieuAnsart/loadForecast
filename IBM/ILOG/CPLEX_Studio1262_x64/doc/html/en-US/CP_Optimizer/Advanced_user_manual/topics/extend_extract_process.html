@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Extraction process" />
+<meta name="abstract" content="A model is extracted to the engine recursively." />
+<meta name="Description" content="A model is extracted to the engine recursively." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerextend.1014893" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" />
+<title>Extraction process</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerextend.1014893">
+<h1 class="title topictitle1">Extraction process</h1>
+<div class="body"><p class="shortdesc">A model is extracted to the engine recursively.</p>
+<p class="p">When an instance of <samp class="ph codeph">IloCP</samp> extracts
+a model, it iterates over each extractable added to the model and
+works on extracting it. This mechanism is recursive in the sense that
+the extraction of an object may lead to the extraction of another
+object. For instance, the extraction of the model: </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 1);
+    IloIntVar y(env, 0, 10);
+    IloIntVar z(env, -1, 3);
+    IloModel model(env);
+    model.add(z);
+    model.add(x + 2 * y &lt;= 3);
+</code></pre>
+<p class="p">involves the extraction of the variable <em class="ph i">z</em> and the constraint <em class="ph i">x + 2 * y &lt;= 3</em>. The extraction
+of the constraint in turn involves the extraction of variables <em class="ph i">x</em> and <em class="ph i">y</em>. </p>
+<p class="p">The purpose of extraction is to create engine objects
+from the extractables of the model. Theses objects can be constraints,
+variables or expressions. </p>
+<p class="p">In particular, it creates:</p>
+<ul class="ul"><li class="li"><p class="p">one engine variable for each decision
+variable in the model and</p>
+</li>
+<li class="li"><p class="p">an engine constraint for a constraint
+or a group of constraints in the model.</p>
+</li>
+</ul>
+<p class="p">These engine objects are usually prefixed with <samp class="ph codeph">Ilc</samp>. </p>
+<ul class="ul"><li class="li"><p class="p">The engine object of a decision variable
+is an instance of <samp class="ph codeph">IlcIntVar</samp>.</p>
+</li>
+<li class="li"><p class="p">The engine object of a constraint is
+an instance of <samp class="ph codeph">IlcConstraint</samp>. </p>
+</li>
+<li class="li"><p class="p">The engine object of an expression is
+an instance of <samp class="ph codeph">IlcIntExp</samp> or <samp class="ph codeph">IlcFloatExp</samp> depending
+on the type of the expression. </p>
+</li>
+<li class="li"><p class="p">Other types of extractables generally
+have counterparts in the engine. For instance, an instance of <samp class="ph codeph">IloIntTupleSet</samp> is
+extracted to an instance of <samp class="ph codeph">IlcIntTupleSet</samp>. </p>
+</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" title="A model is extracted to the to the optimizer before search begins.">Model extraction</a></div>
+</div>
+</div></body>
+</html>

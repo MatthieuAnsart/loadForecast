@@ -1,0 +1,158 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/******************************************************************************</font></b>
+013: <b><font color="#007D00"> OPL Model for Call Traffic Optimization (Hop Version)</font></b>
+014: <b><font color="#007D00">  </font></b>
+015: <b><font color="#007D00"> This builds upon the simple version by adding an additional subscript for</font></b>
+016: <b><font color="#007D00"> the number of hops each packet travels.  </font></b>
+017: <b><font color="#007D00">  </font></b>
+018: <b><font color="#007D00"> The data indicator "test" controls whether the model solves a feasibility or optimization </font></b>
+019: <b><font color="#007D00"> problem.  The data "maxHops" controls the maximum number of hops that can be used.</font></b>
+020: <b><font color="#007D00"> An artificial variable "infeas" indicates how much more capacity required on every arc </font></b>
+021: <b><font color="#007D00"> to maintain feasible flows at the current "Maxhops", if the program is in the mode of </font></b>
+022: <b><font color="#007D00"> testing feasibility ("test "=1). If the program is in optimization mode, namely, </font></b>
+023: <b><font color="#007D00"> test =0, "infeas" has no effect and the program solves the problem with </font></b>
+024: <b><font color="#007D00"> the original arc capacities.  </font></b>
+025: 
+026: <b><font color="#007D00">******************************************************************************/</font></b>
+027: 
+028: 
+029: <b><font color="#007D00">// Basic network configuration</font></b>
+030: {<b><font color="#0000FF">string</font></b>} Hubs = ...;
+031: 
+032: <b><font color="#0000FF">tuple</font></b> link {
+033:     <b><font color="#0000FF">string</font></b>    org;
+034:     <b><font color="#0000FF">string</font></b>    dst;
+035: }
+036: 
+037: <b><font color="#0000FF">tuple</font></b> market {
+038:     <b><font color="#0000FF">string</font></b>    org;
+039:     <b><font color="#0000FF">string</font></b>    dst;
+040: }
+041: 
+042: {link} Links = ...;
+043: {market} Markets = ...;
+044: 
+045: 
+046: <b><font color="#007D00">// Capacities and traffic volume</font></b>
+047: <b><font color="#0000FF">float</font></b> cap[Links] = ...;
+048: <b><font color="#0000FF">float</font></b> vol[Markets] = ...;
+049: 
+050: 
+051: <b><font color="#007D00">// Hop Network configuration</font></b>
+052: <b><font color="#0000FF">int</font></b> maxHops = ...;
+053: 
+054: <b><font color="#0000FF">tuple</font></b> hoplink {
+055:     <b><font color="#0000FF">int</font></b>     hop;
+056:     link    lnk;
+057: }
+058: 
+059: <b><font color="#0000FF">tuple</font></b> hophub {
+060:     <b><font color="#0000FF">int</font></b>     hop;
+061:     <b><font color="#0000FF">string</font></b>  hub;
+062: }
+063: 
+064: <b><font color="#007D00">// Initialize HopLinks and HopHubs implicitly from Links and Hubs.</font></b>
+065: <b><font color="#007D00">// Note that the HopLinks must include single period delays and that the</font></b>
+066: <b><font color="#007D00">// HopHubs start at time 0.</font></b>
+067: 
+068: {hoplink} temp1 =
+069:      { &lt;n, &lt;l.org,l.dst&gt;&gt; | l <b><font color="#0000FF">in</font></b> Links, n <b><font color="#0000FF">in</font></b> 1..maxHops};
+070: 
+071: {hoplink} temp2 =
+072:      { &lt;n, &lt;h,h&gt;&gt; | h <b><font color="#0000FF">in</font></b> Hubs, n <b><font color="#0000FF">in</font></b> 1..maxHops};
+073: 
+074: {hoplink} HopLinks = temp1 <b><font color="#0000FF">union</font></b> temp2;        
+075:     
+076: {hophub}  HopHubs = 
+077:     { &lt;n,h&gt; | h <b><font color="#0000FF">in</font></b> Hubs, n <b><font color="#0000FF">in</font></b> 0..maxHops };
+078: 
+079: 
+080: <b><font color="#007D00">// Indicators to represent whether a node is supply, sink, or intermediate</font></b>
+081: <b><font color="#0000FF">int</font></b> supply[HopHubs][Markets];
+082: 
+083: 
+084: <b><font color="#0000FF">execute</font></b> INITIALIZE {
+085:    <b><font color="EA7D00">if</font></b>(maxHops == 0) {
+086:       writeln(<b><font color="#8A2BE2">"maxHops has not been defined"</font></b>);
+087:    } <b><font color="EA7D00">else</font></b> {
+088:       <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> h <b><font color="EA7D00">in</font></b> HopHubs)
+089:          <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> m <b><font color="EA7D00">in</font></b> Markets)
+090:             <b><font color="EA7D00">if</font></b>(h.hub == m.org &amp;&amp; h.hop == 0)
+091:                supply[h][m] = -1;
+092:             
+093:       <b><font color="EA7D00">for</font></b>(h <b><font color="EA7D00">in</font></b> HopHubs)
+094:          <b><font color="EA7D00">for</font></b>(m <b><font color="EA7D00">in</font></b> Markets)
+095:             <b><font color="EA7D00">if</font></b>(h.hub == m.dst &amp;&amp; h.hop == maxHops)
+096:                supply[h][m] = 1;
+097:             
+098:       <b><font color="EA7D00">for</font></b>(h <b><font color="EA7D00">in</font></b> HopHubs)
+099:          <b><font color="EA7D00">for</font></b>(m <b><font color="EA7D00">in</font></b> Markets)
+100:             <b><font color="EA7D00">if</font></b>( (h.hub != m.org &amp;&amp; h.hop == 0) ||
+101:                 (h.hub != m.dst &amp;&amp; h.hop == maxHops) ||
+102:                 (0 &lt; h.hop &amp;&amp; h.hop &lt; maxHops) )
+103:                supply[h][m] = 0;
+104:    }
+105: }
+106: 
+107: 
+108: // Indicator to toggle between infeasibility testing and optimization
+109: int test = ...;
+110: 
+111: 
+112: // Variables
+113: dvar float+ traffic[HopLinks][Markets];          // arc traffic
+114: dvar float+ surplus;                             // smallest surplus capacity
+115: dvar float+ infeas;                              // arc infeasibility adder
+116: 
+117: // Constraint labels
+118: constraint csv;
+119: constraint arc[Links];
+120: 
+121: 
+122: 
+123: /************************************************************************
+124:  * LINEAR PROGRAMMING MODEL
+125: ************************************************************************/
+126: 
+127: maximize  (1-test)*surplus - test*infeas;
+128: 
+129: subject to {
+130:     <b><font color="#007D00">// Flow conservation</font></b>
+131:     <b><font color="#007D00">// flows in at this hop - flows out at the next hop = the demand at this hub</font></b>
+132:     csv =
+133:     forall(h <b><font color="EA7D00">in</font></b> HopHubs, m <b><font color="EA7D00">in</font></b> Markets)
+134:           sum(l <b><font color="EA7D00">in</font></b> HopLinks: l.lnk.dst == h.hub &amp;&amp; l.hop == h.hop)
+135:             traffic[l][m]
+136:         - sum(l <b><font color="EA7D00">in</font></b> HopLinks: l.lnk.org == h.hub &amp;&amp; l.hop == (h.hop+1))
+137:             traffic[l][m]
+138:             == supply[h][m]*(vol[m] + surplus);
+139: 
+140:     <b><font color="#007D00">// Arc capacities</font></b>
+141:     forall(k <b><font color="EA7D00">in</font></b> Links)
+142:        arc[k] =
+143:           sum(l <b><font color="EA7D00">in</font></b> HopLinks, m <b><font color="EA7D00">in</font></b> Markets: l.lnk.org == k.org &amp;&amp; l.lnk.dst == k.dst)
+144:             traffic[l][m] &lt;= cap[k] + test*infeas;
+145: }
+146: 
+147: // Display the surplus and the nondegenerate dual variables; ignored by the script in calls.mod
+148: execute DISPLAY {
+149:    writeln(<b><font color="#8A2BE2">"surplus = "</font></b>, surplus);
+150:    <b><font color="EA7D00">for</font></b>(k <b><font color="EA7D00">in</font></b> Links)
+151:       <b><font color="EA7D00">if</font></b>(arc[k].slack == 0 &amp;&amp; (Math.abs(arc[k].dual) &gt; 0.0001)) 
+152:          writeln(<b><font color="#8A2BE2">"cap["</font></b>, k, <b><font color="#8A2BE2">"] = "</font></b>, cap[k]);
+153: }
+</tt></pre>

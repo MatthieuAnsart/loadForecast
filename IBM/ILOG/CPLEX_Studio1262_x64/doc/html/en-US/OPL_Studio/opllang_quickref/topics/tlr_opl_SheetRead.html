@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="SheetRead" />
+<meta name="abstract" content="OPL keyword to read spreadsheet ranges into multidimensional arrays or sets." />
+<meta name="Description" content="OPL keyword to read spreadsheet ranges into multidimensional arrays or sets." />
+<meta name="DC.subject" content="ranges, from a spreadsheet, reading, reading, from a spreadsheet, spreadsheets, reading from, SheetRead, OPL keyword, accessing named ranges, Excel, accessing named ranges, in Excel, R1C1 style not supported in Excel, Excel, R1C1 style not supported" />
+<meta name="keywords" content="ranges, from a spreadsheet, reading, reading, from a spreadsheet, spreadsheets, reading from, SheetRead, OPL keyword, accessing named ranges, Excel, accessing named ranges, in Excel, R1C1 style not supported in Excel, Excel, R1C1 style not supported" />
+<meta name="DC.Relation" scheme="URI" content="tlr_opl_SheetWrite.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_opl_SheetConnection.html" />
+<meta name="DC.Relation" scheme="URI" content="../../opllangref/topics/opl_langref_spreadsheet.html" />
+<meta name="DC.Relation" scheme="URI" content="../../usroplide/topics/opl_ide_extdata_oil_sheet.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="rjIyRnqL" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<title>SheetRead</title>
+</head>
+<body role="main" id="rjIyRnqL">
+<h1 class="title topictitle1">SheetRead</h1>
+<div class="body refbody"><p class="shortdesc">OPL keyword to read spreadsheet ranges into multidimensional
+arrays or sets.</p>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Data files (.dat)</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>Read: Id "from" "DBRead" '(' Id String ')' PlaceHolders_opt
+    | Id "from" "SheetRead" '(' Id String ')' 
+</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">Use the <samp class="ph codeph">SheetRead</samp> keyword
+to read spreadsheet ranges into OPL 1-D or 2-D arrays and sets, as
+shown in the following example. If you do not specify a sheet, the
+active sheet is selected (in Microsoft Excel, the one in bold).</p>
+<div class="note note"><span class="notetitle">Note:</span> <ul class="ul"><li class="li"><p class="p">OPL does not support the R1C1 reference style to specify the
+range when reading data from an Excel spreadsheet.</p>
+</li>
+</ul>
+ </div>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">From the <samp class="ph codeph">oilSheet</samp> example:</p>
+<p class="p"><strong class="ph b">In
+the model file</strong></p>
+<pre class="pre codeblock"><code>{string} Gasolines = ...;
+{string} Oils = ...;</code></pre>
+<pre class="pre codeblock"><code>tuple gasType {
+  float demand;
+  float price;
+  float octane;
+  float lead;
+}
+
+tuple oilType {
+  float capacity;
+  float price;
+  float octane;
+  float lead;
+}</code></pre>
+<pre class="pre codeblock"><code>gasType Gas[Gasolines] = ...;
+oilType Oil[Oils] = ...;</code></pre>
+<p class="p"><strong class="ph b">In
+the data file</strong></p>
+<pre class="pre codeblock"><code>SheetConnection sheet("oilSheet.xls");</code></pre>
+<pre class="pre codeblock"><code>Gasolines from SheetRead(sheet,"'gas data'!A2:A4");
+Oils from SheetRead(sheet,"'oil data'!A2:A4");</code></pre>
+<pre class="pre codeblock"><code>Gas from SheetRead(sheet,"'gas data'!B2:E4");
+Oil from SheetRead(sheet,"'oil data'!B2:E4");</code></pre>
+<p class="p">OPL
+opens a spreadsheet in read-only mode to read data from it. </p>
+<p class="p">The
+types of data elements supported are the same as for databases, plus
+arrays with one or two dimensions:</p>
+<ul class="ul"><li class="li"><p class="p">sets with integers, floats, strings, or tuples;</p>
+</li>
+<li class="li"><p class="p">arrays with integers, floats, strings, or tuples with up to
+two dimensions;</p>
+</li>
+<li class="li"><p class="p">Only tuples with integer, float, and string components are
+supported.</p>
+</li>
+</ul>
+<p class="p">If the sheet name contains a space, the name should be surrounded
+by single quotes in the <samp class="ph codeph">SheetRead</samp> instruction. For
+example:</p>
+<p class="p"><samp class="ph codeph">Oil from SheetRead(sheet,"'oil data'!B2:E4");</samp></p>
+<p class="p">See <a class="xref" href="../../opllangref/topics/opl_langref_datasources_spreadsheet_read.html#usropllangref.uss_langref_datasources.1056122__section1327067635507">What data can be read from an Excel spreadsheet?</a> in
+the <em class="ph i">Language Reference Manual</em>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" title="Description, syntax, and example for each individual OPL keyword..">OPL keywords</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_opl_SheetWrite.html" title="OPL keyword to write results to a spreadsheet.">SheetWrite</a></div>
+<div><a class="link" href="tlr_opl_SheetConnection.html" title="OPL keyword to connect to a spreadsheet.">SheetConnection</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../../opllangref/topics/opl_langref_spreadsheet.html" title="Describes how to connect an MS Excel spreadsheet, read from it, and write the results to the connected spreadsheet.">Spreadsheet Input/Output</a></div>
+<div><a class="link" href="../../usroplide/topics/opl_ide_extdata_oil_sheet.html" title="Describes the oil data spreadsheet, the oil sheet project, and its execution.">The oil sheet example</a></div>
+</div>
+</div></body>
+</html>

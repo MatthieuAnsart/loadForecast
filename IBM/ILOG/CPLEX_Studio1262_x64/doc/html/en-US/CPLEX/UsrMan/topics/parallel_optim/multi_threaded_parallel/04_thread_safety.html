@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Thread safety" />
+<meta name="abstract" content="Summarizes special considerations about thread safety in parallel applications." />
+<meta name="Description" content="Summarizes special considerations about thread safety in parallel applications." />
+<meta name="DC.subject" content="thread safety, parallel mode and, callbacks and, callback, thread safety and, parallel mode" />
+<meta name="keywords" content="thread safety, parallel mode and, callbacks and, callback, thread safety and, parallel mode" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/03_threads_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1272704164268" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/03_threads_title_synopsis.html" />
+<title>Thread safety</title>
+</head>
+<body role="main" id="descriptiveTopic1272704164268">
+<h1 class="title topictitle1">Thread safety</h1>
+<div class="body"><p class="shortdesc">Summarizes special considerations about thread safety
+in parallel applications.</p>
+<p class="p">When you use <strong class="ph b">callbacks</strong> with
+the CPLEX <strong class="ph b">parallel</strong> optimizers,
+the nature of the callback can affect the <strong class="ph b">thread
+safety</strong> of the application. You should consider the
+performance trade-offs that may occur in such a situation.  For example,
+if the application invokes a callback that provides significant performance
+improvements, but cannot be written in a thread-safe way, you should
+assess whether running CPLEX in
+sequential mode in the presence of the callback yields better performance
+than running CPLEX in
+parallel mode without the callback.</p>
+<p class="p">Also, in order to make sure of thread safety, in certain
+cases CPLEX 
+restricts the way in which it calls a callback.   In particular, when
+it calls an <strong class="ph b">informational callback</strong> in
+either deterministic or opportunistic mode, CPLEX  makes sure of thread
+safety by calling the callback only from the main thread that contains
+the relevant global information required by the informational callback.
+  </p>
+<p class="p">When CPLEX solves
+MIPs, each deterministic thread runs independently and solves a separate
+subtree, so you may see a significant number of nodes processed between
+calls to the callback.   </p>
+<p class="p">For this reason, if you need to <strong class="ph b">terminate</strong> an
+optimization running in parallel, you need to assess whether stopping
+the optimization deterministically or stopping it as quickly as possible
+is more important. </p>
+<p class="p">With respect to a <strong class="ph b">query callback</strong>,
+ the routine <samp class="ph codeph">CPXsetterminate</samp>  in the C
+API or methods of the class <samp class="ph codeph">IloCplex::Aborter</samp> in
+the object-oriented APIs yields the fastest termination but may compromise
+determinism due to slight variations in system runtime.  In contrast,
+aborting the optimization by returning a nonzero status may take longer
+since the run continues until the next synchronization point, but
+the results will be deterministic.  </p>
+<p class="p">With an <strong class="ph b">informational callback</strong>,
+the two alternatives for terminating the optimization  are both deterministic
+and do not delay the termination. However, CPLEX calls informational callbacks
+less frequently than it calls query callbacks.</p>
+<p class="p"><a class="xref" href="04_thread_safety.html#descriptiveTopic1272704164268__table1272707176555" title="A four-column table showing the type of callback, its behavior in deterministic parallel mode with respect to thread safety, its behavior in opportunistic parallel mode with respect to thread safety, and a link to additional information.">Table 1</a>  
+summarizes compatibility of callbacks,
+by type, with thread-safety and parallel mode.  
+<a class="xref" href="04_thread_safety.html#descriptiveTopic1272704164268__table1272707202086" title="A four-column table showing the type of callback with a link to additional information, its behavior in dynamic search, its behavior in conventional search, any additional comments.">Table 2</a>  
+summarizes compatibility of callbacks,
+by type, with dynamic and conventional MIP search mode.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four-column table showing the type of callback, its behavior in deterministic parallel mode with respect to thread safety, its behavior in opportunistic parallel mode with respect to thread safety, and a link to additional information." id="descriptiveTopic1272704164268__table1272707176555" class="table VertHorizShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Thread safety of callbacks by parallel mode</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d447843e91">Type of callback</th>
+<th class="entry" align="left" valign="top" id="d447843e93">Parallel mode:<p class="p">Deterministic</p>
+</th>
+<th class="entry" align="left" valign="top" id="d447843e97">Parallel mode:<p class="p">Opportunistic</p>
+</th>
+<th class="entry" align="left" valign="top" id="d447843e101">Additional <p class="p">information</p>
+</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry ShadedHead" align="left" valign="top" headers="d447843e91 "><a class="xref" href="../../progr_adv/callbacks_basic/03_info_cb_title_synopsis.html" title="Documents informational callbacks.">Informational callbacks</a></td>
+<td class="entry" align="left" valign="top" headers="d447843e93 ">thread-safe</td>
+<td class="entry" align="left" valign="top" headers="d447843e97 ">thread-safe</td>
+<td class="entry" align="left" valign="top" headers="d447843e101 "> </td>
+</tr>
+<tr class="row"><td class="entry ShadedHead" align="left" valign="top" headers="d447843e91 "><a class="xref" href="../../progr_adv/callbacks_basic/08_query_diag_title_synopsis.html" title="Documents query or diagnostic callbacks.">Query or diagnostic callbacks</a></td>
+<td class="entry" align="left" valign="top" headers="d447843e93 ">thread-safe, but user must make sure of determinism</td>
+<td class="entry" align="left" valign="top" headers="d447843e97 ">thread-safe</td>
+<td class="entry" align="left" valign="top" headers="d447843e101 "><a class="xref" href="../../progr_adv/callbacks_basic/12_query_parallel.html" title="Describes query callbacks with respect to parallel search and thread safety.">Query callbacks and parallel search</a></td>
+</tr>
+<tr class="row"><td class="entry ShadedHead" align="left" valign="top" headers="d447843e91 "><a class="xref" href="../../progr_adv/callbacks_basic/13_control_cb_title_synopsis.html" title="Documents control callbacks.">Control callbacks</a></td>
+<td class="entry" align="left" valign="top" headers="d447843e93 ">thread limit set to 1 (one) by default; otherwise, thread-safe;
+user must make sure of determinism</td>
+<td class="entry" align="left" valign="top" headers="d447843e97 ">thread limit set to 1 (one) by default; otherwise, thread-safe</td>
+<td class="entry" align="left" valign="top" headers="d447843e101 "><a class="xref" href="../../progr_adv/callbacks_adv/05_thread_safety.html" title="Describes control callbacks in parallel MIP.">Thread safety and MIP control callbacks</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four-column table showing the type of callback with a link to additional information, its behavior in dynamic search, its behavior in conventional search, any additional comments." id="descriptiveTopic1272704164268__table1272707202086" class="table VertHorizShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. Compatibility of callbacks with MIP search mode</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" width="25%" id="d447843e160">Type of callback</th>
+<th class="entry" align="left" valign="top" width="25%" id="d447843e162">MIP search mode:<p class="p">Dynamic</p>
+</th>
+<th class="entry" align="left" valign="top" width="25%" id="d447843e166">MIP search mode:<p class="p">Conventional</p>
+</th>
+<th class="entry" align="left" valign="top" width="25%" id="d447843e170">Additional <p class="p">information</p>
+</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry ShadedHead" align="left" valign="top" width="25%" headers="d447843e160 "><a class="xref" href="../../progr_adv/callbacks_basic/03_info_cb_title_synopsis.html" title="Documents informational callbacks.">Informational callbacks</a></td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e162 ">compatible</td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e166 ">compatible</td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e170 "> </td>
+</tr>
+<tr class="row"><td class="entry ShadedHead" align="left" valign="top" width="25%" headers="d447843e160 "><a class="xref" href="../../progr_adv/callbacks_basic/08_query_diag_title_synopsis.html" title="Documents query or diagnostic callbacks.">Query or diagnostic callbacks</a></td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e162 ">compatible</td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e166 ">compatible</td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e170 "><a class="xref" href="../../progr_adv/callbacks_basic/11_dynamic_srch.html" title="Describes query callbacks as incompatible with dynamic search.">Query callbacks and dynamic search</a></td>
+</tr>
+<tr class="row"><td class="entry ShadedHead" align="left" valign="top" width="25%" headers="d447843e160 "><a class="xref" href="../../progr_adv/callbacks_basic/13_control_cb_title_synopsis.html" title="Documents control callbacks.">Control callbacks</a></td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e162 ">incompatible</td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e166 ">compatible</td>
+<td class="entry" align="left" valign="top" width="25%" headers="d447843e170 "><a class="xref" href="../../progr_adv/callbacks_basic/16_control_cb_dyn_srch.html" title="Describes control callbacks as incompatible with dynamic search.">Control callbacks and dynamic search</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/03_threads_title_synopsis.html" title="Documents threads in the context of parallel optimizers.">Threads</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving network-flow problems as LP problems" />
+<meta name="abstract" content="Explains the conversion between a network flow model and a conventional LP model." />
+<meta name="Description" content="Explains the conversion between a network flow model and a conventional LP model." />
+<meta name="DC.subject" content="basis, no factoring in network optimizer, network, converting to LP model, problem formulation, switching from network to LP, converting, network-flow model to LP, CPXcopynettolp routine, network-flow problem to LP, problem type, changing from network to LP, changing, network to LP, role in converting network-flow to LP, differences between LP and network optimizers, from basis file, slack, variable needed in basis (network), role in converting LP to network flow" />
+<meta name="keywords" content="basis, no factoring in network optimizer, network, converting to LP model, problem formulation, switching from network to LP, converting, network-flow model to LP, CPXcopynettolp routine, network-flow problem to LP, problem type, changing from network to LP, changing, network to LP, role in converting network-flow to LP, differences between LP and network optimizers, from basis file, slack, variable needed in basis (network), role in converting LP to network flow" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveNet.650645" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" />
+<title>Solving network-flow problems as LP problems</title>
+</head>
+<body role="main" id="User_manual.uss_solveNet.650645">
+<h1 class="title topictitle1">Solving network-flow problems as LP problems</h1>
+<div class="body"><p class="shortdesc">Explains the conversion between a network flow model and
+a conventional LP model.</p>
+<p class="p">A network-flow model is an LP model with special structure. The
+CPLEX network optimizer is a highly efficient implementation of the
+primal simplex technique adapted to take advantage of this special
+structure. In particular, no basis factoring occurs. However, it is
+possible to solve network models using any of the CPLEX LP optimizers
+if first, you convert the network data structures to those of an LP
+model. To convert the network data structures to LP data structures,
+in the Interactive Optimizer, use the command <samp class="ph codeph">change problem lp</samp> ;
+from the Callable Library, use the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/copynettolp.html" title="The routine CPXXcopynettolp/CPXcopynettolp copies a network problem stored in a network problem object to a CPLEX problem object (as an LP).">CPXcopynettolp</a></samp>.</p>
+<p class="p">The LP formulation of our example from  <a class="xref" href="05_eg_Interactive_prob_descrip.html#User_manual.uss_solveNet.653116__User_manual.uss_solveNet.657919">Figure 1</a> 
+looks like this:</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" role="presentation" class="table presentation NoBorder" width="100%" rules="none" frame="void" border="0"><tbody class="tbody"><tr class="row" valign="top"><td class="entry" rowspan="1" colspan="5" valign="top">Minimize</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">3a1</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">3a2</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">4a3</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">3a4</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">5a5</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">6a6</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">7a7</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">4a8</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">2a9</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">6a10</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">5a11</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">4a12</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">3a13</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">6a14</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" rowspan="1" colspan="5" valign="top">subject to</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">a1</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">20</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">-a1</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a2</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a8</td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a9</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a14</td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a2</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a3</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a9</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a3</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a4</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a10</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a11</td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a12</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">-15</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">a7</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a8</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a10</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a13</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">5</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a5</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a6</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a11</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a12</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a13</td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a14</td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a4</td>
+<td class="entry" valign="top" width="3.4482758620689653%">+</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a5</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a6</td>
+<td class="entry" valign="top" width="3.4482758620689653%">-</td>
+<td class="entry" valign="top" width="3.4482758620689653%">a7</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">-10</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" rowspan="1" colspan="7" valign="top"> with these bounds </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">18</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a1</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">24</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a2</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">25</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">a3</td>
+<td class="entry" valign="top" width="3.4482758620689653%">=</td>
+<td class="entry" valign="top" width="3.4482758620689653%">12</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a4</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">10</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a5</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">9</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">a6</td>
+<td class="entry" rowspan="1" colspan="3" valign="top">free</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a7</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">20</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a8</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">10</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> 0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a9</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">5</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a10</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">15</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a11</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">10</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> 0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a12</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">11</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a13</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">6</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%">0</td>
+<td class="entry" valign="top" width="3.4482758620689653%"><samp class="ph codeph">≤</samp></td>
+<td class="entry" valign="top" width="3.4482758620689653%">a14</td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+<td class="entry" valign="top" width="3.4482758620689653%"> </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">In that formulation, in each column there is exactly one coefficient
+equal to 1 (one), exactly one coefficient equal to -1, and all other
+coefficients are 0 (zero).</p>
+<p class="p">Since a network-flow problem corresponds in this way to an LP problem,
+you can indeed solve a network-flow problem by means of a CPLEX LP
+optimizer as well. If you read a network-flow problem into the Interactive
+Optimizer, you can transform it into its LP formulation with the command <samp class="ph codeph">change problem lp</samp>.
+After this change, you can apply any of the LP optimizers to this
+problem.</p>
+<p class="p">When you change a network-flow problem into an LP problem, the
+basis information that is available in the network-flow problem is
+passed along to the LP formulation. In fact, if you have already solved
+the network-flow problem to optimality, then if you call the primal
+or dual simplex optimizers (for example, with the Interactive Optimizer
+command <samp class="ph codeph">primopt</samp> or <samp class="ph codeph">tranopt</samp>), that
+simplex optimizer will perform no iterations.</p>
+<p class="p">Generally, you can also use the same basis from a basis file for
+both the LP and the network optimizers. However, there is one exception:
+in order to use an LP basis with the network optimizer, at least one
+slack variable or one artificial variable needs to be basic. <a class="xref" href="../simplex/16_adv_basis.html" title="Documents effect of an advanced basis on LP optimizers.">Starting from an advanced basis</a> explains
+more about this topic in the context of LP optimizers.</p>
+<p class="p">If you have already read the LP formulation of a problem into the
+Interactive Optimizer, you can transform it into a network with the
+command <samp class="ph codeph">change problem network</samp>. Given any LP problem
+and this command, CPLEX will try to find the largest network embedded
+in the LP problem and transform it into a network-flow problem. However,
+as it does so, it discards all rows and columns that are not part
+of the embedded network. At the same time, CPLEX passes along as much
+basis information as possible to the network optimizer.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/network/01_title_synopsis.html" title="Documents the CPLEX network optimizer.">Solving network-flow problems</a></div>
+</div>
+</div></body>
+</html>

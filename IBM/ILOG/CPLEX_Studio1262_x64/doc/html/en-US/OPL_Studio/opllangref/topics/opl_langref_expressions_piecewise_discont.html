@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Discontinuous piecewise-linear functions" />
+<meta name="abstract" content="Describes the use of discontinuous piecewise-linear functions in OPL." />
+<meta name="Description" content="Describes the use of discontinuous piecewise-linear functions in OPL." />
+<meta name="DC.subject" content="discontinuous piecewise-linear functions, piecewise-linear functions, discontinuous, breakpoint" />
+<meta name="keywords" content="discontinuous piecewise-linear functions, piecewise-linear functions, discontinuous, breakpoint" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_expressions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Discontpwlfunctions" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_expressions.html" />
+<title>Discontinuous piecewise-linear functions</title>
+</head>
+<body role="main" id="Discontpwlfunctions">
+<h1 class="title topictitle1">Discontinuous piecewise-linear functions</h1>
+<div class="body conbody"><p class="shortdesc">Describes the use of discontinuous piecewise-linear functions
+in OPL.</p>
+<p class="p">OPL also allows you to write discontinuous piecewise-linear functions.
+This is the case when, in the syntax of a piecewise-linear function
+with slopes and breakpoints, two successive breakpoints are identical
+and the value associated with the second one is considered to be a <span class="q">"step"</span> instead
+of a <span class="q">"slope"</span>. The CPLEX and the CP Optimizer engines behave differently
+with respect to what limit they consider as the discontinuity value.
+Because CPLEX allows either of these limits, note  that the anchor
+point used to ground the breakpoints and slopes must not reside at
+the discontinuity. Otherwise, the piecewise-linear function would
+not be uniquely defined.</p>
+<div class="section" id="Discontpwlfunctions__usropllangref.uss_langref_expressRelations.1050084"><h2 class="title sectiontitle">Behavior
+with the CPLEX engine</h2><p class="p exampletitle">Example 1: the sign function</p>
+<p class="p">The
+following piecewise function: </p>
+<pre class="pre codeblock"><code>piecewise{0-&amp;gt;0; 2-&amp;gt;0; 0}(1,1) x; </code></pre>
+<p class="p">has
+a slope of 0 up to breakpoint 0, then a step of 2 at this breakpoint,
+then a slope of 0. It takes the value 1 at point 1. This piecewise
+represents the function <samp class="ph codeph">sign()</samp> which returns the
+sign (1 or -1) of its argument, as represented in Figure 1 below. </p>
+<div class="fig fignone" id="Discontpwlfunctions__usropllangref.uss_langref_expressRelations.1049529"><span class="figcap">Figure 1. The
+discontinuous piecewise-linear function sign()</span><div class="image"><img class="image" src="../images/discontpwl4.jpg" alt="Diagram of the discontinuous function “sign”" /></div></div>
+<p class="p">Then this model</p>
+<pre class="pre codeblock"><code>dvar float x;
+dvar float signx;
+
+dvar float y;
+dvar float signy;
+
+maximize x;
+subject to {
+   x == 2;
+   signx == piecewise{0-&gt;0; 2-&gt;0; 0}(1,1) x;
+   y == -2;
+   signy == piecewise{0-&gt;0; 2-&gt;0; 0}(1,1) y;
+}</code></pre>
+<p class="p">gives
+the following output:</p>
+<pre class="pre codeblock"><code>Final solution with objective 2.0000:
+x = 2.0000;
+signx = 1.0000;
+y = -2.0000;
+signy = -1.0000;</code></pre>
+<p class="p"><a class="xref" href="#Discontpwlfunctions__usropllangref.uss_langref_expressRelations.1049529">Figure 1</a> shows
+that the value of the <samp class="ph codeph">sign</samp> function at the breakpoint
+is either <samp class="ph codeph">-1</samp> (on the left-hand slope) or <samp class="ph codeph">1</samp> (on
+the right-hand <samp class="ph codeph">slope)</samp>. </p>
+<p class="p">For example, this model
+takes this into account and sets the constraint <samp class="ph codeph">x==y;</samp> on
+both values.</p>
+<pre class="pre codeblock"><code>dvar float x;
+dvar float signx;
+
+dvar float y;
+dvar float signy;
+
+maximize signx-signy;
+subject to {
+   x == y;
+   signx == piecewise{0-&gt;0; 2-&gt;0; 0}(1,1) x;
+   signy == piecewise{0-&gt;0; 2-&gt;0; 0}(1,1) y;
+}</code></pre>
+<p class="p">This
+model solves with the following output:</p>
+<pre class="pre codeblock"><code>Final solution with objective 2:
+signx = 1;
+signy = -1;
+x = 0;
+y = 0;</code></pre>
+<p class="p exampletitle">Example 2: discontinuous cost</p>
+<p class="p">The
+following piecewise function</p>
+<pre class="pre codeblock"><code>piecewise{0-&amp;gt;0; 10-&amp;gt;0; 0-&amp;gt;10; 5-&amp;gt;10; 0-&amp;gt;20; 5-&amp;gt;20; 0} (5,10) unit;</code></pre>
+<p class="p">represents
+a discontinuous cost. </p>
+<p class="p">This function is illustrated in Figure
+2, <em class="ph i">Discontinuous costs</em>,  for the values summarized in Table
+1.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table that lists values of unit and the associated cost." id="Discontpwlfunctions__usropllangref.uss_langref_expressRelations.1050198" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. A discontinuous cost function</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="50%" id="d719977e117">Values of Unit</th>
+<th class="entry" align="left" valign="top" width="50%" id="d719977e119">Cost</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d719977e117 ">&amp;lt0</td>
+<td class="entry" valign="top" width="50%" headers="d719977e119 ">0</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d719977e117 ">0 to 10</td>
+<td class="entry" valign="top" width="50%" headers="d719977e119 ">10</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d719977e117 ">10 to 20</td>
+<td class="entry" valign="top" width="50%" headers="d719977e119 ">15</td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d719977e117 ">&amp;gt;20</td>
+<td class="entry" valign="top" width="50%" headers="d719977e119 ">20</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="fig fignone" id="Discontpwlfunctions__usropllangref.uss_langref_expressRelations.1049740"><span class="figcap">Figure 2. Discontinuous costs</span><div class="image"><img class="image" src="../images/discontcost5.jpg" alt="Diagram of a discontinuous pwl costs function" /></div></div>
+</div>
+<div class="section" id="Discontpwlfunctions__usropllangref.uss_langref_expressRelations.1053292"><h2 class="title sectiontitle">Different
+behavior with the CP Optimizer engine</h2><p class="p">Consider the following
+model:</p>
+<pre class="pre codeblock"><code>//using CP;
+dvar int x in -10..10;
+dvar int signx;
+dvar int y in -10..10;
+dvar int signy;
+maximize signx-signy;
+   subject to {
+      x == y;
+      signx == piecewise{0-&amp;gt;0; 2-&amp;gt;0; 0}(1,1) x;
+      signy == piecewise{0-&amp;gt;0; 2-&gt;0; 0}(1,1) y;
+   }
+execute
+{
+   writeln(signx-signy);
+}</code></pre>
+<p class="p">Depending
+on which solving engine you write for, you get a different result
+because CPLEX and CP Optimizer do not handle limit values in the same
+way.</p>
+<ul class="ul"><li class="li"><p class="p">If you comment out the <samp class="ph codeph">using CP;</samp> statement,
+the model is solved by the CPLEX engine and the result is <samp class="ph codeph">2</samp> because
+CPLEX handles symmetry in such a way that it interprets either limit
+as the discontinuity value.</p>
+</li>
+<li class="li"><p class="p">However, if you uncomment the <samp class="ph codeph">using CP;</samp> statement,
+the model is solved by the CP Optimizer engine and the result is <samp class="ph codeph">0</samp> because
+CP Optimizer considers the left limit as the discontinuity value.</p>
+ </li>
+</ul>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_expressions.html" title="Describes data and decision variable identifiers, integer and float expressions, aggregate operators, piecewise-linear functions (continuous and discontinuous), set expressions, and Boolean expressions.">Expressions</a></div>
+</div>
+</div></body>
+</html>

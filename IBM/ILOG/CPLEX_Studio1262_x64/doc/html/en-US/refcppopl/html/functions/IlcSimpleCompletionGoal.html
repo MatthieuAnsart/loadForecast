@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en"
+            xml:lang="en"><head><title>IlcSimpleCompletionGoal</title>
+<link
+            type="text/css" rel="stylesheet"
+            href="../cppdoc.css" />
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../functions/IlcSimpleCompletionGoal.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+                name="ibm-content"></a><h3><a
+            name="method_IlcSimpleCompletionGoal">IlcSimpleCompletionGoal</a></h3><div
+                class="prototype">public <a
+                href="../classes/IlcGoal.html">IlcGoal</a> <span
+                class="function-name">IlcSimpleCompletionGoal</span>(<a
+                href="../classes/IloCP.html">IloCP</a> <span
+            class="parameter-name">cp</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+            class="include-file">&lt;ilcp/cpext.h&gt; </span></div>
+This function creates a goal which instantiates all decision variables.
+      <div
+            class="description"><p>This function creates a goal which instantiates all variables in the
+ model. The goal is not the same as automatic search,
+ although it uses in part the same underlying procedures. In particular it
+ does not use restarts, multi-point search, etc.</p><p>This goal must be used in conjunction with a user-defined
+ goal. Your user-defined goal solves the difficult part of the problem but
+ it can leave some variables unfixed (in particular it can leave as unfixed
+ variables which can be instantiated trivally or almost trivally). Then
+ simple completion goal fixes all these variables.</p><p>The simple completion goal works in the following steps:</p><ul>
+<li> It first instantiates all interval variables. Depending on the
+ objective function and IloCP::TemporalRelaxation parameter it use either
+ chronological search or temporal relaxation.</li><li> It instantiates all integer variables in the same way as
+ <code>IlcInstantiate(allIntegerVariables, IlcChooseMinSizeInt)</code>.</li><li> It instantiates all sequence variables (instances of 
+ <code>IloIntervalSequenceVar</code>). This may be necessary when
+ there are intervals with zero length in a sequence.</li><li> It instantiates all state functions (instances of 
+ <code>IloStateFunction</code>). In case of state function in the model, 
+ this goal is mandatory.</li>
+</ul><p>The goal is guaranteed to find a solution if there is one, but if the
+ remaining problem is not trivial, it make take a long time.
+ It is recommended to use this goal after your user-defined goal if
+ your search goal does not instantiate all variables in the model. Keep in
+ mind that the remaining problem should be simple to solve. Some examples:</p><ul>
+<li> Your goal decides on precedence for solving critical resources,
+ for example, it sequences all sequence variables, and then lets the simple completion
+ goal assign start and end times of interval variables to achieve the
+ best objective value. Thanks to temporal relaxation inside simple solution
+ goal, it can be quite effective strategy.</li><li> Some intervals or integer variables values are dominated by main
+ decision variables: for example the master of a span or alternative 
+ constraint. Similarly, integer or cumul element variable that models some capacity
+ constraints are essentially determined by the variable that consumes the cumul. 
+ Your goal does not fix the dominated variables and lets the simple completion goal 
+ do it.</li><li> This goal is mandatory if the model contains state
+ functions.</li>
+</ul></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a href="../classes/IloGoal.html">IloGoal</a></p><hr /></body>
+</html>

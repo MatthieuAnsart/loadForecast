@@ -1,0 +1,112 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/****************************************************************** </font></b>
+013: <b><font color="#007D00"> * Life Game from Robert Bosch and Michael Trick, CP 2001, </font></b>
+014: <b><font color="#007D00"> * CPAIOR 2002.</font></b>
+015: <b><font color="#007D00"> * Original model IP2 available at </font></b>http://mat.gsia.cmu.edu/Life/
+016: <b><font color="#007D00"> * Basic integer program with birth constraints</font></b>
+017: <b><font color="#007D00"> *</font></b>
+018: <b><font color="#007D00"> * This model is greater than the size allowed in trial mode. </font></b>
+019: <b><font color="#007D00"> * You therefore need a commercial edition of CPLEX Studio to run this example. </font></b>
+020: <b><font color="#007D00"> * If you are a student or teacher, you can also get a full version through</font></b>
+021: <b><font color="#007D00"> * the IBM Academic Initiative.</font></b>
+022: <b><font color="#007D00"> *</font></b>
+023: <b><font color="#007D00"> ******************************************************************/</font></b>
+024: 
+025: <b><font color="#0000FF">int</font></b> n=6;
+026: <b><font color="#0000FF">int</font></b> Half=n <b><font color="#0000FF">div</font></b> 2;
+027: <b><font color="#0000FF">range</font></b> FirstHalf = 1..Half;
+028: <b><font color="#0000FF">range</font></b> LastHalf = n-Half+1..n; 
+029: <b><font color="#0000FF">range</font></b> States = 0..1;
+030: <b><font color="#0000FF">range</font></b> Bord = 0..(n+1);
+031: <b><font color="#0000FF">range</font></b> Interior = 1..n;
+032: 
+033: <b><font color="#0000FF">range</font></b> obj = 0..(n*n);
+034: 
+035: <b><font color="#0000FF">tuple</font></b> neighbors {
+036:    <b><font color="#0000FF">int</font></b> row;
+037:    <b><font color="#0000FF">int</font></b> col;
+038: }
+039: 
+040: {neighbors} Neighbor = 
+041:   {&lt;(-1),(-1)&gt;,&lt;(-1),0&gt;,&lt;(-1),1&gt;,&lt;0,(-1)&gt;,&lt;0,1&gt;,&lt;1,(-1)&gt;,&lt;1,0&gt;,&lt;1,1&gt;};
+042: 
+043: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Life[Bord][Bord] <b><font color="#0000FF">in</font></b> States;
+044: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Obj <b><font color="#0000FF">in</font></b> obj;
+045: 
+046: <b><font color="#0000FF">maximize</font></b> Obj;
+047: 
+048: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+049:   ct1:
+050:     Obj == <b><font color="#7D007D">sum</font></b>( i , j <b><font color="#0000FF">in</font></b> Bord ) 
+051:       Life[i][j];
+052:      
+053:   <b><font color="#7D007D">forall</font></b>( i , j <b><font color="#0000FF">in</font></b> Interior ) {
+054:     ct21: 
+055:       2*Life[i][j] - <b><font color="#7D007D">sum</font></b>( nb <b><font color="#0000FF">in</font></b> Neighbor ) 
+056:         Life[i+nb.row][j+nb.col] &lt;= 0;
+057:     ct22:
+058:       3*Life[i][j] + <b><font color="#7D007D">sum</font></b>( nb <b><font color="#0000FF">in</font></b> Neighbor ) 
+059:         Life[i+nb.row][j+nb.col] &lt;= 6;
+060:     <b><font color="#7D007D">forall</font></b>( <b><font color="#0000FF">ordered</font></b> n1 , n2 , n3 <b><font color="#0000FF">in</font></b> Neighbor ) {
+061:       ct23: 
+062:         -Life[i][j]+Life[i+n1.row][j+n1.col]
+063:                    +Life[i+n2.row][j+n2.col]
+064:                    +Life[i+n3.row][j+n3.col]
+065:         -<b><font color="#7D007D">sum</font></b>( nb <b><font color="#0000FF">in</font></b> Neighbor : nb!=n1 &amp;&amp; nb!=n2 &amp;&amp; nb!=n3 ) 
+066:           Life[i+nb.row][j+nb.col] &lt;= 2;
+067:     }
+068:   }
+069:   <b><font color="#7D007D">forall</font></b>( j <b><font color="#0000FF">in</font></b> Bord ) {
+070:     ct31:
+071:       Life[0][j] == 0;
+072:     ct32:  
+073:       Life[j][0] == 0;
+074:     ct33:  
+075:       Life[j][n+1] == 0;
+076:     ct34:  
+077:       Life[n+1][j] == 0;
+078:   }
+079:   <b><font color="#7D007D">forall</font></b>( i <b><font color="#0000FF">in</font></b> Bord : i&lt;n ) {
+080:     ct41:
+081:       Life[i][1]+Life[i+1][1]+Life[i+2][1] &lt;= 2;
+082:     ct42:
+083:       Life[1][i]+Life[1][i+1]+Life[1][i+2] &lt;= 2;
+084:     ct43:
+085:       Life[i][n]+Life[i+1][n]+Life[i+2][n] &lt;= 2;
+086:     ct44:
+087:       Life[n][i]+Life[n][i+1]+Life[n][i+2] &lt;= 2;
+088:   }
+089:   ct5:
+090:     <b><font color="#7D007D">sum</font></b>( i <b><font color="#0000FF">in</font></b> FirstHalf , j <b><font color="#0000FF">in</font></b> Bord ) 
+091:       Life[i][j] &gt;= 
+092:     <b><font color="#7D007D">sum</font></b>( i <b><font color="#0000FF">in</font></b> LastHalf , j <b><font color="#0000FF">in</font></b> Bord ) 
+093:       Life[i][j];
+094:   ct6:
+095:     <b><font color="#7D007D">sum</font></b>( i <b><font color="#0000FF">in</font></b> Bord , j <b><font color="#0000FF">in</font></b> FirstHalf ) 
+096:       Life[i][j] &gt;= 
+097:     <b><font color="#7D007D">sum</font></b>( i <b><font color="#0000FF">in</font></b> Bord , j <b><font color="#0000FF">in</font></b> LastHalf ) 
+098:       Life[i][j];   
+099: }
+100: 
+101: 
+102: <b><font color="#0000FF">tuple</font></b> LifeSolutionT{ 
+103:         <b><font color="#0000FF">int</font></b> Bord1; 
+104:         <b><font color="#0000FF">int</font></b> Bord2; 
+105:         <b><font color="#0000FF">int</font></b> value; 
+106: };
+107: {LifeSolutionT} LifeSolution = {&lt;i0,i1,Life[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Bord,i1 <b><font color="#0000FF">in</font></b> Bord};
+</tt></pre>

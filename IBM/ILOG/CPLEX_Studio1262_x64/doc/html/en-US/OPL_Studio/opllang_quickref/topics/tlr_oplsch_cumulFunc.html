@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="cumulFunction" />
+<meta name="abstract" content="OPL keyword (CP, scheduling) to create a cumulative function." />
+<meta name="Description" content="OPL keyword (CP, scheduling) to create a cumulative function." />
+<meta name="DC.subject" content="cumulFunction, OPL keyword (CP, scheduling)" />
+<meta name="keywords" content="cumulFunction, OPL keyword (CP, scheduling)" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_interval.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_pulse.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_alwaysIn.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_step.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_stepAtStart.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_stepAtEnd.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_heightAtEnd.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_heightAtStart.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_stateFunc.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="xpYdNX8J" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<title>cumulFunction</title>
+</head>
+<body role="main" id="xpYdNX8J">
+<h1 class="title topictitle1">cumulFunction</h1>
+<div class="body refbody"><p class="shortdesc">OPL keyword (CP, scheduling) to create a cumulative
+function.</p>
+<div class="section"><h2 class="title sectiontitle">Purpose</h2><p class="p">OPL keyword
+(CP, scheduling) to create a cumulative function.</p>
+</div>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+<tr class="strow"><td valign="top" class="stentry">type</td>
+<td valign="top" class="stentry"><pre class="pre msgblock"><code>int</code></pre>
+</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>cumulFunction f = pulse(u,v, h);
+cumulFunction f = pulse(a, h);
+cumulFunction f = pulse(a, hmin, hmax);
+cumulFunction f = step(u, h);
+cumulFunction f = stepAtStart(a, h);
+cumulFunction f = stepAtStart(a, hmin, hmax);
+cumulFunction f = stepAtEnd(a, h);
+cumulFunction f = stepAtEnd(a, hmin, hmax);
+
+
+Where:
+
+int u;
+int v;
+int h;
+int hmin;
+int hmax;
+int dval;
+cumulFunction f;
+dvar interval a;
+</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">A
+cumulative function expression can be used to model a quantity that
+varies over time and whose value depends on other decision variables
+of the problem. For example a given capacity or physical resource
+may be described by several parameters that change over time and thus,
+by several functions. For instance a truck can be described using
+two functions that model the variation over time of the volume and
+the weight of the truck content. Note however that a function is not
+always associated with a physical resource, thus providing a level
+of abstraction that may be necessary in your model.</p>
+<p class="p">An
+activity usually increases the function at the start of usage of these
+cumulative or renewable resources, and decreases the function when
+the resource is released at its end time (<em class="ph i">pulse</em> function).
+Some resources, such as inventories or tanks, can be produced and
+consumed by activities; production activities increase the resource
+level and consuming activities decrease it (<em class="ph i">step</em> function).
+The cumulated contribution of activities on the resource is represented
+by a function of time, and constraints (such as maximal or minimal
+levels) can be modeled on this function. Contrast this incremental
+effect with the <a class="xref" href="tlr_oplsch_stateFunc.html" title="OPL keyword (CP, scheduling) to create a state function.">stateFunction</a>, where interval variables
+have an absolute effect (as the function must be in a particular state).</p>
+<p class="p">A <em class="ph i">cumulFunction</em> is restricted to being non-negative
+when involved with the constraints <a class="xref" href="tlr_oplsch_inferiorOrEqual.html" title="OPL (scheduling) constraint used on a cumulative function.">&lt;= (scheduling)</a> and <a class="xref" href="tlr_oplsch_alwaysIn.html" title="OPL constraint (scheduling) used on a cumulative function or a state function">alwaysIn</a>; also, those constraints
+cannot be used in meta-constraints.</p>
+<p class="p"><em class="ph i">cumulFunction</em> is a CP keyword and is still accepted as
+a CPLEX identifier.</p>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">A basic
+program to show the effects of using <em class="ph i">pulse</em> with <em class="ph i">cumulFunction</em>:</p>
+<pre class="pre msgblock"><code>using CP;
+
+dvar interval it;
+cumulFunction c=pulse(it,10);
+
+subject to
+{
+ startOf(it)==2;
+ endOf(it)==4;
+}
+
+int v[i in 0..5]=cumulFunctionValue(c,i);
+execute
+{
+  writeln(v);
+}
+
+assert forall(i in 2..3) v[i]==10;
+assert forall(i in 0..5: i!=2 &amp;&amp; i!=3) v[i]==0;</code></pre>
+<p class="p">A composite cumulative function expression
+defined as a sum of <em class="ph i">cumulFunction</em> expressions, with
+a minus (-) operator:</p>
+<pre class="pre msgblock"><code>cumulFunction h = sum(i in ...) F[i] - sum(j in ...) G[j];
+</code></pre>
+<p class="p">A set of producing and consuming activities
+on a tank with a given capacity and safety level.</p>
+<pre class="pre msgblock"><code>int SafetyLevel = ...;
+int Capacity = ...;
+int StartLevel = ...;
+int QProd[p in 1..NProd] ...;
+int QCons[c in 1..NCons] ...;
+
+dvar interval AProd[p in 1..NProd] ...;
+dvar interval ACons[c in 1..NCons] ...;
+
+cumulFunction level =
+    step(0, StartLevel)
+  + sum (p in 1..NProd) stepAtEnd(AProd[p], QProd[p])
+  - sum (c in 1..NCons) stepAtStart(ACons[c], QCons[c]);
+
+subject to {
+  alwaysIn(level, 0, maxint, SafetyLevel, Capacity);
+};</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" title="Description, syntax, and example for each individual OPL keyword..">OPL keywords</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_oplsch_interval.html" title="OPL keyword (CP, scheduling) for interval variables.">interval</a></div>
+<div><a class="link" href="tlr_oplsch_pulse.html" title="OPL expression (scheduling) of a cumulative function">pulse</a></div>
+<div><a class="link" href="tlr_oplsch_alwaysIn.html" title="OPL constraint (scheduling) used on a cumulative function or a state function">alwaysIn</a></div>
+<div><a class="link" href="tlr_oplsch_step.html" title="OPL expression (scheduling) of a cumulative function">step</a></div>
+<div><a class="link" href="tlr_oplsch_stepAtStart.html" title="OPL expression (scheduling) of a cumulative function">stepAtStart</a></div>
+<div><a class="link" href="tlr_oplsch_stepAtEnd.html" title="OPL expression (scheduling) of a cumulative function">stepAtEnd</a></div>
+<div><a class="link" href="tlr_oplsch_heightAtEnd.html" title="OPL expression (scheduling) used with a cumulative function">heightAtEnd</a></div>
+<div><a class="link" href="tlr_oplsch_heightAtStart.html" title="OPL expression (scheduling) used with a cumulative function">heightAtStart</a></div>
+<div><a class="link" href="tlr_oplsch_stateFunc.html" title="OPL keyword (CP, scheduling) to create a state function.">stateFunction</a></div>
+</div>
+</div></body>
+</html>

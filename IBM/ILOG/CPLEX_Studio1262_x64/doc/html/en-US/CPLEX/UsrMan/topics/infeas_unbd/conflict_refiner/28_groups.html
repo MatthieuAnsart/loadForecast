@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Groups in the conflict refiner" />
+<meta name="abstract" content="Highlights groups in the conflict refiner." />
+<meta name="Description" content="Highlights groups in the conflict refiner." />
+<meta name="DC.subject" content="conflict, groups in, group, definition, example in conflict" />
+<meta name="keywords" content="conflict, groups in, group, definition, example in conflict" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/26_cf_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_refineConflict.1045474" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/26_cf_title_synopsis.html" />
+<title>Groups in the conflict refiner</title>
+</head>
+<body role="main" id="User_manual.uss_refineConflict.1045474">
+<h1 class="title topictitle1">Groups in the conflict refiner</h1>
+<div class="body"><p class="shortdesc">Highlights groups in the conflict refiner.</p>
+<p class="p">You can organize constraints and bounds into one or more <em class="ph i">groups</em> in a conflict. A group is
+a set of constraints or bounds that must be considered together; that
+is, if one member of a group is designated by the conflict refiner
+to be a necessary in a minimal conflict, then the entire group will
+be part of the conflict. </p>
+<p class="p">For example, in the resource allocation problem from <a class="xref" href="08_eg_model.html" title="Describes a model to exercise the conflict refiner in the Interactive Optimizer.">A model for the conflict refiner</a>,
+management might consider the three skill requirements (c2, c3, c4)
+as inseparable. Adjusting the data in any one of them should require
+a careful re-evaluation of all three. To achieve that effect in the
+modified version of <samp class="ph codeph">ilomipex2.cpp</samp>, replace
+this line:  </p>
+<pre class="pre codeblock"><code> infeas.add(rng);</code></pre>
+<p class="p">by the following lines to declare a group of the constraints
+expressing skill requirements: </p>
+<pre class="pre codeblock"><code>         infeas.add(rng[0]);
+         IloAnd skills(env);
+         skills.add(rng[1]);
+         skills.add(rng[2]);
+         skills.add(rng[3]);
+         infeas.add(skills);
+         for (IloInt i = 4; i&lt;rng.getSize(); i++) {
+           infeas.add(rng[i]);
+         }</code></pre>
+<p class="p">(This particular modification is specific to this simplified
+resource allocation model and thus would not make sense in some other
+infeasible model you might run with the modified <samp class="ph codeph">ilomipex2.cpp</samp> 
+application.)</p>
+<p class="p">After that modification, the cost constraint and the
+constraints indexed 4 through 10 are treated individually (that is,
+normally) as before. The three constraints indexed 1 through three
+are combined into a <samp class="ph codeph">skills </samp> constraint
+through the <samp class="ph codeph">IloAnd</samp>  operator, and added
+to the infeasible set. </p>
+<p class="p">Individual preferences are not assigned to any of these
+members in this example, but you could assign preferences if they
+express your knowledge of the problem.</p>
+<p class="p">After this modification to group the skill constraints,
+a minimal conflict is reported like this, with the skill constraints
+grouped inseparably:  </p>
+<pre class="pre codeblock"><code>Conflict :
+Proved  : IloAnd and36 = {
+c2( 2.1 &lt;= ( x1 + x2 + 0.8 * x3 + 0.6 * x4 + 0.4 * x5 ) ) 
+c3( 1.2 &lt;= ( x6 + 0.9 * x7 + 0.5 * x8 ) ) 
+c4( 0.8 &lt;= ( x9 + 0.9 * x10 ) ) }
+
+Proved  : c8( ( x2 + x3 + x4 + x5 )  &lt;= 0)</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/infeas_unbd/conflict_refiner/26_cf_title_synopsis.html" title="Contrasts the conflict refiner in an application and in the Interactive Optimizer to demonstrate features available only in the Callable Library and Concert Technology, not in the Interactive Optimizer:">Comparing a conflict application to Interactive Optimizer</a></div>
+</div>
+</div></body>
+</html>

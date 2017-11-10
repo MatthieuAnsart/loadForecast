@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Dispatching problem data to remote objects" />
+<meta name="abstract" content="Documents the dispatch of data to remote objects in an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="Description" content="Documents the dispatch of data to remote objects in an example of distributed concurrent optimization of a mixed integer program." />
+<meta name="DC.subject" content="remote object, distributed concurrent MIP, remote object and, mixed integer program (MIP), distributed concurrent, concurrent optimization, distributed, example, dispatching data to remote object" />
+<meta name="keywords" content="remote object, distributed concurrent MIP, remote object and, mixed integer program (MIP), distributed concurrent, concurrent optimization, distributed, example, dispatching data to remote object" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="dispatchRemoteObj" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" />
+<title>Dispatching problem data to remote objects</title>
+</head>
+<body role="main" id="dispatchRemoteObj">
+<h1 class="title topictitle1">Dispatching problem data to remote objects</h1>
+<div class="body"><p class="shortdesc">Documents the dispatch of data to remote objects in an example of distributed concurrent optimization of a mixed integer program.</p>
+<p class="p">This example (<span class="ph filepath">parmipopt.c</span>) of distributed concurrent 
+MIP optimization reads the data of the model from a file. One possibility for 
+dispatching the data from that original file to the remote objects (in this 
+example, the two workers) is to iterate over the remote objects and read the 
+data file to each of them. In this example, the number of remote objects (two) 
+is small, but in general the number of remote objects can be huge. If the 
+number of remote objects is truly large, iterating over the individual remote 
+objects and loading the data file into each of them can be impractical or 
+unrealistic. In contrast, using a <strong class="ph b">multicast</strong> to load the data file 
+simultaneously into all the remote objects is usually faster. In fact, 
+some transport implementations provide special handling of multicasts 
+that can improve performance dramatically. The message passing interface (MPI)
+is one such transport.</p>
+<p class="p">To take advantage of a multicast, the following lines of code first create 
+an <strong class="ph b">environment group</strong>. That group contains all the environments of 
+remote objects that participate in the multicast. </p>
+<img class="image" src="../../../images/egRemoteObj_env_group.jpg" /><p class="p">The argument <samp class="ph codeph">group</samp> contains a reference to the newly 
+created group, which contains all the jobs of all the environments of all 
+the remote objects stored in the argument <samp class="ph codeph">env</samp>. After 
+that group is created, it is possible to read the data file and 
+multicast it to all remote objects in the group, as in the 
+following lines of code.</p>
+<img class="image" src="../../../images/egRemoteObj_read_multicast.jpg" /><p class="p">Those lines of code read the file locally into memory 
+and then send this memory block to all remote objects in the group. 
+The remote objects then parse the memory
+block as if it were a file, and thereby each remote object 
+loads the respective model.  After 
+<span class="keyword apiname">CPXXreadcopyprob_multicast</span>
+returns, all remote objects in the group
+will have loaded the exact same model.</p>
+<p class="p">This example also sets the number of threads in each remote object 
+to 1 (one). This setting reduces machine load in case all "remote" machines are
+in fact the same local host.</p>
+<p class="p">To perform yet another operation (this time, setting the number of threads) 
+in exactly the same way on every remote object, 
+the example again uses a group and multicast in the following lines of code.</p>
+<img class="image" src="../../../images/egRemoteObj_threads_multicast.jpg" /><p class="p">The following line deletes the group after the group is no longer needed.</p>
+<pre class="pre codeblock"><code> CPXXfreeenvgroup (&amp;group);</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/60_intro_eg_parmipopt.html" title="Introduces an example of distributed concurrent optimization of a mixed integer program.">Example: distributed concurrent MIP</a></div>
+</div>
+</div></body>
+</html>

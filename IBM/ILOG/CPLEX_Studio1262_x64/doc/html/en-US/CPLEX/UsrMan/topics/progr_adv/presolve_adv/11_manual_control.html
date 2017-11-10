@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Manual control of presolve" />
+<meta name="abstract" content="Describes features to control presolve." />
+<meta name="Description" content="Describes features to control presolve." />
+<meta name="DC.subject" content="presolve, interface, CPXprimopt, CPXdualopt, CPXbaropt, CPXmipopt, CPX_PARAM_REDUCE, problem modifications and, optimal basis and, CPXcopystart, advanced presolved solution and, solution, using advanced presolved, CPXcopystart, CPXpresolve, crushing primal or dual solutions, CPXcopybase, CPX_PARAM_ADVIND, presolve and advanced start, gathering information about, CPXgetredlp, CPXcloneprob routine, advanced preprocessing and, limited, CPXbasicpresolve, presolved model, freeing memory" />
+<meta name="keywords" content="presolve, interface, CPXprimopt, CPXdualopt, CPXbaropt, CPXmipopt, CPX_PARAM_REDUCE, problem modifications and, optimal basis and, CPXcopystart, advanced presolved solution and, solution, using advanced presolved, CPXcopystart, CPXpresolve, crushing primal or dual solutions, CPXcopybase, CPX_PARAM_ADVIND, presolve and advanced start, gathering information about, CPXgetredlp, CPXcloneprob routine, advanced preprocessing and, limited, CPXbasicpresolve, presolved model, freeing memory" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advancedPresolve.1005134" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" />
+<title>Manual control of presolve</title>
+</head>
+<body role="main" id="User_manual.uss_advancedPresolve.1005134">
+<h1 class="title topictitle1">Manual control of presolve</h1>
+<div class="body"><p class="shortdesc">Describes features to control presolve.</p>
+<p class="p">While presolve was a highly automated and transparent procedure
+in releases of CPLEX prior to 7.0, releases after 7.0  give the user
+significant control over when presolve is performed and what is done
+with the result. This section discusses these added control facilities.
+The routines mentioned here are documented in detail, including arguments
+and return values, in the <em class="ph i">Callable Library Reference Manual</em>.</p>
+<p class="p">The first control function provided by the advanced presolve interface
+is <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/presolve.html" title="The routine CPXXpresolve/CPXpresolve performs LP or MIP presolve depending whether a problem object is an LP or a MIP.">CPXpresolve</a></samp>,
+ which manually invokes presolve on the supplied problem. After this
+routine is called on a problem, the original problem has a <em class="ph i">presolved
+model</em> associated with it. Subsequent calls to optimization routines
+(<samp class="ph codeph">CPXprimopt</samp>, <samp class="ph codeph">CPXdualopt</samp>, <samp class="ph codeph">CPXbaropt</samp>, <samp class="ph codeph">CPXmipopt</samp>)
+will use this presolved model without repeating the presolve, provided
+no operation that discards the presolved model is performed in the
+interim. The presolved model is automatically discarded if a problem
+modification is performed that is incompatible with the setting of
+the parameter <samp class="ph codeph">CPX_PARAM_REDUCE</samp>, documented in <a class="xref" href="../../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a>.
+(Further information about this point appears in <a class="xref" href="12_modify_prob.html" title="Describes conditions in which to modify a model after presolve.">Modifying a problem</a>.)</p>
+<p class="p">By using the parameter <samp class="ph codeph">CPX_PARAM_REDUCE</samp> to restrict
+the types of presolve reductions, CPLEX can make use of the optimal
+basis of the presolved model. If you set <samp class="ph codeph">CPX_PARAM_REDUCE</samp> to
+restrict presolve reductions, then make problem modifications that
+don’t invalidate those reductions, CPLEX will automatically use the
+optimal basis of the presolved model. On the other hand, if the nature
+of the problem modifications is such that you cannot set <samp class="ph codeph">CPX_PARAM_REDUCE</samp>,
+you can still perform an advanced start by making the modifications,
+then calling <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/presolve.html" title="The routine CPXXpresolve/CPXpresolve performs LP or MIP presolve depending whether a problem object is an LP or a MIP.">CPXpresolve</a></samp> to
+create the new presolved model, then calling <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/copystart.html" title="The routine CPXXcopystart/CPXcopystart provides starting information for use in a subsequent call to a simplex optimization routine (CPXXlpopt/CPXlpopt with CPX_PARAM_LPMETHOD or CPX_PARAM_QPMETHOD set to CPX_ALG_PRIMAL or CPX_ALG_DUAL, CPXXdualopt/CPXdualopt, CPXXprimopt/CPXprimopt, or CPXXhybnetopt/CPXhybnetopt).">CPXcopystart</a></samp>,
+passing the original model and any combination of primal and dual
+solutions. With nondefault settings of the parameter <samp class="ph codeph">CPX_PARAM_REDUCE</samp> <a class="xref" href="../../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a> ,
+CPLEX will crush the solutions and use them to construct a starting
+basis for the presolved model. If you are continuing with primal simplex,
+only providing a primal starting vector will usually perform better. </p>
+<p class="p">There are subtleties associated with using <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/copystart.html" title="The routine CPXXcopystart/CPXcopystart provides starting information for use in a subsequent call to a simplex optimization routine (CPXXlpopt/CPXlpopt with CPX_PARAM_LPMETHOD or CPX_PARAM_QPMETHOD set to CPX_ALG_PRIMAL or CPX_ALG_DUAL, CPXXdualopt/CPXdualopt, CPXXprimopt/CPXprimopt, or CPXXhybnetopt/CPXhybnetopt).">CPXcopystart</a></samp> to
+start an optimization from an advanced, presolved solution. This routine
+creates a presolved solution vector only if the presolved model is
+already present (either because the user called <samp class="ph codeph">CPXpresolve</samp> or
+because the user turned off some presolve reductions through <samp class="ph codeph">CPX_PARAM_REDUCE</samp> and
+then solved a problem). The earlier sequence would not have started
+from an advanced solution if <samp class="ph codeph">CPXcopystart</samp>  had been
+called before <samp class="ph codeph">CPXpresolve</samp>. Another important detail
+about <samp class="ph codeph">CPXcopystart</samp> is that it crushes primal and/or
+dual solutions, not bases. It then uses the crushed solutions to choose
+a starting basis. If you have a basis, you need to compute optimal
+primal and dual solutions (using <samp class="ph codeph">CPXcopybase</samp> and
+then <samp class="ph codeph">CPXprimopt</samp>), extract them, and then call <samp class="ph codeph">CPXcopystart</samp> with
+them to use the corresponding advanced solution. In general, starting
+with both a primal and dual solution is preferable to starting with
+one or the other. One other thing to note about <samp class="ph codeph">CPXcopystart</samp> is
+that the primal and dual slack (<samp class="ph msgph">slack</samp> and <samp class="ph msgph">dj</samp>)
+arguments are optional. The routine will compute slack values if none
+are provided.</p>
+<p class="p">You can set the <a class="xref" href="../../../../Parameters/topics/AdvInd.html" title="If set to 1 or 2, this parameter specifies that CPLEX should use advanced starting information when it initiates optimization.">advanced start switch</a> (<samp class="ph codeph">CPX_PARAM_ADVIND</samp>)
+to 2 in order to use advanced starting information together with presolve.
+At this setting, CPLEX will use starting information provided to it
+with <samp class="ph codeph">CPXcopystart</samp> or <samp class="ph codeph">CPXcopybase</samp> when
+it solves an LP with the primal or dual simplex optimizer in the following
+way. If no presolved model is available, presolve is invoked. Then
+the starting information is crushed and installed in the presolved
+model. Finally, the presolved model is solved from the advanced (crushed)
+starting point.</p>
+<p class="p">Another situation where a user might want to use <samp class="ph codeph">CPXpresolve</samp> is
+if the user wants to gather information about the presolve, possibly
+in preparation for using the advanced MIP callback routines to control
+branch &amp; cut. After <samp class="ph codeph">CPXpresolve</samp> has been called,
+the user can then call <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getprestat.html" title="The routine CPXXgetprestat/CPXgetprestat accesses presolve status information for the columns and rows of the presolved problem in the original problem and of the original problem in the presolved problem.">CPXgetprestat</a></samp> to
+obtain information about the reductions performed on the problem.
+This routine provides information, for each variable in the original
+problem, about whether the variable was fixed and removed, aggregated
+out, removed for some other reason, or is still present in the reduced
+model. It also gives information, for each row in the original problem,
+about whether it was removed due to redundancy, aggregated out, or
+is still present in the reduced model. For those rows and columns
+that are present in the reduced model, this function provides a mapping
+from original row/column number to row/column number in the reduced
+model, and vice-versa.</p>
+<p class="p">Another situation where a user might want to use <samp class="ph codeph">CPXpresolve</samp> is
+to work directly on the presolved model.  By calling <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getredlp.html" title="The routine CPXXgetredlp/CPXgetredlp returns a pointer for the presolved problem.">CPXgetredlp</a></samp> immediately
+after <samp class="ph codeph">CPXpresolve</samp>,  the user can obtain a pointer
+to the presolved model. As an example of how this pointer might be
+used, the user could call routines <samp class="ph codeph">CPXcrushx</samp> and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/crushpi.html" title="The routine CPXXcrushpi/CPXcrushpi crushes a dual solution for the original problem to a dual solution for the presolved problem.">CPXcrushpi</a></samp> to
+presolve primal and dual solution vectors, then call <samp class="ph codeph">CPXgetredlp</samp> 
+to get access to the presolved model, then use <samp class="ph codeph">CPXcopystart</samp> to
+copy the presolved solutions into the presolved model, then optimize
+the problem, and finally call the routines <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/uncrushx.html" title="The routine CPXXuncrushx/CPXuncrushx uncrushes a solution for the presolved problem to the solution for the original problem.">CPXuncrushx</a></samp> and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/uncrushpi.html" title="The routine CPXXuncrushpi/CPXuncrushpi uncrushes a dual solution for the presolved problem to a dual solution for the original problem.">CPXuncrushpi</a></samp> (<samp class="ph codeph">CPXqpuncrushpi</samp> 
+for QPs) to unpresolve solutions from the presolved model, creating
+solutions for the original problem.</p>
+<p class="p">The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getredlp.html" title="The routine CPXXgetredlp/CPXgetredlp returns a pointer for the presolved problem.">CPXgetredlp</a></samp> 
+provides the user access to internal CPLEX data structures. The presolved
+model must not be modified by the user. If the user wants to manipulate
+the reduced problem, the user should make a copy of it (using <samp class="ph codeph">CPXcloneprob</samp>)
+and manipulate the copy instead.</p>
+<p class="p">The advanced presolve interface provides another call that is useful
+when working directly with the presolved model (either through <samp class="ph codeph">CPXgetredlp</samp> or
+through the advanced MIP callbacks). The call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/crushform.html" title="The routine CPXcrushform crushes a linear formula of the original problem to a linear formula of the presolved problem.">CPXcrushform</a></samp> translates
+a linear expression in the original problem into a linear expression
+in the presolved model. The most likely use of this routine is to
+add user cuts to the presolved model during a mixed integer optimization.
+The advanced presolve interface also provides the reverse operation.
+The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/uncrushform.html" title="The routine CPXXuncrushform/CPXuncrushform uncrushes a linear formula of the presolved problem to a linear formula of the original problem.">CPXuncrushform</a></samp> translates
+a linear expression in the presolved model into a linear expression
+in the original problem.</p>
+<p class="p">A limited presolve analysis is performed by <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/basicpresolve.html" title="The routine CPXXbasicpresolve/CPXbasicpresolve performs bound strengthening and detects redundant rows.">CPXbasicpresolve</a></samp> and
+by the Concert Technology method <samp class="ph codeph">IloCplex::basicPresolve</samp> .
+This routine detects which rows are redundant and computes strengthened
+bounds on the variables. This information can be used to derive some
+types of cuts that will tighten the formulation, to aid in formulation
+by pointing out redundancies, and to provide upper bounds for variables. <samp class="ph codeph">CPXbasicpresolve</samp> does
+not create a presolved model. </p>
+<p class="p">The interface allows the user to manually free the memory associated
+with the presolved model using the routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/freepresolve.html" title="The routine CPXXfreepresolve/CPXfreepresolve frees the presolved problem from the LP problem object.">CPXfreepresolve</a></samp>.
+The next optimization call (or call to <samp class="ph codeph">CPXpresolve</samp>)
+ re-creates the presolved model.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/presolve_adv/01_presolve_title_synopsis.html" title="Documents the advanced presolve routines, available only in the Callable Library (C API).">Advanced presolve routines</a></div>
+</div>
+</div></body>
+</html>

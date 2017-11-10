@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The models" />
+<meta name="abstract" content="Presents the four different model files used in the vellino example." />
+<meta name="Description" content="Presents the four different model files used in the vellino example." />
+<meta name="DC.subject" content="vellino problem, the models" />
+<meta name="keywords" content="vellino problem, the models" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_cp.1068050" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>The models</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_cp.1068050">
+<h1 class="title topictitle1">The models</h1>
+<div class="body"><p class="shortdesc">Presents the four different model files used in
+the vellino example.</p>
+<p class="p"></p>
+<p class="p">In the distributed project, you can see that there are
+four different model files described in the following sections:</p>
+<ul class="ul"><li class="li"><p class="p">The model for common definitions: <span class="ph filepath">vellinocommon.mod</span> contains the declaration of
+data common to all other models. </p>
+ </li>
+<li class="li"><p class="p">The generation model: <span class="ph filepath">vellinogenBin.mod</span> is
+the model to generate the possible configurations for bins. This is
+a CP model. </p>
+</li>
+<li class="li"><p class="p">The selection model: <span class="ph filepath">vellinochooseBin.mod</span> selects
+a subset of configurations. This is a CPLEX model. </p>
+ </li>
+<li class="li"><p class="p">The flow control script: <span class="ph filepath">vellino.mod</span> is
+only a flow control script that executes the two other models in the
+right order and transfers information from one to the other.</p>
+ </li>
+<li class="li"><p class="p">Selection of the bins to use: passing the
+generated bins to the selection model</p>
+ </li>
+</ul>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_cp.1068059"><h2 class="title topictitle2">The model for common definitions</h2>
+<div class="body"><p class="p">The model <span class="ph filepath">vellinocommon.mod</span> contains
+definitions that are common to all the models. For example, the tuple
+definition:</p>
+<pre class="pre codeblock"><code>tuple Bin {
+   key int id;
+   string color;
+   int n[Components];
+};</code></pre>
+<p class="p">is used to represent configurations that are passed between
+the different models.</p>
+<p class="p">The set of available configurations is given by:</p>
+<pre class="pre codeblock"><code>{Bin} Bins = ...;</code></pre>
+<p class="p">This model is included in other models that use these
+definitions as follows:</p>
+<pre class="pre codeblock"><code>include "vellinocommon.mod";</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_cp.1068079"><h2 class="title topictitle2">The generation model</h2>
+<div class="body"><p class="p">The generation model <span class="ph filepath">vellinogenBin.mod</span> starts
+with the statement:</p>
+<pre class="pre codeblock"><code>using CP;</code></pre>
+<p class="p">which means that it is solved by the CP Optimizer engine.</p>
+<p class="p">The decision variables are:</p>
+<pre class="pre codeblock"><code>dvar int color in RColors;
+dvar int n[Components] in 0..maxCapacity;</code></pre>
+<p class="p">The decision variable <samp class="ph codeph">color</samp> indicates
+the color of the generated configuration. Colors are represented by
+integer values and each <samp class="ph codeph">n[c]</samp> indicates how
+many components of type <samp class="ph codeph">c</samp> are included in
+the bin configuration. Then, all the compatibility constraints are
+easily written:</p>
+<pre class="pre codeblock"><code>subject to {  
+   1 &lt;= sum(c in Components) n[c];
+   sum(c in Components) n[c] &lt;= capacity_int_idx[color];
+   color == ord(Colors, "red") =&gt;
+     n["plastic"] == 0 &amp;&amp;  n["steel"] == 0 &amp;&amp; n["wood"] &lt;= 1;
+   color == ord(Colors, "blue") =&gt;
+      n["plastic"] == 0 &amp;&amp; n["wood"] == 0;
+   color == ord(Colors, "green") =&gt;
+     n["glass"] == 0 &amp;&amp; n["steel"] == 0 &amp;&amp; n["wood"] &lt;= 2;
+   n["wood"] &gt;= 1 =&gt; n["plastic"] &gt;= 1;
+   n["glass"] == 0 || n["copper"] == 0;  
+   n["copper"] == 0 || n["plastic"] == 0;
+};</code></pre>
+<p class="p">Some are just a direct expression of the problem description.
+For example, this constraint:</p>
+<pre class="pre codeblock"><code>   n["wood"] &gt;= 1 =&gt; n["plastic"] &gt;= 1;</code></pre>
+<p class="p">means that if there is at least one wood component, there
+needs to be at least one plastic component.</p>
+<p class="p">Others use intermediate structures. For example, this
+constraint:</p>
+<pre class="pre codeblock"><code>   sum(c in Components) n[c] &lt;= capacity_int_idx[color];</code></pre>
+<p class="p">states that the total number of components must not exceed
+the capacity, depending on the color. For this, a preprocessed calculated
+structure has been created to go from the capacity indexed by strings
+to the capacity given by color indexes.</p>
+<pre class="pre codeblock"><code>int capacity_int_idx[RColors] = [ord(Colors,c) : capacity[c] | c in Colors];</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_cp.1068124"><h2 class="title topictitle2">The selection model</h2>
+<div class="body"><p class="p">The selection model <span class="ph filepath">vellinochooseBin.mod</span> is
+also a very simple CPLEX model.</p>
+<p class="p">A variable is created for each available configuration
+given as input, by means of the tuple structure <samp class="ph codeph">Bin</samp> and
+given in the tuple set <samp class="ph codeph">Bins</samp>:</p>
+<pre class="pre codeblock"><code>dvar int produce[Bins] in 0..maxDemand;</code></pre>
+<p class="p">The objective is to minimize the number of bins produced.</p>
+<pre class="pre codeblock"><code>minimize
+   sum(b in Bins) produce[b];</code></pre>
+<p class="p">The only constraint is to cover the demand in terms of
+number of components:</p>
+<pre class="pre codeblock"><code>subject to {
+   forall(c in Components)
+     demandCt: sum(b in Bins) b.n[c] * produce[b] == demand[c];
+ };</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_cp.1068144"><h2 class="title topictitle2">The flow control script</h2>
+<div class="body"><p class="p">The flow control script defined in <samp class="ph codeph">vellino.mod</samp> links
+the other models with each other. </p>
+<p class="p">It works as follows:</p>
+<ol class="ol"><li class="li"><p class="p">It solves the generation model as many times
+as necessary to find all the possible solutions. This is easily done
+because the CP Optimizer engine can iterate on the feasible solutions. </p>
+ </li>
+<li class="li"><p class="p">For each solution, a new <samp class="ph codeph">Bin</samp> is
+created and added to the current list. </p>
+</li>
+<li class="li"><p class="p">The selection model is created and it uses
+the set of Bins just generated as input data.</p>
+ </li>
+</ol>
+<div class="section" id="usropllangtut.uss_langtut_cp.1068144__usropllangtut.uss_langtut_cp.1068150"><h3 class="title sectiontitle">Generation of all the configurations</h3><p class="p">Generating all the possible configurations consists in:</p>
+<ol class="ol"><li class="li"><p class="p">creating an instance of the <samp class="ph codeph">vellinogenBin.mod</samp> model
+using the common data</p>
+</li>
+<li class="li"><p class="p">using the following methods of the<span class="keyword apiname">IloCP</span> class to iterate on the feasible solutions:</p>
+ <ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">startNewSearch</samp> </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">next</samp> </p>
+ </li>
+<li class="li"><p class="p"><samp class="ph codeph">endSearch</samp> </p>
+ </li>
+</ul>
+ </li>
+</ol>
+<p class="p">At each solution, a new tuple is added to Bins from
+the current solution. You need to call the method <span class="keyword apiname">postProcess</span> on
+the generation model to be able to use postprocessing elements.</p>
+<pre class="pre codeblock"><code>   var genBin = new IloOplRunConfiguration("vellinogenBin.mod");
+   genBin.oplModel.addDataSource(data);
+   genBin.oplModel.generate();
+   genBin.cp.startNewSearch();
+   while (genBin.cp.next()) {  
+     genBin.oplModel.postProcess();
+     data.Bins.add(genBin.oplModel.newId, 
+                   genBin.oplModel.colorStringValue, 
+                   genBin.oplModel.n.solutionValue);
+   }
+   genBin.cp.endSearch();
+   genBin.end();</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_cp.1068172"><h2 class="title topictitle2">Selection of the bins to use</h2>
+<div class="body"><p class="p">As the generated bin configurations have been added to
+the <samp class="ph codeph">Bins</samp> data element, you can pass this
+data element object to the selection model.</p>
+<pre class="pre codeblock"><code>   var chooseBin = new IloOplRunConfiguration("vellinochooseBin.mod");
+   chooseBin.cplex = cplex;   
+   chooseBin.oplModel.addDataSource(data);   
+   chooseBin.oplModel.generate();
+   if (chooseBin.cplex.solve()) {
+     chooseBin.oplModel.postProcess();
+   } 
+   chooseBin.end();</code></pre>
+</div>
+</div>
+</body>
+</html>

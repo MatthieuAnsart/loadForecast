@@ -1,0 +1,68 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">int</font></b> NbPeriods = ...;
+13: <b><font color="#0000FF">range</font></b> Periods = 1..NbPeriods;
+14: 
+15: <b><font color="#0000FF">float</font></b> Demand[Periods] = ...;
+16: <b><font color="#0000FF">float</font></b> RegularCost = ...;
+17: <b><font color="#0000FF">float</font></b> ExtraCost = ...;
+18: <b><font color="#0000FF">float</font></b> Capacity = ...;
+19: <b><font color="#0000FF">float</font></b> Inventory = ...;
+20: <b><font color="#0000FF">float</font></b> InventoryCost = ...;
+21: 
+22: <b><font color="#0000FF">range</font></b> Periods0 = 0..NbPeriods;
+23: 
+24: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ RegulBoat[Periods];
+25: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ ExtraBoat[Periods];
+26: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Inv[Periods0];
+27: 
+28: 
+29: <b><font color="#0000FF">minimize</font></b>
+30:    RegularCost * 
+31:    ( <b><font color="#7D007D">sum</font></b>( t <b><font color="#0000FF">in</font></b> Periods ) RegulBoat[t] ) +
+32:    ExtraCost * 
+33:    ( <b><font color="#7D007D">sum</font></b>( t <b><font color="#0000FF">in</font></b> Periods ) ExtraBoat[t] ) +
+34:    InventoryCost * 
+35:    ( <b><font color="#7D007D">sum</font></b>(t <b><font color="#0000FF">in</font></b> Periods ) Inv[t] );
+36:    
+37: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+38:   ctInit:  
+39:     Inv[0] == Inventory;
+40:   <b><font color="#7D007D">forall</font></b>( t <b><font color="#0000FF">in</font></b> Periods ) 
+41:     ctCapacity:
+42:       RegulBoat[t] &lt;= Capacity;
+43:   <b><font color="#7D007D">forall</font></b>( t <b><font color="#0000FF">in</font></b> Periods )
+44:     ctBoat: 
+45:       RegulBoat[t] + ExtraBoat[t] + Inv[t-1] == Inv[t] + Demand[t];
+46: }
+47: 
+48: 
+49: <b><font color="#0000FF">tuple</font></b> RegulBoatSolutionT{ 
+50:         <b><font color="#0000FF">int</font></b> Periods; 
+51:         <b><font color="#0000FF">float</font></b> value; 
+52: };
+53: {RegulBoatSolutionT} RegulBoatSolution = {&lt;i0,RegulBoat[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Periods};
+54: <b><font color="#0000FF">tuple</font></b> ExtraBoatSolutionT{ 
+55:         <b><font color="#0000FF">int</font></b> Periods; 
+56:         <b><font color="#0000FF">float</font></b> value; 
+57: };
+58: {ExtraBoatSolutionT} ExtraBoatSolution = {&lt;i0,ExtraBoat[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Periods};
+59: <b><font color="#0000FF">tuple</font></b> InvSolutionT{ 
+60:         <b><font color="#0000FF">int</font></b> Periods0; 
+61:         <b><font color="#0000FF">float</font></b> value; 
+62: };
+63: {InvSolutionT} InvSolution = {&lt;i0,Inv[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Periods0};
+</tt></pre>

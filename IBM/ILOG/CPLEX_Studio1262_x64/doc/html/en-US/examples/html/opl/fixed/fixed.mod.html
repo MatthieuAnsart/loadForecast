@@ -1,0 +1,62 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: {<b><font color="#0000FF">string</font></b>} Machines = ...;
+13: {<b><font color="#0000FF">string</font></b>} Products = ...;
+14: {<b><font color="#0000FF">string</font></b>} Resources = ...;
+15: 
+16: <b><font color="#0000FF">int</font></b> Capacity[Resources] = ...;
+17: <b><font color="#0000FF">int</font></b> MaxProduction = <b><font color="#7D007D">max</font></b>(r <b><font color="#0000FF">in</font></b> Resources) Capacity[r];
+18: <b><font color="#0000FF">int</font></b> RentingCost[Machines] = ...;
+19: <b><font color="#0000FF">tuple</font></b> productType {
+20:    <b><font color="#0000FF">int</font></b> profit;
+21:    {<b><font color="#0000FF">string</font></b>} machines;
+22:    <b><font color="#0000FF">int</font></b> use[Resources];
+23: }
+24: productType Product[Products] = ...;
+25: 
+26: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> Rent[Machines];
+27: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Produce[Products] <b><font color="#0000FF">in</font></b> 0..MaxProduction;
+28: 
+29: <b><font color="#0000FF">constraint</font></b> ctMaxProd[Products][Machines];
+30: 
+31: <b><font color="#0000FF">maximize</font></b> 
+32:   <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) 
+33:     Product[p].profit * Produce[p] -
+34:   <b><font color="#7D007D">sum</font></b>( m <b><font color="#0000FF">in</font></b> Machines ) 
+35:     RentingCost[m] * Rent[m];
+36:       
+37: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+38:   <b><font color="#7D007D">forall</font></b>( r <b><font color="#0000FF">in</font></b> Resources )
+39:     ctCapacity:
+40:       <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) 
+41:         Product[p].use[r] * Produce[p] &lt;= Capacity[r];
+42:     <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products , m <b><font color="#0000FF">in</font></b> Product[p].machines )
+43:       ctMaxProd[p][m]:
+44:         Produce[p] &lt;= MaxProduction * Rent[m];
+45: }
+46: 
+47: 
+48: <b><font color="#0000FF">tuple</font></b> ProduceSolutionT{ 
+49:         <b><font color="#0000FF">string</font></b> Products; 
+50:         <b><font color="#0000FF">int</font></b> value; 
+51: };
+52: {ProduceSolutionT} ProduceSolution = {&lt;i0,Produce[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Products};
+53: <b><font color="#0000FF">tuple</font></b> RentSolutionT{ 
+54:         <b><font color="#0000FF">string</font></b> Machines; 
+55:         <b><font color="#0000FF">int</font></b> value; 
+56: };
+57: {RentSolutionT} RentSolution = {&lt;i0,Rent[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Machines};
+</tt></pre>

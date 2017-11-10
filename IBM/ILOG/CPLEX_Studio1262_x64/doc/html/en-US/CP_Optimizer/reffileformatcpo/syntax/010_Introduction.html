@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="Introduction and an example" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/syntax.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Introduction_and_an_example" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/syntax.html" />
+<title>Introduction and an example</title>
+</head>
+<body role="main" id="Introduction_and_an_example">
+<h1 class="title topictitle1">Introduction and an example</h1>
+<div class="body conbody"><div class="section" id="Introduction_and_an_example__Features_of_the_CPO_file_format"><h2 class="title sectiontitle">Features of the CPO file format</h2>
+<p class="p">The CP Optimizer (CPO) file format is a specification for writing
+constraint programming models suitable for CP Optimizer, together with
+other information such as parameter settings and search phases.  A single
+model can be contained in one file or span multiple files.</p>
+
+
+<p class="p">CP Optimizer supports both reading and writing models in the
+CPO file format.  In particular, it is possible to build a model using any
+supported language or interface such as C++, Java™, C# or OPL and then, instead
+of solving the model, write it into a "CPO file". This file can be read into
+another instance of CP Optimizer using the appropriate APIs (possibly on
+another machine) and solved there.  It is possible to write CPO files
+manually or to generate them programmatically.  CPO files are particularly useful
+for debugging, since one can exactly see the model being solved by the engine,
+which is more difficult to do when examining source code or OPL models.</p>
+
+</div>
+<div class="section" id="Introduction_and_an_example__CPO_file_format_compared_to_OPL"><h2 class="title sectiontitle">CPO file format compared to OPL</h2>
+<p class="p">The main difference between the CPO file format and OPL is that the CPO
+file format is used for representing instantiated models: that is, models
+which already have their data incorporated.  By comparison, OPL models generally 
+separate models and data.  The CPO file format is also much
+simpler than the OPL language.  There are no user-defined data structures,
+no scripting, no <samp class="ph codeph">forall</samp> constructs, no database connections and so on.</p>
+
+
+<p class="p">Although a CPO file tends to be larger than an equivalent model and data
+files in OPL, CP Optimizer is able to read even large files quickly, which
+means that CPO files may be a viable option for modeling and solving in
+two different spaces (languages or machines for example).</p>
+
+</div>
+<div class="section" id="Introduction_and_an_example__Example"><h2 class="title sectiontitle">Example</h2>
+<p class="p">Let's start with a simple example. The model below finds a coloring of a
+map with six countries such that no two neighboring countries have the same
+color. Up to four colors are allowed.</p>
+
+
+<pre class="pre codeblock"><code><span class="ph commentemph">// Decision variables:</span>
+Belgium = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..4);
+Denmark = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..4);
+France = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..4);
+Germany = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..4);
+Luxembourg = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..4);
+Netherlands = <a class="xref" href="../functions/intVar.html" title="Creates a new integer variable.">intVar</a>(1..4);
+
+<span class="ph commentemph">/* Constraints: */</span>
+Belgium != France;
+Belgium != Germany;
+Belgium != Netherlands;
+Belgium != Luxembourg;
+Denmark != Germany;
+France != Germany;
+France != Luxembourg;
+Germany != Luxembourg;
+Germany != Netherlands;
+
+<a class="xref" href="../parameters.html" title="The optional section parameters specifies the CP Optimizer parameters that should be used for solving the model.">parameters</a> {
+  SearchType = DepthFirst;
+}</code></pre>
+
+<p class="p">There are six integer decision variables (Belgium, Denmark, France, Germany,
+Luxembourg and Netherlands) with possible values {1, 2, 3, 4}. For every pair
+of neighboring countries there is a constraint that their color is different
+(e.g. <samp class="ph codeph">Belgium != France</samp>). Finally, there is section <samp class="ph codeph"><a class="xref" href="../parameters.html" title="The optional section parameters specifies the CP Optimizer parameters that should be used for solving the model.">parameters</a></samp> where
+the parameter <samp class="ph codeph">SearchType</samp> is set to <samp class="ph codeph">DepthFirst</samp>.</p>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/syntax.html" title="This section describes the elements of the CPO file format such as statements, expressions, types, variables, constants or directives, and how to use them.">CP Optimizer file format syntax</a></div>
+</div>
+</div></body>
+</html>

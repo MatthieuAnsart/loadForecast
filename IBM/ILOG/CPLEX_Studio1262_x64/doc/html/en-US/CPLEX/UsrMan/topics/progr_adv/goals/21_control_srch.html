@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Controlling goal-defined search" />
+<meta name="abstract" content="Describes node selection strategy with goals." />
+<meta name="Description" content="Describes node selection strategy with goals." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_goals.1019462" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" />
+<title>Controlling goal-defined search</title>
+</head>
+<body role="main" id="User_manual.uss_goals.1019462">
+<h1 class="title topictitle1">Controlling goal-defined search</h1>
+<div class="body"><p class="shortdesc">Describes node selection strategy with goals.</p>
+<p class="p">So far, you have seen how to control the branching and
+cut generation of CPLEX branch &amp; cut search. The remaining
+missing piece is the node selection strategy. The node selection strategy
+sets which of the active nodes in the tree CPLEX chooses when it selects
+the next node for processing. CPLEX has several built-in node selection
+strategies, selected through the node selection parameter <samp class="ph codeph">(NodeSel</samp>, <samp class="ph codeph">CPX_PARAM_NODESEL</samp>).</p>
+<p class="p">When you use goal-controlled search, you use node evaluators
+to override the built-in node selection strategy. You combine a goal
+with a node evaluator by calling the method <samp class="ph codeph">IloCplex::Goal::Apply</samp> (<samp class="ph codeph">IloCplex.apply</samp> or <samp class="ph codeph">Cplex.Apply</samp>).
+This method returns a new goal that implements the same search strategy
+as the goal passed as the argument, but adds the node evaluator to
+every node in the subtree defined by the goal. Consequently, nodes
+may have a list of evaluators attached to them.</p>
+<p class="p">When node evaluators are used, nodes are selected like
+this: </p>
+<ol class="ol"><li class="li"><p class="p">CPLEX starts to choose the node with
+the built-in strategy as a first candidate.</p>
+</li>
+<li class="li"><p class="p">Then CPLEX loops over all remaining
+active nodes and considers choosing them instead. </p>
+</li>
+<li class="li"><p class="p">If a node has the same evaluator attached
+to it as the current candidate, the evaluator is asked whether this
+node should take precedence over the current candidate. If the response
+is positive, the node under investigation becomes the new candidate,
+and the test against other nodes continues.</p>
+</li>
+</ol>
+<p class="p">If a node has multiple evaluators attached, they are
+consulted in the order the evaluators have been applied. Here is the
+application order: </p>
+<ul class="ul"><li class="li"><p class="p">If the first evaluator prefers one node
+over the other, the preferred node is used as candidate and the next
+node is considered. </p>
+</li>
+<li class="li"><p class="p">If the first evaluator does not give
+preference to one node over the other, the second evaluator is considered,
+and so on. </p>
+</li>
+</ul>
+<p class="p">Thus, by adding multiple evaluators, you can build composite
+node selection strategies where later evaluators are used for breaking
+ties in previous evaluations.</p>
+<p class="p">In the C++ API, node evaluators are implemented as subclasses
+of class <samp class="ph codeph">IloCplex::NodeEvaluatorI</samp>. The
+class <samp class="ph codeph">IloCplex::NodeEvaluator</samp> is the handle
+class for node evaluators. </p>
+<p class="p">In <strong class="ph b">Java</strong>, node evaluators
+are implemented in objects of type <samp class="ph codeph">IloCplex.NodeEvaluator</samp> 
+(and there are no handle classes). Likewise, in the .NET API, node
+evaluators are implemented in <samp class="ph codeph">Cplex.NodeEvaluator</samp>.</p>
+<p class="p">Like goals, node evaluators use reference counting for
+memory management. As a result, you should always use the handle objects
+when dealing with node evaluators, and there is no method <samp class="ph codeph">end</samp> 
+to be called.</p>
+<p class="p">Node evaluators use a two-step process to decide whether
+one node should take precedence over another. First, the evaluator
+computes a value for every node to which it is attached. This is done
+by the method <samp class="ph codeph">evaluate</samp> in C++: </p>
+<pre class="pre codeblock"><code>IloNum IloCplex::NodeEvaluatorI::evaluate();</code></pre>
+<p class="p">and in <strong class="ph b">Java</strong>, by the
+method: </p>
+<pre class="pre codeblock"><code>double IloCplex.NodeEvaluator.evaluate();</code></pre>
+<p class="p">and in <strong class="ph b">C#.NET</strong>:  </p>
+<pre class="pre codeblock"><code>double Cplex.NodeEvaluator.Evaluate();</code></pre>
+<p class="p">This method must be implemented by users who write their
+own node evaluators. In the method <samp class="ph codeph">evaluate</samp>,
+the protected methods of the class <samp class="ph codeph">IloCplex::NodeEvaluatorI</samp> 
+(<samp class="ph codeph">IloCplex.NodeEvaluator</samp> or <samp class="ph codeph">Cplex.NodeEvaluator</samp>)
+can be called to query information about the node being evaluated.
+The method <samp class="ph codeph">evaluate</samp> must compute and return
+an evaluation (that is, a value) that is used later on, in the second
+step, to compare two nodes and select one of them. The <samp class="ph codeph">evaluate</samp> method
+is called only once for every node, and the result is cached and reused
+whenever the node is compared against another node with the evaluator.</p>
+<p class="p">The second step consists of comparing the current candidate
+to another node. This comparison happens only for evaluators that
+are shared by the current candidate and the other node. By default,
+the candidate is replaced by the other node if its evaluation value
+is smaller than that of the candidate. You can alter this behavior
+by overwriting the method: </p>
+<pre class="pre codeblock"><code>IloBool IloCplex::NodeEvaluatorI::subsume(IloNum candVal, IloNum nodeVal);</code></pre>
+<p class="p">or, in the case of <strong class="ph b">Java</strong>: </p>
+<pre class="pre codeblock"><code>boolean IloCplex.NodeEvaluator.subsume(double candVal, double nodeVal);</code></pre>
+<p class="p">or, in the case of <strong class="ph b">C#.NET</strong>:
+ </p>
+<pre class="pre codeblock"><code>bool Cplex.NodeEvaluator.Subsume(double evalNode, double evalCurrent);</code></pre>
+<p class="p">CPLEX calls this method of an evaluator attached to the
+current candidate if the node being compared also has the same evaluator
+attached. The first argument <samp class="ph codeph">candVal</samp> is
+the evaluation value the evaluator has previously computed for the
+current candidate, and <samp class="ph codeph">nodeVal</samp> is the evaluation
+value the evaluator has previously computed for the node being tested.
+If this method returns <samp class="ph codeph">IloTrue</samp> (<samp class="ph codeph">true</samp>),
+the candidate is replaced. Otherwise, the method is called again with
+reversed arguments. If it still returns <samp class="ph codeph">IloFalse</samp> (<samp class="ph codeph">false</samp>),
+both nodes are tied with respect to that evaluator, and the next evaluator
+they share is consulted. Otherwise, the current candidate is kept
+and tested against the next node.</p>
+<p class="p">There are two more virtual methods defined for node evaluators
+that should be considered when you implement your own node evaluator.
+The method <samp class="ph codeph">init</samp> is called immediately before <samp class="ph codeph">evaluate</samp> is
+called for the first time, thus allowing you to initialize internal
+data of the evaluator. When this happens, the evaluator has been initialized
+to the first node to be evaluated; thus information about this node
+can be queried by the methods of the class <samp class="ph codeph">IloCplex::NodeEvaluatorI</samp> (<samp class="ph codeph">IloCplex.NodeEvaluator</samp> or <samp class="ph codeph">Cplex.NodeEvaluator</samp>).</p>
+<p class="p">Finally, in C++, the method: </p>
+<pre class="pre codeblock"><code>IloCplex::NodeEvaluatorI* IloCplex::NodeEvaluatorI::duplicateEvaluator();</code></pre>
+<p class="p">must be implemented by the user to return a copy of the
+invoking node evaluator object. This method is called by <samp class="ph codeph">IloCplex</samp> to
+create copies of the evaluator for parallel branch &amp; cut
+search.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/goals/01_goals_title_synopsis.html" title="Documents goals and their role in a branch &amp; cut search.">Using goals</a></div>
+</div>
+</div></body>
+</html>

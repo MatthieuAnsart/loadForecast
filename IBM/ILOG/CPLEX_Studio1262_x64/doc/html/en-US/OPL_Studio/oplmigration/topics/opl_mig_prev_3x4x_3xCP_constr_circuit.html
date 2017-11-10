@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="circuit" />
+<meta name="abstract" content="Gives the syntax and an example of circuit for OPL 3.x and OPL 6.x." />
+<meta name="Description" content="Gives the syntax and an example of circuit for OPL 3.x and OPL 6.x." />
+<meta name="DC.subject" content="circuit, migration" />
+<meta name="keywords" content="circuit, migration" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCP_cstr.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1204226444658" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCP_cstr.html" />
+<title>circuit</title>
+</head>
+<body role="main" id="descriptiveTopic1204226444658">
+<h1 class="title topictitle1">circuit</h1>
+<div class="body"><p class="shortdesc">Gives the syntax and an example of <samp class="ph codeph">circuit</samp> for OPL 3.x and OPL 6.x.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCP_cstr.html" title="Describes the keywords affected by the changes of syntax to express constraint programming.">Constraints, functions, and operators</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="section1204289632428"><h2 class="title topictitle2">In OPL 3.x</h2>
+<div class="body"><p class="p"> <samp class="ph codeph">Circuit (Composite)</samp> </p>
+<p class="p exampletitle" id="section1204289632428__example1204289636303">OPL 3.x: Euler example</p>
+<pre class="pre codeblock"><code>range ChessBoard 1..64;
+
+{ChessBoard} Knightmove[ i in ChessBoard] = { j | j in ChessBoard :   
+        i mod 8 = 1 &amp; 
+       (j = i-15 \/ j = i-6 \/ j = i+10 \/ j = i+17) 
+     \/ i mod 8 = 2 &amp; 
+       (j=i-17 \/ j=i-15 \/ j=i-6 \/  j=i+10 \/ j=i+15 \/ j=i+17)  
+     \/ i mod 8 &gt;= 3 &amp; i mod 8 &lt;= 6 &amp; 
+       (j=i-17 \/ j=i-15 \/ j=i-10 \/ j=i-6 \/ j=i+6 \/ j=i+10 \/ j=i+15 \/ j=i+17) 
+     \/ i mod 8 = 7 &amp; 
+       (j=i-17 \/ j=i-15 \/ j=i-10 \/  j=i+6  \/ j=i+15 \/ j=i+17)  
+     \/ i mod 8 = 0 &amp; 
+       (j = i-17 \/ j = i-10 \/ j = i+6 \/ j=i+15)
+};
+
+var ChessBoard jump[ChessBoard];
+
+solve {
+   forall(p in ChessBoard)
+      jump[p] in Knightmove[p];
+
+   circuit(jump);
+
+   forall(p in ChessBoard)
+      sum(c in Knightmove[p]) (jump[c] = p) = 1;   
+};
+</code></pre>
+<div class="section" id="section1204289632428__section1204226471331"><h3 class="title sectiontitle">In OPL 6.x</h3><p class="p">Not available. </p>
+<p class="p">To translate the circuit constraint, you can:</p>
+<ul class="ul"><li class="li"><p class="p">define a sequence of moves</p>
+</li>
+<li class="li"><p class="p">specify that the last sequence is <samp class="ph codeph">1</samp></p>
+</li>
+<li class="li"><p class="p">specify that all values of the sequence
+are different</p>
+</li>
+</ul>
+<p class="p exampletitle" id="section1204289632428__example1204226485285">Migrating the circuit constraint (<samp class="ph codeph">euler.mod</samp>)</p>
+<pre class="pre codeblock"><code>using CP;
+
+int scale=8;
+range ChessBoard = 1..scale*scale;
+
+
+tuple coord
+{
+ int x;
+ int y;  
+};
+
+{coord} Knightmoves2D[i in 1..scale][j in 1..scale]=
+{&lt;i+2,j+1&gt;,&lt;i+2,j-1&gt;,&lt;i+1,j+2&gt;,&lt;i+1,j-2&gt;,
+&lt;i-2,j+1&gt;,&lt;i-2,j-1&gt;,&lt;i-1,j+2&gt;,&lt;i-1,j-2&gt;}
+inter {&lt;x,y&gt; | x in 1..scale ,y in 1..scale};
+
+{int} Knightmove[i in ChessBoard]={(x-1)*scale+y | &lt;x,y&gt; in Knightmoves2D[(i-1) div scale+1][(i-1) % scale+1]};
+
+dvar int jump[ChessBoard] in ChessBoard;
+dvar int Sequence[ChessBoard] in ChessBoard;
+
+execute {
+        cp.param.Workers = 1;
+        var f = cp.factory;
+        cp.setSearchPhases(f.searchPhase(Sequence));
+        cp.param.defaultInferenceLevel="Extended";
+}
+
+subject to {
+   forall(p in ChessBoard)
+      jump[p] in Knightmove[p];
+
+    Sequence[1] == jump[1];
+    forall(p in 2..scale*scale)
+      Sequence[p] == jump[Sequence[p-1]];
+
+   allDifferent(Sequence);
+   allDifferent(jump);
+   
+   Sequence[scale*scale] == 1;
+
+
+   forall(p in ChessBoard)
+      sum(c in Knightmove[p]) (jump[c] == p) == 1;  
+
+
+};
+
+
+int rank[1..scale,1..scale]=[ (Sequence[i]-1) % scale+1 : [ (Sequence[i]-1) div scale+1 : i ] | i in 1..scale *scale]; 
+
+execute
+{
+ // rank is the human oriented result
+ writeln(rank);  
+}
+</code></pre>
+</div>
+</div>
+</div>
+</body>
+</html>

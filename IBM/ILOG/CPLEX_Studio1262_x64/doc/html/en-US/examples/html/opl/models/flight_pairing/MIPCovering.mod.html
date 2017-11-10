@@ -1,0 +1,51 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2015. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#007D00">/// --- </font></b>
+13: <b><font color="#007D00">/// This is the MIP variant of the set covering problem.</font></b>
+14: <b><font color="#007D00">/// ---</font></b>
+15: include <b><font color="#8A2BE2">"FlightPairing_data.mod"</font></b>;
+16: include <b><font color="#8A2BE2">"PairingGeneration_data.mod"</font></b>;
+17: 
+18: <b><font color="#007D00">/// externals</font></b>
+19: {TPairingCost} pairingCosts = ...;
+20: {TPairingLeg}  pairingLegs  = ...;
+21: 
+22: <b><font color="#007D00">/// internal</font></b>
+23: <b><font color="#0000FF">int</font></b> NbFlights = <b><font color="#7D007D">card</font></b>(flights);
+24: <b><font color="#0000FF">range</font></b> FlightIndexRange = 1..NbFlights;
+25: 
+26: {<b><font color="#0000FF">int</font></b>} pairing_ids = { pc.id | pc <b><font color="#0000FF">in</font></b> pairingCosts };
+27: 
+28: <b><font color="#007D00">/// locals</font></b>
+29: {<b><font color="#0000FF">int</font></b>} covered[ p <b><font color="#0000FF">in</font></b> pairing_ids] = { fr | &lt;p, l, fr&gt; <b><font color="#0000FF">in</font></b> pairingLegs };
+30: 
+31: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> iUsageVars[ pairing_ids ];
+32: 
+33: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> totalUsageCost = <b><font color="#7D007D">sum</font></b>(pc <b><font color="#0000FF">in</font></b> pairingCosts) (iUsageVars[pc.id] * pc.cost);
+34: 
+35: <b><font color="#0000FF">minimize</font></b> totalUsageCost;
+36: 
+37: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> { 
+38:   <b><font color="#7D007D">forall </font></b>(f <b><font color="#0000FF">in</font></b> FlightIndexRange) {
+39:     <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> pairing_ids: f <b><font color="#0000FF">in</font></b> covered[p]) iUsageVars[p] &gt;= 1;  
+40:   }
+41: }
+42: 
+43: <b><font color="#0000FF">int</font></b> numberOfSelectedPairings = <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> pairing_ids) iUsageVars[p];
+44: <b><font color="#0000FF">execute</font></b> DEBUG {
+45:   writeln(<b><font color="#8A2BE2">"* MIP covering uses: "</font></b>, numberOfSelectedPairings, <b><font color="#8A2BE2">" out of "</font></b>, pairingLegs.size);
+46: }
+</tt></pre>

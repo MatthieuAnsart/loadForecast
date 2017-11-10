@@ -1,0 +1,150 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#0000FF">int</font></b> RollWidth = ...;
+013: <b><font color="#0000FF">int</font></b> NbItems = ...;
+014: 
+015: <b><font color="#0000FF">range</font></b> Items = 1..NbItems;
+016: <b><font color="#0000FF">int</font></b> Size[Items] = ...;
+017: <b><font color="#0000FF">int</font></b> Amount[Items] = ...;
+018: 
+019: <b><font color="#007D00">// Output dual values used to fill in the sub model.</font></b>
+020: <b><font color="#0000FF">float</font></b> Duals[Items] = ...;
+021: 
+022: <b><font color="#0000FF">tuple</font></b>  pattern {
+023:    <b><font color="#0000FF">key</font></b> <b><font color="#0000FF">int</font></b> id;
+024:    <b><font color="#0000FF">int</font></b> cost;
+025:    <b><font color="#0000FF">int</font></b> fill[Items];
+026: }
+027: 
+028: {pattern} Patterns = ...;
+029: 
+030: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> Cut[Patterns] <b><font color="#0000FF">in</font></b> 0..1000000;
+031: 
+032: <b><font color="#0000FF">minimize</font></b>
+033:   <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Patterns ) 
+034:     p.cost * Cut[p];
+035: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+036:   <b><font color="#7D007D">forall</font></b>( i <b><font color="#0000FF">in</font></b> Items ) 
+037:    ctFill:
+038:      <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Patterns ) 
+039:        p.fill[i] * Cut[p] &gt;= Amount[i];
+040: }
+041:  
+042: <b><font color="#007D00">// dual values used to fill in the sub model.</font></b>
+043: <b><font color="#0000FF">execute</font></b> FillDuals {
+044:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> Items) {
+045:      Duals[i] = ctFill[i].dual;
+046:   }
+047: }    
+048: 
+049: main {
+050:   <b><font color="EA7D00">var</font></b> status = 0;
+051:   <b><font color="#0000FF">thisOplModel</font></b>.generate();
+052: 
+053:   <b><font color="EA7D00">var</font></b> RC_EPS = 1.0e-6;
+054: 
+055:   <b><font color="EA7D00">var</font></b> masterDef = <b><font color="#0000FF">thisOplModel</font></b>.modelDefinition;
+056:   <b><font color="EA7D00">var</font></b> masterCplex = <b><font color="#0000FF">cplex</font></b>;
+057:   <b><font color="EA7D00">var</font></b> masterData = <b><font color="#0000FF">thisOplModel</font></b>.dataElements;
+058:    
+059:   <b><font color="EA7D00">var</font></b> subSource = <b><font color="EA7D00">new</font></b> IloOplModelSource(<b><font color="#8A2BE2">"cutstock-sub.mod"</font></b>);
+060:   <b><font color="EA7D00">var</font></b> subDef = <b><font color="EA7D00">new</font></b> IloOplModelDefinition(subSource);
+061:   <b><font color="EA7D00">var</font></b> subData = <b><font color="EA7D00">new</font></b> IloOplDataElements();
+062:   <b><font color="EA7D00">var</font></b> subCplex = <b><font color="EA7D00">new</font></b> IloCplex();
+063: 
+064:   <b><font color="EA7D00">var</font></b> best;
+065:   <b><font color="EA7D00">var</font></b> curr = Infinity;
+066: 
+067:   <b><font color="EA7D00">while</font></b> ( best != curr ) {
+068:     best = curr;
+069: 
+070:     <b><font color="EA7D00">var</font></b> masterOpl = <b><font color="EA7D00">new</font></b> IloOplModel(masterDef, masterCplex);
+071:     masterOpl.addDataSource(masterData);
+072:     masterOpl.generate();
+073:     masterOpl.convertAllIntVars();
+074:         
+075:     writeln(<b><font color="#8A2BE2">"Solve master."</font></b>);
+076:     <b><font color="EA7D00">if</font></b> ( masterCplex.solve() ) {
+077:       curr = masterCplex.getObjValue();
+078:       writeln();
+079:       writeln(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b>,curr);
+080:     } 
+081:     <b><font color="EA7D00">else</font></b> {
+082:       writeln(<b><font color="#8A2BE2">"No solution!"</font></b>);
+083:       masterOpl.end();
+084:       <b><font color="EA7D00">break</font></b>;
+085:     }
+086: 
+087:     subData.RollWidth = masterOpl.RollWidth;
+088:     subData.Size = masterOpl.Size;
+089:     subData.Duals = masterOpl.Duals;
+090:     <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> masterOpl.Items) {
+091:       subData.Duals[i] = masterOpl.ctFill[i].dual;
+092:     }
+093: 
+094:     <b><font color="EA7D00">var</font></b> subOpl = <b><font color="EA7D00">new</font></b> IloOplModel(subDef, subCplex);
+095:     subOpl.addDataSource(subData);
+096:     subOpl.generate();
+097: 
+098:     writeln(<b><font color="#8A2BE2">"Solve sub."</font></b>);
+099:     <b><font color="EA7D00">if</font></b> ( subCplex.solve() ) {
+100:       writeln();
+101:       writeln(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b>,subCplex.getObjValue());
+102:     }
+103:     <b><font color="EA7D00">else</font></b> {
+104:       writeln(<b><font color="#8A2BE2">"No solution!"</font></b>);
+105:       subOpl.end();
+106:       masterOpl.end();
+107:       <b><font color="EA7D00">break</font></b>;
+108:     }
+109: 
+110:     <b><font color="EA7D00">if</font></b> (subCplex.getObjValue() &gt; -RC_EPS) { 
+111:       subOpl.end();
+112:       masterOpl.end();
+113:       <b><font color="EA7D00">break</font></b>;
+114:     }
+115: 
+116:         
+117:     <b><font color="#007D00">// Prepare the next iteration:</font></b>
+118:     masterData.Patterns.add(masterData.Patterns.size,1,subOpl.Use.solutionValue);
+119: 
+120:     subOpl.end();
+121:     masterOpl.end();
+122:   }
+123:   writeln(<b><font color="#8A2BE2">"Relaxed model search end."</font></b>);
+124: 
+125:   masterOpl = <b><font color="EA7D00">new</font></b> IloOplModel(masterDef,masterCplex);
+126:   masterOpl.addDataSource(masterData);
+127:   masterOpl.generate();   
+128: 
+129:   writeln(<b><font color="#8A2BE2">"Solve integer master."</font></b>);  
+130:   <b><font color="EA7D00">if</font></b> ( masterCplex.solve() ) {
+131:     writeln();
+132:     writeln(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b>,masterCplex.getObjValue());
+133:     <b><font color="EA7D00">if</font></b> (Math.abs(masterCplex.getObjValue() - 47)&gt;=0.0001) {
+134:       status = -1;
+135:       writeln(<b><font color="#8A2BE2">"Unexpected objective value"</font></b>);
+136:     }
+137:     <b><font color="EA7D00">for</font></b>(i <b><font color="EA7D00">in</font></b>  masterData.Patterns) {
+138:       <b><font color="EA7D00">if</font></b> (masterOpl.Cut[i].solutionValue &gt; 0) {
+139:         writeln(<b><font color="#8A2BE2">"Pattern : "</font></b>, i, <b><font color="#8A2BE2">" used "</font></b>, masterOpl.Cut[i].solutionValue &lt;&lt; <b><font color="#8A2BE2">" times"</font></b>);
+140:       }
+141:     }
+142:   }
+143:   masterOpl.end();
+144:   status;
+145: }
+</tt></pre>

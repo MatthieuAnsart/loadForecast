@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="forbidStart" />
+<meta name="abstract" content="Forbid an interval variable to start during specified regions." />
+<meta name="Description" content="Forbid an interval variable to start during specified regions." />
+<meta name="DC.subject" content="forbidStart" />
+<meta name="keywords" content="forbidStart" />
+<meta name="DC.Relation" scheme="URI" content="../syntax/130_MoreTypes.html#More_types/Type_stepFunction" />
+<meta name="DC.Relation" scheme="URI" content="intervalVar.html" />
+<meta name="DC.Relation" scheme="URI" content="forbidEnd.html" />
+<meta name="DC.Relation" scheme="URI" content="forbidExtent.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="forbidStart" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/reffileformatcpo/functions.html" />
+<title>forbidStart</title>
+</head>
+<body role="main" id="forbidStart">
+<h1 class="title topictitle1">forbidStart</h1>
+<div class="body refbody"><p class="shortdesc">Forbid an interval variable to start during specified regions.</p>
+<div class="section" id="forbidStart__Syntax"><h2 class="title sectiontitle">Syntax</h2>
+<pre class="pre codeblock"><code><a class="xref" href="../syntax/070_Types.html#Type_constraint">constraint</a> <strong class="ph b">forbidStart</strong>(<a class="xref" href="../syntax/070_Types.html#Variable_types__intervalVar">intervalVar</a> itv, <a class="xref" href="../syntax/130_MoreTypes.html#More_types__Type_stepFunction">stepFunction</a> f)</code></pre>
+</div>
+<div class="section" id="forbidStart__Parameters"><h2 class="title sectiontitle">Parameters</h2>
+<ul class="ul"><li class="li">    <samp class="ph codeph">itv</samp>: interval variable being restricted.
+  </li>
+<li class="li">    <samp class="ph codeph">f</samp>: if the function <samp class="ph codeph">f</samp> has value 0 at point <samp class="ph codeph">t</samp> then the interval variable
+    <samp class="ph codeph">itv</samp> cannot start at <samp class="ph codeph">t</samp>.
+  </li>
+</ul>
+
+</div>
+<div class="section" id="forbidStart__Description"><h2 class="title sectiontitle">Description</h2>
+<p class="p">This constraint restricts possible start times of interval variable using a
+step function. The interval variable can start only at points where the
+function value is not zero. When the interval variable is absent then this
+constraint is automatically satisfied (since such interval variable does not
+have any start at all).</p>
+
+
+<p class="p">In declaration of <a class="xref" href="intervalVar.html" title="Creates a new interval variable."><samp class="ph codeph">intervalVar</samp></a> it is only possible to specify
+a range of possible start times. This function allows more
+precise specification of when the interval variable can start.</p>
+
+</div>
+<div class="section" id="forbidStart__Example"><h2 class="title sectiontitle">Example</h2>
+<p class="p">Forbid task <samp class="ph codeph">itv</samp> to start during weekends.</p>
+
+
+<pre class="pre codeblock"><code>workingDays = <a class="xref" href="stepFunction.html" title="Creates a new step function (a function that remains constant within each of a series of adjacent intervals but changes in value from one interval to the next).">stepFunction</a>((0, 100), (5, 0), (7, 100), (12, 0), (14, 100), (19, 0));
+itv = <a class="xref" href="intervalVar.html" title="Creates a new interval variable.">intervalVar</a>(length=4, end=0..21);
+<strong class="ph b">forbidStart</strong>(itv, workingDays);</code></pre>
+
+<p class="p">A possible solution is:</p>
+
+
+
+<div class="imageleft"><img class="image syntaxdiagram" src="../diagrams/diagram19.png" /></div>
+
+<p class="p">Note that <samp class="ph codeph">itv</samp> can start at time 7 because the function has value 100 at 7.</p>
+
+
+<p class="p">Another similar example of when a task is also suspended during weekends can be
+found in <a class="xref" href="stepFunction.html" title="Creates a new step function (a function that remains constant within each of a series of adjacent intervals but changes in value from one interval to the next).">description of <samp class="ph codeph">stepFunction</samp></a>.</p>
+
+</div>
+<div class="section" id="forbidStart__Notes"><h2 class="title sectiontitle">Notes</h2>
+<ul class="ul"><li class="li">    When the interval variable is optional and this constraints eliminates all
+    the remaining possible start times, then then interval variable is set to
+    absent.
+  </li>
+</ul>
+
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/reffileformatcpo/functions.html" title="The following functions can be used in a CP Optimizer model file (CPO file):">Functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="intervalVar.html" title="Creates a new interval variable.">function <samp class="ph codeph">intervalVar</samp></a></div>
+<div><a class="link" href="forbidEnd.html" title="Forbid an interval variable to end during specified regions.">forbidEnd</a></div>
+<div><a class="link" href="forbidExtent.html" title="Forbid an interval variable to overlap with specified regions.">forbidExtent</a></div>
+</div>
+<div class="relinfo"><strong>Related information</strong>:<br />
+<div><a class="link" href="../syntax/130_MoreTypes.html#More_types__Type_stepFunction">stepFunction</a></div>
+</div>
+</div></body>
+</html>

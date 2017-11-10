@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Working with LP files" />
+<meta name="abstract" content="Describes programming considerations for working with LP file format." />
+<meta name="Description" content="Describes programming considerations for working with LP file format." />
+<meta name="DC.subject" content="LP file format, special considerations, displaying, variables" />
+<meta name="keywords" content="LP file format, special considerations, displaying, variables" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_file_formats_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_manageIO.1005404" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_file_formats_synopsis.html" />
+<title>Working with LP files</title>
+</head>
+<body role="main" id="User_manual.uss_manageIO.1005404">
+<h1 class="title topictitle1">Working with LP files</h1>
+<div class="body"><p class="shortdesc">Describes programming considerations for working with
+LP file format.</p>
+<p class="p">LP files are row-oriented so you can look at a problem
+as you enter it in a naturally and intuitively algebraic way. However,
+CPLEX represents a problem internally in a column-ordered format.
+This difference between the way CPLEX accepts a problem in LP format
+and the way it stores the problem internally may have an impact on
+memory use and on the order in which variables are displayed on screen
+or in files.</p>
+<div class="section" id="User_manual.uss_manageIO.1005404__User_manual.uss_manageIO.1005423"><h2 class="title sectiontitle">Variable order and LP files</h2>
+
+
+
+
+
+
+<p class="p">As CPLEX reads an LP format file by rows, it adds columns
+as it encounters them in a row. This convention will have an impact
+on the order in which variables are named and displayed. For example,
+consider this problem: </p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="" role="presentation" class="table presentation NoBorder" rules="none" frame="void" border="0"><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> Maximize </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> 2x2 </td>
+<td class="entry" valign="top"> + </td>
+<td class="entry" valign="top"> 3x3 </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> subject to </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> -x1 </td>
+<td class="entry" valign="top"> + </td>
+<td class="entry" valign="top"> x2 </td>
+<td class="entry" valign="top"> + </td>
+<td class="entry" valign="top"> x3 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> 20 </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> x1 </td>
+<td class="entry" valign="top"> - </td>
+<td class="entry" valign="top"> 3x2 </td>
+<td class="entry" valign="top"> + </td>
+<td class="entry" valign="top"> x3 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> 30 </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" rowspan="1" colspan="3" valign="top"> with these bounds </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> 0 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> x1 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> 40 </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> 0 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> x2 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> infinity </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> 0 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> x3 </td>
+<td class="entry" valign="top"> <samp class="ph codeph">≤</samp> </td>
+<td class="entry" valign="top"> infinity </td>
+<td class="entry" valign="top"> </td>
+<td class="entry" valign="top"> </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Since CPLEX reads the objective function as the first
+row, the two columns appearing there will become the first two variables.
+When the problem is displayed or rewritten into another LP file, the
+variables there will appear in a different order within each row.
+In this example, if you execute the command <samp class="ph codeph">display problem all</samp>,
+you see this:</p>
+<pre class="pre codeblock"><code>Maximize
+ obj: 2 x2 + 3 x3
+Subject To
+ c1: x2 + x3 - x1 &lt;= 20
+ c2: - 3 x2 + x3 + x1 &lt;= 30
+Bounds
+ 0 &lt;= x1 &lt;= 40
+ All other variables are &gt;= 0.</code></pre>
+<p class="p">That is, <samp class="ph codeph">x1</samp> appears at the
+end of each constraint in which it has a nonzero coefficient. Also,
+while re-ordering like this does not affect the optimal objective
+function value of the problem, if there exist alternate optimal solutions
+at this value, then the different order of the variables could result
+in a change in the solution path of the algorithm, and there may be
+noticeable variation in the solution values of the individual variables.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/input_output/manageIO_file_formats_synopsis.html" title="Explains programming considerations about widely used file formats.">Understanding file formats</a></div>
+</div>
+</div></body>
+</html>

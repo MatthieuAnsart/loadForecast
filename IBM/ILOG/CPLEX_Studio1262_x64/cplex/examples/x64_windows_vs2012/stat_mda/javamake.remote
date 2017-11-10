@@ -1,0 +1,31 @@
+!include javamake 
+
+# Default transport type.
+TRANSPORT = process
+
+# Directory where binaries and DLLs reside.
+REMOTEBINDIR = ..\..\..\bin\x64_win64
+# Path to worker.
+WORKER = $(REMOTEBINDIR)\cplex.exe
+
+# We need one more directory in the class path when running the
+# remote examples, so we use a different macro for running examples
+# than for non-remote examples
+REMOTEJAVA  = java  -Djava.library.path=..\..\..\bin\x64_win64 \
+              -classpath "..\..\..\lib\cplex.jar;.;$(TRANSPORT)"
+
+REMOTEEXSRC = ..\..\src\remotejava
+
+remote-run: remote-run-RemoteParBenders
+
+remote-clean:
+	-del $(TRANSPORT)\*.class
+
+RemoteParBendersAargs        = # nothing
+RemoteParBendersUserfunction = # nothing
+$(TRANSPORT)\RemoteParBenders.class: $(REMOTEEXSRC)\RemoteParBenders.java
+	IF NOT EXIST $(TRANSPORT) md $(TRANSPORT)
+	$(JAVAC) $(JCFLAGS) -d $(TRANSPORT) \
+		$(REMOTEEXSRC)\RemoteParBenders.java
+
+!include javamake.$(TRANSPORT)

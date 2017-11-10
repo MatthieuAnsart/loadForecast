@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Common pitfalls" />
+<meta name="abstract" content="Lists syntax errors you should avoid when writing IBM ILOG Script statements in OPL models." />
+<meta name="Description" content="Lists syntax errors you should avoid when writing IBM ILOG Script statements in OPL models." />
+<meta name="DC.subject" content="models, efficiency, script statements, efficient models, pitfalls in script statements, scripting, common pitfalls" />
+<meta name="keywords" content="models, efficiency, script statements, efficient models, pitfalls in script statements, scripting, common pitfalls" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_script_intro.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_script_intro.1009127" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_intro.html" />
+<title>Common pitfalls</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_script_intro.1009127">
+<h1 class="title topictitle1">Common pitfalls</h1>
+<div class="body"><p class="shortdesc">Lists syntax errors you should avoid when writing IBM® ILOG® Script
+statements in OPL models.</p>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1009127__usropllangtut.uss_langtut_script_intro.1014106"><h2 class="title sectiontitle">No
+range syntax</h2><p class="p">The range syntax you can
+use in OPL modeling statements does not exist for script statements.</p>
+<p class="p">In
+OPL, <samp class="ph codeph">a &lt;= x &lt;= b</samp>  is equivalent to <samp class="ph codeph">a &lt;=
+x &amp;&amp; x &lt;= b</samp>, </p>
+<p class="p">whereas in scripting it is
+evaluated as <samp class="ph codeph">((a &lt;= x) &lt;= b)</samp> or </p>
+<p class="p"><samp class="ph codeph">var
+v1 = a &lt;= x;</samp></p>
+<p class="p"><samp class="ph codeph">v1 &lt;= b;</samp></p>
+<p class="p">However,
+that syntax is valid for JavaScript (ECMAScript)
+parsing in some cases. </p>
+<p class="p">For example, this statement:</p>
+<pre class="pre codeblock"><code> for(var i in 1..n) </code></pre>
+<p class="p">iterates
+an empty loop. The expression “<samp class="ph codeph">1..n</samp> ” is interpreted
+as the named property <samp class="ph codeph">n</samp> for the number object <samp class="ph codeph">1</samp>.
+As that property does not exist, it evaluates to <samp class="ph codeph">undefined</samp>.
+Iterating the <samp class="ph codeph">undefined</samp> value is an empty loop. </p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1009127__usropllangtut.uss_langtut_script_intro.1014113"><h2 class="title sectiontitle">No
+tuple syntax</h2><p class="p">The tuple syntax in OPL
+modeling statements does not exist for script statements. Use the <span class="keyword apiname">find()</span> or
+the <span class="keyword apiname">get()</span> methods to get control of tuple objects.
+For example, instead of writing:</p>
+<pre class="pre codeblock"><code> A[&lt;a,b&gt;] </code></pre>
+<p class="p">which
+results in a parsing error, write</p>
+<pre class="pre codeblock"><code> A[S.get(a,b)] </code></pre>
+<p class="p">where <samp class="ph codeph">S</samp> is
+the indexer for <samp class="ph codeph">A</samp>. </p>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1009127__usropllangtut.uss_langtut_script_intro.1015070"><h2 class="title sectiontitle">IBM ILOG Script
+variables</h2><p class="p">All
+variables you declare using the <samp class="ph codeph">var</samp> keyword in a
+scripting block are undefined in the block until they are declared.
+For example:</p>
+<pre class="pre codeblock"><code>int a=2;
+execute {
+  writeln(a);
+var a=2;
+  writeln(a);
+}</code></pre>
+<p class="p">gives out</p>
+<pre class="pre codeblock"><code> undefined 2</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_script_intro.1009127__CgLWzrpQ"><h2 class="title sectiontitle">Lazy initialization of data</h2><p class="p">See <a class="xref" href="../../opllangref/topics/opl_langref_datasources_pitfall.html" title="In OPL, external data is always initialized before internal data.">Pitfall of lazy initialization of data</a>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_script_intro.html" title="Defines IBM ILOG Script as a scripting language and describes the situations in which it is used: preprocessing, postprocessing, and flow control. Also provides programming tips and warns you of pitfalls to avoid.">Introduction to scripting</a></div>
+</div>
+</div></body>
+</html>

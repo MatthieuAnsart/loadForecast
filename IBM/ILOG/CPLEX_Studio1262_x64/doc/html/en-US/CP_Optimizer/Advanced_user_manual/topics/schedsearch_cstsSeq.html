@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Writing a custom constraint on a sequence variable" />
+<meta name="abstract" content="Custom constraints on interval sequence variables can be written using engine extensions." />
+<meta name="Description" content="Custom constraints on interval sequence variables can be written using engine extensions." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1271679825307" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" />
+<title>Writing a custom constraint on a sequence variable</title>
+</head>
+<body role="main" id="descriptiveTopic1271679825307">
+<h1 class="title topictitle1">Writing a custom constraint on a sequence variable</h1>
+<div class="body"><p class="shortdesc">Custom constraints on interval sequence variables can
+be written using engine extensions.</p>
+<p class="p">Sequencing of non-overlaping intervals is an important
+concept in scheduling applications. To model a scheduling problem,
+the specific topology of a sequence of intervals or between sequences
+of intervals may need to be constrained. In some cases, a complex
+assembly of constraints may be used to express the constraint. For
+example, the sample <samp class="ph codeph">sched_pflowshop.cpp</samp> illustrates
+modeling a permutation flow shop problem. This practice has limitations
+in expressivity and performance; in <samp class="ph codeph">sched_pflowshop.cpp</samp>,
+a constraint per interval variable is added to the model, and these
+expressions are quite complex. The model for <samp class="ph codeph">sched_pflowshop.cpp</samp> is
+limited to a perfect permutation. Supporting stronger conditions or
+relaxing conditions on the permutation is difficult. For example,
+this model does not work if some interval variables are optional and
+may be absent in the solution.</p>
+<p class="p">An interval sequence variable in the engine of CP Optimizer
+is an instance of the class <samp class="ph codeph">IlcIntervalSequenceVariable</samp>.
+The internal data structure specialized for chronological scheduling
+is the head-tail graph. The sample <samp class="ph codeph">schedsearch_permutation.cpp</samp> illustrates
+writing a permutation constraint that allows some interval variables
+to be absent in the solution.</p>
+<p class="p">Following the design in the example, you can write your
+own constraint on sequence variables. The events on the head-tail
+graph include changes in presence in the sequence of an interval variable,
+head and tail extensions, and the global update of the set of not
+sequenced intervals. </p>
+<p class="p">The filtering algorithms associated with head or tail
+extensions or changes in presence of an interval in the head or tail
+include:</p>
+<ul class="ul"><li class="li"><p class="p">a filtering algorithm that processes
+the “last interval in head” changes that extend the
+head or remove a candidate for the head; </p>
+</li>
+<li class="li"><p class="p">a filtering algorithm that processes
+the “last interval in tail” changes that extend of the
+tail or remove of a candidate for the tail; </p>
+</li>
+<li class="li"><p class="p">a filtering algorithm that processes
+the “last interval in tail” or “last interval
+in head” changes when the sequence variable is sequenced by
+propagating the next relationship between the last interval in head
+and the last interval in tail;</p>
+</li>
+<li class="li"><p class="p">the maintenance of incremental support
+on an interval in head for which the condition of the constraint is
+bound before it in the head: the head boundary; </p>
+</li>
+<li class="li"><p class="p">the maintenance of incremental support
+on an interval in tail for which the condition of the constraint is
+bound after it in the tail: the tail boundary;</p>
+</li>
+<li class="li"><p class="p">an algorithm that propagates the change
+of an interval variable in head after the head boundary that considers
+the neighboring in head of this interval. </p>
+</li>
+<li class="li"><p class="p">an algorithm that propagates the change
+of an interval variable in tail after the tail boundary that considers
+the neighboring in tail of this interval;</p>
+</li>
+<li class="li"><p class="p">If possible, associated with the non
+sequenced event change set, a filtering algorithm that tries to remove
+candidate head and tail based on knowledge of the last present intervals
+in head and tail.</p>
+</li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/schedsearch.html" title="Custom constraints and goals for scheduling can be written using engine extensions.">Writing custom scheduling constraints and goals</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Displaying results" />
+<meta name="abstract" content="Describes how to display results by writing an execute IBM ILOG Script block." />
+<meta name="Description" content="Describes how to display results by writing an execute IBM ILOG Script block." />
+<meta name="DC.subject" content="scripting, displaying results, execute, IBM ILOG Script block, to display results, tuples of expressions, displaying solutions, solutions, displaying, results, costs, reduced, displayed, reduced costs, in product.mod/productn.data example" />
+<meta name="keywords" content="scripting, displaying results, execute, IBM ILOG Script block, to display results, tuples of expressions, displaying solutions, solutions, displaying, results, costs, reduced, displayed, reduced costs, in product.mod/productn.data example" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_LP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_shortTour.1005820" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_LP.html" />
+<title>Displaying results</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_shortTour.1005820">
+<h1 class="title topictitle1">Displaying results</h1>
+<div class="body taskbody"><p class="shortdesc">Describes how to display results by writing an <samp class="ph codeph">execute</samp> IBM® ILOG® Script block.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div> <p class="p">The statements presented so far did
+not specify what elements of the solution should be displayed. OPL
+offers a way to display the results of an application. An interesting
+feature of OPL is the ability to display tuples of expressions.</p>
+ </div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><p class="li stepsection"><p class="p">To display results using an <samp class="ph codeph">execute</samp> block:</p>
+</p><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Add the following IBM ILOG Script <samp class="ph codeph">execute</samp> block
+to the <span class="ph filepath">product.mod</span> file (see <a class="xref" href="opl_languser_shortTour_LP_elements.html#usropllangtut.uss_langtut_shortTour.1005660__usropllangtut.uss_langtut_shortTour.1005765">The production-planning problem revisited (<samp class="ph codeph">product.mod</samp>)</a>) </span> <pre class="pre codeblock"><code>tuple R { float x; float y; };
+{R} Result = { &lt;Inside[p],Outside[p]&gt; | p in Products };
+execute { writeln("Result=",Result); } </code></pre>
+<p class="p">You see the following output:</p>
+<pre class="pre codeblock"><code>Optimal solution found with objective: 372
+result= {&lt;40.0000 60.0000&gt; &lt;0.0000 200.0000&gt; &lt;0.0000 300.0000&gt;} </code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Run the product model
+with the <span class="ph filepath">productn.dat</span> data file shown
+in <a class="xref" href="opl_languser_shortTour_LP_results.html#usropllangtut.uss_langtut_shortTour.1005820__usropllangtut.uss_langtut_shortTour.1062374">Named data for the revised production-planning problem (<span class="ph filepath">productn.dat</span>)</a>.</span> <p class="p">You can visualize the inside and outside productions of a
+product simultaneously.</p>
+<pre class="pre codeblock"><code>Final Solution with objective 372.0000:
+  inside = [40.0000 0.0000 0.0000];
+  outside = [60.0000 200.0000 300.0000];</code></pre>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_shortTour.1005820__usropllangtut.uss_langtut_shortTour.1062374">Named data for the revised production-planning
+problem (<span class="ph filepath">productn.dat</span>)</p>
+<pre class="pre codeblock"><code>Products =  { "kluski", "capellini", "fettucine" };
+Resources = { "flour", "eggs" };
+
+Product = #[
+      kluski : 
+   #&lt; demand:100
+           insideCost:0.6
+           outsideCost:0.8
+           consumption:[0.5 0.2]
+        &gt;#,
+      capellini :
+   #&lt; demand:200
+           insideCost:0.8
+           outsideCost:0.9
+           consumption:[0.4 0.4]
+        &gt;#,
+      fettucine :
+   #&lt; demand:300
+           insideCost:0.3
+           outsideCost:0.4
+           consumption:[0.3 0.6]
+        &gt;#
+          ]#;
+
+Capacity = [ 20, 40 ];</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Add the following IBM ILOG Script postprocessing lines to the <span class="ph filepath">product.mod</span> file</span> <pre class="pre codeblock"><code>execute {
+   for(p in Products)
+     writeln("inside[",p,"].reducedCost = ", inside[p].reducedCost); 
+}</code></pre>
+<p class="p">You can see both the inside production of
+a product and its reduced cost.</p>
+<pre class="pre codeblock"><code>Optimal solution found with objective: 372 
+ inside[kluski].reducedCost = 0 
+ inside[capellini].reducedCost = 0.06000000000000005
+ inside[fettucine].reducedCost = 0.02000000000000002</code></pre>
+</li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_LP.html" title="Explains how OPL expresses LP problems, describes the production planning problem, presents the elements of a production model, shows how results can be displayed, and how to change a parameter value.">Linear programming: a production planning example</a></div>
+</div>
+</div></body>
+</html>

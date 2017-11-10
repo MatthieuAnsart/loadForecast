@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Serializing for the remote object" />
+<meta name="abstract" content="Documents serialization to support the remote object." />
+<meta name="Description" content="Documents serialization to support the remote object." />
+<meta name="DC.subject" content="remote object, serialization and, serialization, remote object and" />
+<meta name="keywords" content="remote object, serialization and, serialization, remote object and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="remoteObjSerializer" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" />
+<title>Serializing for the remote object</title>
+</head>
+<body role="main" id="remoteObjSerializer">
+<h1 class="title topictitle1">Serializing for the remote object</h1>
+<div class="body"><p class="shortdesc">Documents serialization to support the remote object.</p>
+<p class="p">When you implement a user function, it may be advantageous or
+even necessary to <strong class="ph b">serialize</strong> data into a 
+buffer that can then be passed to your user function. In the other direction, 
+a buffer obtained from a user function may need to be de-serialized.
+To make your application portable, this serialization needs to be independent of
+byte-order and other machine-specific details. To facilitate this serialization and 
+de-serialization, CPLEX Callable Library (C API) provides two structures: <span class="keyword apiname">CPXSERIALIZER</span>
+and <span class="keyword apiname">CPXDESERIALIZER</span>. </p>
+<p class="p">In the Concert C++ API, use the class 
+<span class="keyword apiname">IloCplex::Serializer</span> to serialize 
+arguments for user functions. 
+Likewise, use the class <span class="keyword apiname">IloCplex::Deserializer</span> 
+to de-serialize results of user functions.</p>
+<p class="p">In the Concert Java API, use the class 
+<span class="keyword apiname">IloCplex.Serializer</span> to serialize 
+arguments for user functions. Likewise, use the class 
+<span class="keyword apiname">IloCplex.Deserializer</span> 
+to de-serialize results of user functions.</p>
+<p class="p">The routine <span class="keyword apiname">CPXXserializercreate</span> creates 
+<span class="keyword apiname">CPXSERIALIZER</span>, and  
+<span class="keyword apiname">CPXXserializerdestroy</span> destroys it.</p>
+<p class="p">Likewise, the routine <span class="keyword apiname">CPXXdeserializercreate</span> creates the structure 
+<span class="keyword apiname">CPXDESERIALIZER</span>, and the routine <span class="keyword apiname">CPXXdeserializerdestroy</span> 
+destroys the de-serialization structure.</p>
+<p class="p">Each structure, <span class="keyword apiname">CPXSERIALIZER</span>
+and <span class="keyword apiname">CPXDESERIALIZER</span>, is a collection of function pointers. 
+The serializer operates on blocks of memory. It can serialize data that is common in CPLEX
+applications, such data as integers and floating-point numbers (that is, numeric data). 
+Likewise, the de-serializer also operates on blocks of memory to de-serialize common CPLEX data. </p>
+<p class="p">Because pointers in a <strong class="ph b">local</strong> process (such as master) are not meaningful to 
+<strong class="ph b">remote</strong> processes (such as the workers, running in different processes, possibly on 
+different machines), you cannot simply serialize the pointer values of handles 
+to the familiar CPLEX LP object or network object. Instead, in order to serialize 
+or de-serialize handles to problem objects, use these special CPLEX routines: </p>
+<ul class="ul"><li class="li"><span class="keyword apiname">CPXXstoreNEThandle</span></li>
+<li class="li"><span class="keyword apiname">CPXXloadNEThandle</span></li>
+<li class="li"><span class="keyword apiname">CPXXstoreLPhandle</span></li>
+<li class="li"><span class="keyword apiname">CPXXloadLPhandle</span></li>
+</ul>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/remote_obj/00_remote_obj_synopsis.html" title="Introduces the remote object available in CPLEX for distributed parallel optimization.">Remote object for distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

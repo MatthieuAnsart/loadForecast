@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example: diverse solutions through replacement parameter" />
+<meta name="abstract" content="Illustrates effect on diversity of the replacement parameter of the solution pool." />
+<meta name="Description" content="Illustrates effect on diversity of the replacement parameter of the solution pool." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/31_params_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solnpool.1049251" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/31_params_title_synopsis.html" />
+<title>Example: diverse solutions through replacement parameter</title>
+</head>
+<body role="main" id="User_manual.uss_solnpool.1049251">
+<h1 class="title topictitle1">Example: diverse solutions through replacement parameter</h1>
+<div class="body"><p class="shortdesc">Illustrates effect on diversity of the replacement parameter
+of the solution pool.</p>
+<p class="p">It is often impractical to manage a very large number
+of solutions, and in those situations, a smaller set of solutions
+with different characteristics proves more useful. You can achieve
+this aim in two steps:</p>
+<ol class="ol"><li class="li"><p class="p">Set the solution pool capacity parameter
+(<a class="xref" href="../../../../Parameters/topics/SolnPoolCapacity.html" title="Limits the number of solutions kept in the solution pool">maximum number of solutions kept in solution pool</a> <samp class="ph codeph">SolnPoolCapacity</samp>, <samp class="ph codeph">CPX_PARAM_SOLNPOOLCAPACITY</samp>)
+to a manageable number, rather than its default value, which is quite
+large.</p>
+</li>
+<li class="li"><p class="p">Set the <a class="xref" href="../../../../Parameters/topics/SolnPoolReplace.html" title="Designates the strategy for replacing a solution in the solution pool when the solution pool has reached its capacity.">solution pool replacement strategy</a> (<samp class="ph codeph">SolnPoolReplace</samp>, <samp class="ph codeph">CPX_PARAM_SOLNPOOLREPLACE</samp>)
+to 2: replace least diverse solutions. </p>
+</li>
+</ol>
+<p class="p">These settings make sure that pool capacity will not
+increase as solutions are added. Instead, solutions will be replaced
+in the pool according to their diversity if the number of solutions
+generated exceeds the limited capacity of the pool.</p>
+<p class="p">As an example of this idea of using the replacement strategy
+parameter to control diversity of solutions in the solution pool,
+consider the following session in the Interactive Optimizer, again
+reading the model in <a class="xref" href="03_eg_facility_location.html" title="Describes a model used in documentation of the solution pool.">Example: simple facility location problem</a>,
+setting parameters, and calling populate.  </p>
+<pre class="pre codeblock"><code>read location.lp
+set mip pool intensity 2
+set mip pool relgap 0.1
+set mip pool replace 2
+set mip pool capacity 10
+set mip limits populate 10000
+set time 1
+populate</code></pre>
+<p class="p">Logically, the pool contains only ten solutions now (its
+capacity) even though more solutions have been generated. The number
+of solutions that have been generated but are not retained in the
+pool is reported in the log by the number of solutions replaced.</p>
+<p class="p">If you apply a time limit of 10 seconds instead of 1
+(one), many more solutions will be generated. That greater number
+of solutions also leads to greater diversity among the solutions retained
+in the pool. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/soln_pool/31_params_title_synopsis.html" title="Describes parameters to control the solution pool.">Parameters of the solution pool</a></div>
+</div>
+</div></body>
+</html>

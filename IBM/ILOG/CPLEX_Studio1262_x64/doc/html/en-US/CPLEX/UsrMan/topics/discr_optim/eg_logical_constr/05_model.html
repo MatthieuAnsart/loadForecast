@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Developing the model" />
+<meta name="abstract" content="Describes creation of the model for the problem." />
+<meta name="Description" content="Describes creation of the model for the problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_logical_constr/01_food_mfg_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingFoodMfg2.1027015" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_logical_constr/01_food_mfg_title_synopsis.html" />
+<title>Developing the model</title>
+</head>
+<body role="main" id="User_manual.uss_usingFoodMfg2.1027015">
+<h1 class="title topictitle1">Developing the model</h1>
+<div class="body"><p class="shortdesc">Describes creation of the model for the problem.</p>
+<p class="p">First, create the model, like this:  </p>
+<pre class="pre codeblock"><code>IloModel model(env);
+</code></pre>
+<p class="p">Then use a for-loop to add the constraints for each month
+(from <a class="xref" href="04_data.html" title="Raises questions pertinent to a sound representation of the data of the problem.">Representing the data</a>: <em class="ph i">What are the constraints?</em>), like
+this:  </p>
+<pre class="pre codeblock"><code>    IloExpr profit(env);  
+    for (i = 0; i &lt; nbMonths; i++) {
+         model.add(use[i][v1] + use[i][v2] &lt;= 200); 
+         model.add(use[i][o1] + use[i][o2] + use[i][o3] &lt;= 250); 
+         model.add(3 * produce[i] &lt;=
+                   8.8 * use[i][v1] + 6.1 * use[i][v2] +
+                   2   * use[i][o1] + 4.2 * use[i][o2] + 5 * use[i][o3]);
+         model.add(8.8 * use[i][v1] + 6.1 * use[i][v2] +
+                   2   * use[i][o1] + 4.2 * use[i][o2] + 5 * use[i][o3]
+                   &lt;= 6 * produce[i]);
+         model.add(produce[i] == IloSum(use[i]));
+         if (i == 0) {
+            for (IloInt p = 0; p &lt; nbProducts; p++)
+               model.add(500 + buy[i][p] == use[i][p] + store[i][p]);
+         }
+         else {
+            for (IloInt p = 0; p &lt; nbProducts; p++)
+              model.add(store[i-1][p] + buy[i][p] == use[i][p] + store[i][p]);
+         }
+         profit += 150 * produce[i] 
+                 - IloScalProd(cost[i], buy[i]) 
+                 - 5 * IloSum(store[i]);
+
+         model.add((use[i][v1] == 0) + (use[i][v2] == 0) + (use[i][o1] == 0) +
+                   (use[i][o2] == 0) + (use[i][o3] == 0) &gt;= 2);
+         for (p = 0; p &lt; nbProducts; p++)
+            model.add((use[i][p] == 0) || (use[i][p] &gt;= 20));
+         model.add(IloIfThen(env, (use[i][v1] &gt;= 20) || (use[i][v2] &gt;= 20),
+           use[i][o3] &gt;= 20));
+      }</code></pre>
+<p class="p">To consolidate the monthly objectives, add the overall
+objective to the model, like this:  </p>
+<pre class="pre codeblock"><code>      model.add(IloMaximize(env, profit));</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/eg_logical_constr/01_food_mfg_title_synopsis.html" title="Demonstrates logical constraints in a sample application.">Using logical constraints: Food Manufacture 2</a></div>
+</div>
+</div></body>
+</html>

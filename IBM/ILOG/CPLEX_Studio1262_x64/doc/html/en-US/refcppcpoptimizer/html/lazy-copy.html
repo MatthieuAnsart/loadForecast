@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Creation of extractable objects</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="lazy-copy.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="18"><div
+                class="section-title1">Creation of extractable objects</div>
+</a><div
+                    align="right"><a
+                    href="conflictrefiner.html">PREVIOUS</a> <a
+                href="inferencer.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%" /><div
+                            class="section-body"><p>
+For most Concert applications, you can simply create the extractable
+objects that you need to build your model, then let their destructors 
+manage the subsequent deletions.
+However, when memory use is critical to your application, you may need to
+take control of the deletion of extractable objects. In such cases, 
+you will need a deeper 
+understanding of how IBM&reg; ILOG&reg; Concert Technology creates and maintains 
+extractable objects. The following guidelines, 
+along with the concept 
+Deletion of Extractable Objects,  should help. 
+</p><p>
+1. An <strong>expression</strong> 
+(that is, an instance of the class 
+<code><a
+                            href="classes/IloExpr.html">IloExpr</a></code> or its superclasses 
+<code><a
+                            href="classes/IloNumExpr.html">IloNumExpr</a></code> and 
+<code><a
+                            href="classes/IloNumExprArg.html">IloNumExprArg</a></code>) 
+is <strong>passed by value</strong> to an extractable object (an instance of 
+the class <code><a
+                            href="classes/IloExtractable.html">IloExtractable</a></code>).  
+Therefore, you
+can delete the original expression after passing it by value without
+affecting the extractable object that received it.  
+</p><p>All copies by value are deep copies, not shallow copies. </p><p>
+More generally, if you have multiple handles passed to Concert objects 
+pointing to an instance of 
+<code><a
+                            href="classes/IloExpr.html">IloExpr</a></code>, 
+and you call a method that modifies one of those handles, 
+Concert Technology performs a <strong>lazy copy</strong>.  
+In other words, it  first copies the implementation 
+object for the handle you are modifying and then makes the modification. 
+The other handles pointing to the original implementation object remain 
+unchanged, and your modification has no impact on them.  
+</p><p> 
+Lazy copying does not apply to other Concert Technology objects.  
+In general, it is recommended that you 
+avoid using multiple handles to the same object if you do not
+feel comfortable with lazy copying.
+</p><p> 
+2. A <strong>variable</strong> (that is, an instance of 
+<code><a
+                            href="classes/IloNumVar.html">IloNumVar</a></code>, 
+<code><a
+                            href="classes/IloIntVar.html">IloIntVar</a></code>, or 
+<code><a
+                            href="classes/IloBoolVar.html">IloBoolVar</a></code>) 
+is <strong>passed by reference</strong> to an extractable object.   
+Therefore, when your Concert application is in linear deleter mode,
+deleting a variable will remove it from any extractables that received it.
+</p><p> 
+3. An extractable object is <strong>passed by reference</strong> 
+to a logical constraint 
+(such as <code><a
+                    href="classes/IloIfThen.html">IloIfThen</a></code>) 
+or to a nonlinear expression  (such as <code>IloMax</code>).   
+Therefore, you 
+should not delete the original expression after passing it to such functions
+unless you have finished with the associated model.
+</p><p>
+Here are some examples to consider in light of these guidelines.
+The first example illustrates guidelines 2 and 3.
+</p><pre
+                    class="sample">
+      IloEnv env;
+      IloNumVar x(env, 0, IloInfinity, &quot;X&quot;);
+      IloNumVar y(env, 0, IloInfinity, &quot;Y&quot;);
+      IloNumVar z(env, 0, IloInfinity, &quot;Z&quot;);
+
+      IloExpr e = x + y;
+
+      IloConstraint c1 = (e &lt;= z);
+      IloConstraint c2 = (e &gt;= z);
+      IloConstraint c3 = IloIfThen(env, c1, c2);
+      e.end();           // OK; c1 and c2 use copies of e;
+      c1.end();          // BAD IDEA; c3 still references c1
+      IloModel m(env);
+      m.add (c3);        // c3 is not correctly represented in m.
+</pre><p>
+In that example, since <code>c1</code> is passed by reference, the
+call to <code>c1.end</code> raises errors. In contrast, the call to
+<code>e.end</code> causes no harm because <code>e</code> is passed
+by value.
+</p><p>
+The following example illustrates guidelines 1 and 2.
+</p><pre
+                    class="sample">
+      IloEnv env;
+      IloModel model(env);
+      IloNumVar y(env, 0, 10, &quot;y&quot;);
+#ifdef WILLDELETE
+      IloNumVar y2 = y;     // second handle pointing to implementation of y
+#else
+      IloExpr y2 = y;       // first handle pointing to expression 1*y
+#endif
+      IloConstraint cst = y2 &lt;= 6;
+      model.add(cst);
+      y2.end();
+</pre><p>
+When <code>y2</code> is an instance of the class <code>IloNumVar</code>, 
+the call to <code>y2.and</code> will remove <code>y2</code> from the constraint
+<code>cst</code>, according to guideline 2.   
+</p><p>
+When <code>y2</code> is an expression, it will be passed by value to the 
+constraint <code>cst</code>, according to guideline 1.   
+Hence, the call to <code>y2.end</code> will leave <code>cst</code>
+untouched.   
+</p><p>
+While a thorough understanding of these conventions provides you with 
+complete control over management of the extractable objects in your 
+application, in general, you should simply avoid creating extra handles 
+to extractable objects that can result in unexpected behavior.   
+</p><p>
+In light of that observation, the previous example can be 
+simplified to the following lines:
+</p><pre
+                class="sample">
+    IloEnv env;
+    IloModel model(env);
+    IloNumVar y(env, 0, 10, &quot;y&quot;);
+    IloConstraint cst = y &lt;= 6;
+    model.add(cst);
+</pre></div><div
+                    align="right"><a
+                    href="conflictrefiner.html">PREVIOUS</a> <a href="inferencer.html">NEXT</a></div></div></body>
+</html>

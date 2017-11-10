@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Modifying the CPLEX matrix incrementally" />
+<meta name="abstract" content="How to change the bounds of a CPLEX constraint or variable. How to change the coefficient of a variable." />
+<meta name="Description" content="How to change the bounds of a CPLEX constraint or variable. How to change the coefficient of a variable." />
+<meta name="DC.subject" content="scripting, incrementality, incrementality in scripting, CPLEX matrix, modifying incrementally, variables, changing bounds and coefficients using IBM ILOG Script, bounds, changing, in a CPLEX constraint, coefficient of variable, in CPLEX constraint or objective, changing using IBM ILOG Script, CPLEX objective, changing coefficient of variable, CPLEX constraint, changing bounds, setCoef method, IloConstraint class, IloCplex class, IloObjective class, IloObjective class" />
+<meta name="keywords" content="scripting, incrementality, incrementality in scripting, CPLEX matrix, modifying incrementally, variables, changing bounds and coefficients using IBM ILOG Script, bounds, changing, in a CPLEX constraint, coefficient of variable, in CPLEX constraint or objective, changing using IBM ILOG Script, CPLEX objective, changing coefficient of variable, CPLEX constraint, changing bounds, setCoef method, IloConstraint class, IloCplex class, IloObjective class, IloObjective class" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_mulmod.1015770" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Modifying the CPLEX matrix incrementally</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_mulmod.1015770">
+<h1 class="title topictitle1">Modifying the CPLEX matrix
+incrementally</h1>
+<div class="body"><p class="shortdesc">How to change the bounds of a CPLEX® constraint or variable. How to change
+the coefficient of a variable.</p>
+<p class="p">In this tutorial, you have learned how to solve a sequence
+of modified OPL models by changing data in OPL. This is a useful technique,
+however you need to generate the CPLEX model
+again after each modification. Sometimes, when the number of iterations
+is high and generating the new iteration takes a long time compared
+to solving it, you may prefer to have a direct interaction with the
+generated optimization model and be able to work incrementally on
+the result of the previous iteration. You can do so by taking advantage
+of the API of IBM® ILOG Script
+extensions for OPL.</p>
+<p class="p">The <samp class="ph codeph">mulprod</samp> production planning
+example illustrates how to change the bounds of a CPLEX constraint. </p>
+<p class="p">You can also:</p>
+<ul class="ul"><li class="li"><p class="p">change the bounds of a variable</p>
+ </li>
+<li class="li"><p class="p">change the coefficient of a variable in a CPLEX constraint or in the CPLEX objective</p>
+ </li>
+</ul>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_mulmod.1017086"><h2 class="title topictitle2">Changing bounds</h2>
+<div class="body"><div class="section" id="usropllangtut.uss_langtut_mulmod.1017086__usropllangtut.uss_langtut_mulmod.1017090"><h3 class="title sectiontitle">Of a CPLEX constraint</h3><p class="p">To
+change the bound of a constraint, you can directly change the <samp class="ph codeph">LB</samp> and <samp class="ph codeph">UB</samp> properties on
+the <span class="keyword apiname">IloConstraint</span> class.</p>
+<p class="p">It
+is important to understand what happens when these methods are used:
+the optimization model is directly modified but the OPL model is not.
+Therefore, the solution given by CPLEX corresponds
+to the modified optimization model, but not to the original OPL model
+any more. On the other hand, the advantage is that the CPLEX matrix is directly modified (not rebuilt
+from scratch) and any new search can take advantage of the previous
+ones.</p>
+<p class="p">You can see in the <span class="ph filepath">mulprod_change_main.mod</span> file
+how the example can be modified to change the optimization model directly.
+In particular, the important line is the one that changes the bound
+of a constraint:</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_mulmod.1017086__usropllangtut.uss_langtut_mulmod.1015794">Changing the bound of a CPLEX constraint</p>
+<pre class="pre codeblock"><code>    for(var t in thisOplModel.Periods)
+      thisOplModel.ctCapacity["flour"][t].UB = capFlour;
+  }</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_mulmod.1017086__usropllangtut.uss_langtut_mulmod.1016281"><h3 class="title sectiontitle">Of a variable</h3><p class="p">To change the bound of a variable, you can directly change
+the lower-bound (<samp class="ph codeph">LB</samp>) and upper-bound (<samp class="ph codeph">UB</samp>) properties on the <span class="keyword apiname">IloNumVar</span> class.
+This does not change the bound of the variable in the OPL model but <strong class="ph b">only</strong> in the CPLEX matrix.
+This change is taken into account incrementally by the CPLEX engine.</p>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="usropllangtut.uss_langtut_mulmod.1016128"><h2 class="title topictitle2">Changing the coefficient of a variable</h2>
+<div class="body"><p class="p">You can use the method <span class="keyword apiname">IloConstraint.setCoef</span> to
+change the coefficient of a variable in the invoking constraint and
+the method <span class="keyword apiname">IloObjective.setCoef</span> to change
+the coefficient of a variable in the invoking objective. The coefficient
+is changed <strong class="ph b">only</strong> in the CPLEX matrix
+and in the Concert extracted model. The OPL model is not affected.
+On the other hand, the change is taken into account incrementally
+by the CPLEX engine.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">The method <span class="keyword apiname">IloCplex.setCoef</span> is
+available for all CPLEX linear
+constraints. It changes the engine representation directly without
+going through Concert.</p>
+ </div>
+</div>
+</div>
+</body>
+</html>

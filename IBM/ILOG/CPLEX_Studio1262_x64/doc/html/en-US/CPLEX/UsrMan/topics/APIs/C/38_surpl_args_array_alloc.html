@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using surplus arguments for array allocations" />
+<meta name="abstract" content="Describes coding conventions of the C API to manage surplus arguments and array allocations." />
+<meta name="Description" content="Describes coding conventions of the C API to manage surplus arguments and array allocations." />
+<meta name="DC.subject" content="CPXgetcols routine, surplus argument (C API), CPXERR_NEGATIVE_SURPLUS symbolic constant" />
+<meta name="keywords" content="CPXgetcols routine, surplus argument (C API), CPXERR_NEGATIVE_SURPLUS symbolic constant" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/C/01_cAPI_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callableLibrary.665515" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/C/01_cAPI_title_synopsis.html" />
+<title>Using surplus arguments for array allocations</title>
+</head>
+<body role="main" id="User_manual.uss_callableLibrary.665515">
+<h1 class="title topictitle1">Using surplus arguments for array allocations</h1>
+<div class="body"><p class="shortdesc">Describes coding conventions of the C API to manage surplus
+arguments and array allocations.</p>
+<p class="p">Most of the query routines in the Callable Library require your
+application to allocate memory for one or more arrays that will contain
+the results of the query. In many cases, your application—the calling
+program—does not know the size of these arrays in advance. For example,
+in a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getcols.html" title="The routine CPXXgetcols/CPXgetcols accesses a range of columns of the constraint matrix of a CPLEX problem object.">CPXgetcols</a></samp>requesting
+the matrix data for a range of columns, your application needs to
+pass the arrays <samp class="ph codeph">cmatind</samp> and <samp class="ph codeph">cmatval</samp> for
+CPLEX to populate with matrix coefficients and row indices. However,
+unless your application has carefully kept track of the number of
+nonzeros in each column throughout the problem specification and,
+if applicable, throughout its modification, the actual length of these
+arrays remains unknown. </p>
+<p class="p">Fortunately, the query routines in the Callable Library contain
+a <samp class="ph codeph">surplus_p</samp> argument that, when used in conjunction
+with the array length arguments, enables you first to call the query
+routine to discover the length of the required array. Then, when the
+length is known, your application can properly allocate these arrays.
+Afterwards, your application makes a second call to the query routine
+with the correct array lengths to obtain the requested data. </p>
+<p class="p">For example, consider an application that needs to call <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getcols.html" title="The routine CPXXgetcols/CPXgetcols accesses a range of columns of the constraint matrix of a CPLEX problem object.">CPXgetcols</a></samp> to
+access a range of columns. Here is the list of arguments for <samp class="ph codeph">CPXgetcols</samp>.</p>
+<pre class="pre codeblock"><code>CPXgetcols (CPXENVptr env, 
+            CPXLPptr lp, 
+            int *nzcnt_p,
+            int *cmatbeg, 
+            int *cmatind, 
+            double *cmatval,
+            int cmatspace, 
+            int *surplus_p,
+            int begin, 
+            int end);</code></pre>
+<p class="p">The arrays <samp class="ph codeph">cmatind</samp>  and <samp class="ph codeph">cmatval</samp> 
+require one element for each nonzero matrix coefficient in the requested
+range of columns. The required length of these arrays, specified in <samp class="ph codeph">cmatspace</samp> ,
+remains unknown at the time of the query. Your application—the calling
+program—can discover the length of these arrays by first calling <samp class="ph codeph">CPXgetcols</samp> 
+with a value of <samp class="ph codeph">0</samp>  for <samp class="ph codeph">cmatspace</samp> .
+This call will return an error status of <samp class="ph codeph">CPXERR_NEGATIVE_SURPLUS</samp> 
+indicating a shortfall of the array length specified in <samp class="ph codeph">cmatspace</samp> 
+(in this case, <samp class="ph codeph">0</samp> ); it will also return the actual
+number of matrix nonzeros in the requested range of columns. <samp class="ph codeph">CPXgetcols</samp> 
+deposits this shortfall as a negative number in the integer pointed
+to by <samp class="ph codeph">surplus_p</samp> . Your application can then negate
+this shortfall and allocate the arrays <samp class="ph codeph">cmatind</samp>  and <samp class="ph codeph">cmatval</samp> 
+sufficiently long to contain all the requested matrix elements.</p>
+<p class="p">The following sample of code illustrates this procedure. The first
+call to <samp class="ph codeph">CPXgetcols</samp>  passes a value of <samp class="ph codeph">0</samp> 
+(zero) for <samp class="ph codeph">cmatspace</samp>  in order to obtain the shortfall
+in <samp class="ph codeph">cmatsz</samp> . The sample then uses the shortfall to
+allocate the arrays <samp class="ph codeph">cmatind</samp>  and <samp class="ph codeph">cmatval</samp> 
+properly; then it calls <samp class="ph codeph">CPXgetcols</samp>  again to obtain
+the actual matrix coefficients and row indices.  </p>
+<pre class="pre codeblock"><code>status = CPXgetcols (env, lp, &amp;nzcnt, cmatbeg, NULL, NULL,
+                     0, &amp;cmatsz, 0, numcols - 1);
+if ( status != CPXERR_NEGATIVE_SURPLUS ) {
+   if ( status != 0 ) {
+      CPXmsg (cpxerror, 
+              "CPXgetcols for surplus failed, status = %d\n", status);
+      goto TERMINATE;
+   }
+   CPXmsg (cpxwarning, 
+           "All columns in range [%d, %d] are empty.\n",
+           0, (numcols - 1));
+}
+cmatsz   = -cmatsz;
+cmatind  = (int *) malloc ((unsigned) (1 + cmatsz)*sizeof(int));
+cmatval  = (double *) malloc ((unsigned) (1 + cmatsz)*sizeof(double));
+if ( cmatind == NULL || cmatval == NULL ) {
+   CPXmsg (cpxerror, "CPXgetcol mallocs failed\n");
+   status = 1;
+   goto TERMINATE;
+}
+status = CPXgetcols (env, lp, &amp;nzcnt, cmatbeg, cmatind, cmatval,
+                     cmatsz, &amp;surplus, 0, numcols - 1);
+if ( status ) {
+   CPXmsg (cpxerror, "CPXgetcols failed, status = %d\n", status);
+   goto TERMINATE;
+}</code></pre>
+<p class="p">That sample code (or your application) does not need to set the
+length of the array <samp class="ph codeph">cmatbeg</samp> . The array <samp class="ph codeph">cmatbeg</samp> 
+has one element for each column in the requested range. Since this
+length is known ahead of time, your application does not need to call
+a query routine to calculate it. More generally, query routines use
+surplus arguments in this way only for the length of any array required
+to store problem data of unknown length. Problem data in this category
+include nonzero matrix entries, row and column names, other problem
+data names, special ordered sets (SOS), priority orders, and MIP start
+information. </p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/C/01_cAPI_title_synopsis.html" title="Shows how to write C applications using the Callable Library.">Callable Library</a></div>
+</div>
+</div></body>
+</html>

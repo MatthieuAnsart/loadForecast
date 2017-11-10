@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Overview" />
+<meta name="abstract" content="A custom constraint can be written using engine extensions." />
+<meta name="Description" content="A custom constraint can be written using engine extensions." />
+<meta name="DC.subject" content="constraint, example, IlcConstraintI class" />
+<meta name="keywords" content="constraint, example, IlcConstraintI class" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="KQHSEwb5" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" />
+<title>Overview</title>
+</head>
+<body role="main" id="KQHSEwb5">
+<h1 class="title topictitle1">Overview</h1>
+<div class="body"><p class="shortdesc">A custom constraint can be written using engine extensions.</p>
+<p class="p">Obviously, a constraint is an object in CP Optimizer.
+More precisely, a constraint in CP Optimizer is an instance of a class
+with two pure virtual functions, <samp class="ph codeph">propagate</samp> and <samp class="ph codeph">post</samp>.
+The virtual function <samp class="ph codeph">propagate</samp> implements
+the invariant of the constraint; the function <samp class="ph codeph">post</samp> defines
+on which events <samp class="ph codeph">propagate</samp> executes. </p>
+<p class="p">To define a new class of constraint, you define a subclass
+of <samp class="ph codeph">IlcConstraintI</samp>. The data members of
+this subclass include, among others, the search decision variables
+on which the constraint is posted. </p>
+<p class="p">Consequently, the definition of a new class of constraint
+looks something like this:  </p>
+<pre class="pre codeblock"><code>class MyConstraintI : public IlcConstraintI {
+     ... // data members of the constraint
+public :
+    MyConstraintI(IloCP cp, ... args ...); // constructor
+    ~MyConstraintI(){} // destructor; usually empty
+    void post();
+    void propagate();
+}</code></pre>
+<p class="p">To clarify how to define a new class of constraint, consider
+the constraint <em class="ph i">x != y</em>.
+The arguments of this constraint are the search decision variables <em class="ph i">x</em> and <em class="ph i">y</em>.
+ </p>
+<pre class="pre codeblock"><code>class DiffConstraintI : public IlcConstraintI {
+    IlcIntVar _x, _y;
+  public:
+    DiffConstraintI(IloCP cp, IlcIntVar x, IlcIntVar y);
+    ~DiffConstraintI(){}; // empty destructor
+
+    virtual void propagate ();
+    virtual void post();
+};
+</code></pre>
+<p class="p">The role of the constructor is to initialize the data
+members, like this:  </p>
+<pre class="pre codeblock"><code>DiffConstraintI::DiffConstraintI(IloCP cp,
+                               IlcIntVar x,
+                               IlcIntVar y)
+    : IlcConstraintI(cp), _x(x), _y(y) {}
+</code></pre>
+<p class="p">The invariant of <em class="ph i">x !=
+y</em> is easy to determine: </p>
+<ul class="ul"><li class="li"><p class="p">if <em class="ph i">x</em> is
+bound to a value, the domain of <em class="ph i">y</em> does
+not contain this value; </p>
+</li>
+<li class="li"><p class="p">likewise, if <em class="ph i">y</em> is bound to a value, the domain
+of <em class="ph i">x</em> does not contain
+this value. </p>
+</li>
+</ul>
+<p class="p">The virtual member function <samp class="ph codeph">propagate</samp> implements
+the reduction of the domains. Using what you've already written, you
+would get this:  </p>
+<pre class="pre codeblock"><code>void DiffConstraintI::propagate () {
+    if (_x.isFixed()) _y.removeValue(_x.getValue());
+    if (_y.isFixed()) _x.removeValue(_y.getValue());
+}
+</code></pre>
+<p class="p">The second virtual member function to write is <samp class="ph codeph">post</samp>.
+It connects the constraint to its arguments by specifying the events
+that have triggered the constraint. For search decision variables,
+there are three kinds of attachments, one kind for each type of event.</p>
+<p class="p"> For the class <samp class="ph codeph">IlcIntVar</samp>,
+these member functions are as follows: (The class <samp class="ph codeph">IlcConstraintI</samp> derives
+from the class <samp class="ph codeph">IlcDemonI</samp>.) </p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">whenValue(IlcDemon ct)</samp> attaches
+the demon <samp class="ph codeph">ct</samp> to the value event of the
+variable under consideration. Every time the variable takes a unique
+value, the <samp class="ph codeph">execute</samp> function for <samp class="ph codeph">ct</samp> is
+called. </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">whenRange(IlcDemon ct)</samp> attaches
+the demon <samp class="ph codeph">ct</samp> to the range event of the
+variable under consideration. Every time the domain of the expression
+gets a new boundary, the <samp class="ph codeph">execute</samp> function
+for <samp class="ph codeph">ct</samp> is called. </p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">whenDomain(IlcDemon ct)</samp> attaches
+the demon <samp class="ph codeph">ct</samp> to the domain event. Every
+time the domain of the variable is modified, the <samp class="ph codeph">execute</samp> function
+for <samp class="ph codeph">ct</samp> is called. </p>
+</li>
+</ul>
+<p class="p">For a constraint, the <samp class="ph codeph">execute</samp> member
+function calls <samp class="ph codeph">propagate</samp>. </p>
+<p class="p">In the example of the constraint <em class="ph i">x != y</em>, you want to propagate the
+constraint every time <em class="ph i">x</em> or <em class="ph i">y</em> is fixed. Here is the code for
+doing that:  </p>
+<pre class="pre codeblock"><code>void DiffConstraintI::post(){
+    _x.whenValue(this);
+    _y.whenValue(this);
+}
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/csts_write.html" title="A custom constraint can be written using engine extensions.">Writing your own constraint</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="stateFunction" />
+<meta name="abstract" content="OPL keyword (CP, scheduling) to create a state function." />
+<meta name="Description" content="OPL keyword (CP, scheduling) to create a state function." />
+<meta name="DC.subject" content="stateFunction, OPL keyword (CP, scheduling)" />
+<meta name="keywords" content="stateFunction, OPL keyword (CP, scheduling)" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_interval.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_alwaysIn.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_alwaysConstant.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_alwaysEqual.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_alwaysNoState.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_cumulFunc.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="vBoMf9WI" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" />
+<title>stateFunction</title>
+</head>
+<body role="main" id="vBoMf9WI">
+<h1 class="title topictitle1">stateFunction</h1>
+<div class="body refbody"><p class="shortdesc">OPL keyword (CP, scheduling) to create a state
+function.</p>
+<div class="section"><h2 class="title sectiontitle">Purpose</h2><p class="p">OPL keyword
+(CP, scheduling) to create a state function.</p>
+</div>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>stateFunction f [with M];
+
+
+With example optional argument M:
+
+tuple triplet { int v1; int v2; int dist; };
+{ triplet } M = ...;
+</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">A
+state function is a function describing the evolution of a given feature
+of the environment. The possible evolution of this feature is constrained
+by interval variables of the problem. For example, a scheduling problem
+may contain a resource whose state changes over time. The resource
+state can change because of scheduled activities or because of exogenous
+events; some activities in the schedule may need a particular resource
+state in order to execute.</p>
+<p class="p">States of a state function
+are non-negative integers. The transition between two states is not
+always instantaneous, and a transition time may be necessary for the
+resource to switch states. Transitions are modeled with the optional
+argument <em class="ph i">M</em> as a transition matrix that needs to be
+defined as a set of integer triplets (just as for the <a class="xref" href="tlr_oplsch_noOverlap.html" title="OPL constraint (scheduling) used to prevent intervals in a sequence from overlapping and (optionally) to enforce a minimal distance between consecutive intervals.">noOverlap</a> constraint). Thus
+this matrix is a tuple set. Note that if there are two transition
+times in the matrix, the maximum will be considered. For example, &lt;1,2,3&gt;,&lt;1,2,4&gt;
+will be equivalent to &lt;1,2,4&gt;.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <ol class="ol"><li class="li"><p class="p">By default, if a pair of states (i,j) is
+not referred to in the tuple set M representing the transition distance
+matrix, the default transition distance is 0, so stateFunction behaves
+as if the tuple &lt;i,j,0&gt; was in the set.</p>
+ </li>
+<li class="li"><p class="p">The transition distance should satisfy triangular
+inequality.</p>
+</li>
+<li class="li"><p class="p">The possible states of the state function
+are between 0 and the maximal state referred to in the transition
+distance M.</p>
+</li>
+</ol>
+ </div>
+<p class="p">Interval variables have an absolute effect
+on a state function, requiring the function value to be equal to a
+particular state or in a set of possible states. </p>
+<p class="p">If
+there is a duplicate in the transition matrix, such as:</p>
+<pre class="pre codeblock"><code>&lt;Index["m1"], Index["m2"], 70&gt;</code></pre>
+<pre class="pre codeblock"><code>&lt;Index["m1"], Index["m2"], 50&gt;</code></pre>
+<p class="p">the
+maximum value is used. So, in this example, 70 would be used.</p>
+<p class="p">Although <em class="ph i">stateFunction</em> is a CP keyword it
+is still accepted as a CPLEX identifier. Note that the state function
+constraints <a class="xref" href="tlr_oplsch_alwaysIn.html" title="OPL constraint (scheduling) used on a cumulative function or a state function">alwaysIn</a>, <a class="xref" href="tlr_oplsch_alwaysConstant.html" title="OPL constraint (scheduling) used on a state function">alwaysConstant</a>, <a class="xref" href="tlr_oplsch_alwaysEqual.html" title="OPL constraint (scheduling) used on a state function">alwaysEqual</a>, and <a class="xref" href="tlr_oplsch_alwaysNoState.html" title="OPL constraint (scheduling) used on a state function">alwaysNoState</a> cannot be used in
+meta-constraints.</p>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">A limited capacity
+oven is used to treat items in parallel batches. Items requiring incompatible
+temperatures cannot be treated in the same batch. Some setup time
+is needed to warm-up and cool-down the oven depending on the original
+and target temperature levels. The oven temperature is modelled as
+a state function. In a solution, the intervals of the state function
+represent the different batches. The treatment of each item is modelled
+by an interval variable. Because of parallel batching, items treated
+in the same batch need to be synchronized; they have the same start
+and end time, and this is modelled using the notion of start and end
+alignment.</p>
+<p class="p">Additionally a maintenance task is to be
+performed on the oven and during this maintenance task, the oven temperature
+should not reach high values (say, greater than level 4). This could
+be modelled by the additional constraint at the end.</p>
+<pre class="pre msgblock"><code>int MaxItemsInOven = ...;
+int NbItems = ...;
+range Items = 1..NbItems;
+int DurationMin[Items] = ...;
+int DurationMax[Items] = ...;
+int Temperature[Items] = ...;
+tuple triplet { int t1; int t2; int value; };
+{ triplet } Transition = ...;
+
+dvar interval treat[i in Items] size DurationMin[i]..DurationMax[i];
+
+stateFunction ovenTemperature with Transition;
+cumulFunction itemsInOven = sum(i in Items) pulse(treat[i], 1);
+
+constraints {
+itemsInOven &lt;= MaxItemsInOven;
+forall(i in Items)
+
+alwaysEqual(ovenTemperature, treat[i], Temperature[i], 1, 1);
+}
+
+dvar interval maintenance ...;
+
+constraints {
+// ...
+alwaysIn(ovenTemperature, maintenance, 0, 4);
+}
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_keywords_top.html" title="Description, syntax, and example for each individual OPL keyword..">OPL keywords</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_oplsch_interval.html" title="OPL keyword (CP, scheduling) for interval variables.">interval</a></div>
+<div><a class="link" href="tlr_oplsch_alwaysIn.html" title="OPL constraint (scheduling) used on a cumulative function or a state function">alwaysIn</a></div>
+<div><a class="link" href="tlr_oplsch_alwaysConstant.html" title="OPL constraint (scheduling) used on a state function">alwaysConstant</a></div>
+<div><a class="link" href="tlr_oplsch_alwaysEqual.html" title="OPL constraint (scheduling) used on a state function">alwaysEqual</a></div>
+<div><a class="link" href="tlr_oplsch_alwaysNoState.html" title="OPL constraint (scheduling) used on a state function">alwaysNoState</a></div>
+<div><a class="link" href="tlr_oplsch_cumulFunc.html" title="OPL keyword (CP, scheduling) to create a cumulative function.">cumulFunction</a></div>
+</div>
+</div></body>
+</html>

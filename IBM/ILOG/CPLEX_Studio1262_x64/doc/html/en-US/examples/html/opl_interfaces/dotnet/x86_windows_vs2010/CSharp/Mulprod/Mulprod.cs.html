@@ -1,0 +1,87 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+02: <b><font color="#007D00">// File: Mulprod.cs</font></b>
+03: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+04: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+05: <b><font color="#007D00">// </font></b>
+06: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+07: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+08: <b><font color="#007D00">//</font></b>
+09: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+10: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+11: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+12: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+13: 
+14: <b><font color="#007D00">//-------------------------------------------------------------- -*- C# -*-</font></b>
+15: <b><font color="#007D00">// C# version of mulprod.cpp of OPL distrib</font></b>
+16: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+17: 
+18: using System;
+19: using System.Collections;
+20: using ILOG.Concert;
+21: using ILOG.CPLEX;
+22: using ILOG.OPL;
+23: 
+24: namespace Mulprod
+25: {
+26:   <b><font color="EA7D00">class</font></b> Mulprod
+27:   {
+28:     <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> Main(string[] args)
+29:     {
+30:       <b><font color="#0000FF">int</font></b> status = 127;
+31:       <b><font color="EA7D00">const</font></b> string DATADIR = <b><font color="#8A2BE2">"../.."</font></b>;
+32: 
+33:       <b><font color="EA7D00">try</font></b>
+34:       {
+35:           OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+36:           OplErrorHandler handler = oplF.CreateOplErrorHandler(Console.Out);
+37:           OplModelSource modelSource = oplF.CreateOplModelSource(DATADIR + <b><font color="#8A2BE2">"/mulprod.mod"</font></b>);
+38:           OplSettings settings = oplF.CreateOplSettings(handler);
+39:           OplModelDefinition def = oplF.CreateOplModelDefinition(modelSource, settings);
+40:           Cplex cplex = oplF.CreateCplex();
+41:           OplModel opl = oplF.CreateOplModel(def, cplex);
+42:           OplDataSource dataSource = oplF.CreateOplDataSource(DATADIR + <b><font color="#8A2BE2">"/mulprod.dat"</font></b>);
+43:           opl.AddDataSource(dataSource);
+44:           opl.Generate();
+45:           <b><font color="EA7D00">if</font></b> (cplex.Solve())
+46:           {
+47:               Console.Out.WriteLine();
+48:               Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.Cplex.ObjValue);
+49:               opl.PostProcess();
+50:               opl.PrintSolution(Console.Out);
+51:               status = 0;
+52:           }
+53:           <b><font color="EA7D00">else</font></b>
+54:           {
+55:               Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>);
+56:               status = 1;
+57:           }
+58:           oplF.End();
+59:       }
+60:       <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+61:       {
+62:           Console.WriteLine(ex.Message);
+63:           status = 2;
+64:       }
+65:       <b><font color="EA7D00">catch</font></b> (ILOG.Concert.Exception ex)
+66:       {
+67:           Console.WriteLine(ex.Message);
+68:           status = 3;
+69:       }
+70:       <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+71:       {
+72:           Console.WriteLine(ex.Message);
+73:           status = 4;
+74:       }
+75: 
+76:     Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>);
+77:     Console.ReadLine();
+78:     
+79:     <b><font color="EA7D00">return</font></b> status;
+80:     }
+81:   }
+82: }
+</tt></pre>

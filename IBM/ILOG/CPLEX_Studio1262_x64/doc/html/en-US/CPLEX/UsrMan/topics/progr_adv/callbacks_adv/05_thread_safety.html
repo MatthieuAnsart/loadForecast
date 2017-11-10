@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Thread safety and MIP control callbacks" />
+<meta name="abstract" content="Describes control callbacks in parallel MIP." />
+<meta name="Description" content="Describes control callbacks in parallel MIP." />
+<meta name="DC.subject" content="opportunistic search, thread safety and, callback, thread safety (MIP)" />
+<meta name="keywords" content="opportunistic search, thread safety and, callback, thread safety (MIP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/03_control_callbacks_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advMIPcontrolInterface.1002001" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/03_control_callbacks_title_synopsis.html" />
+<title>Thread safety and MIP control callbacks</title>
+</head>
+<body role="main" id="User_manual.uss_advMIPcontrolInterface.1002001">
+<h1 class="title topictitle1">Thread safety and MIP control callbacks</h1>
+<div class="body"><p class="shortdesc">Describes control callbacks in parallel MIP.</p>
+<p class="p">When you use a control callback with parallel MIP, you
+must observe several points about default parameter settings, thread-safety,
+and parallelism. This topic addresses those points.</p>
+<p class="p">The presence of a control callback in an application
+with default parameter settings turns off parallel MIP. (Informational
+callbacks do not have this effect of turning off parallel MIP optimization
+by default. For more about informational callbacks, see <a class="xref" href="../callbacks_basic/03_info_cb_title_synopsis.html" title="Documents informational callbacks.">Informational callbacks</a>.)
+In order to continue using parallel MIP in the presence of a control
+callback, the user must set the <a class="xref" href="../../../../Parameters/topics/Threads.html" title="Sets the default number of parallel threads that will be invoked by any CPLEX parallel optimizer.">global thread count</a> parameter
+(<samp class="ph codeph">Threads</samp>, <samp class="ph codeph">CPX_PARAM_THREADS</samp>)
+to a value strictly greater than one. It is then the responsibility
+of the user to implement that control callback in such a way that
+the callback is thread-safe. </p>
+<p class="p">With respect to determinism, if the user sets the <a class="xref" href="../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> (<samp class="ph codeph">ParallelMode</samp>, <samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>)
+to 1 (one) thus invoking deterministic parallel MIP optimization,
+it is up to the user to make sure that the control callback does not
+interfere with the search in any way that would compromise determinism.
+In particular, the control callback must be written in such a way
+that it does not depend on the order in which callbacks are called,
+as no fixed order of calling the callbacks can be guaranteed by parallel CPLEX. To make sure of that
+condition, the control callback must use only information queried
+from CPLEX itself
+within the callback as the basis for algorithmic decisions. In other
+words, no information that accumulated in an external data structure
+over several invocations of the control callback can be used.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/03_control_callbacks_title_synopsis.html" title="Documents MIP control callbacks">Introducing MIP control callbacks</a></div>
+</div>
+</div></body>
+</html>

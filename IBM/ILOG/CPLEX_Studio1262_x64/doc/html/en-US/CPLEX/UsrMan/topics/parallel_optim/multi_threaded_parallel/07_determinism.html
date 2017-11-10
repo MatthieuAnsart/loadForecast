@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Determinism of results" />
+<meta name="abstract" content="Defines determinism and describes its effect in parallel optimization." />
+<meta name="Description" content="Defines determinism and describes its effect in parallel optimization." />
+<meta name="DC.subject" content="concurrent optimizer, threads and, barrier optimizer, mixed integer programming (MIP), determinism, parallel, deterministic search, mixed integer programming (MIP) and, opportunist mode, MIP in parallel and, opportunistic search, synchronization and, threads, threads parameter and, parallel mode parameter, time limit, deterministic search and, time limits and" />
+<meta name="keywords" content="concurrent optimizer, threads and, barrier optimizer, mixed integer programming (MIP), determinism, parallel, deterministic search, mixed integer programming (MIP) and, opportunist mode, MIP in parallel and, opportunistic search, synchronization and, threads, threads parameter and, parallel mode parameter, time limit, deterministic search and, time limits and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_parallel.1004952" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" />
+<title>Determinism of results</title>
+</head>
+<body role="main" id="User_manual.uss_parallel.1004952">
+<h1 class="title topictitle1">Determinism of results</h1>
+<div class="body"><p class="shortdesc">Defines determinism and describes its effect in parallel optimization.</p>
+<p class="p">By default, CPLEX employs parallel algorithms only as
+long as the optimization remains deterministic. In this context, <strong class="ph b">deterministic</strong> means that repeated
+solving of the same model with the same parameter settings, including <strong class="ph b">limits</strong>,
+on the same computing platform will follow exactly the same solution
+path, yielding the same level of performance and the same values in
+the solution. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">CPLEX real time limits (also known as wall clock time) 
+depend on system time. 
+<strong class="ph b">System time is not deterministic.</strong> 
+In other words, system time may vary from one run to another. 
+Consequently, two consecutive runs even
+with the same time limit may yield results that are not deterministic.
+In contrast, CPLEX deterministic time limits do not depend on system time.
+Consequently, two consecutive runs with the same 
+deterministic time limit will follow the same solution path.</p>
+</div>
+<p class="p">Two parallel implementations are available in CPLEX:
+deterministic and opportunistic. Opportunistic parallel optimization
+requires less synchronization between threads and thus offers better
+performance on average. Consequently, during development of an application,
+you may find deterministic parallelism advantageous for the repeatable,
+invariant solution path and results, whereas after development, during
+application deployment, you may prefer opportunistic parallelism for
+its performance.</p>
+<p class="p">To maintain determinism (that is, an implicit contract
+of repeatable, invariant search path and results), CPLEX invokes deterministic
+parallelism by default for MIP optimization.</p>
+<p class="p">In addition to the threads parameter, you can use the 
+<a class="xref" href="../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a> 
+(<samp class="ph codeph">ParallelMode</samp>, <samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>)
+to control the invocation of opportunistic algorithms. With its default
+setting of 0 (zero), only deterministic algorithms are used, unless
+the threads parameter is changed to a value strictly greater than
+one. </p>
+<p class="p">To force CPLEX to use deterministic algorithms in all
+cases, set the parallel mode parameter to 1 (one).</p>
+<p class="p">To allow CPLEX to use opportunistic algorithms in all
+situations, set the parallel mode parameter to -1 (minus one).</p>
+<p class="p">The presence of a time limit, set by the 
+<a class="xref" href="../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> parameter
+(<samp class="ph codeph">TiLim</samp>, <samp class="ph codeph">CPX_PARAM_TILIM</samp>)
+for example, poses problems for reproducibility in any algorithm that
+is otherwise deterministic, even in sequential rather than parallel
+mode. Subtle variations in runtime on computer architectures can lead
+to variation in the measurement of time. (Other limits, such as node
+limits, are not subject to this variability.) </p>
+<p class="p">Because time limits are so important in many applications,
+CPLEX will still attempt to use deterministic mode without regard
+to whether a time limit is in effect. While variability will still
+be much lower than with the opportunistic setting, the user is advised
+that complete determinism within time limits can not be assured.</p>
+<p class="p">There are other features of CPLEX that also depend implicitly
+on computer run time. Because of this implicit dependence, they too
+can pose problems for reproducibility in otherwise deterministic algorithms.
+ Examples include terminating the optimization, using a termination
+signal in a callback, or any other use of a callback where behavior
+varies according to the order in which the callbacks are invoked on
+multiple threads.  In fact, the subtle variations in computer run
+time can alter the order in which the threads invoke a callback on
+consecutive runs.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/multi_threaded_parallel/01_parallel_title_synopsis.html" title="Documents the CPLEX multithreaded parallel optimizers.">Multithreaded parallel optimizers</a></div>
+</div>
+</div></body>
+</html>

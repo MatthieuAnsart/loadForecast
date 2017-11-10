@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Understanding solution quality from the barrier LP optimizer" />
+<meta name="abstract" content="Documents the information available about the quality of a solution found by the barrier optimizer." />
+<meta name="Description" content="Documents the information available about the quality of a solution found by the barrier optimizer." />
+<meta name="DC.subject" content="log file, contents, barrier optimizer, solution quality, solution, quality, displaying, barrier solution quality, getQuality method, IloCplex class, IloCplex class, getQuality method, CPXgetintquality routine, CPXgetdblquality routine, optimality, normalized error and, simplex solution quality" />
+<meta name="keywords" content="log file, contents, barrier optimizer, solution quality, solution, quality, displaying, barrier solution quality, getQuality method, IloCplex class, IloCplex class, getQuality method, CPXgetintquality routine, CPXgetdblquality routine, optimality, normalized error and, simplex solution quality" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/01_barrier_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveBarrier.653820" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/01_barrier_title_synopsis.html" />
+<title>Understanding solution quality from the barrier LP optimizer</title>
+</head>
+<body role="main" id="User_manual.uss_solveBarrier.653820">
+<h1 class="title topictitle1">Understanding solution quality from the barrier LP optimizer</h1>
+<div class="body"><p class="shortdesc">Documents the information available about the quality of
+a solution found by the barrier optimizer.</p>
+<p class="p">When CPLEX successfully solves a problem with the CPLEX barrier
+optimizer, it reports the optimal objective value and solution time
+in a log file, as it does for other LP optimizers.</p>
+<p class="p">Because barrier solutions (prior to crossover) are not basic solutions,
+certain solution statistics associated with basic solutions are not
+available for a strictly barrier solution. For example, reduced costs
+and dual values are available for strictly barrier LP solutions, but
+range information about them is not.</p>
+<p class="p">To help you evaluate the quality of a barrier solution more readily,
+CPLEX offers a special display of information about barrier solution
+quality. To display this information in the Interactive Optimizer,
+use the command <samp class="ph codeph">display solution quality</samp> after optimization.
+When using the Component Libraries, use the method <samp class="ph codeph">cplex.getQuality</samp> or
+use the routines <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getintquality.html" title="The routine CPXXgetintquality/CPXgetintquality accesses integer-valued information about the quality of the current solution of a problem.">CPXgetintquality</a></samp> for
+integer information and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/cpxapi/getdblquality.html" title="The routine CPXXgetdblquality/CPXgetdblquality accesses double-valued information about the quality of the current solution of a problem.">CPXgetdblquality</a></samp> for
+double-valued information.</p>
+<p class="p"> <a class="xref" href="18_soln_quality.html#User_manual.uss_solveBarrier.653820__User_manual.uss_solveBarrier.670717" title="A two-column table showing possible types of solution quality and their meaning.">Table 1</a> lists
+the items CPLEX displays and explains their meaning. In the solution
+quality display, the term <samp class="ph codeph">pi</samp> refers to dual solution
+values, that is, the y values in the conventional barrier problem-formulation.
+The term <samp class="ph codeph">rc</samp> refers to reduced cost, that is, the
+difference z - w in the conventional barrier problem-formulation.
+Other terms are best understood in the context of primal and dual
+LP formulations. </p>
+<p class="p">Normalized errors, for example, represent the accuracy of satisfying
+the constraints while considering the quantities used to compute Ax
+on each row and y<sup class="ph sup">T</sup>A on each column. In the primal case,
+for each row, consider the nonzero coefficients and the xj values
+used to compute Ax. If these numbers are large in absolute value,
+then it is acceptable to have a larger absolute error in the primal
+constraint.</p>
+<p class="p">Similar reasoning applies to the dual constraint.</p>
+<p class="p">If CPLEX returned an optimal solution, but the primal error seems
+high to you, the primal normalized error should be low, since it takes
+into account the scaling of the problem and solution.</p>
+<p class="p">After a simplex optimization—whether primal, dual, or network—or
+after a crossover, the display command will display information related
+to the quality of the simplex solution.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible types of solution quality and their meaning." id="User_manual.uss_solveBarrier.653820__User_manual.uss_solveBarrier.670717" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Barrier solution quality display </span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d371317e124"> Item </th>
+<th class="entry" align="left" valign="top" id="d371317e126"> Meaning </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> primal objective </td>
+<td class="entry" valign="top" headers="d371317e126 "> primal objective value c<sup class="ph sup">T</sup>x </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> dual objective </td>
+<td class="entry" valign="top" headers="d371317e126 "> dual objective value b<sup class="ph sup">T</sup>y - u<sup class="ph sup">T</sup>w + l<sup class="ph sup">T</sup>z </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> duality gap </td>
+<td class="entry" valign="top" headers="d371317e126 "> difference between primal and dual objectives </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> complementarity </td>
+<td class="entry" valign="top" headers="d371317e126 "> sum of column and row complementarity </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> column complementarity (total) </td>
+<td class="entry" valign="top" headers="d371317e126 "> sum of |(x<sub class="ph sub">j</sub> - l<sub class="ph sub">j</sub> )• z<sub class="ph sub">j</sub>| + |(u<sub class="ph sub">j</sub> - x<sub class="ph sub">j</sub> )• w<sub class="ph sub">j</sub>| </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> column complementarity (max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> maximum of |(x<sub class="ph sub">j</sub> - l<sub class="ph sub">j</sub> )• z<sub class="ph sub">j</sub>| and
+|(u<sub class="ph sub">j</sub> - x<sub class="ph sub">j</sub> )• w<sub class="ph sub">j</sub>| over all variables </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> row complementarity (total) </td>
+<td class="entry" valign="top" headers="d371317e126 "> sum of |slacki • y<sub class="ph sub">i</sub>| </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> row complementarity (max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> maximum of |slacki • y<sub class="ph sub">i</sub>| </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> primal norm |x| (total) </td>
+<td class="entry" valign="top" headers="d371317e126 "> sum of absolute values of all primal variables </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> primal norm |x| (max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> maximum of absolute values of all primal variables </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> dual norm |rc| (total) </td>
+<td class="entry" valign="top" headers="d371317e126 "> sum of absolute values of all reduced costs </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> dual norm |rc| (max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> maximum of absolute values of all reduced costs </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> primal error (Ax = b) (total, max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> total and maximum error in satisfying primal equality constraints </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> dual error (A’<samp class="ph codeph">pi</samp>  + <samp class="ph codeph">rc</samp>  = c)
+(total, max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> total and maximum error in satisfying dual equality constraints </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> primal x bound error (total, max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> total and maximum error in satisfying primal lower and upper
+bound constraints </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> primal slack bound error (total, max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> total and maximum violation in slack variables </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> dual pi bound error (total, max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> total and maximum violation with respect to zero of dual variables
+on inequality rows </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> dual rc bound error (total, max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> total and maximum violation with respect to zero of reduced
+costs </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> primal normalized error (Ax = b) (max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> accuracy of primal constraints </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d371317e124 "> dual normalized error (A'pi + rc = c) (max) </td>
+<td class="entry" valign="top" headers="d371317e126 "> accuracy of dual constraints </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/barrier/01_barrier_title_synopsis.html" title="Documents solving linear programming problems by means of the CPLEX barrier optimizer.">Solving LPs: barrier optimizer</a></div>
+</div>
+</div></body>
+</html>

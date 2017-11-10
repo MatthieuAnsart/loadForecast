@@ -1,0 +1,201 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: REM ------------------------------------------------ -*- Visual Basic .Net -*-
+002: REM File: Warehouse.vb
+003: REM --------------------------------------------------------------------------
+004: REM Licensed Materials - Property of IBM
+005: REM 
+006: REM 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 
+007: REM Copyright IBM Corporation 1998, 2013. All Rights Reserved.
+008: REM
+009: REM Note to U.S. Government Users Restricted Rights:
+010: REM Use, duplication or disclosure restricted by GSA ADP Schedule
+011: REM Contract with IBM Corp.
+012: REM --------------------------------------------------------------------------
+013: 
+014: 
+015: REM --------------------------------------------------------------------------
+016: REM Visual Basic version of steelmill.cpp of OPL distrib
+017: REM --------------------------------------------------------------------------
+018: 
+019: Imports System
+020: Imports ILOG.Concert
+021: Imports ILOG.CPLEX
+022: Imports ILOG.OPL
+023: 
+024: Module Warehouse
+025: 
+026:   Sub Main(ByVal args() As String)
+027: 
+028:     Dim nbWarehouses As Integer = 5
+029:     Dim nbStores As Integer = 10
+030:     Dim fixedP As Integer = 30
+031:     Dim disaggregate As Integer = 1
+032:     For i As Integer = 0 To args.Length - 1
+033:       If (<b><font color="#8A2BE2">"-h"</font></b>.Equals(args(i))) Then
+034:         usage()
+035:       ElseIf (<b><font color="#8A2BE2">"fixed"</font></b>.Equals(args(i))) Then
+036:         i = i + 1
+037:         If (i = args.Length) Then
+038:           usage()
+039:         End If
+040:         fixedP = System.Int32.Parse(args(i))
+041: 
+042:       ElseIf (<b><font color="#8A2BE2">"nbWarehouses"</font></b>.Equals(args(i))) Then
+043:         i = i + 1
+044:         If (i = args.Length) Then
+045:           usage()
+046:         End If
+047:         nbWarehouses = System.Int32.Parse(args(i))
+048:       ElseIf (<b><font color="#8A2BE2">"nbStores"</font></b>.Equals(args(i))) Then
+049:         i = i + 1
+050:         If (i = args.Length) Then
+051:           usage()
+052:         End If
+053:         nbStores = System.Int32.Parse(args(i))
+054:       ElseIf (<b><font color="#8A2BE2">"disaggregate"</font></b>.Equals(args(i))) Then
+055:         i = i + 1
+056:         If (i = args.Length) Then
+057:           usage()
+058:         End If
+059:         disaggregate = System.Int32.Parse(args(i))
+060:       Else
+061:         Exit For
+062:       End If
+063:     Next
+064:     If (fixedP = -1 Or nbWarehouses = -1 Or nbStores = -1 Or disaggregate = -1) Then
+065:       usage()
+066:     End If
+067:     Console.Out.WriteLine(<b><font color="#8A2BE2">"Using parameters: "</font></b>)
+068:     Console.Out.WriteLine(<b><font color="#8A2BE2">"    nbWarehouses "</font></b> + nbWarehouses.ToString)
+069:     Console.Out.WriteLine(<b><font color="#8A2BE2">"    nbStores     "</font></b> + nbStores.ToString)
+070:     Console.Out.WriteLine(<b><font color="#8A2BE2">"    fixed        "</font></b> + fixedP.ToString)
+071:     Console.Out.WriteLine(<b><font color="#8A2BE2">"    disaggregate "</font></b> + disaggregate.ToString)
+072:     Console.Out.WriteLine()
+073:     Dim status As Integer = 127
+074:     Try
+075:       OplFactory.DebugMode = True
+076:       Dim oplF As OplFactory = New OplFactory()
+077:       Dim errHandler As OplErrorHandler = oplF.CreateOplErrorHandler(Console.Out)
+078:       Dim modelSource As OplModelSource = oplF.CreateOplModelSourceFromString(GetModelText(), <b><font color="#8A2BE2">"warehouse"</font></b>)
+079:       Dim settings As OplSettings = oplF.CreateOplSettings(errHandler)
+080:       Dim def As OplModelDefinition = oplF.CreateOplModelDefinition(modelSource, settings)
+081:       Dim cplex As Cplex = oplF.CreateCplex()
+082:       Dim opl As OplModel = oplF.CreateOplModel(def, cplex)
+083:       Dim dataSource As OplDataSource = New MyParams(oplF, nbWarehouses, nbStores, fixedP, disaggregate)
+084:       opl.AddDataSource(dataSource)
+085:       opl.Generate()
+086:       If (cplex.Solve()) Then
+087:         Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.Cplex.ObjValue.ToString())
+088:         opl.PostProcess()
+089:         opl.PrintSolution(Console.Out)
+090:         status = 0
+091:       Else
+092: 
+093:         Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>)
+094:         status = 1
+095:       End If
+096: 
+097:       oplF.End()
+098:     Catch ex As ILOG.OPL.OplException
+099:         Console.Out.WriteLine(ex.Message)
+100:         Status = 2
+101:     Catch ex As ILOG.Concert.Exception
+102:         Console.Out.WriteLine(ex.Message)
+103:         Status = 3
+104:     Catch ex As System.Exception
+105:         Console.Out.WriteLine(ex.Message)
+106:         Status = 4
+107:     End Try
+108: 
+109:     Environment.ExitCode = status
+110: 
+111:     Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>)
+112:     Console.ReadLine()
+113:   End Sub
+114: 
+115:   Function GetModelText() As String
+116: 
+117:     Dim model As String
+118:     model = <b><font color="#8A2BE2">"int   fixed        = ...;"</font></b> &amp; vbCrLf &amp; _
+119:             <b><font color="#8A2BE2">"int   nbWarehouses = ...;"</font></b> &amp; vbCrLf &amp; _
+120:             <b><font color="#8A2BE2">"int   nbStores     = ...;"</font></b> &amp; vbCrLf &amp; _
+121:             <b><font color="#8A2BE2">"int   disaggregate = ...;"</font></b> &amp; vbCrLf &amp; _
+122:             <b><font color="#8A2BE2">"assert nbStores &gt; nbWarehouses;"</font></b> &amp; vbCrLf &amp; _
+123:             <b><font color="#8A2BE2">"range Warehouses = 1..nbWarehouses;"</font></b> &amp; vbCrLf &amp; _
+124:             <b><font color="#8A2BE2">"range Stores     = 1..nbStores;"</font></b> &amp; vbCrLf &amp; _
+125:             <b><font color="#8A2BE2">"int capacity[w in Warehouses] = nbStores div nbWarehouses + w mod (nbStores div nbWarehouses);"</font></b> &amp; vbCrLf &amp; _
+126:             <b><font color="#8A2BE2">"int supplyCost[s in Stores][w in Warehouses] = 1+((s+10*w) mod 100);"</font></b> &amp; vbCrLf &amp; _
+127:             <b><font color="#8A2BE2">"dvar boolean open[Warehouses];"</font></b> &amp; vbCrLf &amp; _
+128:             <b><font color="#8A2BE2">"dvar boolean supply[Stores][Warehouses];"</font></b> &amp; vbCrLf &amp; _
+129:             <b><font color="#8A2BE2">"minimize "</font></b> &amp; vbCrLf &amp; _
+130:             <b><font color="#8A2BE2">"sum(w in Warehouses) fixed * open[w] +"</font></b> &amp; vbCrLf &amp; _
+131:             <b><font color="#8A2BE2">"sum(w in Warehouses, s in Stores) supplyCost[s][w] * supply[s][w];"</font></b> &amp; vbCrLf &amp; _
+132:             <b><font color="#8A2BE2">"constraints {"</font></b> &amp; vbCrLf &amp; _
+133:             <b><font color="#8A2BE2">"  forall(s in Stores)"</font></b> &amp; vbCrLf &amp; _
+134:             <b><font color="#8A2BE2">"    sum(w in Warehouses) supply[s][w] == 1;"</font></b> &amp; vbCrLf &amp; _
+135:             <b><font color="#8A2BE2">"  forall(w in Warehouses)"</font></b> &amp; vbCrLf &amp; _
+136:             <b><font color="#8A2BE2">"    sum(s in Stores) supply[s][w] &lt;= open[w]*capacity[w];"</font></b> &amp; vbCrLf &amp; _
+137:             <b><font color="#8A2BE2">"  if (disaggregate == 1) {"</font></b> &amp; vbCrLf &amp; _
+138:             <b><font color="#8A2BE2">"   forall(w in Warehouses, s in Stores)"</font></b> &amp; vbCrLf &amp; _
+139:             <b><font color="#8A2BE2">"      supply[s][w] &lt;= open[w];"</font></b> &amp; vbCrLf &amp; _
+140:             <b><font color="#8A2BE2">"  }"</font></b> &amp; vbCrLf &amp; _
+141:             <b><font color="#8A2BE2">"}"</font></b>
+142:     Return model
+143:   End Function
+144: 
+145:   Sub usage()
+146:     Console.Error.WriteLine()
+147:     Console.Error.WriteLine(<b><font color="#8A2BE2">"Usage: warehouse [-h] parameters"</font></b>)
+148:     Console.Error.WriteLine(<b><font color="#8A2BE2">"  -h  this help message"</font></b>)
+149:     Console.Error.WriteLine(<b><font color="#8A2BE2">"  parameters "</font></b>)
+150:     Console.Error.WriteLine(<b><font color="#8A2BE2">"    nbWarehouses &lt;value&gt; "</font></b>)
+151:     Console.Error.WriteLine(<b><font color="#8A2BE2">"    nbStores &lt;value&gt; "</font></b>)
+152:     Console.Error.WriteLine(<b><font color="#8A2BE2">"    fixed &lt;value&gt; "</font></b>)
+153:     Console.Error.WriteLine(<b><font color="#8A2BE2">"    disaggregate &lt;value&gt; "</font></b>)
+154:     Console.Error.WriteLine()
+155:     Environment.Exit(0)
+156:   End Sub
+157: 
+158: 
+159:   Friend Class MyParams
+160:     Inherits CustomOplDataSource
+161: 
+162:     Dim _nbWarehouses As Integer
+163:     Dim _nbStores As Integer
+164:     Dim _fixed As Integer
+165:     Dim _disaggregate As Integer
+166: 
+167:     Friend Sub New(ByVal oplF As OplFactory, ByVal nbWarehouses As Integer, ByVal nbStores As Integer, ByVal fixedP As Integer, ByVal disaggregate As Integer)
+168:       MyBase.New(oplF)
+169: 
+170:       _nbWarehouses = nbWarehouses
+171:       _nbStores = nbStores
+172:       _fixed = fixedP
+173:       _disaggregate = disaggregate
+174:     End Sub
+175:     Public Overrides Sub CustomRead()
+176: 
+177:       Dim handler As OplDataHandler = DataHandler
+178: 
+179:       handler.StartElement(<b><font color="#8A2BE2">"nbWarehouses"</font></b>)
+180:       handler.AddIntItem(_nbWarehouses)
+181:       handler.EndElement()
+182: 
+183:       handler.StartElement(<b><font color="#8A2BE2">"nbStores"</font></b>)
+184:       handler.AddIntItem(_nbStores)
+185:       handler.EndElement()
+186: 
+187:       handler.StartElement(<b><font color="#8A2BE2">"fixed"</font></b>)
+188:       handler.AddIntItem(_fixed)
+189:       handler.EndElement()
+190: 
+191:       handler.StartElement(<b><font color="#8A2BE2">"disaggregate"</font></b>)
+192:       handler.AddIntItem(_disaggregate)
+193:       handler.EndElement()
+194:     End Sub
+195:   End Class
+196: End Module
+</tt></pre>

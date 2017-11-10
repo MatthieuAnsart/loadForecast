@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="How the flow control script works" />
+<meta name="abstract" content="Illustrated via the model solpoolscript.mod." />
+<meta name="Description" content="Illustrated via the model solpoolscript.mod." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplide/topics/opl_ide_solpool_fc.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usroplide.uss_ide_solutionpools.150642" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplide/topics/opl_ide_solpool_fc.html" />
+<title>How the flow control script works</title>
+</head>
+<body role="main" id="usroplide.uss_ide_solutionpools.150642">
+<h1 class="title topictitle1">How the flow control script works</h1>
+<div class="body"><p class="shortdesc">Illustrated via the model <samp class="ph codeph">solpoolscript.mod</samp>.</p>
+<p class="p">The model <samp class="ph codeph">solpoolscript.mod</samp> is
+a variation of <samp class="ph codeph">scalableWarehouse.mod</samp> and
+has been written to illustrate how the flow control script works.
+It contains the <samp class="ph codeph">main</samp> flow control script
+shown in the following code extract.</p>
+<div class="example" id="usroplide.uss_ide_solutionpools.150642__usroplide.uss_ide_solutionpools.148351"><h2 class="title sectiontitle">Flow control script for pool solutions (<samp class="ph codeph">solpoolscript.mod</samp>)</h2><pre class="pre codeblock"><code>main {
+    thisOplModel.generate();
+    cplex.solve();
+    if (cplex.populate()) {
+      var nsolns = cplex.solnPoolNsolns;
+      writeln("Number of solutions found = ",nsolns);
+      writeln();
+      for (var s=0; s&lt;nsolns; s++) {
+        thisOplModel.setPoolSolution(s);
+        writeln("solution #", s, ": objective = ", cplex.getObjValue(s));
+        write("Open = [ ");
+        for (var i in thisOplModel.Warehouses)
+          write(thisOplModel.Open[i], " ");
+        writeln("]");  
+        writeln("---------");
+      }
+    }
+}</code></pre>
+</div>
+<p class="p">This flow control script</p>
+<ol class="ol"><li class="li"><p class="p">creates and extracts the model, and
+populates the solution pool after a regular MIP solve</p>
+
+
+<pre class="pre codeblock"><code>    thisOplModel.generate();
+    cplex.solve();
+    if (cplex.populate()) {</code></pre>
+</li>
+<li class="li"><p class="p">gets the number of solutions in the
+solution pool</p>
+
+
+<pre class="pre codeblock"><code>      var nsolns = cplex.solnPoolNsolns;
+      writeln("Number of solutions found = ",nsolns);</code></pre>
+</li>
+<li class="li"><p class="p">uses the solutions in the model</p>
+
+
+<pre class="pre codeblock"><code>      writeln();
+      for (var s=0; s&lt;nsolns; s++) {
+        thisOplModel.setPoolSolution(s);</code></pre>
+</li>
+<li class="li"><p class="p">gets the objective values for those
+solutions</p>
+
+
+<pre class="pre codeblock"><code>        writeln("solution #", s, ": objective = ", cplex.getObjValue(s));</code></pre>
+</li>
+<li class="li"><p class="p">writes the results to the Scripting
+Log</p>
+
+
+<pre class="pre codeblock"><code>        write("Open = [ ");
+        for (var i in thisOplModel.Warehouses)
+          write(thisOplModel.Open[i], " ");
+        writeln("]");  
+        writeln("---------");</code></pre>
+</li>
+</ol>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplide/topics/opl_ide_solpool_fc.html" title="Describes how to use the IBM ILOG Script API to populate the solution pool and use the solutions found.">Flow control script and solution pool</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using multiple processes as workers on a single machine" />
+<meta name="abstract" content="Explains an application of distributed parallel MIP in multiple processes on a single machine." />
+<meta name="Description" content="Explains an application of distributed parallel MIP in multiple processes on a single machine." />
+<meta name="DC.subject" content="MIP, distributed computing and, Mixed Integer Programming (MIP), concurrent, distributed MIP, multiple processes on single machine, infinite horizon, ramping up, concurrent MIP optimization" />
+<meta name="keywords" content="MIP, distributed computing and, Mixed Integer Programming (MIP), concurrent, distributed MIP, multiple processes on single machine, infinite horizon, ramping up, concurrent MIP optimization" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="distribMIPsingleMachine" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" />
+<title>Using multiple processes as workers on a single machine</title>
+</head>
+<body role="main" id="distribMIPsingleMachine">
+<h1 class="title topictitle1">Using multiple processes as workers on a single machine</h1>
+<div class="body"><p class="shortdesc">Explains an application of distributed parallel MIP in multiple 
+processes on a single machine.</p>
+<p class="p">There are situations in which you want to run all code on a single machine. For example, 
+when you are debugging a complex application, running all code locally can be beneficial. 
+For the purpose of this example, assume that the local environment offers 12 cores. In such 
+a case, it can be useful to view that computer as 12 virtual machines with one core each.</p>
+<p class="p">To configure such an environment, you simply add a <span class="keyword apiname">threads</span> 
+parameter for each virtual machine in your Virtual Machine Configuration, like this:</p>
+<pre class="pre codeblock"><code>&lt;machine&gt;
+    &lt;transport type=". . ."&gt;
+    . . .
+    &lt;/transport&gt;
+    &lt;param name="threads" value="1" /&gt;
+&lt;/machine&gt;</code></pre>
+<p class="p">That configuration tells CPLEX to use one thread on this particular virtual machine. 
+The deployment in this case is almost the same as in other cases, with these differences: </p>
+<ul class="ul"><li class="li">If you choose message passing interface (MPI) as the transport protocol, use 
+"localhost" as the host name for each host.</li>
+<li class="li">If you choose the process transport, omit the following arguments from the command line:<span class="keyword apiname"></span>
+    <ul class="ul"><li class="li">&lt;item value="-stdio" /&gt; </li>
+<li class="li">&lt;item value="ssh" /&gt; </li>
+<li class="li">&lt;item value="hostname" /&gt; </li>
+</ul>
+</li>
+<li class="li">If you choose TCP/IP transport protocol, you need to start only one worker on 
+the local host. All virtual machines declared in the Virtual Machine Configuration 
+(that is, the configuration.vmc file) should connect to the same address, such as 
+<samp class="ph codeph">localhost:12345</samp>, for example.</li>
+</ul>
+<p class="p">Such a configuration provides interesting opportunities.  For example, you can 
+use a single machine to ramp up an infinite horizon. That practice of ramping up with 
+an infinite horizon is also known as concurrent MIP optimization. For certain hard models, 
+concurrent MIP optimization or ramping up with an infinite horizon has been shown to 
+improve performance, even on a single computer with multiple cores.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/parallel_optim/distribMIP/01_distributed_mip_title_synopsis.html" title="Documents the solution in parallel of a mixed integer program (MIP) in a distributed environment">Solving a MIP with distributed parallel optimization</a></div>
+</div>
+</div></body>
+</html>

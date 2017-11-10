@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="OPL Grammar" />
+<meta name="abstract" content="The grammar of OPL keywords" />
+<meta name="Description" content="The grammar of OPL keywords" />
+<meta name="DC.subject" content="grammar, of OPL" />
+<meta name="keywords" content="grammar, of OPL" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_syntax.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplhelp.uss_opl_grammar.1012969" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_syntax.html" />
+<title>OPL Grammar</title>
+</head>
+<body role="main" id="oplhelp.uss_opl_grammar.1012969">
+<h1 class="title topictitle1">OPL Grammar</h1>
+<div class="body"><p class="shortdesc">The grammar of OPL keywords</p>
+<pre class="pre codeblock"><code>    0 $accept: CompilationUnit $end
+    1 CompilationUnit: TopLevelDeclarations_opt
+    2 TopLevelDeclarations_opt: /* empty */
+    3                         | TopLevelDeclarations
+    4 TopLevelDeclarations: TopLevelDeclaration
+    5                     | TopLevelDeclarations TopLevelDeclaration
+    6 @1: /* empty */
+    7 TopLevelDeclaration: "include" "(string-literal)" @1 ';'
+    8                    | InModelDeclaration
+    9                    | "using" Id ';'
+   10                    | Model
+   11                    | error ';'
+
+   12 Scripting: "execute" Id_opt "(execute-block)"
+   13          | "main" "(execute-block)"
+
+   14 Model: "template" Id '{' InModelDeclarations_opt '}'
+
+   15 Id_opt: /* empty */
+   16       | Id
+
+   17 Id: "(identifier)"
+
+   18 InModelDeclarations_opt: /* empty */
+   19                        | InModelDeclarations
+
+   20 InModelDeclarations: InModelDeclaration
+   21                    | InModelDeclarations InModelDeclaration
+
+   22 InModelDeclaration: LocalVar ';'
+   23                   | TypeDeclaration
+   24                   | Objective ';'
+   25                   | "constraints" '{' Constraints_opt '}'
+   26                   | "subject to" '{' Constraints_opt '}'
+   27                   | ';'
+   28                   | "assert" Constraint
+   29                   | Scripting
+
+   30 LocalVar: Type VariableDeclarator
+   31         | "dvar" Type VariableDeclarator DecisionVarRange_opt
+   32         | "dvar" Type VariableDeclarator "=" Expression
+   33         | "dexpr" Type VariableDeclarator "=" Expression
+   34         | Type VariableDeclarator "=" Expression
+   35         | Type VariableDeclarator "=" "..."
+
+   36 DecisionVarRange_opt: /* empty */
+   37                     | DecisionVarRange
+
+   38 DecisionVarRange: "in" Expression
+
+   39 VariableDeclarator: Id Dimensions_opt References_opt
+
+   40 Dimensions_opt: /* empty */
+   41               | Dimensions
+   42               | '[' ManyExpressions ']'
+   43               | '[' SimpleQualifiers ']'
+
+   44 Dimensions: Dimension
+   45           | Dimensions Dimension
+
+   46 Dimension: '[' Expression ']'
+   47          | '[' SimpleQualifier ']'
+
+   48 References_opt: /* empty */
+   49               | "with" References
+
+   50 References: Reference
+   51           | References ',' Reference
+
+   52 Reference: Ids "in" Id
+
+   53 Ids: Id
+   54    | Ids ',' Id
+
+   55 TypeDeclaration: "tuple" Id '{' TupleComponents '}'
+   56                | "struct" Id '{' TupleComponents '}'
+
+   57 TupleComponents: TupleComponent
+   58                | TupleComponents TupleComponent
+
+   59 TupleComponent: Type VariableDeclarator ';'
+   60               | "key" Type VariableDeclarator ';'
+
+   61 Type: NonArrayType
+   62     | Type '[' Type ']'
+   63     | SetType
+
+   64 NonArrayType: LiteralType
+   65             | Id
+
+   66 LiteralType: "int"
+   67            | "float"
+   68            | "boolean"
+   69            | "int+"
+   70            | "float+"
+   71            | "string"
+   72            | "range"
+   73            | "range" "float"
+   74            | "constraint"
+
+   75 SetType: "setof" '(' NonArrayType ')'
+   76        | '{' NonArrayType '}'
+   77        | SetTypeModifier "setof" '(' NonArrayType ')'
+   78        | SetTypeModifier '{' NonArrayType '}'
+
+   79 SetTypeModifier: "ordered"
+   80                | "sorted"
+   81                | "reversed"
+
+   82 Constraints_opt: /* empty */
+   83                | Constraints
+
+   84 Constraints: Constraint
+   85            | Constraints Constraint
+
+   86 Constraint: Expression ';'
+   87           | Id ':' Constraint
+   88           | ArraySlotExpression ':' Constraint
+   89           | LocationExpression "=" Constraint
+   90           | "if" '(' Expression ')' Constraint "else" Constraint
+   91           | "if" '(' Expression ')' Constraint
+   92           | "forall" '(' Qualifiers ')' Constraint
+   93           | "forall" '(' Qualifiers ')' ArraySlotExpression "=" 
+Constraint
+   94           | BooleanBlock
+   95           | ';'
+   96           | error ';'
+   97           | error '}'
+
+   98 Objective: "minimize" Expression
+   99          | "maximize" Expression
+
+  100 PathExpression: LocationExpression
+  101               | ArraySlotExpression
+  102               | FunctionCall
+
+  103 Expression: '(' Expression ')'
+  104           | PathExpression
+  105           | LiteralExpression
+  106           | BinaryExpression
+  107           | UnaryExpression
+  108           | RangeExpression
+  109           | AggregateExpression
+  110           | CollectionExpression
+  111           | TupleExpression
+  112           | PiecewiseExpression
+  113           | Expression '?' Expression ':' Expression
+
+  114 LiteralExpression: "(integer-literal)"
+  115                  | "(float-literal)"
+  116                  | "(boolean-literal)"
+  117                  | "(string-literal)"
+  118                  | "infinity"
+  119                  | "maxint"
+
+  120 BinaryExpression: Expression "==" Expression
+  121                 | Expression "!=" Expression
+  122                 | Expression "&lt;=" Expression
+  123                 | Expression "&lt;" Expression
+  124                 | Expression "&gt;=" Expression
+  125                 | Expression "&gt;" Expression
+  126                 | Expression "+" Expression
+  127                 | Expression "-" Expression
+  128                 | Expression "*" Expression
+  129                 | Expression "/" Expression
+  130                 | Expression "div" Expression
+  131                 | Expression "%" Expression
+  132                 | Expression "mod" Expression
+  133                 | Expression "in" Expression
+  134                 | Expression "not in" Expression
+  135                 | Expression "inter" Expression
+  136                 | Expression "union" Expression
+  137                 | Expression "diff" Expression
+  138                 | Expression "symdiff" Expression
+  139                 | Expression "^" Expression
+  140                 | Expression "&amp;&amp;" Expression
+  141                 | Expression "||" Expression
+  142                 | Expression "=&gt;" Expression
+
+  143 UnaryExpression: "-" Expression
+  144                | "!" Expression
+
+  145 LocationExpression: Id
+  146                   | PathExpression '.' Id
+  147                   | '(' AllExpression ')'
+
+  148 ArraySlotExpression: PathExpression '[' Expression ']'
+  149                    | PathExpression '[' ManyExpressions ']'
+
+  150 Locations: LocationExpression ',' LocationExpression
+  151          | Locations ',' LocationExpression
+
+  152 Expressions: Expression
+  153            | Expressions ',' Expression
+
+  154 ManyExpressions: Expression ',' Expression
+  155                | ManyExpressions ',' Expression
+
+  156 Expressions_opt: /* empty */
+  157                | Expressions
+
+  158 RangeExpression: Expression ".." Expression
+
+  159 BooleanBlock: '{' BlockExpressions '}'
+
+  160 BlockExpressions: BlockExpression
+  161                 | BlockExpressions BlockExpression
+
+  162 BlockExpression: Constraint
+
+  163 TupleExpression: "&lt;" Expressions "&gt;"
+  164                | "&lt;" error "&gt;"
+
+  165 FunctionCall: Id '(' Expressions_opt ')'
+
+  166 AggregateExpression: "sum" '(' Qualifiers ')' Expression
+  167                    | "min" '(' Qualifiers ')' Expression
+  168                    | "max" '(' Qualifiers ')' Expression
+  169                    | "prod" '(' Qualifiers ')' Expression
+  170                    | "or" '(' Qualifiers ')' Expression
+  171                    | "and" '(' Qualifiers ')' Expression
+  172                    | "union" '(' Qualifiers ')' Expression
+  173                    | "inter" '(' Qualifiers ')' Expression
+  174                    | AllExpression
+
+  175 AllExpression: "all" AllRange_opt '(' Qualifiers ')' Expression
+
+  176 AllRange_opt: /* empty */
+  177             | AllRange
+
+  178 AllRange: '[' RangeExpression ']'
+  179         | '[' LocationExpression ']'
+  180         | '[' Expression ".." "*" ']'
+
+  181 Qualifiers: Qualifier
+  182           | Qualifiers ',' Qualifier
+
+  183 Qualifier: SimpleQualifier
+  184          | "ordered" Locations "in" Expression Filter_opt
+  185          | Locations "in" Expression Filter_opt
+
+  186 SimpleQualifier: Pattern "in" Expression Filter_opt
+
+  187 SimpleQualifiers: SimpleQualifier ',' SimpleQualifier
+  188                 | SimpleQualifiers ',' SimpleQualifier
+
+  189 Pattern: Expression
+
+  190 Filter_opt: /* empty */
+  191           | Filter
+
+  192 Filter: ':' Expression
+
+  193 CollectionExpression: Comprehension
+  194                     | Extension
+
+  195 Comprehension: '{' Expression '|' Qualifiers '}'
+  196              | '[' Expression ':' Expression 
+ArrayComprehensionQualifiers_opt ']'
+
+  197 ArrayComprehensionQualifiers_opt: /* empty */
+  198                                 | '|' Qualifiers
+
+  199 Extension: '{' Expressions_opt '}'
+  200          | '[' Expressions_opt ']'
+
+  201 PiecewiseExpression: "piecewise" '{' Pieces Expression '}' Offset_opt 
+Expression
+  202                    | "piecewise" '(' Qualifiers ')' '{' Piece Expression 
+'}' Offset_opt Expression
+
+  203 Offset_opt: /* empty */
+  204           | '(' Expression ',' Expression ')'
+
+  205 Pieces: Piece
+  206       | Pieces Piece
+
+  207 Piece: Expression "-&gt;" Expression ';'</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_syntax.html" title="Grammar of the modeling language.">OPL Syntax</a></div>
+</div>
+</div></body>
+</html>

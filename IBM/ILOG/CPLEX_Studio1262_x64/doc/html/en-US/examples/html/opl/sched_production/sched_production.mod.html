@@ -1,0 +1,114 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// From Bradley, Hax, Magnanti, Applied Mathematical Programming, </font></b>
+013: <b><font color="#007D00">// Chapter 9, Exercise 24</font></b>
+014: 
+015: <b><font color="#007D00">//  - A Custom Pilot Chemical Company is a chemical manufacturer that produces</font></b>
+016: <b><font color="#007D00">// batches of specialty chemicals to order. Principal equipment consists of</font></b>
+017: <b><font color="#007D00">// eight interchangable reactor vessels, five interchangeable distillation</font></b>
+018: <b><font color="#007D00">// columns, four large interchangeable centrifuges, and a network of switchable</font></b>
+019: <b><font color="#007D00">// piping and storage tanks. Customer demand comes in the form of orders for</font></b>
+020: <b><font color="#007D00">// batches of one or more specialty chemicals, normally to be delivered</font></b>
+021: <b><font color="#007D00">// simultaneously for further use by the customer.</font></b>
+022: 
+023: <b><font color="#007D00">// - An order consists of a set of jobs. Each job has an optional precedence</font></b>
+024: <b><font color="#007D00">// requirement, arrival week of the job, duration of the job in weeks, the week</font></b>
+025: <b><font color="#007D00">// that the job is due, the number of reactors required, distillation columns</font></b>
+026: <b><font color="#007D00">// required, and centrifuges required.</font></b>
+027: 
+028: <b><font color="#007D00">// - Find a schedule of the orders and jobs to minimize the completion time of all</font></b>
+029: <b><font color="#007D00">// orders</font></b>
+030: 
+031: 
+032: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+033: 
+034: <b><font color="#0000FF">tuple</font></b> paramsT{
+035:         <b><font color="#0000FF">int</font></b> NbReactors;
+036:         <b><font color="#0000FF">int</font></b> NbColumns;
+037:         <b><font color="#0000FF">int</font></b> NbCentrifuges;
+038: };
+039: paramsT Params = ...;
+040: 
+041: <b><font color="#0000FF">int</font></b> NbReactors    = Params.NbReactors;
+042: <b><font color="#0000FF">int</font></b> NbColumns     = Params.NbColumns;
+043: <b><font color="#0000FF">int</font></b> NbCentrifuges = Params.NbCentrifuges;
+044: 
+045: <b><font color="#0000FF">tuple</font></b> JobIndex {
+046:   <b><font color="#0000FF">string</font></b> ordernumber;
+047:   <b><font color="#0000FF">int</font></b>    jobnum;
+048: };
+049: 
+050: <b><font color="#0000FF">tuple</font></b> JobInfo {
+051:   <b><font color="#0000FF">int</font></b> jobprec;
+052:   <b><font color="#0000FF">int</font></b> arrival;
+053:   <b><font color="#0000FF">int</font></b> duration;
+054:   <b><font color="#0000FF">int</font></b> weekdue;
+055:   <b><font color="#0000FF">int</font></b> reactors;
+056:   <b><font color="#0000FF">int</font></b> columns;
+057:   <b><font color="#0000FF">int</font></b> centrifuges;
+058: };
+059: 
+060: <b><font color="#0000FF">tuple</font></b> JobData {
+061:   JobIndex ind;
+062:   JobInfo  info;
+063: };
+064: {JobData} jobs = ...;
+065: 
+066: {JobIndex} joblist = { i | &lt;i,j&gt; <b><font color="#0000FF">in</font></b> jobs };
+067: <b><font color="#7D007D">assert </font></b>( <b><font color="#7D007D">card</font></b>(joblist) == <b><font color="#7D007D">card</font></b>(jobs) );
+068: 
+069: JobInfo datarray[joblist];
+070: 
+071: <b><font color="#0000FF">execute</font></b> {
+072:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> jobs)
+073:     datarray[j.ind] = j.info;
+074: };
+075: 
+076: dvar interval a[j in joblist] 
+077:   in datarray[j].arrival..datarray[j].weekdue 
+078:   size datarray[j].duration;
+079: 
+080: cumulFunction reactors    = sum (j in joblist) pulse(a[j], datarray[j].reactors);
+081: cumulFunction columns     = sum (j in joblist) pulse(a[j], datarray[j].columns);
+082: cumulFunction centrifuges = sum (j in joblist) pulse(a[j], datarray[j].centrifuges);
+083: 
+084: minimize max(j in joblist) endOf(a[j]);
+085: subject to {
+086:   forall (j <b><font color="EA7D00">in</font></b> joblist) {
+087:     <b><font color="EA7D00">if</font></b> (datarray[j].jobprec &gt; 0) {
+088:       endBeforeStart(a[&lt;j.ordernumber,datarray[j].jobprec&gt;], a[j]);
+089:     }
+090:   }
+091:   reactors    &lt;= NbReactors;
+092:   columns     &lt;= NbColumns;
+093:   centrifuges &lt;= NbCentrifuges;
+094: };
+095: 
+096: execute {
+097:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> j <b><font color="EA7D00">in</font></b> joblist) {
+098:     writeln(j + <b><font color="#8A2BE2">" on ["</font></b> + a[j].start + <b><font color="#8A2BE2">","</font></b> + a[j].end + <b><font color="#8A2BE2">")"</font></b>);
+099:   }
+100: }
+101: 
+102: tuple solutionT{
+103:         JobIndex idx;
+104:         <b><font color="#0000FF">int</font></b> start;
+105:         <b><font color="#0000FF">int</font></b> end;
+106: };
+107: {solutionT} solution = {&lt;j, startOf(a[j]), endOf(a[j])&gt; | j <b><font color="EA7D00">in</font></b> joblist};
+108: execute{
+109:         writeln(solution);
+110: }</tt></pre>

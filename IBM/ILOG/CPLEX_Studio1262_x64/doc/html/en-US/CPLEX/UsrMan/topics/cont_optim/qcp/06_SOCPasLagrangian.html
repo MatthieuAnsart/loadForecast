@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Representing SOCP as Lagrangian" />
+<meta name="abstract" content="Recalls mathematical principles useful in creating and manipulating second order cone programs." />
+<meta name="Description" content="Recalls mathematical principles useful in creating and manipulating second order cone programs." />
+<meta name="DC.subject" content="SOCP, background, examples, second order cone constraint, definition, second order cone program, Lagrangian equivalents" />
+<meta name="keywords" content="SOCP, background, examples, second order cone constraint, definition, second order cone program, Lagrangian equivalents" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/02_identify_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="SOCPasLagrangian" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/02_identify_title_synopsis.html" />
+<title>Representing SOCP as Lagrangian</title>
+</head>
+<body role="main" id="SOCPasLagrangian">
+<h1 class="title topictitle1">Representing SOCP as Lagrangian</h1>
+<div class="body"><p class="shortdesc">Recalls mathematical principles useful in creating
+and manipulating second order cone programs. </p>
+<p class="p">Second order cone programs (SOCPs) are special in the
+sense that any quadratically constrained program (QCP) can be transformed
+into an equivalent second order cone program. CPLEX makes use of this
+fact to solve a wider range of quadratically constrained models. Furthermore,
+CPLEX uses this equivalence to return more information, such as dual
+values and reduced costs, about the model and its solution, even about
+SOCPs.</p>
+<p class="p">To understand how best to use CPLEX routines and methods
+when you solve SOCPs, recall how second order cone programs mathematically
+represent a model that includes second order cone constraints. 
+A <strong class="ph b">second order cone program</strong> is an optimization problem
+in this standard form, where the <em class="ph i">x<sub class="ph sub">i</sub></em> are
+pair-wise disjoint vectors of variables such that 
+<em class="ph i">x<sub class="ph sub">i</sub> = (x<sub class="ph sub">i,1</sub> , . . . , x<sub class="ph sub">i,i<sub class="ph sub">n</sub></sub>)</em>:</p>
+<img class="image" src="../../../images/socpStandardForm.jpg" /><p class="p">A <strong class="ph b">second order cone constraint</strong> for a variable vector 
+<img class="image" src="../../../images/socpVectorXsubiGEzero.jpg" /> 
+is defined like this, where the double bars represent 
+the Euclidean norm of the vector:</p>
+<img class="image" src="../../../images/socpConstraint.jpg" /><p class="p">Also recall that if 
+<em class="ph i">n<sub class="ph sub">i</sub> = 1</em>, then the following second order cone constraint:</p>
+<img class="image" src="../../../images/socpVectorXsubiGEzero.jpg" /><p class="p">reduces to the following inequality:</p>
+<img class="image" src="../../../images/socpXsubi1GEzero_reduced.jpg" /><p class="p">In other words, a second order cone constraint, such as
+this inequality:</p>
+<img class="image" src="../../../images/socpConstraintAlone.jpg" /><p class="p">(where the double bars specify a Euclidean norm) 
+is equivalent to these two constraints:</p>
+<img class="image" src="../../../images/socpConstraintEquiv.jpg" /><p class="p">With those facts about the standard form of a second order
+cone constraint in mind, you can specify the objective function and
+the linear constraints of a second order cone program (SOCP) just
+as you would specify them in a similar linear program (LP); then,
+in addition, you specify those two equivalent constraints for each
+of the second order cone constraints in your model.</p>
+<p class="p">To clarify that procedure for specifying SOCPs, consider
+the following model:</p>
+<pre class="pre codeblock"><code>min x1 + x2 + x3 + x4 + x5 + x6
+    x1 + x2 +           x5      = 8
+              x3 +      x5 + x6 = 10
+    (x1, x2, x3) ≥ 0  (x4, x5) ≥ 0 (x6) ≥ 0 </code></pre>
+<p class="p">In that model, there are two ordinary linear constraints:</p>
+<pre class="pre codeblock"><code>    x1 + x2 +           x5      = 8
+              x3 +      x5 + x6 = 10</code></pre>
+<p class="p">At first glance, there appear to be three second order cones (SOC)
+to consider:</p>
+<pre class="pre codeblock"><code>(x1, x2, x3) ≥ 0  
+(x4, x5) ≥ 0 
+(x6) ≥ 0 </code></pre>
+<p class="p">According to the procedure, you must specify two equivalent 
+constraints for each second order cone constraint in the model. 
+For the first SOC, consider <samp class="ph codeph">x1</samp> greater than 
+or equal to the Euclidean norm of <samp class="ph codeph">x2</samp> and 
+<samp class="ph codeph">x3</samp>. This consideration leads to the following 
+pair of constraints.</p>
+<pre class="pre codeblock"><code>-x1<sup class="ph sup">2</sup> + x2<sup class="ph sup">2</sup> + x3<sup class="ph sup">3</sup> ≤ 0
+x1 ≥ 0</code></pre>
+<p class="p">Likewise, according to the procedure, consider the second SOC.</p>
+<pre class="pre codeblock"><code> (x4, x5) ≥ 0 
+ </code></pre>
+<p class="p">That second consideration leads to the following pair of 
+ constraints.</p>
+<pre class="pre codeblock"><code> -x4<sup class="ph sup">2</sup> + x5<sup class="ph sup">2</sup> ≤ 0
+ x4 ≥ 0
+ </code></pre>
+<p class="p">The third SOC consists of only one variable, so according to 
+the procedure, it leads only to the lower bound of 0 (zero) on 
+<samp class="ph codeph">x6</samp>.</p>
+<p class="p">Consequently, that model looks like this in conventional LP format:</p>
+<pre class="pre codeblock"><code>Minimize
+   obj: x1 + x2 + x3 + x4 + x5 + x6
+Subject To
+    c1: x1 + x2 +           x5      = 8
+    c2:           x3 +      x5 + x6 = 10
+    q1: [ -x1^2 + x2^2 + x3^2 ] &lt;= 0
+    q2: [ -x4^2 + x5^2 ] &lt;= 0
+Bounds
+    0 &lt;= x1
+    x2 Free
+    x3 Free
+    0 &lt;= x4
+    x5 Free
+    0 &lt;= x6
+End</code></pre>
+<p class="p">For more detail about the syntax of LP format, see 
+<a class="xref" href="../../../../FileFormats/topics/LP.html" title="CPLEX conforms to these rules for the LP file format.">LP file format: algebraic representation</a>
+in the reference manual <em class="ph i">File formats supported by CPLEX</em>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qcp/02_identify_title_synopsis.html" title="Defines the types of quadratically constrained programs that CPLEX solves.">Identifying a quadratically constrained program (QCP)</a></div>
+</div>
+</div></body>
+</html>

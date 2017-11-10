@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Suggested answers" />
+<meta name="abstract" content="Suggested answers to the review exercises are provided." />
+<meta name="Description" content="Suggested answers to the review exercises are provided." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/color_review.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizercolor.119138" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/color_review.html" />
+<title>Suggested answers</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizercolor.119138">
+<h1 class="title topictitle1">Suggested answers</h1>
+<div class="body"><p class="shortdesc">Suggested answers to the review exercises are provided. </p>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.133570"><h2 class="title sectiontitle">Exercise 1</h2><p class="p">What is a decision variable?</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.133572"><h2 class="title sectiontitle">Suggested answer</h2><p class="p">A decision variable is a constrained integer variable
+that takes integers as possible values. A constrained integer variable
+is represented in Concert Technology by the class <samp class="ph codeph">IloIntVar</samp>.
+The possible values are represented as a domain of integers with an
+upper bound and a lower bound. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.133577"><h2 class="title sectiontitle">Exercise 2</h2><p class="p">How do you place a constraint on decision variables?</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.133579"><h2 class="title sectiontitle">Suggested answer</h2><p class="p">You create an instance of the class <samp class="ph codeph">IloConstraint</samp> and
+explicitly add that constraint to the model using <samp class="ph codeph">IloModel::add</samp>.
+If the constraint is not added to the model object, it will not be
+considered in the search.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.133551"><h2 class="title sectiontitle">Exercise 3</h2><p class="p">Change the code so that Germany and Denmark are always
+the same color. Except for Germany and Denmark, no two neighboring
+countries are the same color.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.119530"><h2 class="title sectiontitle">Suggested answer</h2><p class="p">The code that has changed from <samp class="ph codeph">color.cpp</samp> follows.
+You can view the complete program online in the file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/color_ex3.cpp</samp>.</p>
+<p class="p">This constraint between Denmark and Germany is changed
+to be: </p>
+<pre class="pre codeblock"><code>    model.add(Denmark == Germany); 
+</code></pre>
+<p class="p">You should obtain the following results: </p>
+<pre class="pre codeblock"><code>Feasible Solution
+Belgium:     green
+Denmark:     white
+France:      yellow
+Germany:     white
+Luxembourg:  blue
+Netherlands: blue
+</code></pre>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.119224"><h2 class="title sectiontitle">Exercise 4</h2><p class="p">Change the original code to include Switzerland in the
+map. Switzerland shares borders with France and Germany. No neighboring
+countries are the same color.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizercolor.119138__migration.uss_gscpoptimizercolor.119569"><h2 class="title sectiontitle">Suggested answer</h2><p class="p">The code that has changed from <samp class="ph codeph">color.cpp</samp> follows.
+You can view the complete program online in the file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/src/cpp/color_ex4.cpp</samp>.</p>
+<p class="p">The declaration of the variables is changed as follows:
+ </p>
+<pre class="pre codeblock"><code>    IloIntVar Belgium(env, 0, 3), Denmark(env, 0, 3), France(env, 0, 3), 
+      Germany(env, 0, 3), Luxembourg(env, 0, 3), Netherlands(env, 0, 3),
+      Switzerland(env, 0, 3);
+</code></pre>
+<p class="p">These additional constraints are added to the model: </p>
+<pre class="pre codeblock"><code>    model.add(France != Switzerland);
+    model.add(Germany != Switzerland);
+</code></pre>
+<p class="p">This code is added to the solution display: </p>
+<pre class="pre codeblock"><code>      cp.out() &lt;&lt; "Switzerland: " &lt;&lt; Names[cp.getValue(Switzerland)] &lt;&lt; std::endl;
+</code></pre>
+<p class="p">You should obtain the following results: </p>
+<pre class="pre codeblock"><code>Feasible Solution
+Belgium:     green
+Denmark:     blue
+France:      yellow
+Germany:     white
+Luxembourg:  blue
+Netherlands: blue
+Switzerland: blue
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/color_review.html" title="Complete these exercises to review what you have learned in the tutorial. Suggested answers are provided.">Review exercises</a></div>
+</div>
+</div></body>
+</html>

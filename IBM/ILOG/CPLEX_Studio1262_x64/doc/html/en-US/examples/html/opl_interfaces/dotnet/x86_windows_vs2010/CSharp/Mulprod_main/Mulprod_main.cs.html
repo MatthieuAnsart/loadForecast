@@ -1,0 +1,93 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+02: <b><font color="#007D00">// File: Mulprod_main.cs</font></b>
+03: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+04: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+05: <b><font color="#007D00">// </font></b>
+06: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+07: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+08: <b><font color="#007D00">//</font></b>
+09: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+10: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+11: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+12: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+13: 
+14: <b><font color="#007D00">//-------------------------------------------------------------- -*- C# -*-</font></b>
+15: <b><font color="#007D00">// C# version of mulprod_main.cpp of OPL distrib</font></b>
+16: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+17: 
+18: using System;
+19: using ILOG.Concert;
+20: using ILOG.CPLEX;
+21: using ILOG.OPL;
+22: 
+23: namespace Mulprod_main
+24: {
+25:   <b><font color="EA7D00">class</font></b> Mulprod_main
+26:   {
+27:     <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">int</font></b> Main(string[] args)
+28:     {
+29:       <b><font color="#0000FF">int</font></b> status = 127;
+30:       <b><font color="EA7D00">const</font></b> string DATADIR = <b><font color="#8A2BE2">"../.."</font></b>;
+31:       OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+32:       <b><font color="EA7D00">try</font></b> {
+33:         <b><font color="#0000FF">int</font></b> capFlour = 20;
+34:         <b><font color="#0000FF">double</font></b> best;
+35:         <b><font color="#0000FF">double</font></b> curr = <b><font color="#0000FF">double</font></b>.MaxValue;
+36: 
+37:         OplRunConfiguration rc0 = oplF.CreateOplRunConfiguration(DATADIR+<b><font color="#8A2BE2">"/mulprod.mod"</font></b>,DATADIR+<b><font color="#8A2BE2">"/mulprod.dat"</font></b>);
+38:         OplDataElements dataElements = rc0.GetOplModel().MakeDataElements();
+39: 
+40:         Cplex cplex = oplF.CreateCplex();
+41:         <b><font color="EA7D00">do</font></b> {
+42:           best = curr;
+43: 
+44:           OplRunConfiguration rc = oplF.CreateOplRunConfiguration(rc0.GetOplModel().ModelDefinition,dataElements);
+45: 
+46:           rc.Cplex.SetOut(<b><font color="EA7D00">null</font></b>);
+47:           rc.GetOplModel().Generate();
+48: 
+49:           Console.Out.WriteLine(<b><font color="#8A2BE2">"Solve with capFlour = "</font></b> + capFlour);
+50:           <b><font color="EA7D00">if</font></b> ( rc.Cplex.Solve() ) {
+51:             curr = rc.Cplex.ObjValue;
+52:             Console.Out.WriteLine();
+53:             Console.Out.WriteLine( <b><font color="#8A2BE2">"OBJECTIVE: "</font></b> +curr);
+54:             status = 0;
+55:           } <b><font color="EA7D00">else</font></b> {
+56:             Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>);
+57:             status = 1;
+58:           }
+59: 
+60:           capFlour++;
+61:           <b><font color="#007D00">// Change the value of Capacity["flour"] in dataElements</font></b>
+62:           dataElements.GetElement(<b><font color="#8A2BE2">"Capacity"</font></b>).AsNumMap().Set(<b><font color="#8A2BE2">"flour"</font></b>, capFlour);
+63: 
+64:           rc.End();
+65:         } <b><font color="EA7D00">while</font></b> ( best != curr &amp;&amp; status == 0);
+66:       }
+67:     <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+68:     {
+69:         Console.WriteLine(ex.Message);
+70:         status = 2;
+71:     }
+72:     <b><font color="EA7D00">catch</font></b> (ILOG.Concert.Exception ex)
+73:     {
+74:         Console.WriteLine(ex.Message);
+75:         status = 3;
+76:     }
+77:     <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+78:     {
+79:         Console.WriteLine(ex.Message);
+80:         status = 4;
+81:     }
+82:     oplF.End();
+83:     Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>);
+84:     Console.ReadLine();
+85:     <b><font color="EA7D00">return</font></b> status;
+86:     }
+87:   }
+88: }
+</tt></pre>

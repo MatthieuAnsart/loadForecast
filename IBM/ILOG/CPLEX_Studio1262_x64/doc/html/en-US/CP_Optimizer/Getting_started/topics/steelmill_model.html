@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Model" />
+<meta name="abstract" content="Once the steel mill problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="Description" content="Once the steel mill problem has been described using natural language, you then use Concert Technology classes to model the constraint programming problem." />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Getting_started/topics/steelmill.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_gscpoptimizersteelmill.114936" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Getting_started/topics/steelmill.html" />
+<title>Model</title>
+</head>
+<body role="main" id="migration.uss_gscpoptimizersteelmill.114936">
+<h1 class="title topictitle1">Model</h1>
+<div class="body"><p class="shortdesc">Once the steel mill problem has been described
+using natural language, you then use Concert Technology classes to
+model the constraint programming problem. </p>
+<p class="p">After you have written a description of your problem,
+you can use IBM® ILOG® Concert Technology
+classes to model it. After you create a model of your problem, you
+can use CP Optimizer classes and member functions to search for a
+solution.</p>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144703"><h2 class="title sectiontitle">Step 2: Open the example file</h2><p class="p">Open the
+example file <samp class="ph codeph">&lt;Install_dir&gt;/cpoptimizer/examples/tutorial/cpp/steelmill_partial.cpp</samp> in
+your development environment. This file is a program that is only
+partially completed. You will enter the missing code in each step
+in this lesson. At the end, you will have completed the program code
+and you can compile and run the program.</p>
+<p class="p">The
+first step in converting your natural language description of the
+problem into code using IBM ILOG Concert Technology
+classes is to create an environment and a model.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144692"><h2 class="title sectiontitle">Step 3: Create the environment and model</h2><p class="p">The
+following code which creates the environment and model has been provided
+for you  </p>
+<pre class="pre codeblock"><code>int main(int argc, const char * argv[]) {
+  IloEnv env;
+  try {
+    IloModel model(env);
+    IloInt m, o, c, q;
+</code></pre>
+<p class="p">You create standard variables to represent
+the number of orders, <samp class="ph codeph">nbOrders</samp>, the maximum
+number of slabs needed, <samp class="ph codeph">nbSlabs</samp>, and the
+number of colors, <samp class="ph codeph">nbColors</samp>. You model the
+order sizes and colors as arrays of integer values. The possible sizes,
+or capacities, of the slabs are also modeled as an array.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144681"><h2 class="title sectiontitle">Step 4: Create the data</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Create the data</samp>  </p>
+<pre class="pre codeblock"><code>    IloInt         nbOrders   = 12; 
+    IloInt         nbSlabs    = 12; 
+    IloInt         nbColors   = 8;
+    IloIntArray    capacities(env, 20, 0, 11, 13, 16, 17, 19, 20, 
+                                       23, 24, 25, 26, 27, 28, 29, 
+                                       30, 33, 34, 40, 43, 45); 
+    IloIntArray    sizes(env, nbOrders, 22, 9, 9, 8, 8, 6, 5, 3, 3, 3, 2, 2);
+    IloIntArray    colors(env, nbOrders,  5, 3, 4, 5, 7, 3, 6, 0, 2, 3, 1, 5);
+</code></pre>
+<p class="p">The first array of decision variables represents
+which slab should be used to process each order. To represent this
+information, you declare an array of decision variables <samp class="ph codeph">where</samp>.
+This array has <samp class="ph codeph">nbOrders</samp> elements or, in
+this example, 12. The possible values for these variables represent
+the ordered slabs. In this example, a value of 0 represents the first
+slab, a value of 1 represents the second slab, and so on. The array
+of decision variables <samp class="ph codeph">where</samp> will represent
+the solution to the problem, after the CP Optimizer engine has found
+a solution.</p>
+<p class="p">The second array of decision variables
+represents the load assigned to each slab. To represent this information,
+you declare an array of decision variables <samp class="ph codeph">load</samp>.
+This array has <samp class="ph codeph">nbSlabs</samp> elements, or, in
+this example, 12. The possible values for these variables represent
+the cumulative sum of the sizes of the orders assigned to each slab.
+The minimum load is 0 and the maximum load is the cumulative sum of
+the sizes of the entire batch of orders. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144670"><h2 class="title sectiontitle">Step 5: Declare the decision variables</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Declare the
+decision variables</samp>  </p>
+<pre class="pre codeblock"><code>    IloIntVarArray where(env, nbOrders, 0, nbSlabs-1);
+    IloIntVarArray load(env, nbSlabs, 0, IloSum(sizes));
+</code></pre>
+<p class="p">You now begin to add the constraints. First
+you create the constraint that links the <samp class="ph codeph">where</samp> and <samp class="ph codeph">load</samp> variables. For each slab, its load must be
+equal to the sum of sizes of orders that are assigned to it. To model
+this, you use the predefined constraint <samp class="ph codeph">IloPack</samp>.
+     </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Load balancing constraint</strong> </p>
+ <p class="p"> Using specialized constraints, such as <samp class="ph codeph">IloPack</samp>,
+makes modeling simpler and solving more efficient. </p>
+ <p class="p">The
+constraint <samp class="ph codeph">IloPack</samp> maintains the load of
+a set of containers, given a set of weighted items and an assignment
+of items to containers. </p>
+ </div>
+<p class="p">The class <samp class="ph codeph">IloPack</samp> is a subclass of the class <samp class="ph codeph">IloConstraint</samp>.
+The first argument of the constructor of <samp class="ph codeph">IloPack</samp> is
+the environment. The second argument is the array of load variables.
+The third argument is the array for assignments, in this case the
+slab to which each order is assigned. The fourth argument is the array
+of order sizes or weights. The fifth argument is an optional name
+used for debug and trace purposes. Here is the constructor you will
+use:  </p>
+<pre class="pre codeblock"><code>  IloPack(const IloEnv env, 
+          const IloIntVarArray load, 
+          const IloIntVarArray where, 
+          const IloIntArray weight, 
+          const char * name=0);
+</code></pre>
+<p class="p">The arrays <samp class="ph codeph">where</samp> and <samp class="ph codeph">sizes</samp> are indexed by the orders. For each slab <samp class="ph codeph">i</samp>, the packing constraint requires that the value
+of <samp class="ph codeph">load[i]</samp> is equal to the sum of the <samp class="ph codeph">sizes[j]</samp> such that the value of <samp class="ph codeph">where[j]</samp> is <samp class="ph codeph">i</samp>. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144659"><h2 class="title sectiontitle">Step 6: Add the pack constraint</h2><p class="p">Add the following
+code after the comment <samp class="ph codeph">//Add the pack constraint</samp>  </p>
+<pre class="pre codeblock"><code>    model.add(IloPack(env, load, where, sizes));
+</code></pre>
+<p class="p">Next, you create the constraints to constrain
+the number of colors represented by the orders assigned to a slab.
+For a given slab, you create an array of expressions <samp class="ph codeph">colorExpArray</samp> which
+is indexed on the set of colors. Each element has a domain of<samp class="ph codeph">[0..1]</samp> and indicates whether or not at least one
+order of the corresponding color is assigned to the slab. For each
+color, you need to determine if an order of that color has been assigned
+to the given slab. Using the array <samp class="ph codeph">colorExpArray</samp> and
+the predefined IBM ILOG Concert Technology
+constraint <samp class="ph codeph">IloOr</samp>, you can link the order
+assignments to the <samp class="ph codeph">colorExpArray</samp> to represent
+whether an order of a particular color has been assigned to the slab.
+ </p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Disjunctive constraint</strong> </p>
+ <p class="p">Using specialized constraints such as <samp class="ph codeph">IloOr</samp> makes
+modeling easier. </p>
+ <p class="p">An instance of <samp class="ph codeph">IloOr</samp> represents
+a disjunctive constraint. In other words, it defines a disjunctive-OR
+among any number of constraints. To add a constraint to this logical
+constraint, you use the method <samp class="ph codeph">IloOr::add</samp>.
+ </p>
+ <p class="p">For example, you may write: </p>
+ <p class="p"><samp class="ph codeph"> IloOr or(env);</samp><samp class="ph codeph"> or.add(constraint1);</samp><samp class="ph codeph"> or.add(constraint2);</samp><samp class="ph codeph"> or.add(constraint3);</samp></p>
+ <p class="p">Those lines are equivalent to: </p>
+ <p class="p"><samp class="ph codeph"> IloConstraint or = constraint1 || constraint2 || constraint3;</samp> </p>
+ </div>
+<p class="p">For a given slab <samp class="ph codeph">m</samp> and a given
+color, you iterate through the orders. If the order, <samp class="ph codeph">o</samp>,
+is of the given color, then you add the constraint <samp class="ph codeph">(where[o]
+== m)</samp> to the <samp class="ph codeph">IloOr</samp> logical constraint.
+If any one of the orders of the given color is assigned to the given
+slab, then the value of the expression will be 1.</p>
+<p class="p">Finally,
+you constrain the sum of the elements of the <samp class="ph codeph">colorExpArray</samp> to
+be no greater than two.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144648"><h2 class="title sectiontitle">Step 7: Add the color constraints</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the color
+constraints</samp>  </p>
+<pre class="pre codeblock"><code>    for(m = 0; m &lt; nbSlabs; m++) {
+      IloExprArray colorExpArray(env); 
+      for(c = 0; c &lt; nbColors; c++) {
+        IloOr orExp(env);
+        for(o = 0; o &lt; nbOrders; o++){
+          if (colors[o] == c){
+            orExp.add(where[o] == m);
+          }
+        } 
+        colorExpArray.add(orExp);
+      }
+      model.add(IloSum(colorExpArray) &lt;= 2); 
+    }
+</code></pre>
+<p class="p">To create the objective expression, you calculate
+an expression to represent the loss for each slab. First you determine,
+for each possible value of load, the minimum sized slab needed and
+thus the loss that would be incurred. If a slab has a given load,
+the loss is the difference between the load assigned to the slab and
+the minimal size slab needed to process the load.</p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144637"><h2 class="title sectiontitle">Step 8: Add the objective</h2><p class="p">Add
+the following code after the comment <samp class="ph codeph">//Add the objective</samp>  </p>
+<pre class="pre codeblock"><code>    IloIntArray lossValues(env);
+    lossValues.add(0);
+    for(q = 1; q &lt; capacities.getSize(); q++){ 
+      for(IloInt p = capacities[q-1] + 1; p &lt;= capacities[q]; p++){
+        lossValues.add(capacities[q] - p);
+      }
+    }
+    IloExpr obj(env);
+    for(m = 0; m &lt; nbSlabs; m++){
+      obj += lossValues[load[m]];  
+    }
+    model.add(IloMinimize(env, obj));
+</code></pre>
+<p class="p">Since the slabs are ordered with no distinguishing
+characteristics, reordering the slabs would produce a number of equivalent
+solutions. One way to reduce symmetry is to introduce order among
+variables, as was done in previous lessons. You add constraints that
+state that the ordered slabs must have decreasing loads. This constraint
+eliminates some, though not all, symmetric solutions. </p>
+</div>
+<div class="section" id="migration.uss_gscpoptimizersteelmill.114936__migration.uss_gscpoptimizersteelmill.144626"><h2 class="title sectiontitle">Step 9: Add the constraints to reduce symmetry</h2><p class="p">Add the following code after the comment <samp class="ph codeph">//Add
+the constraints to reduce symmetry</samp> </p>
+<pre class="pre codeblock"><code>    for(m = 1; m &lt; nbSlabs; m++){
+      model.add(load[m-1] &gt;= load[m]); 
+    }
+</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Getting_started/topics/steelmill.html" title="In this lesson, you will learn how to find a solution to a steel mill problem using CP Optimizer and the three-stage method, including using search phases.">Using search phases on integer variables: steel mill</a></div>
+</div>
+</div></body>
+</html>

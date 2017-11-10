@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Defining your own evaluator" />
+<meta name="abstract" content="CP Optimizer provides an API to define custom evaluators." />
+<meta name="Description" content="CP Optimizer provides an API to define custom evaluators." />
+<meta name="DC.subject" content="evaluator, custom, IloIntValueEvalI class, IloIntVarEvalI class" />
+<meta name="keywords" content="evaluator, custom, IloIntValueEvalI class, IloIntVarEvalI class" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/User_manual/topics/tune_order.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usrcpoptimizertune.1016425" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/User_manual/topics/tune_order.html" />
+<title>Defining your own evaluator</title>
+</head>
+<body role="main" id="migration.uss_usrcpoptimizertune.1016425">
+<h1 class="title topictitle1">Defining your own evaluator</h1>
+<div class="body"><p class="shortdesc">CP Optimizer provides an API to define custom
+evaluators.</p>
+<p class="p">CP Optimizer lets you control the order in which the values
+in the domain of a decision variable are tried during the search for
+a solution through the use of search phases.</p>
+<p class="p"> In that way, you can exploit strategic information that
+you have about the problem to guide the search for a solution. There
+are a few predefined evaluators for the variable chooser and value
+chooser. However, you may encounter problems for which you would like
+to define your own evaluators.</p>
+<p class="p">An evaluator of integer variables is an object that is
+used by selectors of variables to define instantiation strategies.
+In the C++ API, an evaluator of integer variables is defined by implementing
+the pure virtual member function <samp class="ph codeph">IloNum IloIntVarEvalI::eval(IloCP
+cp, IloIntVar x)</samp> that returns a floating-point evaluation
+of the integer variable <samp class="ph codeph">x</samp>.</p>
+<p class="p">An evaluator of integer values is an object that is used
+by selectors of values to define instantiation strategies. In the
+C++ API, an evaluator of integer value assignments is defined by implementing
+the pure virtual member function <samp class="ph codeph">IloNum IloIntValueEvalI::eval(IloCP
+cp, IloIntVar x, IloInt value)</samp> that returns an evaluation
+of fixing the decision variable <samp class="ph codeph">x</samp> to <samp class="ph codeph">value</samp>.</p>
+<p class="p">For example, assume that you want to control the order
+in which values are assigned to constrained integer variables, and
+in particular, you want the order of values chosen to be 0, -1, +1,
+-2, +2 and so forth. The following code uses an evaluator and value
+chooser to implement that approach. </p>
+<pre class="pre codeblock"><code>class AbsValI : public IloIntValueEvalI {
+public:
+  AbsValI(IloEnv env) : IloIntValueEvalI(env) { }
+  IloNum eval(IloCP cp, IloIntVar x, IloInt value) {
+    return IloAbs(value);
+  }
+};
+
+IloIntValueEval AbsVal(IloEnv env) {
+  return new (env) AbsValI(env);
+}
+</code></pre>
+<p class="p">It is a good idea then to test that code in a program
+like this: </p>
+<pre class="pre codeblock"><code>  IloEnv env;
+  try {
+    IloModel model(env);
+    IloIntVarArray x(env, 2, -2, 4);
+    model.add(x);
+
+    IloCP cp(model);
+    cp.setParameter(IloCP::LogVerbosity,IloCP::Quiet);
+    IloVarSelectorArray varSel(env);
+    varSel.add(IloSelectRandomVar(env));
+    IloValueSelectorArray valSel(env);
+    valSel.add(IloSelectSmallest(AbsVal(env)));
+    IloSearchPhase phase(env, x, varSel, valSel);
+    cp.startNewSearch(phase);
+    while (cp.next()) {
+      cp.out() &lt;&lt; cp.getValue(x[0]) &lt;&lt; " " &lt;&lt; cp.getValue(x[1]) &lt;&lt; std::endl;
+    }
+    cp.end();
+  } catch (IloException &amp; ex) {
+    env.out() &lt;&lt; "Caught " &lt;&lt; ex &lt;&lt; std::endl;
+  }
+  env.end();
+</code></pre>
+<p class="p">In the <strong class="ph b">C++ API</strong> of CP Optimizer, you use
+the classes <samp class="ph codeph">IloIntVarEvalI</samp> and  <samp class="ph codeph">IloIntValueEvalI</samp> and the functions <samp class="ph codeph">IloIntVarEvalI::eval</samp> and <samp class="ph codeph">IloIntValueEvalI::eval</samp>.</p>
+<p class="p">In the <strong class="ph b">Java™ API</strong> of
+CP Optimizer, you use you use the classes <samp class="ph codeph">IloCustomIntVarEval</samp> and
+ <samp class="ph codeph">IloCustomIntValueEval</samp> and the functions <samp class="ph codeph">IloCustomIntVarEval.eval</samp> and <samp class="ph codeph">IloCustomIntValueEval.eval</samp>.</p>
+<p class="p">At this time, custom evaluators are not available in the <strong class="ph b">C# API</strong> of CP Optimizer.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/User_manual/topics/tune_order.html" title="Decision variables and their possible values can be ordered so that the optimizer can fix the key decision variables early in the process.">Ordering variables and values</a></div>
+</div>
+</div></body>
+</html>

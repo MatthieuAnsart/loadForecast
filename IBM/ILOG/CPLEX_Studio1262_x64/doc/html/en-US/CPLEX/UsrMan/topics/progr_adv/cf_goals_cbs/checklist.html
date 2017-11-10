@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Overview" />
+<meta name="abstract" content="Outlines advantages of goals and callbacks." />
+<meta name="Description" content="Outlines advantages of goals and callbacks." />
+<meta name="DC.subject" content="starting algorithm, goals and, callbacks and" />
+<meta name="keywords" content="starting algorithm, goals and, callbacks and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/cf_goals_cbs/cfGoalsCallbacks_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="QVGwUykE" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/cf_goals_cbs/cfGoalsCallbacks_title_synopsis.html" />
+<title>Overview</title>
+</head>
+<body role="main" id="QVGwUykE">
+<h1 class="title topictitle1">Overview</h1>
+<div class="body"><p class="shortdesc">Outlines advantages of goals and callbacks.</p>
+<p class="p">Goals and callbacks both provide an API within IBM ILOG CPLEX to allow you
+to take control over the branch &amp; cut search for solving
+MIP models. With one exception, the same functionality is available
+in both goals and callbacks. In fact, the goal API is built on top
+of callbacks. As a consequence, you can <strong class="ph b">not</strong> use callbacks and goals at the same time. To help you choose which
+API is more suited to your needs, this topic examines commonalities
+and differences between both.</p>
+<div class="section" id="QVGwUykE__QvgPItUB"><h2 class="title sectiontitle">A quick checklist comparing goals and callbacks</h2><p class="p">Both approaches (goals and callbacks) allow you to control
+the branch &amp; cut search used by CPLEX to solve MIP models.
+The following points distinguish specific features of this control.</p>
+<ul class="ul"><li class="li"><p class="p">Checking feasibility</p>
+
+<ul class="ul"><li class="li"><p class="p">With goals, you can discontinue the
+search at a node by returning a <samp class="ph codeph">Fail</samp> goal.
+Alternatively, you can continue searching, even though an integer
+feasible solution has been found, by returning another nonempty goal.</p>
+</li>
+<li class="li"><p class="p">With callbacks, you can use method <samp class="ph codeph">prune</samp> of the branch callback to discontinue the search,
+and an incumbent callback to accept or reject integer feasible solutions.</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Creating branches</p>
+
+<ul class="ul"><li class="li"><p class="p">With goals, you create branches by using <samp class="ph codeph">Or</samp>  goals with local cut goals as parameters.</p>
+</li>
+<li class="li"><p class="p">With callbacks, you create branches
+by using a branch callback.</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Adding local or global cuts</p>
+
+<ul class="ul"><li class="li"><p class="p">With goals, you can add global and local
+cuts by using global and local cut goals, respectively.</p>
+</li>
+<li class="li"><p class="p">With callbacks, you need to implement
+either a cut callback (for global and local cuts) or a branch callback
+for branching on local cuts</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Injecting solution candidates</p>
+
+<ul class="ul"><li class="li"><p class="p">With goals, you inject solutions by
+using a solution goal.</p>
+</li>
+<li class="li"><p class="p">With callbacks, you need to implement
+a heuristic callback to inject solutions.</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Controlling the node selection strategy</p>
+
+<ul class="ul"><li class="li"><p class="p">With goals, you control node selection
+by applying node evaluators to your search goal. </p>
+</li>
+<li class="li"><p class="p">With callbacks, you control node selection
+by using a node callback.</p>
+</li>
+</ul>
+</li>
+<li class="li"><p class="p">Supporting advanced starts</p>
+
+<ul class="ul"><li class="li"><p class="p">Since goals can enforce constraints,
+they do not support advanced starting information. An optimization
+with goals starts from scratch.</p>
+</li>
+<li class="li"><p class="p">Since each callback provides a specific
+functionality, callbacks support advanced starts.</p>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="QVGwUykE__Ww5ro3D8"><h2 class="title sectiontitle">Further notes about goals and callbacks</h2><p class="p">Thus, one of the main differences between goals and callbacks
+is that with goals, all functionality is available from the <samp class="ph codeph">execute</samp>  method of the goal, whereas with callbacks,
+you must implement different callbacks to access different functionality.</p>
+<p class="p">With goals, the feasibility test and the resulting branching
+can be implemented with a single goal.</p>
+<p class="p">The second big difference between goals and callbacks
+is that with goals you can easily specify different search strategies
+in different subtrees. To do this, simply provide different search
+goals as a parameter to the <samp class="ph codeph">Or</samp>  goal when
+creating the root nodes for the subtrees in question. To achieve a
+similar result with callbacks requires an implementation that is too
+complex for a presentation here.</p>
+<p class="p">The only functionality that is not supported via goals
+is that provided by the <samp class="ph codeph">solve</samp>  callback.
+Because of this, the <samp class="ph codeph">solve</samp> callbacks can
+be used at the same time as goals. However, this callback is very
+rarely used.</p>
+<p class="p">In summary, goals can be advantageous if you want to
+take control over several steps of the branch &amp; cut
+search simultaneously, or if you want to specify different search
+strategies in different subtrees. On the other hand, if you only need
+to control a single aspect of the search (for example, adding cuts)
+using the appropriate callback may involve a smaller API and thus
+be quicker and easier to understand and implement.</p>
+</div>
+<div class="section" id="QVGwUykE__mI6BLI5A"><h2 class="title sectiontitle">Example contrasting goals and callbacks</h2><p class="p">As an example, suppose you want to extend a search to
+satisfy additional constraints that could not conveniently be added
+as linear constraints to the model. </p>
+<p class="p">With callbacks, you need to use an incumbent callback
+and a branch callback. The incumbent callback has to reject an otherwise
+integer feasible solution if it violates such an additional constraint.
+In this case, the branch callback has to follow up with an appropriate
+branch to enforce the constraint. The choice of the appropriate branch
+may be quite difficult for constraints not modeled with linear expressions,
+even though CPLEX supports branching on hyperplanes. </p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/cf_goals_cbs/cfGoalsCallbacks_title_synopsis.html" title="Contrasts goals with callbacks.">Goals and callbacks: a comparison</a></div>
+</div>
+</div></body>
+</html>

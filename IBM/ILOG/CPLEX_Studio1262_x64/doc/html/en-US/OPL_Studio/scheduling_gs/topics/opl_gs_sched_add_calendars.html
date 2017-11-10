@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Adding calendars to the house building problem" />
+<meta name="abstract" content="Introduces calendars to the house building problem." />
+<meta name="Description" content="Introduces calendars to the house building problem." />
+<meta name="DC.subject" content="limit, fail, fail limit" />
+<meta name="keywords" content="limit, fail, fail limit" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="BN1pXubG" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<title>Adding calendars to the house building problem</title>
+</head>
+<body role="main" id="BN1pXubG">
+<h1 class="title topictitle1">Adding calendars to the house building problem</h1>
+<div class="body"><p class="shortdesc">Introduces calendars to the house building problem.</p>
+<p class="p">In this section, you will learn how to:</p>
+<ul class="ul"><li class="li"><p class="p">use the keyword <span class="keyword apiname">stepFunction</span>;</p>
+ </li>
+<li class="li"><p class="p">use an alternative version of the constraint <span class="keyword apiname">noOverlap</span>;</p>
+ </li>
+<li class="li"><p class="p">use intensity expression;</p>
+ </li>
+<li class="li"><p class="p">use the constraints <span class="keyword apiname">forbidStart</span> and <span class="keyword apiname">forbidEnd</span>;</p>
+ </li>
+<li class="li"><p class="p">use the length and size of an interval variable.</p>
+</li>
+</ul>
+<p class="p">You will learn how to model and solve a house building problem, a problem of scheduling the tasks involved in building multiple houses in such a manner that minimizes the overall completion date of the houses. Some tasks must necessarily take place before other tasks, and each task has a predefined size. Moreover, there are two workers, each of whom must perform a given subset of the necessary tasks. Each worker has a calendar detailing on which days he does not work, such as weekends and holidays. On a worker’s day off, he does no work on his tasks. His tasks may not be scheduled to start or end on these days. Tasks that are in process by the worker are suspended during his days off. To find a solution to this problem using IBM ILOG OPL, you will use the three-stage method: describe, model, and solve.</p>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="PQKpiuuH"><h2 class="title topictitle2">Describe</h2>
+<div class="body"><p class="p">The problem consists of assigning start dates to a set of tasks in such a way that the schedule satisfies temporal constraints and minimizes a criterion. The criterion for this problem is to minimize the overall completion date.</p>
+<p class="p">For each task type in the house building project, the following table shows the size of the task in days along with the tasks that must be finished before the task can start. In addition, each type of task can be performed by a given one of the two workers, Jim and Joe. A worker can only work on one task at a time; once started, a task may be suspended during a worker’s days off, but may not be interrupted by another task.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A four column table that lists the tasks in the house building problem, the duration of each task, the worker assigned to each task, and the preceding tasks." class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. House construction tasks</span></caption><thead class="thead" align="left"><tr class="row"><th class="entry" align="left" valign="top" id="d863802e66">Task</th>
+<th class="entry" align="left" valign="top" id="d863802e68">Duration</th>
+<th class="entry" align="left" valign="top" id="d863802e70">Worker</th>
+<th class="entry" align="left" valign="top" id="d863802e72">Preceding tasks</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">masonry</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">35</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 "> </td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">carpentry</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">15</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">plumbing</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">40</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">ceiling</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">15</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">masonry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">roofing</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">5</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">carpentry</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">painting</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">10</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">ceiling</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">windows</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">5</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">roofing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">facade</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">10</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">garden</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">5</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Joe</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">roofing, plumbing</td>
+</tr>
+<tr class="row"><td class="entry" align="left" valign="top" headers="d863802e66 ">moving</td>
+<td class="entry" align="left" valign="top" headers="d863802e68 ">5</td>
+<td class="entry" align="left" valign="top" headers="d863802e70 ">Jim</td>
+<td class="entry" align="left" valign="top" headers="d863802e72 ">windows, facade, garden, painting </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">Solving the problem consists of determining starting dates for the tasks such that the overall completion date is minimized.</p>
+<div class="section" id="PQKpiuuH__XgNAFAqO"><h3 class="title sectiontitle">Step 1: Describe the problem</h3><p class="p">The first step in modeling and solving the problem is to write a natural language description of the problem, identifying the decision variables and the constraints on these variables.</p>
+<p class="p">Write a natural language description of this problem. Answer these questions:</p>
+<ul class="ul"><li class="li"><p class="p">What is the known information in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the decision variables or unknowns in this problem?</p>
+</li>
+<li class="li"><p class="p">What are the constraints on these variables?</p>
+ </li>
+<li class="li"><p class="p">What is the objective?</p>
+ </li>
+</ul>
+</div>
+<div class="section" id="PQKpiuuH__SCPiKlkQ"><h3 class="title sectiontitle">Discussion</h3><p class="p">What is the known information in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">There are five houses to be built by two workers. For each house, there are ten house building tasks, each with a given size. For each task, there is a list of tasks that must be completed before the task can start. Each task must be performed by a given worker, and each worker has a calendar listing his days off.</p>
+</li>
+</ul>
+<p class="p">What are the decision variables or unknowns in this problem?</p>
+<ul class="ul"><li class="li"><p class="p">The unknowns are the start and end times of tasks which also determine the overall completion time. The actual length of a task depends on its position in time and on the calendar of the associated worker.</p>
+</li>
+</ul>
+<p class="p">What are the constraints on these variables?</p>
+<ul class="ul"><li class="li"><p class="p">There are constraints that specify that a particular task may not begin until one or more given tasks have been completed. In addition, there are constraints that specify that a worker can be assigned to only one task at a time. A task cannot start or end during the associated worker’s days off.</p>
+ </li>
+</ul>
+<p class="p">What is the objective?</p>
+<ul class="ul"><li class="li"><p class="p">The objective is to minimize the overall completion date.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="TPY7FZe5"><h2 class="title topictitle2">Model</h2>
+<div class="body"><p class="p">After you have written a description of your problem, you can use IBM ILOG OPL to model and solve it.</p>
+<div class="section" id="TPY7FZe5__vLfykwKi"><h3 class="title sectiontitle">Step 2: Open the example file</h3><ul class="ul"><li class="li"><p class="p">Still working with the <span class="ph uicontrol">scheduling_tutorial</span> project, open the <span class="ph uicontrol">sched_calendar.mod</span> file in the IDE editing area.</p>
+</li>
+</ul>
+<p class="p">This file is an OPL model that is only partially completed. You will add the missing code in each step of this lesson. At the end, you will have completed the OPL model.</p>
+<p class="p">The code for reading the data into the data structures from the data file is provided.</p>
+<p class="p">In the related data file, the data provided includes the number of houses (<samp class="ph codeph">NbHouses</samp>), the names of the workers (<samp class="ph codeph">WorkerNames</samp>), the names of the tasks (<samp class="ph codeph">TaskNames</samp>), the sizes of the tasks (<samp class="ph codeph">Duration</samp>), the worker that can perform each task (<samp class="ph codeph">Worker</samp>), the precedence relations (<samp class="ph codeph">Precedences</samp>), and the breaks for each worker (<samp class="ph codeph">breaks</samp>)..</p>
+<p class="p">To model the availability of a worker with respect to his days off, you first create a step function that represents his intensity over time. You specify that this function has a range of [0..100], where the value 0 represents that the worker is not available and the value 100 represents that the worker is available with regard to his calendar.</p>
+<p class="p">IBM ILOG OPL provides the keyword <span class="keyword apiname">stepFunction</span> to represent a step function that is defined everywhere on a given interval and can be used to model the intensity of a worker.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Step function</strong></p>
+ <p class="p">Step functions are represented by the keyword <span class="keyword apiname">stepFunction</span> in IBM ILOG OPL.</p>
+ <p class="p">Each interval <samp class="ph codeph">[x1, x2)</samp> on which the function has the same value is called a <samp class="ph codeph">step</samp>.</p>
+ <p class="p">When two consecutive steps of the function have the same value, these steps are merged so that the function is always represented with the minimal number of steps.</p>
+ </div>
+<p class="p">For each worker, a sorted tupleset is created. At each point in time where the worker’s availability changes, a tuple is created. The tuple has two elements; the first element is an integer value that represents the worker’s availability (0 for on a break, 100 for fully available to work, 50 for a half-day), and the other element represents the date at which the availability changes to this value. This tupleset, sorted by date, is then used to create a <span class="keyword apiname">stepFunction</span> to represent the worker’s intensity over time. The value of the function after the final step is set to 100.</p>
+</div>
+<div class="section" id="TPY7FZe5__qffnXmbd"><h3 class="title sectiontitle">Step 3: Add the intensity step functions</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the intensity step functions</samp>:</p>
+<pre class="pre codeblock"><code>tuple Step {
+  int v;
+  key int x;
+};
+sorted {Step} Steps[w in WorkerNames] = 
+   { &lt;100, b.s&gt; | b in Breaks[w] } union 
+   { &lt;0, b.e&gt;   | b in Breaks[w] };
+   
+stepFunction Calendar[w in WorkerNames] = 
+  stepwise (s in Steps[w]) { s.v -&gt; s.x; 100 };
+</code></pre>
+<p class="p">This intensity function is used in creating the task variables for the workers. The intensity step function of the appropriate worker is passed to the creation of each interval variable. The size of the interval variable is the time spent at the house to process the task, not including the worker’s day off. The length is the difference between the start and the end of the interval. </p>
+</div>
+<div class="section" id="TPY7FZe5__f1AWQfNf"><h3 class="title sectiontitle">Step 4: Create the interval variables</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the interval variables</samp>:</p>
+<pre class="pre codeblock"><code>dvar interval itvs[h in Houses, t in TaskNames] 
+  size      Duration[t]
+  intensity Calendar[Worker[t]];
+</code></pre>
+<p class="p">The tasks of the house building project have precedence constraints that are added to the model.</p>
+</div>
+<div class="section" id="TPY7FZe5__oNhZ3tV9"><h3 class="title sectiontitle">Step 5: Add the precedence constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the precedence constraints</samp>:</p>
+<pre class="pre codeblock"><code>  forall(h in Houses) {
+    forall(p in Precedences)
+      endBeforeStart(itvs[h][p.pre], itvs[h][p.post]);</code></pre>
+<p class="p">To add the constraints that a worker can perform only one task at a time, you constrain that the interval variables associated with that worker do not overlap in the solution. To do this, you use the specialized constraint <span class="keyword apiname">noOverlap</span>, but with a slightly different form than was used in the section <a class="xref" href="opl_gs_sched_add_workers.html" title="Introduces workers and transition times to the house building problem described in the previous section.">Adding workers and transition times to the house building problem</a>.</p>
+<p class="p">This form is a shortcut that avoids the need to explicitly define the interval sequence variable when no additional constraints are required on the sequence variable. You add to the model one no overlap constraint on the array of interval variables for each worker.</p>
+</div>
+<div class="section" id="TPY7FZe5__A1zIJpZD"><h3 class="title sectiontitle">Step 6: Add the no overlap constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the no overlap constraints</samp>:</p>
+<pre class="pre codeblock"><code>  forall(w in WorkerNames)
+    noOverlap( all(h in Houses, t in TaskNames: Worker[t]==w) itvs[h][t]);</code></pre>
+<p class="p">When an intensity function is set on an interval variable, the tasks which overlap weekends and/or holidays will be automatically prolonged. A task could still be scheduled to start or end in a weekend, but, in this problem, a worker’s tasks cannot start or end during the worker’s days off. OPL provides the constraints <span class="keyword apiname">forbidStart</span> and <span class="keyword apiname">forbidEnd</span> to model these types of constraints.</p>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p"><strong class="ph b">Forbid start constraint</strong></p>
+ <p class="p">With the constraint <span class="keyword apiname">forbidStart</span>, you can create a constraint that specifies that an interval variable must not be scheduled to start at certain times.</p>
+ <p class="p">The constraint takes an interval variable and a step function. It the interval variable is present in the solution, then it is constrained to not start at a time when the value of the step function is zero. </p>
+ <p class="p">OPL also provides <span class="keyword apiname">forbidEnd</span> and <span class="keyword apiname">forbidExtent</span>, which respectively constrain an interval variable to not end and not overlap where the associated step function is valued zero.</p>
+ </div>
+<p class="p">The first argument of the constraint <span class="keyword apiname">forbidStart</span> is the interval variable on which you want to place the constraint. The second argument is the step function that defines a set of forbidden values for the start of the interval variable: the interval variable cannot start at a point where the step function is 0.</p>
+</div>
+<div class="section" id="TPY7FZe5__PTibyV2b"><h3 class="title sectiontitle">Step 7: Create the forbidden start and end constraints</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Create the forbidden start and end constraints</samp> (note that the final bracket is necessary to close the one opened in step 5):</p>
+<pre class="pre codeblock"><code>    forall(t in TaskNames) {
+      forbidStart(itvs[h][t], Calendar[Worker[t]]);
+      forbidEnd  (itvs[h][t], Calendar[Worker[t]]);
+    }
+  }</code></pre>
+<p class="p">The objective of this problem is to minimize the overall completion date (the completion date of the house that is completed last). You determine the maximum completion date among the individual house projects using the expression <span class="keyword apiname">endOf</span> on the last task in building each house (here, it is the moving task) and minimize the maximum of these expressions.</p>
+</div>
+<div class="section" id="TPY7FZe5__JenzZaqk"><h3 class="title sectiontitle">Step 8: Create the objective</h3><p class="p">Add the following code after the comment <samp class="ph codeph">//Add the objective</samp>:</p>
+<pre class="pre codeblock"><code>minimize max(h in Houses) endOf(itvs[h]["moving"]);</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="krfCMCAn"><h2 class="title topictitle2">Solve</h2>
+<div class="body"><p class="p">The search for an optimal solution in this problem could potentiality take a long time, so a fail limit has been placed on the solve process. The search will stop when the fail limit is reached, even if optimality of the current best solution is not guaranteed. The code for limiting the solve process has been provided for you:</p>
+<pre class="pre codeblock"><code>execute {
+  cp.param.FailLimit = 10000;
+}</code></pre>
+<div class="section" id="krfCMCAn__TukgSKWj"><h3 class="title sectiontitle">Step 9: Execute the model</h3><ul class="ul"><li class="li"><p class="p">Execute the model in the CPLEX Studio IDE or using <samp class="ph codeph">oplrun</samp>; you will need to pass as arguments not only the model file but also the data file, <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/tutorial/sched_calendar.dat</span>.</p>
+ </li>
+</ul>
+<p class="p">You can also view the complete model online in the <span class="ph filepath">&lt;Install_dir&gt;/opl/examples/opl/sched_calendar/sched_calendar.mod</span> file. </p>
+</div>
+</div>
+</div>
+</body>
+</html>

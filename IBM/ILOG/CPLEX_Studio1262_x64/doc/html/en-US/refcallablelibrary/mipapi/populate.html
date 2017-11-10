@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="CPXXpopulate and CPXpopulate" />
+<meta name="abstract" content="The routine CPXXpopulate/CPXpopulate generates multiple solutions to a mixed integer programming (MIP) problem." />
+<meta name="Description" content="The routine CPXXpopulate/CPXpopulate generates multiple solutions to a mixed integer programming (MIP) problem." />
+<meta name="DC.subject" content="CPXpopulate, C API Reference Manual, CPXXpopulate" />
+<meta name="keywords" content="CPXpopulate, C API Reference Manual, CPXXpopulate" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/groups/homepagesolutionpool.html" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/groups/homepagecallable.html" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/mipapi/hpMIPsolnpool.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="populate" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../refcallablelibrary/groups/homepagesolutionpool.html" />
+<link rel="Start" href="../../refcallablelibrary/groups/homepagecallable.html" />
+<link rel="Start" href="../../refcallablelibrary/mipapi/hpMIPsolnpool.html" />
+<title>CPXXpopulate and CPXpopulate</title>
+</head>
+<body role="main" id="populate">
+<h1 class="title topictitle1"><span class="keyword apiname">CPXXpopulate</span> and <span class="keyword apiname">CPXpopulate</span></h1>
+<div class="body refbody"><p class="shortdesc">     
+ 
+
+ The routine <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> generates multiple
+ solutions to a mixed integer programming (MIP) problem.
+  </p>
+<div class="section refsyn">      <p class="p"><span class="ph synph">        <span class="keyword kwd">int</span>
+        <span class="ph sep"> </span><span class="keyword kwd">CPXXpopulate</span><span class="ph delim">(</span>
+          <span class="keyword kwd">CPXCENVptr</span><span class="ph sep"> </span><span class="ph var">env</span><span class="ph delim">,</span>
+          <span class="keyword kwd">CPXLPptr</span><span class="ph sep"> </span><span class="ph var">lp</span>        <span class="ph delim">)</span>
+      </span></p>
+
+      <p class="p"><span class="ph synph">        <span class="keyword kwd">int</span>
+        <span class="ph sep"> </span><span class="keyword kwd">CPXpopulate</span><span class="ph delim">(</span>
+          <span class="keyword kwd">CPXCENVptr</span><span class="ph sep"> </span><span class="ph var">env</span><span class="ph delim">,</span>
+          <span class="keyword kwd">CPXLPptr</span><span class="ph sep"> </span><span class="ph var">lp</span>        <span class="ph delim">)</span>
+      </span></p>
+
+    </div>
+<div class="section"><h2 class="title sectiontitle">Description</h2>    
+ 
+ 
+
+ <p class="p">The routine <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> generates multiple
+ solutions to a mixed integer programming (MIP) problem.</p>
+
+ <p class="p">The algorithm that populates the solution pool works in two phases.</p>
+
+ <p class="p"><strong class="ph b">In the first phase</strong>, it solves the problem to
+ optimality (or some stopping criterion set by the user) while it
+ sets up a branch and cut tree for the second phase.</p>
+
+ <p class="p"><strong class="ph b">In the second phase</strong>, it generates multiple solutions
+ by using the information computed and stored in the first phase
+ and by continuing to explore the tree.</p>
+
+ <p class="p">The amount of preparation in the first phase and the intensity
+ of exploration in the second phase are controlled by the solution
+ pool intensity parameter <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_SOLNPOOLINTENSITY</span></samp>.</p>
+
+ <p class="p">Optimality is not a stopping criterion for the populate procedure.
+ Even if the optimality gap is zero, this routine will still try
+ to find alternative solutions. The <strong class="ph b">stopping criteria</strong>
+ for <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> are these:</p>
+
+ <ul class="ul"><li class="li">Populate limit <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_POPULATELIM</span></samp>. This parameter
+ controls how many solutions are generated before stopping. Its default
+ value is 20.
+ </li>
+<li class="li">Time limit <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_TILIM</span></samp>, as in standard MIP optimization.
+ </li>
+<li class="li">Deterministic time limit <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_DETTILIM</span></samp>, as in standard MIP optimization.
+ </li>
+<li class="li">Node limit <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_NODELIM</span></samp>,
+ as in standard MIP optimization.
+ </li>
+<li class="li">In the absence of other stopping criteria, <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp>
+ stops when it cannot enumerate any more solutions. In particular, if the
+ user specifies an objective tolerance with the relative or absolute
+ solution pool gap parameters, <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> stops if it
+ cannot enumerate any more solutions within the specified objective
+ tolerance. However, there may exist additional solutions that
+ are feasible, and if the user has specified an objective tolerance,
+ those feasible solutions may also satisfy this additional criterion.
+ (For example, there may be a great many solutions to a given problem
+ with the same integer values but different values for
+ continuous variables.) Depending on the setting of the solution pool
+ intensity parameter <samp class="ph codeph"><span class="keyword apiname">CPX_PARAM_SOLNPOOLINTENSITY</span></samp>,
+ <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> may or may not enumerate all possible solutions.
+ Consequently, <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> may stop when it has
+ enumerated only a subset of the solutions satisfying your criteria.
+ </li>
+</ul>
+
+
+ <p class="p">Successive calls to <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> create solutions
+ that are stored in the solution pool. However, each call to
+ <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> applies only to the subset of solutions
+ created in the current call; the call does not affect the solutions
+ already in the pool. In other words, solutions in the pool are
+ persistent. </p>
+
+
+ <p class="p">The user may call this routine independently of any MIP optimization
+ of a problem (such as <samp class="ph codeph"><span class="keyword apiname">CPXXmipopt</span>/<span class="keyword apiname">CPXmipopt</span></samp>). In that case,
+ <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> carries out the first and second phase itself. </p>
+
+
+ <p class="p">The user may also call <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> after
+ <samp class="ph codeph"><span class="keyword apiname">CPXXmipopt</span>/<span class="keyword apiname">CPXmipopt</span></samp>. The
+ activity of <samp class="ph codeph"><span class="keyword apiname">CPXXmipopt</span>/<span class="keyword apiname">CPXmipopt</span></samp> constitutes the first phase of the
+ populate algorithm; <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> then re-uses the
+ information computed and stored by <samp class="ph codeph"><span class="keyword apiname">CPXXmipopt</span>/<span class="keyword apiname">CPXmipopt</span></samp> and thus
+ carries out only the second phase.</p>
+
+
+ <p class="p"><samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> does not try to generate
+ multiple solutions for unbounded MIP problems. As soon
+ as the proof of unboundedness is obtained,
+ <samp class="ph codeph"><span class="keyword apiname">CPXXpopulate</span>/<span class="keyword apiname">CPXpopulate</span></samp> stops.</p>
+
+
+ 
+    </div>
+<div class="section"><h2 class="title sectiontitle">Arguments</h2>      
+    </div>
+<table cellpadding="4" cellspacing="0" summary="Each row in this table describes a property; each property can have a type, value, and description." border="1" class="simpletable properties"><tr class="sthead prophead">
+<th valign="bottom" align="left" id="d1690828e310" class="stentry propvaluehd">Name</th>
+<th valign="bottom" align="left" id="d1690828e312" class="stentry propdeschd">Description</th>
+</tr><tr class="strow property">
+<td valign="top" headers="d1690828e310" class="stentry propvalue">env</td>
+<td valign="top" headers="d1690828e312" class="stentry propdesc">          
+
+          A pointer to the CPLEX environment as returned by <samp class="ph codeph"><span class="keyword apiname">CPXXopenCPLEX</span>/<span class="keyword apiname">CPXopenCPLEX</span></samp>.
+        </td>
+</tr>
+<tr class="strow property">
+<td valign="top" headers="d1690828e310" class="stentry propvalue">lp</td>
+<td valign="top" headers="d1690828e312" class="stentry propdesc">          
+
+          A pointer to the CPLEX problem object as returned by <samp class="ph codeph"><span class="keyword apiname">CPXXcreateprob</span>/<span class="keyword apiname">CPXcreateprob</span></samp>.
+        </td>
+</tr>
+</table>
+<div class="section"><h2 class="title sectiontitle">Return</h2>      
+      The routine returns 0 (zero) if successful and nonzero if an error occurs.
+    </div>
+<div class="section"><h2 class="title sectiontitle">Example</h2>      
+      
+ <pre class="pre codeblock"><code> status = CPXpopulate (env, lp);
+ </code></pre>
+
+
+ <p class="p">For more detail about populate, see also the chapter titled
+ <em class="ph i">Solution Pool: Generating and Keeping Multiple Solutions</em>
+ in the <em class="ph i">CPLEX User's Manual</em>.</p>
+
+
+
+      
+    </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/groups/homepagesolutionpool.html">Accessing the Solution Pool in the CPLEX Callable Library (C API)</a></div>
+</div>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/groups/homepagecallable.html">Routines in the CPLEX Callable Library (C API)</a></div>
+</div>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/mipapi/hpMIPsolnpool.html">Managing the solution pool of a discrete model</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,352 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: REM ------------------------------------------------ -*- Visual Basic .Net -*-
+002: REM File: OplRunSample.vb
+003: REM --------------------------------------------------------------------------
+004: REM Licensed Materials - Property of IBM
+005: REM 
+006: REM 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55
+007: REM Copyright IBM Corporation 1998, 2013. All Rights Reserved.
+008: REM
+009: REM Note to U.S. Government Users Restricted Rights:
+010: REM Use, duplication or disclosure restricted by GSA ADP Schedule
+011: REM Contract with IBM Corp.
+012: REM --------------------------------------------------------------------------
+013: 
+014: 
+015: REM --------------------------------------------------------------------------
+016: REM Visual Basic version of OplRunSample.cpp of OPL distrib
+017: REM --------------------------------------------------------------------------
+018: 
+019: Imports ILOG.OPL
+020: Imports ILOG.Concert
+021: Imports ILOG.CPLEX
+022: Imports System.Collections
+023: Imports System.IO
+024: 
+025: 
+026: 
+027: Module OplRunSample
+028:     Dim _cl As CommandLine
+029:     Dim _timer As Timer
+030: 
+031:     Sub Main()
+032:         Try
+033:             _cl = New CommandLine(Environment.GetCommandLineArgs)
+034:             _timer = New Timer
+035:             Run()
+036:         Catch ex As System.Exception
+037:             Console.Error.WriteLine(ex)
+038:             Console.Error.WriteLine(ex.StackTrace)
+039:         End Try
+040:         Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>)
+041:         Console.ReadLine()
+042:     End Sub
+043: 
+044:     Function Run() As Integer
+045:         Dim Status As Integer = 1
+046:         Try
+047:             OplFactory.DebugMode = True
+048:             Dim oplF As OplFactory = New OplFactory
+049: 
+050:             If (Not _cl.CompileName Is Nothing) Then
+051:                 Dim modelSource As OplModelSource = oplF.CreateOplModelSource(_cl.ModelFileName)
+052:                 Dim compiler As OplCompiler = oplF.CreateOplCompiler()
+053:                 Dim ofs As StreamWriter = New StreamWriter(_cl.CompileName, FileMode.Create)
+054:                 compiler.Compile(modelSource, ofs)
+055:                 ofs.Close()
+056:                 Trace(<b><font color="#8A2BE2">"compile"</font></b>)
+057:                 Return 0
+058:             End If
+059: 
+060:             If (_cl.ModelFileName = <b><font color="#8A2BE2">""</font></b> &amp; Not _cl.IsProject) Then
+061:                 Return 0
+062:             End If
+063: 
+064:             Trace(<b><font color="#8A2BE2">"initial"</font></b>)
+065: 
+066:             Dim errHandler As OplErrorHandler = oplF.CreateOplErrorHandler()
+067:             Dim rc As OplRunConfiguration
+068:             If (_cl.IsProject) Then
+069:                 Dim prj As OplProject = oplF.CreateOplProject(_cl.ProjectPath)
+070:                 rc = prj.MakeRunConfiguration(_cl.RunConfigurationName)
+071:             Else
+072:                 If (_cl.DataFileNames.Count = 0) Then
+073:                     rc = oplF.CreateOplRunConfiguration(_cl.ModelFileName)
+074:                 Else
+075:                     Dim dataFiles As String()
+076:                     dataFiles = CType(_cl.DataFileNames.ToArray(GetType(String)), String())
+077:                     rc = oplF.CreateOplRunConfiguration(_cl.ModelFileName, dataFiles)
+078:                 End If
+079:             End If
+080:             rc.ErrorHandler = errHandler
+081: 
+082:             Dim opl As OplModel = rc.OplModel
+083: 
+084:             Dim settings As OplSettings = opl.Settings
+085:             settings.IsWithLocations = True
+086:             settings.IsWithNames = True
+087:             settings.IsForceElementUsage = _cl.IsForceElementUsage
+088: 
+089:             If (opl.ModelDefinition.hasMain) Then
+090:                 opl.Main()
+091:                 Trace(<b><font color="#8A2BE2">"main"</font></b>)
+092:             Else
+093:                 opl.Generate()
+094:                 Trace(<b><font color="#8A2BE2">"generate model"</font></b>)
+095:                 If (opl.hasCplex()) Then
+096:                     If (Not _cl.ExportName Is Nothing) Then
+097:                         opl.Cplex.ExportModel(_cl.ExportName)
+098:                         Trace(<b><font color="#8A2BE2">"export model"</font></b>, _cl.ExportName)
+099:                     End If
+100: 
+101:                     If _cl.IsRelaxation Then
+102:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"RELAXATIONS to obtain a feasable problem: "</font></b>)
+103:                         Dim count As Integer = opl.PrintRelaxation(Console.Out)
+104:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"RELAXATIONS done."</font></b>)
+105:                         If (count &gt; 0) Then
+106:                             opl.PostProcess()
+107:                             Trace(<b><font color="#8A2BE2">"post process"</font></b>)
+108:                             If (_cl.IsVerbose) Then
+109:                                 opl.PrintSolution(Console.Out)
+110:                             End If
+111:                         End If
+112:                     ElseIf _cl.IsConflict Then
+113:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"CONFLICTS to obtain a feasable problem: "</font></b>)
+114:                         opl.PrintConflict(Console.Out)
+115:                         Console.Out.WriteLine(<b><font color="#8A2BE2">"CONFLICTS done."</font></b>)
+116:                     Else
+117:                         Dim result As Boolean = opl.Cplex.Solve()
+118:                         If (result) Then
+119:                             Trace(<b><font color="#8A2BE2">"solve"</font></b>)
+120:                             Console.Out.WriteLine()
+121:                             Console.Out.WriteLine()
+122:                             Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + Str(opl.Cplex.ObjValue))
+123: 
+124:                             opl.PostProcess()
+125:                             Trace(<b><font color="#8A2BE2">"post process"</font></b>)
+126: 
+127:                             If (_cl.IsVerbose) Then
+128:                                 opl.PrintSolution(Console.Out)
+129:                             End If
+130:                         Else
+131:                             Trace(<b><font color="#8A2BE2">"no solution"</font></b>)
+132:                         End If
+133:                     End If
+134:                 Else <b><font color="#8A2BE2">'opl.hasCP()</font></b>
+135: <b><font color="#8A2BE2">                    Dim result As Boolean = opl.CP.Solve()</font></b>
+136: <b><font color="#8A2BE2">                    If (result) Then</font></b>
+137: <b><font color="#8A2BE2">                        Trace("solve")</font></b>
+138: <b><font color="#8A2BE2">                        Console.Out.WriteLine()</font></b>
+139: <b><font color="#8A2BE2">                        Console.Out.WriteLine()</font></b>
+140: <b><font color="#8A2BE2">                        If (opl.CP.hasObjective()) Then</font></b>
+141: <b><font color="#8A2BE2">                            Console.Out.WriteLine("OBJECTIVE: " + Str(opl.CP.ObjValue))</font></b>
+142: <b><font color="#8A2BE2">                        Else</font></b>
+143: <b><font color="#8A2BE2">                            Console.Out.WriteLine("OBJECTIVE: no objective")</font></b>
+144: <b><font color="#8A2BE2">                        End If</font></b>
+145: <b><font color="#8A2BE2">                        opl.PostProcess()</font></b>
+146: <b><font color="#8A2BE2">                        If (_cl.IsVerbose) Then</font></b>
+147: <b><font color="#8A2BE2">                            opl.PrintSolution(Console.Out)</font></b>
+148: <b><font color="#8A2BE2">                        Else</font></b>
+149: <b><font color="#8A2BE2">                            Trace("no solution")</font></b>
+150: <b><font color="#8A2BE2">                        End If</font></b>
+151: 
+152: <b><font color="#8A2BE2">                    End If</font></b>
+153: <b><font color="#8A2BE2">                End If</font></b>
+154: <b><font color="#8A2BE2">                Trace("done")</font></b>
+155: <b><font color="#8A2BE2">            End If</font></b>
+156: 
+157: 
+158: <b><font color="#8A2BE2">            If (Not _cl.ExternalDataName Is Nothing) Then</font></b>
+159: <b><font color="#8A2BE2">                Dim ofs As StreamWriter = New StreamWriter(_cl.ExternalDataName, FileMode.Create)</font></b>
+160: <b><font color="#8A2BE2">                opl.PrintExternalData(ofs)</font></b>
+161: <b><font color="#8A2BE2">                ofs.Close()</font></b>
+162: <b><font color="#8A2BE2">                Trace("write external data", _cl.ExternalDataName)</font></b>
+163: <b><font color="#8A2BE2">            End If</font></b>
+164: 
+165: <b><font color="#8A2BE2">            If (Not _cl.InternalDataName Is Nothing) Then</font></b>
+166: <b><font color="#8A2BE2">                Dim ofs As StreamWriter = New StreamWriter(_cl.InternalDataName, FileMode.Create)</font></b>
+167: <b><font color="#8A2BE2">                opl.PrintInternalData(ofs)</font></b>
+168: <b><font color="#8A2BE2">                ofs.Close()</font></b>
+169: <b><font color="#8A2BE2">                Trace("write internal data", _cl.InternalDataName)</font></b>
+170: <b><font color="#8A2BE2">            End If</font></b>
+171: 
+172: <b><font color="#8A2BE2">            rc.End()</font></b>
+173: <b><font color="#8A2BE2">            oplF.End()</font></b>
+174: <b><font color="#8A2BE2">        Catch ex As ILOG.OPL.OplException</font></b>
+175: <b><font color="#8A2BE2">            Console.Out.WriteLine(ex.Message)</font></b>
+176: <b><font color="#8A2BE2">            Status = 2</font></b>
+177: <b><font color="#8A2BE2">        Catch ex As ILOG.Concert.Exception</font></b>
+178: <b><font color="#8A2BE2">            Console.Out.WriteLine(ex.Message)</font></b>
+179: <b><font color="#8A2BE2">            Status = 3</font></b>
+180: <b><font color="#8A2BE2">        Catch ex As System.Exception</font></b>
+181: <b><font color="#8A2BE2">            Console.Out.WriteLine(ex.Message)</font></b>
+182: <b><font color="#8A2BE2">            Status = 4</font></b>
+183: <b><font color="#8A2BE2">        End Try</font></b>
+184: <b><font color="#8A2BE2">    End Function</font></b>
+185: 
+186: <b><font color="#8A2BE2">    Sub Trace(ByVal title As String, ByVal info As String)</font></b>
+187: <b><font color="#8A2BE2">        Console.Out.WriteLine()</font></b>
+188: <b><font color="#8A2BE2">        Console.Out.Write("&lt;&lt;&lt; " + title)</font></b>
+189: <b><font color="#8A2BE2">        If (Not info Is Nothing) Then</font></b>
+190: <b><font color="#8A2BE2">            Console.Out.Write(": " + info)</font></b>
+191: <b><font color="#8A2BE2">        End If</font></b>
+192: <b><font color="#8A2BE2">        If (_cl.IsVerbose) Then</font></b>
+193: <b><font color="#8A2BE2">            Console.Out.Write(", at " + Str(_timer.GetAbsoluteTime()) + "s" + ", took " + Str(_timer.GetTime()) + "s")</font></b>
+194: <b><font color="#8A2BE2">            _timer.Restart()</font></b>
+195: <b><font color="#8A2BE2">        End If</font></b>
+196: <b><font color="#8A2BE2">        Console.Out.WriteLine()</font></b>
+197: <b><font color="#8A2BE2">        Console.Out.WriteLine()</font></b>
+198: <b><font color="#8A2BE2">    End Sub</font></b>
+199: 
+200: <b><font color="#8A2BE2">    Sub Trace(ByVal title As String)</font></b>
+201: <b><font color="#8A2BE2">        Trace(title, Nothing)</font></b>
+202: <b><font color="#8A2BE2">    End Sub</font></b>
+203: 
+204: <b><font color="#8A2BE2">    Class CommandLine</font></b>
+205: <b><font color="#8A2BE2">        Public IsVerbose As Boolean = False</font></b>
+206: <b><font color="#8A2BE2">        Public IsForceElementUsage As Boolean = False</font></b>
+207: <b><font color="#8A2BE2">        Public IsRelaxation As Boolean = False</font></b>
+208: <b><font color="#8A2BE2">        Public IsConflict As Boolean = False</font></b>
+209: <b><font color="#8A2BE2">        Public ModelFileName As String</font></b>
+210: <b><font color="#8A2BE2">        Public DataFileNames As ArrayList = New ArrayList</font></b>
+211: <b><font color="#8A2BE2">        Public IsProject As Boolean = False</font></b>
+212: <b><font color="#8A2BE2">        Public ExportName As String</font></b>
+213: <b><font color="#8A2BE2">        Public CompileName As String</font></b>
+214: <b><font color="#8A2BE2">        Public ExternalDataName As String</font></b>
+215: <b><font color="#8A2BE2">        Public InternalDataName As String</font></b>
+216: 
+217: 
+218: <b><font color="#8A2BE2">        Public ReadOnly Property ProjectPath() As String</font></b>
+219: <b><font color="#8A2BE2">            Get</font></b>
+220: <b><font color="#8A2BE2">                If (IsProject) Then</font></b>
+221: <b><font color="#8A2BE2">                    Return ModelFileName</font></b>
+222: <b><font color="#8A2BE2">                Else</font></b>
+223: <b><font color="#8A2BE2">                    Return Nothing</font></b>
+224: <b><font color="#8A2BE2">                End If</font></b>
+225: <b><font color="#8A2BE2">            End Get</font></b>
+226: <b><font color="#8A2BE2">        End Property</font></b>
+227: 
+228: <b><font color="#8A2BE2">        Public ReadOnly Property RunConfigurationName() As String</font></b>
+229: <b><font color="#8A2BE2">            Get</font></b>
+230: <b><font color="#8A2BE2">                If (IsProject And DataFileNames.Count = 1) Then</font></b>
+231: <b><font color="#8A2BE2">                    Return DataFileNames.Item(0)</font></b>
+232: <b><font color="#8A2BE2">                Else</font></b>
+233: <b><font color="#8A2BE2">                    Return Nothing</font></b>
+234: <b><font color="#8A2BE2">                End If</font></b>
+235: <b><font color="#8A2BE2">            End Get</font></b>
+236: <b><font color="#8A2BE2">        End Property</font></b>
+237: 
+238: 
+239: <b><font color="#8A2BE2">        Sub New(ByVal args() As String)</font></b>
+240: <b><font color="#8A2BE2">            If (args.Length &lt; 2) Then</font></b>
+241: <b><font color="#8A2BE2">                ModelFileName = "..</font></b>\.<b><font color="#8A2BE2">.</font></b>\m<b><font color="#8A2BE2">ulprod.mod"</font></b>
+242: <b><font color="#8A2BE2">                DataFileNames.Add("..</font></b>\.<b><font color="#8A2BE2">.</font></b>\m<b><font color="#8A2BE2">ulprod.dat")</font></b>
+243: <b><font color="#8A2BE2">            End If</font></b>
+244: 
+245: <b><font color="#8A2BE2">            Dim i As Integer = 0</font></b>
+246: <b><font color="#8A2BE2">            For i = 1 To args.Length - 1</font></b>
+247: <b><font color="#8A2BE2">                If ("-h".Equals(args(i))) Then</font></b>
+248: <b><font color="#8A2BE2">                    Usage()</font></b>
+249: <b><font color="#8A2BE2">                ElseIf ("-p".Equals(args(i))) Then</font></b>
+250: <b><font color="#8A2BE2">                    IsProject = True</font></b>
+251: <b><font color="#8A2BE2">                ElseIf ("-v".Equals(args(i))) Then</font></b>
+252: <b><font color="#8A2BE2">                    IsVerbose = True</font></b>
+253: <b><font color="#8A2BE2">                ElseIf ("-e".Equals(args(i))) Then</font></b>
+254: <b><font color="#8A2BE2">                    i = i + 1</font></b>
+255: <b><font color="#8A2BE2">                    If (i &lt; args.Length And args(i).Chars(0) &lt;&gt; "-") Then</font></b>
+256: <b><font color="#8A2BE2">                        ExportName = args(i)</font></b>
+257: <b><font color="#8A2BE2">                    Else</font></b>
+258: <b><font color="#8A2BE2">                        ExportName = "oplRunSample.lp"</font></b>
+259: <b><font color="#8A2BE2">                        i = i - 1</font></b>
+260: <b><font color="#8A2BE2">                    End If</font></b>
+261: <b><font color="#8A2BE2">                ElseIf ("-o".Equals(args(i))) Then</font></b>
+262: <b><font color="#8A2BE2">                    i = i + 1</font></b>
+263: <b><font color="#8A2BE2">                    If (i &lt; args.Length And args(i).Chars(0) &lt;&gt; "-") Then</font></b>
+264: <b><font color="#8A2BE2">                        CompileName = args(i)</font></b>
+265: <b><font color="#8A2BE2">                    Else</font></b>
+266: <b><font color="#8A2BE2">                        Usage()</font></b>
+267: <b><font color="#8A2BE2">                    End If</font></b>
+268: <b><font color="#8A2BE2">                ElseIf ("-de".Equals(args(i))) Then</font></b>
+269: <b><font color="#8A2BE2">                    i = i + 1</font></b>
+270: <b><font color="#8A2BE2">                    If (i &lt; args.Length And args(i).Chars(0) &lt;&gt; "-") Then</font></b>
+271: <b><font color="#8A2BE2">                        ExternalDataName = args(i)</font></b>
+272: <b><font color="#8A2BE2">                    Else</font></b>
+273: <b><font color="#8A2BE2">                        Usage()</font></b>
+274: <b><font color="#8A2BE2">                    End If</font></b>
+275: <b><font color="#8A2BE2">                ElseIf ("-di".Equals(args(i))) Then</font></b>
+276: <b><font color="#8A2BE2">                    i = i + 1</font></b>
+277: <b><font color="#8A2BE2">                    If (i &lt; args.Length And args(i).Chars(0) &lt;&gt; "-") Then</font></b>
+278: <b><font color="#8A2BE2">                        InternalDataName = args(i)</font></b>
+279: <b><font color="#8A2BE2">                    Else</font></b>
+280: <b><font color="#8A2BE2">                        Usage()</font></b>
+281: <b><font color="#8A2BE2">                    End If</font></b>
+282: <b><font color="#8A2BE2">                ElseIf ("-f".Equals(args(i))) Then</font></b>
+283: <b><font color="#8A2BE2">                    IsForceElementUsage = True</font></b>
+284: <b><font color="#8A2BE2">                ElseIf ("-relax".Equals(args(i))) Then</font></b>
+285: <b><font color="#8A2BE2">                    IsRelaxation = True</font></b>
+286: <b><font color="#8A2BE2">                ElseIf ("-conflict".Equals(args(i))) Then</font></b>
+287: <b><font color="#8A2BE2">                    IsConflict = True</font></b>
+288: <b><font color="#8A2BE2">                ElseIf (args(i).Chars(0) = "-") Then</font></b>
+289: <b><font color="#8A2BE2">                    Console.Error.WriteLine("Unknown option: " + args(i))</font></b>
+290: <b><font color="#8A2BE2">                    Usage()</font></b>
+291: <b><font color="#8A2BE2">                Else</font></b>
+292: <b><font color="#8A2BE2">                    Exit For</font></b>
+293: <b><font color="#8A2BE2">                End If</font></b>
+294: <b><font color="#8A2BE2">            Next</font></b>
+295: 
+296: <b><font color="#8A2BE2">            If (i &gt;= args.Length &amp; i &gt; 1) Then</font></b>
+297: <b><font color="#8A2BE2">                Usage()</font></b>
+298: <b><font color="#8A2BE2">            End If</font></b>
+299: <b><font color="#8A2BE2">            If (i &lt; args.Length) Then</font></b>
+300: <b><font color="#8A2BE2">                ModelFileName = args(i)</font></b>
+301: <b><font color="#8A2BE2">                Dim j As Integer</font></b>
+302: <b><font color="#8A2BE2">                For j = i + 1 To args.Length - 1</font></b>
+303: <b><font color="#8A2BE2">                    DataFileNames.Add(args(j))</font></b>
+304: <b><font color="#8A2BE2">                Next</font></b>
+305: <b><font color="#8A2BE2">            End If</font></b>
+306: 
+307: <b><font color="#8A2BE2">            If ((IsProject And DataFileNames.Count &gt; 1) Or (IsProject And args.Length &lt; 3)) Then</font></b>
+308: <b><font color="#8A2BE2">                Usage()</font></b>
+309: <b><font color="#8A2BE2">            End If</font></b>
+310: <b><font color="#8A2BE2">        End Sub</font></b>
+311: 
+312: <b><font color="#8A2BE2">        Sub Usage()</font></b>
+313: <b><font color="#8A2BE2">            Console.Error.WriteLine()</font></b>
+314: <b><font color="#8A2BE2">            Console.Error.WriteLine("Usage:")</font></b>
+315: <b><font color="#8A2BE2">            Console.Error.WriteLine("OplRunSample [options] model-file [data-file ...]")</font></b>
+316: <b><font color="#8A2BE2">            Console.Error.WriteLine("OplRunSample [options] -p project-path [run-configuration]")</font></b>
+317: <b><font color="#8A2BE2">            Console.Error.WriteLine("  options ")</font></b>
+318: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -h               this help message")</font></b>
+319: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -v               verbose")</font></b>
+320: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -e [export-file] export model")</font></b>
+321: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -de dat-file     write external data")</font></b>
+322: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -di dat-file     write internal data")</font></b>
+323: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -o output-file   compile model")</font></b>
+324: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -f               force element usage")</font></b>
+325: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -relax           calculate relaxations needed for feasable model")</font></b>
+326: <b><font color="#8A2BE2">            Console.Error.WriteLine("    -conflict        calculate a conflict for an infeasable model")</font></b>
+327: 
+328: <b><font color="#8A2BE2">            Console.Error.WriteLine()</font></b>
+329: <b><font color="#8A2BE2">            End</font></b>
+330: <b><font color="#8A2BE2">        End Sub</font></b>
+331: <b><font color="#8A2BE2">    End Class</font></b>
+332: 
+333: <b><font color="#8A2BE2">    Class Timer</font></b>
+334: <b><font color="#8A2BE2">        Dim _time As Integer = System.Environment.TickCount</font></b>
+335: <b><font color="#8A2BE2">        Dim _startTime As Integer = System.Environment.TickCount</font></b>
+336: <b><font color="#8A2BE2">        Sub Restart()</font></b>
+337: <b><font color="#8A2BE2">            _time = System.Environment.TickCount</font></b>
+338: <b><font color="#8A2BE2">        End Sub</font></b>
+339: <b><font color="#8A2BE2">        Function GetTime() As Double</font></b>
+340: <b><font color="#8A2BE2">            Return (System.Environment.TickCount - _time) / 1000</font></b>
+341: <b><font color="#8A2BE2">        End Function</font></b>
+342: <b><font color="#8A2BE2">        Function GetAbsoluteTime() As Double</font></b>
+343: <b><font color="#8A2BE2">            Return (System.Environment.TickCount - _startTime) / 1000</font></b>
+344: <b><font color="#8A2BE2">        End Function</font></b>
+345: <b><font color="#8A2BE2">    End Class</font></b>
+346: 
+347: <b><font color="#8A2BE2">End Module</font></b>
+</tt></pre>

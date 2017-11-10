@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Example of writing your own goal: implementing IlcInstantiate" />
+<meta name="abstract" content="The instantiation goal is used as an example of writing your own goal." />
+<meta name="Description" content="The instantiation goal is used as an example of writing your own goal." />
+<meta name="DC.subject" content="custom goal, example" />
+<meta name="keywords" content="custom goal, example" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizergoals.1010617" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" />
+<title>Example of writing your own goal: implementing IlcInstantiate</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizergoals.1010617">
+<h1 class="title topictitle1">Example of writing your own goal: implementing IlcInstantiate</h1>
+<div class="body"><p class="shortdesc">The instantiation goal is used as an example of writing
+your own goal.</p>
+<p class="p">As an example of goal programming, you are going to look
+closely at how the function <samp class="ph codeph">IlcInstantiate</samp> is
+implemented. This function takes a decision variable as its argument
+and fixes it. More precisely, this function selects a value in the
+domain of the decision variable and assigns that value to the decision
+variable. The CP Optimizer engine automatically propagates the constraints
+incident on this decision variable. </p>
+<p class="p">With the ideas about choice points and backtracking that
+you have just learned in mind, now you can implement a goal that is
+similar to <samp class="ph codeph">IlcInstantiate</samp>. </p>
+<p class="p">To do so, you will use the following algorithm: </p>
+<ul class="ul"><li class="li"><p class="p">If the decision variable is fixed (that
+is, it has already been assigned a value), do nothing and succeed. </p>
+</li>
+<li class="li"><p class="p">Otherwise, set a choice point between
+two subgoals. If a selector is specified, the first subgoal assigns
+a valued based on the selection criteria. Otherwise, the minimum value
+of the current domain of the decision variable is assigned to it. </p>
+</li>
+<li class="li"><p class="p">If a contradiction is detected (the
+domain of a decision variable is reduced to the empty set), execute
+the second subgoal of the choice point. The second subgoal removes
+the tried and failed value from the domain of the constrained variable
+and executes the goal again. Indeed, this execution will try another
+value from the domain of the decision variable and repeat the process.</p>
+</li>
+</ul>
+<p class="p">Assigning a value to (or removing a value from the domain
+of) a decision variable is straightforward. To do so, use the CP Optimizer
+constraint operators <samp class="ph codeph">==</samp> and <samp class="ph codeph">!=</samp>. </p>
+<p class="p">The CP Optimizer code corresponding to <samp class="ph codeph">IlcInstantiate</samp> for
+decision variables is quite simple. You will see a couple versions
+of it to clarify a few points about goals. </p>
+<p class="p">To define a goal, you use a macro of the form <samp class="ph codeph">ILCGOALn</samp>,
+where <samp class="ph codeph">n</samp> is the number of arguments of the
+goal. The arguments of <samp class="ph codeph">ILCGOALn</samp> are the
+name of the goal, followed by the types and names of the goal's arguments.
+Then the macro is followed by the body of a C++ function. This body
+defines how to execute the goal. The return value of that function
+is the subgoal of the goal defined by the macro itself. When there
+are no such subgoals, the function must return 0. </p>
+<p class="p">Now you can define <samp class="ph codeph">MycInstantiate</samp> as
+a choice point between two goals. </p>
+<p class="p">Before setting a choice point, CP Optimizer checks whether
+the decision variable has been fixed, and if not, CP Optimizer selects
+a value in its domain. The second subgoal recursively calls <samp class="ph codeph">IlcInstantiate</samp>. </p>
+<p class="p">Here is a first version of <samp class="ph codeph">MycInstantiate</samp>:
+ </p>
+<pre class="pre codeblock"><code>ILCGOAL1(MycInstantiate, IlcIntVar, var) {
+  if (var.isFixed())
+    return 0;
+  IlcInt value = var.getMin();
+  return IlcOr( var == value,
+                IlcAnd( var != value,
+                        MycInstantiate(getCP(), var)));
+}
+</code></pre>
+<p class="p">As the <samp class="ph codeph">ILCGOALn</samp> macros define
+classes of <samp class="ph codeph">IlcGoalI</samp>, you can use the standard
+C++ keyword <samp class="ph codeph">this</samp> to refer to the current
+goal. With that possibility in mind, here is a second version of <samp class="ph codeph">MycInstantiate</samp>:
+ </p>
+<pre class="pre codeblock"><code>ILCGOAL1(MycInstantiate, IlcIntVar, var) {
+  if (var.isFixed())
+    return 0;
+  IlcInt value = var.getMin();
+  return IlcOr( var == value,
+                IlcAnd( var != value,
+                        this));
+}
+</code></pre>
+<p class="p">(The actual implementation of the predefined goal <samp class="ph codeph">IlcInstantiate</samp> is
+slightly different since the choice of the value can be indicated
+by a parameter, but these two versions indicate the substance of the
+implementation.) </p>
+<p class="p">If you want to have an <samp class="ph codeph">IloGoal</samp> object
+that can then be passed as an argument to the <samp class="ph codeph">IloCP::solve</samp> and <samp class="ph codeph">IloCP:startNewSearch</samp> functions,
+use the macro <samp class="ph codeph">ILOCPGOALWRAPPER1</samp>. </p>
+<p class="p">For example, you can define <samp class="ph codeph">MyoInstantiate</samp> this
+way:  </p>
+<pre class="pre codeblock"><code>ILOCPGOALWRAPPER1(MyoInstantiate, cp, IloIntVar, x){
+  return MycInstantiate(cp, cp.getIntVar(x));
+}
+</code></pre>
+<p class="p">To create an instance of this modeling layer goal you
+write:  </p>
+<pre class="pre codeblock"><code>  IloGoal goal = MyoInstantiate(env, x);</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" title="A custom goal can be written using a macro.">Writing your own goal</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,77 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+02: <b><font color="#007D00">// File: mulprod.cpp</font></b>
+03: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+04: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+05: <b><font color="#007D00">// </font></b>
+06: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+07: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+08: <b><font color="#007D00">//</font></b>
+09: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+10: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+11: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+12: <b><font color="#007D00">/////////////////////////////////////////////////////////////////////////////// </font></b>
+13: 
+14: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+15: 
+16: #include <b><font color="#8A2BE2">&lt;sstream&gt;</font></b>
+17: 
+18: #ifdef ILO_WINDOWS
+19: #define DIRSEP <b><font color="#8A2BE2">"</font></b>\\<b><font color="#8A2BE2">"</font></b>
+20: #else
+21: #define DIRSEP <b><font color="#8A2BE2">"/"</font></b>
+22: #endif
+23: #ifndef DATADIR
+24: #define DATADIR <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b>  DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">"opl"</font></b> DIRSEP
+25: #endif
+26: 
+27: ILOSTLBEGIN
+28: 
+29: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+30:     IloEnv env;
+31: 
+32:     <b><font color="#0000FF">int</font></b> status = 127;
+33:     <b><font color="EA7D00">try</font></b> {
+34:         IloOplErrorHandler handler(env,cout);
+35:         IloOplModelSource modelSource(env, DATADIR <b><font color="#8A2BE2">"mulprod"</font></b> DIRSEP <b><font color="#8A2BE2">"mulprod.mod"</font></b>);
+36:         IloOplSettings settings(env,handler);
+37:         IloOplModelDefinition def(modelSource,settings);
+38:         IloCplex cplex(env);
+39:         IloOplModel opl(def,cplex);
+40:         IloOplDataSource dataSource(env, DATADIR <b><font color="#8A2BE2">"mulprod"</font></b> DIRSEP <b><font color="#8A2BE2">"mulprod.dat"</font></b>);
+41:         opl.addDataSource(dataSource);
+42:         opl.generate();
+43: 
+44:         <b><font color="EA7D00">if</font></b> ( cplex.solve() ) {
+45:           cout &lt;&lt; endl
+46:                 &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; opl.getCplex().getObjValue()
+47:                 &lt;&lt; endl;
+48:             opl.postProcess();
+49:             opl.printSolution(cout);
+50:             status = 0;
+51:         } <b><font color="EA7D00">else</font></b> {
+52:             cout &lt;&lt; <b><font color="#8A2BE2">"No solution!"</font></b> &lt;&lt; endl;
+53:             status = 1;
+54:         }
+55:     } <b><font color="EA7D00">catch</font></b> (IloOplException &amp; e) {
+56:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+57:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+58:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+59:         e.print(cout);
+60:         status = 2;
+61:     } <b><font color="EA7D00">catch</font></b> (...) {
+62:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+63:         status = 3;
+64:     }
+65: 
+66:     env.end();
+67: 
+68:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+69:     getchar();
+70: 
+71:     <b><font color="EA7D00">return</font></b> status;
+72: }
+</tt></pre>

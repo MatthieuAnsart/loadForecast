@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Building a model" />
+<meta name="abstract" content="Describes the application to solve a model with semi-continuous variables." />
+<meta name="Description" content="Describes the application to solve a model with semi-continuous variables." />
+<meta name="DC.subject" content="variable, semi-continuous (example), semi-continuous variable, example" />
+<meta name="keywords" content="variable, semi-continuous (example), semi-continuous variable, example" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/semi_cont_var/01_SemiCont_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingSemiCont.1003349" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/semi_cont_var/01_SemiCont_title_synopsis.html" />
+<title>Building a model</title>
+</head>
+<body role="main" id="User_manual.uss_usingSemiCont.1003349">
+<h1 class="title topictitle1">Building a model</h1>
+<div class="body"><p class="shortdesc">Describes the application to solve a model with semi-continuous
+variables.</p>
+<p class="p">After the application creates an environment and a model
+in that environment, it is ready to populate the model with extractable
+objects pertinent to the problem.</p>
+<p class="p">It represents the production level of each generator
+as a semi-continuous variable. In that way, with the value 0 (zero),
+the application can accommodate whether the generator is on or off;
+with the semi-continuous lower bound of each variable, it can indicate
+the minimum level of output from each generator; and indicate the
+maximum level of output for each generator by the upper bound of its
+semi-continuous variable. The following lines create the array <samp class="ph codeph">production</samp> 
+of semi-continuous variables (one for each generator), like this:
+ </p>
+<pre class="pre codeblock"><code>IloNumVarArray production(env);
+   for (IloInt j = 0; j &lt; generators; ++j)
+        production.add(IloSemiContVar(env, minArray[j], maxArray[j]));</code></pre>
+<p class="p">The application adds an objective to the model to minimize
+production costs in this way:  </p>
+<pre class="pre codeblock"><code>mdl.add(IloMinimize(env, IloScalProd(cost, production)));</code></pre>
+<p class="p">It also adds a constraint to the model: it must meet
+demand.  </p>
+<pre class="pre codeblock"><code>mdl.add(IloSum(production) &gt;= demand);</code></pre>
+<p class="p">With that model, now the application is ready to create
+an algorithm (in this case, an instance of <samp class="ph codeph">IloCplex</samp> )
+and extract the model.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/semi_cont_var/01_SemiCont_title_synopsis.html" title="Demonstrates semi-continuous variables in Concert Technology in an example of managing production in a power plant.">Using semi-continuous variables: a rates example</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Analyzing a simple OPL model" />
+<meta name="abstract" content="Analyzes a simple OPL model and describes how to execute the model in the IDE." />
+<meta name="Description" content="Analyzes a simple OPL model and describes how to execute the model in the IDE." />
+<meta name="DC.subject" content="analyzing a simple OPL model, production.mod, OPL model production.mod, exercise for beginners" />
+<meta name="keywords" content="analyzing a simple OPL model, production.mod, OPL model production.mod, exercise for beginners" />
+<meta name="DC.Relation" scheme="URI" content="../../../Optimization_Studio/orientation_guide/topics/new_to_cos.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="analyzingasimpleoplmodel" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../Optimization_Studio/orientation_guide/topics/new_to_cos.html" />
+<title>Analyzing a simple OPL model</title>
+</head>
+<body role="main" id="analyzingasimpleoplmodel">
+<h1 class="title topictitle1">Analyzing a simple OPL model</h1>
+<div class="body"><p class="shortdesc">Analyzes a simple OPL model and describes how to execute
+the model in the IDE.</p>
+<ul class="ul"><li class="li"><a class="xref" href="#analyzingasimpleoplmodel__TheBusinessProblem">The business problem</a></li>
+<li class="li"><a class="xref" href="#analyzingasimpleoplmodel__TheMathematicalRepresentation">The mathematical representation</a></li>
+<li class="li"><a class="xref" href="#analyzingasimpleoplmodel__TheOPLCode">The OPL code</a></li>
+</ul>
+<div class="section" id="analyzingasimpleoplmodel__TheBusinessProblem"><h2 class="title sectiontitle">The business problem</h2><p class="p">A
+manufacturer has some products he wants to sell, and these products
+are manufactured with resources. The products can be made in either
+of two ways. They can be made inside the factory, where production
+consumes scarce resources and there is a cost per unit to manufacture
+the products, or they can be ordered from outside the factory. In
+the latter case there is no resource usage but there is a higher cost
+per unit to purchase the products. There is a constraint that all
+customer demand for the products must be satisfied, and the business
+goal is to minimize cost.</p>
+<p class="p">The problem is to determine how much
+of each product should be produced inside the company and how much
+outside, while minimizing the overall production cost, meeting the
+demand, and satisfying the resource constraints.</p>
+</div>
+<div class="section" id="analyzingasimpleoplmodel__TheMathematicalRepresentation"><h2 class="title sectiontitle">The mathematical
+representation</h2><p class="p"><strong class="ph b">Conventions used in this mathematical
+description</strong></p>
+<ul class="ul"><li class="li">Uppercase is used for data and constants</li>
+<li class="li">Lowercase is used for variables</li>
+</ul>
+<p class="p"><strong class="ph b">Data</strong></p>
+<ul class="ul"><li class="li">P is the number of products; p is an index ranging from 1 to P.</li>
+<li class="li">R is the number of resources; r is an index ranging from 1 to
+R.</li>
+<li class="li"><em class="ph i">C<sub class="ph sub">p</sub>,<sub class="ph sub">r</sub></em> is the amount of resource r
+consumed by product p when produced inside.</li>
+<li class="li"><em class="ph i">D<sub class="ph sub">p</sub></em> is the amount of demand for product p.</li>
+<li class="li"><em class="ph i">INSIDECOST<sub class="ph sub">p</sub></em> is the cost of producing one unit
+of product p.</li>
+<li class="li"><em class="ph i">OUTSIDECOST<sup class="ph sup">p</sup></em> is the cost of providing one unit
+of product p from an outside source.</li>
+</ul>
+<p class="p"><strong class="ph b">Decision variables</strong></p>
+<ul class="ul"><li class="li"><em class="ph i">in<sub class="ph sub">p</sub></em> is the amount of product p manufactured
+inside the plant (positive or null).</li>
+<li class="li"><em class="ph i">out<sub class="ph sub">p</sub></em> is the amount of product p provided by
+outside sources (positive or null).</li>
+<li class="li"></li>
+</ul>
+<p class="p"><strong class="ph b">The mathematical problem</strong></p>
+<p class="p"><img class="image" src="../images/math_representation.jpg" alt="Mathematical representation of the production problem, production.mod" /></p>
+<p class="p">The
+objective, line (1), is to minimize the total cost, computed as the
+sum over all products of both the internal cost incurred by actually
+producing the product and the cost of purchasing the product from
+an outside source.</p>
+<p class="p">The capacity constraint, line (2), states
+that the total required capacity cannot exceed the maximum for any
+resource.</p>
+<p class="p">The demand constraint, line (3), states that, for
+all products, the sum of products produced inside, plus those provided
+from outside sources, must be greater than the demand.</p>
+<p class="p">Line
+(4) states that we are only interested in solutions for which production
+amounts are positive.</p>
+</div>
+<div class="section" id="analyzingasimpleoplmodel__TheOPLCode"><h2 class="title sectiontitle">The OPL code</h2><p class="p">OPL allows
+you to write a mathematical representation of your business problem
+that is separate from your data. An example of an OPL model, <span class="ph filepath">production.mod</span>,
+is shown here. The terms in <strong class="ph b">bold</strong> are OPL keywords.</p>
+<pre class="pre codeblock"><code>{<strong class="ph b">string</strong>} Products = ...;
+{<strong class="ph b">string</strong>} Resources = ...;
+
+<strong class="ph b">float</strong> Consumption[Products][Resources] = ...;
+<strong class="ph b">float</strong> Capacity[Resources] = ...;
+<strong class="ph b">float</strong> Demand[Products] = ...;
+<strong class="ph b">float</strong> InsideCost[Products] = ...;
+<strong class="ph b">float</strong> OutsideCost[Products]  = ...;
+
+<strong class="ph b">dvar float+</strong> Inside[Products];
+<strong class="ph b">dvar float+</strong> Outside[Products];
+
+<strong class="ph b">minimize</strong>
+  <strong class="ph b">sum</strong>( p in Products ) 
+    ( InsideCost[p] * Inside[p] + OutsideCost[p] * Outside[p] );
+   
+<strong class="ph b">subject to</strong> {
+  <strong class="ph b">forall</strong>( r in Resources )
+    ctCapacity: 
+      <strong class="ph b">sum</strong>( p in Products ) 
+        Consumption[p][r] * Inside[p] &lt;= Capacity[r];
+
+  <strong class="ph b">forall</strong>(p in Products)
+    ctDemand:
+      Inside[p] + Outside[p] &gt;= Demand[p];
+}</code></pre>
+<ol class="ol"><li class="li">The first step in specifying an OPL model is to declare the data,
+and in this particular instance the first things you declare are the
+index sets, which represent the set of products and the set of resources.<pre class="pre codeblock"><code>{string} Products = ...;
+{string} Resources = ...;</code></pre>
+<p class="p">These are defined as sets
+of strings. That is, the strings are the names of the products and
+the resources. On the right-hand side of the equal sign, the  three
+dots are the OPL notation to indicate that you read this data from
+an external data source, which could be a data file, a spreadsheet,
+or a database. You do not have to specify the data within the model;
+the data is read in from a data file.</p>
+</li>
+<li class="li"> Next, you specify the recipe. How many units of each resource
+are required for each product?<pre class="pre codeblock"><code>float Consumption[Products][Resources] = ...;</code></pre>
+<p class="p">This
+is an array, called “Consumption” with two indexes. One index is the
+set of products and the other is the set of resources. The notation
+“float” indicates a real number. So each entry in this array represents
+the amount of resource that is required to produce one unit of each
+product.</p>
+</li>
+<li class="li">There is a capacity available for each resource, or an amount
+of each resource available.<pre class="pre codeblock"><code>float Capacity[Resources] = ...;</code></pre>
+<p class="p">This
+is, again, a real number array, “Capacity”, that is indexed over the
+resources.</p>
+</li>
+<li class="li">A quantity of each product is required. This is an array indexed
+by the products, called "Demand," and is also a real number.<pre class="pre codeblock"><code>float Demand[Products] = ...;</code></pre>
+</li>
+<li class="li">And then there are the costs per unit for production, inside the
+factory and outside, of each product.<pre class="pre codeblock"><code>float InsideCost[Products] = ...;
+float OutsideCost[Products]  = ...;</code></pre>
+</li>
+</ol>
+<p class="p">The product in this model could be anything. For example,
+it could be jewelry. So we could have a data file that goes with this
+particular model when we are producing jewelry that looks like this:</p>
+<pre class="pre codeblock"><code>Products =  { "rings", "earrings" };  //index sets for
+Resources = { "gold", "diamonds" };   //products and resources
+
+Consumption = [ [3.0, 1.0], [2.0, 2.0] ];
+Capacity = [ 130, 180 ];
+Demand = [ 100, 150 ];
+InsideCost = [ 250, 200 ];
+OutsideCost  = [ 260, 270 ];</code></pre>
+<p class="p">In that case, there are
+two products, rings and earrings, and two resources, gold and diamonds.
+The recipe calls for three units of gold and one diamond to produce
+each ring, or two units of gold and two diamonds for each earring.
+For the amount of resources available, there are 130 units of gold
+and 180 diamonds. The demand is for 100 rings and 150 pairs of earrings.
+The inside cost to produce the rings is $250 and to produce the earrings
+it is  $200. The outside cost is $260 for rings and $270 for earrings.</p>
+<p class="p">However,
+in our distributed example, the products are pasta, and the <span class="ph filepath">production.dat</span> file
+looks like this:</p>
+<pre class="pre codeblock"><code>Products =  {"kluski", "capellini", "fettucine"};
+Resources = {"flour", "eggs"};
+
+Consumption = [ [0.5, 0.2], [0.4, 0.4], [0.3, 0.6] ];
+Capacity = [ 20, 40 ];
+Demand = [ 100, 200, 300 ];
+InsideCost = [ 0.6, 0.8, 0.3 ];
+OutsideCost  = [ 0.8, 0.9, 0.4 ];</code></pre>
+<p class="p">In this case there
+are three products - kluski, capellini and fettuccine - and there
+are two resources, flour and eggs. The consumption here is that producing
+a unit of kluski requires half a unit of flour and 0.2 units of eggs,
+and so forth for each of the other products. There is a capacity of
+20 units of flour and 40 units of eggs. There is a demand of 100,
+200, 300 for each of the three products -- kluski, capellini and fettuccine.
+And there is an inside and an outside cost to produce each product.</p>
+<p class="p">An
+important point to note here is that the model is the same for pasta,
+for jewelry, or any other product. The model does not depend on the
+data.</p>
+<p class="p">To return to the model, <span class="ph filepath">production.mod</span>,
+we see that two decision variables are specified.</p>
+<pre class="pre codeblock"><code>dvar float+ Inside[Products];
+dvar float+ Outside[Products];</code></pre>
+<p class="p">The two decision variables
+(<samp class="ph codeph">dvar</samp>) are the inside production of each product
+and the outside production of each product, and they are specified
+as nonnegative real numbers, so we have a simple linear program here.</p>
+<p class="p">The
+actual specification of the model consists of the objective function
+and the constraints. The objective function in our example is to minimize
+the total cost of meeting the demand.</p>
+<pre class="pre codeblock"><code>minimize
+  sum( p in Products ) 
+    ( InsideCost[p] * Inside[p] + OutsideCost[p] * Outside[p] );</code></pre>
+<p class="p">This
+is the sum over each product in the product set of the inside cost
+of producing that product, times the inside production, plus the outside
+cost of producing that product, or acquiring that product, times the
+outside production.</p>
+<p class="p">The objective function is subject to two
+constraints.</p>
+<pre class="pre codeblock"><code>subject to {
+  forall( r in Resources )
+    ctCapacity: 
+      sum( p in Products ) 
+        Consumption[p][r] * Inside[p] &lt;= Capacity[r];
+
+  forall(p in Products)
+    ctDemand:
+      Inside[p] + Outside[p] &gt;= Demand[p];</code></pre>
+<p class="p">The first
+constraint (<samp class="ph codeph">ctCapacity</samp>) is a capacity constraint
+on the resources. It says that, for each resource in the set of resources,
+the sum over all the products of the consumption of the resource for
+that product, times the inside production, has to be less than or
+equal to the capacity available for that resource.</p>
+<p class="p">The second
+constraint (<samp class="ph codeph">ctDemand</samp>) is the demand constraint. It
+says that, for each product in the set of products, the inside production
+plus the outside production has to be at least as great as the demand.
+So, again, this is a simple linear programming problem.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../Optimization_Studio/orientation_guide/topics/new_to_cos.html" title="A first contact with OPL, the Optimization Programming Language, and the integrated development environment (IDE).">Completely new to CPLEX Optimization Studio?</a></div>
+</div>
+</div></body>
+</html>

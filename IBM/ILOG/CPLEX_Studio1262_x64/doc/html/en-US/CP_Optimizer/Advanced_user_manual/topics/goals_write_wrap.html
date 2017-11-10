@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using ILOCPGOALWRAPPER to wrap the goals" />
+<meta name="abstract" content="A custom goal must be wrapped to be used in a model." />
+<meta name="Description" content="A custom goal must be wrapped to be used in a model." />
+<meta name="DC.subject" content="ILOCPGOALWRAPPERn macro, using" />
+<meta name="keywords" content="ILOCPGOALWRAPPERn macro, using" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizergoals.1010560" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" />
+<title>Using ILOCPGOALWRAPPER to wrap the goals</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizergoals.1010560">
+<h1 class="title topictitle1">Using ILOCPGOALWRAPPER to wrap the goals</h1>
+<div class="body"><p class="shortdesc">A custom goal must be wrapped to be used in a model.</p>
+<p class="p">There are several situations in which you might need
+to wrap a goal in an instance of <samp class="ph codeph">IloGoal</samp>: </p>
+<ul class="ul"><li class="li"><p class="p">You want to use the goal as an argument
+of <samp class="ph codeph">IloCP::solve</samp>. </p>
+</li>
+<li class="li"><p class="p">You want to use the goal as an argument
+of <samp class="ph codeph">IloCP::startNewSearch</samp>. </p>
+</li>
+</ul>
+<p class="p">Any time a goal is to be used within the Concert Technology
+layer, it must be wrapped. In such situations, use the macro <samp class="ph codeph">ILOCPGOALWRAPPERn</samp> to
+wrap your goal. </p>
+<p class="p">For example, you can wrap the <samp class="ph codeph">PrintAll</samp> goal
+in an instance of <samp class="ph codeph">IloGoal</samp> in this way:
+ </p>
+<pre class="pre codeblock"><code>ILOCPGOALWRAPPER0(PrintAllConcert,cp) {
+  return PrintAll(cp);
+}
+</code></pre>
+<p class="p">To create an instance of this goal you write:  </p>
+<pre class="pre codeblock"><code>  IloGoal goal = PrintAllConcert(env);</code></pre>
+<p class="p">The <samp class="ph codeph">IloGoal</samp> object returned
+can then be passed as an argument to the <samp class="ph codeph">IloCP::solve</samp> and <samp class="ph codeph">IloCP:startNewSearch</samp> functions.
+Both of these functions extract the instance of the <samp class="ph codeph">IloGoalI</samp> to
+the optimizer. In the body of the macro <samp class="ph codeph">ILOCPGOALWRAPPERn,</samp> you
+must take the arguments to the modeling layer goal and determine the
+extracted counterparts of these objects in order to create the search
+layer counterpart of the goal. For example, if the modeling layer
+goal takes a decision variable as an argument, then in the body of
+the macro you must determine the engine object extracted by the optimizer
+and pass this search decision variable to the search layer goal.</p>
+<p class="p">For example, if the goal takes a decision variable as
+an argument: </p>
+<pre class="pre codeblock"><code>ILCGOAL1(MycGoal, IlcIntVar, var) {
+  ...
+  return 0;
+}</code></pre>
+<p class="p">Then in the macro to wrap the goal you need to determine
+the search decision variable that has been extracted from the model
+decision variable:  </p>
+<pre class="pre codeblock"><code>ILOCPGOALWRAPPER1(MyoGoal, cp, IloIntVar, x){
+  return MycGoal(cp, cp.getIntVar(x));
+}</code></pre>
+<p class="p">The extraction of a goal does not extract and must not
+extract its arguments. Therefore, when using a goal you must make
+sure that the arguments will be extracted by the model. A good way
+to ensure this is to add an object to the model before using it as
+an argument to a goal.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_write.html" title="A custom goal can be written using a macro.">Writing your own goal</a></div>
+</div>
+</div></body>
+</html>

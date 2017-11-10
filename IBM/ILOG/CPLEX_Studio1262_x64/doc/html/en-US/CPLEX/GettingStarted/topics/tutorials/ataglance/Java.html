@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using Concert Technology in Java" />
+<meta name="abstract" content="This Java application solves the model in this way." />
+<meta name="Description" content="This Java application solves the model in this way." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_ataglance.1011767" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<title>Using Concert Technology in Java</title>
+</head>
+<body role="main" id="Getting_started.uss_ataglance.1011767">
+<h1 class="title topictitle1">Using Concert Technology in Java</h1>
+<div class="body"><p class="shortdesc">This Java application solves the model in this way.</p>
+<p class="p">Here is a Java application using CPLEX with Concert Technology
+to solve the example. An expanded form of this example is discussed
+in detail in <a class="xref" href="../Java/Java_synopsis.html" title="Applications written in the Java programming language use CPLEX with Concert Technology in the Java API.">Java tutorial</a>. </p>
+<pre class="pre codeblock"><code>import ilog.concert.*;
+import ilog.cplex.*;
+
+public class Example {
+  public static void main(String[] args) {
+    try {
+      IloCplex cplex = new IloCplex();
+
+      double[]    lb = {0.0, 0.0, 0.0};
+      double[]    ub = {40.0, Double.MAX_VALUE, Double.MAX_VALUE};
+      IloNumVar[] x  = cplex.numVarArray(3, lb, ub);
+
+      double[] objvals = {1.0, 2.0, 3.0};
+      cplex.addMaximize(cplex.scalProd(x, objvals));
+
+      cplex.addLe(cplex.sum(cplex.prod(-1.0, x[0]),
+                            cplex.prod( 1.0, x[1]),
+                            cplex.prod( 1.0, x[2])), 20.0);
+      cplex.addLe(cplex.sum(cplex.prod( 1.0, x[0]),
+                            cplex.prod(-3.0, x[1]),
+                            cplex.prod( 1.0, x[2])), 30.0);
+
+      if ( cplex.solve() ) {
+        cplex.output().println("Solution status = " + cplex.getStatus());
+        cplex.output().println("Solution value  = " + cplex.getObjValue());
+
+        double[] val = cplex.getValues(x);
+        int ncols = cplex.getNcols();
+        for (int j = 0; j &lt; ncols; ++j)
+          cplex.output().println("Column: " + j + " Value = " + val[j]);
+      }
+      cplex.end();
+    }
+    catch (IloException e) {
+      System.err.println("Concert exception '" + e + "' caught");
+    }
+  }
+}</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" title="This example solves an LP model to contrast CPLEX components.">Solving an LP with CPLEX</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><title>IlcInstantiate</title>
+<link
+            type="text/css" rel="stylesheet"
+            href="../cppdoc.css" />
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../functions/IlcInstantiate.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+                name="ibm-content"></a><h3><a
+            name="method_IlcInstantiate">IlcInstantiate</a></h3><div
+                class="prototype">public <a
+                href="../classes/IlcGoal.html">IlcGoal</a> <span
+                class="function-name">IlcInstantiate</span>(const <a
+                href="../classes/IlcFloatVar.html">IlcFloatVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IlcBool.html">IlcBool</a> <span
+                class="parameter-name">increaseMinFirst</span>=<span
+                class="parameter-name">IlcTrue</span>, <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+                class="parameter-name">prec</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+            class="include-file">&lt;ilcp/cpext.h&gt; </span></div>
+A goal to assign a value to a variable.
+      <div
+                        class="description"><p>This function creates and returns a goal, a primitive in the algorithms that search for solutions. Its
+ behavior varies slightly, depending on the class of its arguments.</p><p>The algorithm that <code>IlcInstantiate</code> uses for constrained integer variables and constrained
+ enumerated variables tries every value in the domain. Since the number of elements in the domain of a constrained
+ floating-point variable is very high (typically millions), that approach would not be very efficient.
+ Consequently, <code>IlcInstantiate</code> handles the domain of a constrained floating-point variable
+ differently. The idea is to recursively split the domain of the constrained floating-point variable into two parts.</p><p>If <code>var</code> is already bound, then <code>IlcInstantiate</code> does nothing and succeeds. Otherwise,
+ <code>IlcInstantiate</code> sets a choice point, then replaces the <em>domain</em> of <code>var</code> by one
+ of its <em>halves</em>, and calls itself recursively. The function stops when the variable is bound or when it
+ is known with a precision smaller than <code>prec</code>. If a failure occurs, then the domain is replaced by
+ the other half, and <code>IlcInstantiate</code> is called recursively. </p><p>The optional argument <code>increaseMin</code> should be a Boolean value, either <code>IlcTrue</code> or
+ <code>IlcFalse</code>. If <code>increaseMinFirst</code> is <code>IlcTrue</code>, then the upper half domain
+ is tried first; otherwise, the lower half is tried first.</p><p>This algorithm is available explicitly for constrained integer variables as the function
+ <code><a
+                    href="../functions/IlcDichotomize.html">IlcDichotomize</a></code>.</p><p>For more information, see the concept 
+ <a
+            href="../choice.html">Choice point in CP Optimizer</a>
+ .</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../functions/IlcBestInstantiate.html">IlcBestInstantiate</a>, <a
+                href="../functions/IlcDichotomize.html">IlcDichotomize</a>, <a
+                href="../functions/IlcGenerate.html">IlcGenerate</a>, <a
+                href="../classes/IlcGoal.html">IlcGoal</a></p><hr /><h3><a
+            name="method_IlcInstantiate">IlcInstantiate</a></h3><div
+                class="prototype">public <a
+                href="../classes/IlcGoal.html">IlcGoal</a> <span
+                class="function-name">IlcInstantiate</span>(const <a
+                href="../classes/IlcIntVar.html">IlcIntVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="prototype">public <a
+                href="../classes/IlcGoal.html">IlcGoal</a> <span
+                class="function-name">IlcInstantiate</span>(const <a
+                href="../classes/IlcIntVar.html">IlcIntVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../classes/IlcIntSelect.html">IlcIntSelect</a> <span
+            class="parameter-name">select</span>)</div><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+            class="include-file">&lt;ilcp/cpext.h&gt; </span></div>
+A goal to assign a value to a variable.
+      <div
+                class="description"><p>This function creates and returns a goal, a primitive in the algorithms that search
+ for solutions. The goal <code>IlcInstantiate</code> assigns a value to a constrained variable.
+ It uses choice points so that if a failure occurs as a result of that reversible assignment,
+ another value will be assigned to the constrained variable so that the search can continue.</p><p>If <code>var</code> has already been fixed, then <code>IlcInstantiate</code> does nothing and
+ succeeds. Otherwise, <code>IlcInstantiate</code> sets a choice point, then assigns a value to the
+ constrained variable. In case of failure, the tried-and-failed value is removed from the domain of
+ the constrained variable, and another value not yet used is tried until a value assignment succeeds
+ or the domain is exhausted. In that latter case, the domain becomes empty, and failure occurs. The
+ values are selected by the <code>select</code> object, if it is provided. Otherwise, values are
+ tried by default in ascending order.</p><p><strong>Implementation</strong></p><p>Here's how we could define that goal for <code>IlcIntVar</code>, using the constraints
+ <code>==</code> and <code>!=</code> directly as goals themselves.</p><pre
+                    class="sample">
+ static ILCGOAL2(IlcIntInstantiate,
+                 IlcIntVar, var,
+                 IlcIntSelectI*, select) {
+     if (var.isFixed()) return 0;
+     IlcInt val = (select)? select-&gt;select(var) : var.getMin();
+     return IlcOr(var == val, IlcAnd(var != val,
+                                     this));
+ }
+ IlcGoal IlcInstantiate(IlcIntVar var){
+     return IlcIntInstantiate(var, 0);
+ }
+ IlcGoal IlcInstantiate(IlcIntVar var, IlcIntSelect sel){
+     return IlcIntInstantiate(var, sel.getImpl());
+ }</pre><p>For more information, see the concept 
+ <a
+            href="../choice.html">Choice point in CP Optimizer</a>
+ .</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../functions/IlcBestInstantiate.html">IlcBestInstantiate</a>, <a
+                href="../functions/IlcDichotomize.html">IlcDichotomize</a>, <a
+                href="../functions/IlcGenerate.html">IlcGenerate</a>, <a
+                href="../classes/IlcGoal.html">IlcGoal</a>, <a href="../classes/IlcIntSelect.html">IlcIntSelect</a></p><hr /></body>
+</html>

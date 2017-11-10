@@ -1,0 +1,120 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: {<b><font color="#0000FF">string</font></b>} Products = ...;
+013: 
+014: <b><font color="#0000FF">int</font></b> NbMonths   = ...;
+015: <b><font color="#0000FF">range</font></b> Months = 1..NbMonths;
+016: <b><font color="#0000FF">float</font></b> Cost[Months][Products] = ...;
+017: 
+018: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Produce[Months];
+019: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Use[Months][Products];
+020: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Buy[Months][Products];
+021: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b> Store[Months][Products] <b><font color="#0000FF">in</font></b> 0..1000;
+022: 
+023: 
+024: <b><font color="#0000FF">maximize</font></b> 
+025:   <b><font color="#7D007D">sum</font></b>( m <b><font color="#0000FF">in</font></b> Months ) 
+026:     (150 * Produce[m] 
+027:     - <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) 
+028:       Cost[m][p] * Buy[m][p] 
+029:     - 5 * <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) 
+030:       Store[m][p]);
+031: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+032:   <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products )
+033:     ctStore:
+034:       Store[NbMonths][p] == 500;
+035:   <b><font color="#7D007D">forall</font></b>( m <b><font color="#0000FF">in</font></b> Months ) {
+036:     ctUse1:
+037:       Use[m][<b><font color="#8A2BE2">"v1"</font></b>] + Use[m][<b><font color="#8A2BE2">"v2"</font></b>] &lt;= 200;
+038:     ctUse2:                
+039:       Use[m][<b><font color="#8A2BE2">"o1"</font></b>] + Use[m][<b><font color="#8A2BE2">"o2"</font></b>] + Use[m][<b><font color="#8A2BE2">"o3"</font></b>] &lt;= 250;
+040:     ctUse3:
+041:       3 * Produce[m] &lt;=
+042:             8.8 * Use[m][<b><font color="#8A2BE2">"v1"</font></b>] + 6.1 * Use[m][<b><font color="#8A2BE2">"v2"</font></b>] +
+043:             2   * Use[m][<b><font color="#8A2BE2">"o1"</font></b>] + 4.2 * Use[m][<b><font color="#8A2BE2">"o2"</font></b>] + 5 * Use[m][<b><font color="#8A2BE2">"o3"</font></b>];
+044:      ctUse4:
+045:        8.8 * Use[m][<b><font color="#8A2BE2">"v1"</font></b>] + 6.1 * Use[m][<b><font color="#8A2BE2">"v2"</font></b>] +
+046:             2   * Use[m][<b><font color="#8A2BE2">"o1"</font></b>] + 4.2 * Use[m][<b><font color="#8A2BE2">"o2"</font></b>] + 5 * Use[m][<b><font color="#8A2BE2">"o3"</font></b>]
+047:             &lt;= 6 * Produce[m];
+048:             
+049:      ctUse5:
+050:        Produce[m] == <b><font color="#7D007D">sum</font></b>( p <b><font color="#0000FF">in</font></b> Products ) Use[m][p];
+051:    }
+052:   <b><font color="#7D007D">forall</font></b>( m <b><font color="#0000FF">in</font></b> Months )
+053:     <b><font color="#7D007D">forall</font></b>( p <b><font color="#0000FF">in</font></b> Products ) {
+054:       ctUse6:  
+055:         <b><font color="#7D007D">if </font></b>(m == 1) {
+056:           500 + Buy[m][p] == Use[m][p] + Store[m][p];
+057:         }
+058:         <b><font color="#0000FF">else</font></b> {
+059:           Store[m-1][p] + Buy[m][p] == Use[m][p] + Store[m][p];
+060:         }
+061:     }
+062:     
+063: };
+064: 
+065: <b><font color="#007D00">// Expected result : 107843</font></b>
+066: <b><font color="#0000FF">tuple</font></b> ProduceSolutionT{ 
+067:         <b><font color="#0000FF">int</font></b> Months; 
+068:         <b><font color="#0000FF">float</font></b> value; 
+069: };
+070: {ProduceSolutionT} ProduceSolution = {&lt;i0,Produce[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Months};
+071: <b><font color="#0000FF">tuple</font></b> BuySolutionT{ 
+072:         <b><font color="#0000FF">int</font></b> Months; 
+073:         <b><font color="#0000FF">string</font></b> Products; 
+074:         <b><font color="#0000FF">float</font></b> value; 
+075: };
+076: {BuySolutionT} BuySolution = {&lt;i0,i1,Buy[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Months,i1 <b><font color="#0000FF">in</font></b> Products};
+077: <b><font color="#0000FF">tuple</font></b> StoreSolutionT{ 
+078:         <b><font color="#0000FF">int</font></b> Months; 
+079:         <b><font color="#0000FF">string</font></b> Products; 
+080:         <b><font color="#0000FF">float</font></b> value; 
+081: };
+082: {StoreSolutionT} StoreSolution = {&lt;i0,i1,Store[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Months,i1 <b><font color="#0000FF">in</font></b> Products};
+083: <b><font color="#0000FF">tuple</font></b> UseSolutionT{ 
+084:         <b><font color="#0000FF">int</font></b> Months; 
+085:         <b><font color="#0000FF">string</font></b> Products; 
+086:         <b><font color="#0000FF">float</font></b> value; 
+087: };
+088: {UseSolutionT} UseSolution = {&lt;i0,i1,Use[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Months,i1 <b><font color="#0000FF">in</font></b> Products};
+089: 
+090: <b><font color="#0000FF">execute</font></b>{ 
+091:         writeln(ProduceSolution);
+092:         writeln(BuySolution);
+093:         writeln(StoreSolution);
+094:         writeln(UseSolution);
+095: }
+096: 
+097: execute DISPLAY {   
+098:   writeln(<b><font color="#8A2BE2">" Maximum profit = "</font></b> , <b><font color="#0000FF">cplex</font></b>.getObjValue());
+099:   <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> i <b><font color="EA7D00">in</font></b> Months) {
+100:     writeln(<b><font color="#8A2BE2">" Month "</font></b>, i, <b><font color="#8A2BE2">" "</font></b>);
+101:     write(<b><font color="#8A2BE2">"  . Buy   "</font></b>);
+102:     <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> p <b><font color="EA7D00">in</font></b> Products)
+103:       write(Buy[i][p], <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2"> "</font></b>);
+104:     writeln();            
+105:     write(<b><font color="#8A2BE2">"  . Use   "</font></b>);
+106:     <b><font color="EA7D00">for</font></b> (p <b><font color="EA7D00">in</font></b> Products) 
+107:       write(Use[i][p], <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2"> "</font></b>);
+108:     writeln();
+109:     write(<b><font color="#8A2BE2">"  . store "</font></b>);
+110:     <b><font color="EA7D00">for</font></b> (p <b><font color="EA7D00">in</font></b> Products) 
+111:       write(Store[i][p], <b><font color="#8A2BE2">"</font></b>\t<b><font color="#8A2BE2"> "</font></b>);
+112:     writeln();
+113:   }
+114: }
+115:  
+</tt></pre>

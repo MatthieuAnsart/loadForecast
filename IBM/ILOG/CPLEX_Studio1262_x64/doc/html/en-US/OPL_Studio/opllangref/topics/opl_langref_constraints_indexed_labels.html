@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="task" />
+<meta name="DC.Title" content="Using indexed labels" />
+<meta name="abstract" content="Shows how to use indexed labels for your OPL constraints." />
+<meta name="Description" content="Shows how to use indexed labels for your OPL constraints." />
+<meta name="DC.subject" content="indexed labels" />
+<meta name="keywords" content="indexed labels" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_labels.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="proceduralTopic1198255860200" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_labels.html" />
+<title>Using indexed labels</title>
+</head>
+<body role="main" id="proceduralTopic1198255860200">
+<h1 class="title topictitle1">Using indexed labels</h1>
+<div class="body taskbody"><p class="shortdesc">Shows how to use indexed labels for your OPL constraints.</p>
+<div class="section context"><div class="tasklabel"><h2 class="sectiontitle tasklabel">About this task</h2></div> <p class="p">In some cases, it is more convenient
+to use indexed labels. Indexed labels enable you to control how a
+constraint is assigned to an array item.</p>
+ <p class="p">The
+example below, <a class="xref" href="#proceduralTopic1198255860200__usropllangref.uss_langref_constraints.1076685">Labeling constraints with indexed labels</a> shows
+that the <samp class="ph codeph">transp2.mod</samp> model identifies constraints
+using indexed labels following this syntax:</p>
+<pre class="pre codeblock"><code>constraint ctDemand[Products];
+...
+ctDemand[p]:...</code></pre>
+<p class="p" id="proceduralTopic1198255860200__p1310136714870"><strong class="ph b">Indexed labels
+on constraints (transp2.mod)</strong></p>
+<pre class="pre codeblock"><code>  forall( p in Products , d in Dest[p] )
+    ctDemand[p][d]:  
+      sum( o in Orig[p] ) 
+        Trans[&lt; p,o,d &gt;] == Demand[&lt;p,d&gt;];
+  ctCapacity:  forall( o , d in Cities )
+                 sum( &lt;p,o,d&gt; in Routes ) 
+                   Trans[&lt;p,o,d&gt;] &lt;= Capacity;</code></pre>
+<p class="p">A
+case where you need indexed labels to reduce memory overhead is when
+you use <samp class="ph codeph">forall</samp> iterations with variable
+sizes, as shown in the following code.</p>
+<p class="p" id="proceduralTopic1198255860200__p1310137056399"><strong class="ph b">forall iterations with variable sizes</strong></p>
+<pre class="pre codeblock"><code>  forall( p in Products , o in Orig[p] ) </code></pre>
+<p class="p">In
+this <samp class="ph codeph">forall</samp> example, the second formal parameter <samp class="ph codeph">o</samp> iterates on sets of potentially different sizes,
+depending on the value of the formal parameter <samp class="ph codeph">p</samp>. </p>
+ <p class="p">To use indexed labels:</p>
+ </div>
+<div class="tasklabel"><h2 class="sectiontitle tasklabel">Procedure</h2></div><ol class="ol steps"><li class="li step stepexpand"><span class="ph cmd">Declare the constraint array that will
+receive the labeled constraints.</span> <pre class="pre codeblock"><code>constraint ctSupply[Products][Cities];</code></pre>
+</li>
+<li class="li step stepexpand"><span class="ph cmd">Add the indexing expressions to the label.</span> <pre class="pre codeblock"><code>ctSupply[p][o]:</code></pre>
+</li>
+</ol>
+<div class="example"><div class="tasklabel"><h2 class="sectiontitle tasklabel">Example</h2></div><p class="p">The full code extract is shown here.</p>
+ <p class="p exampletitle" id="proceduralTopic1198255860200__usropllangref.uss_langref_constraints.1076685">Labeling constraints with indexed
+labels</p>
+<pre class="pre codeblock"><code>constraint ctSupply[Products][Cities];
+constraint ctDemand[Products][Cities];
+
+minimize
+  sum(l in Routes) Cost[l] * Trans[l];
+   
+subject to {
+  forall( p in Products , o in Orig[p] ) 
+
+    ctSupply[p][o]: 
+      sum( d in Dest[p] ) 
+        Trans[&lt; p,o,d &gt;] == Supply[&lt;p,o&gt;];
+  forall( p in Products , d in Dest[p] )
+    ctDemand[p][d]:  
+      sum( o in Orig[p] ) 
+        Trans[&lt; p,o,d &gt;] == Demand[&lt;p,d&gt;];</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllangref/topics/opl_langref_constraints_labels.html" title="Explains why label constraints, the benefits, costs, and limitations, how to label constraints, how to use indexed labels, and how to deal with compatibility between constraint names and labels.">Constraint labels</a></div>
+</div>
+</div></body>
+</html>

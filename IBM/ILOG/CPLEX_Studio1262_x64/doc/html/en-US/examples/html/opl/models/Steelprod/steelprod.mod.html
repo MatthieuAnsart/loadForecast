@@ -1,0 +1,106 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">/* ---------------------------------------------------------------</font></b>
+013: <b><font color="#007D00">   OPL Model for Steel Production Example </font></b>
+014: <b><font color="#007D00">   </font></b>
+015: <b><font color="#007D00">This model is described in the documentation. </font></b>
+016: <b><font color="#007D00">See IDE and OPL &gt; Language and Interfaces Examples.</font></b>
+017: <b><font color="#007D00"> </font></b>
+018: <b><font color="#007D00">--------------------------------------------------------------------*/</font></b>
+019: 
+020: {<b><font color="#0000FF">string</font></b>} Products = ...;
+021: <b><font color="#0000FF">int</font></b>      T = ...;
+022: {<b><font color="#0000FF">string</font></b>} Resources = ...;
+023: <b><font color="#0000FF">range</font></b> TimePeriods = 1..T;
+024: 
+025: <b><font color="#0000FF">float</font></b> ResourceReq[Products][Resources] = ...;  <b><font color="#007D00">//Bills of materials   </font></b>
+026: <b><font color="#0000FF">float</font></b> Avail[Resources][TimePeriods]=...;  <b><font color="#007D00">//Available resources in each period </font></b>
+027: <b><font color="#0000FF">float</font></b> Inv0[Products] = ...;     <b><font color="#007D00">// Initial inventories</font></b>
+028: <b><font color="#0000FF">float</font></b> Backorder0[Products]=...; <b><font color="#007D00">// Initial backorders</font></b>
+029: <b><font color="#0000FF">float</font></b> EndBlg[Products]=...; <b><font color="#007D00">//Bounds on ending backorder levels</font></b>
+030: <b><font color="#0000FF">float</font></b> EndInv[Products]=...;<b><font color="#007D00">//Target ending inventory levels</font></b>
+031: 
+032: <b><font color="#0000FF">float</font></b> Demand[Products][TimePeriods] = ...;
+033: <b><font color="#0000FF">float</font></b> Prodcost[Products][TimePeriods] = ...; <b><font color="#007D00">// Variable production cost</font></b>
+034: <b><font color="#0000FF">float</font></b> Invcost[Products][TimePeriods] = ...;  <b><font color="#007D00">// Unit inventory holding cost</font></b>
+035: 
+036: <b><font color="#0000FF">float</font></b> Backlogcost[Products][TimePeriods]=...;<b><font color="#007D00">// Unit backorder cost</font></b>
+037: 
+038: <b><font color="#0000FF">range</font></b> R0 = 0..T;
+039: 
+040: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Backorder[Products][R0];
+041: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Make[Products][TimePeriods]; <b><font color="#007D00">// Production quantities in each period</font></b>
+042: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">float</font></b>+ Inv[Products][R0];
+043: 
+044: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> TotalCost =
+045:    <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> Products,t <b><font color="#0000FF">in</font></b> TimePeriods)
+046:        (Backlogcost[p,t] * Backorder[p,t]
+047:        + Prodcost[p,t]*Make[p,t] + Invcost[p,t]*Inv[p,t]);
+048: 
+049: <b><font color="#0000FF">minimize</font></b> TotalCost;
+050: 
+051: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b>{
+052:    
+053:   <b><font color="#007D00">// Resource capacity constraints</font></b>
+054:   <b><font color="#7D007D">forall</font></b>(r <b><font color="#0000FF">in</font></b> Resources, t <b><font color="#0000FF">in</font></b> TimePeriods) 
+055:     ctAvail: 
+056:       <b><font color="#7D007D">sum</font></b>(p <b><font color="#0000FF">in</font></b> Products) 
+057:         ResourceReq[p][r]*Make[p][t] &lt;= Avail[r][t];
+058:    
+059:   <b><font color="#007D00">// Initial inventories and backorders</font></b>
+060:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> Products) 
+061:     Inv[p][0] == Inv0[p];
+062:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> Products)
+063:     Backorder[p][0] == Backorder0[p];
+064:    
+065:   <b><font color="#007D00">// Inventory flow balance constraints</font></b>
+066:   <b><font color="#007D00">// The left side represents the history:</font></b>
+067:   <b><font color="#007D00">//    the prior inventory less the backorders plus the current production</font></b>
+068:   <b><font color="#007D00">// The right side represents the future:</font></b>
+069:   <b><font color="#007D00">//    the current demand plus the carryover inventory less the backorders</font></b>
+070:   <b><font color="#007D00">// (If this seems confusing, think about the case when there are no backorders)</font></b>
+071:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> Products,t <b><font color="#0000FF">in</font></b> TimePeriods)
+072:     Inv[p][t-1] - Backorder[p][t-1] + Make[p][t] == Demand[p][t] + Inv[p][t] - Backorder[p][t];
+073:    
+074:   <b><font color="#007D00">// Bounds on ending backorder levels</font></b>
+075:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> Products) 
+076:     ctEndBlg: Backorder[p][T] &lt;= EndBlg[p];
+077:   <b><font color="#007D00">// Target ending inventory levels </font></b>
+078:   <b><font color="#7D007D">forall</font></b>(p <b><font color="#0000FF">in</font></b> Products) 
+079:     Inv[p][T] == EndInv[p];      
+080:     
+081: }
+082: 
+083: 
+084: <b><font color="#0000FF">tuple</font></b> BackorderSolutionT{ 
+085:         <b><font color="#0000FF">string</font></b> Products; 
+086:         <b><font color="#0000FF">int</font></b> R; 
+087:         <b><font color="#0000FF">float</font></b> value; 
+088: };
+089: {BackorderSolutionT} BackorderSolution = {&lt;i0,i1,Backorder[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Products,i1 <b><font color="#0000FF">in</font></b> R0};
+090: <b><font color="#0000FF">tuple</font></b> MakeSolutionT{ 
+091:         <b><font color="#0000FF">string</font></b> Products; 
+092:         <b><font color="#0000FF">int</font></b> TimePeriods; 
+093:         <b><font color="#0000FF">float</font></b> value; 
+094: };
+095: {MakeSolutionT} MakeSolution = {&lt;i0,i1,Make[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Products,i1 <b><font color="#0000FF">in</font></b> TimePeriods};
+096: <b><font color="#0000FF">tuple</font></b> InvSolutionT{ 
+097:         <b><font color="#0000FF">string</font></b> Products; 
+098:         <b><font color="#0000FF">int</font></b> R; 
+099:         <b><font color="#0000FF">float</font></b> value; 
+100: };
+101: {InvSolutionT} InvSolution = {&lt;i0,i1,Inv[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Products,i1 <b><font color="#0000FF">in</font></b> R0};
+</tt></pre>

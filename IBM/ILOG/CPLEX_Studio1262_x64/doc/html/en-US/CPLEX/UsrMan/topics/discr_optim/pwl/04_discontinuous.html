@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Discontinuous piecewise linear functions" />
+<meta name="abstract" content="Defines a discontinuous piecewise linear function." />
+<meta name="Description" content="Defines a discontinuous piecewise linear function." />
+<meta name="DC.subject" content="continuous piecewise linear, piecewise linear, continuous, piecewise linear, steps, step in piecewise linear function, discontinuous, discontinuous piecewise linear, breakpoint, discontinuous piecewise linear and, discontinuous piecewise linear, breakpoints and, segments and" />
+<meta name="keywords" content="continuous piecewise linear, piecewise linear, continuous, piecewise linear, steps, step in piecewise linear function, discontinuous, discontinuous piecewise linear, breakpoint, discontinuous piecewise linear and, discontinuous piecewise linear, breakpoints and, segments and" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/discr_optim/pwl/01_pwl_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_usingPiecewiseLin.1003373" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/discr_optim/pwl/01_pwl_title_synopsis.html" />
+<title>Discontinuous piecewise linear functions</title>
+</head>
+<body role="main" id="User_manual.uss_usingPiecewiseLin.1003373">
+<h1 class="title topictitle1">Discontinuous piecewise linear functions</h1>
+<div class="body"><p class="shortdesc">Defines a discontinuous piecewise linear function.</p>
+<p class="p">Thus far, you have seen a piecewise linear function where
+the segments are continuous. Intuitively, in a continuous piecewise
+linear function, the endpoint of one segment has the same coordinates
+as the initial point of the next segment, as in <a class="xref" href="02_pwl_defn.html#User_manual.uss_usingPiecewiseLin.1003384__User_manual.uss_usingPiecewiseLin.1003400">Figure 1</a>. One way of defining a continuous piecewise linear
+function is by specifying its breakpoints and the slope of each segment.
+Those specification breakpoints are also known as the <strong class="ph b">anchors</strong> of
+their segments.</p>
+<p class="p">There are piecewise linear functions, however, where the
+endpoint of one segment and the initial point of the next segment
+may have the same <samp class="ph codeph">x</samp> coordinate but differ
+in the value of <samp class="ph codeph">f(x)</samp>. Such a difference
+is known as a <strong class="ph b">step</strong> in the piecewise linear function,
+and such a function is known as <strong class="ph b">discontinuous</strong>. <a class="xref" href="04_discontinuous.html#User_manual.uss_usingPiecewiseLin.1003373__User_manual.uss_usingPiecewiseLin.1008156">Figure 1</a> shows a discontinuous piecewise linear function with
+two steps.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span>  <p class="p">When the <strong class="ph b">anchor</strong> of
+a segment resides at a <strong class="ph b">step</strong>, then the discontinuous
+piecewise linear function is <strong class="ph b">not</strong> uniquely defined
+by specifying its breakpoints and the slopes of its segments. In contrast,
+as long as the anchor point resides elsewhere, rather than at a step,
+one can specify a discontinuous piecewise linear function by its breakpoints
+and slopes as one specifies a continuous piecewise linear function.</p>
+ </div>
+<p class="p">Syntactically, a step is represented in this way:</p>
+<ul class="ul"><li class="li"><p class="p">The x-coordinate of the breakpoint where
+the step occurs is repeated in the array of the breakpoint.</p>
+ </li>
+<li class="li"><p class="p">The value of the first point of a step in
+the array of slopes is the height of the step. This value replaces
+the undefined slope of the vertical line associated with the discontinuous
+step.</p>
+</li>
+<li class="li"><p class="p">The value of the second point of the step
+in the array of slopes is the slope of the function after the step.</p>
+</li>
+</ul>
+<p class="p">Concert Technology also supports discontinuous piecewise
+linear functions specified by the x-coordinate of the breakpoints
+and their associated function values, along with the  slopes of the
+first and last segments. This additional information uniquely defines
+the function. At a step, the value of the x-coordinate appears twice
+in the breakpoint array of the specification. The function values
+associated with the bottom and top of the step appear in the corresponding
+entries of the values array.</p>
+<p class="p">By convention, a breakpoint belongs in both segments associated
+with the step. For example, in <a class="xref" href="04_discontinuous.html#User_manual.uss_usingPiecewiseLin.1003373__User_manual.uss_usingPiecewiseLin.1008156">Figure 1</a>, at the breakpoint <samp class="ph codeph">x=3</samp> ,
+the points <samp class="ph codeph">(3,1)</samp>  and <samp class="ph codeph">(3,3)</samp> are
+both admissible. Similarly, when <samp class="ph codeph">x = 5</samp> ,
+the points <samp class="ph codeph">(5,4)</samp> and <samp class="ph codeph">(5,5)</samp> are
+both admissible.</p>
+<p class="p">However, isolated points, as explained in <a class="xref" href="05_isolated_pts.html" title="Defines an isolated point in a piecewise linear function.">Isolated points in piecewise linear functions</a>, are not allowed,
+neither in continuous nor in discontinuous piecewise linear functions.
+In fact, only one step is allowed at a given point.</p>
+<p class="p">In Concert Technology, a discontinuous piecewise linear
+function is represented by the overloaded function<samp class="ph codeph">IloPiecewiseLinear</samp>.
+For example, the function in <a class="xref" href="04_discontinuous.html#User_manual.uss_usingPiecewiseLin.1003373__User_manual.uss_usingPiecewiseLin.1008156">Figure 1</a> is declared in this way, with the discontinuous step
+values (2 and 1) highlighted:</p>
+<pre class="pre codeblock"><code>IloPiecewiseLinear(x, 
+                   IloNumArray(env, 4, 3. ,3. ,5. ,5.),
+                   IloNumArray(env, 5, 0., <strong class="ph b">2</strong>., 0.5, <strong class="ph b">1.</strong>, -1.),
+                   0, 1);</code></pre>
+<p class="p">The anchor point of (0,1) specified as the last two arguments
+does not reside at a discontinuity in that example.</p>
+<p class="p">Similarly, one can specify the same discontinuous piecewise
+linear function using breakpoints and values  by providing the slope
+of the segment preceding the first break point, arrays of the breakpoints
+and associated function values, and the slope of the segment following
+the last breakpoint, like this:</p>
+<pre class="pre codeblock"><code>IloPiecewiseLinear(x, 0., 
+                   IloNumArray(env, 4, 3. ,3. ,5. ,5.), 
+                   IloNumArray(env, 4, 1., 3., 4., 5.), 
+                   -1.); </code></pre>
+<div class="fig fignone" id="User_manual.uss_usingPiecewiseLin.1003373__User_manual.uss_usingPiecewiseLin.1008156"><span class="figcap">Figure 1. A discontinuous piecewise linear function with steps</span><div class="image"><img class="image" src="../../../images/usingPiecewiseLin2.gif" alt="usingPiecewiseLin2.gif" /></div></div>
+<div class="note note"><span class="notetitle">Note:</span>  <p class="p">It may help to understand the signature
+of the function in this example to recall that in Cartesian coordinates,
+the slope of a horizontal line (that is, a line or segment parallel
+to the x-axis) is 0 (zero), and the slope of a vertical line (that
+is, a line or segment parallel to the y-axis) is undefined in the
+conventional representation: </p>
+ <p class="p">y = ax + b </p>
+ <p class="p">In the signature of the function, the undefined slope of
+the vertical segment at the point of discontinuity is represented
+as the height of the step. </p>
+ </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/discr_optim/pwl/01_pwl_title_synopsis.html" title="Demonstrates the use of piecewise linear functions to solve a transportation problem.">Using piecewise linear functions in optimization: a transport example</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IlcFloatVar</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IlcFloatVar.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IlcFloatVar</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+                class="include-file">&lt;ilcp/cpext.h&gt; </span></div><div><img
+                src="IlcFloatVar.png" border="0"
+                usemap="#svg_map_IlcFloatVar"
+                    alt="Map of IlcFloatVar"><map
+                        name="svg_map_IlcFloatVar"><area
+                        href="../classes/IlcFloatVar.html" shape="rect"
+                        alt="IlcFloatVar"
+                        coords="10.0,37.6357421875,68.0,55.271484375" /><area
+                        href="../classes/IlcFloatVar.html" shape="rect"
+                        alt="IlcFloatVar"
+                        coords="10.0,37.6357421875,68.0,55.271484375" /><area
+                        href="../classes/IlcFloatExp.html" shape="rect"
+                        alt="IlcFloatExp"
+            coords="49.0,10.0,107.0,27.6357421875" /></map></img></div>
+The class for representing constrainted floating-point variables.
+    <div
+                        class="description"><p>The class <code>IlcFloatVar</code> is a subclass of
+ <code>IlcFloatExp</code>. A constrained floating-point variable (an instance
+ of <code>IlcFloatVar</code>) is a constrained floating-point expression that
+ stores its domain (instead of computing the domain from the domains of its
+ subexpressions). The domain of a constrained floating-point variable
+ contains values of type <code><a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code>.</p><p>Most member functions in this class contain <code>assert</code>
+ statements. For an explanation of the macro <code>NDEBUG</code> (a way to
+ turn on or turn off these <code>assert</code> statements), see the concept
+ <a
+                href="../assert-and-ndebug.html">Assert and NDEBUG</a>. </p><p>Typically, in floating-point variables, the number of elements in the
+ domain is very high
+ (typically millions). Consequently, CP Optimizer associates an interval with the
+ variable to represent its domain. Because it is not practical to count the
+ elements in the domain of a floating-point variable, there are no
+ iterators for traversing the domain of continuous floating-point variables.
+ </p><p><strong>Failure</strong></p><p>If the boundaries of the domain are identical and equal to minus infinity
+ or plus infinity, then failure is triggered since no finite solution is then
+ possible. That situation can happen with the following declaration, for
+ example:</p><pre
+            class="sample">
+ IlcFloatVar x(cp,0,10);
+ IlcFloatVar y=IlcLog(x);
+ cp.add( x == 0);</pre><p>Those lines cause failure since the minimal and maximal boundaries of
+ <code>y</code> are equal to minus infinity. </p><p><strong>Domain-Delta And Propagation</strong></p><p>When a propagation event is triggered for a constrained variable, the
+ variable is pushed into the propagation queue if it was not already in the
+ queue. Moreover, the modifications of the domain of the constrained variable
+ are stored in a special set called the <em>domain-delta</em>. This
+ domain-delta can be accessed during the propagation of the constraints
+ posted on that variable. When all the constraints posted on that variable
+ have been processed, then the domain-delta is cleared. If the variable is
+ modified again, then the whole process begins again. The state of the
+ domain-delta is reversible.</p><p><strong>Backtracking and Reversibility</strong></p><p>All the member functions and operators defined for this class and capable
+ of modifying constrained variables are <em>reversible</em>. In particular,
+ the changes made by constraint-posting functions are made with reversible
+ assignments. Thus, the value, the domain, and the constraints posted on any
+ constrained variable are restored when CP Optimizer backtracks.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../typedefs/IlcFloat.html">IlcFloat</a>, <a
+                href="../classes/IlcFloatExp.html">IlcFloatExp</a>, <a
+            href="../classes/IlcFloatVarArray.html">IlcFloatVarArray</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_getMax">getMax</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public ILCDEPRECATED <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_getMaxDelta">getMaxDelta</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_getMin">getMin</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public ILCDEPRECATED <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_getMinDelta">getMinDelta</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_getOldMax">getOldMax</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_getOldMin">getOldMin</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_IlcFloatVar">IlcFloatVar</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_IlcFloatVar">IlcFloatVar</a>(<a
+                            href="../classes/IloCP.html">IloCP</a> cp, <a
+                            href="../typedefs/IlcFloat.html">IlcFloat</a> min, <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a> max, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_IlcFloatVar">IlcFloatVar</a>(<a
+                            href="../classes/IloCP.html">IloCP</a> cp, <a
+                            href="../typedefs/IlcFloat.html">IlcFloat</a> min, <a
+                            href="../typedefs/IlcFloat.html">IlcFloat</a> max, <a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a> precision, const char * name=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_IlcFloatVar">IlcFloatVar</a>(IlcFloatVarI * impl)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_IlcFloatVar">IlcFloatVar</a>(<a
+                    href="../classes/IlcIntVar.html">IlcIntVar</a> var)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_IlcFloatVar">IlcFloatVar</a>(const <a
+                    href="../classes/IlcFloatExp.html">IlcFloatExp</a> exp)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcBool.html">IlcBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_isInDelta">isInDelta</a>(<a
+                    href="../typedefs/IlcFloat.html">IlcFloat</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IlcBool.html">IlcBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IlcFloatVar.html#method_isInProcess">isInProcess</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_operator=">operator=</a>(<a
+                    href="../classes/IlcFloatExp.html">IlcFloatExp</a> exp)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_whenRange">whenRange</a>(const <a
+                    href="../classes/IlcDemon.html">IlcDemon</a> demon) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatVar.html#method_whenValue">whenValue</a>(const <a
+            href="../classes/IlcDemon.html">IlcDemon</a> demon) const</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IlcFloatExp.html">IlcFloatExp</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IlcFloatExp.html#method_display"></a><a
+                            href="../classes/IlcFloatExp.html#method_display">display</a>, <a
+                            href="../classes/IlcFloatExp.html#method_getMax"></a><a
+                            href="../classes/IlcFloatExp.html#method_getMax">getMax</a>, <a
+                            href="../classes/IlcFloatExp.html#method_getMin"></a><a
+                            href="../classes/IlcFloatExp.html#method_getMin">getMin</a>, <a
+                            href="../classes/IlcFloatExp.html#method_getPrecision"></a><a
+                            href="../classes/IlcFloatExp.html#method_getPrecision">getPrecision</a>, <a
+                            href="../classes/IlcFloatExp.html#method_getSize"></a><a
+                            href="../classes/IlcFloatExp.html#method_getSize">getSize</a>, <a
+                            href="../classes/IlcFloatExp.html#method_IlcFloatExp"></a><a
+                            href="../classes/IlcFloatExp.html#method_IlcFloatExp">IlcFloatExp</a>, <a
+                            href="../classes/IlcFloatExp.html#method_isFixed"></a><a
+                            href="../classes/IlcFloatExp.html#method_isFixed">isFixed</a>, <a
+                            href="../classes/IlcFloatExp.html#method_isInDomain"></a><a
+                            href="../classes/IlcFloatExp.html#method_isInDomain">isInDomain</a>, <a
+                            href="../classes/IlcFloatExp.html#method_setMax"></a><a
+                            href="../classes/IlcFloatExp.html#method_setMax">setMax</a>, <a
+                            href="../classes/IlcFloatExp.html#method_setMin"></a><a
+                            href="../classes/IlcFloatExp.html#method_setMin">setMin</a>, <a
+                            href="../classes/IlcFloatExp.html#method_setPrecision"></a><a
+                            href="../classes/IlcFloatExp.html#method_setPrecision">setPrecision</a>, <a
+                            href="../classes/IlcFloatExp.html#method_setRange"></a><a
+            href="../classes/IlcFloatExp.html#method_setRange">setRange</a></code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IlcFloatVar">IlcFloatVar</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IlcFloatVar</span>()</div><div
+                class="description"><p>This constructor creates a constrained floating-point variable which is empty, that is,
+ whose handle pointer is null. This object must then be assigned before it can be used,
+ exactly as when you, as a developer, declare a pointer. To check whether a floating-point
+ variable is empty, use the member function <code>IlcFloatExp::getImpl</code>.</p></div><hr /><h3><a
+            name="method_IlcFloatVar">IlcFloatVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IlcFloatVar</span>(<a
+                href="../classes/IloCP.html">IloCP</a> <span
+                class="parameter-name">cp</span>, <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+                class="parameter-name">min</span>, <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+                class="parameter-name">max</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates a continuous constrained floating-point variable with a domain
+ containing all the floating-point values between <code>min</code> and <code>max</code>,
+ inclusive. If <code>min</code> is greater than <code>max</code>, the function <code>IlcFail</code>
+ is called. The optional argument <code>name</code>, if provided, becomes the name of the constrained
+ floating-point variable. The precision associated with the constrained floating-point variable will
+ be the default precision of CP Optimizer.</p></div><hr /><h3><a
+            name="method_IlcFloatVar">IlcFloatVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IlcFloatVar</span>(<a
+                href="../classes/IloCP.html">IloCP</a> <span
+                class="parameter-name">cp</span>, <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+                class="parameter-name">min</span>, <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+                class="parameter-name">max</span>, <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+                class="parameter-name">precision</span>, const char * <span
+                class="parameter-name">name</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates a continuous constrained floating-point variable with a domain containing
+ all the floating-point values between <code>min</code> and <code>max</code>, inclusive. If
+ <code>min</code> is greater than <code>max</code>, the function <code>IlcFail</code> is called.
+ The argument <code>precision</code> becomes the precision associated with the constrained floating-point
+ variable. If the optional argument <code>name</code> is provided, it becomes the name of the constrained
+ floating-point variable.</p><p>For example, here's how to create a constrained floating-point variable with a minimum of 0, a
+ maximum of 10, and a name.</p><pre
+                class="sample">
+ IlcFloatVar x (cp, 0, 10, &quot;x&quot;);</pre><p>Here's how to create a constrained floating-point variable with an associated precision of 10-4.</p><pre
+                class="sample">
+ IlcFloatVar x (cp, 0, 100, 1e-4);</pre><p>You can specify both the name and the precision at the same time, like this:</p><pre
+                class="sample">
+ IlcFloatVar x (cp, -100, 100, 1e-4, &quot;x&quot;);</pre></div><hr /><h3><a
+            name="method_IlcFloatVar">IlcFloatVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IlcFloatVar</span>(IlcFloatVarI * <span
+            class="parameter-name">impl</span>)</div><div
+                class="description"><p>This constructor creates a handle object (an instance of the class
+ <code>IlcFloatVar</code>) from a pointer to an object (an instance of the class
+ <code>IlcFloatVarI</code>).</p></div><hr /><h3><a
+            name="method_IlcFloatVar">IlcFloatVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IlcFloatVar</span>(<a
+                href="../classes/IlcIntVar.html">IlcIntVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="description"><p>This constructor creates an instance of the class
+ <code>IlcFloatVar</code>. This instance is constrained to be equal to the
+ argument <code>var</code>.</p></div><hr /><h3><a
+            name="method_IlcFloatVar">IlcFloatVar</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IlcFloatVar</span>(const <a
+                href="../classes/IlcFloatExp.html">IlcFloatExp</a> <span
+            class="parameter-name">exp</span>)</div><div
+                class="description"><p>This constructor creates a constrained floating-point variable from
+    a constrained integer expression.  The newly created variable
+    has an associated domain which will be maintained consistent
+    with the computed bounds of <code>exp</code>.
+ </p></div><hr /><h3><a
+            name="method_getMax">getMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getMax</span>() const</div><div
+                class="description"><p>This member function returns the maximum of the domain of the invoking object.</p></div><hr /><h3><a
+            name="method_getMaxDelta">getMaxDelta</a></h3><div
+                class="prototype">public ILCDEPRECATED <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getMaxDelta</span>() const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2.</p><p>This member function returns the difference between the maximum of the domain of the invoking
+ constrained variable and the maximum of its domain-delta. This member function can be applied only
+ to the variable currently in process.</p></div><hr /><h3><a
+            name="method_getMin">getMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getMin</span>() const</div><div
+                class="description"><p>This member function returns the minimum of the domain of the invoking object.</p></div><hr /><h3><a
+            name="method_getMinDelta">getMinDelta</a></h3><div
+                class="prototype">public ILCDEPRECATED <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getMinDelta</span>() const</div><div
+                class="description"><p>This member function is deprecated in CP Optimizer 2.2.</p><p>This member function returns the difference between the minimum of the domain of the invoking
+ constrained variable and the minimum of its domain-delta. This member function can be applied only
+ to the variable currently in process.</p><p>For example, to know whether the minimum of a constrained floating-point variable <code>x</code>
+ has been modified since the last time the constraints posted on <code>x</code> were processed, it is
+ sufficient to test the value of <code>x.getMinDelta()</code>. If that test returns 0, then the minimum
+ of <code>x</code> has not been modified.</p></div><hr /><h3><a
+            name="method_getOldMax">getOldMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getOldMax</span>() const</div><div
+                class="description"><p>This member function returns the maximum of the domain-delta of the invoking constrained
+ variable. This member function can be applied only to the variable currently in process.</p></div><hr /><h3><a
+            name="method_getOldMin">getOldMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="function-name">getOldMin</span>() const</div><div
+                class="description"><p>This member function returns the minimum of the domain-delta of the invoking constrained
+ variable. This member function can be applied only to the variable currently in process.</p></div><hr /><h3><a
+            name="method_isInDelta">isInDelta</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcBool.html">IlcBool</a> <span
+                class="function-name">isInDelta</span>(<a
+                href="../typedefs/IlcFloat.html">IlcFloat</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p>This member function returns <code>IlcTrue</code> if the argument <code>value</code> belongs to
+ the domain-delta of the invoking constrained variable. This member function can be applied only to
+ the variable currently in process.</p></div><hr /><h3><a
+            name="method_isInProcess">isInProcess</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IlcBool.html">IlcBool</a> <span
+            class="function-name">isInProcess</span>() const</div><div
+                class="description"><p>This member function returns <code>IlcTrue</code> if the invoking constrained variable
+ is currently being processed by the constraint propagation algorithm. Only one variable can
+ be in process at a time.</p></div><hr /><h3><a
+            name="method_operator=">operator=</a></h3><div
+                class="prototype">public void <span
+                class="function-name">operator=</span>(<a
+                href="../classes/IlcFloatExp.html">IlcFloatExp</a> <span
+            class="parameter-name">exp</span>)</div><div
+                class="description"><p>This operator assigns an address to the handle pointer of the invoking object. That address is the
+ location of the implementation object of the argument <code>exp</code>. After the execution of this
+ operator, the invoking object and <code>exp</code> both point to the same implementation object.
+ Moreover, this assignment operator associates a domain with the constrained floating-point expression
+ <code>exp</code>, which is thus transformed into a constrained floating-point variable.</p></div><hr /><h3><a
+            name="method_whenRange">whenRange</a></h3><div
+                class="prototype">public void <span
+                class="function-name">whenRange</span>(const <a
+                href="../classes/IlcDemon.html">IlcDemon</a> <span
+            class="parameter-name">demon</span>) const</div><div
+                class="description"><p>This member function associates <code>demon</code> with the range event of the invoking
+ constrained expression. Whenever one of the boundaries of the domain of the invoking
+ constrained expression changes, the demon will be executed immediately. </p><p>Since a constraint is also a demon, a constraint can also be passed as an argument to
+ this member function. Whenever one of the boundaries of the domain of the invoking constrained
+ expression changes, the constraint will be propagated.</p></div><hr /><h3><a
+            name="method_whenValue">whenValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">whenValue</span>(const <a
+                href="../classes/IlcDemon.html">IlcDemon</a> <span
+            class="parameter-name">demon</span>) const</div><div class="description"><p>This member function associates <code>demon</code> with the value event of the invoking
+ constrained expression. Whenever the invoking constrained expression becomes fixed, the demon
+ will be executed immediately.</p><p>Since a constraint is also a demon, a constraint can also be passed as an argument to this
+ member function. Whenever the invoking constrained expression becomes fixed, the constraint
+ will be propagated.</p></div><hr /></body>
+</html>

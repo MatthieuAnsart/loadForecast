@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Examples: time limits on tuning in the Interactive Optimizer" />
+<meta name="abstract" content="Shows the effect of both deterministic and nondeterministic time limits on the tuning tool in the Interactive Optimizer." />
+<meta name="Description" content="Shows the effect of both deterministic and nondeterministic time limits on the tuning tool in the Interactive Optimizer." />
+<meta name="DC.subject" content="Interactive Optimizer, tuning tool time limit, time limit, tuning tool examples, determinism, tuning tool time limit (examples)" />
+<meta name="keywords" content="Interactive Optimizer, tuning tool time limit, time limit, tuning tool examples, determinism, tuning tool time limit (examples)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/01_tune_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_tuningTool.1041359" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/01_tune_title_synopsis.html" />
+<title>Examples: time limits on tuning in the Interactive Optimizer</title>
+</head>
+<body role="main" id="User_manual.uss_tuningTool.1041359">
+<h1 class="title topictitle1">Examples: time limits on tuning in the Interactive Optimizer</h1>
+<div class="body"><p class="shortdesc">Shows the effect of both deterministic and nondeterministic time limits on the tuning tool in
+the Interactive Optimizer.</p>
+<p class="p">Both overall system time limits (in seconds) and 
+overall deterministic time limits (in ticks) have an impact on 
+tuning. Likewise, both overall time limits and 
+per-problem, per-optimization time limits also govern 
+tuning. These examples in the Interactive Optimizer illustrate key points about time limits and tuning.</p>
+<p class="p"><strong class="ph b">First example: overall time limit and per-problem time limit in seconds</strong></p>
+<p class="p">As a first example, suppose that you want to spend an overall
+amount of time tuning the parameter settings for a given model, say,
+1000 seconds. Also suppose that you want CPLEX to make multiple attempts
+within that overall time limit to tune the parameter settings for
+your model. Suppose further that you want to set a time limit on each
+of those attempts, say, 200 seconds per attempt. </p>
+<p class="p">In the Interactive Optimizer, first enter your model
+into a session (for example, by reading a formatted file), like this:</p>
+<p class="p"> <samp class="ph codeph">read model.mps</samp> </p>
+<p class="p">Then set the overall time limit through the environment
+with this command:</p>
+<p class="p"> <samp class="ph codeph">set timelimit 1000</samp> </p>
+<p class="p">That command makes 1000 seconds available as a resource
+in the environment. The command effectively sets the overall time
+limit (<a class="xref" href="../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a>: <samp class="ph codeph">TiLim</samp>, <samp class="ph codeph">CPX_PARAM_TILIM</samp>). </p>
+<p class="p">Then set the tuning time limit, like this: </p>
+<p class="p"> <samp class="ph codeph">set tune timelimit 200</samp> </p>
+<p class="p">This series of commands tells CPLEX to tune the parameters
+of your model, making multiple attempts of 200 seconds each (set by
+the <a class="xref" href="../../../../Parameters/topics/TuningTiLim.html" title="Sets a nondeterministic time limit in seconds per model and per test set (that is, suite of models) applicable in tuning.">tuning time limit in seconds</a>: <samp class="ph codeph">TuningTiLim</samp>, <samp class="ph codeph">CPX_PARAM_TUNINGTILIM</samp>),
+within an overall time limit of 1000 seconds (set by the <a class="xref" href="../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a>: <samp class="ph codeph">TiLim</samp>, <samp class="ph codeph">CPX_PARAM_TILIM</samp>)
+.</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> Remember that system time limits in seconds lead to nondeterministic results in 
+tuning, as explained in the topics  
+<a class="xref" href="06_time_limits.html" title="Introduces parameters to set time limits on tuning.">Tuning and time limits</a> and 
+<a class="xref" href="06_time_limits_and_determinism.html" title="Documents the effect of tuning time limits on determinism.">Tuning time limits and determinism</a>. 
+If your application requires deterministic results, use deterministic time limits instead, as 
+illustrated in the next example.</div>
+<p class="p"><strong class="ph b">Second example: overall deterministic time limit and per-problem deterministic time limit in ticks</strong></p>
+<p class="p">As a second example, suppose that you want to spend an overall 
+amount of time deterministically tuning the parameter settings for a given model, say, 
+1000000 ticks. Also suppose that you want CPLEX to make multiple attempts
+within that overall time limit to tune the parameter settings for
+your model. Suppose further that you want to set a time limit on each
+of those attempts, say, 200 ticks per attempt. </p>
+<p class="p">In the Interactive Optimizer, as in the previous example, first enter your model
+into a session (for example, by reading a formatted file), like this:</p>
+<p class="p"> <samp class="ph codeph">read model.mps</samp> </p>
+<p class="p">Then set the overall deterministic time limit through the environment
+with this command:</p>
+<p class="p"> <samp class="ph codeph">set dettimelimit 1000000</samp> </p>
+<p class="p">That command makes 1000000 ticks available as a resource
+in the environment. The command effectively sets the overall deterministic time
+limit (<a class="xref" href="../../../../Parameters/topics/DetTiLim.html" title="Deterministic time limit">deterministic time limit</a>: 
+<samp class="ph codeph">DetTiLim</samp>, <samp class="ph codeph">CPX_PARAM_DETTILIM</samp>). </p>
+<p class="p">Then set the deterministic tuning time limit, like this: </p>
+<p class="p"> <samp class="ph codeph">set tune dettimelimit 200000</samp> </p>
+<p class="p">This series of commands tells CPLEX to tune the parameters
+of your model deterministically, making multiple attempts of 200000 ticks each (set by
+the <a class="xref" href="../../../../Parameters/topics/TuningDetTiLim.html" title="Sets a time limit in deterministic ticks per model and per test set (that is, suite of models) applicable in tuning.">deterministic tuning time limit</a>: 
+<samp class="ph codeph">TuningDetTiLim</samp>, <samp class="ph codeph">CPX_PARAM_TUNINGDETTILIM</samp>),
+within an overall time limit of 1000000 ticks 
+(set by the <a class="xref" href="../../../../Parameters/topics/DetTiLim.html" title="Deterministic time limit">deterministic time limit</a>: 
+<samp class="ph codeph">DetTiLim</samp>, <samp class="ph codeph">CPX_PARAM_DETTILIM</samp>).</p>
+<div class="note tip"><span class="tiptitle">Tip:</span> You can use both overall time limits (both system in seconds <strong class="ph b">and</strong> deterministic in ticks) 
+together; that is, you can set both <samp class="ph codeph">TiLim</samp> and <samp class="ph codeph">DetTiLim</samp> 
+simultaneously, as explained in the topic
+<a class="xref" href="06_time_limits.html" title="Introduces parameters to set time limits on tuning.">Tuning and time limits</a>. 
+However, you must <strong class="ph b">not</strong> mix a per-problem, per-optimization tuning time limit in seconds 
+with a <strong class="ph b">deterministic</strong> per-problem, per-optimization tuning time limit in ticks. 
+That is, do <strong class="ph b">not</strong> mix 
+<samp class="ph codeph">TuningTiLim, CPX_PARAM_TUNINGTILIM</samp> with 
+<samp class="ph codeph">TuningDetTiLim, CPX_PARAM_TUNINGDETTILIM</samp>, 
+again as explained in 
+<a class="xref" href="06_time_limits.html" title="Introduces parameters to set time limits on tuning.">Tuning and time limits</a>.</div>
+<p class="p"><strong class="ph b">Default behavior</strong></p>
+<p class="p">At default settings, these four time limits are set to infinity (that is, 1e+75 on most platforms). 
+These default settings are equivalent to setting the deterministic tuning time limit 
+<samp class="ph codeph">TuningDetTiLim, CPX_PARAM_TUNINGDETTILIM</samp> 
+to 1e+7.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/01_tune_title_synopsis.html" title="The tuning tool, a utility to aid you in improving the performance of your optimization applications, analyzes a model or a group of models and suggests a suite of parameter settings for you to use that provide better performance than the default parameter settings for your model or group of models. This topic documents the tuning tool of IBM ILOG CPLEX.">Tuning tool</a></div>
+</div>
+</div></body>
+</html>

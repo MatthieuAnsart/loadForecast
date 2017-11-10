@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Solving in batch mode and comparing KPIs" />
+<meta name="abstract" content="You can execute the same model with several different data sets and compare the resulting KPIs contained in a generated HTML document. You can also compare several models. To use this feature, you need to write some ILOG Script code." />
+<meta name="Description" content="You can execute the same model with several different data sets and compare the resulting KPIs contained in a generated HTML document. You can also compare several models. To use this feature, you need to write some ILOG Script code." />
+<meta name="DC.subject" content="batch mode, solving models with multiple data sets, KPIs, comparing, ILOG Script to solve in batch mode, saveKpi, in batch example" />
+<meta name="keywords" content="batch mode, solving models with multiple data sets, KPIs, comparing, ILOG Script to solve in batch mode, saveKpi, in batch example" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/usroplexamples/topics/opl_examples.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="solvinginbatchmodeandcomparingkpis" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/usroplexamples/topics/opl_examples.html" />
+<title>Solving in batch mode and comparing KPIs</title>
+</head>
+<body role="main" id="solvinginbatchmodeandcomparingkpis">
+<h1 class="title topictitle1">Solving in batch mode and comparing KPIs</h1>
+<div class="body"><p class="shortdesc">You can execute the same model with several different data
+sets and compare the resulting KPIs contained in a generated HTML
+document. You can also compare several models. To use this feature,
+you need to write some ILOG Script code.</p>
+<p class="p">The project named "batch", used to illustrate this feature, can
+be found in your installation, for example:</p>
+<p class="p"><span class="ph filepath">C:\Program Files\IBM\ILOG\CPLEX_Studio &lt;version&gt;\opl\examples\opl\batch</span></p>
+<p class="p">The batch project is composed of three separate examples:</p>
+<ul class="ul"><li class="li">A basic CPLEX® example,
+batchCPLEX</li>
+<li class="li">An advanced CPLEX example,
+batchAdvancedCPLEX</li>
+<li class="li">An advanced CP Optimizer example, batchAdvancedCP</li>
+</ul>
+<p class="p">These examples can be modified to be used on other projects.</p>
+<div class="section"><h2 class="title sectiontitle">Importing the batch project in the IDE</h2><p class="p">You
+can access the batch project from the IDE via the menu <span class="ph uicontrol">File&gt;Import&gt;Example</span>.
+In the wizard, double-click <span class="ph uicontrol">IBM ILOG OPL Examples</span>,
+then select <span class="ph uicontrol">Intermediate&gt;Batch examples</span>.</p>
+<p class="p"><img class="image" src="../images/batch_examples_import.jpg" alt="Import Examples wizard showing batch examples" /></p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Running the examples</h2><p class="p">To execute the examples
+outside the IDE, use the command <samp class="ph codeph">oplrun</samp>. For example:</p>
+<p class="p"><samp class="ph codeph">oplrun.exe
+-p batch "batchCPLEX"</samp></p>
+<p class="p">In the IDE, right-click a run
+configuration and select <span class="ph uicontrol">Run this</span>.</p>
+<p class="p"><div class="image"><img class="image" src="../images/batch_examples_runthis.jpg" alt="Run this command in contextual menu" /></div></p>
+<p class="p">When you execute
+a run configuration, a file named <span class="ph filepath">report.html</span> is
+generated in the folder containing the <samp class="ph codeph">.mod</samp> and <samp class="ph codeph">.dat</samp> files.
+This HTML report displays various KPIs for the models executed. The <span class="ph filepath">report.html</span> file
+can be viewed directly in the IDE.</p>
+<p class="p"><div class="image"><img class="image" src="../images/batch_examples_kpi_report.jpg" alt="KPI report after executing a run configuration" /></div></p>
+<p class="p">The
+three examples are described below.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Basic CPLEX batch</h2><p class="p">The run configuration <samp class="ph codeph">batchCPLEX</samp> is
+the simplest of the three examples. It solves, one by one, all the
+files from a given directory <samp class="ph codeph">dataPath</samp> and for a given
+duration <samp class="ph codeph">timeLimit</samp>, as specified in the <samp class="ph codeph">path.dat</samp> file.
+All the file formats supported by the CPLEX engine
+can be used. For the <samp class="ph codeph">batchCPLEX</samp> example, the values
+in the <samp class="ph codeph">path.dat</samp> file are:</p>
+<pre class="pre codeblock"><code>dataPath = "./data";
+timeLimit = 2;</code></pre>
+<p class="p">After each solve, the resulting KPIs
+are saved in a file named <samp class="ph codeph">cplexKPIs.kpi</samp>. This file
+is then re-read to generate a basic HTML report, <samp class="ph codeph">report.html</samp>.</p>
+<p class="p">The
+code for saving and reading KPIs in a CSV-type file is in a script
+called <samp class="ph codeph">kpiFile.js</samp>.  The two main classes in <samp class="ph codeph">kpiFile.js</samp> are <samp class="ph codeph">KpiOutputFile</samp>,
+with the method <samp class="ph codeph">saveAllKpi</samp>, and <samp class="ph codeph">KpiInputFile</samp> with
+the method <samp class="ph codeph">next()</samp> to get the next KPI. As shown below,
+the <samp class="ph codeph">saveAllKpi</samp> method can be redefined  to contain
+your own KPIs.</p>
+<pre class="pre codeblock"><code>function overload_output_saveAllKpi(modelName, modelParam, 
+                                    dataSetName, engine, previousTime) 
+{
+ if (typeof(engine)=="IloOplMain.IloCplex") {
+  // CPLEX
+	this.saveKpi(modelName, modelParam, dataSetName, 
+                    engine, "best obj", engine.getBestObjValue(), MAX);
+	this.saveKpi(modelName, modelParam, dataSetName, engine, 
+                    "status", engine.getCplexStatus(), MIN);
+	this.saveKpi(modelName, modelParam, dataSetName, engine, 
+                    "n cols", engine.getNcols(), MIN);
+	...
+ } else {
+	// CP
+		
+    }	
+} 	</code></pre>
+<p class="p">When all the solves have been performed, the <samp class="ph codeph">batchCPLEX</samp> example
+calls a small script, <samp class="ph codeph">htmlReport.js</samp>, which opens
+the generated KPI file and generates an HTML report.  In The import
+method that could be customized is <samp class="ph codeph">_generateReport(modelNames,
+datFileNames)</samp>. This script relies on the class <samp class="ph codeph">IloOplOutputFile</samp>.</p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Advanced CPLEX batch</h2><p class="p">This
+is a more advanced example that solves all the <samp class="ph codeph">.dat</samp> files
+in a subdirectory of data files from a given directory, against a
+list of <samp class="ph codeph">.mod</samp> files.</p>
+<p class="p">Because there is a KPI
+file for each <samp class="ph codeph">.mod</samp> file, you can solve and generate
+KPIs only for the selected <samp class="ph codeph">.mod</samp> file. You do not
+have to solve everything again.</p>
+<p class="p">Thus if, in your project, you
+have written a new <samp class="ph codeph">.mod</samp> file,  you can compare its
+KPIs against your other <samp class="ph codeph">.mod</samp> files without the need
+to rerun everything. In the <samp class="ph codeph">path.dat</samp> for this example,
+the parameter after the <samp class="ph codeph">.mod</samp> file indicates whether
+the solves have been performed. The value 1 means "to be solved",
+0 means "already solved, no need to re-run".</p>
+<pre class="pre codeblock"><code>models = {
+	&lt;"./gas/gas1.mod", 1&gt;,
+	&lt;"./gas/gas2.mod", 1&gt;
+};
+
+dataPath = "./gas/data";</code></pre>
+<p class="p">As in the previous example,
+custom KPIs can easily be added by editing  the following function
+in <samp class="ph codeph">batchMain.mod</samp>:</p>
+<pre class="pre codeblock"><code>function overload_output_saveAllKpi(modelName, modelParam, 
+                                    dataSetName, engine, previousTime)</code></pre>
+<p class="p">Once
+all the solves have been performed, all the KPI files are read and
+aggregated to generate a more advanced KPI report, where the best
+and the worst KPIs are highlighted in green or red (depending on whether
+the KPI was minimized or maximized).</p>
+<p class="p">For instance in the diagram
+below: the <samp class="ph codeph">obj</samp> KPI is maximized,  therefore the best
+value is 1800 (in green) and the worst value is 1500 (in red). The <samp class="ph codeph">time</samp> KPI
+is minimized.</p>
+<p class="p"><div class="image"><img class="image" src="../images/batch_examples_kpi_values.jpg" alt="Best and worst values in KPI report" /></div></p>
+</div>
+<div class="section"><h2 class="title sectiontitle">Advanced CP Optimizer batch</h2><p class="p">Instead of having
+a different data set for each run, the <samp class="ph codeph">batchAdvancedCP</samp> example
+has only one data set, which is an OPL project. The same OPL project
+is solved for a given time limit, but with a different random seed
+value for each run.</p>
+<p class="p">The <samp class="ph codeph">path.dat</samp> file for the
+example <samp class="ph codeph">batchAdvancedCP</samp> contains:</p>
+<pre class="pre codeblock"><code>dataPath = "./config";
+// The time limit
+timeLimit = 5;
+// solve the above OPL project for seed = 1 to the following value
+seed = 3;</code></pre>
+<p class="p">The random seed and time limit are set by
+code within a <samp class="ph codeph">for</samp> loop  just before running the CP
+engine. As in the previous examples, the KPIs can be customized.</p>
+<p class="p">The
+reporting is the same as in the example <samp class="ph codeph">batchAdvancedCPLEX</samp>.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/usroplexamples/topics/opl_examples.html" title="CPLEX Studio is delivered with numerous examples that illustrate the features of the product. You can use the examples to help you write your own OPL models.">Language and Interfaces Examples</a></div>
+</div>
+</div></body>
+</html>

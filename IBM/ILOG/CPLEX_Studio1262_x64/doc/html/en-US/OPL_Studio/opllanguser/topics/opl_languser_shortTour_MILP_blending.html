@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="The blending problem" />
+<meta name="abstract" content="Describes the problem and presents the model." />
+<meta name="Description" content="Describes the problem and presents the model." />
+<meta name="DC.subject" content="code samples, blending.mod" />
+<meta name="keywords" content="code samples, blending.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_MILP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_shortTour.1079946" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_MILP.html" />
+<title>The blending problem</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_shortTour.1079946">
+<h1 class="title topictitle1">The blending problem</h1>
+<div class="body"><p class="shortdesc">Describes the problem and presents the model.</p>
+<p class="p">The following blending problem is taken from W. Winston’s
+book (see the Bibliography). Consider the following application involving
+mixing some metals into an alloy. The metal may come from several
+sources: in pure form or from raw materials, scraps from previous
+mixes, or ingots. The alloy must contain a certain amount of the various
+metals, as expressed by a production constraint specifying lower and
+upper bounds for the quantity of each metal in the alloy. Each source
+also has a cost and the problem consists of blending the sources into
+the alloy while minimizing the cost and satisfying the production
+constraints. Similar problems arise in other domains, e.g., the oil,
+paint, and the food processing industries. The example below
+shows the two parts of the model for the blending problem.</p>
+<div class="example" id="usropllangtut.uss_langtut_shortTour.1079946__usropllangtut.uss_langtut_shortTour.1069985"><h2 class="title sectiontitle">A blending problem: part I (<span class="ph filepath">blending.mod</span>)</h2><pre class="pre codeblock"><code>int   NbMetals = ...;
+int   NbRaw = ...;
+int   NbScrap = ...;
+int   NbIngo = ...;
+
+range Metals = 1..NbMetals;
+range Raws = 1..NbRaw;
+range Scraps = 1..NbScrap;
+range Ingos = 1..NbIngo;
+
+float CostMetal[Metals] = ...;
+float CostRaw[Raws] = ...;
+float CostScrap[Scraps] = ...;
+float CostIngo[Ingos] = ...;
+float Low[Metals] = ...;
+float Up[Metals] = ...;
+float PercRaw[Metals][Raws] = ...;
+float PercScrap[Metals][Scraps] = ...;
+float PercIngo[Metals][Ingos] = ...;
+
+int Alloy  = ...;</code></pre>
+</div>
+<div class="example" id="usropllangtut.uss_langtut_shortTour.1079946__usropllangtut.uss_langtut_shortTour.1070019"><h2 class="title sectiontitle">A blending problem: part II (<span class="ph filepath">blending.mod</span>)</h2><pre class="pre codeblock"><code>dvar float+    p[Metals];
+dvar float+    r[Raws];
+dvar float+    s[Scraps];
+dvar int+      i[Ingos];
+dvar float    m[j in Metals] in Low[j] * Alloy .. Up[j] * Alloy;
+
+
+minimize 
+  sum(j in Metals) CostMetal[j] * p[j] +
+  sum(j in Raws)   CostRaw[j]   * r[j] +
+  sum(j in Scraps) CostScrap[j] * s[j] +
+  sum(j in Ingos)  CostIngo[j]  * i[j];
+subject to {
+  forall( j in Metals )
+    ct1:
+      m[j] == 
+      p[j] + 
+      sum( k in Raws )   PercRaw[j][k] * r[k] +
+      sum( k in Scraps ) PercScrap[j][k] * s[k] +
+      sum( k in Ingos )  PercIngo[j][k] * i[k];
+    ct2:  
+      sum( j in Metals ) m[j] == Alloy;
+}</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_shortTour_MILP.html" title="Presents OPL and MILP and describes a blending problem.">Mixed integer-linear programming: a blending problem</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="concept" />
+<meta name="DC.Title" content="OPL model files" />
+<meta name="abstract" content="Model files contain all your OPL statements. The data and the objective function are not mandatory and there may be more optional components, such as scripting statements, in a model file." />
+<meta name="Description" content="Model files contain all your OPL statements. The data and the objective function are not mandatory and there may be more optional components, such as scripting statements, in a model file." />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplquickstart/topics/opl_quickstart_understanding.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplquickstart.uss_fromortoopl.1031251" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplquickstart/topics/opl_quickstart_understanding.html" />
+<title>OPL model files</title>
+</head>
+<body role="main" id="oplquickstart.uss_fromortoopl.1031251">
+<h1 class="title topictitle1">OPL model files</h1>
+<div class="body conbody"><div class="abstract"><div class="shortdesc">Model files contain all your OPL statements. The data
+and the objective function are not mandatory and there may be more
+optional components, such as scripting statements, in a model file.</div>
+
+<p class="p">Model (<span class="ph filepath">.mod</span>) files
+contain all your OPL statements. The data and the objective function
+are not mandatory and there may be more optional components, such
+as scripting statements. Note that you can also generate a model file
+in a compiled form (<span class="ph filepath">.opl</span>) from
+the IDE for execution through the OPL interface libraries (see <a class="xref" href="../../refoplide/topics/opl_ideref_proces_output_compil.html" title="Describes how to generate a binary version of a model file.">Generating a compiled model</a>). The components of a model file are covered in the following sections.</p>
+</div>
+<div class="section" id="oplquickstart.uss_fromortoopl.1031251__oplquickstart.uss_fromortoopl.1030999"><h2 class="title sectiontitle">Declarations of data</h2><p class="p">Data declarations allow you to name your data items so
+that you can reference them easily in your model. For example, if
+your data in a table defines the cost of shipping one unit of material
+from location <em class="ph i">i</em> to
+location <em class="ph i">j</em>, you
+might want to call your item of data <em class="ph i">cost</em><sub class="ph sub">ij</sub> where <em class="ph i">i</em>=1, . . . , <em class="ph i">n</em> and <em class="ph i">j</em>=1, . . . , <em class="ph i">n</em> and <em class="ph i">n</em> is the number
+of locations in your model. You tell OPL that your model uses this
+data by declaring:</p>
+<p class="p"> </p>
+<pre class="pre codeblock"><code>int n = . . . ;
+float cost[1..n][1..n] = . . . ;</code></pre>
+<p class="p"> </p>
+<p class="p">The <strong class="ph b">. . .</strong> (ellipsis) means that the values for your table are located in a
+data file, which must be listed in the current project.</p>
+<p class="p">You could also list the data explicitly in the model
+file. However, it is recommended that you construct model files without
+specifying values for data so that you can later easily solve many
+instances of the same model by simply changing the data file. See
+also <a class="xref" href="opl_quickstart_runconfigs.html" title="Run configurations are a way of handling model, data, and settings files within a project.">Run configurations</a>.</p>
+<p class="p">Note that the <samp class="ph codeph">int</samp> type declared
+means that the numbers in the data file must be integers. If the numbers
+in the data file are floating-point numbers, use the <samp class="ph codeph">float</samp> type instead.</p>
+</div>
+<div class="section" id="oplquickstart.uss_fromortoopl.1031251__oplquickstart.uss_fromortoopl.1033027"><h2 class="title sectiontitle">Declarations of decision variables</h2><p class="p">In an OPL context, as opposed to IBM ILOG Script and
+to the general programming context, variables are decision variables.
+Declarations of decision variables name, and give the type of, each
+variable in the model. For example, if you want to create a variable
+that equals the amount of material shipped from location <em class="ph i">i</em> to location <em class="ph i">j</em>, you can create a variable named <em class="ph i">ship</em><sub class="ph sub">ij</sub>.</p>
+<pre class="pre codeblock"><code>dvar float+ ship[1..n][1..n];</code></pre>
+<p class="p">That statement declares an array of non-negative floating-point
+variables. (That is what <samp class="ph codeph">float+</samp> means).
+The <samp class="ph codeph">dvar</samp> keyword indicates that you are
+declaring a decision variable.</p>
+</div>
+<div class="section" id="oplquickstart.uss_fromortoopl.1031251__oplquickstart.uss_fromortoopl.1033044"><h2 class="title sectiontitle">An objective function</h2><p class="p">The objective function is a function that you want to
+optimize. This function must consist of variables and data that you
+have declared earlier in the model file. The objective function is
+introduced by either the <samp class="ph codeph">minimize</samp> or the <samp class="ph codeph">maximize</samp> keyword. For example,</p>
+<pre class="pre codeblock"><code>minimize sum(i,j in 1..n) cost[i][j]*ship[i][j];</code></pre>
+<p class="p">That statement indicates that you want to minimize the
+sum of the shipping costs for each origin-destination pair.</p>
+</div>
+<div class="section" id="oplquickstart.uss_fromortoopl.1031251__oplquickstart.uss_fromortoopl.1033081"><h2 class="title sectiontitle">Constraints</h2><p class="p">Constraints indicate the conditions necessary for a feasible
+solution to your model. You declare constraints within a <samp class="ph codeph">subject to</samp> block. For example,</p>
+<p class="p"> </p>
+<pre class="pre codeblock"><code>subject to {
+   forall(j in 1..n) sum(i in 1..n) ship[i][j] == demand[j];
+}</code></pre>
+<p class="p"> </p>
+<p class="p">That statement declares one set of constraints. There
+is a constraint for each destination. (That is what the <samp class="ph codeph">forall</samp> keyword indicates.) The constraint for each
+destination states that the sum of material shipped to that destination
+must equal the demand at that destination. The symbol <samp class="ph codeph">==</samp> indicates equals within a constraint block. The
+symbol <samp class="ph codeph">&lt;=</samp> indicates less than or equal
+to. The symbol <samp class="ph codeph">&gt;=</samp> indicates greater than
+or equal to.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplquickstart/topics/opl_quickstart_understanding.html" title="CPLEX Studio handles OPL project files, data files, model files, setting files, and run configurations.">Understanding OPL projects</a></div>
+</div>
+</div></body>
+</html>

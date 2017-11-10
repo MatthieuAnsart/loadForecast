@@ -1,0 +1,183 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2015. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012:  include <b><font color="#8A2BE2">"FlightPairing_data.mod"</font></b>;
+013:  include <b><font color="#8A2BE2">"PairingGeneration_data.mod"</font></b>;
+014:  
+015:  <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+016:  
+017:  <b><font color="#0000FF">int</font></b> NbFlights  = <b><font color="#7D007D">card</font></b>(flights);
+018:  <b><font color="#007D00">//int NbAirports = card(airports);</font></b>
+019:  <b><font color="#0000FF">int</font></b> MaxLegs = parameters.maxNbLegs;
+020:  <b><font color="#0000FF">int</font></b> latestArrivalTime = <b><font color="#7D007D">max</font></b>(f <b><font color="#0000FF">in</font></b> flights) f.arrivalTime;
+021:  <b><font color="#0000FF">int</font></b> MaxWorkTime = parameters.workDurationMax;
+022:  
+023:  <b><font color="#0000FF">range</font></b> FlightRange  = 1..NbFlights;
+024:  <b><font color="#0000FF">range</font></b> LegRange     = 1..MaxLegs;
+025:  
+026:  <b><font color="#007D00">// time horizon is limited by latest arrival time.</font></b>
+027:  <b><font color="#0000FF">range</font></b> horizon      = 0..latestArrivalTime;
+028:  
+029:  <b><font color="#007D00">/// intermediate arrays for CP</font></b>
+030:  TFlightData FlightsByIndex[ f <b><font color="#0000FF">in</font></b> FlightRange ] = <b><font color="#7D007D">item</font></b>(flights,f-1);
+031:  <b><font color="#0000FF">int</font></b> arrivalTimes  [ f <b><font color="#0000FF">in</font></b> FlightRange ] = FlightsByIndex[f].arrivalTime;
+032:  <b><font color="#0000FF">int</font></b> departureTimes[ f <b><font color="#0000FF">in</font></b> FlightRange ] = FlightsByIndex[f].departureTime;
+033:  <b><font color="#0000FF">int</font></b> FlyingTimes[ f <b><font color="#0000FF">in</font></b> FlightRange ] = FlightsByIndex[f].arrivalTime-FlightsByIndex[f].departureTime;
+034:  
+035:  <b><font color="#0000FF">int</font></b> fromAirportIndex[ f <b><font color="#0000FF">in</font></b> FlightRange] = <b><font color="#7D007D">ord</font></b>(airports,&lt;FlightsByIndex[f].fromAirportName&gt;);
+036:  <b><font color="#0000FF">int</font></b> toAirportIndex  [ f <b><font color="#0000FF">in</font></b> FlightRange] = <b><font color="#7D007D">ord</font></b>(airports,&lt;FlightsByIndex[f].toAirportName&gt;);
+037:  
+038:  TAirport originAirport     [f <b><font color="#0000FF">in</font></b> FlightRange] = <b><font color="#7D007D">item</font></b>( airports, <b><font color="#7D007D">ord</font></b>(airports,&lt;FlightsByIndex[f].fromAirportName&gt;) );
+039:  <b><font color="#007D00">//TAirport destinationAirport[f in FlightRange] = item( airports, ord(airports,&lt;FlightsByIndex[f].originAirportName&gt;) );</font></b>
+040:   
+041:  <b><font color="#0000FF">int</font></b> originTransitTimeMin[ f <b><font color="#0000FF">in</font></b> FlightRange ] = originAirport[f].transitTimeMin;
+042:  <b><font color="#0000FF">int</font></b> originTransitTimeMax[ f <b><font color="#0000FF">in</font></b> FlightRange ] = originAirport[f].transitTimeMax;
+043:  
+044:  <b><font color="#007D00">/// external generation parameters</font></b>
+045: 
+046:  {<b><font color="#0000FF">int</font></b>} forcedCoveredFlights = ...;
+047:  <b><font color="#0000FF">int</font></b> costMax = ...;
+048:  <b><font color="#0000FF">int</font></b> tabuLength = ...; <b><font color="#007D00">// crude way to avoid finding the same</font></b>
+049:  
+050:  {TPairingLeg} genLegs;
+051:  TPairingCost genCost;
+052:  
+053:  <b><font color="#007D00">/**</font></b>
+054: <b><font color="#007D00">  ** Pairings are modeled by a sequence of variables ranging over flights.</font></b>
+055: <b><font color="#007D00">  ** </font></b>
+056: <b><font color="#007D00">  */</font></b>
+057:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> flightVars[ LegRange ] <b><font color="#0000FF">in</font></b> FlightRange;
+058:  
+059:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> isActualLeg[ LegRange];
+060:  
+061:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ startTimeVar <b><font color="#0000FF">in</font></b> horizon;
+062:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ endTimeVar   <b><font color="#0000FF">in</font></b> horizon;
+063:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ totalFlyingTime <b><font color="#0000FF">in</font></b> 0..parameters.flyingDurationMax;
+064:  
+065:  <b><font color="#007D00">/// pay</font></b>
+066:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ costVar <b><font color="#0000FF">in</font></b> parameters.minPay..999999999;
+067:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ workTimeCostVar;
+068:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ flyingTimeCostVar;
+069:  
+070:  <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">int</font></b> pairingLengthExp = <b><font color="#7D007D">sum</font></b>(l <b><font color="#0000FF">in</font></b> LegRange) isActualLeg[l];
+071:  
+072:  <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ costVars[1..3];
+073:  
+074:  <b><font color="#0000FF">execute</font></b> DEBUG {
+075:    <b><font color="EA7D00">if</font></b> ( PairingGenerationData.DebugMode &gt;= 1 ) {
+076:      writeln(<b><font color="#8A2BE2">"-- searching for pairings with cost &lt; "</font></b>, costMax, <b><font color="#8A2BE2">", length !="</font></b>, tabuLength, <b><font color="#8A2BE2">", forced="</font></b>, forcedCoveredFlights); 
+077:     }
+078:  }
+079:  
+080: //minimize costVar;
+081: subject to
+082:  {
+083:     <b><font color="#007D00">// forbid one-leg pairings</font></b>
+084:     flightVars[1] != flightVars[2];
+085:     isActualLeg[1] == 1;
+086:     pairingLengthExp != tabuLength;
+087:     pairingLengthExp &gt;= 4;
+088:     
+089:     <b><font color="#007D00">// relate status vars to flight vars</font></b>
+090:     forall(l <b><font color="EA7D00">in</font></b> LegRange: l &gt; 1) {
+091:       isActualLeg[l] == (flightVars[l] != flightVars[l-1]);    
+092:     }
+093:     
+094:     <b><font color="#007D00">// return home at the end of the chain</font></b>
+095:     fromAirportIndex[ flightVars[1] ] == toAirportIndex[ flightVars[ MaxLegs]];
+096:     
+097:     <b><font color="#007D00">// either the chain ends or the airport chain is continuous</font></b>
+098:     forall(l <b><font color="EA7D00">in</font></b> 2..MaxLegs) {
+099:        (0 == isActualLeg[l])
+100:        ||
+101:        (fromAirportIndex[ flightVars[l] ] == toAirportIndex[ flightVars[l-1]]);
+102:     }
+103:   
+104:     forall (l <b><font color="EA7D00">in</font></b> 2..MaxLegs) {
+105:        (0 == isActualLeg[l])    
+106:      ||
+107:      (
+108:       departureTimes[ flightVars[l] ] &gt;= arrivalTimes[ flightVars[l-1]]
+109:       + originTransitTimeMin[ flightVars[l] ]
+110:       );
+111:      }
+112:     forall (l <b><font color="EA7D00">in</font></b> 2..MaxLegs) {       
+113:         (isActualLeg[l]==0)
+114:       || 
+115:       (
+116:       departureTimes[ flightVars[l] ] &lt;= arrivalTimes[ flightVars[l-1]]
+117:       + originTransitTimeMax[ flightVars[l] ]
+118:       );
+119:     }
+120:    
+121: 
+122:     
+123:     <b><font color="#007D00">/// propagate end of chain to the right</font></b>
+124:     forall (l <b><font color="EA7D00">in</font></b> LegRange: 1 &lt; l) {
+125:        isActualLeg[l-1] &gt;= isActualLeg[l];
+126:     }
+127:     
+128:     <b><font color="#007D00">// total flying time is counted only on "actual" legs</font></b>
+129:     totalFlyingTime == 
+130:     FlyingTimes[ flightVars[1]]
+131:     + sum(l <b><font color="EA7D00">in</font></b> 2..MaxLegs) ( FlyingTimes[ flightVars[l] ] * isActualLeg[l]);
+132:     
+133:     startTimeVar == departureTimes[ flightVars[1]];
+134:     endTimeVar   == arrivalTimes  [ flightVars[MaxLegs] ];
+135:     
+136:     (endTimeVar &lt;= startTimeVar + MaxWorkTime);
+137:     
+138:     flyingTimeCostVar &gt;= parameters.flyingPayRate * totalFlyingTime;
+139:     flyingTimeCostVar &lt;= parameters.flyingPayRate * totalFlyingTime+1;
+140:     workTimeCostVar &gt;= parameters.workPayRate * (endTimeVar - startTimeVar);
+141:     workTimeCostVar &lt;= parameters.workPayRate * (endTimeVar - startTimeVar)+1;
+142:     
+143:     <b><font color="#007D00">/// all that pain to use max[]</font></b>
+144:     costVars[1] == parameters.minPay;
+145:     costVars[2] == workTimeCostVar;
+146:     costVars[3] == flyingTimeCostVar;
+147:     
+148:     costVar == max(j <b><font color="EA7D00">in</font></b> 1..3) costVars[j];
+149:     
+150:      <b><font color="#007D00">// at least one forced flight is covered.</font></b>
+151:      <b><font color="EA7D00">if</font></b> ( card(forcedCoveredFlights) &gt; 0)
+152:        sum (f <b><font color="EA7D00">in</font></b> forcedCoveredFlights) count(flightVars, f ) &gt;= 1;
+153:     
+154:     <b><font color="#007D00">// ceiling on cost.</font></b>
+155:     costVar &lt; costMax;
+156:  }
+157:  
+158:  execute STORE {
+159:    <b><font color="EA7D00">var</font></b> lastTime = -1;
+160:    <b><font color="EA7D00">var</font></b> lastFlight = <b><font color="EA7D00">null</font></b>;
+161:    genLegs.clear();
+162:    <b><font color="EA7D00">for</font></b> (<b><font color="EA7D00">var</font></b> l <b><font color="EA7D00">in</font></b> LegRange) {
+163:      <b><font color="EA7D00">var</font></b> flightRank = flightVars[l];
+164:      <b><font color="EA7D00">var</font></b> flight = FlightsByIndex[flightRank];
+165:      genLegs.add(1, l, flightRank);
+166:      
+167:      <b><font color="EA7D00">if</font></b> ( flight == lastFlight ) <b><font color="EA7D00">break</font></b>;
+168:      <b><font color="#007D00">//writeln("* leg #", l, ", f#", flightRank, flight.name, ", from ", flight.fromAirportName, " to ", flight.toAirportName);</font></b>
+169:      <b><font color="EA7D00">var</font></b> idle = lastTime&gt;=0? flight.departureTime - lastTime: 0;
+170:      <b><font color="#007D00">//writeln("* idle: ", idle, ", fly time=", flight.arrivalTime-flight.departureTime);</font></b>
+171:      lastTime = flight.arrivalTime;
+172:      lastFlight = flight;
+173:    }
+174:    genCost.id = 1;
+175:    genCost.cost = costVar;
+176:    <b><font color="#007D00">//writeln(" work=", (endTimeVar - startTimeVar), ", flying=", totalFlyingTime);</font></b>
+177:    <b><font color="#007D00">//writeln(" cost=", costVar, ", work cost=", workTimeCostVar, ", fly cost=", flyingTimeCostVar);</font></b>
+178:  }
+</tt></pre>

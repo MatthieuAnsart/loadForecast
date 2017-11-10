@@ -1,0 +1,63 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: <b><font color="#0000FF">range</font></b> r = 1..10;
+13: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ x[r];
+14: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ y[r];
+15: <b><font color="#007D00">// The following array of values (defined as data) will be used as </font></b>
+16: <b><font color="#007D00">// a starting solution to warm-start the CPLEX search.</font></b>
+17: <b><font color="#0000FF">float</font></b> values[i <b><font color="#0000FF">in</font></b> r] = (i==5)? 10 : 0;
+18: 
+19: 
+20: <b><font color="#0000FF">minimize</font></b> 
+21:   <b><font color="#7D007D">sum</font></b>( i <b><font color="#0000FF">in</font></b> r ) x[i] + <b><font color="#7D007D">sum</font></b>( j <b><font color="#0000FF">in</font></b> r ) y[j];
+22: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b>{
+23:   ctSum:    
+24:     <b><font color="#7D007D">sum</font></b>( i <b><font color="#0000FF">in</font></b> r ) x[i] &gt;= 10;
+25:   <b><font color="#7D007D">forall</font></b>( j <b><font color="#0000FF">in</font></b> r )
+26:     ctEqual:
+27:       y[j] == j;
+28: }
+29: 
+30: <b><font color="#0000FF">main</font></b>{
+31:   <b><font color="#0000FF">thisOplModel</font></b>.generate();  
+32:   <b><font color="EA7D00">var</font></b> def = <b><font color="#0000FF">thisOplModel</font></b>.modelDefinition;   
+33:   <b><font color="#007D00">// Default behaviour</font></b>
+34:   writeln(<b><font color="#8A2BE2">"Default Behaviour"</font></b>);
+35:   <b><font color="EA7D00">var</font></b> cplex1 = <b><font color="EA7D00">new</font></b> IloCplex();
+36:   <b><font color="EA7D00">var</font></b> opl1 = <b><font color="EA7D00">new</font></b> IloOplModel(def, cplex1);
+37:   opl1.generate();
+38:   cplex1.solve();   
+39:   writeln(opl1.printSolution());
+40:   <b><font color="#007D00">// Setting initial solution</font></b>
+41:   writeln(<b><font color="#8A2BE2">"Setting initial solution"</font></b>);
+42:   <b><font color="EA7D00">var</font></b> cplex2 = <b><font color="EA7D00">new</font></b> IloCplex();
+43:   <b><font color="EA7D00">var</font></b> opl2 = <b><font color="EA7D00">new</font></b> IloOplModel(def, cplex2);
+44:   opl2.generate();
+45:   <b><font color="EA7D00">var</font></b> vectors = <b><font color="EA7D00">new</font></b> IloOplCplexVectors();
+46:   <b><font color="#007D00">// We attach the values (defined as data) as starting solution</font></b>
+47:   <b><font color="#007D00">// for the variables x.</font></b>
+48:   vectors.attach(opl2.x,opl2.values);
+49:   vectors.setVectors(cplex2);   
+50:   cplex2.solve();   
+51:   writeln(opl2.printSolution());
+52: 
+53:   opl1.end();
+54:   cplex1.end();
+55:   opl2.end();
+56:   cplex2.end();
+57:   0;
+58: }
+</tt></pre>

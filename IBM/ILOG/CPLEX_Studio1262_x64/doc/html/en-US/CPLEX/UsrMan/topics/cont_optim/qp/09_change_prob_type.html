@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Changing problem type in QPs" />
+<meta name="abstract" content="Explains special considerations about the change of the problem type of a quadratic program." />
+<meta name="Description" content="Explains special considerations about the change of the problem type of a quadratic program." />
+<meta name="DC.subject" content="problem type, quadratic programming and, quadratic program (QP), changing problem type" />
+<meta name="keywords" content="problem type, quadratic programming and, quadratic program (QP), changing problem type" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveQP.637558" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" />
+<title>Changing problem type in QPs</title>
+</head>
+<body role="main" id="User_manual.uss_solveQP.637558">
+<h1 class="title topictitle1">Changing problem type in QPs</h1>
+<div class="body"><p class="shortdesc">Explains special considerations about the change of the problem type of a quadratic program.</p>
+<p class="p"> 
+Situations in which you must change the problem type of your model arise, for example, when you remove 
+quadratic terms from the objective function of a QP or when you add a quadratic term to the objective
+function of a linear program (LP). This topic highlights whether and how to change problem type 
+according to the CPLEX component that you use (Concert Technology, Python API, Callable Library, 
+Interactive Optimizer).  </p>
+<p class="p"><strong class="ph b">Concert Technology</strong> (that
+is, applications written in the C++, Java, or .NET API of CPLEX) treats
+all models as capable of containing quadratic coefficients in the
+objective function. These coefficients can therefore be added or deleted
+at will. When extracting a model with a quadratic objective function,
+CPLEX will automatically detect it as a QP and make the required adjustments
+to data structures. Likewise, in the <strong class="ph b">Python API</strong>,
+CPLEX treats all models as capable of containing quadratic coefficients
+in the objective function.</p>
+<p class="p">However, the other ways of using CPLEX (the <strong class="ph b">Callable
+Library</strong> and the <strong class="ph b">Interactive Optimizer</strong>)
+require an explicit <em class="ph i">problem type</em> to
+distinguish a linear program (LP) from a QP. The following sections
+discuss the topic for these users.</p>
+<p class="p">When you enter a problem, CPLEX discovers the problem
+type from the available information. When read from a file (LP, MPS,
+or SAV format, for example), or entered interactively, a continuous
+optimization problem is usually treated as being of type QP if quadratic
+coefficients are present in the objective function and no quadratic
+terms are present among the constraints. (Quadratic terms among the
+constraints may make a problem of type QCP. For more about that type,
+see <a class="xref" href="../qcp/01_QCP_title_synopsis.html" title="Documents the solution of quadratically constrained programming problems (QCPs), including the special case of second order cone programming problems (SOCPs).">Solving problems with quadratic constraints (QCP)</a>.) Otherwise, the problem type is usually
+LP. The issue of problem types that support integer restrictions in
+conjunction with quadratic variables is discussed in <a class="xref" href="../../discr_optim/mip/01_mip_title_synopsis.html" title="Documents the solution of mixed integer programs (MIPs) with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values.">Solving mixed integer programming problems (MIP)</a>.</p>
+<p class="p">If you enter a problem that lacks any quadratic coefficients,
+its <em class="ph i">problem type</em> is
+initially LP. If you then wish to modify the problem to contain quadratic
+coefficients in the objective function, you do this by first changing
+the problem type to QP. Conversely, if you have entered a QP model
+and wish to remove all the quadratic coefficients from the objective
+function and thus convert the model to an LP, you must also change
+the problem type to LP. Note that deleting each of the quadratic coefficients
+individually still leaves the problem type as QP, although in most
+instances the distinction between this problem and its LP or QP counterpart
+is somewhat arbitrary in terms of the steps to solve it.</p>
+<p class="p">When using the <strong class="ph b">Interactive Optimizer</strong>,
+you use the command <samp class="ph codeph">change problem</samp>  with
+one of the following options:</p>
+<ul class="ul"><li class="li"><p class="p"><samp class="ph codeph">lp</samp> indicates
+that you want CPLEX to treat the problem as an LP. This change in
+Problem Type removes from your problem all the quadratic information,
+if there is any present.</p>
+</li>
+<li class="li"><p class="p"><samp class="ph codeph">qp</samp> indicates
+that you want CPLEX to treat the problem as a QP. This change in Problem
+Type creates in your problem an empty quadratic matrix, if there is
+not one already present, for the objective function, ready for populating
+via the <samp class="ph codeph">change qpterm</samp> command.</p>
+</li>
+</ul>
+<p class="p">From the <strong class="ph b">Callable Library</strong>,
+use the routine <samp class="ph codeph">CPXchgprobtype</samp> to change
+the problem type to either <samp class="ph codeph">CPXPROB_LP</samp> for
+the LP case or <samp class="ph codeph">CPXPROB_QP</samp> for the QP case
+for the same purposes.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/qp/01_QP_title_synopsis.html" title="Describes solving quadratic programming problems (QPs) with CPLEX.">Solving problems with a quadratic objective (QP)</a></div>
+</div>
+</div></body>
+</html>

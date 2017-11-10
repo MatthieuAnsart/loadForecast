@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Choosing an optimizer" />
+<meta name="abstract" content="Describes the optimizers available in the C++ API." />
+<meta name="Description" content="Describes the optimizers available in the C++ API." />
+<meta name="DC.subject" content="setting, algorithm in LP (C++ API), algorithm, choosing in LP (C++ API), LP, choosing algorithm (C++ API), enumeration, Algorithm (C++ API)" />
+<meta name="keywords" content="setting, algorithm in LP (C++ API), algorithm, choosing in LP (C++ API), LP, choosing algorithm (C++ API), enumeration, Algorithm (C++ API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/solving_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cplusIloCplex.124899" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/solving_synopsis.html" />
+<title>Choosing an optimizer</title>
+</head>
+<body role="main" id="User_manual.uss_cplusIloCplex.124899">
+<h1 class="title topictitle1">Choosing an optimizer</h1>
+<div class="body"><p class="shortdesc">Describes the optimizers available in the C++ API.</p>
+<p class="p">Solving the extracted model with CPLEX involves solving one or
+a series of continuous relaxations:</p>
+<ul class="ul"><li class="li"><p class="p">Only one continuous relaxation needs to be solved if the extracted
+model is continuous itself, that is, if it does not contain integer
+variables, Boolean variables, semi-continuous or semi-integer variables,
+logical constraints, special ordered sets (SOS), or piecewise linear
+functions. <a class="xref" href="../../cont_optim/simplex/01_simplex_title_synopsis.html" title="Documents the primal and dual simplex optimizers.">Solving LPs: simplex optimizers</a> and <a class="xref" href="../../cont_optim/barrier/01_barrier_title_synopsis.html" title="Documents solving linear programming problems by means of the CPLEX barrier optimizer.">Solving LPs: barrier optimizer</a> discuss
+the algorithms available for solving LPs. Similarly, <a class="xref" href="../../cont_optim/qp/01_QP_title_synopsis.html" title="Describes solving quadratic programming problems (QPs) with CPLEX.">Solving problems with a quadratic objective (QP)</a>, discusses
+the algorithms available for solving QPs. <a class="xref" href="../../cont_optim/qcp/01_QCP_title_synopsis.html" title="Documents the solution of quadratically constrained programming problems (QCPs), including the special case of second order cone programming problems (SOCPs).">Solving problems with quadratic constraints (QCP)</a> re-introduces
+the barrier optimizer in the context of quadratically constrained
+programming problems (QCPs). <a class="xref" href="../../discr_optim/pwl/01_pwl_title_synopsis.html" title="Demonstrates the use of piecewise linear functions to solve a transportation problem.">Using piecewise linear functions in optimization: a transport example</a> introduces
+piecewise-linear functions through a transportation example. <a class="xref" href="../../discr_optim/logical_constr/01_logical_constr_title_synopsis.html" title="Describes logical constraints in CPLEX with Concert Technology.">Logical constraints in optimization</a> introduces
+logical constraints, and chapters following it offer examples.</p>
+</li>
+<li class="li"><p class="p">In all other cases, the extracted problem that CPLEX sees is
+indeed a MIP and, in general, a <em class="ph i">series</em> of continuous relaxations
+needs to be solved. The method <samp class="ph codeph">cplex.isMIP</samp>  returns <samp class="ph codeph">IloTrue</samp> 
+in such a case. <a class="xref" href="../../discr_optim/mip/01_mip_title_synopsis.html" title="Documents the solution of mixed integer programs (MIPs) with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values.">Solving mixed integer programming problems (MIP)</a> discusses
+the algorithms applied.</p>
+ </li>
+</ul>
+<p class="p">The optimizer option used for solving the first continuous relaxation
+(whether it is the only one or just the first in a series of problems)
+is controlled by the root algorithm parameter: </p>
+<pre class="pre codeblock"><code>cplex.setParam(IloCplex::RootAlg, alg);</code></pre>
+<p class="p">where <samp class="ph codeph">alg</samp>  is a member of the nested enumeration <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html" title="(Opens in a new tab or window)">IloCplex_Algorithm</a>.</p>
+<p class="p"> As a nested enumeration, the fully qualified names that must be
+used in the program are <samp class="ph codeph">IloCplex::Primal</samp>, <samp class="ph codeph">IloCplex::Dual</samp>,
+and so on. <a class="xref" href="choose_optimizer.html#User_manual.uss_cplusIloCplex.124899__User_manual.uss_cplusIloCplex.134555" title="A two-column table showing optimizers and their purpose.">Table 1</a> displays
+the meaning of the optimizer options defined by <samp class="ph codeph">IloCplex::Algorithm</samp>. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span>  <p class="p">The choice <samp class="ph codeph">Sifting</samp>  is not available
+for QP models. Only the <samp class="ph codeph">Barrier</samp>  option is available
+for QCP models. <a class="xref" href="choose_optimizer.html#User_manual.uss_cplusIloCplex.124899__User_manual.uss_cplusIloCplex.136337" title="A five-column table showing the value associated with an optimizer at the root, the associated type of algorithm, whether the algorithm solves linear programs and mixed integer programs, whether the algorithm solves programs with a quadratic term in the objective, whether the algorithm solves programs with quadratic terms among the constraints.">Table 2</a> summarizes
+these options.</p>
+ </div>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing optimizers and their purpose." id="User_manual.uss_cplusIloCplex.124899__User_manual.uss_cplusIloCplex.134555" class="table NoBorder" rules="none" frame="void" border="0"><caption><span class="tablecap">Table 1. Optimizer options in IloCplex::Algorithm</span></caption><tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top"> <samp class="ph codeph">AutoAlg</samp> </td>
+<td class="entry" valign="top"> let CPLEX decide which algorithm to use </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html#Primal" title="(Opens in a new tab or window)">Primal</a>  </td>
+<td class="entry" valign="top"> use the primal simplex algorithm </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html#Dual" title="(Opens in a new tab or window)">Dual</a>  </td>
+<td class="entry" valign="top"> use the dual simplex algorithm </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html#Network" title="(Opens in a new tab or window)">Network</a>  </td>
+<td class="entry" valign="top"> use the primal network simplex algorithm on an embedded network
+followed by the dual simplex algorithm for LPs and the primal simplex
+algorithm for QPs on the entire problem </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html#Barrier" title="(Opens in a new tab or window)">Barrier</a>  </td>
+<td class="entry" valign="top"> use the barrier algorithm. The type of crossover performed
+after the barrier algorithm is set by the parameter <samp class="ph codeph">IloCplex::BarCrossAlg</samp> . </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html#Sifting" title="(Opens in a new tab or window)">Sifting</a>  </td>
+<td class="entry" valign="top"> use the sifting algorithm </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top">   <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/enumerations/IloCplex_Algorithm.html#Concurrent" title="(Opens in a new tab or window)">Concurrent</a>  </td>
+<td class="entry" valign="top"> use multiple algorithms concurrently on a multiprocessor system </td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A five-column table showing the value associated with an optimizer at the root, the associated type of algorithm, whether the algorithm solves linear programs and mixed integer programs, whether the algorithm solves programs with a quadratic term in the objective, whether the algorithm solves programs with quadratic terms among the constraints." id="User_manual.uss_cplusIloCplex.124899__User_manual.uss_cplusIloCplex.136337" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. Algorithm available at root by problem type</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d348642e216"> Value </th>
+<th class="entry" align="left" valign="top" id="d348642e218"> Algorithm Type </th>
+<th class="entry" align="left" valign="top" id="d348642e220"> <p class="p">LP?</p>
+ <p class="p">MILP?</p>
+ </th>
+<th class="entry" align="left" valign="top" id="d348642e228"> <p class="p">QP?</p>
+ <p class="p">MIQP?</p>
+ </th>
+<th class="entry" align="left" valign="top" id="d348642e236"> <p class="p">QCP?</p>
+ <p class="p">MIQCP?</p>
+ </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e216 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" headers="d348642e218 ">  <samp class="ph codeph">IloCplex::AutoAlg</samp>  </td>
+<td class="entry" valign="top" headers="d348642e220 "> yes </td>
+<td class="entry" valign="top" headers="d348642e228 "> yes </td>
+<td class="entry" valign="top" headers="d348642e236 "> yes </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e216 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" headers="d348642e218 ">  <samp class="ph codeph">IloCplex::Primal</samp>  </td>
+<td class="entry" valign="top" headers="d348642e220 "> yes </td>
+<td class="entry" valign="top" headers="d348642e228 "> yes </td>
+<td class="entry" valign="top" headers="d348642e236 "> not available </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e216 ">  <samp class="ph codeph">2</samp>  </td>
+<td class="entry" valign="top" headers="d348642e218 ">  <samp class="ph codeph">IloCplex::Dual</samp>  </td>
+<td class="entry" valign="top" headers="d348642e220 "> yes </td>
+<td class="entry" valign="top" headers="d348642e228 "> yes </td>
+<td class="entry" valign="top" headers="d348642e236 "> not available </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e216 ">  <samp class="ph codeph">3</samp>  </td>
+<td class="entry" valign="top" headers="d348642e218 ">  <samp class="ph codeph">IloCplex::Network</samp>  </td>
+<td class="entry" valign="top" headers="d348642e220 "> yes </td>
+<td class="entry" valign="top" headers="d348642e228 "> yes </td>
+<td class="entry" valign="top" headers="d348642e236 "> not available </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e216 ">  <samp class="ph codeph">4</samp>  </td>
+<td class="entry" valign="top" headers="d348642e218 ">  <samp class="ph codeph">IloCplex::Barrier</samp>  </td>
+<td class="entry" valign="top" headers="d348642e220 "> yes </td>
+<td class="entry" valign="top" headers="d348642e228 "> yes </td>
+<td class="entry" valign="top" headers="d348642e236 "> yes </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e216 "> 5 </td>
+<td class="entry" valign="top" headers="d348642e218 ">  <samp class="ph codeph">IloCplex::Sifting</samp>  </td>
+<td class="entry" valign="top" headers="d348642e220 "> yes </td>
+<td class="entry" valign="top" headers="d348642e228 "> not available </td>
+<td class="entry" valign="top" headers="d348642e236 "> not available </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e216 "> 6 </td>
+<td class="entry" valign="top" headers="d348642e218 ">  <samp class="ph codeph">IloCplex::Concurrent</samp>  </td>
+<td class="entry" valign="top" headers="d348642e220 "> yes </td>
+<td class="entry" valign="top" headers="d348642e228 "> yes </td>
+<td class="entry" valign="top" headers="d348642e236 "> not available </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">If the extracted model requires the solution of more than one continuous
+relaxation, the algorithm for solving the first one at the root is
+controlled by the <samp class="ph codeph">RootAlg</samp>  parameter. The algorithm
+at all other nodes except the root is controlled by the <samp class="ph codeph">NodeAlg</samp> 
+parameter: </p>
+<pre class="pre codeblock"><code>cplex.setParam(IloCplex::NodeAlg, alg)</code></pre>
+<p class="p"> <a class="xref" href="choose_optimizer.html#User_manual.uss_cplusIloCplex.124899__User_manual.uss_cplusIloCplex.136452" title="A five-column table showing the value associated with an optimizer at nodes, the associated type of algorithm, whether the algorithm solves mixed integer linear programs, whether the algorithm solves programs with a quadratic term in the objective, whether the algorithm solves programs with quadratic terms among the constraints.">Table 3</a> summarizes
+the options available at nodes.  </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A five-column table showing the value associated with an optimizer at nodes, the associated type of algorithm, whether the algorithm solves mixed integer linear programs, whether the algorithm solves programs with a quadratic term in the objective, whether the algorithm solves programs with quadratic terms among the constraints." id="User_manual.uss_cplusIloCplex.124899__User_manual.uss_cplusIloCplex.136452" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 3. Algorithm types for NodeAlg </span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d348642e391"> Value </th>
+<th class="entry" align="left" valign="top" id="d348642e393"> Algorithm Type </th>
+<th class="entry" align="left" valign="top" id="d348642e395"> MILP? </th>
+<th class="entry" align="left" valign="top" id="d348642e397"> MIQP? </th>
+<th class="entry" align="left" valign="top" id="d348642e399"> MIQCP? </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e391 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" headers="d348642e393 ">  <samp class="ph codeph">IloCplex::Auto</samp>  </td>
+<td class="entry" valign="top" headers="d348642e395 "> yes </td>
+<td class="entry" valign="top" headers="d348642e397 "> yes </td>
+<td class="entry" valign="top" headers="d348642e399 "> yes </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e391 ">  <samp class="ph codeph">1</samp>  </td>
+<td class="entry" valign="top" headers="d348642e393 ">  <samp class="ph codeph">IloCplex::Primal</samp>  </td>
+<td class="entry" valign="top" headers="d348642e395 "> yes </td>
+<td class="entry" valign="top" headers="d348642e397 "> yes </td>
+<td class="entry" valign="top" headers="d348642e399 "> not available </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e391 ">  <samp class="ph codeph">2</samp>  </td>
+<td class="entry" valign="top" headers="d348642e393 ">  <samp class="ph codeph">IloCplex::Dual</samp>  </td>
+<td class="entry" valign="top" headers="d348642e395 "> yes </td>
+<td class="entry" valign="top" headers="d348642e397 "> yes </td>
+<td class="entry" valign="top" headers="d348642e399 "> not available </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e391 ">  <samp class="ph codeph">3</samp>  </td>
+<td class="entry" valign="top" headers="d348642e393 ">  <samp class="ph codeph">IloCplex::Network</samp>  </td>
+<td class="entry" valign="top" headers="d348642e395 "> yes </td>
+<td class="entry" valign="top" headers="d348642e397 "> not available  </td>
+<td class="entry" valign="top" headers="d348642e399 "> not available </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e391 ">  <samp class="ph codeph">4</samp>  </td>
+<td class="entry" valign="top" headers="d348642e393 ">  <samp class="ph codeph">IloCplex::Barrier</samp>  </td>
+<td class="entry" valign="top" headers="d348642e395 "> yes </td>
+<td class="entry" valign="top" headers="d348642e397 "> yes </td>
+<td class="entry" valign="top" headers="d348642e399 "> yes </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d348642e391 "> 5 </td>
+<td class="entry" valign="top" headers="d348642e393 ">  <samp class="ph codeph">IloCplex::Sifting</samp>  </td>
+<td class="entry" valign="top" headers="d348642e395 "> yes </td>
+<td class="entry" valign="top" headers="d348642e397 "> not available </td>
+<td class="entry" valign="top" headers="d348642e399 "> not available </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/solving_synopsis.html" title="Describes facilities for solving a model in the C++ API.">Solving the model</a></div>
+</div>
+</div></body>
+</html>

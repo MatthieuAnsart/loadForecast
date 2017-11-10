@@ -1,0 +1,671 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloExpr</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.concert/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloExpr.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloExpr</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilconcert/iloexpression.h</span></div><div><img
+                src="IloExpr.png" border="0" usemap="#svg_map_IloExpr"
+                    alt="Map of IloExpr"><map
+                        name="svg_map_IloExpr"><area
+                        href="../classes/IloExpr.html" shape="rect"
+                        alt="IloExpr"
+                        coords="10.0,92.9072265625,88.0,110.54296875" /><area
+                        href="../classes/IloExpr.html" shape="rect"
+                        alt="IloExpr"
+                        coords="10.0,92.9072265625,88.0,110.54296875" /><area
+                        href="../classes/IloNumExpr.html" shape="rect"
+                        alt="IloNumExpr"
+                        coords="59.0,65.271484375,137.0,82.9072265625" /><area
+                        href="../classes/IloNumExprArg.html"
+                        shape="rect" alt="IloNumExprArg"
+                        coords="108.0,37.6357421875,186.0,55.271484375" /><area
+                        href="../classes/IloExtractable.html"
+                        shape="rect" alt="IloExtractable"
+            coords="157.0,10.0,235.0,27.6357421875" /></map></img></div>
+An instance of this class represents an expression in a model.
+    <div
+                    class="description"><p>An instance of <code>IloExpr</code> is a handle.</p><p><strong>Expressions in Environments</strong></p><p>The variables in an expression must all belong to the same environment as
+ the expression itself. In other words, you must not mix variables from
+ different environments within the same expression.</p><p>Most member functions in this class contain <code>assert</code>
+ statements. For an explanation of the macro <code>NDEBUG</code> (a way to
+ turn on or turn off these <code>assert</code> statements), see the concept
+ <a
+                href="../assert-and-ndebug.html">Assert and NDEBUG</a>.
+ </p><p><strong>Programming Hint: Creating Expressions</strong></p><p>In addition to using a constructor of this class to create an expression,
+ you may also initialize an instance of <code>IloExpr</code> as a C++
+ expression built from variables of a model. For example:</p><pre
+                        class="sample">
+
+ IloNumVar x;
+ IloNumVar y;
+ IloExpr expr = x + y;</pre><p><strong>Programming Hint: Empty Handles and Null Expressions</strong></p><p>This statement creates an empty handle:</p><p><code>IloExpr e1; </code></p><p>You must initialize it before you use it. For example, if you attempt to
+ use it in this way:</p><p><code>e1 += 10; // BAD IDEA</code></p><p>Without the compiler option <code>-DNDEBUG</code>, that line will cause
+ a failure at execution time because you are attempting to use
+ an empty handle.</p><p>In contrast, the following statement</p><p><code>IloExpr e2(env);</code></p><p>creates a handle to a null expression. You can use this handle to build
+ up an expression, for example, in this way:</p><p><code>e2 += 10; // OK</code></p><p><strong>Normalizing Linear Expressions: Reducing the Terms</strong></p><p><em>Normalizing</em> is sometimes known as <em>reducing the terms</em> of
+ a linear expression. </p><p>Linear expressions consist of terms made up of constants and variables
+ related by arithmetic operations; for example, x + 3y is a linear expression
+ of two terms consisting of two variables. In some expressions, a given
+ variable may appear in more than one term, for example, x + 3y +2x. Concert
+ Technology has more than one way of dealing with linear expressions in this
+ respect, and you control which way Concert Technology treats expressions
+ from your application. </p><p>In one mode, Concert Technology analyzes linear expressions that your
+ application passes it and attempts to reduce them so that a given variable
+ appears in only one term in the linear expression. This is the default
+ mode. You set this mode with the member function <code><a
+                        href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a>(IloTrue)</code>.</p><p>In the other mode, Concert Technology assumes that no variable appears in
+ more than one term in any of the linear expressions that your application
+ passes to Concert Technology. We call this mode assume normalized linear
+ expressions. You set this mode with the member function <code><a
+            href="../classes/IloEnv.html#method_setNormalizer">IloEnv::setNormalizer</a>(IloFalse)</code>.  </p><p>Certain constructors and member functions in this class check this
+ setting in the environment and behave accordingly: they assume that no
+ variable appears in more than one term in a linear expression. This mode may
+ save time during computation, but it entails the risk that a linear
+ expression may contain one or more variables, each of which appears in one
+ or more terms. Such a case may cause certain assertions in member functions
+ of this class to fail if you do not compile with the flag
+ <code>-DNDEBUG</code>.</p><p>Certain constructors and member functions in this class check this
+ setting in the environment and behave accordingly: they attempt to reduce
+ expressions. This mode may require more time during preliminary computation,
+ but it avoids of the possibility of a failed assertion in case of
+ duplicates.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloExprArray.html">IloExprArray</a>, <a
+            href="../classes/IloModel.html">IloModel</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_getConstant">getConstant</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloNumLinTermI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_getImpl">getImpl</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloExpr_LinearIterator.html">IloExpr::LinearIterator</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_getLinearIterator">getLinearIterator</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloExpr_QuadIterator.html">IloExpr::QuadIterator</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_getQuadIterator">getQuadIterator</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>(IloNumExprI * expr)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>(const IloNumLinExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>(const IloIntLinExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>(const IloNumQuadExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>(const IloIntQuadExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>(<a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a>)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_IloExpr">IloExpr</a>(const <a
+                            href="../classes/IloEnv.html">IloEnv</a> env, <a
+                    href="../typedefs/IloNum.html">IloNum</a> val=0)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_isNormalized">isNormalized</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_normalize">normalize</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator*=">operator*=</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> val)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator+=">operator+=</a>(const IloIntQuadExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator+=">operator+=</a>(const IloNumQuadExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator+=">operator+=</a>(const IloIntLinExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator+=">operator+=</a>(const IloNumLinExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator+=">operator+=</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator+=">operator+=</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator+=">operator+=</a>(const <a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a> expr)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator+=">operator+=</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> val)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator-=">operator-=</a>(const IloIntQuadExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator-=">operator-=</a>(const IloNumQuadExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator-=">operator-=</a>(const IloIntLinExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloExpr.html#method_operator-=">operator-=</a>(const IloNumLinExprTerm term)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator-=">operator-=</a>(const <a
+                    href="../classes/IloIntVar.html">IloIntVar</a> var)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator-=">operator-=</a>(const <a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator-=">operator-=</a>(const <a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a> expr)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator-=">operator-=</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> val)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public IloExpr &amp;</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_operator/=">operator/=</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> val)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_remove">remove</a>(const <a
+                    href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_setConstant">setConstant</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> cst)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_setLinearCoef">setLinearCoef</a>(const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../typedefs/IloNum.html">IloNum</a> value)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_setLinearCoefs">setLinearCoefs</a>(const <a
+                            href="../classes/IloNumVarArray.html">IloNumVarArray</a> vars, <a
+                    href="../classes/IloNumArray.html">IloNumArray</a> values)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_setNumConstant">setNumConstant</a>(<a
+                    href="../typedefs/IloNum.html">IloNum</a> constant)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloExpr.html#method_setQuadCoef">setQuadCoef</a>(const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var1, const <a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var2, <a
+            href="../typedefs/IloNum.html">IloNum</a> value)</code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloNumExpr.html">IloNumExpr</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloNumExpr.html#method_getImpl"></a><a
+                            href="../classes/IloNumExpr.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr"></a><a
+                            href="../classes/IloNumExpr.html#method_IloNumExpr">IloNumExpr</a>, <a
+                            href="../classes/IloNumExpr.html#method_operator*="></a><a
+                            href="../classes/IloNumExpr.html#method_operator*=">operator*=</a>, <a
+                            href="../classes/IloNumExpr.html#method_operator+="></a><a
+                            href="../classes/IloNumExpr.html#method_operator+=">operator+=</a>, <a
+                            href="../classes/IloNumExpr.html#method_operator+="></a><a
+                            href="../classes/IloNumExpr.html#method_operator+=">operator+=</a>, <a
+                            href="../classes/IloNumExpr.html#method_operator-="></a><a
+                            href="../classes/IloNumExpr.html#method_operator-=">operator-=</a>, <a
+                            href="../classes/IloNumExpr.html#method_operator-="></a><a
+                            href="../classes/IloNumExpr.html#method_operator-=">operator-=</a>, <a
+                            href="../classes/IloNumExpr.html#method_operator/="></a><a
+            href="../classes/IloNumExpr.html#method_operator/=">operator/=</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloNumExprArg.html">IloNumExprArg</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloNumExprArg.html#method_getImpl"></a><a
+                            href="../classes/IloNumExprArg.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg"></a><a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg">IloNumExprArg</a>, <a
+                            href="../classes/IloNumExprArg.html#method_IloNumExprArg"></a><a
+            href="../classes/IloNumExprArg.html#method_IloNumExprArg">IloNumExprArg</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                            colspan="1">Inherited Methods from <code><a
+                    href="../classes/IloExtractable.html">IloExtractable</a></code></th></tr><tr><td
+                            width="100%"><code><a
+                            href="../classes/IloExtractable.html#method_asConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_asConstraint">asConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_asIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asIntExpr">asIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asModel"></a><a
+                            href="../classes/IloExtractable.html#method_asModel">asModel</a>, <a
+                            href="../classes/IloExtractable.html#method_asNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_asNumExpr">asNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_asObjective"></a><a
+                            href="../classes/IloExtractable.html#method_asObjective">asObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_asVariable"></a><a
+                            href="../classes/IloExtractable.html#method_asVariable">asVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_end"></a><a
+                            href="../classes/IloExtractable.html#method_end">end</a>, <a
+                            href="../classes/IloExtractable.html#method_getEnv"></a><a
+                            href="../classes/IloExtractable.html#method_getEnv">getEnv</a>, <a
+                            href="../classes/IloExtractable.html#method_getId"></a><a
+                            href="../classes/IloExtractable.html#method_getId">getId</a>, <a
+                            href="../classes/IloExtractable.html#method_getImpl"></a><a
+                            href="../classes/IloExtractable.html#method_getImpl">getImpl</a>, <a
+                            href="../classes/IloExtractable.html#method_getName"></a><a
+                            href="../classes/IloExtractable.html#method_getName">getName</a>, <a
+                            href="../classes/IloExtractable.html#method_getObject"></a><a
+                            href="../classes/IloExtractable.html#method_getObject">getObject</a>, <a
+                            href="../classes/IloExtractable.html#method_IloExtractable"></a><a
+                            href="../classes/IloExtractable.html#method_IloExtractable">IloExtractable</a>, <a
+                            href="../classes/IloExtractable.html#method_isConstraint"></a><a
+                            href="../classes/IloExtractable.html#method_isConstraint">isConstraint</a>, <a
+                            href="../classes/IloExtractable.html#method_isIntExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isIntExpr">isIntExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isModel"></a><a
+                            href="../classes/IloExtractable.html#method_isModel">isModel</a>, <a
+                            href="../classes/IloExtractable.html#method_isNumExpr"></a><a
+                            href="../classes/IloExtractable.html#method_isNumExpr">isNumExpr</a>, <a
+                            href="../classes/IloExtractable.html#method_isObjective"></a><a
+                            href="../classes/IloExtractable.html#method_isObjective">isObjective</a>, <a
+                            href="../classes/IloExtractable.html#method_isVariable"></a><a
+                            href="../classes/IloExtractable.html#method_isVariable">isVariable</a>, <a
+                            href="../classes/IloExtractable.html#method_removeFromAll"></a><a
+                            href="../classes/IloExtractable.html#method_removeFromAll">removeFromAll</a>, <a
+                            href="../classes/IloExtractable.html#method_setLocation"></a><a
+                            href="../classes/IloExtractable.html#method_setLocation">setLocation</a>, <a
+                            href="../classes/IloExtractable.html#method_setName"></a><a
+                            href="../classes/IloExtractable.html#method_setName">setName</a>, <a
+                            href="../classes/IloExtractable.html#method_setObject"></a><a
+            href="../classes/IloExtractable.html#method_setObject">setObject</a></code></td></tr></table><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                        colspan="2">Inner Class</th></tr><tr><td><a
+                        href="../classes/IloExpr_LinearIterator.html">IloExpr::LinearIterator</a></td><td>
+An iterator over the linear part of an expression.
+        </td></tr><tr><td><a
+            href="../classes/IloExpr_QuadIterator.html">IloExpr::QuadIterator</a></td><td>
+An iterator over quadratic terms in a linear expression.
+        </td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+            class="function-name">IloExpr</span>()</div><div
+                class="description"><p>This constructor creates an empty handle. You must initialize it before you use
+ it.</p></div><hr /><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloExpr</span>(IloNumExprI * <span
+            class="parameter-name">expr</span>)</div><div
+                class="description"><p>This constructor creates an expression from a pointer to the implementation class
+ of numeric expressions <code>IloNumExprI*</code>.</p></div><hr /><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloExpr</span>(const IloNumLinExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This constructor creates an integer expression with linear terms using the
+ undocumented class <code>IloNumLinExprTerm</code>.</p></div><hr /><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloExpr</span>(const IloIntLinExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This constructor creates an integer expression with linear terms using the
+ undocumented class <code>IloIntLinExprTerm</code>.</p></div><hr /><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloExpr</span>(const IloNumQuadExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This constructor creates an expression using the undocumented class
+ <code>IloNumExprArg</code>.</p></div><hr /><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloExpr</span>(const IloIntQuadExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This constructor creates an integer expression with linear terms using the
+ undocumented class <code>IloIntLinExprTerm</code>.</p></div><hr /><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloExpr</span>(<a
+            href="../classes/IloNumExprArg.html">IloNumExprArg</a>)</div><div
+                class="description"><p>This constructor creates an expression using the undocumented class
+ <code>IloNumExprArg</code>.</p></div><hr /><h3><a
+            name="method_IloExpr">IloExpr</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloExpr</span>(const <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+                class="parameter-name">env</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">val</span>=<span
+            class="parameter-name">0</span>)</div><div
+                class="description"><p>This constructor creates an expression initialized to the value 
+ <code>val</code> in the environment specified by <code>env</code>. 
+ This constructor may be used to build other expressions from variables
+ belonging to <code>env</code>. You must not mix variables of different
+ environments within an expression.</p></div><hr /><h3><a
+            name="method_getConstant">getConstant</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getConstant</span>() const</div><div
+                class="description"><p>This member function returns the constant term in the invoking
+ expression.</p></div><hr /><h3><a
+            name="method_getImpl">getImpl</a></h3><div
+                class="prototype">public IloNumLinTermI * <span
+            class="function-name">getImpl</span>() const</div><div
+                class="description"><p>This member function returns the implementation object of the invoking
+ enumerated variable.</p></div><hr /><h3><a
+            name="method_getLinearIterator">getLinearIterator</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloExpr_LinearIterator.html">IloExpr::LinearIterator</a> <span
+            class="function-name">getLinearIterator</span>() const</div><div
+                class="description"><p>This methods returns a linear iterator on the invoking expression.</p></div><hr /><h3><a
+            name="method_getQuadIterator">getQuadIterator</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloExpr_QuadIterator.html">IloExpr::QuadIterator</a> <span
+            class="function-name">getQuadIterator</span>() const</div><div
+                class="description"><p>This methods returns an iterator over
+ the quadratic terms of the invoking expression.</p></div><hr /><h3><a
+            name="method_isNormalized">isNormalized</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+            class="function-name">isNormalized</span>() const</div><div
+                        class="description"><p>This member function returns <code>IloTrue</code> if the invoking expression
+ has been normalized using <code><a
+                href="../classes/IloExpr.html#method_normalize">IloExpr::normalize</a></code>.</p></div><hr /><h3><a
+            name="method_normalize">normalize</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="function-name">normalize</span>() const</div><div
+                class="description"><p>This member function normalizes the invoking linear or quadratic expression.
+ Normalizing is sometimes known as reducing the terms of
+ an expression. 
+ Concert Technology will analyze the linear expressions and will attempt to reduce 
+ them so that a given variable appears in only one term in the linear expression.
+ </p><p>If there is more than one linear term using the same variable in
+ an invoking linear expression, this member function merges those
+ linear terms into a single term expressed in that variable.
+ For linear expressions, the return value specifies the number of merged terms.</p><p>For example, <code>1*x + 17*y - 3*x</code> becomes <code>17*y - 2*x</code>,
+ and the member function returns 1 (one).</p></div><hr /><h3><a
+            name="method_operator*=">operator*=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator*=</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">val</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop.  It is more efficient than <code>x = x * ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(const IloIntQuadExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(const IloNumQuadExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(const IloIntLinExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(const IloNumLinExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+            class="parameter-name">expr</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator+=">operator+=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator+=</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">val</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x + ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(const IloIntQuadExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(const IloNumQuadExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(const IloIntLinExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(const IloNumLinExprTerm <span
+            class="parameter-name">term</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(const <a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(const <a
+                href="../classes/IloNumExprArg.html">IloNumExprArg</a> <span
+            class="parameter-name">expr</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator-=">operator-=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator-=</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">val</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop. It is more efficient than <code>x = x - ...</code></p></div><hr /><h3><a
+            name="method_operator/=">operator/=</a></h3><div
+                class="prototype">public IloExpr &amp; <span
+                class="function-name">operator/=</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">val</span>)</div><div
+                class="description"><p>This operator is recommended for building a Concert Technology expression
+ in a loop.  It is more efficient than <code>x = x / ...</code></p></div><hr /><h3><a
+            name="method_remove">remove</a></h3><div
+                class="prototype">public void <span
+                class="function-name">remove</span>(const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+            class="parameter-name">vars</span>)</div><div
+                class="description"><p>This member function removes all occurrences of all variables listed in
+ the array <code>vars</code> from the invoking expression. For linear
+ expressions, the effect of this member function is equivalent to setting the
+ coefficient for all the variables listed in <code>vars</code> to 0 (zero).
+ </p></div><hr /><h3><a
+            name="method_setConstant">setConstant</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setConstant</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">cst</span>)</div><div
+                class="description"><p>This member function assigns <code>cst</code> as the constant term in the
+ invoking expression.</p></div><hr /><h3><a
+            name="method_setLinearCoef">setLinearCoef</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLinearCoef</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>)</div><div
+                class="description"><p>This member function assigns <code>value</code> as the coefficient of
+ <code>var</code> in the invoking expression if the invoking expression is
+ linear. This member function applies only to linear expressions. In other
+ words, you can not use this member function to change the coefficient of a
+ non linear expression. An attempt to do so will cause Concert Technology to
+ throw an exception.</p></div><hr /><h3><a
+            name="method_setLinearCoefs">setLinearCoefs</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setLinearCoefs</span>(const <a
+                href="../classes/IloNumVarArray.html">IloNumVarArray</a> <span
+                class="parameter-name">vars</span>, <a
+                href="../classes/IloNumArray.html">IloNumArray</a> <span
+            class="parameter-name">values</span>)</div><div
+                class="description"><p>For each of the variables in <code>vars</code>, this member function
+ assigns the corresponding value of <code>values</code> as its linear
+ coefficient if the invoking expression is linear. This member function
+ applies only to linear expressions. In other words, you can not use this
+ member function to change the coefficient of a nonlinear expression. An
+ attempt to do so will cause Concert Technology to throw an exception.</p></div><hr /><h3><a
+            name="method_setNumConstant">setNumConstant</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setNumConstant</span>(<a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">constant</span>)</div><div
+                class="description"><p>This member function assigns <code>cst</code> as the constant term in the
+ invoking expression.</p></div><hr /><h3><a
+            name="method_setQuadCoef">setQuadCoef</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setQuadCoef</span>(const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var1</span>, const <a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var2</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>)</div><div class="description"><p>This member function changes the coefficient 
+ of a pair of variables in a quadratic expression. </p></div><hr /></body>
+</html>

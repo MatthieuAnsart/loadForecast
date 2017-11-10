@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Writing callbacks with macros in C++" />
+<meta name="abstract" content="Describes implementation of a callback class by means of a macro." />
+<meta name="Description" content="Describes implementation of a callback class by means of a macro." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/18_Concert_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_callbacks.1009168" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/18_Concert_title_synopsis.html" />
+<title>Writing callbacks with macros in C++</title>
+</head>
+<body role="main" id="User_manual.uss_callbacks.1009168">
+<h1 class="title topictitle1">Writing callbacks with macros in C++</h1>
+<div class="body"><p class="shortdesc">Describes implementation of a callback class by
+means of a macro.</p>
+<p class="p">This is how to implement a callback using macros. Since
+macros are not supported in Java nor in .NET, this technique applies
+only to C++ applications. </p>
+<div class="note tip"><span class="tiptitle">Tip:</span>  <p class="p">These macros make it easier
+to write callback functions by hiding some of the implementation details,
+such as their use of a copy constructor and placement syntax. Because
+the macros hide these implementation details, they also introduce
+a risk of side effects that you may not anticipate, especially in
+the context of multiple threads. On the other hand, in most situations,
+these macros greatly simplify implementation of callbacks and may
+be well suited to your application.</p>
+ </div>
+<p class="p">Start by deciding which callback you want to implement
+and how many arguments to pass to the callback function. These two
+pieces of information determine the macro you need to use. </p>
+<p class="p">For example, to implement a simplex callback with one
+argument, the macro is <samp class="ph codeph">ILOSIMPLEXCALLBACK1</samp> .
+Generally, for every callback type <samp class="ph codeph">XXX</samp> 
+and any number of arguments <samp class="ph codeph">n</samp>  from <samp class="ph codeph">0</samp>  to <samp class="ph codeph">7</samp> , there is a macro
+called <samp class="ph codeph">ILOXXXCALLBACKn</samp> . The table 
+<a class="xref" href="21_write_by_macros.html#User_manual.uss_callbacks.1009168__User_manual.uss_callbacks.1009672" title="A three-column table showing types of callbacks, the macro to declare such a callback, and the C++ class of such a callback.">Table 1</a> 
+lists the informational and query callbacks with the corresponding macros
+and classes (where n is a placeholder for 0 to 7). 
+The names of macros to write control callbacks are similar and documented in 
+the reference manual of the Concert Technology C++ API.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three-column table showing types of callbacks, the macro to declare such a callback, and the C++ class of such a callback." id="User_manual.uss_callbacks.1009168__User_manual.uss_callbacks.1009672" class="table ShadedHead" width="100%" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Informational and query callback macros </span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="20%" id="d468128e57"> Callback </th>
+<th class="entry" align="left" valign="top" width="40%" id="d468128e59"> Macro </th>
+<th class="entry" align="left" valign="top" width="40%" id="d468128e61"> Class </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> presolve </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOPRESOLVECALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::PresolveCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> continuous </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOCONTINUOUSCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::ContinuousCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> simplex </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOSIMPLEXCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::SimplexCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> barrier </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOBARRIERCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::BarrierCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> crossover </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOCROSSOVERCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::CrossoverCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> network </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILONETWORKCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::NetworkCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> MIP info </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOMIPINFOCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::MIPInfoCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> MIP </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOMIPCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::MIPCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> probing info </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOPROBINGINFOCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::ProbingCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> probing </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOPROBINGCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::ProbingCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> fractional cut info </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOFRACTIONALCUTINFOCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::FractionalCutCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> fractional cut  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOFRACTIONALCUTCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::FractionalCutCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> disjunctive cut info </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILODISJUNCTIVECUTINFOCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::DisjunctiveCutCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> disjunctive cut </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILODISJUNCTIVECUTCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::DisjunctiveCutCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> flow MIR cut info </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOFLOMIRCUTINFOCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::FlowMIRCutInfoCallbackI</samp>  </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="20%" headers="d468128e57 "> flow MIR cut </td>
+<td class="entry" valign="top" width="40%" headers="d468128e59 ">  <samp class="ph codeph">ILOFLOMIRCUTCALLBACKn</samp>  </td>
+<td class="entry" valign="top" width="40%" headers="d468128e61 ">  <samp class="ph codeph">IloCplex::FlowMIRCutCallbackI</samp>  </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">The protected methods of the corresponding class and its
+base classes specify the functions that can be called for implementing
+your callback. See the <em class="ph i">Reference Manual of the C++ API</em> with
+respect to these classes for details of which functions can be called.</p>
+<p class="p">Here is an example of how to implement a simplex callback
+with the name <samp class="ph codeph">MyCallback</samp> that takes one
+argument:</p>
+<pre class="pre codeblock"><code>virtual IloCplex::CallbackI* 
+IloCplex::CallbackI::duplicateCallback() const = 0;
+
+ILOSIMPLEXCALLBACK1(MyCallback, IloInt, num) {
+  if ( getNiterations() == num ) abort();
+}</code></pre>
+<p class="p">This callback terminates the simplex algorithm at the iteration
+specified by the number <samp class="ph codeph">num</samp>. It queries
+the current iteration number by calling the function <samp class="ph codeph">getNiterations</samp> ,
+a protected method of the class <samp class="ph codeph">IloCplex::ContinuousCallbackI</samp>.</p>
+<p class="p">To use this callback with an instance of <samp class="ph codeph">IloCplex</samp> declared
+as <samp class="ph codeph">cplex</samp>, simply call:</p>
+<pre class="pre codeblock"><code>IloCplex::Callback mycallback = cplex.use(MyCallback(env, 10));</code></pre>
+<p class="p">The callback that is added to <samp class="ph codeph">cplex</samp> is
+returned by the method <samp class="ph codeph">use</samp> and stored in
+the variable <samp class="ph codeph">mycallback</samp>. This convention
+allows you to call <samp class="ph codeph">mycallback.end</samp> to remove
+the callback from <samp class="ph codeph">cplex</samp>. If you do not intend
+to access your callback (for example, in order to delete it before
+ending the environment), you may safely leave out the declaration
+and initialization of the variable <samp class="ph codeph">mycallback</samp>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_basic/18_Concert_title_synopsis.html" title="Documents callbacks in Concert Technology.">Implementing callbacks with Concert Technology</a></div>
+</div>
+</div></body>
+</html>

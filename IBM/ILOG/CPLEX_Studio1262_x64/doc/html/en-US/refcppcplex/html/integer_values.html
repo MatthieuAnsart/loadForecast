@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Integer values, integrality tolerance, and round-off in CPLEX Optimizers</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="integer_values.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="31"><div
+                class="section-title1">Integer values, integrality tolerance, and round-off in CPLEX Optimizers</div>
+</a><div
+                    align="right"><a
+                    href="infeasibiltytools.html">PREVIOUS</a> <a
+                href="iterator.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%" /><div
+                class="section-body"><p><strong>Tip</strong>: If you need an exact integer value, use the 
+function <code>IloRound</code> to avoid the hazard of truncation.
+</p><p>
+CPLEX Optimizers implement conventional floating-point arithmetic 
+to represent numbers. In the context of integer constraints and integral 
+solutions, this convention means that the internal value of 
+an integer represented as a floating-point number can be very close to 
+integral without being the floating-point representation of that integer. 
+This discrepancy between the floating-point representation of an integer
+and the expected computation of an integer 
+can produce surprising results in some situations.
+</p><p>
+For example, consider a problem in which the internal value of the 
+variable x is -0.99999952316284191.  You might expect that value to be 
+rounded and returned as -1 (negative one), depending on the value of the
+integrality tolerance of the model in the problem.  However, that rounding 
+is not applied because it could affect the feasibility of the constraints in
+which x appears. If you now assign this value to a variable of type <code>integer</code> 
+such as <code>IloInt</code>, in your application, 
+this assignment implicitly <strong>truncates</strong> the floating-point
+representation to the integer value 0 (zero), according to these conventions. That is, 
+the assignment does not <strong>round</strong> the value to  -1 (negative one), as you might expect.
+</p><p>
+In particular, the following methods accept an instance of 
+<code>IloIntVar</code> 
+or 
+<code>IloIntVarArray</code> 
+as an argument. When you assign the return value of these methods 
+to an instance of <code>IloInt</code> (or <code>IloIntArray</code>) 
+truncation (rather than rounding) can produce surprising results in your 
+application.
+</p><ul>
+<li><code>IloAlgorithm::getValue</code></li><li><code>IloAlgorithm::getValues</code></li><li><code>IloCplex::getValue</code></li><li><code>IloCplex::getValues</code></li><li><code>IloSolution::getValue</code></li><li><code>IloCplex::ControlCallbackI::getValue</code></li><li><code>IloCplex::ControlCallbackI::getValues</code></li><li><code>IloCplex::IncumbentCallbackI::getValue</code></li><li><code>IloCplex::IncumbentCallbackI::getValues</code></li><li><code>IloCplex::GoalI::getValue</code></li><li><code>IloCplex::GoalI::getValues</code></li>
+</ul></div><div
+                    align="right"><a
+                    href="infeasibiltytools.html">PREVIOUS</a> <a href="iterator.html">NEXT</a></div></div></body>
+</html>

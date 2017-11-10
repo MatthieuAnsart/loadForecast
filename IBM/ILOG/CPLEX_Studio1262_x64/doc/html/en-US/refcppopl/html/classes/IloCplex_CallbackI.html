@@ -1,0 +1,367 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>CallbackI</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cplex.cpp/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloCplex_CallbackI.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloCplex::CallbackI</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+                class="definition-file">ilcplex/ilocplexi.h</span></div><div><img
+                src="IloCplex_CallbackI.png" border="0"
+                usemap="#svg_map_IloCplex::CallbackI"
+                    alt="Map of IloCplex::CallbackI"><map
+                        name="svg_map_IloCplex::CallbackI"><area
+                        href="../classes/IloCplex_CallbackI.html"
+                        shape="rect" alt="IloCplex::CallbackI"
+                        coords="10.0,10.0,171.0,27.6357421875" /><area
+                        href="../classes/IloCplex_OptimizationCallbackI.html"
+                        shape="rect"
+                        alt="IloCplex::OptimizationCallbackI"
+                        coords="100.5,37.6357421875,261.5,55.271484375" /><area
+                        href="../classes/IloCplex_TuningCallbackI.html"
+                        shape="rect" alt="IloCplex::TuningCallbackI"
+                        coords="100.5,65.271484375,261.5,82.9072265625" /><area
+                        href="../classes/IloCplex_CallbackI.html"
+                        shape="rect" alt="IloCplex::CallbackI"
+            coords="10.0,10.0,171.0,27.6357421875" /></map></img></div><div
+                            class="description"><p>This is the abstract base class for user-written callback classes. 
+ It provides their common application programming interface (API). 
+ Callbacks may
+ be called repeatedly at various points during an optimization; for each
+ place a callback is called, CPLEX provides a separate callback class
+ (derived from this class). Such a callback class provides the specific API
+ as a protected method to use for the particular implementation.</p><p>You do not create instances of this class; rather, you use one of
+ its child classes to implement your own callback. In order to implement
+ your user-written callbacks with an instance of <code>IloCplex</code>,
+ follow these steps:</p><ol>
+<li>Determine which kind of callback you want to write, and choose the
+     appropriate class for it. The class hierarchy in Tree 
+     may give you some ideas here.</li><li>Derive your own subclass, <code>MyCallbackI</code>, say,
+     from the appropriate predefined callback class. Your derived
+     class must inherit from only one predefined callback class; that
+     is multiple inheritance is not allowed. </li><li>In your subclass of the callback class, 
+     use the protected API defined in
+     the base class to implement the <code>main</code> routine of your 
+     user-written callback. (All constructors of predefined callback
+     classes are protected; they can be called only from
+     user-written derived subclasses.)</li><li>In your subclass, implement the method 
+     <code>duplicateCallback</code>.</li><li>Write a function <code>myCallback</code>, say, 
+     that creates an instance of your implementation
+     class in the Concert Technology environment and 
+     returns it as a handle of 
+     <code><a
+                            href="../classes/IloCplex_Callback.html">IloCplex::Callback</a></code>.</li><li>Create an instance of your callback class and pass it to the member
+     function <code><a
+                href="../classes/IloCplex.html#method_use">IloCplex::use</a></code>.</li>
+</ol><div
+                    class="note"><div class="noteTitle">Note</div><div
+                        class="noteText"><p>
+ Macros <code>ILOXXXCALLBACKn</code> (for <code>n</code> from 0 to 7) are
+ available to facilitate steps 2 through 5, where <code>XXX</code>
+ stands for the particular callback under construction and <code>n</code>
+ stands for the number of parameters that 
+ the function written in step 5 is to
+ receive in addition to the environment parameter.
+ </p></div></div><p>You can use one instance of a callback with only one instance of
+ <code>IloCplex</code>. When you use a callback with a second instance of
+ <code>IloCplex</code>, 
+ a copy will be automatically created using the method
+ <code>duplicateCallback</code>, and that copy will be
+ used instead. 
+ </p><p>
+ Also, an instance of <code>IloCplex</code> takes account of
+ only one instance of a particular callback at any given time. That is, if
+ you call <code><a
+            href="../classes/IloCplex.html#method_use">IloCplex::use</a></code> more than once with
+ the same class of callback, the last call overrides any previous one. For
+ example, you can use only one primal simplex callback at a time, or you can
+ use only one network callback at a time; and so forth.</p><p>There are two varieties of callbacks:</p><ul>
+<li>Query callbacks enable your application to retrieve information about
+ the current solution in an instance of <code>IloCplex</code>. The
+ information available depends on the algorithm (primal
+ simplex, dual simplex, barrier, mixed integer, or network) that you are
+ using. For example, 
+ a query callback can return the current objective value,
+ the number of simplex iterations that have been completed, and other
+ details. Query callbacks can also be called from presolve, probing,
+ fractional cuts, and disjunctive cuts.</li><li>Control callbacks enable you to direct the search when you are solving
+ a MIP in an instance of <code>IloCplex</code>. For example, control
+ callbacks enable you to select the
+ next node to process or to control the creation of subnodes (among other
+ possibilities).</li>
+</ul><p>Existing extractables should never be modified within a
+ callback. Temporary extractables, such as arrays, expressions, and
+ range constraints, can be created and modified. Temporary extractables
+ are often useful, for example, for computing cuts.</p></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../macros/ILOBARRIERCALLBACK0.html">ILOBARRIERCALLBACK0</a>, <a
+                href="../macros/ILOBRANCHCALLBACK0.html">ILOBRANCHCALLBACK0</a>, <a
+                href="../classes/IloCplex.html">IloCplex</a>, <a
+                href="../classes/IloCplex_BarrierCallbackI.html">IloCplex::BarrierCallbackI</a>, <a
+                href="../classes/IloCplex_BranchCallbackI.html">IloCplex::BranchCallbackI</a>, <a
+                href="../classes/IloCplex_Callback.html">IloCplex::Callback</a>, <a
+                href="../classes/IloCplex_ControlCallbackI.html">IloCplex::ControlCallbackI</a>, <a
+                href="../classes/IloCplex_CrossoverCallbackI.html">IloCplex::CrossoverCallbackI</a>, <a
+                href="../classes/IloCplex_UserCutCallbackI.html">IloCplex::UserCutCallbackI</a>, <a
+                href="../classes/IloCplex_LazyConstraintCallbackI.html">IloCplex::LazyConstraintCallbackI</a>, <a
+                href="../classes/IloCplex_DisjunctiveCutCallbackI.html">IloCplex::DisjunctiveCutCallbackI</a>, <a
+                href="../classes/IloCplex_FlowMIRCutCallbackI.html">IloCplex::FlowMIRCutCallbackI</a>, <a
+                href="../classes/IloCplex_FractionalCutCallbackI.html">IloCplex::FractionalCutCallbackI</a>, <a
+                href="../classes/IloCplex_HeuristicCallbackI.html">IloCplex::HeuristicCallbackI</a>, <a
+                href="../classes/IloCplex_IncumbentCallbackI.html">IloCplex::IncumbentCallbackI</a>, <a
+                href="../classes/IloCplex_ContinuousCallbackI.html">IloCplex::ContinuousCallbackI</a>, <a
+                href="../classes/IloCplex_MIPCallbackI.html">IloCplex::MIPCallbackI</a>, <a
+                href="../classes/IloCplex_NetworkCallbackI.html">IloCplex::NetworkCallbackI</a>, <a
+                href="../classes/IloCplex_NodeCallbackI.html">IloCplex::NodeCallbackI</a>, <a
+                href="../classes/IloCplex_OptimizationCallbackI.html">IloCplex::OptimizationCallbackI</a>, <a
+                href="../classes/IloCplex_PresolveCallbackI.html">IloCplex::PresolveCallbackI</a>, <a
+                href="../classes/IloCplex_ProbingCallbackI.html">IloCplex::ProbingCallbackI</a>, <a
+                href="../classes/IloCplex_SimplexCallbackI.html">IloCplex::SimplexCallbackI</a>, <a
+                href="../classes/IloCplex_SolveCallbackI.html">IloCplex::SolveCallbackI</a>, <a
+                href="../classes/IloCplex_TuningCallbackI.html">IloCplex::TuningCallbackI</a>, <a
+                href="../macros/ILOCROSSOVERCALLBACK0.html">ILOCROSSOVERCALLBACK0</a>, <a
+                href="../macros/ILOBRANCHCALLBACK0.html">ILOBRANCHCALLBACK0</a>, <a
+                href="../macros/ILODISJUNCTIVECUTCALLBACK0.html">ILODISJUNCTIVECUTCALLBACK0</a>, <a
+                href="../macros/ILOFLOWMIRCUTCALLBACK0.html">ILOFLOWMIRCUTCALLBACK0</a>, <a
+                href="../macros/ILOFRACTIONALCUTCALLBACK0.html">ILOFRACTIONALCUTCALLBACK0</a>, <a
+                href="../macros/ILOHEURISTICCALLBACK0.html">ILOHEURISTICCALLBACK0</a>, <a
+                href="../macros/ILOINCUMBENTCALLBACK0.html">ILOINCUMBENTCALLBACK0</a>, <a
+                href="../macros/ILOCONTINUOUSCALLBACK0.html">ILOCONTINUOUSCALLBACK0</a>, <a
+                href="../macros/ILOMIPCALLBACK0.html">ILOMIPCALLBACK0</a>, <a
+                href="../macros/ILONETWORKCALLBACK0.html">ILONETWORKCALLBACK0</a>, <a
+                href="../macros/ILONODECALLBACK0.html">ILONODECALLBACK0</a>, <a
+                href="../macros/ILOPRESOLVECALLBACK0.html">ILOPRESOLVECALLBACK0</a>, <a
+                href="../macros/ILOPROBINGCALLBACK0.html">ILOPROBINGCALLBACK0</a>, <a
+                href="../macros/ILOSIMPLEXCALLBACK0.html">ILOSIMPLEXCALLBACK0</a>, <a
+                href="../macros/ILOSOLVECALLBACK0.html">ILOSOLVECALLBACK0</a>, <a
+            href="../macros/ILOTUNINGCALLBACK0.html">ILOTUNINGCALLBACK0</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_abort">abort</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">protected virtual CallbackI *</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_duplicateCallback">duplicateCallback</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getCplexTime">getCplexTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getDetTime">getDetTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getEndDetTime">getEndDetTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getEndTime">getEndTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloEnv.html">IloEnv</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getEnv">getEnv</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getStartDetTime">getStartDetTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getStartTime">getStartTime</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public virtual <a
+                    href="../enumerations/Callback_Type.html">Callback::Type</a></code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloCplex_CallbackI.html#method_getType">getType</a>() const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">protected virtual void</code></td><td
+                            width="100%"><code><a
+            href="../classes/IloCplex_CallbackI.html#method_main">main</a>()</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_abort">abort</a></h3><div
+                class="prototype">public void <span
+            class="function-name">abort</span>()</div><div
+                class="description"><p>
+ This method instructs CPLEX to stop the current optimization after the
+ user callback finishes.  Note that executing additional 
+ <code>IloCplex</code> callback methods in the callback can 
+ lead to unpredictable behavior. For example, callback methods such
+ as <code>IloCplex::SolveCallbackI::solve</code> or
+ <code>IloCplex::BranchCallbackI::makeBranch</code> 
+ can overwrite the callback status and thus enable the optimization 
+ to continue.  Therefore, to abort an optimization effectively,
+ a user should exit the callback by one of 
+ the following ways:
+ </p><ul>
+<li>Call <code>return</code> immediately after the call 
+ of <code>abort</code>. </li><li>Structure the callback so that it calls no additional methods
+ of <code>IloCplex::CallbackI</code> and its subclasses after
+ <code>abort</code>.</li>
+</ul></div><hr /><h3><a
+            name="method_duplicateCallback">duplicateCallback</a></h3><div
+                class="prototype">protected virtual CallbackI * <span
+            class="function-name">duplicateCallback</span>() const</div><div
+                class="description"><p>This virtual method must be implemented to create a copy of the
+ invoking callback object on the same environment. Typically the following
+ implementation will work for a callback class called
+ <code>MyCallbackI</code>:</p><pre
+                class="sample">
+
+ IloCplex::CallbackI* MyCallbackI::duplicateCallback() const {
+
+   return (new (getEnv()) MyCallbackI(*this));
+
+ } </pre><p>This method is called by an <code>IloCplex</code> object in two
+ cases: </p><ul>
+<li>When <code>cplex.use(cb)</code> is called for a callback object
+ <code>cb</code> that is already used by another instance of
+ <code>IloCplex</code>, a copy of the implementation object of
+ <code>cb</code> is created by calling <code>duplicateCallback</code> 
+ and used in its place. The method <code>use</code> will return 
+ a handle to that copy.</li><li>When a parallel optimizer is used, <code>IloCplex</code>  
+ creates copies of every callback that it uses by calling
+ <code>duplicateCallback</code>. 
+ One copy of a callback is created for each
+ additional thread being used in the parallel optimizer. During the
+ optimization, each thread will invoke the copy corresponding to the thread
+ number. The methods provided by the callback APIs are guaranteed to be
+ threadsafe. However, when accessing parameters passed to callbacks or
+ members stored in a callback, it is up to the user to make
+ sure of thread safety
+ by synchronizing access or creating distinct copies of the data in the
+ implementation of <code>duplicateCallback</code>.</li>
+</ul></div><hr /><h3><a
+            name="method_getCplexTime">getCplexTime</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getCplexTime</span>() const</div><div
+                class="description"><p>This method returns a time stamp, useful in measuring
+ elapsed time in seconds.</p><p>To measure time spent between a starting point and
+ ending point of an operation, take the result of this method
+ at the starting point; take the result of this method at the
+ end point; subtract the starting time stamp from the ending
+ time stamp; the subtraction yields elapsed time in seconds.</p><p>Whether the elapsed time measures wall clock time (also known
+ as real time) or CPU time depends on the setting of the clock
+ type parameter <code>ClockType</code>.</p><p>The absolute value of the time stamp is not meaningful.</p></div><hr /><h3><a
+            name="method_getDetTime">getDetTime</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getDetTime</span>() const</div><div
+                class="description"><p>This method returns a deterministic time stamp in ticks.</p><p>
+ To measure elapsed deterministic time in ticks 
+ between a starting point and ending point of an operation, 
+ take the deterministic time stamp at the starting point; 
+ take the deterministic time stamp at the ending point; 
+ subtract the starting
+ deterministic time stamp from the ending deterministic time stamp. </p><p>The absolute value of the deterministic time stamp 
+ is not meaningful.</p></div><hr /><h3><a
+            name="method_getEndDetTime">getEndDetTime</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getEndDetTime</span>() const</div><div
+                class="description"><p>This method returns a deterministic time stamp specifying when 
+ the deterministic time limit will occur. 
+ To compute remaining time in ticks, 
+ subtract the result of 
+ <code>getDetTime</code> 
+ from the result of this method.</p><p>The absolute value of the deterministic time stamp 
+ is not meaningful.</p></div><hr /><h3><a
+            name="method_getEndTime">getEndTime</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getEndTime</span>() const</div><div
+                class="description"><p>This method returns a time stamp specifying when 
+ the time limit will occur. To compute remaining time in seconds, 
+ subtract the result of 
+ <code>getCplexTime</code> 
+ from the result of this method.
+ This computation yields either wall clock time (also 
+ known as real time) or CPU time, depending on the clock type
+ set by the parameter <code>ClockType</code>. The absolute value 
+ of the time stamp is not meaningful.</p></div><hr /><h3><a
+            name="method_getEnv">getEnv</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+            class="function-name">getEnv</span>() const</div><div
+                class="description"><p>This method returns the environment belonging to the
+ <code>IloCplex</code> object that invoked 
+ the method <code>main</code>.</p></div><hr /><h3><a
+            name="method_getStartDetTime">getStartDetTime</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getStartDetTime</span>() const</div><div
+                class="description"><p>This method returns a deterministic time stamp specifying when 
+ the solving process was started.
+ To compute elapsed time in ticks, 
+ subtract the result of 
+ <code>getDetTime</code> 
+ from the result of this method.</p><p>The absolute value of the deterministic time stamp 
+ is not meaningful.</p></div><hr /><h3><a
+            name="method_getStartTime">getStartTime</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="function-name">getStartTime</span>() const</div><div
+                class="description"><p>This method returns a time stamp specifying when 
+ the solving process was started. To compute elapsed time in seconds, 
+ subtract the result of 
+ <code>getCplexTime</code> 
+ from the result of this method.
+ This computation yields either wall clock time (also 
+ known as real time) or CPU time, depending on the clock type
+ set by the parameter <code>ClockType</code>. The absolute value 
+ of the time stamp is not meaningful.</p></div><hr /><h3><a
+            name="method_getType">getType</a></h3><div
+                class="prototype">public virtual <a
+                href="../enumerations/Callback_Type.html">Callback::Type</a> <span
+            class="function-name">getType</span>() const</div><div
+                class="description"><p>This method returns the callback type of the invoking
+ callback object.</p></div><hr /><h3><a
+            name="method_main">main</a></h3><div
+                class="prototype">protected virtual void <span
+            class="function-name">main</span>()</div><div class="description"><p>This virtual method is to be implemented by the user in a
+ derived callback class to define the functionality of the callback. When
+ an instance of <code>IloCplex</code> uses a callback (an instance of
+ <code>IloCplex::CallbackI</code> or one of its derived subclasses),
+ <code>IloCplex</code> calls this virtual method <code>main</code>
+ at the point during the optimization at which the callback is executed.
+ </p></div><hr /></body>
+</html>

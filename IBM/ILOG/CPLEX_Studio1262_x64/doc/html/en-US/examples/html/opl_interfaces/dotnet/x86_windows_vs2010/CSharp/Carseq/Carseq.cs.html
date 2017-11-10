@@ -1,0 +1,185 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------- -*- C# -*-</font></b>
+002: <b><font color="#007D00">// File: Carseq.cs</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">// </font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 </font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+013: 
+014: 
+015: <b><font color="#007D00">//-------------------------------------------------------------- -*- C# -*-</font></b>
+016: <b><font color="#007D00">// C# version of carseq.cpp of OPL distrib</font></b>
+017: <b><font color="#007D00">//--------------------------------------------------------------------------</font></b>
+018: using System;
+019: using ILOG.Concert;
+020: using ILOG.CP;
+021: using ILOG.OPL;
+022: 
+023: namespace Carseq
+024: {
+025:     <b><font color="EA7D00">class</font></b> Carseq
+026:     {
+027:         <b><font color="#007D00">/// &lt;summary&gt;</font></b>
+028:         <b><font color="#007D00">/// The main entry point for the application.</font></b>
+029:         <b><font color="#007D00">/// &lt;/summary&gt;</font></b>
+030:         [STAThread]
+031:         <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">void</font></b> Main(string[] args)
+032:         {
+033:             <b><font color="#0000FF">int</font></b> status = 127;
+034:             <b><font color="EA7D00">try</font></b>
+035:             {
+036:                 OplFactory.DebugMode = <b><font color="EA7D00">true</font></b>;
+037:                 OplFactory oplF = <b><font color="EA7D00">new</font></b> OplFactory();
+038:                 OplErrorHandler errHandler = oplF.CreateOplErrorHandler(Console.Out);
+039:                 OplModelSource modelSource = oplF.CreateOplModelSourceFromString(GetModelText(), <b><font color="#8A2BE2">"carseq"</font></b>);
+040:                 OplSettings settings = oplF.CreateOplSettings(errHandler);
+041:                 OplModelDefinition def = oplF.CreateOplModelDefinition(modelSource, settings);
+042:                 CP cp = oplF.CreateCP();
+043:                 OplModel opl = oplF.CreateOplModel(def, cp);
+044:                 OplDataSource dataSource = <b><font color="EA7D00">new</font></b> MyData(oplF);
+045:                 opl.AddDataSource(dataSource);
+046:                 opl.Generate();
+047: 
+048:                 <b><font color="EA7D00">if</font></b> (cp.Solve())
+049:                 {
+050:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"OBJECTIVE: "</font></b> + opl.CP.ObjValue);
+051:                     opl.PostProcess();
+052:                     opl.PrintSolution(Console.Out);
+053:                     status = 0;
+054:                 }
+055:                 <b><font color="EA7D00">else</font></b>
+056:                 {
+057:                     Console.Out.WriteLine(<b><font color="#8A2BE2">"No solution!"</font></b>);
+058:                     status = 1;
+059:                 }
+060: 
+061:                 oplF.End();
+062:             }
+063:             <b><font color="EA7D00">catch</font></b> (ILOG.OPL.OplException ex)
+064:             {
+065:                 Console.WriteLine(ex.Message);
+066:                 status = 2;
+067:             }
+068:             <b><font color="EA7D00">catch</font></b> (ILOG.Concert.Exception ex)
+069:             {
+070:                 Console.WriteLine(ex.Message);
+071:                 status = 3;
+072:             }
+073:             <b><font color="EA7D00">catch</font></b> (System.Exception ex)
+074:             {
+075:                 Console.WriteLine(ex.Message);
+076:                 status = 4;
+077:             }
+078:             Environment.ExitCode=status;
+079: 
+080:             Console.WriteLine(<b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b>);
+081:             Console.ReadLine();
+082:         }
+083: 
+084:         <b><font color="EA7D00">static</font></b> String GetModelText() 
+085:         {
+086:             String model=<b><font color="#8A2BE2">""</font></b>; 
+087:             model+=<b><font color="#8A2BE2">"using CP;"</font></b>;
+088:             model += <b><font color="#8A2BE2">"int nbConfs   = ...;"</font></b>;
+089:             model += <b><font color="#8A2BE2">"int nbOptions = ...;"</font></b>;
+090:             model += <b><font color="#8A2BE2">"range Confs = 1..nbConfs;"</font></b>;
+091:             model += <b><font color="#8A2BE2">"range Options = 1..nbOptions;"</font></b>;
+092:             model += <b><font color="#8A2BE2">"int demand[Confs] = ...;"</font></b>;
+093:             model += <b><font color="#8A2BE2">"tuple CapacitatedWindow {"</font></b>;
+094:             model += <b><font color="#8A2BE2">"  int l;"</font></b>;
+095:             model += <b><font color="#8A2BE2">"  int u;"</font></b>;
+096:             model += <b><font color="#8A2BE2">"};"</font></b>;
+097:             model += <b><font color="#8A2BE2">"CapacitatedWindow capacity[Options] = ...; "</font></b>;
+098:             model += <b><font color="#8A2BE2">"range AllConfs = 0..nbConfs;"</font></b>;
+099:             model += <b><font color="#8A2BE2">"int nbCars = sum (c in Confs) demand[c];"</font></b>;
+100:             model += <b><font color="#8A2BE2">"int nbSlots = ftoi(floor(nbCars * 1.1 + 5)); "</font></b>;
+101:             model += <b><font color="#8A2BE2">"int nbBlanks = nbSlots - nbCars;"</font></b>;
+102:             model += <b><font color="#8A2BE2">"range Slots = 1..nbSlots;"</font></b>;
+103:             model += <b><font color="#8A2BE2">"int option[Options,Confs] = ...; "</font></b>;
+104:             model += <b><font color="#8A2BE2">"int allOptions[o in Options, c in AllConfs] = (c == 0) ? 0 : option[o][c];"</font></b>;
+105:             model += <b><font color="#8A2BE2">"dvar int slot[Slots] in AllConfs;"</font></b>;
+106:             model += <b><font color="#8A2BE2">"dvar int lastSlot in nbCars..nbSlots;"</font></b>;
+107: 
+108:             model += <b><font color="#8A2BE2">"minimize lastSlot - nbCars; "</font></b>;
+109:             model += <b><font color="#8A2BE2">"subject to {"</font></b>;
+110:             model += <b><font color="#8A2BE2">"  count(slot, 0) == nbBlanks;"</font></b>;
+111:             model += <b><font color="#8A2BE2">"  forall (c in Confs)"</font></b>;
+112:             model += <b><font color="#8A2BE2">"    count(slot, c) == demand[c];"</font></b>;
+113:             model += <b><font color="#8A2BE2">"  forall(o in Options, s in Slots : s + capacity[o].u - 1 &lt;= nbSlots)"</font></b>;
+114:             model += <b><font color="#8A2BE2">"    sum(j in s .. s + capacity[o].u - 1) allOptions[o][slot[j]] &lt;= capacity[o].l;"</font></b>;
+115:             model += <b><font color="#8A2BE2">"  forall (s in nbCars + 1 .. nbSlots)"</font></b>;
+116:             model += <b><font color="#8A2BE2">"    (s &gt; lastSlot) =&gt; slot[s] == 0;"</font></b>;
+117:             model += <b><font color="#8A2BE2">"}"</font></b>;      
+118:             <b><font color="EA7D00">return</font></b> model;
+119:         }
+120: 
+121:     }
+122: 
+123:     internal <b><font color="EA7D00">class</font></b> MyData : CustomOplDataSource 
+124:     {
+125:     
+126:         internal MyData(OplFactory oplF) : base(oplF)
+127:         {
+128:         }
+129:         <b><font color="EA7D00">public</font></b> override <b><font color="#0000FF">void</font></b> CustomRead()
+130:         {
+131: 
+132:             <b><font color="#0000FF">int</font></b> _nbConfs = 7;
+133:             <b><font color="#0000FF">int</font></b> _nbOptions = 5;
+134: 
+135:             OplDataHandler handler = getDataHandler();
+136:             handler.StartElement(<b><font color="#8A2BE2">"nbConfs"</font></b>);
+137:             handler.AddIntItem(_nbConfs);
+138:             handler.EndElement();
+139:             handler.StartElement(<b><font color="#8A2BE2">"nbOptions"</font></b>);
+140:             handler.AddIntItem(_nbOptions);
+141:             handler.EndElement();
+142: 
+143:             <b><font color="#0000FF">int</font></b>[] _demand = {5, 5, 10, 10, 10, 10, 5};
+144:             handler.StartElement(<b><font color="#8A2BE2">"demand"</font></b>);
+145:             handler.StartArray();
+146:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0; i &lt; _nbConfs; i++)
+147:                 handler.AddIntItem(_demand[i]);
+148:             handler.EndArray();
+149:             handler.EndElement();
+150: 
+151:             <b><font color="#0000FF">int</font></b>[,] _option = {{1, 0, 0, 0, 1, 1, 0}, 
+152:                                {0, 0, 1, 1, 0, 1, 0}, 
+153:                                {1, 0, 0, 0, 1, 0, 0}, 
+154:                                {1, 1, 0, 1, 0, 0, 0}, 
+155:                                {0, 0, 1, 0, 0, 0, 0}};
+156:             handler.StartElement(<b><font color="#8A2BE2">"option"</font></b>);
+157:             handler.StartArray();
+158:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0 ; i&lt; _nbOptions ; i++) {
+159:                 handler.StartArray();
+160:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j = 0; j &lt; _nbConfs; j++)
+161:                     handler.AddIntItem(_option[i, j]);
+162:                 handler.EndArray();
+163:             }
+164:             handler.EndArray();
+165:             handler.EndElement();
+166: 
+167:             <b><font color="#0000FF">int</font></b>[,] _capacity= {{1, 2}, {2, 3}, {1, 3}, {2, 5}, {1, 5}};
+168:             handler.StartElement(<b><font color="#8A2BE2">"capacity"</font></b>);
+169:             handler.StartArray();
+170:             <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> i = 0; i&lt;_nbOptions;i++) {
+171:                 handler.StartTuple();
+172:                 <b><font color="EA7D00">for</font></b> (<b><font color="#0000FF">int</font></b> j= 0; j&lt;=1;j++)
+173:                     handler.AddIntItem(_capacity[i,j]);
+174:                 handler.EndTuple();
+175:             }
+176:             handler.EndArray();
+177:             handler.EndElement();
+178:         }
+179:     }
+180: }
+</tt></pre>

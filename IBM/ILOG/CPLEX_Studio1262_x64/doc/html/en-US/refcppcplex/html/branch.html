@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Branch and cut in CPLEX</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a href="branch.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="12"><div
+                class="section-title1">Branch and cut in CPLEX</div>
+</a><div
+                    align="right"><a
+                    href="assert-and-ndebug.html">PREVIOUS</a> <a
+                href="callbacks-cpp.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%" /><div
+                    class="section-body"><p>
+
+
+CPLEX uses 
+<em>branch-and-cut search</em> 
+when solving mixed integer programming (MIP) models. 
+The branch-and-cut procedure manages a search tree 
+consisting of <em>nodes</em>. Every node represents 
+an LP or QP subproblem to be processed; that is, to be solved, 
+to be checked for integrality, and perhaps to be analyzed further. 
+Nodes are called <em>active</em> if they have not yet 
+been processed. After a node has been processed, it is no longer active. 
+Cplex processes active nodes in the tree until 
+either no more active nodes are available or some limit has been reached.</p><p>
+
+A <em>branch</em> is the creation of two new nodes from a 
+parent node. Typically, a branch occurs when the bounds on a single 
+variable are modified, with the new bounds remaining in effect for that 
+new node and for any of its descendants. For example, if a branch occurs
+on a binary variable, that is, one with a lower bound of 0 (zero) and 
+an upper bound of 1 (one), then the result will be two new nodes, 
+one node with a modified upper bound of 0 (the downward branch, 
+in effect requiring this variable to take only the value 0), 
+and the other node with a modified lower bound of 1 (the upward branch, 
+placing the variable at 1). The two new nodes will thus have completely 
+distinct solution domains.</p><p>
+
+A <em>cut</em> 
+is a constraint added to the model. The purpose of adding any cut is to 
+limit the size of the solution domain for the continuous LP or QP problems 
+represented at the nodes, while not eliminating legal integer solutions. 
+The outcome is thus to reduce the number of branches required to 
+solve the MIP. </p><p>
+
+As an example of a cut, first consider  
+the following constraint involving three binary (0-1) variables:</p><pre
+                    class="sample">
+20x + 25y + 30z &lt;= 40
+</pre><p>
+
+That sample constraint can be strengthened by adding the following 
+cut to the model:</p><pre
+                class="sample">
+1x + 1y + 1z &lt;= 1
+</pre><p>
+No feasible integer solutions are ruled out by the cut, but some 
+fractional solutions, for example (0.0, 0.4, 1.0), can no longer 
+be obtained in any LP or QP subproblems at the nodes, possibly 
+reducing the amount of searching needed.</p><p>
+
+The branch-and-cut procedure, then, consists of performing branches 
+and applying cuts at the nodes of the tree. Here is a more detailed outline 
+of the steps involved.</p><p>
+
+First, the branch-and-cut tree is initialized to contain the root node 
+as the only active node. The root node of the tree represents the entire 
+problem, ignoring all of the explicit integrality requirements. Potential 
+cuts are generated for the root node but, in the interest of keeping the 
+problem size reasonable, not all such cuts are applied to the model 
+immediately. If possible, an incumbent solution (that is, the best known 
+solution that satisfies all the integrality requirements) is established 
+at this point for later use in the algorithm. 
+Such a solution may be established either by CPLEX or by a user who 
+specifies a starting solution by means of 
+the Callable Library routine <code>CPXcopymipstart</code> or the Concert
+Technology method <code>IloCplex::setVectors</code>. 
+</p><p> 
+If you are solving a sequence of problems by modifying the
+problem already in memory and re-solving, then you do not 
+need to establish a starting solution explicitly every time,
+because for each revised problem, the solution of the previous
+problem will be retained as a possible starting solution.
+</p><p> 
+When processing a node, CPLEX
+starts by solving the continuous relaxation of its subproblem. 
+that is, the subproblem without integrality constraints. 
+If the solution violates any cuts,  CPLEX 
+may add some or all of them to the node problem and may resolve it, if
+CPLEX has added cuts. 
+This procedure is iterated until no more violated cuts are detected 
+(or deemed worth adding at this time) by the algorithm. 
+If at any point in the addition of cuts the node becomes infeasible, 
+the node is pruned (that is, it is removed from the tree).</p><p>
+
+Otherwise, CPLEX 
+checks whether the solution of the node-problem satisfies the 
+integrality constraints. If so, and if its objective value is better 
+than that of the current incumbent, the solution of the node-problem 
+is used as the new incumbent. If not, branching will occur, but first 
+a heuristic method may be tried at this point to see if a new incumbent 
+can be inferred from the LP-QP solution at this node, 
+and other methods of analysis may be performed on this node. 
+The branch, when it occurs, is performed on a variable where the
+value of the present solution violates its integrality requirement. 
+This practice results in two new nodes being added to the tree for 
+later processing.</p><p>
+Each node, after its relaxation is solved, possesses an optimal 
+objective function value Z. At any given point in the algorithm, 
+there is a node whose Z value is better (less, in the case of a 
+minimization problem, or greater for a maximization problem) 
+than all the others. This Best Node value can be 
+compared to the objective function value of the incumbent solution. 
+The resulting MIP Gap, expressed as a percentage of the incumbent solution, 
+serves as a measure of progress toward finding and proving optimality. 
+When active nodes no longer exist, then these two values will have 
+converged toward each other, and the MIP Gap will thus be zero, 
+signifying that optimality of the incumbent has been proven.</p><p>
+
+It is possible to tell  CPLEX 
+to terminate the branch-and-cut procedure sooner 
+than a completed proof of optimality. For example, a user can set
+a time limit or a limit on the number of nodes to be processed. 
+Indeed, with default settings,  CPLEX 
+will terminate the search when the MIP Gap has been brought 
+lower than 0.0001 (0.01%), because it is often the case that 
+much computation is invested in moving the Best Node value after 
+the eventual optimal incumbent has been located. This termination 
+criterion for the MIP Gap can be changed by the user, of course.</p></div><div
+                    align="right"><a
+                    href="assert-and-ndebug.html">PREVIOUS</a> <a href="callbacks-cpp.html">NEXT</a></div></div></body>
+</html>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="A production problem" />
+<meta name="abstract" content="Uses again the model production.mod." />
+<meta name="Description" content="Uses again the model production.mod." />
+<meta name="DC.subject" content="models, production planning, production planning problem, linear programming, planning a production, code samples, production.dat, production.mod" />
+<meta name="keywords" content="models, production planning, production planning problem, linear programming, planning a production, code samples, production.dat, production.mod" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_LP.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_linearInteger.1045577" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_LP.html" />
+<title>A production problem</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_linearInteger.1045577">
+<h1 class="title topictitle1">A production problem</h1>
+<div class="body"><p class="shortdesc">Uses again the model <span class="ph filepath">production.mod</span>.</p>
+<p class="p">Consider again the production planning problem first presented
+in the section <a class="xref" href="opl_languser_shortTour_LP_elements.html#usropllangtut.uss_langtut_shortTour.1005660">Tuples</a>.
+The model, <samp class="ph codeph">production.mod</samp>, and the instance data, <samp class="ph codeph">production.dat</samp> are
+shown again in the examples below.</p>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1045577__usropllangtut.uss_langtut_linearInteger.1046601"><h2 class="title sectiontitle">A
+Production planning problem (<samp class="ph codeph">production.mod</samp>) </h2><pre class="pre codeblock"><code>{string} Products = ...;
+{string} Resources = ...;
+
+float Consumption[Products][Resources] = ...;
+float Capacity[Resources] = ...;
+float Demand[Products] = ...;
+float InsideCost[Products] = ...;
+float OutsideCost[Products]  = ...;
+
+dvar float+ Inside[Products];
+dvar float+ Outside[Products];
+
+minimize
+  sum( p in Products ) 
+    ( InsideCost[p] * Inside[p] + OutsideCost[p] * Outside[p] );
+   
+subject to {
+  forall( r in Resources )
+    ctCapacity: 
+      sum( p in Products ) 
+        Consumption[p][r] * Inside[p] &lt;= Capacity[r];
+
+  forall(p in Products)
+    ctDemand:
+      Inside[p] + Outside[p] &gt;= Demand[p];
+}</code></pre>
+</div>
+<div class="example" id="usropllangtut.uss_langtut_linearInteger.1045577__usropllangtut.uss_langtut_linearInteger.1046634"><h2 class="title sectiontitle">Instance
+data for the production-planning problem (<samp class="ph codeph">production.dat</samp>) </h2><pre class="pre codeblock"><code>Products =  { "kluski", "capellini", "fettucine" };
+Resources = { "flour", "eggs" };
+
+Consumption = [ [0.5, 0.2], [0.4, 0.4], [0.3, 0.6] ];
+Capacity = [ 20, 40 ];
+Demand = [ 100, 200, 300 ];
+InsideCost = [ 0.6, 0.8, 0.3 ];
+OutsideCost  = [ 0.8, 0.9, 0.4 ];</code></pre>
+</div>
+<p class="p">The model aims at minimizing the production cost for a number of
+products while satisfying customer demand. Each product can be produced
+either inside the company or outside, at a higher cost. The inside
+production is constrained by the company's resources, while outside
+production is considered unlimited. The model first declares the products
+and the resources. The data consists of the description of the products,
+i.e., the demand, the inside and outside costs, and the resource consumption,
+and the capacity of the various resources. The variables for this
+problem are the inside and outside production for each product.</p>
+<div class="section" id="usropllangtut.uss_langtut_linearInteger.1045577__usropllangtut.uss_langtut_linearInteger.1049237"><h2 class="title sectiontitle">A
+solution to production.mod</h2><p class="p">For
+these statements, OPL returns the optimal solution </p>
+<pre class="pre codeblock"><code>Final Solution with objective 372.0000:
+  inside = [40.0000 0.0000 0.0000];
+  outside = [60.0000 200.0000 300.0000];</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_app_areas_LP.html" title="Defines linear programming and describes a simple production planning problem, a multiperiod production planning problem, a blending problem, and sensitivity analysis.">Linear programming</a></div>
+</div>
+</div></body>
+</html>

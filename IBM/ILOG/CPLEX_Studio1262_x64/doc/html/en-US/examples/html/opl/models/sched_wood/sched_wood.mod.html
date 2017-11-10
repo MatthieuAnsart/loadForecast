@@ -1,0 +1,113 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+002: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+003: <b><font color="#007D00">//</font></b>
+004: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+005: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+006: <b><font color="#007D00">//</font></b>
+007: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+008: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+009: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+010: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+011: 
+012: <b><font color="#007D00">// Problem Description</font></b>
+013: <b><font color="#007D00">//</font></b>
+014: <b><font color="#007D00">// The wood cutting machine</font></b>
+015: <b><font color="#007D00">//</font></b>
+016: <b><font color="#007D00">// A wood factory machine cuts stands (processed portions of log) into</font></b>
+017: <b><font color="#007D00">// chips.  Each stand has a certain length, diameter and specie.  The</font></b>
+018: <b><font color="#007D00">// machine can cut a limited number of stands at a time with some</font></b>
+019: <b><font color="#007D00">// restriction on the sum of the diameters that it can accept.  Only</font></b>
+020: <b><font color="#007D00">// one specie can be processed simultaneously.  Finally, each stands</font></b>
+021: <b><font color="#007D00">// have fixed delivery dates and a processing status being either</font></b>
+022: <b><font color="#007D00">// standard or rush.  Any delay on rush stand will cost a penalty.</font></b>
+023: <b><font color="#007D00">//</font></b>
+024: <b><font color="#007D00">// In the model, the stands are represented by activities with</font></b>
+025: <b><font color="#007D00">// pre-specified durations.  The objective is to minimize the total</font></b>
+026: <b><font color="#007D00">// cost of operating and delay while meeting the system constraints:</font></b>
+027: <b><font color="#007D00">// </font></b>
+028: <b><font color="#007D00">// 1) The truck fleet that carry stands to machines for processing is</font></b>
+029: <b><font color="#007D00">// limited.</font></b>
+030: <b><font color="#007D00">//</font></b>
+031: <b><font color="#007D00">// 2) The machine is a discrete resource with capacity specified in</font></b>
+032: <b><font color="#007D00">// terms of the sume of stands capacity that can be cut at the same</font></b>
+033: <b><font color="#007D00">// time.</font></b>
+034: <b><font color="#007D00">// </font></b>
+035: <b><font color="#007D00">// 3) Beside the diameter constraint, only limited number of stands</font></b>
+036: <b><font color="#007D00">// can be loaded at the same time.</font></b>
+037: <b><font color="#007D00">// </font></b>
+038: <b><font color="#007D00">// 4) To express that only one type of species can be cut at the same</font></b>
+039: <b><font color="#007D00">// time a state resource is used.  At any given time, this resource</font></b>
+040: <b><font color="#007D00">// indicates the state in terms of available to cut.</font></b>
+041: 
+042: <b><font color="#007D00">//</font></b>
+043: <b><font color="#007D00">// OPL model</font></b>
+044: <b><font color="#007D00">//</font></b>
+045: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+046: 
+047: <b><font color="#0000FF">int</font></b> maxDiameter = ...;
+048: <b><font color="#0000FF">int</font></b> nbTrucks = ...;
+049: <b><font color="#0000FF">int</font></b> maxStandsTogether = ...;
+050: <b><font color="#0000FF">int</font></b> nbPeriodsPerDay = ...;
+051: <b><font color="#0000FF">int</font></b> costPerDay = ...;
+052: <b><font color="#0000FF">int</font></b> costPerLateFoot = ...;
+053: <b><font color="#0000FF">int</font></b> maxCost = ...;
+054: {<b><font color="#0000FF">string</font></b>} Species = ...;
+055: <b><font color="#0000FF">int</font></b> cutTime[Species] = ...;
+056: 
+057: <b><font color="#0000FF">tuple</font></b> Stand {
+058:   <b><font color="#0000FF">int</font></b>     diameter;
+059:   <b><font color="#0000FF">string</font></b>  species;
+060:   <b><font color="#0000FF">int</font></b>     len;
+061:   <b><font color="#0000FF">int</font></b>     dueDate;
+062:   <b><font color="#0000FF">int</font></b>     rush;
+063: };
+064: 
+065: {Stand} stands = ...;
+066: 
+067: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">interval</font></b> a[s <b><font color="#0000FF">in</font></b> stands] <b><font color="#7D007D">size </font></b>(s.len * cutTime[s.species]);
+068: 
+069: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">float</font></b> lateFeet = 
+070:   <b><font color="#7D007D">sum </font></b>(s <b><font color="#0000FF">in</font></b> stands : s.rush == 1) s.len * (<b><font color="#7D007D">endOf</font></b>(a[s]) &gt; s.dueDate);
+071: 
+072: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">int</font></b> makespan = 
+073:   <b><font color="#7D007D">max </font></b>(s <b><font color="#0000FF">in</font></b> stands) <b><font color="#7D007D">endOf</font></b>(a[s]);
+074: 
+075: <b><font color="#0000FF">cumulFunction</font></b> standsBeingProcessed = <b><font color="#7D007D">sum </font></b>(s <b><font color="#0000FF">in</font></b> stands) <b><font color="#7D007D">pulse</font></b>(a[s], 1);
+076: <b><font color="#0000FF">cumulFunction</font></b> trucksBeingUsed = standsBeingProcessed;
+077: <b><font color="#0000FF">cumulFunction</font></b> diameterBeingProcessed = <b><font color="#7D007D">sum </font></b>(s <b><font color="#0000FF">in</font></b> stands) <b><font color="#7D007D">pulse</font></b>(a[s], s.diameter);
+078: 
+079: <b><font color="#0000FF">stateFunction</font></b> species;
+080: 
+081: <b><font color="#0000FF">execute</font></b> {
+082:                 cp.param.FailLimit = 10000;
+083: }
+084: 
+085: dexpr float objective = makespan * (costPerDay / nbPeriodsPerDay) + costPerLateFoot * lateFeet;
+086: minimize objective;
+087: 
+088: subject to {
+089:   forall (s <b><font color="EA7D00">in</font></b> stands)
+090:     alwaysEqual(species, a[s], ord(Species, s.species));
+091:   standsBeingProcessed   &lt;= maxStandsTogether;
+092:   diameterBeingProcessed &lt;= maxDiameter;
+093:   trucksBeingUsed        &lt;= nbTrucks;
+094: };
+095: 
+096: execute {
+097:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> s <b><font color="EA7D00">in</font></b> stands) {
+098:     writeln(s + <b><font color="#8A2BE2">" on ["</font></b> + a[s].start + <b><font color="#8A2BE2">","</font></b> + a[s].end + <b><font color="#8A2BE2">")"</font></b>);
+099:   }
+100:   
+101:   <b><font color="#007D00">//writeln("species ",species);</font></b>
+102:   <b><font color="EA7D00">for</font></b>(<b><font color="EA7D00">var</font></b> i=0; i&lt;species.getNumberOfSegments(); i++) {
+103:     <b><font color="EA7D00">var</font></b> v = species.getSegmentValue(i);
+104:     <b><font color="EA7D00">if</font></b> ( v&gt;-1 ) {
+105:       writeln(<b><font color="#8A2BE2">"species "</font></b>,v,<b><font color="#8A2BE2">" available "</font></b>,species.getSegmentStart(i),<b><font color="#8A2BE2">" to "</font></b>,species.getSegmentEnd(i));
+106:     }
+107:   }
+108: }
+</tt></pre>

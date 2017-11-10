@@ -1,0 +1,98 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>01: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+02: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+03: <b><font color="#007D00">//</font></b>
+04: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+05: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2014. All Rights Reserved.</font></b>
+06: <b><font color="#007D00">//</font></b>
+07: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+08: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+09: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+10: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+11: 
+12: 
+13: <b><font color="#007D00">//</font></b>
+14: <b><font color="#007D00">// For a description of the problem and resolution methods:</font></b>
+15: <b><font color="#007D00">//</font></b>
+16: <b><font color="#007D00">//    The Progressive Party Problem: Integer Linear Programming</font></b>
+17: <b><font color="#007D00">//    and Constraint Programming Compared</font></b>
+18: <b><font color="#007D00">//</font></b>
+19: <b><font color="#007D00">//    Proceedings of the First International Conference on Principles</font></b>
+20: <b><font color="#007D00">//    and Practice of Constraint Programming table of contents</font></b>
+21: <b><font color="#007D00">//</font></b>
+22: <b><font color="#007D00">//    Lecture Notes In Computer Science; Vol. 976, pages 36-52, 1995</font></b>
+23: <b><font color="#007D00">//    ISBN:3-540-60299-2</font></b>
+24: <b><font color="#007D00">//</font></b>
+25: 
+26: <b><font color="#007D00">// This model is greater than the size allowed in trial mode. </font></b>
+27: <b><font color="#007D00">// You therefore need a commercial edition of CPLEX Studio to run this example.</font></b>
+28: <b><font color="#007D00">// If you are a student or teacher, you can also get a full version through</font></b>
+29: <b><font color="#007D00">// the IBM Academic Initiative.</font></b>
+30: 
+31: <b><font color="#0000FF">using</font></b> <b><font color="#0000FF">CP</font></b>;
+32: 
+33: <b><font color="#0000FF">int</font></b> numBoats = ...;
+34: <b><font color="#0000FF">range</font></b> Boats = 0..numBoats - 1;
+35: <b><font color="#0000FF">int</font></b> boatSize[Boats] = ...;
+36: <b><font color="#0000FF">int</font></b> crewSize[Boats] = ...;
+37: 
+38: <b><font color="#0000FF">int</font></b> numPeriods = 6;
+39: <b><font color="#0000FF">range</font></b> Periods = 0..numPeriods - 1;
+40: 
+41: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">boolean</font></b> host[Boats];
+42: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b> goWhere[Periods][Boats] <b><font color="#0000FF">in</font></b> Boats;
+43: <b><font color="#0000FF">dvar</font></b> <b><font color="#0000FF">int</font></b>+ load[Periods][Boats];
+44: 
+45: <b><font color="#0000FF">dexpr</font></b> <b><font color="#0000FF">int</font></b> numHosts = <b><font color="#7D007D">sum </font></b>(b <b><font color="#0000FF">in</font></b> Boats) host[b];
+46: 
+47: <b><font color="#0000FF">minimize</font></b> numHosts;
+48: 
+49: <b><font color="#0000FF">subject</font></b> <b><font color="#0000FF">to</font></b> {
+50:    <b><font color="#007D00">// Capacity of hosts, non-hosts have zero capacity</font></b>
+51:    <b><font color="#7D007D">forall </font></b>(b <b><font color="#0000FF">in</font></b> Boats, p <b><font color="#0000FF">in</font></b> Periods)
+52:      load[p][b] &lt;= host[b] * boatSize[b];
+53:    
+54:    <b><font color="#007D00">// Capacities respected</font></b>
+55:    <b><font color="#7D007D">forall </font></b>(p <b><font color="#0000FF">in</font></b> Periods)
+56:      <b><font color="#7D007D">pack</font></b>(<b><font color="#7D007D">all </font></b>(b <b><font color="#0000FF">in</font></b> Boats) load[p][b], <b><font color="#7D007D">all </font></b>(b <b><font color="#0000FF">in</font></b> Boats) goWhere[p][b], crewSize, numHosts);   
+57: 
+58:    <b><font color="#007D00">// Hosts are always in their boat, guests are never in their boat</font></b>
+59:    <b><font color="#7D007D">forall </font></b>(b <b><font color="#0000FF">in</font></b> Boats)
+60:      <b><font color="#7D007D">count</font></b>(<b><font color="#7D007D">all</font></b>(p <b><font color="#0000FF">in</font></b> Periods) goWhere[p][b], b) == host[b] * numPeriods;
+61:      
+62:    <b><font color="#007D00">// No two crews meet more than once</font></b>
+63:    <b><font color="#7D007D">forall </font></b>(b1, b2 <b><font color="#0000FF">in</font></b> Boats : b1 &lt; b2)
+64:      <b><font color="#7D007D">sum </font></b>(p <b><font color="#0000FF">in</font></b> Periods) (goWhere[p][b1] == goWhere[p][b2]) &lt;= 1;
+65:    
+66:    <b><font color="#007D00">// Asserted hosts and guests (in spec)</font></b>
+67:    host[0] == <b><font color="#0000FF">true</font></b>;
+68:    host[1] == <b><font color="#0000FF">true</font></b>;
+69:    host[2] == <b><font color="#0000FF">true</font></b>;
+70:    host[39] == <b><font color="#0000FF">false</font></b>;
+71:    host[40] == <b><font color="#0000FF">false</font></b>;
+72:    host[41] == <b><font color="#0000FF">false</font></b>;
+73: }
+74: 
+75: <b><font color="#0000FF">tuple</font></b> hostSolutionT{ 
+76:         <b><font color="#0000FF">int</font></b> Boats; 
+77:         <b><font color="#0000FF">int</font></b> value; 
+78: };
+79: {hostSolutionT} hostSolution = {&lt;i0,host[i0]&gt; | i0 <b><font color="#0000FF">in</font></b> Boats};
+80: <b><font color="#0000FF">tuple</font></b> loadSolutionT{ 
+81:         <b><font color="#0000FF">int</font></b> Periods; 
+82:         <b><font color="#0000FF">int</font></b> Boats; 
+83:         <b><font color="#0000FF">int</font></b> value; 
+84: };
+85: {loadSolutionT} loadSolution = {&lt;i0,i1,load[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Periods,i1 <b><font color="#0000FF">in</font></b> Boats};
+86: <b><font color="#0000FF">tuple</font></b> goWhereSolutionT{ 
+87:         <b><font color="#0000FF">int</font></b> Periods; 
+88:         <b><font color="#0000FF">int</font></b> Boats; 
+89:         <b><font color="#0000FF">int</font></b> value; 
+90: };
+91: {goWhereSolutionT} goWhereSolution = {&lt;i0,i1,goWhere[i0][i1]&gt; | i0 <b><font color="#0000FF">in</font></b> Periods,i1 <b><font color="#0000FF">in</font></b> Boats};
+92: 
+93: 
+</tt></pre>

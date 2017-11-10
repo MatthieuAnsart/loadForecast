@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Preprocessing" />
+<meta name="abstract" content="CP may preprocess a model during extraction." />
+<meta name="Description" content="CP may preprocess a model during extraction." />
+<meta name="DC.subject" content="preprocessing" />
+<meta name="keywords" content="preprocessing" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizerextend.1015154" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" />
+<title>Preprocessing</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizerextend.1015154">
+<h1 class="title topictitle1">Preprocessing</h1>
+<div class="body"><p class="shortdesc">CP may preprocess a model during extraction.</p>
+<p class="p">CP Optimizer preprocessing can aggregate expressions,
+constraints or decision variables in order to provide faster constraint
+propagation, more domain reduction or both. </p>
+<p class="p">As an example, a set of <samp class="ph codeph">IloCount</samp> expressions
+operating on the same array of decision variables are extracted to
+a single instance of <samp class="ph codeph">IlcDistribute</samp> constraint. </p>
+<p class="p">Variables can also be aggregated. For instance, in the
+following model:  </p>
+<pre class="pre codeblock"><code>    IloIntVar x(env, 0, 10,"x"); 
+    IloIntVar y(env, 0, 50,"y"); 
+    IloModel model(env); 
+    model.add(x == y + 2);
+</code></pre>
+<p class="p">the variables <em class="ph i">x</em> and <em class="ph i">y</em> are aggregated. Running the code:
+ </p>
+<pre class="pre codeblock"><code>    IloCP cp(env);
+    cp.extract(model);
+    cp.out() &lt;&lt; "The engine variable of " &lt;&lt; x &lt;&lt; " is " &lt;&lt; cp.getIntVar(x) &lt;&lt; std::endl;
+    cp.out() &lt;&lt; "The engine variable of " &lt;&lt; y &lt;&lt; " is " &lt;&lt; cp.getIntVar(y) &lt;&lt; std::endl;
+</code></pre>
+<p class="p">produces the output:  </p>
+<pre class="pre codeblock"><code>The engine variable of x[0..10]  is (y[0..50] + 2)
+The engine variable of y[0..50]  is y[0..50]
+</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/extend_extract.html" title="A model is extracted to the to the optimizer before search begins.">Model extraction</a></div>
+</div>
+</div></body>
+</html>

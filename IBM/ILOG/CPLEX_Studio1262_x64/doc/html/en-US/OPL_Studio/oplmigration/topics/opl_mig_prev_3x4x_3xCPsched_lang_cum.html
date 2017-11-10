@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Cumulative resources" />
+<meta name="abstract" content="Explains how to model cumulative resources in OPL 6.x." />
+<meta name="Description" content="Explains how to model cumulative resources in OPL 6.x." />
+<meta name="DC.subject" content="scheduling cumulative resources, migration" />
+<meta name="keywords" content="scheduling cumulative resources, migration" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched_lang.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1204287705514" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched_lang.html" />
+<title>Cumulative resources</title>
+</head>
+<body role="main" id="descriptiveTopic1204287705514">
+<h1 class="title topictitle1">Cumulative resources</h1>
+<div class="body"><p class="shortdesc">Explains how to model  cumulative resources in OPL 6.x.</p>
+<p class="p">Cumulative resources are those with limited capacity,
+and whose capacity can be used to different degrees by the tasks that
+use the resource.</p>
+<p class="p">In OPL 3.7, there were two types of cumulative resources:
+discrete resources and reservoirs, specified by the types <samp class="ph codeph">DiscreteResource</samp> and <samp class="ph codeph">Reservoir</samp>. The difference between the two is that in the former, the requested
+amount of resource is acquired at the beginning of the activity and
+returned at the end. In the latter, one can either produce or consume
+a resource, but once a resource is produced or consumed, it is never
+taken or given back. </p>
+<p class="p">In OPL 6.x, these concepts are all unified into the addition
+of simple functions, and then the bounding of these functions. For
+example, when the resource is required and then later given back,
+this is represented by a <samp class="ph codeph">pulse</samp> function
+that steps up, then is flat, then steps back down. In the <samp class="ph codeph">reservoir</samp> case, this is represented by a <samp class="ph codeph">step</samp> function; a negative <samp class="ph codeph">step</samp> consumes the resource while a positive one produces it. </p>
+<p class="p">A cumulative resource (of the "discrete" type) of maximal
+capacity <samp class="ph codeph">Q</samp> required by a set of operations:</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_prev_3x4x_3xCPsched_lang.html" title="Describes the language elements affected by the changes to scheduling in OPL 6.x.">Individual language elements</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="section1204289373010"><h2 class="title topictitle2">In OPL 3.7</h2>
+<div class="body"><pre class="pre codeblock"><code>  int nbOps = ...;
+  int Q = ...;
+  int ProcessingTime[1..nbOps] = ...;
+  int Demand[1..nbOps] = ...;
+  Activity operations[i in 1..nbOps](ProcessingTime[i]);
+  DiscreteResource machine(Q);
+  solve {
+    forall(i in 1..nbOps)
+      operations[i] requires(Demand[i]) machine;
+  };</code></pre>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="section1204289382683"><h2 class="title topictitle2">In OPL 6.x</h2>
+<div class="body"><pre class="pre codeblock"><code>  using CP;
+  int nbOps = ...;
+  int Q = ...;
+  int ProcessingTime[1..nbOps] = ...;
+  int Demand[1..nbOps] = ...;
+  dvar interval operations[i in 1..nbOps] size ProcessingTime[i];
+  constraints {
+    sum(i in 1..nbOps) pulse(operations[i], Demand[i]) &lt;= Q;
+  }</code></pre>
+<p class="p">A cumulative resource (of the "reservoir" type) of maximal
+capacity <samp class="ph codeph">Q</samp> produced and consumed by a set
+of activities:</p>
+<div class="section" id="section1204289382683__section1204289391386"><h3 class="title sectiontitle">In OPL 3.7</h3><pre class="pre codeblock"><code>  int nbProd = ...;
+  int nbCons = ...;
+  int Q =...;
+  int Prod[1..nbProd] = ...;
+  int Cons[1..nbCons] = ...;
+  Activity producers[i in 1..nbProd](1);
+  Activity consumers[i in 1..nbCons](1);
+  Reservoir res(Q,0);
+  solve {
+    forall(i in 1..nbProd)
+      producers[i] produces(Prod[i]) res;
+    forall(i in 1..nbCons)
+      consumers[i] consumes(Cons[i]) res;
+  };</code></pre>
+</div>
+<div class="section" id="section1204289382683__section1204289396762"><h3 class="title sectiontitle">In OPL 6.x</h3><pre class="pre codeblock"><code>  using CP;
+  int nbProd = ...;
+  int nbCons = ...;
+  int Q =...;
+  int Prod[1..nbProd] = ...;
+  int Cons[1..nbCons] = ...;
+  dvar interval producers[i in 1..nbProd] size 1;
+  dvar interval consumers[i in 1..nbCons] size 1;
+  constraints {
+    sum(i in 1..nbProd) stepAtEnd(producers[i], Prod[i]) -
+    sum(i in 1..nbCons) stepAtStart(consumers[i], Cons[i]) &lt;= Q;
+  }</code></pre>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Using Concert Technology in C++" />
+<meta name="abstract" content="This C++ application solves the model in this way." />
+<meta name="Description" content="This C++ application solves the model in this way." />
+<meta name="DC.subject" content="Concert Technology Library, example model" />
+<meta name="keywords" content="Concert Technology Library, example model" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="Getting_started.uss_ataglance.997583" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" />
+<title>Using Concert Technology in C++</title>
+</head>
+<body role="main" id="Getting_started.uss_ataglance.997583">
+<h1 class="title topictitle1">Using Concert Technology in C++</h1>
+<div class="body"><p class="shortdesc">This C++ application solves the model in this way.</p>
+<p class="p">Here is a C++ application using CPLEX in Concert Technology
+to solve the example. An expanded form of this example is discussed
+in detail in <a class="xref" href="../Cplusplus/cpp_synopsis.html" title="This tutorial shows you how to write C++ applications using CPLEX with Concert Technology. In this tutorial you will learn about:">C++ tutorial</a>. </p>
+<pre class="pre codeblock"><code>#include &lt;ilcplex/ilocplex.h&gt;
+ILOSTLBEGIN
+
+int
+main (int argc, char **argv)
+{
+   IloEnv env;
+   try {
+      IloModel model(env);
+      IloNumVarArray vars(env);
+      vars.add(IloNumVar(env, 0.0, 40.0));
+      vars.add(IloNumVar(env));
+      vars.add(IloNumVar(env));
+        model.add(IloMaximize(env, vars[0] + 2 * vars[1] + 3 * vars[2]));
+      model.add( - vars[0] +     vars[1] + vars[2] &lt;= 20);
+      model.add(   vars[0] - 3 * vars[1] + vars[2] &lt;= 30);
+
+      IloCplex cplex(model);
+      if ( !cplex.solve() ) {
+         env.error() &lt;&lt; "Failed to optimize LP." &lt;&lt; endl;
+         throw(-1);
+      }
+
+     IloNumArray vals(env);
+      env.out() &lt;&lt; "Solution status = " &lt;&lt; cplex.getStatus() &lt;&lt; endl;
+      env.out() &lt;&lt; "Solution value = " &lt;&lt; cplex.getObjValue() &lt;&lt; endl;
+      cplex.getValues(vals, vars);
+      env.out() &lt;&lt; "Values = " &lt;&lt; vals &lt;&lt; endl;
+   }
+   catch (IloException&amp; e) {
+      cerr &lt;&lt; "Concert exception caught: " &lt;&lt; e &lt;&lt; endl;
+   }
+   catch (...) {
+      cerr &lt;&lt; "Unknown exception caught" &lt;&lt; endl;
+   }
+
+   env.end();
+
+   return 0;
+}</code></pre>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/GettingStarted/topics/tutorials/ataglance/ataglance_synopsis.html" title="This example solves an LP model to contrast CPLEX components.">Solving an LP with CPLEX</a></div>
+</div>
+</div></body>
+</html>

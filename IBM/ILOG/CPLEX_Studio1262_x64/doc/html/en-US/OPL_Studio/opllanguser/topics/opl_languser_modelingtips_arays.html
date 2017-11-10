@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="About arrays" />
+<meta name="abstract" content="Discusses sparsity, tuples of parameters, and filtering in the context of model efficiency." />
+<meta name="Description" content="Discusses sparsity, tuples of parameters, and filtering in the context of model efficiency." />
+<meta name="DC.subject" content="modeling tips, arrays" />
+<meta name="keywords" content="modeling tips, arrays" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="descriptiveTopic1197305601670" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips.html" />
+<title>About arrays</title>
+</head>
+<body role="main" id="descriptiveTopic1197305601670">
+<h1 class="title topictitle1">About arrays</h1>
+<div class="body"><p class="shortdesc">Discusses sparsity, tuples of parameters, and filtering
+in the context of model efficiency. </p>
+<div class="section" id="descriptiveTopic1197305601670__fCO82kRu"><h2 class="title sectiontitle">Order of indexers</h2><p class="p">When you use multidimensional arrays, the order of the
+dimensions may be significant. For instance, in the following example:</p>
+<pre class="pre codeblock"><code>/*..*/
+
+range r1 = 1..n1;
+range r2 = 1..n2;
+
+dvar int+ x[r1][r2];
+
+/*..*/
+
+a1 == sum(i in r1, j in r2) x[i][j];
+a2 == sum(j in r2, i in r1) x[i][j];</code></pre>
+<p class="p">the calculation of <samp class="ph codeph">a1</samp> is more
+efficient because OPL internal caching mechanism recalculates <samp class="ph codeph">x[i]</samp> only when <samp class="ph codeph">i</samp> changes.</p>
+</div>
+<div class="section" id="descriptiveTopic1197305601670__DeDgdu43"><h2 class="title sectiontitle">Array initialization</h2><p class="p">A better-performing array initialization syntax has been
+introduced in OPL4.1. For example, the <span class="ph filepath">profiler.mod</span> example contains two semantically equivalent initializations:</p>
+<p class="p exampletitle" id="descriptiveTopic1197305601670__usropllangtut.uss_langtut_modelingtips.1012772">Two ways of initializing arrays</p>
+<pre class="pre codeblock"><code>int Values1[r][r];
+
+execute INIT_Values1 {
+  for( var i in r )
+    for( var j in r )
+      if ( i == 2*j ) 
+        Values1[i][j] = i+j;
+  writeln(Values1);          
+}
+
+int Values2[i in r][j in r] = (i==2*j) ? i+j : 0;
+
+execute INIT_Values2 {
+  writeln(Values2);
+}
+</code></pre>
+<p class="p">Initialization of <samp class="ph codeph">Values2</samp> is
+much faster than initialization of <samp class="ph codeph">Values1</samp>, as shown by the profiling facility described in <a class="xref" href="../../usroplide/topics/opl_ide_profil.html" title="Explains how the IDE Profiler table can help you improve your model to make it run faster while consuming less memory.">Profiling the execution of a model</a> in <em class="ph i">IDE Tutorials</em>.</p>
+</div>
+<div class="section" id="descriptiveTopic1197305601670__kwhl8dOG"><h2 class="title sectiontitle">Generic arrays</h2><p class="p">It is recommended to use generic arrays, or generic indexed
+arrays, whenever possible because they make the model more explicit
+and readable.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_modelingtips.html" title="Describes a few recommended practices to help you write more efficient models.">Modeling tips</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>ILOCPCONSTRAINTWRAPPER0</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../macros/ILOCPCONSTRAINTWRAPPER0.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Macro ILOCPCONSTRAINTWRAPPER0</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cpext.h</span></div><div
+            class="prototype">ILOCPCONSTRAINTWRAPPER0(_this, cp)</div><div
+            class="prototype">ILOCPCONSTRAINTWRAPPER1(_this, cp, t1, a1)</div><div
+            class="prototype">ILOCPCONSTRAINTWRAPPER2(_this, cp, t1, a1, t2, a2)</div><div
+            class="prototype">ILOCPCONSTRAINTWRAPPER3(_this, cp, t1, a1, t2, a2, t3, a3)</div><div
+            class="prototype">ILOCPCONSTRAINTWRAPPER4(_this, cp, t1, a1, t2, a2, t3, a3, t4, a4)</div><div
+            class="prototype">ILOCPCONSTRAINTWRAPPER5(_this, cp, t1, a1, t2, a2, t3, a3, t4, a4, t5, a5)</div><div
+            class="prototype">ILOCPCONSTRAINTWRAPPER6(_this, cp, t1, a1, t2, a2, t3, a3, t4, a4, t5, a5, t6, a6)</div>
+Macro for wrapping a new constraint class.
+      <div
+                        class="description"><p>This macro defines a constraint class named <code>_thisI</code> with
+ <em>n</em> data members. When <em>n</em> is greater than zero, the types and
+ names of the data members must be supplied as arguments to the macro. Each
+ data member is defined by its type <code>t</code><em>i</em> and a name
+ <code>a</code><em>i</em>.</p><p>Since the argument <code>this</code> is used to name the constraint
+ class, it is not possible to use the same name for several constraints.</p><p>You can use the macro <code>ILOCPCONSTRAINTWRAPPER</code> to wrap an
+ existing instance of <code>IlcConstraint</code> when you want to use it
+ within IBM&reg; ILOG&reg; Concert Technology model objects. In order to use an instance of
+ <code>IlcConstraint</code> in that way, you need to follow these steps:</p><ol>
+<li>Use the macro to wrap the instance of <code>
+ IlcConstraint</code> in an instance of <code>
+ IloConstraint</code>.</li><li>Extract your model and model objects for an instance of <code>
+ IloCP</code> by calling the member function <code>
+ IloCP::extract</code>. During extraction, <code>
+ IloCP::extract</code> will put back the instance of <code>
+ IloConstraint</code>.</li>
+</ol><p>You must use the following <code><a
+                href="../classes/IloCPConstraintI.html">IloCPConstraintI</a></code> member
+ functions to force extraction of a varianle or an array of variables:</p><pre
+                class="sample">
+ void use(const IloCP cp, const IloNumVar x) const;
+ void use(const IloCP cp, const IloIntervalVar x) const;
+ void use(const IloCP cp, const IloIntervalSequenceVar x) const;
+
+ void use(const IloCP cp, const IloNumVarArray xa) const;
+ void use(const IloCP cp, const IloIntervalVarArray xa) const;
+ void use(const IloCP cp, const IloIntervalSequenceVarArray xa) const;
+ </pre><p> Each object type passed as a parameter must be processable by an
+     object of type <code>std::ostream</code> (needed for the <code>display
+     </code> member function - see example below).  If needed, you can do
+     this by writing code like the following code for some type <code>MyType</code>
+     used in the constraint wrapper.  Note that most Concert Technology
+     objects already have this capability.
+ </p><pre
+                class="sample">
+ std::ostream&amp; operator &lt;&lt; (std::ostream&amp; out, const MyType&amp; myObj) {
+   // ... insert code for displaying myObj ...
+   return out;
+ }
+ </pre><p><strong>Example</strong></p><p>Here's how to define a constraint wrapper with one data member:</p><pre
+                class="sample">
+ ILOCPCONSTRAINTWRAPPER1(IloFreqConstraint, cp, IloIntVarArray, _vars) {
+   use(cp, _vars);
+   return IlcFreqConstraint(cp, cp.getIntVarArray(_vars));
+ }</pre><p>In order to use <code>IloCP::getIntVarArray</code>, the object must
+ be extracted. To force extraction of an extractable or an array of
+ extractables, pass them as parameters of the <code>use</code> method.</p><p>The macro generates code similar to the following lines:</p><pre
+            class="sample">
+ class IloFreqConstraintI : public IloCPConstraintI {
+ ILOCPCONSTRAINTWRAPPERDECL
+ private:
+   IloIntVarArray _vars;
+
+ public:
+   IloFreqConstraintI(IloEnvI*, const IloIntVarArray&amp;, const char*);
+   virtual IloExtractableI* makeClone(IloEnvI*) const;
+   virtual void display(ostream       &amp; out) const;
+   IlcConstraint extract(const IloCP) const;
+ };
+
+ ILOCPCONSTRAINTWRAPPERIMPL(IloFreqConstraintI)
+
+ IloFreqConstraintI::IloFreqConstraintI(IloEnvI* env,
+                                     const IloIntVarArray&amp;   T_vars,
+                                     const char* name) :
+   IloCPConstraintI (env, name), _vars ((IloIntVarArray&amp;)T_vars) {}
+
+ IloExtractableI* IloFreqConstraintI::makeClone(IloEnvI* env) const {
+   IloIntVarArray targ1 = IloGetClone(env, _vars);
+   return new (env) IloFreqConstraintI(env,
+                                    (const IloIntVarArray &amp;)targ1,
+                                    (const char*)0);
+ }
+
+ void IloFreqConstraintI::display(ostream&amp; out) const {
+   out &lt;&lt; &quot;IloFreqConstraintI&quot; &lt;&lt; &quot; (&quot;;
+   if (getName()) out &lt;&lt; getName();
+   else out &lt;&lt; getId(); out &lt;&lt; &quot;)&quot; &lt;&lt; std::endl;
+   out &lt;&lt; &quot;  &quot; &lt;&lt; &quot;_vars&quot; &lt;&lt; &quot; &quot; &lt;&lt; _vars &lt;&lt;
+ std::endl;
+ }
+
+ IloConstraint  IloFreqConstraint(IloEnv env,
+                               IloIntVarArray _vars,
+                               const char* name=0) {
+   IloFreqConstraintI::InitTypeIndex();
+   return new (env) IloFreqConstraintI(env.getImpl(), _vars, name);
+ }
+
+ IlcConstraint IloFreqConstraintI::extract(const IloCP&amp; cp) const
+ {
+   use(cp, _vars);
+   return IlcFreqConstraint(cp, cp.getIntVarArray(_vars));
+ }
+ </pre></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../classes/IloCP.html">IloCP</a>, <a href="../classes/IloCPConstraintI.html">IloCPConstraintI</a></p></body>
+</html>

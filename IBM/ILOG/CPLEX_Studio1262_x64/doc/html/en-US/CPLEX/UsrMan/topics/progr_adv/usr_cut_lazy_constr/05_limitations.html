@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Limitations on user-cut pools" />
+<meta name="abstract" content="Describes a limitation on pools with respect to presolve reductions." />
+<meta name="Description" content="Describes a limitation on pools with respect to presolve reductions." />
+<meta name="DC.subject" content="CPXERR_PRESOLVE_BAD_PARAM, CPX_PARAM_REDUCE, lazy constraints and, Reduce parameter, presolve, preprocessing" />
+<meta name="keywords" content="CPXERR_PRESOLVE_BAD_PARAM, CPX_PARAM_REDUCE, lazy constraints and, Reduce parameter, presolve, preprocessing" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cbAndLcPools.1018648" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" />
+<title>Limitations on user-cut pools</title>
+</head>
+<body role="main" id="User_manual.uss_cbAndLcPools.1018648">
+<h1 class="title topictitle1">Limitations on user-cut pools</h1>
+<div class="body"><p class="shortdesc">Describes a limitation on pools with respect to presolve
+reductions.</p>
+<p class="p">Certain considerations apply to user cuts, user-cut pools, and
+user-cut callbacks. </p>
+<ul class="ul"><li class="li"><p class="p">If  the <a class="xref" href="../../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a> (<samp class="ph codeph">CPX_PARAM_PRELINEAR</samp>, <samp class="ph codeph">PreLinear</samp>)
+is set to 1 (one), its default, then nonlinear presolve reductions
+are allowed. If there are <strong class="ph b">user cuts</strong> in the model as well, then
+it can happen that a user cut cannot be crushed to the presolved model,
+and CPLEX therefore disregards the uncrushed user cut. In that case,
+CPLEX displays a log message on the results channel: "Could not crush
+NNN user cuts." where NNN is the number of user cuts that CPLEX could
+not crush and that CPLEX consequently disregarded.</p>
+</li>
+<li class="li"><p class="p">Furthermore, the <a class="xref" href="../../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a> (<samp class="ph codeph">CPX_PARAM_PRELINEAR</samp>, <samp class="ph codeph">PreLinear</samp>)
+is set to 1 (one), its default, and there is a <strong class="ph b">user cut callback</strong>,
+then it can happen that the user cut generated in the user cut callback
+cannot be crushed to the presolved model. This situation means that
+a call to <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/cutcallbackadd.html" title="The routine CPXXcutcallbackadd/CPXcutcallbackadd adds lazy constraints and globally valid cuts to the current node LP subproblem during MIP branch and cut.">CPXcutcallbackadd</a></samp> or <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/cutcallbackaddlocal.html" title="The routine CPXXcutcallbackaddlocal/CPXcutcallbackaddlocal adds local cuts during MIP branch and cut.">CPXcutcallbackaddlocal</a></samp> returns
+the status <samp class="ph codeph">CPXERR_PRESLV_CRUSHFORM</samp>. This error is
+not critical: the message simply tells the user that the cut was discarded
+because it could not be crushed to the presolved model; in other words,
+the cut could not be represented in terms of presolved problem variables.
+Since user cuts are optional (they do not affect the integer-feasible
+region of the problem), discarding a user cut does not affect the
+correctness of the algorithm.</p>
+ </li>
+</ul>
+<p class="p">Lazy constraints, lazy constraint pools, and lazy constraint callbacks
+differ from their user-cut counterparts in this respect: CPLEX automatically
+adjusts these parameters in all APIs to turn off dual reductions when
+CPLEX detects the presence of lazy constraints in a model:</p>
+<ul class="ul"><li class="li"><p class="p">the <a class="xref" href="../../../../Parameters/topics/PreLinear.html" title="Decides whether linear or full reductions occur during preprocessing.">linear reduction switch</a> (<samp class="ph codeph">CPX_PARAM_PRELINEAR</samp>, <samp class="ph codeph">PreLinear</samp>)</p>
+ </li>
+<li class="li"><p class="p">the <a class="xref" href="../../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a> (<samp class="ph codeph">CPX_PARAM_REDUCE</samp>, <samp class="ph codeph">Reduce</samp>)</p>
+ </li>
+</ul>
+<p class="p">Specifically, when CPLEX detects a lazy constraint, it disables
+dual reductions: if the parameter was at its <strong class="ph b">default</strong> (<samp class="ph codeph">CPX_PREREDUCE_PRIMALANDDUAL
+= 3</samp>), then CPLEX changes the value of the parameter to <samp class="ph codeph">CPX_PREREDUCE_PRIMALONLY
+= 1</samp> (one); if it was at <samp class="ph codeph">CPX_PREREDUCE_DUALONLY =
+2</samp>, then CPLEX changes the value of the parameter to <samp class="ph codeph">CPX_PREREDUCE_NOPRIMALORDUAL
+= 0</samp> (zero); if it was at <samp class="ph codeph">CPX_PREREDUCE_PRIMALONLY
+= 1</samp>(one) or <samp class="ph codeph">CPX_PREREDUCE_NOPRIMALORDUAL = 0</samp> (zero),
+then CPLEX does not change the value of the parameter at all because
+in that case, dual reductions have already been turned off.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/usr_cut_lazy_constr/01_uc_lc_title_synopsis.html" title="Documents pools of user-defined cuts and lazy constraints.">User-cut and lazy-constraint pools</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Benefits of constraint programming" />
+<meta name="abstract" content="Constraint programming is a technology that solves time tabling problems and sequencing problems. It can also be an alternative to mathematical programming for allocation problems that have a slow convergence." />
+<meta name="Description" content="Constraint programming is a technology that solves time tabling problems and sequencing problems. It can also be an alternative to mathematical programming for allocation problems that have a slow convergence." />
+<meta name="DC.subject" content="constraint programming, benefits" />
+<meta name="keywords" content="constraint programming, benefits" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllanguser/topics/opl_languser_intro_cp_vs_mp.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="usropllangtut.uss_langtut_intro.1014907" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllanguser/topics/opl_languser_intro_cp_vs_mp.html" />
+<title>Benefits of constraint programming</title>
+</head>
+<body role="main" id="usropllangtut.uss_langtut_intro.1014907">
+<h1 class="title topictitle1">Benefits of constraint programming</h1>
+<div class="body"><p class="shortdesc">Constraint programming is a technology that solves
+time tabling problems and sequencing problems. It can also be an alternative
+to mathematical programming for allocation problems that have a slow
+convergence.</p>
+<p class="p">Constraint programming has native support for:</p>
+<ul class="ul"><li class="li"><p class="p"><a class="xref" href="opl_languser_intro_benef_cp.html#usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1015449">Nonlinear costs or constraints</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="opl_languser_intro_benef_cp.html#usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1014924">Logical constraints and statements</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="opl_languser_intro_benef_cp.html#usropllangtut.uss_langtut_intro.1014907__section1208351421634">Constraints on and between interval variables</a></p>
+ </li>
+<li class="li"><p class="p"><a class="xref" href="opl_languser_intro_benef_cp.html#usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1015506">Compatibility or incompatibility constraints</a></p>
+</li>
+<li class="li"><p class="p"><a class="xref" href="opl_languser_intro_benef_cp.html#usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1014971">More useful features</a></p>
+</li>
+</ul>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1015449"><h2 class="title sectiontitle">Nonlinear costs or constraints</h2><p class="p">For example, a
+quadratic assignment problem can be modeled in CP as follows:</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1015889">A quadratic assignment problem (CP)</p>
+<pre class="pre codeblock"><code>using CP;
+
+int nbPerm = ...;
+range r = 1..nbPerm;
+int dist[r][r] = ...;
+int flow[r][r] =...;
+
+execute {
+        cp.param.Workers = 1;
+                cp.param.timeLimit=30;
+}
+
+
+dvar int perm[1..nbPerm] in r;
+
+dexpr int cost[i in r][j in r] = dist[i][j]*flow[perm[i]][perm[j]];
+
+minimize sum(i in r, j in r) cost[i][j];
+subject to {
+
+  allDifferent(perm);
+
+};</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1014924"><h2 class="title sectiontitle">Logical constraints and statements</h2><p class="p">For example, <samp class="ph codeph">forall</samp> statements, such as the following one, are
+efficiently taken into account by constraint programming:</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1015929">A <samp class="ph codeph">forall</samp> statement in CP</p>
+<pre class="pre codeblock"><code>  forall(s in 1..nbSlabs)
+    colorCt: sum (c in 1..nbColors) (or(o in 1..nbOrders : colors[o] == c) (where[o] == s)) &lt;= 2; </code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014907__section1208351421634"><h2 class="title sectiontitle">Constraints
+on and between interval variables</h2><p class="p">CP scheduling can express several types of constraint on
+and between interval variables:</p>
+<ul class="ul"><li class="li"><p class="p">to limit the possible positions of an interval
+variable (forbidden start/end values or <em class="ph i">extent</em> values),</p>
+ </li>
+<li class="li"><p class="p">to specify precedence relations between two
+interval variables,</p>
+</li>
+<li class="li"><p class="p">to relate the position of an interval variable
+with one of a set of interval variables (spanning, synchronization,
+alternative).</p>
+</li>
+</ul>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1015506"><h2 class="title sectiontitle">Compatibility or incompatibility constraints</h2><p class="p">For instance, the following example is a concise model of
+the knight problem:</p>
+<p class="p exampletitle" id="usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1017105">The knight problem</p>
+<pre class="pre codeblock"><code>using CP;
+
+int N = 18;
+range K = 1..N;
+range R = 1..8;
+
+dvar int x[K] in R;
+dvar int y[K] in R;
+
+dvar int used[R][R] in 0..1;
+
+constraints {
+   forall(ordered k1,k2 in K) {
+     forbiddenAssignments(
+        {&lt;i1,j1,i1,j1&gt; | i1,j1 in R} 
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1+1 &amp;&amp; j2==j1+2}
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1+1 &amp;&amp; j2==j1-2}
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1-1 &amp;&amp; j2==j1+2}
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1-1 &amp;&amp; j2==j1-2}
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1+2 &amp;&amp; j2==j1+1}
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1+2 &amp;&amp; j2==j1-1}
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1-2 &amp;&amp; j2==j1+1}
+        union
+        {&lt;i1,j1,i2,j2&gt; | i1,j1,i2,j2 in R : i2==i1-2 &amp;&amp; j2==j1-1},
+        x[k1], y[k1], x[k2], y[k2] );
+   }
+
+   forall(k in K) {
+      used[x[k]][y[k]] ==1;
+   }
+
+   N == sum(i,j in R) used[i][j];
+}</code></pre>
+</div>
+<div class="section" id="usropllangtut.uss_langtut_intro.1014907__usropllangtut.uss_langtut_intro.1014971"><h2 class="title sectiontitle">More useful features</h2><p class="p">When it comes to
+computing operational plans or schedules that must be executable,
+you cannot always use the linear form to simplifying costs or constraints.
+Fortunately, constraint programming can accurately model these problems.</p>
+<p class="p">Constraint programming can also be used as a fast generator
+of feasible solutions. This can be extremely useful in combination
+with other models and engines, for instance to implement column generation
+for a complex optimization model.</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllanguser/topics/opl_languser_intro_cp_vs_mp.html" title="Explains why it makes sense to compare CP and MP, and provides details on the salient features of each approach.">Constraint programming versus mathematical programming</a></div>
+</div>
+</div></body>
+</html>

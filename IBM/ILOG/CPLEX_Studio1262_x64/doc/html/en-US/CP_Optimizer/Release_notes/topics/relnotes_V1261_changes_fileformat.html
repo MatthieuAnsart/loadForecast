@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="New feature: CP Optimizer file format" />
+<meta name="abstract" content="Methods for dumping, exporting and importing the model have been introduced." />
+<meta name="Description" content="Methods for dumping, exporting and importing the model have been introduced." />
+<meta name="DC.subject" content="model, export, dump" />
+<meta name="keywords" content="model, export, dump" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Release_notes/topics/relnotes_V1261_changes.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="newfeaturefileformat" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Release_notes/topics/relnotes_V1261_changes.html" />
+<title>New feature: CP Optimizer file format</title>
+</head>
+<body role="main" id="newfeaturefileformat">
+<h1 class="title topictitle1">New feature: CP Optimizer file format</h1>
+<div class="body"><p class="shortdesc">Methods for dumping, exporting and importing the model have been introduced.</p>
+<p class="p">The CP Optimizer (CPO) file format is a specification for writing constraint
+   programming models suitable for CP Optimizer together with other information
+   such as parameter settings and search phases. A single model can be contained in
+   one file or span multiple files.</p>
+<p class="p">CP Optimizer supports both reading and writing models in the CP Optimizer file format. In
+   particular, it is possible to build a model using any supported language or
+   interface such as C++, Java, C# or OPL and then, instead of solving the model,
+   write it into a CPO file. This file can be read into another instance of CP Optimizer
+   using the appropriate API (possibly on another machine) and solved there. It is
+   possible to write CPO files directly or generate them programmatically. CPO files
+   are particularly useful for debugging since the model being
+   solved by the engine can be examined, which is more difficult to do when examining source code or
+   OPL models.</p>
+<p class="p">The CP Optimizer file format is supported in all provided APIs. In the <strong class="ph b">C++ API</strong> of CP Optimizer,
+  the functions to dump or export the current
+  model into the CP Optimizer file format are <samp class="ph codeph">IloCP::dumpModel</samp> and <samp class="ph codeph">IloCP::exportModel</samp>.
+  The model can be imported using the function
+   <samp class="ph codeph">IloCP::importModel</samp>. A dumped model contains the model and also internal data to guarantee that the behavior of CP
+   Optimizer on the model after import is the same as on the original model. In contrast, an exported model contains only
+   the model, and it is easier to read by a human.</p>
+<p class="p">The model can also be exported into the CP Optimizer file format during the search. In this case, the file contains the
+   current domains of all variables (instead of the initial domains) and the current objective cuts. Constraints that were
+   added during the search are not included.</p>
+<div class="p">Here is a small example of a model in CP Optimizer file format:
+<pre class="pre codeblock"><code>// Decision variables:
+Belgium = intVar(1..4);
+Denmark = intVar(1..4);
+France = intVar(1..4);
+Germany = intVar(1..4);
+Luxembourg = intVar(1..4);
+Netherlands = intVar(1..4);
+
+/* Constraints: */
+Belgium != France;
+Belgium != Germany;
+Belgium != Netherlands;
+Belgium != Luxembourg;
+Denmark != Germany;
+France != Germany;
+France != Luxembourg;
+Germany != Luxembourg;
+Germany != Netherlands;
+
+parameters {
+  SearchType = DepthFirst;
+}</code></pre>
+
+ </div>
+<p class="p">Other methods related to the new CP Optimizer file format are
+   <samp class="ph codeph">IloCP::getAllIloIntVars</samp>, <samp class="ph codeph">IloCP::getAllIloIntervalVars</samp>, 
+   <samp class="ph codeph">IloCP::getAllIntervalSequenceVars,</samp>, <samp class="ph codeph">IloCP::getAllConstrainedCumulFunctionExprs</samp>, 
+   <samp class="ph codeph">IloCP::getIloIntVar</samp>, 
+   <samp class="ph codeph">IloCP::getIloIntervalVar</samp>, <samp class="ph codeph">IloCP::getIloIntervalSequenceVar</samp>, and
+   <samp class="ph codeph"> IloCP::getIloCumulFunctionExpr</samp>.
+   In addition, the methods <samp class="ph codeph">IloCP::getValue</samp>, <samp class="ph codeph">IloCP::isPresent</samp>, <samp class="ph codeph">IloCP::isAbsent</samp>, 
+   <samp class="ph codeph">IloCP::getStart</samp>, <samp class="ph codeph">IloCP::getEnd</samp>, <samp class="ph codeph">IloCP::getSize</samp>, and 
+   <samp class="ph codeph">IloCP::getLength</samp>, now have a form
+   that takes a string as an argument, such as <samp class="ph codeph">IloInt IloCP::getValue(const char*
+    intVarName) const;</samp>.</p>
+<p class="p">The <strong class="ph b">Java™ API</strong> and <strong class="ph b">C# API</strong> have equivalent new methods, such as 
+   <samp class="ph codeph">IloCP.importModel</samp> and <samp class="ph codeph">CP.ImportModel</samp>.</p>
+<p class="p">An example of the usage of the file format has been added 
+  for each API:  <span class="ph filepath">cpoptimizer/examples/src/cpp/cpofileformat.cpp</span>,
+  <span class="ph filepath">cpoptimizer/examples/src/csharp/CPOFileFormat.cs</span>, and
+  <span class="ph filepath">cpoptimizer/examples/src/java/CPOFileFormat.java</span>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Release_notes/topics/relnotes_V1261_changes.html" title="Describes the changes for the release of the CP Optimizer feature of CPLEX Optimization Studio V12.6.1.">Changes since CP Optimizer V12.6.0</a></div>
+</div>
+</div></body>
+</html>

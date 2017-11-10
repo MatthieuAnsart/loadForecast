@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Selecting nodes" />
+<meta name="abstract" content="Describes options of the parameter to control selection of strategies applied at nodes and their effect on the search." />
+<meta name="Description" content="Describes options of the parameter to control selection of strategies applied at nodes and their effect on the search." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/performance/12_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.684651" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/performance/12_title_synopsis.html" />
+<title>Selecting nodes</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.684651">
+<h1 class="title topictitle1">Selecting nodes</h1>
+<div class="body"><p class="shortdesc">Describes options of the parameter to control selection
+of strategies applied at nodes and their effect on the search.</p>
+<p class="p">When CPLEX backtracks, there usually remain large numbers
+of unexplored nodes from which to begin a new dive. The node selection
+parameter sets this choice. (For documentation of the node selection
+parameter, see <a class="xref" href="../../../../../Parameters/topics/NodeSel.html" title="Used to set the rule for selecting the next node to process when backtracking.">MIP node selection strategy</a> in
+the <em class="ph i">CPLEX Parameters Reference Manual</em>.)</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A three-column table showing possible values of their parameter, their symbolic name, and their meaning." id="User_manual.uss_solveMIP.684651__User_manual.uss_solveMIP.676690" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Node selection parameter settings for node search type</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d418248e31"> Value of the parameter </th>
+<th class="entry" align="left" valign="top" id="d418248e33"> Symbolic Value </th>
+<th class="entry" align="left" valign="top" id="d418248e35"> Node Search Type </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d418248e31 ">  <samp class="ph codeph">1 </samp> (Default) </td>
+<td class="entry" valign="top" headers="d418248e33 ">  <samp class="ph codeph">CPX_NODESEL_BESTBOUND</samp>  </td>
+<td class="entry" valign="top" headers="d418248e35 "> Best Bound search, which means that the node
+with the best objective function will be selected, generally near
+the top of the tree. </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d418248e31 ">  <samp class="ph codeph">2</samp>  </td>
+<td class="entry" valign="top" headers="d418248e33 ">  <samp class="ph codeph">CPX_NODESEL_BESTEST</samp>  </td>
+<td class="entry" valign="top" headers="d418248e35 "> Best Estimate search, whereby CPLEX will
+use an estimate of a given node's progress toward integer feasibility
+relative to its degradation of the objective function. This setting
+can be useful in cases where there is difficulty in finding feasible
+solutions or in cases where a proof of optimality is not crucial. </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d418248e31 ">  <samp class="ph codeph">3</samp>  </td>
+<td class="entry" valign="top" headers="d418248e33 ">  <samp class="ph codeph">CPX_NODESEL_BESTEST_ALT</samp>  </td>
+<td class="entry" valign="top" headers="d418248e35 "> A variation on the Best Estimate search. </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d418248e31 ">  <samp class="ph codeph">0</samp>  </td>
+<td class="entry" valign="top" headers="d418248e33 ">  <samp class="ph codeph">CPX_NODESEL_DFS</samp>  </td>
+<td class="entry" valign="top" headers="d418248e35 "> Depth First search will be conducted. In
+many cases this amounts to a brute force strategy for solving the
+combinatorial problem, gaining a small amount of tactical efficiency
+due to a variety of reasons, and it is rare that it offers any advantage
+over other settings. </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">In instances where Best Estimate node selection (<samp class="ph codeph">NodeSel</samp> = <samp class="ph codeph">2</samp> or <samp class="ph codeph">3</samp>)
+is in effect, the parameter known as <a class="xref" href="../../../../../Parameters/topics/BBInterval.html" title="Sets the best bound interval for MIP strategy.">MIP strategy best bound interval</a> (<samp class="ph codeph">BBinterval</samp> or <samp class="ph codeph">CPX_PARAM_BBINTERVAL</samp>)
+sets the frequency at which CPLEX uses Best Bound upon backtracking.
+The default value of <samp class="ph codeph">7</samp>  works well, but
+you can set it to <samp class="ph codeph">0</samp>  (zero) to make sure
+that Best Estimate is used every time backtracking occurs.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/performance/12_title_synopsis.html" title="Describes features for tuning performance of the MIP optimizer.">Tuning performance features of the mixed integer optimizer</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Composing goals" />
+<meta name="abstract" content="A goal can be defined as a sequence of goals that must all succeed." />
+<meta name="Description" content="A goal can be defined as a sequence of goals that must all succeed." />
+<meta name="DC.subject" content="IlcAnd function" />
+<meta name="keywords" content="IlcAnd function" />
+<meta name="DC.Relation" scheme="URI" content="../../../CP_Optimizer/Advanced_user_manual/topics/goals_understand.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="migration.uss_usradvcpoptimizergoals.1014631" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_understand.html" />
+<title>Composing goals</title>
+</head>
+<body role="main" id="migration.uss_usradvcpoptimizergoals.1014631">
+<h1 class="title topictitle1">Composing goals</h1>
+<div class="body"><p class="shortdesc">A goal can be defined as a sequence of goals that must
+all succeed.</p>
+<p class="p">A goal can be defined as a sequence of goals that must
+all succeed. At the Concert Technology level, goals can be composed
+using the <samp class="ph codeph">operator&amp;&amp;</samp> function.
+For example, consider a custom goal “Greetings”: </p>
+<pre class="pre codeblock"><code>ILCGOAL0(Greetings){
+  IloCP cp = getCP();
+  cp.out() &lt;&lt; "Greetings" &lt;&lt; std::endl;
+  return 0;
+}
+ILOCPGOALWRAPPER0(GreetingsConcert,cp) {
+  return Greetings(cp);
+}
+</code></pre>
+<p class="p">If this goal is composed with the custom “Hello
+World” goal from the previous section, calling the CP Optimizer
+search with the code: </p>
+<pre class="pre codeblock"><code>    IloModel model(env);
+    IloCP cp(model);
+    cp.setParameter(IloCP::LogVerbosity,IloCP::Quiet);
+    if (cp.solve(HelloWorldConcert(env) &amp;&amp; GreetingsConcert(env)))
+      cp.out() &lt;&lt; "Success" &lt;&lt; std::endl;
+    else 
+      cp.out() &lt;&lt; "Fail" &lt;&lt; std::endl;
+    cp.end();
+</code></pre>
+<p class="p">produces the following results: </p>
+<pre class="pre codeblock"><code>Hello World
+Greetings
+Success
+</code></pre>
+<p class="p">Goals can be composed at the search level using the function <samp class="ph codeph">IlcAnd</samp>.
+This function defines a goal composed of several subgoals. The subgoals
+are executed from left to right. For example, the previous goal composition
+could alternatively be written as:  </p>
+<pre class="pre codeblock"><code>ILOCPGOALWRAPPER0(ComposedGoalConcert,cp) {
+  return IlcAnd(HelloWorld(cp), Greetings(cp));
+}
+</code></pre>
+<p class="p">The return type of the <samp class="ph codeph">execute</samp> function
+of a subclass of <samp class="ph codeph">IlcGoalI</samp> is an <samp class="ph codeph">IlcGoalI</samp>,
+which provides yet another way to compose goals. Changing the final
+line of code of the function <samp class="ph codeph">HelloWorldI::execute</samp> to
+be  </p>
+<pre class="pre codeblock"><code>  return Greetings(cp);</code></pre>
+<p class="p">produces the same results as composing the goals with
+the <samp class="ph codeph">IlcAnd</samp> function.</p>
+<p class="p">For a goal that is a conjunction of subgoals, every subgoal
+must succeed in order for the goal to succeed. If one of the subgoals
+in the conjunction fails, then the goal fails.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../CP_Optimizer/Advanced_user_manual/topics/goals_understand.html" title="Customizable search goals enable you to write your own search strategy.">Understanding goals</a></div>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Preprocessing: presolver and aggregator" />
+<meta name="abstract" content="Describes preprocessing in the MIP optimizer." />
+<meta name="Description" content="Describes preprocessing in the MIP optimizer." />
+<meta name="DC.subject" content="preprocessing, MIPs, linear relaxation, MIP and preprocessing, MIP and coefficients at nodes, RepeatPresolve parameter, purpose, CPX_PARAM_REPEATPRESOLVE, basis, preprocessing versus starting (MIP)" />
+<meta name="keywords" content="preprocessing, MIPs, linear relaxation, MIP and preprocessing, MIP and coefficients at nodes, RepeatPresolve parameter, purpose, CPX_PARAM_REPEATPRESOLVE, basis, preprocessing versus starting (MIP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveMIP.686661" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" />
+<title>Preprocessing: presolver and aggregator</title>
+</head>
+<body role="main" id="User_manual.uss_solveMIP.686661">
+<h1 class="title topictitle1">Preprocessing: presolver and aggregator</h1>
+<div class="body"><p class="shortdesc">Describes preprocessing in the MIP optimizer.</p>
+<p class="p">When you invoke the MIP optimizer, whether through the <strong class="ph b">Interactive
+Optimizer</strong> command <samp class="ph codeph">mipopt</samp>, through a call to the <strong class="ph b">Concert
+Technology</strong> <samp class="ph codeph">IloCplex</samp>  method <samp class="ph codeph">solve</samp> ,
+or through the <strong class="ph b">Callable Library</strong> routine <samp class="ph codeph"><a class="xref" href="../../../../../../refcallablelibrary/mipapi/mipopt.html" title="At any time after a mixed integer program has been created by a call to CPXXcreateprob/CPXcreateprob, the routine CPXXmipopt/CPXmipopt may be used to find a solution to that problem.">CPXmipopt</a></samp> ,
+CPLEX by default automatically <em class="ph i">preprocesses</em> your problem. <a class="xref" href="48_preproc.html#User_manual.uss_solveMIP.686661__User_manual.uss_solveMIP.646426" title="A five-column table showing the name of a parameter in the Interactive Optimizer, its name in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), a comment about its effect, and a link to the documentation of the parameter.">Table 1</a> summarizes
+the preprocessing parameters. In preprocessing, CPLEX applies its
+presolver and aggregator one or more times to reduce the size of the
+integer program in order to strengthen the initial linear relaxation
+and to decrease the overall size of the mixed integer program.</p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A five-column table showing the name of a parameter in the Interactive Optimizer, its name in Concert Technology (C++, Java, .NET APIs), its name in the Callable Library (C API), a comment about its effect, and a link to the documentation of the parameter." id="User_manual.uss_solveMIP.686661__User_manual.uss_solveMIP.646426" class="table ShadedHead" width="100%" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Parameters to control MIP preprocessing</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="18.181818181818183%" id="d412708e102"> Interactive Command </th>
+<th class="entry" align="left" valign="top" width="18.181818181818183%" id="d412708e104"> Concert Technology Parameter </th>
+<th class="entry" align="left" valign="top" width="27.27272727272727%" id="d412708e106"> Callable Library Parameter </th>
+<th class="entry" align="left" valign="top" width="18.181818181818183%" id="d412708e108"> Comment </th>
+<th class="entry" align="left" valign="top" width="18.181818181818183%" id="d412708e110">Parameter Reference</th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing aggregator</span>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">AggInd</samp></td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "> <samp class="ph codeph">CPX_PARAM_AGGIND</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> on by default </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/AggInd.html" title="Invokes the aggregator to use substitution where possible to reduce the number of rows and columns before the problem is solved.">preprocessing aggregator application limit</a></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing presolve</span>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">PreInd</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "> <samp class="ph codeph">CPX_PARAM_PREIND</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> on by default </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/PreInd.html" title="Decides whether CPLEX applies presolve during preprocessing.">presolve switch</a></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing boundstrength</span>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">BndStrenInd</samp>  </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "><samp class="ph codeph">CPX_PARAM_BNDSTRENIND</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> presolve must be on </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/BndStrenInd.html" title="Decides whether to apply bound strengthening in mixed integer programs (MIPs).">bound strengthening switch</a></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing coeffreduce</span>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">CoeRedInd</samp>  </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "> <samp class="ph codeph">CPX_PARAM_COEREDIND</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> presolve must be on </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/CoeRedInd.html" title="Decides how coefficient reduction is used.">coefficient reduction setting</a></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing relax</span>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">RelaxPreInd</samp>  </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "><samp class="ph codeph">CPX_PARAM_RELAXPREIND</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> applies to relaxation </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/RelaxPreInd.html" title="Decides whether LP presolve is applied to the root relaxation in a mixed integer program (MIP).">relaxed LP presolve switch</a></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing reduce</span>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">Reduce</samp>  </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "> <samp class="ph codeph">CPX_PARAM_REDUCE</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> all on by default </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/Reduce.html" title="Specifies whether primal reductions, dual reductions, both, or neither are performed during preprocessing.">primal and dual reduction type</a></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing numpass</span>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">PrePass</samp> </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "> <samp class="ph codeph">CPX_PARAM_PREPASS</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> automatic by default </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/PrePass.html" title="Limits the number of presolve passes that CPLEX makes during preprocessing.">limit on the number of presolve passes made</a></td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="18.181818181818183%" headers="d412708e102 "> <span class="keyword cmdname">set preprocessing repeat</span> </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e104 "> <samp class="ph codeph">RepeatPresolve</samp>  </td>
+<td class="entry" valign="top" width="27.27272727272727%" headers="d412708e106 "><samp class="ph codeph">CPX_PARAM_REPEATPRESOLVE</samp>  </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e108 "> automatic by default </td>
+<td class="entry" valign="top" width="18.181818181818183%" headers="d412708e110 "><a class="xref" href="../../../../../Parameters/topics/RepeatPresolve.html" title="Specifies whether to re-apply presolve, with or without cuts, to a MIP model after processing at the root is otherwise complete.">MIP repeat presolve switch</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">These and other parameters also control the behavior of preprocessing
+of the continuous subproblem (LP, QP, or QCP) solved during a MIP
+optimization. See <a class="xref" href="../../../cont_optim/simplex/15_preprocess.html" title="Documents preprocessing at default parameter settings in LP optimizers.">Preprocessing</a> for
+further details about these parameters in that context. The following
+discussion pertains to these parameters specifically in MIP preprocessing.</p>
+<p class="p">While preprocessing, CPLEX attempts to strengthen bounds on variables.
+This bound strengthening may take a long time. In such cases, you
+may want to turn off bound strengthening.</p>
+<p class="p">CPLEX attempts to reduce coefficients of constraints during preprocessing.
+Coefficient reduction usually strengthens the continuous relaxation
+and reduces the number of nodes in the branch &amp; cut tree, but
+not always. Sometimes, it increases the amount of time needed to solve
+the linear relaxations at each node, possibly enough time to offset
+the benefit of fewer nodes. Two levels of coefficient reduction are
+available, so it is worthwhile to experiment with these preprocessing
+options to see whether they are beneficial to your problem.</p>
+<p class="p">The <samp class="ph codeph">RelaxPreInd</samp> parameter controls whether an
+additional round of presolve is applied before CPLEX solves the continuous
+subproblem at the root relaxation. Often the root relaxation is the
+single most time-consuming subproblem solved during branch and cut.
+Certain additional presolve reductions are possible when MIP restrictions
+are not present, and on difficult models this extra step will often
+pay off in faster root-solve times. Even when there is no appreciable
+benefit, there is usually no harm either. However, the <samp class="ph codeph">RelaxPreInd</samp> parameter
+is available if you want to explore whether skipping the additional
+presolve step will improve overall solution speed, for example, if
+you are solving a long sequence of very easy models and need maximum
+speed on each one.</p>
+<p class="p">It is possible to apply preprocessing a second time, after cuts
+and other analyses have been performed and before branching begins.
+If your models tend to require a lot of branching, this technique
+is sometimes useful in further tightening the formulation. Use the <a class="xref" href="../../../../../Parameters/topics/RepeatPresolve.html" title="Specifies whether to re-apply presolve, with or without cuts, to a MIP model after processing at the root is otherwise complete.">MIP repeat presolve switch</a> (<samp class="ph codeph">RepeatPresolve</samp>, <samp class="ph codeph">CPX_PARAM_REPEATPRESOLVE</samp>)
+parameter to invoke this additional step. Its default value of -1
+means that CPLEX makes the decision internally whether to repeat presolve;
+0 (zero) turns off this feature unconditionally, while positive values
+allow you control over which aspects of the preprocessed model are
+re-examined during preprocessing and whether additional cuts are then
+permitted. <a class="xref" href="48_preproc.html#User_manual.uss_solveMIP.686661__User_manual.uss_solveMIP.688265" title="A two-column table showing possible values and their meaning.">Table 2</a> summarizes
+the possible values of this parameter.  </p>
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible values and their meaning." id="User_manual.uss_solveMIP.686661__User_manual.uss_solveMIP.688265" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 2. Values of RepeatPresolve parameter</span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" width="50%" id="d412708e346"> Value </th>
+<th class="entry" align="left" valign="top" width="50%" id="d412708e348"> Effect </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d412708e346 "> -1 </td>
+<td class="entry" valign="top" width="50%" headers="d412708e348 "> Automatic (default) </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d412708e346 "> 0 </td>
+<td class="entry" valign="top" width="50%" headers="d412708e348 "> Turn off repeat presolve </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d412708e346 "> 1 </td>
+<td class="entry" valign="top" width="50%" headers="d412708e348 "> Repeat presolve without cuts </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d412708e346 "> 2 </td>
+<td class="entry" valign="top" width="50%" headers="d412708e348 "> Repeat presolve with cuts </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" width="50%" headers="d412708e346 "> 3 </td>
+<td class="entry" valign="top" width="50%" headers="d412708e348 "> Repeat presolve with cuts and allow new root cuts </td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="p">CPLEX preprocesses a MIP by default. However, if you use a basis
+to start LP optimization of the root relaxation, CPLEX will proceed
+with that starting basis without preprocessing it. Frequently the
+strategic benefits of MIP presolve outweigh the tactical advantage
+of using a starting basis for the root node, so use caution when considering
+the advantages of a starting basis.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../../CPLEX/UsrMan/topics/discr_optim/mip/01_mip_title_synopsis.html" title="Documents the solution of mixed integer programs (MIPs) with the CPLEX mixed integer optimizer; that is, solving models in which one or more variables must take integer solution values.">Solving mixed integer programming problems (MIP)</a></div>
+</div>
+</div></body>
+</html>

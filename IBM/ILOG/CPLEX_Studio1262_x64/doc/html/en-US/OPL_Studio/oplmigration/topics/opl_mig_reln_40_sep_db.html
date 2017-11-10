@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Databases" />
+<meta name="abstract" content="Discusses how to create a database connection and modify the database by writing in the data files." />
+<meta name="Description" content="Discusses how to create a database connection and modify the database by writing in the data files." />
+<meta name="DC.subject" content="databases, encryption of SQL statements, SQL encryption, SQL encryption, DBMapping" />
+<meta name="keywords" content="databases, encryption of SQL statements, SQL encryption, SQL encryption, DBMapping" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_sep.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="oplrelnotes.uss_reln_from37to40.1022463" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_sep.html" />
+<title>Databases</title>
+</head>
+<body role="main" id="oplrelnotes.uss_reln_from37to40.1022463">
+<h1 class="title topictitle1">Databases</h1>
+<div class="body"><p class="shortdesc">Discusses how to create a database connection
+and modify the database by writing in the data files.</p>
+<p class="p">To create a database connection and modify the database,
+you now write in the data files.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/oplmigration/topics/opl_mig_reln_40_sep.html" title="Describes how data/model separation in OPL expresses itself in databases, spreadsheets, flat files, and data blocks in model files.">Separation between data and model</a></div>
+</div>
+</div><div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1031555"><h2 class="title topictitle2">In OPL 3</h2>
+<div class="body"><p class="p">You wrote in the model file:</p>
+<pre class="pre codeblock"><code>DBconnection db("odbc","DRIVER={Microsoft Access Driver
+(*.mdb)};DBQ=oilDB.mdb//")</code></pre>
+<p class="p">to declare the connection to the database,</p>
+<pre class="pre codeblock"><code>{string} Gasolines from DBread(db,"SELECT name FROM GasData");</code></pre>
+<p class="p">to initialize a set of strings, </p>
+<pre class="pre codeblock"><code>{GasType} gasData from DBread(db,"SELECT * FROM GasData");</code></pre>
+<p class="p">to initialize a set of structs, </p>
+<pre class="pre codeblock"><code>DBexecute(db,"drop table Result");
+DBexecute(db,"create table Result(oil varchar(10), gas varchar(10), blend real, 
+a real)"); 
+DBupdate(db,"INSERT INTO Result(oil,gas,blend,a) VALUES(?,?,?,?)")(result);</code></pre>
+<p class="p">to write the resulting set of structs into the database.</p>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1031555__oplrelnotes.uss_reln_from37to40.1022476"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">Ellipses (...) in the model file
+indicate a reference to external data. The following code lines are
+extracted from the code samples <span class="ph filepath">oilDB.mod</span> and <span class="ph filepath">oilDB.dat</span> in the current distribution:</p>
+<p class="p"><span class="ph filepath">&lt;Install_dir&gt;\examples\opl</span></p>
+<p class="p">where <span class="ph filepath">&lt;Install_dir&gt;</span> is
+your installation directory.</p>
+<p class="p">In the model file, you write: </p>
+<ul class="ul"><li class="li"><p class="p">To read from a database:</p>
+  <pre class="pre codeblock"><code>{string} Gasolines = ...;
+{string} Oils = ...;
+tuple gasType {
+   string name;
+   float demand;
+   float price;
+   float octane;
+   float lead;
+}
+
+tuple oilType {
+   string name;
+   float capacity;
+   float price;
+   float octane;
+   float lead;
+}
+{gasType} GasData = ...;
+{oilType} OilData = ...;</code></pre>
+</li>
+<li class="li"><p class="p">To write the results to the database:</p>
+  <pre class="pre codeblock"><code>tuple result {
+  string oil;
+  string gas;
+  float blend;
+  float a;
+}
+
+{result} Result = 
+  { &lt;o,g,Blend[o][g],a[g]&gt; | o in Oils, g in Gasolines };</code></pre>
+</li>
+</ul>
+<p class="p">In the data file, you write, for example (see <span class="ph filepath">oilDB.dat</span>):</p>
+<pre class="pre codeblock"><code>DBConnection db("access","oilDB.mdb");
+Gasolines from DBRead(db,"SELECT name FROM GasData");
+Oils from DBRead(db,"SELECT name FROM OilData");
+GasData from DBRead(db,"SELECT * FROM GasData");
+OilData from DBRead(db,"SELECT * FROM OilData");
+MaxProduction = 14000;
+ProdCost = 4;
+DBExecute(db,"drop table Result");
+DBExecute(db,"create table Result(oil varchar(10), gas varchar(10), blend real, a real)");
+Result to DBUpdate(db,"INSERT INTO Result(oil,gas,blend,a) VALUES(?,?,?,?)");</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1034314"><h2 class="title topictitle2">SQL encryption</h2>
+<div class="body"><div class="section" id="oplrelnotes.uss_reln_from37to40.1034314__oplrelnotes.uss_reln_from37to40.1034383"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">Because all database instructions
+were in the model file, the SQL statements were encrypted as well
+when the model was compiled.</p>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1034314__oplrelnotes.uss_reln_from37to40.1034369"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">To do the same in OPL 4.x (where
+you write database instructions in data files), you can define literal
+strings inside the model file (which will be compiled) and use them
+in the data file, like this:</p>
+<p class="p">In the model file:</p>
+<pre class="pre codeblock"><code>string connectionString = "scott/tiger@TEST";
+string myQuery = "select id from table";
+{int} setOfInt = ...;
+
+dvar int X in 1..5;
+
+minimize X;
+subject to {
+   forall (i in setOfInt) 
+      X &gt;= i;
+};</code></pre>
+<p class="p">In the data file:</p>
+<pre class="pre codeblock"><code>DBconnection db("oracle9", connectionString);
+setOfInt from DBread (db, myQuery);</code></pre>
+</div>
+</div>
+</div>
+<div class="topic nested1" xml:lang="en-us" id="oplrelnotes.uss_reln_from37to40.1022500"><h2 class="title topictitle2">DBMapping</h2>
+<div class="body"><p class="p">The syntax for DBmapping is no longer supported. You can
+easily write this instruction using the SQL SELECT syntax. For example:</p>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022500__oplrelnotes.uss_reln_from37to40.1031726"><h3 class="title sectiontitle">In OPL 3</h3><p class="p">DBmapping was used when the tuple
+schema did not match exactly the tuple schema in the database table.
+For example, with the same database as in the <samp class="ph codeph">oilDB</samp> example,
+if you wanted to initialize this set of tuples:</p>
+<pre class="pre codeblock"><code>struct GasInfo {
+   float price;
+   float demand;
+   string name;
+};</code></pre>
+<p class="p">you had to do something like</p>
+<pre class="pre codeblock"><code>{ GasInfo } gasInfo from DBread(db,"SELECT price,demand,name FROM
+GasData")
+DBmapping {0 -&gt; price; 1 -&gt; demand; 2 -&gt; name;}; </code></pre>
+</div>
+<div class="section" id="oplrelnotes.uss_reln_from37to40.1022500__oplrelnotes.uss_reln_from37to40.1031747"><h3 class="title sectiontitle">In OPL 4</h3><p class="p">Just write in the data file:</p>
+<pre class="pre codeblock"><code>gasInfo from DBread(db,"SELECT price,demand,name FROM GasData");</code></pre>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Starting from an advanced basis" />
+<meta name="abstract" content="Documents effect of an advanced basis on LP optimizers." />
+<meta name="Description" content="Documents effect of an advanced basis on LP optimizers." />
+<meta name="DC.subject" content="performance, LP, advanced basis and, advanced basis, starting from (LP), saving to file (LP), reading from file (LP), preprocessing, advanced basis and (LP)" />
+<meta name="keywords" content="performance, LP, advanced basis and, advanced basis, starting from (LP), saving to file (LP), reading from file (LP), preprocessing, advanced basis and (LP)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveLP.637803" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" />
+<title>Starting from an advanced basis</title>
+</head>
+<body role="main" id="User_manual.uss_solveLP.637803">
+<h1 class="title topictitle1">Starting from an advanced basis</h1>
+<div class="body"><p class="shortdesc">Documents effect of an advanced basis on LP optimizers.</p>
+<p class="p">Another performance improvement to consider, unless you
+are using the barrier optimizer, is starting from an advanced basis.
+If you can start a simplex optimizer from an advanced basis, then
+there is the potential for the optimizer to perform significantly
+fewer iterations, particularly when your current problem is similar
+to a problem that you have solved previously. Even when problems are
+different, starting from an advanced basis may possibly help performance.
+For example, if your current problem is composed of several smaller
+problems, an optimal basis from one of the component problems may
+significantly speed up solution of the other components or even of
+the full problem.</p>
+<p class="p">Note that if you are solving a sequence of LP models
+all within one run, by entering a model, solving it, modifying the
+model, and solving it again, then with default settings the advanced
+basis will be used for the last of these steps automatically.</p>
+<p class="p">In cases where models are solved in separate application
+calls, and thus the basis will not be available in memory, you can
+communicate the final basis from one run to the start of the next
+by first saving the basis to a file before the end of the first run. </p>
+<p class="p">To save the basis to a file:</p>
+<ul class="ul"><li class="li"><p class="p">When you are using the Component Libraries,
+use the method <samp class="ph codeph">cplex.writeBasis</samp> or the
+Callable Library routine <samp class="ph codeph">CPXmbasewrite</samp> ,
+after the call to the optimizer.</p>
+</li>
+<li class="li"><p class="p">In the Interactive Optimizer, use the <samp class="ph codeph">write</samp> command
+with the file type <samp class="ph codeph">bas</samp> , after optimization.</p>
+</li>
+</ul>
+<p class="p">Then to read an advanced basis from this file later:</p>
+<ul class="ul"><li class="li"><p class="p">When you are using the Component Libraries,
+use the method <samp class="ph codeph">cplex.readBasis</samp> or the routine <samp class="ph codeph">CPXreadcopybase</samp> . </p>
+</li>
+<li class="li"><p class="p">In the Interactive Optimizer, use the <samp class="ph codeph">read</samp> command
+with the file type <samp class="ph codeph">bas</samp> .</p>
+</li>
+</ul>
+<div class="note tip"><span class="tiptitle">Tip:</span> <p class="p">A basis file, also known as a BAS file, is a formatted
+text file conforming to the MPS standard. It relies on each variable
+(column) and each constraint (row) having a name. If those names do
+not exist, names will be created automatically and added during write
+operations of a basis file. If you anticipate the need to read and
+write basis files, it is a good idea to assign a name yourself to
+every variable and constraint when you create your model.</p>
+</div>
+<p class="p">Make sure that the advanced start parameter, <samp class="ph codeph">AdvInd</samp> ,
+is set to either 1 (its default value) or 2, and not 0 (zero), before
+calling the optimization routine that is to make use of an advanced
+basis.</p>
+<p class="p">The two nonzero settings for <samp class="ph codeph">AdvInd</samp> differ
+in this way: </p>
+<ul class="ul"><li class="li"><p class="p"> <samp class="ph codeph">AdvInd</samp> =1
+causes preprocessing to be skipped; </p>
+</li>
+<li class="li"><p class="p"> <samp class="ph codeph">AdvInd</samp> =2
+invokes preprocessing on both the problem and the advanced basis. </p>
+</li>
+</ul>
+<p class="p">If you anticipate the advanced basis to be a close match
+for your problem, so that relatively few iterations will be needed,
+or if you are unsure, then the default setting of 1 is a good choice
+because it avoids some overhead processing. If you anticipate that
+the simplex optimizer will require many iterations even with the advanced
+basis, or if the model is large and preprocessing typically removes
+much from the model, then the setting of 2 may give you a faster solution
+by giving you the advantages of preprocessing. However, in such cases,
+you might also consider not using the advanced basis, by setting this
+parameter to 0 instead, on the grounds that the basis may not be giving
+you a helpful starting point after all.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" title="Documents tactics for tuning performance on LP models.">Tuning LP performance</a></div>
+</div>
+</div></body>
+</html>

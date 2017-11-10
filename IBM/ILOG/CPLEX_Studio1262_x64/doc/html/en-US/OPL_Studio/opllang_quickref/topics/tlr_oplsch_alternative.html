@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="alternative" />
+<meta name="abstract" content="OPL constraint (scheduling) used to create an exclusive alternative interval" />
+<meta name="Description" content="OPL constraint (scheduling) used to create an exclusive alternative interval" />
+<meta name="DC.subject" content="alternative, interval constraint, interval, alternative constraint" />
+<meta name="keywords" content="alternative, interval constraint, interval, alternative constraint" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_interval.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_synchronize.html" />
+<meta name="DC.Relation" scheme="URI" content="tlr_oplsch_span.html" />
+<meta name="DC.Relation" scheme="URI" content="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="FJ8QXnNk" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" />
+<title>alternative</title>
+</head>
+<body role="main" id="FJ8QXnNk">
+<h1 class="title topictitle1">alternative</h1>
+<div class="body refbody"><p class="shortdesc">OPL constraint (scheduling) used to create an exclusive alternative interval</p>
+<div class="section"><h2 class="title sectiontitle">Purpose</h2><p class="p">OPL constraint (scheduling) used to model the selection of one or more intervals from a set of optional intervals.</p>
+</div>
+<table cellpadding="4" cellspacing="0" summary="" border="1" class="simpletable"><tr class="strow"><td valign="top" class="stentry">context</td>
+<td valign="top" class="stentry">Model files (.mod)</td>
+</tr>
+<tr class="strow"><td valign="top" class="stentry">type</td>
+<td valign="top" class="stentry"><pre class="pre msgblock"><code>boolean (1 if the constraint is true, 0 otherwise)</code></pre>
+</td>
+</tr>
+</table>
+<div class="section refsyn"><h2 class="title sectiontitle">Syntax</h2><pre class="pre msgblock"><code>alternative(a, B);
+alternative(a, B, c);
+
+Where
+dvar interval a;
+dvar interval B[];
+dexpr int c;</code></pre>
+</div>
+<div class="section"><h2 class="title sectiontitle">Description</h2><p class="p">The constraint <em class="ph i">alternative(a, {b1, .., bn})</em> models an exclusive alternative between <em class="ph i">{b1, .., bn}</em>. If interval <em class="ph i">a</em> is present then exactly one of intervals <em class="ph i">{b1, .., bn}</em> is present and <em class="ph i">a</em> starts and ends together with this chosen one.</p>
+<p class="p">The constraint <em class="ph i">alternative(a, {b1, .., bn},c)</em> models a selection of <em class="ph i">c</em> intervals in the set<em class="ph i"> {b1, .., bn}</em>. If interval <em class="ph i">a</em> is present then exactly <em class="ph i">c</em> intervals in <em class="ph i">{b1, .., bn}</em> are present and <em class="ph i">a</em> starts and ends together with these selected ones. If <em class="ph i">a</em> is absent, then all <em class="ph i">b</em> intervals are absent. This constraint is typically used to model the selection of 1 resource (or <em class="ph i">c</em> resources) among a set of candidate ones. It can also be used in more complex cases to model alternative execution modes for activities or alternative time-windows for executing a task.</p>
+<p class="p">The array <em class="ph i">B</em> must be a one-dimensional array; for greater complexity, use the keyword <a class="xref" href="tlr_opl_all.html" title="OPL keyword that allows you to use only part of an array with functions that take array parameters.">all</a>.</p>
+<div class="note note"><span class="notetitle">Note:</span> This constraint cannot be used in a meta-constraint.</div>
+</div>
+<div class="example"><h2 class="title sectiontitle">Example</h2><p class="p">The code below defines two interval variables <em class="ph i">a1</em> and <em class="ph i">a2</em> that represent the execution of two tasks on some processors. There are two available processors <em class="ph i">p1</em> and <em class="ph i">p2</em>. The possibility to execute task <em class="ph i">ai</em> on processor <em class="ph i">pj</em> is represented by an optional interval <em class="ph i">aij</em>. The duration of the tasks depends on the processor they execute on as defined by a table <em class="ph i">pij</em>. Task <em class="ph i">a1</em> must be performed before <em class="ph i">a2</em> and the result of <em class="ph i">a1</em> is used as input to <em class="ph i">a2</em>. The communication delay between two processors <em class="ph i">j</em> and <em class="ph i">k</em> are given by a table <em class="ph i">djk</em>.</p>
+<pre class="pre msgblock"><code>dvar interval a1;
+dvar interval a1p[i in 1..2] optional size p[1,i];
+dvar interval a2;
+dvar interval a2p[i in 1..2] optional size p[2,i];
+subject to {
+  alternative(a1, a1p);
+  alternative(a2, a2p);
+  forall (j in 1..2, k in 1..2)
+    endBeforeStart(a1p[j],a2p[k],d[j,k]);
+};</code></pre>
+<p class="p">Use of the keyword <a class="xref" href="tlr_opl_all.html" title="OPL keyword that allows you to use only part of an array with functions that take array parameters.">all</a> with an array on <em class="ph i">alternative</em> follows. For the full example see <samp class="ph codeph">sched_optional.mod</samp> in <samp class="ph codeph">&lt;Install_dir&gt;/opl/examples/opl/sched_optional</samp>.</p>
+<pre class="pre msgblock"><code>alternative(tasks[h] [t], all(s in Skills: s.task==t) wtasks[h] [s]);</code></pre>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../OPL_Studio/opllang_quickref/topics/opl_functions_top.html" title="Description, syntax, and example for each individual OPL function.">OPL functions</a></div>
+</div>
+<div class="relinfo relref"><strong>Related reference</strong>:<br />
+<div><a class="link" href="tlr_oplsch_interval.html" title="OPL keyword (CP, scheduling) for interval variables.">interval</a></div>
+<div><a class="link" href="tlr_oplsch_synchronize.html" title="OPL constraint (scheduling) used to synchronize the start and end of intervals.">synchronize</a></div>
+<div><a class="link" href="tlr_oplsch_span.html" title="OPL constraint (scheduling) used to span intervals">span</a></div>
+</div>
+</div></body>
+</html>

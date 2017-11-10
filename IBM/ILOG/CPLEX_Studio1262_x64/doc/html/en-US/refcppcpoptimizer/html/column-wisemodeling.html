@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="cppdoc.css" />
+<title>Column-Wise Modeling in CPLEX</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="overview.html">Overview</a></td><td>Group</td><td><a
+                        class="navigation-item"
+                        href="tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="index.html"
+                target="_top">FRAMES</a> <a
+                href="column-wisemodeling.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><div class="section"><a
+                    name="15"><div
+                class="section-title1">Column-Wise Modeling in CPLEX</div>
+</a><div
+                    align="right"><a href="choice.html">PREVIOUS</a> <a
+                href="conflict.html">NEXT</a></div><table
+                class="summary" border="1" cellpadding="3"
+                cellspacing="0" width="100%" /><div
+                            class="section-body"><p>Concert Technology supports column-wise modeling, a technique widely used in the math 
+    programming and operations research communities to build a model column by column. In 
+    Concert Technology, creating a new column is comparable to creating a new variable and 
+    adding it to a set of constraints. You use an instance of 
+    <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code> to do so. An instance of 
+    <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code> allows you to specify to which 
+    constraints or other extractable objects Concert Technology should add the new variable 
+    along with its data. For example, in a linear programming problem (an LP), if the new 
+    variable will appear in some linear constraints as ranges (instances of 
+    <code><a
+                            href="classes/IloRange.html">IloRange</a></code>), you need to specify the list of such 
+    constraints along with the non zero coefficients (a value of <code>IloNum</code>) for 
+    each of them.</p><p>You then create a new column in your model when you create a new variable with an 
+    instance of <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code> as its parameter. When 
+    you create the new variable, Concert Technology will add it along with appropriate 
+    parameters to all the extractable objects you have specified in the instance of 
+    <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code>.</p><p>Instead of building an instance of <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code>,
+    as an alternative, you can use a column expression directly in the constructor of the 
+    variable. You can also use instances of <code><a
+                                href="classes/IloNumColumn.html">IloNumColumn</a></code>
+    within column expressions.</p><p>The following undocumented classes provide the underlying mechanism for column-wise 
+    modeling:</p><ul>
+<li><code>IloAddValueToObj</code></li><li><code>IloAddValueToRange</code></li>
+</ul><p>The following operators are useful in column-wise modeling:</p><ul>
+<li>in the class <code><a
+                                href="classes/IloRange.html">IloRange</a></code>, </li>
+</ul><p><code>IloAddValueToRange operator() (IloNum value);</code></p><ul>
+<li>in the class <code><a
+                            href="classes/IloObjective.html">IloObjective</a></code>, </li>
+</ul><p><code>IloAddValueToObj operator () (IloNum value);</code></p><p>That is, the <code>operator ()</code> in extractable classes, such as 
+    <code><a
+                            href="classes/IloRange.html">IloRange</a></code> or 
+    <code><a
+                            href="classes/IloObjective.html">IloObjective</a></code>, creates descriptors of how Concert 
+    Technology should add the new, yet-to-be-created variable to the invoking extractable 
+    object.</p><p>You can use the <code>operator +</code> to link together the objects returned by 
+    <code>operator ()</code> to form a column. You can then use an instance of 
+    <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code> to build up column expressions within
+    a programming loop and thus save them for later use or to pass them to functions.</p><p>Here is how to use an instance of <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code> 
+    with operators from <code><a
+                            href="classes/IloRange.html">IloRange</a></code> and 
+    <code><a
+                    href="classes/IloObjective.html">IloObjective</a></code> to create a column with a coefficient 
+    of 2 in the objective, with 10 in <code>range1</code>, and with 3 in <code>range2</code>. 
+    The example then uses that column when it creates the new variable <code>newvar1</code>, 
+    and it uses column expressions when it creates <code>newvar2</code> and 
+    <code>newvar3</code>.</p><pre
+                    class="sample">
+    IloNumColumn col = obj(2) + range1(10) + range2(3);
+    IloNumVar newvar1(col);
+    IloNumVar newvar2(col + range3(17));
+    IloNumVar newvar3(range1(1) + range3(3));
+    </pre><p>In other words, given an instance <code>obj</code> of <code>IloObjective</code> and 
+    the instances <code>range1</code>, <code>range2</code>, and <code>range3</code> of 
+    <code>IloRange</code>, those lines create the new variables <code>newvar1</code>, 
+    <code>newvar2</code>, and <code>newvar3</code> and add them as linear terms to 
+    <code>obj</code>, <code>range1</code>, and <code>range3</code> in the following way:</p><pre
+                            class="sample">
+    obj: + 2*newvar1 + 2*newvar2
+    range1: +10*newvar1 + 10*newvar2 + 1*newvar3
+    range2: + 3*newvar1 + 3*newvar2
+    range3: + 17*newvar2 +3*newvar3
+    </pre><p>  
+    For more information, refer to the documentation of <code><a
+                            href="classes/IloNumColumn.html">IloNumColumn</a></code>,<code><a
+                            href="classes/IloObjective.html">IloObjective</a></code>, and <code><a
+                href="classes/IloRange.html">IloRange</a></code>.</p></div><div
+                    align="right"><a href="choice.html">PREVIOUS</a> <a href="conflict.html">NEXT</a></div></div></body>
+</html>

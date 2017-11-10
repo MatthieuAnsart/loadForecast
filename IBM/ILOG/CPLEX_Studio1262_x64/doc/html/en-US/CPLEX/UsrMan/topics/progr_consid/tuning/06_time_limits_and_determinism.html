@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Tuning time limits and determinism" />
+<meta name="abstract" content="Documents the effect of tuning time limits on determinism." />
+<meta name="Description" content="Documents the effect of tuning time limits on determinism." />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/02_intro_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="tuningTimeLimitsAndDeterminism" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/02_intro_title_synopsis.html" />
+<title>Tuning time limits and determinism</title>
+</head>
+<body role="main" id="tuningTimeLimitsAndDeterminism">
+<h1 class="title topictitle1">Tuning time limits and determinism</h1>
+<div class="body"><p class="shortdesc">Documents the effect of tuning time limits on determinism.</p>
+<p class="p">Values of the tuning time-limit  
+parameters impact whether or not CPLEX conducts the tuning session in deterministic mode.
+ </p>
+<ul class="ul"><li class="li">    <a class="xref" href="../../../../Parameters/topics/TuningTiLim.html" title="Sets a nondeterministic time limit in seconds per model and per test set (that is, suite of models) applicable in tuning.">tuning time limit in seconds</a>: 
+    <samp class="ph codeph">TuningTiLim</samp>, <samp class="ph codeph">CPX_PARAM_TUNINGTILIM</samp>
+    </li>
+<li class="li">    <a class="xref" href="../../../../Parameters/topics/TuningDetTiLim.html" title="Sets a time limit in deterministic ticks per model and per test set (that is, suite of models) applicable in tuning.">deterministic tuning time limit</a>: 
+    <samp class="ph codeph">TuningDetTiLim</samp>, <samp class="ph codeph">CPX_PARAM_TUNINGDETTILIM</samp>
+    </li>
+</ul>
+<p class="p">In the following discussion, 1e+75 corresponds to infinity on most platforms. Check 
+your platform-specific declarations to be sure.</p>
+<p class="p">If <samp class="ph codeph">TuningTiLim</samp> &lt; 1e+75, and <samp class="ph codeph">TuningDetTiLim</samp> = 1e+75, 
+then the tuning result will be nondeterministic, as CPLEX uses a system time limit for 
+individual tuning runs.</p>
+<p class="p">If <samp class="ph codeph">TuningTiLim</samp> = 1e+75, and <samp class="ph codeph">TuningDetTiLim</samp> &lt; 1e+75, 
+then the tuning result will be deterministic, as CPLEX uses a deterministic time limit for 
+individual tuning runs.</p>
+<p class="p">If <samp class="ph codeph">TuningTiLim</samp> = 1e+75, and <samp class="ph codeph">TuningDetTiLim</samp> = 1e+75 
+(the default values of these parameters), 
+then the tuning result will be deterministic, as CPLEX uses a default deterministic time limit 
+of ten million (1e+7) ticks for individual tuning runs. In other words, the default setting of 
+these two parameters is identical to setting <samp class="ph codeph">TuningDetTiLim</samp> = 1e+7.</p>
+<p class="p">Of course, if you apply a finite overall system time limit (<samp class="ph codeph">TiLim, CPX_PARAM_TILIM</samp>), 
+and the tuning process reaches that finite system time limit, then the tuning results are 
+<strong class="ph b">not</strong> deterministic.  (This principle is the same for optimization in deterministic mode reaching 
+a time limit: results are not deterministic then either.)</p>
+<p class="p">The overall system time limit (<samp class="ph codeph">TiLim, CPX_PARAM_TILIM</samp>), 
+the overall deterministic time limit (<samp class="ph codeph">DetTiLim, CPX_PARAM_DETTILIM</samp>), 
+the tuning time limit in seconds (<samp class="ph codeph">TuningTiLim, CPX_PARAM_TUNINGTILIM</samp>), 
+and the deterministic tuning time limit in ticks (<samp class="ph codeph">TuningDetTiLim, CPX_PARAM_TUNINGDETTILIM</samp>)
+are unrelated to the 
+<a class="xref" href="../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a>  
+(<samp class="ph codeph">ParallelMode</samp>, <samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>). 
+If the parallel mode switch is set as opportunistic, for example, through a tuning parameter file, 
+then the results of tuning will be nondeterministic, even if <samp class="ph codeph">TuningTiLim</samp> is 
+set to infinity (1e+75).</p>
+<p class="p">In order to achieve truly deterministic, repeatable tuning results, all of the following 
+conditions must hold:</p>
+<ul class="ul"><li class="li">The <a class="xref" href="../../../../Parameters/topics/ParallelMode.html" title="Sets the parallel optimization mode. Possible modes are automatic, deterministic, and opportunistic.">parallel mode switch</a>  
+(<samp class="ph codeph">ParallelMode</samp>, <samp class="ph codeph">CPX_PARAM_PARALLELMODE</samp>) 
+must be at its default value, 0 (zero) or set to its deterministic value 1 (one).</li>
+<li class="li">The <a class="xref" href="../../../../Parameters/topics/TiLim.html" title="Sets the maximum time, in seconds, for a call to an optimizer.">optimizer time limit in seconds</a> 
+(<samp class="ph codeph">TiLim</samp>, <samp class="ph codeph">CPX_PARAM_TILIM</samp>) 
+must be set to infinity (1e+75 on most platforms), its default value.</li>
+<li class="li">The <a class="xref" href="../../../../Parameters/topics/TuningTiLim.html" title="Sets a nondeterministic time limit in seconds per model and per test set (that is, suite of models) applicable in tuning.">tuning time limit in seconds</a> 
+(<samp class="ph codeph">TuningTiLim</samp>, <samp class="ph codeph">CPX_PARAM_TUNINGTILIM</samp>) 
+must be set to infinity (1e+75 on most platforms), its default value.</li>
+</ul>
+<p class="p">In other words, if you are using default values of all CPLEX parameters, a tuning session 
+will yield deterministic results.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_consid/tuning/02_intro_title_synopsis.html" title="Introduces the tuning tool.">Meet the tuning tool</a></div>
+</div>
+</div></body>
+</html>

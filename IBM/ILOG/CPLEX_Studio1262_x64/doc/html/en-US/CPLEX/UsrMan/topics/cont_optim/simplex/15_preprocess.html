@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Preprocessing" />
+<meta name="abstract" content="Documents preprocessing at default parameter settings in LP optimizers." />
+<meta name="Description" content="Documents preprocessing at default parameter settings in LP optimizers." />
+<meta name="DC.subject" content="presolve, simplex preprocessing, preprocessing, definition of, simplex and, aggregator" />
+<meta name="keywords" content="presolve, simplex preprocessing, preprocessing, definition of, simplex and, aggregator" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_solveLP.664530" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" />
+<title>Preprocessing</title>
+</head>
+<body role="main" id="User_manual.uss_solveLP.664530">
+<h1 class="title topictitle1">Preprocessing</h1>
+<div class="body"><p class="shortdesc">Documents preprocessing at default parameter settings
+in LP optimizers.</p>
+<p class="p">At default settings, CPLEX preprocesses problems by simplifying
+constraints, reducing problem size, and eliminating redundancy. Its
+presolver tries to reduce the size of a problem by making inferences
+about the nature of any optimal solution to the problem. Its aggregator
+tries to eliminate variables and rows through substitution. For most
+models, preprocessing is beneficial to the total solution speed, and
+CPLEX reports the model's solution in terms of the user's original
+formulation, making the exact nature of any reductions immaterial.</p>
+<div class="section" id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.664641"><h2 class="title sectiontitle">Dual formulation in presolve</h2><p class="p">A useful preprocessing feature for performance tuning,
+one that is not always activated by default, can be to convert the
+problem to its dual formulation. The nature of the dual formulation
+is rooted in linear programming theory, beyond the scope of this manual,
+but for the purposes of this preprocessing feature it is sufficient
+to think of the roles of the rows and columns of the model's constraint
+matrix as being switched. Thus the feature is especially applicable
+to models that have many more rows than columns. </p>
+<p class="p">You can direct the preprocessor to form the dual by setting
+the <samp class="ph codeph">PreDual</samp> parameter to <samp class="ph codeph">1</samp> (one). </p>
+<p class="p">Conversely, to entirely inhibit the dual formulation
+for the barrier optimizer, you can set the <samp class="ph codeph">PreDual</samp> parameter
+to <samp class="ph codeph">-1</samp> . The default, automatic, setting
+is <samp class="ph codeph">0</samp> .</p>
+<p class="p">It is worth emphasizing, to those familiar with linear
+programming theory, that the decision to solve the dual formulation
+of your model, via this preprocessing parameter, is not the same as
+the choice between using the dual simplex method or the primal simplex
+method to perform the optimization. Although these two concepts (dual
+formulation and dual simplex optimizer) have theoretical foundations
+in common, it is valid to consider, for example, solving the dual
+formulation of your model with the dual simplex method; this would
+not simply result in the same computational path as solving the primal
+formulation with the primal simplex method. However, with that distinction
+as background, it may be worth knowing that when CPLEX generates the
+dual formulation, and a simplex optimizer is to be used, CPLEX will
+in most cases automatically select the opposite simplex optimizer
+to the one it would have selected for the primal formulation. Thus,
+if you set the <samp class="ph codeph">PreDual</samp> parameter to 1 (one),
+and also select <samp class="ph codeph">LPMethod</samp> 1 (which normally
+invokes the primal simplex optimizer), the dual simplex optimizer
+will be used in solving the dual formulation. Because solution status
+and the other results of an optimization are the same regardless of
+these settings, no additional steps need to be taken by the user to
+use and interpret the solution; but examination of solution logs might
+prove confusing if this behavior is not taken into account.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672029"><h2 class="title sectiontitle">Dependency checking in presolve</h2><p class="p">The CPLEX preprocessor offers a dependency checker which
+strengthens problem reduction by detecting redundant constraints.
+Such reductions are usually most effective with the barrier optimizer,
+but these reductions can be applied to all types of problems: LP,
+QP, QCP, MIP, MIQP, MIQCP. <a class="xref" href="15_preprocess.html#User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672057" title="A two-column table showing possible values and their effect.">Table 1</a> shows
+you the possible settings of the <a class="xref" href="../../../../Parameters/topics/DepInd.html" title="Decides whether to activate the dependency checker.">dependency switch</a>,
+the parameter that controls dependency checking, and indicates their
+effects. </p>
+
+<div class="tablenoborder"><table cellpadding="4" cellspacing="0" summary="A two-column table showing possible values and their effect." id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672057" class="table ShadedHead" rules="all" frame="border" border="1"><caption><span class="tablecap">Table 1. Dependency checking parameter 
+<samp class="ph codeph">DepInd</samp> or 
+<samp class="ph codeph">CPX_PARAM_DEPIND</samp> </span></caption><thead class="thead" align="left"><tr class="row" valign="top"><th class="entry" align="left" valign="top" id="d393069e116"> Setting </th>
+<th class="entry" align="left" valign="top" id="d393069e118"> Effect </th>
+</tr>
+</thead>
+<tbody class="tbody"><tr class="row" valign="top"><td class="entry" valign="top" headers="d393069e116 "> -1 </td>
+<td class="entry" valign="top" headers="d393069e118 "> automatic: let CPLEX choose when to use dependency
+checking </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393069e116 "> 0 </td>
+<td class="entry" valign="top" headers="d393069e118 "> turn off dependency checking (default) </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393069e116 "> 1 </td>
+<td class="entry" valign="top" headers="d393069e118 "> turn on only at the beginning of preprocessing </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393069e116 "> 2 </td>
+<td class="entry" valign="top" headers="d393069e118 "> turn on only at the end of preprocessing </td>
+</tr>
+<tr class="row" valign="top"><td class="entry" valign="top" headers="d393069e116 "> 3 </td>
+<td class="entry" valign="top" headers="d393069e118 "> turn on at beginning and at end of preprocessing </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672098"><h2 class="title sectiontitle">Final factor after presolve</h2><p class="p">When presolve makes changes to the model prior to optimization,
+a reverse operation (uncrush) occurs at termination to restore the
+full model with its solution. With default settings, the simplex optimizers
+will perform a final basis factorization on the full model before
+terminating. If you turn on the memory emphasis parameter (<a class="xref" href="../../../../Parameters/topics/MemoryEmphasis.html" title="Directs CPLEX that it should conserve memory where possible.">memory reduction switch</a>: <samp class="ph codeph">MemoryEmphasis
+(bool)</samp>, <samp class="ph codeph">CPX_PARAM_MEMORYEMPHASIS (int)</samp>)
+to conserve memory, the final factorization after uncrushing will
+be skipped; on large models this can save some time, but computations
+that require a factorized basis after optimization (for example the
+computation of the condition number Kappa) may be unavailable depending
+on the operations presolve performed.</p>
+<p class="p">Factorization can easily be performed later by a call
+to a simplex optimizer with the parameter <samp class="ph codeph">AdvInd</samp> set
+to a value greater than or equal to one.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672030"><h2 class="title sectiontitle">Memory use and presolve</h2><p class="p">To reduce memory use, presolve may compress the arrays
+used for storage of the original model. This compression can make
+more memory available for the optimizer that the user has called.
+To conserve memory, you can also turn on the memory emphasis parameter
+(<a class="xref" href="../../../../Parameters/topics/MemoryEmphasis.html" title="Directs CPLEX that it should conserve memory where possible.">memory reduction switch</a>: <samp class="ph codeph">MemoryEmphasis
+(bool)</samp>, <samp class="ph codeph">CPX_PARAM_MEMORYEMPHASIS (int)</samp>)
+. </p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672037"><h2 class="title sectiontitle">Controlling passes in preprocessing</h2><p class="p">In rare instances, a user may wish to specify the number
+of analysis passes that the presolver or the aggregator makes through
+the problem. The parameters <samp class="ph codeph">PrePass</samp> and <samp class="ph codeph">AggInd</samp> ,
+respectively, control these two preprocessing features; the default, <samp class="ph codeph">automatic</samp> ,
+setting of <samp class="ph codeph">-1</samp> lets CPLEX decide the number
+of passes to make, while a setting of <samp class="ph codeph">0</samp> directs
+CPLEX not to use that preprocessing feature, and a positive integer
+limits the number of passes to that value. At the automatic setting,
+CPLEX applies the aggregator just once when it is solving the LP model;
+for some problems, it may be worthwhile to increase the <samp class="ph codeph">AggInd</samp> setting.
+The behavior under the <samp class="ph codeph">PrePass</samp> default
+is less easy to predict, but if the output log indicates it is performing
+excessive analysis, you may wish to try a limit of five passes or
+some other modest value.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672038"><h2 class="title sectiontitle">Aggregator fill in preprocessing</h2><p class="p">Another parameter, which affects only the aggregator,
+is <samp class="ph codeph">AggFill</samp>. Occasionally the substitutions
+made by the aggregator will increase matrix density and thus make
+each iteration too expensive to be advantageous. In such cases, try
+lowering <samp class="ph codeph">AggFill</samp> from its default value
+of <samp class="ph codeph">10</samp>. CPLEX may make fewer substitutions
+as a consequence, and the resulting problem will be less dense.</p>
+</div>
+<div class="section" id="User_manual.uss_solveLP.664530__User_manual.uss_solveLP.672043"><h2 class="title sectiontitle">Turning off preprocessing</h2><p class="p">Finally, if for some reason you wish to turn CPLEX preprocessing
+entirely off, set the parameter <samp class="ph codeph">PreInd</samp> to
+0 (zero).</p>
+</div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/cont_optim/simplex/13_tune_title_synopsis.html" title="Documents tactics for tuning performance on LP models.">Tuning LP performance</a></div>
+</div>
+</div></body>
+</html>

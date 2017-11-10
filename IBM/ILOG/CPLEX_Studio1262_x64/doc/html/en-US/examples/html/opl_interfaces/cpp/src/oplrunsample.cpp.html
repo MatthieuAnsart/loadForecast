@@ -1,0 +1,462 @@
+<!-- Generator: GNU source-highlight 2.2
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt>001: <b><font color="#007D00">// -------------------------------------------------------------- -*- C++ -*-</font></b>
+002: <b><font color="#007D00">// File: oplrunsample.cpp</font></b>
+003: <b><font color="#007D00">// --------------------------------------------------------------------------</font></b>
+004: <b><font color="#007D00">// Licensed Materials - Property of IBM</font></b>
+005: <b><font color="#007D00">//</font></b>
+006: <b><font color="#007D00">// 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55</font></b>
+007: <b><font color="#007D00">// Copyright IBM Corporation 1998, 2013. All Rights Reserved.</font></b>
+008: <b><font color="#007D00">//</font></b>
+009: <b><font color="#007D00">// Note to U.S. Government Users Restricted Rights:</font></b>
+010: <b><font color="#007D00">// Use, duplication or disclosure restricted by GSA ADP Schedule</font></b>
+011: <b><font color="#007D00">// Contract with IBM Corp.</font></b>
+012: <b><font color="#007D00">///////////////////////////////////////////////////////////////////////////////</font></b>
+013: 
+014: #include <b><font color="#8A2BE2">&lt;ilopl/iloopl.h&gt;</font></b>
+015: #include <b><font color="#8A2BE2">&lt;ilopl/ilooplprofiler.h&gt;</font></b>
+016: 
+017: 
+018: #ifndef DATADIR
+019: #ifdef ILO_WINDOWS
+020: #define DIRSEP <b><font color="#8A2BE2">"</font></b>\\<b><font color="#8A2BE2">"</font></b>
+021: #else
+022: #define DIRSEP <b><font color="#8A2BE2">"/"</font></b>
+023: #endif
+024: #define DATADIR <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b>  DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">".."</font></b> DIRSEP <b><font color="#8A2BE2">"opl"</font></b> DIRSEP
+025: #endif
+026: 
+027: ILOSTLBEGIN
+028: 
+029: <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* DEFAULT_mod = DATADIR <b><font color="#8A2BE2">"mulprod"</font></b> DIRSEP <b><font color="#8A2BE2">"mulprod.mod"</font></b>;
+030: <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">int</font></b> DEFAULT_ndat = 1;
+031: <b><font color="EA7D00">static</font></b> <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* DEFAULT_dat[] = { DATADIR <b><font color="#8A2BE2">"mulprod"</font></b> DIRSEP <b><font color="#8A2BE2">"mulprod.dat"</font></b> };
+032: 
+033: 
+034: <b><font color="EA7D00">class</font></b> CommandLine;
+035: 
+036: <b><font color="EA7D00">class</font></b> OplRunSample {
+037:     CommandLine&amp; _cl;
+038:     IloEnv&amp; _env;
+039:     IloTimer _timer;
+040: 
+041:     <b><font color="#0000FF">void</font></b> trace(<b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* title, <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* info =0);
+042: 
+043: <b><font color="EA7D00">public</font></b>:
+044:     OplRunSample(IloEnv&amp; env, CommandLine&amp; cl);
+045:     <b><font color="#0000FF">int</font></b> run();
+046: };
+047: 
+048: <b><font color="EA7D00">class</font></b> CommandLine {
+049:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* _myName;
+050:     IloBool _verbose;
+051:     IloBool _forceUsage;
+052:     IloBool _isRelax;
+053:     IloBool _isConflict;
+054: 
+055:     IloBool _project;
+056:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* _modelFileName;
+057:     <b><font color="#0000FF">int</font></b> _nDataFiles;
+058:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>** _dataFileNames;
+059: 
+060:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* _exportName;
+061:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* _compileName;
+062:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* _externalDataName;
+063:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* _internalDataName;
+064: 
+065: <b><font color="EA7D00">public</font></b>:
+066:     CommandLine(<b><font color="#0000FF">int</font></b> argc, <b><font color="#0000FF">char</font></b>* argv[]);
+067:     ~CommandLine();
+068: 
+069:     <b><font color="#0000FF">void</font></b> usage() <b><font color="EA7D00">const</font></b>;
+070: 
+071:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* getModelFileName() <b><font color="EA7D00">const</font></b>;
+072:     <b><font color="#0000FF">int</font></b> getNumberOfDataFiles() <b><font color="EA7D00">const</font></b>;
+073:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>** getDataFileNames() <b><font color="EA7D00">const</font></b>;
+074: 
+075:     IloBool isProject() <b><font color="EA7D00">const</font></b>;
+076:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* getProjectPath() <b><font color="EA7D00">const</font></b>;
+077:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* getRunConfigurationName() <b><font color="EA7D00">const</font></b>;
+078: 
+079:     IloBool isVerbose() <b><font color="EA7D00">const</font></b>;
+080:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* getExportName() <b><font color="EA7D00">const</font></b>;
+081:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* getCompileName() <b><font color="EA7D00">const</font></b>;
+082:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* getExternalDataName() <b><font color="EA7D00">const</font></b>;
+083:     <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* getInternalDataName() <b><font color="EA7D00">const</font></b>;
+084:     IloBool isForceElementUsage() <b><font color="EA7D00">const</font></b>;
+085:     IloBool isRelaxation() <b><font color="EA7D00">const</font></b>;
+086:     IloBool isConflict() <b><font color="EA7D00">const</font></b>;
+087: };
+088: 
+089: <b><font color="#0000FF">int</font></b> main(<b><font color="#0000FF">int</font></b> argc,<b><font color="#0000FF">char</font></b>* argv[]) {
+090:     <b><font color="#0000FF">int</font></b> status = -1;
+091:     IloEnv env;
+092: 
+093:     <b><font color="EA7D00">try</font></b> {
+094:         CommandLine cl(argc,argv);
+095:         OplRunSample oplRun(env,cl);
+096:         status = oplRun.run();
+097:     } <b><font color="EA7D00">catch</font></b>( IloOplException &amp; e ) {
+098:         cout &lt;&lt; <b><font color="#8A2BE2">"### OPL exception: "</font></b> &lt;&lt; e.getMessage() &lt;&lt; endl;
+099:     } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+100:         cout &lt;&lt; <b><font color="#8A2BE2">"### CONCERT exception: "</font></b>;
+101:         e.print(cout);
+102:         status = 2;
+103:         cout &lt;&lt; endl;
+104:     } <b><font color="EA7D00">catch</font></b> (...) {
+105:         cout &lt;&lt; <b><font color="#8A2BE2">"### UNEXPECTED ERROR ..."</font></b> &lt;&lt; endl;
+106:         status = 3;
+107:     }
+108: 
+109:     env.end();
+110: 
+111:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"--Press &lt;Enter&gt; to exit--"</font></b> &lt;&lt; endl;
+112:     getchar();
+113: 
+114:     <b><font color="EA7D00">return</font></b> status;
+115: }
+116: 
+117: <b><font color="#0000FF">int</font></b> OplRunSample::run() {
+118:     locale loc(<b><font color="#8A2BE2">""</font></b>);
+119:     locale::global(loc);
+120: #ifdef ILO_WINDOWS
+121:     <b><font color="EA7D00">static</font></b> <b><font color="#0000FF">char</font></b> buffer[1024];
+122:     cout.rdbuf()-&gt;pubsetbuf(buffer,1024);
+123: #endif
+124: 
+125:     <b><font color="EA7D00">if</font></b> ( _cl.getCompileName() ) {
+126:         IloOplCompiler compiler(_env);
+127:         ofstream ofs(_cl.getCompileName(),ios::binary);
+128:         IloOplModelSource modelSource(_env,_cl.getModelFileName());
+129:         compiler.compile(modelSource,ofs);
+130:         ofs.close();
+131: 
+132:         trace(<b><font color="#8A2BE2">"compile"</font></b>);
+133:         <b><font color="EA7D00">return</font></b> 0;
+134:     }
+135: 
+136:     <b><font color="EA7D00">if</font></b> ( _cl.getModelFileName()==0 &amp;&amp; !_cl.isProject()) {
+137:         <b><font color="EA7D00">return</font></b> 0;
+138:     }
+139: 
+140:     trace(<b><font color="#8A2BE2">"initial"</font></b>);
+141: 
+142:     IloOplRunConfiguration rc;
+143:     <b><font color="EA7D00">if</font></b> ( _cl.isProject() ) {
+144:         IloOplProject prj(_env,_cl.getProjectPath());
+145:         rc = prj.makeRunConfiguration(_cl.getRunConfigurationName());
+146:     } <b><font color="EA7D00">else</font></b> {
+147:         <b><font color="EA7D00">if</font></b> ( _cl.getNumberOfDataFiles()==0 ) {
+148:             rc = IloOplRunConfiguration(_env,_cl.getModelFileName());
+149:         } <b><font color="EA7D00">else</font></b> {
+150:             IloStringArray dataFileNames(_env,_cl.getNumberOfDataFiles());
+151:             <b><font color="EA7D00">for</font></b>(<b><font color="#0000FF">int</font></b> i=0; i&lt;dataFileNames.getSize(); i++) {
+152:                 dataFileNames[i] = _cl.getDataFileNames()[i];
+153:             }
+154:             rc = IloOplRunConfiguration(_env,_cl.getModelFileName(),dataFileNames);
+155:         }
+156:     }
+157: 
+158:     IloOplErrorHandler handler = rc.getErrorHandler();
+159:     IloOplModel opl = rc.getOplModel();
+160: 
+161:     IloOplSettings settings = opl.getSettings();
+162:     settings.setWithLocations(IloTrue);
+163:     settings.setWithNames(IloTrue);
+164:     settings.setForceElementUsage(_cl.isForceElementUsage());
+165: 
+166:     IloInt status = 9;
+167:     <b><font color="EA7D00">if</font></b> ( opl.getModelDefinition().hasMain() ) {
+168:         status = opl.main();
+169:         cout &lt;&lt; <b><font color="#8A2BE2">"main returns "</font></b> &lt;&lt; status &lt;&lt; endl;
+170:         trace(<b><font color="#8A2BE2">"main"</font></b>);
+171:     } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( handler.ok() ) {
+172:         opl.generate();
+173:         trace(<b><font color="#8A2BE2">"generate model"</font></b>);
+174: 
+175:         <b><font color="EA7D00">if</font></b> ( opl.hasCplex() ) {
+176:             <b><font color="EA7D00">if</font></b> ( _cl.getExportName() ) {
+177:                 opl.getCplex().exportModel( _cl.getExportName() );
+178:                 trace(<b><font color="#8A2BE2">"export model"</font></b>,_cl.getExportName());
+179:             }
+180: 
+181:             <b><font color="EA7D00">if</font></b> ( _cl.isRelaxation() ) {
+182:                 cout &lt;&lt; <b><font color="#8A2BE2">"RELAXATIONS to obtain a feasible problem: "</font></b> &lt;&lt; endl;
+183:                 opl.printRelaxation(cout);
+184:                 cout &lt;&lt; <b><font color="#8A2BE2">"RELAXATIONS done."</font></b> &lt;&lt; endl &lt;&lt; endl;
+185:             }
+186:             <b><font color="EA7D00">if</font></b> ( _cl.isConflict() ) {
+187:                 cout &lt;&lt; <b><font color="#8A2BE2">"CONFLICT in the infeasible problem: "</font></b> &lt;&lt; endl;
+188:                 opl.printConflict(cout);
+189:                 cout &lt;&lt; <b><font color="#8A2BE2">"CONFLICT done."</font></b> &lt;&lt; endl &lt;&lt; endl;
+190:             }
+191:             <b><font color="EA7D00">if</font></b> (!_cl.isRelaxation() &amp;&amp; !_cl.isConflict()) {
+192:                 <b><font color="#0000FF">int</font></b> result = 0;
+193:                 <b><font color="EA7D00">try</font></b> {
+194:                     result = opl.getCplex().solve();
+195:                 } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+196:                     cout &lt;&lt; <b><font color="#8A2BE2">"### ENGINE exception: "</font></b>;
+197:                     e.print(cout);
+198:                     cout &lt;&lt; endl;
+199:                 }
+200: 
+201:                 <b><font color="EA7D00">if</font></b> ( result ) {
+202:                     trace(<b><font color="#8A2BE2">"solve"</font></b>);
+203:                     cout &lt;&lt; endl &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; opl.getCplex().getObjValue() &lt;&lt; endl;
+204: 
+205:                     opl.postProcess();
+206:                     trace(<b><font color="#8A2BE2">"post process"</font></b>);
+207: 
+208:                     <b><font color="EA7D00">if</font></b> ( _cl.isVerbose() ) {
+209:                         opl.printSolution(cout);
+210:                     }
+211:                     status = 0;
+212:                 } <b><font color="EA7D00">else</font></b> {
+213:                     trace(<b><font color="#8A2BE2">"no solution"</font></b>);
+214:                     status = 1;
+215:                 }
+216:             }
+217:         } <b><font color="EA7D00">else</font></b> { <b><font color="#007D00">// opl.hasCP()</font></b>
+218:             <b><font color="#0000FF">int</font></b> result = 0;
+219:             <b><font color="EA7D00">try</font></b> {
+220:                 result = opl.getCP().solve();
+221:             } <b><font color="EA7D00">catch</font></b>( IloException &amp; e ) {
+222:                 cout &lt;&lt; <b><font color="#8A2BE2">"### ENGINE exception: "</font></b>;
+223:                 e.print(cout);
+224:                 cout &lt;&lt; endl;
+225:             }
+226: 
+227:             <b><font color="EA7D00">if</font></b> ( result ) {
+228:                 trace(<b><font color="#8A2BE2">"solve"</font></b>);
+229:                 <b><font color="EA7D00">if</font></b> ( opl.getCP().hasObjective() ) {
+230:                     cout &lt;&lt; endl &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: "</font></b> &lt;&lt; fixed &lt;&lt; setprecision(2) &lt;&lt; opl.getCP().getObjValue() &lt;&lt; endl;
+231:                 } <b><font color="EA7D00">else</font></b> {
+232:                     cout &lt;&lt; endl &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"OBJECTIVE: no objective"</font></b> &lt;&lt; endl;
+233:                 }
+234:                 opl.postProcess();
+235:                 trace(<b><font color="#8A2BE2">"post process"</font></b>);
+236: 
+237:                 <b><font color="EA7D00">if</font></b> ( _cl.isVerbose() ) {
+238:                     opl.printSolution(cout);
+239:                 }
+240:                 status = 0;
+241:             } <b><font color="EA7D00">else</font></b> {
+242:                 trace(<b><font color="#8A2BE2">"no solution"</font></b>);
+243:                 status = 1;
+244:             }
+245:         }
+246:     }
+247: 
+248:     <b><font color="EA7D00">if</font></b> ( _cl.getExternalDataName() ) {
+249:         ofstream ofs(_cl.getExternalDataName());
+250:         opl.printExternalData(ofs);
+251:         ofs.close();
+252:         trace(<b><font color="#8A2BE2">"write external data"</font></b>,_cl.getExternalDataName());
+253:     }
+254: 
+255:     <b><font color="EA7D00">if</font></b> ( _cl.getInternalDataName() ) {
+256:         ofstream ofs(_cl.getInternalDataName());
+257:         opl.printInternalData(ofs);
+258:         ofs.close();
+259:         trace(<b><font color="#8A2BE2">"write internal data"</font></b>,_cl.getInternalDataName());
+260:     }
+261: 
+262:     trace(<b><font color="#8A2BE2">"done"</font></b>);
+263:     <b><font color="EA7D00">return</font></b> status;
+264: }
+265: 
+266: <b><font color="#0000FF">void</font></b> CommandLine::usage() <b><font color="EA7D00">const</font></b> {
+267:     cerr &lt;&lt; endl;
+268:     cerr &lt;&lt; <b><font color="#8A2BE2">"Usage: "</font></b> &lt;&lt; endl;
+269:     cerr &lt;&lt; _myName &lt;&lt; <b><font color="#8A2BE2">" [options] model-file [data-file ...]"</font></b> &lt;&lt; endl;
+270:     cerr &lt;&lt; _myName &lt;&lt; <b><font color="#8A2BE2">" [options] -p project-path [run-configuration]"</font></b> &lt;&lt; endl;
+271:     cerr &lt;&lt; <b><font color="#8A2BE2">"  options "</font></b> &lt;&lt; endl;
+272:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -h               "</font></b> &lt;&lt; <b><font color="#8A2BE2">"this help message"</font></b> &lt;&lt; endl;
+273:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -v               "</font></b> &lt;&lt; <b><font color="#8A2BE2">"verbose"</font></b> &lt;&lt; endl;
+274:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -e [export-file] "</font></b> &lt;&lt; <b><font color="#8A2BE2">"export model"</font></b> &lt;&lt; endl;
+275:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -de dat-file     "</font></b> &lt;&lt; <b><font color="#8A2BE2">"write external data"</font></b> &lt;&lt; endl;
+276:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -di dat-file     "</font></b> &lt;&lt; <b><font color="#8A2BE2">"write internal data"</font></b> &lt;&lt; endl;
+277:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -o output-file   "</font></b> &lt;&lt; <b><font color="#8A2BE2">"compile model"</font></b> &lt;&lt; endl;
+278:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -f               "</font></b> &lt;&lt; <b><font color="#8A2BE2">"force element usage"</font></b> &lt;&lt; endl;
+279:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -relax           "</font></b> &lt;&lt; <b><font color="#8A2BE2">"calculate relaxations needed for feasible model"</font></b> &lt;&lt; endl;
+280:     cerr &lt;&lt; <b><font color="#8A2BE2">"    -conflict        "</font></b> &lt;&lt; <b><font color="#8A2BE2">"calculate a conflict for infeasible model"</font></b> &lt;&lt; endl;
+281:     cerr &lt;&lt; endl;
+282:     exit(0);
+283: }
+284: 
+285: <b><font color="EA7D00">static</font></b> IloBool FileExists(<b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* path);
+286: 
+287: CommandLine::CommandLine(<b><font color="#0000FF">int</font></b> argc, <b><font color="#0000FF">char</font></b>* argv[]) {
+288:     _myName = argv[0];
+289:     _verbose = IloFalse;
+290:     _exportName = 0;
+291:     _compileName = 0;
+292:     _externalDataName = 0;
+293:     _internalDataName = 0;
+294:     _project = IloFalse;
+295:     _modelFileName = 0;
+296:     _nDataFiles = 0;
+297:     _dataFileNames = 0;
+298:     _forceUsage = 0;
+299:     _isRelax = IloFalse;
+300:     _isConflict = IloFalse;
+301: 
+302:     <b><font color="#0000FF">int</font></b> i=0;
+303:     <b><font color="EA7D00">for</font></b> (i=1; i&lt;argc; i++) {
+304:         <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-h"</font></b>,argv[i])==0 ) {
+305:             usage();
+306:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-p"</font></b>,argv[i])==0 ) {
+307:             _project = IloTrue;
+308:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-v"</font></b>,argv[i])==0 ) {
+309:             _verbose = IloTrue;
+310:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-e"</font></b>,argv[i])==0 ) {
+311:             i++;
+312:             <b><font color="EA7D00">if</font></b> ( i&lt;argc &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'-'</font></b> &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b> ) {
+313:                 _exportName = argv[i];
+314:             } <b><font color="EA7D00">else</font></b> {
+315:                 _exportName = <b><font color="#8A2BE2">"oplRunSample.lp"</font></b>;
+316:                 i--;
+317:             }
+318:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-o"</font></b>,argv[i])==0 ) {
+319:             i++;
+320:             <b><font color="EA7D00">if</font></b> ( i&lt;argc &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'-'</font></b> &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b> ) {
+321:                 _compileName = argv[i];
+322:             } <b><font color="EA7D00">else</font></b> {
+323:                 usage();
+324:             }
+325:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-de"</font></b>,argv[i])==0 ) {
+326:             i++;
+327:             <b><font color="EA7D00">if</font></b> ( i&lt;argc &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'-'</font></b> &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b> ) {
+328:                 _externalDataName = argv[i];
+329:             } <b><font color="EA7D00">else</font></b> {
+330:                 usage();
+331:             }
+332:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-di"</font></b>,argv[i])==0 ) {
+333:             i++;
+334:             <b><font color="EA7D00">if</font></b> ( i&lt;argc &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'-'</font></b> &amp;&amp; argv[i][0]!=<b><font color="#8A2BE2">'</font></b>\0<b><font color="#8A2BE2">'</font></b> ) {
+335:                 _internalDataName = argv[i];
+336:             } <b><font color="EA7D00">else</font></b> {
+337:                 usage();
+338:             }
+339:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-f"</font></b>,argv[i])==0 ) {
+340:             _forceUsage = IloTrue;
+341:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-relax"</font></b>,argv[i])==0 ) {
+342:             _isRelax = IloTrue;
+343:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strcmp(<b><font color="#8A2BE2">"-conflict"</font></b>,argv[i])==0 ) {
+344:             _isConflict = IloTrue;
+345:         } <b><font color="EA7D00">else</font></b> <b><font color="EA7D00">if</font></b> ( strncmp(<b><font color="#8A2BE2">"-"</font></b>,argv[i],1)==0 ) {
+346:             cerr &lt;&lt; <b><font color="#8A2BE2">"Unknown option: "</font></b> &lt;&lt; argv[i] &lt;&lt; endl;
+347:             usage();
+348:         } <b><font color="EA7D00">else</font></b> {
+349:             <b><font color="EA7D00">break</font></b>;
+350:         }
+351:     }
+352: 
+353:     <b><font color="EA7D00">if</font></b> ( i&lt;argc ) {
+354:         _modelFileName= argv[i];
+355:         _dataFileNames = 0;
+356:         _nDataFiles = 0;
+357:         i++;
+358:         <b><font color="EA7D00">if</font></b> ( i&lt;argc ) {
+359:             _dataFileNames = (<b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>**)&amp;argv[i];
+360:             _nDataFiles = argc-i;
+361:         }
+362:     }
+363: 
+364:     <b><font color="EA7D00">if</font></b> ( _modelFileName==0 &amp;&amp; FileExists(DEFAULT_mod) ) {
+365:         _modelFileName = DEFAULT_mod;
+366:         _nDataFiles = DEFAULT_ndat;
+367:         _dataFileNames = DEFAULT_dat;
+368:     }
+369: 
+370:     <b><font color="EA7D00">if</font></b> ( _project &amp;&amp; _nDataFiles&gt;1 ) {
+371:         usage();
+372:     }
+373: }
+374: 
+375: CommandLine::~CommandLine() {
+376: }
+377: 
+378: IloBool CommandLine::isVerbose() <b><font color="EA7D00">const</font></b> {
+379:     <b><font color="EA7D00">return</font></b> _verbose;
+380: }
+381: 
+382: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* CommandLine::getExportName() <b><font color="EA7D00">const</font></b> {
+383:     <b><font color="EA7D00">return</font></b> _exportName;
+384: }
+385: 
+386: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* CommandLine::getCompileName() <b><font color="EA7D00">const</font></b> {
+387:     <b><font color="EA7D00">return</font></b> _compileName;
+388: }
+389: 
+390: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* CommandLine::getExternalDataName() <b><font color="EA7D00">const</font></b> {
+391:     <b><font color="EA7D00">return</font></b> _externalDataName;
+392: }
+393: 
+394: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* CommandLine::getInternalDataName() <b><font color="EA7D00">const</font></b> {
+395:     <b><font color="EA7D00">return</font></b> _internalDataName;
+396: }
+397: 
+398: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* CommandLine::getModelFileName() <b><font color="EA7D00">const</font></b> {
+399:     <b><font color="EA7D00">return</font></b> _modelFileName;
+400: }
+401: 
+402: <b><font color="#0000FF">int</font></b> CommandLine::getNumberOfDataFiles() <b><font color="EA7D00">const</font></b> {
+403:     <b><font color="EA7D00">return</font></b> _nDataFiles;
+404: }
+405: 
+406: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>** CommandLine::getDataFileNames() <b><font color="EA7D00">const</font></b> {
+407:     <b><font color="EA7D00">return</font></b> _dataFileNames;
+408: }
+409: 
+410: IloBool CommandLine::isProject() <b><font color="EA7D00">const</font></b> {
+411:     <b><font color="EA7D00">return</font></b> _project;
+412: }
+413: 
+414: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* CommandLine::getProjectPath() <b><font color="EA7D00">const</font></b> {
+415:     <b><font color="EA7D00">return</font></b> _project ? _modelFileName : 0;
+416: }
+417: 
+418: <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* CommandLine::getRunConfigurationName() <b><font color="EA7D00">const</font></b> {
+419:     <b><font color="EA7D00">return</font></b> ( _project &amp;&amp; _nDataFiles==1 ) ? _dataFileNames[0] : 0;
+420: }
+421: 
+422: IloBool CommandLine::isForceElementUsage() <b><font color="EA7D00">const</font></b> {
+423:     <b><font color="EA7D00">return</font></b> _forceUsage;
+424: }
+425: 
+426: IloBool CommandLine::isRelaxation() <b><font color="EA7D00">const</font></b> {
+427:     <b><font color="EA7D00">return</font></b> _isRelax;
+428: }
+429: 
+430: IloBool CommandLine::isConflict() <b><font color="EA7D00">const</font></b> {
+431:     <b><font color="EA7D00">return</font></b> _isConflict;
+432: }
+433: 
+434: OplRunSample::OplRunSample(IloEnv&amp; env, CommandLine&amp; cl)
+435: :_cl(cl), _env(env), _timer(env) {
+436:     _timer.restart();
+437: }
+438: 
+439: <b><font color="#0000FF">void</font></b> OplRunSample::trace(<b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* title, <b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* info) {
+440:     cout &lt;&lt; endl &lt;&lt; <b><font color="#8A2BE2">"&lt;&lt;&lt; "</font></b> &lt;&lt; title;
+441:     <b><font color="EA7D00">if</font></b> ( info ) {
+442:         cout &lt;&lt; <b><font color="#8A2BE2">": "</font></b> &lt;&lt; info;
+443:     }
+444:     <b><font color="EA7D00">if</font></b> ( _cl.isVerbose() ) {
+445:         cout &lt;&lt; <b><font color="#8A2BE2">", at "</font></b> &lt;&lt; _env.getTime() &lt;&lt; <b><font color="#8A2BE2">"s"</font></b>
+446:             &lt;&lt; <b><font color="#8A2BE2">", took "</font></b> &lt;&lt; _timer.getTime() &lt;&lt; <b><font color="#8A2BE2">"s"</font></b>;
+447:         _timer.restart();
+448:     }
+449:     cout &lt;&lt; endl &lt;&lt; endl;
+450: }
+451: 
+452: <b><font color="EA7D00">static</font></b> IloBool FileExists(<b><font color="EA7D00">const</font></b> <b><font color="#0000FF">char</font></b>* path) {
+453:     FILE* exists = fopen(path,<b><font color="#8A2BE2">"r"</font></b>);
+454:     <b><font color="EA7D00">if</font></b> ( exists ) fclose(exists);
+455:     <b><font color="EA7D00">return</font></b> exists!=NULL;
+456: }
+457: 
+</tt></pre>

@@ -1,0 +1,430 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/WD-html-in-xml/DTD/xhtml1-strict.dtd">
+<html lang="en" xml:lang="en"><head><link type="text/css"
+            rel="stylesheet"
+            href="../cppdoc.css" />
+<title>IloPropagatorI</title>
+</head><body><div
+                class="ibm-access"><a href="#ibm-content"><img
+                    class="ibm-access" src="../whitepixel.png"
+            alt="Skip to main content" /></a></div><table
+            class="navigation-bar" border="0" cellpadding="0"
+                        cellspacing="3"><tr><td><a
+                        class="navigation-item"
+                        href="../overview.html">Overview</a></td><td><a
+                        class="navigation-item"
+                        href="../optim.cpoptimizer.extensions/group.html">Group</a></td><td><a
+                        class="navigation-item"
+                        href="../tree.html">Tree</a></td><td><a
+                        class="navigation-item"
+                        href="../graph.html">Graph</a></td><td><a
+                        class="navigation-item"
+                        href="../deprecated.html">Deprecated</a></td><td><a
+                        class="navigation-item"
+                        href="../index/index.html">Index</a></td><td><a
+                        class="navigation-item"
+            href="../concepts.html">Concepts</a></td></tr></table><div
+                align="right"><a href="../index.html"
+                target="_top">FRAMES</a> <a
+                href="../classes/IloPropagatorI.html"
+            target="_top">NO FRAMES</a></div><hr /><a
+            name="ibm-content"></a><h1>Class IloPropagatorI</h1><div
+                class="definition-file"><strong>Definition file: </strong><span
+            class="definition-file">ilcp/cp.h</span></div><div
+                class="include-files"><strong>Include file: </strong><span
+                class="include-file">&lt;ilcp/cp.h&gt; </span></div><div><img
+                src="IloPropagatorI.png" border="0"
+                usemap="#svg_map_IloPropagatorI"
+                    alt="Map of IloPropagatorI"><map
+                        name="svg_map_IloPropagatorI"><area
+                        href="../classes/IloPropagatorI.html"
+                        shape="rect" alt="IloPropagatorI"
+                        coords="10.0,37.6357421875,85.0,55.271484375" /><area
+                        href="../classes/IloPropagatorI.html"
+                        shape="rect" alt="IloPropagatorI"
+            coords="10.0,37.6357421875,85.0,55.271484375" /></map></img></div>
+A class for creating a custom constraint.
+    <div
+                        class="description"><p> The <code>IloPropagatorI</code> class offers a simple way
+     to define a <em>custom constraint</em>, that is, one where
+     you define the propagation rules via some C++ code.  You do this
+     by creating your own sub-class of <code>IloPropagatorI</code>.
+ </p><p> There are normally two reasons for writing a custom constraint.
+     One is that CP Optimizer does not have the modeling features required
+     to express the constraint, and <code><a
+                        href="../functions/IloAllowedAssignments.html">IloAllowedAssignments</a></code>
+     and <code><a
+                href="../functions/IloForbiddenAssignments.html">IloForbiddenAssignments</a></code>
+     are not efficient (for example, the number of tuples required would
+     be too high).  The second reason is the opportunity to
+     perform stronger inferences (propagation) than CP Optimizer would typically
+     perform.  This can be the case where, for example, the same expression
+     is used in more than one place in a constraint.
+ </p><p> The <code>IloPropagatorI</code> class has a simple interface,
+     and requires you to define one virtual function <code>execute</code>,
+     which will perform the required propagation.  In addition, you must
+     explicitly state which variables are involved in the constraint.
+     Whenever one of the variables that you indentify changes its domain,
+     the propagator is called.
+ </p><p> The following code shows how to write a propagator that maintains
+     the <em>sign</em> of an integer variable (-1 corresponds to
+     strictly negative, +1 to strictly positive, and zero to zero).
+ </p><pre
+                class="sample">
+   class SignI : public IloPropagatorI {
+   private:
+     IloIntVar _x;
+     IloIntVar _sgn;
+   public:
+     SignI(IloIntVar x, IloIntVar sgn)
+       : IloPropagatorI(x.getEnv()), _x(x), _sgn(sgn) {
+       addVar(x);
+       addVar(sgn);
+     }
+     void execute() {
+       if (!isInDomain(_sgn, -1)) setMin(_x, 0);
+       if (!isInDomain(_sgn, +1)) setMax(_x, 0);
+       if (!isInDomain(_sgn,  0)) removeValue(_x, 0);
+
+       if (getMin(_x) &gt;= 0) removeValue(_sgn, -1);
+       if (getMax(_x) &lt;= 0) removeValue(_sgn, +1);
+     }
+     IloPropagatorI* makeClone(IloEnv env) const {
+       return new (env) SignI(_x, _sgn);
+     }
+   };
+ </pre><div
+                    class="note"><div class="noteTitle">Note</div><div
+                        class="noteText"><p>
+   All modifications made to variables inside a propagator are
+   <em>buffered</em>.  This means that the changes you make to
+   variable domains are not visible inside the propagator,
+   but are recorded and applied when the propagator exits.  Your code
+   needs be aware of this if it examines a variable's domain after
+   modifying it.  For example, the following code will not case the
+   assertion to fail, but the minimum of <code>_x</code> will be set
+   to one greater than its current value when the propagator exits.
+ </p><pre
+            class="sample">
+    IlcInt min = getMin(_x);
+    setMin(_x, min + 1);
+    assert(getMin(_x) == min);
+ </pre></div></div></div><p
+            class="see-also-title">See Also:</p><p
+                class="see-also-links"><a
+                href="../functions/IlcCustomConstraint.html">IlcCustomConstraint</a>, <a
+            href="../functions/IloCustomConstraint.html">IloCustomConstraint</a></p><table
+            class="summary" border="1" cellpadding="3" cellspacing="0"
+                    width="100%"><tr><th
+                    colspan="2">Method Summary</th></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_addVar">addVar</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public virtual void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloPropagatorI.html#method_execute">execute</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloInt.html">IloInt</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_getDomainSize">getDomainSize</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_getMax">getMax</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_getMin">getMin</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloNum.html">IloNum</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_getValue">getValue</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_IloPropagatorI">IloPropagatorI</a>(<a
+                    href="../classes/IloEnv.html">IloEnv</a> env)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_isFixed">isFixed</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../typedefs/IloBool.html">IloBool</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_isInDomain">isInDomain</a>(<a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../typedefs/IloInt.html">IloInt</a> value) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                            class="prototype">public <a
+                    href="../classes/IloCP_IntVarIterator.html">IloCP::IntVarIterator</a></code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_iterator">iterator</a>(<a
+                    href="../classes/IloNumVar.html">IloNumVar</a> var)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public virtual IloPropagatorI *</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_makeClone">makeClone</a>(<a
+                    href="../classes/IloEnv.html">IloEnv</a> env) const</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_removeValue">removeValue</a>(<a
+                            href="../classes/IloIntVar.html">IloIntVar</a> var, <a
+                    href="../typedefs/IloInt.html">IloInt</a> value)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_setMax">setMax</a>(<a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../typedefs/IloNum.html">IloNum</a> max)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_setMin">setMin</a>(<a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../typedefs/IloNum.html">IloNum</a> min)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_setRange">setRange</a>(<a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                            href="../typedefs/IloNum.html">IloNum</a> min, <a
+                    href="../typedefs/IloNum.html">IloNum</a> max)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                            href="../classes/IloPropagatorI.html#method_setValue">setValue</a>(<a
+                            href="../classes/IloNumVar.html">IloNumVar</a> var, <a
+                    href="../typedefs/IloNum.html">IloNum</a> value)</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public void</code></td><td
+                            width="100%"><code><a
+                    href="../classes/IloPropagatorI.html#method_violate">violate</a>()</code></td></tr><tr><td
+                    valign="top" align="right" nowrap=""><code
+                    class="prototype">public </code></td><td
+                            width="100%"><code><a
+            href="../classes/IloPropagatorI.html#method_~IloPropagatorI">~IloPropagatorI</a>()</code></td></tr></table><table
+            border="1" cellspacing="0" width="100%"><tr><th
+                colspan="0">Method Detail</th></tr></table><h3><a
+            name="method_IloPropagatorI">IloPropagatorI</a></h3><div
+                class="prototype">public  <span
+                class="function-name">IloPropagatorI</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+            class="parameter-name">env</span>)</div><div
+                class="description"><p> The constructor of the propagator takes an
+     environment <code>env</code>.
+ </p></div><hr /><h3><a
+            name="method_~IloPropagatorI">~IloPropagatorI</a></h3><div
+                class="prototype">public  <span
+            class="function-name">~IloPropagatorI</span>()</div><div
+                class="description"><p> As <code>IloPropagatorI</code> is an abstract class, a virtual
+     destructor is provided.
+ </p></div><hr /><h3><a
+            name="method_addVar">addVar</a></h3><div
+                class="prototype">public void <span
+                class="function-name">addVar</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="description"><p> This function should be called in the constructor of your
+     sub-class of <code>IloPropagatorI</code> for each variable
+     involved in the custom constraint you are defining.
+ </p></div><hr /><h3><a
+            name="method_execute">execute</a></h3><div
+                class="prototype">public virtual void <span
+            class="function-name">execute</span>()</div><div
+                class="description"><p> When sub-classing the <code>IloPropagatorI</code> class to create
+     your own custom constraint, it is the execute function that you
+     define.  When you overload this function in your sub-class, this
+     function should update the domains of the variables of the
+     constraint to make them consistent.
+ </p></div><hr /><h3><a
+            name="method_getDomainSize">getDomainSize</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+                class="function-name">getDomainSize</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p> The member function returns the number of domain elements of
+     the variable <code>var</code>.  Note that as domain modifications
+     are buffered inside propagators, this value does not include
+     the domain modifications done since the <code>execute</code>
+     method of the propagator was entered.
+ </p></div><hr /><h3><a
+            name="method_getMax">getMax</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getMax</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p> The member function returns the maximum value of the domain of
+     variable <code>var</code>.  Note that as domain modifications
+     are buffered inside propagators, this value does not include
+     the domain modifications done since the <code>execute</code>
+     method of the propagator was entered.
+ </p></div><hr /><h3><a
+            name="method_getMin">getMin</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getMin</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p> The member function returns the minimum value of the domain of
+     variable <code>var</code>.  Note that as domain modifications
+     are buffered inside propagators, this value does not include
+     the domain modifications done since the <code>execute</code>
+     method of the propagator was entered.
+ </p></div><hr /><h3><a
+            name="method_getValue">getValue</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="function-name">getValue</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p> The member function returns the value of the
+     variable <code>var</code>.  If the <code>var</code>
+     was not fixed on entry to the <code>execute</code>
+     function, an exception is raised.
+ </p></div><hr /><h3><a
+            name="method_isFixed">isFixed</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isFixed</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>) const</div><div
+                class="description"><p> The member function determines if the variable <code>var</code>
+     is fixed to a value. Note that as domain modifications
+     are buffered inside propagators, this function will only return true
+     if <code>var</code> was fixed on entry to the <code>execute</code>
+     method of the propagator.
+ </p></div><hr /><h3><a
+            name="method_isInDomain">isInDomain</a></h3><div
+                class="prototype">public <a
+                href="../typedefs/IloBool.html">IloBool</a> <span
+                class="function-name">isInDomain</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">value</span>) const</div><div
+                class="description"><p> The member function determines if the value <code>value</code>
+     is in the current domain of the variable <code>var</code>.
+     Note that as domain modifications are buffered inside propagators,
+     this function will return true if <code>var</code> had
+     <code>value</code> in its domain on entry to the <code>execute</code>
+     method of the propagator.  This is the case even if that value
+     has subsequently been removed from <code>var</code> during the
+     current execution of <code>execute</code>.
+ </p></div><hr /><h3><a
+            name="method_iterator">iterator</a></h3><div
+                class="prototype">public <a
+                href="../classes/IloCP_IntVarIterator.html">IloCP::IntVarIterator</a> <span
+                class="function-name">iterator</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+            class="parameter-name">var</span>)</div><div
+                class="description"><p> This member function creates an iterator (an instance of
+     <code>IloPropagatorI::IntVarIterator</code>) which iterates
+     over the elements of the domain of <code>var</code>.  Note
+     that as modifications are buffered inside a propagator, this
+     iteration will scan all values in the domain of <code>var</code>
+     as they were when the <code>execute</code> member function was
+     entered.
+ </p></div><hr /><h3><a
+            name="method_makeClone">makeClone</a></h3><div
+                class="prototype">public virtual IloPropagatorI * <span
+                class="function-name">makeClone</span>(<a
+                href="../classes/IloEnv.html">IloEnv</a> <span
+            class="parameter-name">env</span>) const</div><div
+                class="description"><p> When sub-classing the <code>IloPropagatorI</code> class to create
+     your own custom constraint, you should define this method that will
+     clone the propagator to use in the CP Optimizer engine.
+ </p></div><hr /><h3><a
+            name="method_removeValue">removeValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">removeValue</span>(<a
+                href="../classes/IloIntVar.html">IloIntVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloInt.html">IloInt</a> <span
+            class="parameter-name">value</span>)</div><div
+                class="description"><p> This function can be called from the <code>execute</code> member
+     function of your sub-class of <code>IloPropagatorI</code>.  It removes
+     value <code>value</code> from the domain of variable
+     <code>var</code>.  Note that that this modification is
+     <em>buffered</em>.  See the class
+     documentation for an explanation of this.
+ </p></div><hr /><h3><a
+            name="method_setMax">setMax</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMax</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">max</span>)</div><div
+                class="description"><p> This function can be called from the <code>execute</code> member
+     function of your sub-class of <code>IloPropagatorI</code>.  It sets
+     the maximum value of <code>var</code> to <code>max</code>.  Note
+     that this modification is <em>buffered</em>.  See the class
+     documentation for an explanation of this.
+ </p></div><hr /><h3><a
+            name="method_setMin">setMin</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setMin</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">min</span>)</div><div
+                class="description"><p> This function can be called from the <code>execute</code> member
+     function of your sub-class of <code>IloPropagatorI</code>.  It sets
+     the minimum value of <code>var</code> to <code>min</code>.  Note
+     that this modification is <em>buffered</em>.  See the class
+     documentation for an explanation of this.
+ </p></div><hr /><h3><a
+            name="method_setRange">setRange</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setRange</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+                class="parameter-name">min</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">max</span>)</div><div
+                class="description"><p> This function can be called from the <code>execute</code> member
+     function of your sub-class of <code>IloPropagatorI</code>.  It sets
+     the minimum value of <code>var</code> to <code>min</code> and the
+     maximum value to <code>max</code>.  Note that
+     that this modification is <em>buffered</em>.  See the class
+     documentation for an explanation of this.
+ </p></div><hr /><h3><a
+            name="method_setValue">setValue</a></h3><div
+                class="prototype">public void <span
+                class="function-name">setValue</span>(<a
+                href="../classes/IloNumVar.html">IloNumVar</a> <span
+                class="parameter-name">var</span>, <a
+                href="../typedefs/IloNum.html">IloNum</a> <span
+            class="parameter-name">value</span>)</div><div
+                class="description"><p> This function can be called from the <code>execute</code> member
+     function of your sub-class of <code>IloPropagatorI</code>.  It sets
+     the value of <code>var</code> to <code>value</code>.
+     Note that that this modification is <em>buffered</em>.  See the class
+     documentation for an explanation of this.
+ </p></div><hr /><h3><a
+            name="method_violate">violate</a></h3><div
+                class="prototype">public void <span
+            class="function-name">violate</span>()</div><div class="description"><p> This function can be called from the <code>execute</code> member
+     function of your sub-class of <code>IloPropagatorI</code>.  It indicates
+     to the solver that the constraint which the propagator is maintaining
+     is violated.
+ </p></div><hr /></body>
+</html>

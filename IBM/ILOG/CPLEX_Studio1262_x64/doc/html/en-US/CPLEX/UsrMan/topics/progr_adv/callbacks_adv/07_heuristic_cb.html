@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Heuristic callback" />
+<meta name="abstract" content="Describes the heuristic callback." />
+<meta name="Description" content="Describes the heuristic callback." />
+<meta name="DC.subject" content="callback, heuristic, CPXsetheuristiccallbackfunc, node, viable, CPXgetcallbackgloballb, CPXgetcallbackglobalub, CPXgetcallbacknodelb, CPXgetcallbacknodeub, CPXgetcallbackincumbent, CPXgetcallbacklp, CPX_PARAM_MIPCBREDLP, heuristic callbacks and, CPXgetcallbacknodelp, callback arguments and, CPXcloneprob routine, copying node LPs" />
+<meta name="keywords" content="callback, heuristic, CPXsetheuristiccallbackfunc, node, viable, CPXgetcallbackgloballb, CPXgetcallbackglobalub, CPXgetcallbacknodelb, CPXgetcallbacknodeub, CPXgetcallbackincumbent, CPXgetcallbacklp, CPX_PARAM_MIPCBREDLP, heuristic callbacks and, CPXgetcallbacknodelp, callback arguments and, CPXcloneprob routine, copying node LPs" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_advMIPcontrolInterface.998413" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" />
+<title>Heuristic callback</title>
+</head>
+<body role="main" id="User_manual.uss_advMIPcontrolInterface.998413">
+<h1 class="title topictitle1">Heuristic callback</h1>
+<div class="body"><p class="shortdesc">Describes the heuristic callback.</p>
+<p class="p">This topic introduces the heuristic callback. The first step in
+using this callback is to call <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/setheuristiccallbackfunc.html" title="The routine CPXXsetheuristiccallbackfunc/CPXsetheuristiccallbackfunc sets or modifies the user-written callback to be called by CPLEX during MIP optimization after the subproblem has been solved to optimality.">CPXsetheuristiccallbackfunc</a></samp>,
+with a pointer to a callback function and optionally a pointer to
+user private data as arguments. Among the examples distributed with
+the product, there is an advanced example <span class="ph filepath">admipex2.c</span> 
+showing details of how this callback is used. After this routine has
+been called, CPLEX calls the user callback function at every <strong class="ph b">viable</strong> node
+in the branch &amp; cut tree. (A node is viable if its LP relaxation
+is feasible and its relaxation objective value is better than that
+of the best available integer solution.) CPLEX calls the user callback
+routine with the solution vector for the current relaxation as input.
+The callback function should return a feasible solution vector, if
+one is found, as output.</p>
+<p class="p">The advanced MIP control interface provides several routines that
+allow the user callback to gather information that may be useful in
+finding heuristic solutions. The routines <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbackgloballb.html" title="The routine CPXXgetcallbackgloballb/CPXgetcallbackgloballb retrieves the best known global lower bound values during MIP optimization from within a user-written callback.">CPXgetcallbackgloballb</a></samp> and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbackglobalub.html" title="The routine CPXXgetcallbackglobalub/CPXgetcallbackglobalub retrieves the best known global upper bound values during MIP optimization from within a user-written callback.">CPXgetcallbackglobalub</a></samp>,
+for example, return the tightest known global lower and upper bounds
+on all the variables in the problem. No feasible solution whose objective
+is better than that of the best known solution can violate these bounds.
+Similarly, the routines <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacknodelb.html" title="The routine CPXXgetcallbacknodelb/CPXgetcallbacknodelb retrieves the lower bound values for the subproblem at the current node during MIP optimization from within a user-written callback.">CPXgetcallbacknodelb</a></samp> and <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacknodeub.html" title="The routine CPXXgetcallbacknodeub/CPXgetcallbacknodeub retrieves the upper bound values for the subproblem at the current node during MIP optimization from within a user-written callback.">CPXgetcallbacknodeub</a></samp> return
+variable bounds at this node. These reflect the bound adjustments
+made during branching. The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbackincumbent.html" title="The routine CPXXgetcallbackincumbent/CPXgetcallbackincumbent retrieves the incumbent values during MIP optimization from within a user-written callback.">CPXgetcallbackincumbent</a></samp> returns
+the current incumbent - the best known feasible solution. The routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacklp.html" title="The routine CPXXgetcallbacklp/CPXgetcallbacklp retrieves the pointer to the MIP problem that is in use when the user-written callback function is called.">CPXgetcallbacklp</a></samp> returns
+a pointer to the MIP problem (presolved or unpresolved, depending
+on the <a class="xref" href="../../../../Parameters/topics/MIPCBREDLP.html" title="Controls whether your callback accesses node information of the original model (off) or node information of the reduced, presolved model (on, default).">MIP callback switch between original model and reduced, presolved model</a>, <samp class="ph codeph">CPX_PARAM_MIPCBREDLP</samp>).
+This pointer can be used to obtain various information about the problem
+(variable types, etc.), or as an argument for the advanced presolve
+interface if the user wants to translate manually between presolved
+and unpresolved values. In addition, the callback can use the <samp class="ph codeph">cbdata</samp> 
+parameter passed to it, along with routine <samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbacknodelp.html" title="The routine CPXXgetcallbacknodelp/CPXgetcallbacknodelp returns a pointer to the subproblem at the current node from within a user-written callback.">CPXgetcallbacknodelp</a></samp>,
+to obtain a pointer to the node relaxation LP. This can be used to
+access  information about the relaxation (row count, column count,
+etc.). Note that in both cases, the user should never use the pointers
+obtained from these callbacks to modify the associated problems.</p>
+<p class="p">As noted earlier, the <samp class="ph codeph">CPX_PARAM_MIPCBREDLP</samp> parameter
+influences the arguments to the user callback routine. If this parameter
+is set to its default value of <samp class="ph codeph">CPX_ON</samp>  (1), the solution
+vector returned to the callback, and any feasible solutions returned
+by the callback, are presolved vectors. They contain one value for
+each variable in the presolved problem. The same is true of the various
+callback support routines (<samp class="ph codeph"><a class="xref" href="../../../../../refcallablelibrary/mipapi/getcallbackgloballb.html" title="The routine CPXXgetcallbackgloballb/CPXgetcallbackgloballb retrieves the best known global lower bound values during MIP optimization from within a user-written callback.">CPXgetcallbackgloballb</a></samp>,
+etc.). If the parameter is set to <samp class="ph codeph">CPX_OFF</samp>  (0), all
+these vectors relate to variables of the original problem. Note that
+this parameter should not be changed in the middle of an optimization.</p>
+<p class="p">The user should be aware that the branch &amp; cut process works
+with the presolved problem, so the code will incur some cost when
+translating from presolved to original values. This cost is usually
+small, but can sometimes be significant. </p>
+<p class="p">We should also note that if a user wants to solve linear programs
+as part of a heuristic callback, the user must make a copy of the
+node LP (for example, using <samp class="ph codeph">CPXcloneprob</samp> ). The user
+should not modify the CPLEX node LP.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/progr_adv/callbacks_adv/01_adv_callbacks_title_synopsis.html" title="Documents the advanced MIP control interface.">Advanced MIP control interface</a></div>
+</div>
+</div></body>
+</html>

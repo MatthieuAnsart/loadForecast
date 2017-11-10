@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="topic" />
+<meta name="DC.Title" content="Querying solution data" />
+<meta name="abstract" content="Describes methods available in the C++ API to query data about the solution after optimization." />
+<meta name="Description" content="Describes methods available in the C++ API to query data about the solution after optimization." />
+<meta name="DC.subject" content="accessing, solution values (C++ API), solution, accessing values of (C++ API), getValue method, IloCplex C++ class, IloCplex class, getValue method (C++ API), getValues method, IloCplex C++ class, getValues method (C++ API), slack, accessing slack variables in constraints (C++ API), accessing slack variables in objective (C++ API), objective function value (C++ API), objective function, accessing value of (C++ API), objective value, accessing slack in (C++ API), getObjValue method, IloCplex C++ class, getObjValue method (C++ API), getSlack method, getSlack method (C++ API), getSlacks method, IloCplex class, getSlacks method (C++ API), variable, accessing dual (C++ API), dual values (C++ API), dual variable, solution data (C++ API), reduced costs (C++ API), reduced cost, accessing (C++ API), getDual method, getDual method (C++ API), getDuals method, getDuals method (C++ API), getReducedCost method, getReducedCost method (C++ API), getReducedCosts method, getReducedCosts method (C++ API)" />
+<meta name="keywords" content="accessing, solution values (C++ API), solution, accessing values of (C++ API), getValue method, IloCplex C++ class, IloCplex class, getValue method (C++ API), getValues method, IloCplex C++ class, getValues method (C++ API), slack, accessing slack variables in constraints (C++ API), accessing slack variables in objective (C++ API), objective function value (C++ API), objective function, accessing value of (C++ API), objective value, accessing slack in (C++ API), getObjValue method, IloCplex C++ class, getObjValue method (C++ API), getSlack method, getSlack method (C++ API), getSlacks method, IloCplex class, getSlacks method (C++ API), variable, accessing dual (C++ API), dual values (C++ API), dual variable, solution data (C++ API), reduced costs (C++ API), reduced cost, accessing (C++ API), getDual method, getDual method (C++ API), getDuals method, getDuals method (C++ API), getReducedCost method, getReducedCost method (C++ API), getReducedCosts method, getReducedCosts method (C++ API)" />
+<meta name="DC.Relation" scheme="URI" content="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/soln_info.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="User_manual.uss_cplusIloCplex.122764" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../../../../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../../../../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/soln_info.html" />
+<title>Querying solution data</title>
+</head>
+<body role="main" id="User_manual.uss_cplusIloCplex.122764">
+<h1 class="title topictitle1">Querying solution data</h1>
+<div class="body"><p class="shortdesc">Describes methods available in the C++ API to
+query data about the solution after optimization.</p>
+<p class="p">If  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getValue" title="(Opens in a new tab or window)">getValue</a> returns <samp class="ph codeph">IloTrue</samp> , a feasible solution has been found and
+solution values for model variables are available to be queried. For
+example, the solution value for the numeric variable <samp class="ph codeph">var1</samp> 
+can be accessed like this: </p>
+<p class="p"> <span class="keyword apiname"> IloNum x1 = </span>  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getValue" title="(Opens in a new tab or window)">getValue</a>(<samp class="ph codeph">var1</samp>); </p>
+<p class="p">However, querying solution values variable by variable
+may result in ugly code. Here, the use of Concert Technology arrays
+provides a much more compact way of accessing the solution values.
+Assuming your variables are stored in an array of numeric variables
+(<samp class="ph codeph">IloNumVarArray)</samp>  named <samp class="ph codeph">var</samp> ,
+use lines like these to access the solution values for all variables
+in <samp class="ph codeph">var</samp>  simultaneously:  </p>
+<p class="p"> <span class="keyword apiname"> IloNumArray x(env); </span>  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getValues" title="(Opens in a new tab or window)">getValues</a>(<samp class="ph codeph">x,
+var</samp>); </p>
+<p class="p">Value <samp class="ph codeph">x[i]</samp>  contains the solution
+value for variable <samp class="ph codeph">var[i]</samp>. </p>
+<p class="p">Solution data is not restricted to the solution values
+of variables. It also includes values of slack variables in constraints
+(whether the constraints are linear or quadratic) and the objective
+value. If the extracted model does not contain an objective object, <samp class="ph codeph">IloCplex</samp>  assumes a 0 expression objective. The
+objective value is returned by calling method  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getObjValue" title="(Opens in a new tab or window)">getObjValue</a>.
+Slack values are accessed with the methods  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getSlack" title="(Opens in a new tab or window)">getSlack</a> and  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getSlacks" title="(Opens in a new tab or window)">getSlacks</a>,
+which take a linear constraint, a quadratic constraint, or an array
+of constraints as a parameter.</p>
+<p class="p">For LPs and QPs, solution data includes information such
+as dual variables and reduced cost. Such information can be queried
+with the methods,  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getDual" title="(Opens in a new tab or window)">getDual</a>,  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getDuals" title="(Opens in a new tab or window)">getDuals</a>,  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getReducedCost" title="(Opens in a new tab or window)">getReducedCost</a>,
+and  <a class="xref hardcodedApiLink" href="../../../../../refcppcplex/html/classes/IloCplex.html#getReducedCosts" title="(Opens in a new tab or window)">getReducedCosts</a>.</p>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../../../../CPLEX/UsrMan/topics/APIs/Cpp/soln_info.html" title="Describes available information about solution feasibility, solution variables, basis information, and solution quality.">Accessing solution information</a></div>
+</div>
+</div></body>
+</html>

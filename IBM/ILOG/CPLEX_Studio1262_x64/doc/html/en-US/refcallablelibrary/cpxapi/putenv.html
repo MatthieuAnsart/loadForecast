@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en-us" lang="en-us">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<meta name="copyright" content="© Copyright IBM Corporation 2015" />
+<meta name="DC.Rights.Owner" content="© Copyright IBM Corporation 2015" />
+<meta name="security" content="public" />
+<meta name="Robots" content="index,follow" />
+<meta name="DC.Type" content="reference" />
+<meta name="DC.Title" content="CPXXputenv and CPXputenv" />
+<meta name="abstract" content="The routine CPXXputenv/CPXputenv sets an environment variable to be used by CPLEX." />
+<meta name="Description" content="The routine CPXXputenv/CPXputenv sets an environment variable to be used by CPLEX." />
+<meta name="DC.subject" content="CPXputenv, C API Reference Manual, CPXXputenv" />
+<meta name="keywords" content="CPXputenv, C API Reference Manual, CPXXputenv" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/groups/homepageportability.html" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/groups/homepagecallable.html" />
+<meta name="DC.Relation" scheme="URI" content="../../refcallablelibrary/cpxapi/hpUtil.html" />
+<meta name="DC.Date" scheme="iso8601" content="2015-05-15" />
+<meta name="DC.Format" content="XHTML" />
+<meta name="DC.Identifier" content="putenv" />
+<meta name="DC.Language" content="en-us" />
+<meta name="IBM.Country" content="ZZ" />
+<!-- Licensed Materials - Property of IBM -->
+<!-- US Government Users Restricted Rights -->
+<!-- Use, duplication or disclosure restricted by -->
+<!-- GSA ADP Schedule Contract with IBM Corp. -->
+<link rel="stylesheet" type="text/css" href="../.././ibmdita.css" />
+<link rel="stylesheet" type="text/css" href="../.././swg_info_common_opti.css" />
+<link rel="Start" href="../../refcallablelibrary/groups/homepageportability.html" />
+<link rel="Start" href="../../refcallablelibrary/groups/homepagecallable.html" />
+<link rel="Start" href="../../refcallablelibrary/cpxapi/hpUtil.html" />
+<title>CPXXputenv and CPXputenv</title>
+</head>
+<body role="main" id="putenv">
+<h1 class="title topictitle1"><span class="keyword apiname">CPXXputenv</span> and <span class="keyword apiname">CPXputenv</span></h1>
+<div class="body refbody"><p class="shortdesc">     
+
+
+The routine <samp class="ph codeph"><span class="keyword apiname">CPXXputenv</span>/<span class="keyword apiname">CPXputenv</span></samp> sets an environment variable to be
+used by CPLEX.
+  </p>
+<div class="section refsyn">      <p class="p"><span class="ph synph">        <span class="keyword kwd">int</span>
+        <span class="ph sep"> </span><span class="keyword kwd">CPXXputenv</span><span class="ph delim">(</span>
+          <span class="keyword kwd">char *</span><span class="ph sep"> </span><span class="ph var">envsetting_str</span>        <span class="ph delim">)</span>
+      </span></p>
+
+      <p class="p"><span class="ph synph">        <span class="keyword kwd">int</span>
+        <span class="ph sep"> </span><span class="keyword kwd">CPXputenv</span><span class="ph delim">(</span>
+          <span class="keyword kwd">char *</span><span class="ph sep"> </span><span class="ph var">envsetting_str</span>        <span class="ph delim">)</span>
+      </span></p>
+
+    </div>
+<div class="section"><h2 class="title sectiontitle">Description</h2>    
+ 
+
+
+<p class="p">The routine <samp class="ph codeph"><span class="keyword apiname">CPXXputenv</span>/<span class="keyword apiname">CPXputenv</span></samp> sets an environment variable to be
+used by CPLEX. Use it instead of the standard C Library
+<samp class="ph codeph"><span class="keyword apiname">putenv</span></samp> function to make sure your application ports properly to
+Windows. Be sure to allocate the memory dynamically for the string passed to
+<samp class="ph codeph"><span class="keyword apiname">CPXXputenv</span>/<span class="keyword apiname">CPXputenv</span></samp>.</p>
+
+
+<p class="p">As with the C <samp class="ph codeph"><span class="keyword apiname">putenv</span></samp> routine, the address of the character
+string goes directly into the environment. Therefore, the memory
+identified by the
+pointer must remain active throughout the remaining parts of the application
+where CPLEX runs. Since global or static variables are not
+thread safe, dynamic memory allocation of the
+<samp class="ph codeph"><span class="keyword apiname">envsetting</span></samp> string is a good programming practice. </p>
+
+
+
+    </div>
+<div class="section"><h2 class="title sectiontitle">Arguments</h2>      
+    </div>
+<table cellpadding="4" cellspacing="0" summary="Each row in this table describes a property; each property can have a type, value, and description." border="1" class="simpletable properties"><tr class="sthead prophead">
+<th valign="bottom" align="left" id="d1097606e136" class="stentry propvaluehd">Name</th>
+<th valign="bottom" align="left" id="d1097606e138" class="stentry propdeschd">Description</th>
+</tr><tr class="strow property">
+<td valign="top" headers="d1097606e136" class="stentry propvalue">envsetting_str</td>
+<td valign="top" headers="d1097606e138" class="stentry propdesc">          
+
+          A string containing an environment variable assignment. This argument typically sets the <samp class="ph codeph"><span class="keyword apiname">ILOG_LICENSE_FILE</span></samp> environment variable that customizes the location of the license key.
+        </td>
+</tr>
+</table>
+<div class="section"><h2 class="title sectiontitle">Return</h2>      
+      The routine returns 0 (zero) when it executes successfully and -1 when it fails.
+    </div>
+<div class="section"><h2 class="title sectiontitle">Example</h2>      
+      
+<pre class="pre codeblock"><code>char *envstr = NULL;
+envstr = (char *) malloc (256);
+if ( envstr != NULL ) {
+strcpy (envstr,
+    "MYAPPLICATION=c:\\myapp");
+CPXputenv (envstr);
+}</code></pre>
+
+
+
+
+    </div>
+</div>
+<div class="related-links">
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/groups/homepageportability.html">Portability Routines in the CPLEX Callable Library (C API)</a></div>
+</div>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/groups/homepagecallable.html">Routines in the CPLEX Callable Library (C API)</a></div>
+</div>
+
+<div class="familylinks">
+<div class="parentlink"><strong>Parent topic:</strong> <a class="link" href="../../refcallablelibrary/cpxapi/hpUtil.html">Utilities for portable applications</a></div>
+</div>
+</div></body>
+</html>
