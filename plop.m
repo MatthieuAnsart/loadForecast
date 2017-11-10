@@ -1,4 +1,4 @@
-cd('Y:\New folder\BaseEMU')
+cd('/cluster/home/ansartm/loadForecast')
 
 clear all
 clc

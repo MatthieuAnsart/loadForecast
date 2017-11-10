@@ -1,12 +1,12 @@
 
-for answer = 8 : 9
+for answer = 2 : 2
     clearvars -except answer
-    % load('C:\Users\ansartm\Desktop\New folder\BaseEMU\sample input data file\Family1Child.mat')
+    % load('/cluster/home/ansartm/loadForecast\sample input data file\Family1Child.mat')
     
     projectpath = genpath(pwd);
     addpath(projectpath);
     % load('C:\Users\ansartm\Desktop\New folder\BaseEMU\sample input data file\Family1Child.mat')
-    load('Y:\New folder\BaseEMU\sample input data file\Noise_generated_plus.mat')
+    load('/cluster/home/ansartm/loadForecast\sample input data file/Noise_generated.mat')
     
     % rho = 10  gives min. ratio of privacy over regularisation term of 10
     
@@ -14,24 +14,24 @@ for answer = 8 : 9
     
     SimSettings = [    %     0            1       9.1        10000       6.4;
         1            1       9.1        10000       6.4;
-        2            1       9.1        10000       6.4;
-        3            1       9.1        10000       6.4;
-        4            1       9.1        10000       6.4;
-        5            1       9.1        10000       6.4;
-        6            1       9.1        10000       6.4;
-        7            1       9.1        10000       6.4;
-        8            1       9.1        10000       6.4;
-        9            1       9.1        10000       6.4;
-        10           1       9.1        10000       6.4;
-        12           1       9.1        10000       6.4;
-        14           1       9.1        10000       6.4;
-        15           1       9.1        10000       6.4;
-        16           1       9.1        10000       6.4;
-        18           1       9.1        10000       6.4;
-        20           1       9.1        10000       6.4;
-        25           1       9.1        10000       6.4;
-        30           1       9.1        10000       6.4;
-        %                             35           1       9.1        10000       6.4;
+%         2            1       9.1        10000       6.4;
+%         3            1       9.1        10000       6.4;
+%         4            1       9.1        10000       6.4;
+%         5            1       9.1        10000       6.4;
+%         6            1       9.1        10000       6.4;
+%         7            1       9.1        10000       6.4;
+%         8            1       9.1        10000       6.4;
+%         9            1       9.1        10000       6.4;
+%         10           1       9.1        10000       6.4;
+%         12           1       9.1        10000       6.4;
+%         14           1       9.1        10000       6.4;
+%         15           1       9.1        10000       6.4;
+%         16           1       9.1        10000       6.4;
+%         18           1       9.1        10000       6.4;
+%         20           1       9.1        10000       6.4;
+%         25           1       9.1        10000       6.4;
+%         30           1       9.1        10000       6.4;
+%         %                             35           1       9.1        10000       6.4;
         %                             40           1       9.1        10000       6.4;
         %                             45           1       9.1        10000       6.4;
         %                             50           1       9.1        10000       6.4;
@@ -53,7 +53,7 @@ for answer = 8 : 9
     Out = size(SimSettings(:,1));
     
     
-    cd('Y:\New folder\BaseEMU\');
+    cd('/cluster/home/ansartm/loadForecast');
     folder = 'Big test 6.4kWh 3.3kW R9.1 30days Y5'; %T12 @ 30 min = 24 Step
     k = datestr(now,'dd-mmm-yyyy HH.MM.SS');
     str = int2str(answer);
