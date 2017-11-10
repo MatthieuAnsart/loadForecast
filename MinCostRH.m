@@ -34,7 +34,7 @@ BattEffC = 1 - 0.04; % Charge losses
 Interval = 60; %minutes
 Horizon = 12/24; %day, optimisation horizon 12 default
 NumOut = Horizon*24*60/Interval; % Optimisation Prediction Horizon T
-Period = 1; %Number of days that is being investigated 30
+Period = 30; %Number of days that is being investigated 30
 
 TimeStep = Interval*60/3600; %to convert values to kWh
 
@@ -83,7 +83,6 @@ xcount_cumulative = xcountrec;
 
 Z_ijtHist = [];
 xycountc_store = [];
-
 %% Controller Specific variables%%
 
 % Optimization Variables - Basic %
@@ -216,92 +215,10 @@ disp(sum(sum(ycounteval)));
 % CPLexOut = {round(Period*24*60/Interval),5};
 
 
-
-
-
-
-
-% %%%%%%%%%%%%%%%% bruit blanc gaussien %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Load = LoadInput;
-% LoadInput = awgn(LoadInput,1);
-
-%%%%%%%%%%%%%%%%% bruit avec esp constant %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% version 1
-%
-% Load = LoadInput;
-% LoadInput = zeros(length(LoadInput),1);
-% sig = 0.1 ;
-% eps = random('norm', 0, sig , length(Load), 1);
-%
-% LoadInput(1)=Load(1);
-%
-% for t = 1:length(LoadInput)-1
-%     LoadInput(t+1) = Load(t+1) - (Load(t)-LoadInput (t))-eps(t+1);
-% end
-
-
-% version 2
-
-% Load = LoadInput;
-% LoadInput = zeros(length(LoadInput),1);
-% sig = LoadMax/3; % 3 sig de chaque cote de la moyenne represente 99.73% de proba dans le cas d'une loi normale
-% eps = random('norm', 0, sig , length(Load), 1);
-%
-% LoadInput(1)=Load(1);
-%
-% for t = 1:length(LoadInput)-1
-%     LoadInput(t+1) = Load(t+1) - (Load(t)-LoadInput (t))-eps(t+1);
-% end
-
-%%%%%%%%%%%%%%%% bruit avec eps random %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Load = LoadInput;
-% LoadInput = zeros(length(LoadInput),1);
-% sig = gamcdf(abs(random('norm', 0.5, 0.5/3 , length(Load), 1)),5,0.5);
-% eps = random('norm', 0, sig , length(Load), 1);
-%
-% LoadInput(1)=Load(1);
-%
-% for t = 1:length(LoadInput)-1
-%     LoadInput(t+1) = Load(t+1) - (Load(t)-LoadInput (t))-eps(t+1);
-% end
-
-% for act = 1 :  round(Period*24*60/Interval)
-%
-%     fprintf('\nTime from Start: ');
-%     disp(act);
-%     [P_pv, E_load, cost] = EnvironmentSense(1, P_pv, E_load, cost, PVInput, LoadInput, CostInput, StartTime, act, NumOut, Interval);
-%     ControllerBase2; %Default
-%     CPlexOut(act) = sol;
-%
-%     if act == 1
-%         options = sdpsettings('solver','CPlex','verbose',1,'showprogress',1,'cplex.solutiontarget',3, 'cplex.mip.display', 'on', 'saveyalmipmodel', 1,...
-%             'savesolveroutput',1);
-%     end
-%
-% end
-
-
-
-% %%%%%%%%%%%%%%% bruit avec eps croissant %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Load = LoadInput;
-LoadInput = zeros(length(LoadInput),1);
-LoadInput(1)=Load(1);
-
-sig = 0.2;
-
-% for t = 1:xbinsize
-%     eps = random('norm', 0, sig * t ,1, 1);
-%     LoadInput(t+1) = Load(t+1) - (Load(t)-LoadInput (t))-eps;
-% end
-
 for act = 1 :  round(Period*24*60/Interval)
     
     fprintf('\nTime from Start: ');
     disp(act);
-    for t = 1  : m
-        eps = random('norm', 0, sig * t ,1, 1);
-        LoadInput(t+act) = Load(t+act) - (Load(t+act-1)-LoadInput (t+act-1))-eps;
-    end
     [P_pv, E_load, cost] = EnvironmentSense(1, P_pv, E_load, cost, PVInput, LoadInput, CostInput, StartTime, act, NumOut, Interval);
     ControllerBase2; %Default
     CPlexOut(act) = sol;

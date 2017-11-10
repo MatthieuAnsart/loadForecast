@@ -2,16 +2,6 @@
 
 temp1 = binvar(1,1);
 
-%%%%%%%%%%%%%%%% bruit
-
-for t = 1 : length(LoadInput)
-    if LoadInput(t) > xbinsize * m
-        LoadInput(t) = xbinsize * m;
-    elseif LoadInput(t)<0
-        LoadInput(t)=0;        
-    end
-end
-
 clear t;
 
 xcount = xcountrec; % x count across prediction horizon, includes predicted values to be purged
@@ -19,7 +9,7 @@ xycountc(m,n) = temp1; % changes to xy count
 
 for t = 1 : NumOut
     %     temp = binx(E_load(t,1), xbinsize, m);
-    temp = binx(LoadInput(act+t,1), xbinsize, m);
+    temp = binx(LoadInput(act,t), xbinsize, m);
     % pas sur pour le act
     xycountc(temp,:) = xycountc(temp,:) + Z_ijt(t,:);   %to change temporal series to count space. i.e. a particular xycount may occur twice in the horizon
     xcount(temp,1) = xcount(temp,1) + 1;
@@ -82,11 +72,11 @@ sol = optimize([constraints constraints2 constraints3 constraints4], ObjectiveFu
 %% Results and Environment Update %%
 
 % P_out(1:NumOut,1,act) = E_load(:) - double(P_battD(:))*TimeStep + double(P_battC(:))*TimeStep - P_pv(:)*TimeStep;
-P_out(1:NumOut,1,act) = LoadInput(act:NumOut+act-1) - double(P_battD(:))*TimeStep + double(P_battC(:))*TimeStep - P_pv(:)*TimeStep;
+P_out(1:NumOut,1,act) = LoadInput(act,:)' - double(P_battD(:))*TimeStep + double(P_battC(:))*TimeStep - P_pv(:)*TimeStep;
 P_out(1:NumOut,2,act) = double(P_battD(:));
 P_out(1:NumOut,3,act) = double(P_battC(:));
 % P_out(1:NumOut,6,act) = E_load(:);
-P_out(1:NumOut,6,act) = LoadInput(act:NumOut+act-1);
+P_out(1:NumOut,6,act) = LoadInput(act,:)';
 P_out(1:NumOut,7,act) = P_pv(:);
 
 for k = 1 : NumOut
@@ -189,7 +179,7 @@ xcountrec(xhist(1,1),1) = xcountrec(xhist(1,1),1) - 1;
 
 %Add latest value
 if P_act(act,2) > ybinsize * n
-    P_act(act,2) = xbinsize * m;
+    P_act(act,2) = ybinsize * n;
 end
 
 tempx = binx(LoadInput(act + StartTime - 1), xbinsize, m);
@@ -232,7 +222,7 @@ fprintf('\nI(Y;X): ');
 P_act(act,8) = PrivacyEval(xycounteval, xcounteval, ycounteval, N_window, m, n, err1, err2, err3);
 disp(P_act(act,8));
 %P_act(act,8) = PEval_act;
-
+ 
 if act >= CumulativeStart
     
     %Add latest values
