@@ -149,8 +149,7 @@ for k = 1 : length(LoadInput)-NumOut
     end
 end
 
-% save('Noise_generated_1','CostInput','Time','PVInput','Noise_generated_2','Noise_generated_3','Noise_generated_4','Noise_generated_5','Noise_generated_6','Noise_generated_7','Noise_generated_8','Noise_generated_9');
-save('Noise_generated_plus','Noise_generated_1','CostInput','Time','PVInput','Noise_generated_8','Noise_generated_9');
+save('Noise_generated','Noise_generated_1','CostInput','Time','PVInput','Noise_generated_2','Noise_generated_3','Noise_generated_4','Noise_generated_5','Noise_generated_6','Noise_generated_7');
 
 %%%%%%%%%%%%%%%%% bruit avec esp constant %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % version 1

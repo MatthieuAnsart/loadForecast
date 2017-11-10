@@ -1,12 +1,13 @@
 
-for answer = 7 : 7
+for answer = 8 : 9
     clearvars -except answer
     % load('C:\Users\ansartm\Desktop\New folder\BaseEMU\sample input data file\Family1Child.mat')
     
     projectpath = genpath(pwd);
     addpath(projectpath);
     % load('C:\Users\ansartm\Desktop\New folder\BaseEMU\sample input data file\Family1Child.mat')
-    load('\\d\dfs\groups\itet\eeh\psl\stud\ansartm\public\New folder\BaseEMU\sample input data file\Noise_generated.mat')
+    load('Y:\New folder\BaseEMU\sample input data file\Noise_generated_plus.mat')
+    
     % rho = 10  gives min. ratio of privacy over regularisation term of 10
     
     %                      mu          cost      rho        gamma   battsize(kWh)
@@ -52,7 +53,7 @@ for answer = 7 : 7
     Out = size(SimSettings(:,1));
     
     
-    cd('\\d\dfs\groups\itet\eeh\psl\stud\ansartm\public\New folder\BaseEMU\');
+    cd('Y:\New folder\BaseEMU\');
     folder = 'Big test 6.4kWh 3.3kW R9.1 30days Y5'; %T12 @ 30 min = 24 Step
     k = datestr(now,'dd-mmm-yyyy HH.MM.SS');
     str = int2str(answer);
@@ -68,21 +69,22 @@ for answer = 7 : 7
     % prompt = 'Which kind of forecast do you want to generate? \n 1 : perfect forecast \n 2 : gaussian noise with constant deviation penalty (no trend) \n 3 : gaussian noise with growing deviation penalty (no trend) \n 4 : gaussian noise with random deviation penalty (no trend) \n 5 : gaussian noise with constant deviation penalty (with trend) \n 6 : gaussian noise with growing deviation penalty (with trend) \n 7 : gaussian noise with random deviation penalty (with trend) \n \n';
     % answer = input(prompt);
     
-    if answer == 1
-        LoadInput = Noise_generated_1;
-    elseif answer == 2
-        LoadInput = Noise_generated_2;
-    elseif answer == 3
-        LoadInput = Noise_generated_3;
-    elseif answer == 4
-        LoadInput = Noise_generated_4;
-    elseif answer == 5
-        LoadInput = Noise_generated_5;
-    elseif answer == 6
-        LoadInput = Noise_generated_6;
-    elseif answer == 7
-        LoadInput = Noise_generated_7;
-    elseif answer == 8
+%     if answer == 1
+%         LoadInput = Noise_generated_1;
+%     elseif answer == 2
+%         LoadInput = Noise_generated_2;
+%     elseif answer == 3
+%         LoadInput = Noise_generated_3;
+%     elseif answer == 4
+%         LoadInput = Noise_generated_4;
+%     elseif answer == 5
+%         LoadInput = Noise_generated_5;
+%     elseif answer == 6
+%         LoadInput = Noise_generated_6;
+%     elseif answer == 7
+%         LoadInput = Noise_generated_7;
+%     elseif answer == 8
+    if answer == 8
         LoadInput = Noise_generated_8;
     elseif answer == 9
         LoadInput = Noise_generated_9;
